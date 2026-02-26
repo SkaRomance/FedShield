@@ -1,0 +1,406 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  junior
+  senior
+  admin
+}
+
+enum InspectionStatus {
+  draft
+  pending_validation
+  validated
+}
+
+enum ChecklistAnswerValue {
+  yes
+  no
+  na
+}
+
+enum ChecklistSection {
+  premises_equipment
+  procedures_hygiene
+}
+
+enum InspectionDocumentStatus {
+  viewed_on_site
+  requested_later
+  not_available
+  not_applicable
+}
+
+enum QuoteStatus {
+  pending
+  accepted
+  remodeling_requested
+  rejected
+  expired
+  assigned_to_third_party
+}
+
+enum MallevaReason {
+  rejected
+  expired
+  assigned_to_third_party
+}
+
+enum GeneratedDocumentKind {
+  inspection_report
+  attestato
+  malleva
+}
+
+enum OdvMatchStatus {
+  matched_to_reported_nc
+  unmatched_not_reported
+  partially_matched
+}
+
+enum DeviceLicenseStatus {
+  active
+  expired
+  revoked
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  fullName     String
+  passwordHash String
+  role         UserRole
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  inspections  Inspection[] @relation("InspectionAuthor")
+  validations  Inspection[] @relation("InspectionValidator")
+  auditLogs    AuditLog[]
+  consultantKpiSnapshots ConsultantKpiSnapshot[]
+  deviceLicenses DeviceLicense[]
+}
+
+model Company {
+  id            String       @id @default(cuid())
+  name          String
+  vatNumber     String       @unique
+  atecoCode     String?
+  contractStart DateTime?
+  city          String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  inspections   Inspection[]
+  quotes        Quote[]
+  odvInspections OdvInspection[]
+  companyKpiSnapshots CompanyKpiSnapshot[]
+}
+
+model Inspection {
+  id                String           @id @default(cuid())
+  companyId         String
+  authorId          String
+  validatorId       String?
+  status            InspectionStatus @default(draft)
+  title             String
+  happenedAt        DateTime         @default(now())
+  notes             String?
+  version           Int              @default(1)
+  sentToAdminAt     DateTime?
+  finalizedAt       DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  company           Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  author            User             @relation("InspectionAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  validator         User?            @relation("InspectionValidator", fields: [validatorId], references: [id], onDelete: SetNull)
+  nonConformities   NonConformity[]
+  answers           InspectionAnswer[]
+  documents         InspectionDocument[]
+  quotes            Quote[]
+  generatedDocuments GeneratedDocument[] @relation("InspectionGeneratedDocuments")
+  odvSanctions      OdvSanction[]
+}
+
+model NonConformity {
+  id               String     @id @default(cuid())
+  inspectionId     String
+  answerId         String?    @unique
+  title            String
+  description      String?
+  isSanctionable   Boolean    @default(false)
+  severity         Int        @default(1)
+  isResolved       Boolean    @default(false)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  inspection       Inspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  answer           InspectionAnswer? @relation(fields: [answerId], references: [id], onDelete: SetNull)
+  quotes           Quote[]
+  matchedOdvSanctions OdvSanction[] @relation("MatchedNc")
+}
+
+model ChecklistTemplate {
+  id          String          @id @default(cuid())
+  name        String
+  description String?
+  atecoCode   String?
+  macroGroup  String?
+  isGeneral   Boolean         @default(false)
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  items       ChecklistItem[]
+
+  @@index([isGeneral, atecoCode, macroGroup])
+}
+
+model ChecklistItem {
+  id                 String             @id @default(cuid())
+  templateId         String
+  section            ChecklistSection   @default(premises_equipment)
+  area               String
+  question           String
+  orderIndex         Int
+  isRequired         Boolean            @default(true)
+  defaultSeverity    Int                @default(1)
+  defaultSanctionable Boolean           @default(false)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  template           ChecklistTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  answers            InspectionAnswer[]
+
+  @@unique([templateId, orderIndex])
+}
+
+model DocumentTemplate {
+  id          String               @id @default(cuid())
+  name        String
+  description String?
+  atecoCode   String?
+  macroGroup  String?
+  isGeneral   Boolean              @default(true)
+  isRequired  Boolean              @default(true)
+  isActive    Boolean              @default(true)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  documents   InspectionDocument[]
+
+  @@index([isGeneral, atecoCode, macroGroup, isActive])
+}
+
+model InspectionDocument {
+  id               String                   @id @default(cuid())
+  inspectionId     String
+  documentTemplateId String?
+  name             String
+  status           InspectionDocumentStatus
+  note             String?
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  inspection       Inspection               @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  template         DocumentTemplate?        @relation(fields: [documentTemplateId], references: [id], onDelete: SetNull)
+
+  @@unique([inspectionId, name])
+  @@index([inspectionId, status])
+}
+
+model InspectionAnswer {
+  id             String               @id @default(cuid())
+  inspectionId   String
+  checklistItemId String
+  value          ChecklistAnswerValue
+  note           String?
+  severity       Int?
+  isSanctionable Boolean?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  inspection     Inspection           @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  checklistItem  ChecklistItem        @relation(fields: [checklistItemId], references: [id], onDelete: Cascade)
+  nonConformity  NonConformity?
+
+  @@unique([inspectionId, checklistItemId])
+  @@index([inspectionId])
+}
+
+model Quote {
+  id              String        @id @default(cuid())
+  nonConformityId String
+  inspectionId    String
+  companyId       String
+  serviceName     String
+  description     String?
+  amount          Float?
+  sentAt          DateTime      @default(now())
+  responseDueAt   DateTime
+  status          QuoteStatus   @default(pending)
+  responseNote    String?
+  createdById     String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  nonConformity   NonConformity @relation(fields: [nonConformityId], references: [id], onDelete: Cascade)
+  inspection      Inspection    @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  company         Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  malleva         Malleva?
+  documents       GeneratedDocument[]
+
+  @@index([companyId, status])
+  @@index([responseDueAt])
+}
+
+model Malleva {
+  id                String       @id @default(cuid())
+  quoteId           String       @unique
+  reason            MallevaReason
+  generatedAt       DateTime     @default(now())
+  documentId        String?      @unique
+  note              String?
+  quote             Quote        @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  generatedDocument GeneratedDocument? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+}
+
+model GeneratedDocument {
+  id           String                @id @default(cuid())
+  kind         GeneratedDocumentKind
+  fileName     String
+  filePath     String
+  metadataJson String?
+  inspectionId String?
+  quoteId      String?
+  createdById  String?
+  createdAt    DateTime              @default(now())
+  inspection   Inspection?           @relation("InspectionGeneratedDocuments", fields: [inspectionId], references: [id], onDelete: Cascade)
+  quote        Quote?                @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  malleva      Malleva?
+}
+
+model DeviceLicense {
+  id               String              @id @default(cuid())
+  deviceId         String              @unique
+  deviceName       String
+  platform         String
+  appVersion       String?
+  activationCode   String?
+  status           DeviceLicenseStatus @default(active)
+  issuedAt         DateTime            @default(now())
+  activatedAt      DateTime            @default(now())
+  expiresAt        DateTime
+  graceUntil       DateTime
+  lastSeenAt       DateTime?
+  lastSyncAt       DateTime?
+  heartbeatToken   String              @unique
+  revokedAt        DateTime?
+  revokedReason    String?
+  createdById      String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  createdBy        User?               @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  syncEvents       SyncEvent[]
+
+  @@index([status, expiresAt])
+}
+
+model SyncEvent {
+  id             String        @id @default(cuid())
+  deviceId       String
+  deviceLicenseId String?
+  clientEventId  String
+  eventType      String
+  entityType     String
+  entityId       String?
+  payloadJson    String
+  occurredAt     DateTime
+  receivedAt     DateTime      @default(now())
+  processedAt    DateTime?
+  processingError String?
+  deviceLicense  DeviceLicense? @relation(fields: [deviceLicenseId], references: [id], onDelete: SetNull)
+
+  @@unique([deviceId, clientEventId])
+  @@index([receivedAt])
+}
+
+model OdvInspection {
+  id             String       @id @default(cuid())
+  companyId      String
+  authorityName  String
+  reportNumber   String?
+  inspectedAt    DateTime
+  receivedAt     DateTime     @default(now())
+  attachmentPath String?
+  notes          String?
+  createdById    String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  company        Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  sanctions      OdvSanction[]
+
+  @@index([companyId, inspectedAt])
+}
+
+model OdvSanction {
+  id                  String         @id @default(cuid())
+  odvInspectionId     String
+  violationTitle      String
+  violationNorm       String?
+  amount              Float?
+  notes               String?
+  matchedNcId         String?
+  matchedInspectionId String?
+  matchStatus         OdvMatchStatus @default(unmatched_not_reported)
+  matchScore          Float?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  odvInspection       OdvInspection  @relation(fields: [odvInspectionId], references: [id], onDelete: Cascade)
+  matchedNc           NonConformity? @relation("MatchedNc", fields: [matchedNcId], references: [id], onDelete: SetNull)
+  matchedInspection   Inspection?    @relation(fields: [matchedInspectionId], references: [id], onDelete: SetNull)
+}
+
+model CompanyKpiSnapshot {
+  id                 String   @id @default(cuid())
+  companyId          String
+  snapshotDate       DateTime @default(now())
+  complianceScore    Float
+  totalInspections   Int
+  totalNc            Int
+  sanctionableNc     Int
+  resolvedNc         Int
+  collaborationScore Float
+  trendJson          String?
+  createdAt          DateTime @default(now())
+  company            Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, snapshotDate])
+}
+
+model ConsultantKpiSnapshot {
+  id                    String   @id @default(cuid())
+  consultantId          String
+  snapshotDate          DateTime @default(now())
+  inspectionsCount      Int
+  ncTotal               Int
+  sanctionableNc        Int
+  conversionRate        Float
+  averageProcessingDays Float
+  lowNcAlert            Boolean  @default(false)
+  lowNcAlertReason      String?
+  createdAt             DateTime @default(now())
+  consultant            User     @relation(fields: [consultantId], references: [id], onDelete: Cascade)
+
+  @@index([consultantId, snapshotDate])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  action      String
+  entityType  String
+  entityId    String?
+  payloadJson String?
+  createdAt   DateTime @default(now())
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}

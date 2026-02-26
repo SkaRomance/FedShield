@@ -1,0 +1,23 @@
+{
+  "name": "@fedshield/tablet",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "build": "echo 'Tablet build gestito con EAS/Expo'",
+    "lint": "echo 'No lint configured for tablet yet'",
+    "test": "echo 'No tests for tablet yet'"
+  },
+  "dependencies": {
+    "expo": "^53.0.20",
+    "expo-status-bar": "^2.2.3",
+    "react": "^19.1.0",
+    "react-native": "^0.79.5"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.13",
+    "typescript": "^5.9.2"
+  }
+}
