@@ -64,6 +64,13 @@ async function run() {
       minSafetyItems: 24,
       minDocsPerMode: 9,
     },
+    {
+      ateco: "56.10.41",
+      templateKeyword: "Gelateria/Pasticceria Ambulante",
+      minHaccpItems: 24,
+      minSafetyItems: 24,
+      minDocsPerMode: 9,
+    },
   ];
 
   for (const category of categories) {

@@ -61,6 +61,7 @@ const ACTIVITY_TYPE_OPTIONS = [
   { value: "canteen", label: "Mense / Catering", atecoCode: "56.29.10" },
   { value: "event_catering", label: "Catering Eventi", atecoCode: "56.21.00" },
   { value: "food_truck", label: "Food Truck / Street Food", atecoCode: "56.10.42" },
+  { value: "ambulant_pastry", label: "Gelateria/Pasticceria Ambulante", atecoCode: "56.10.41" },
   { value: "bar", label: "Bar / Caffetteria", atecoCode: "56.30" },
   { value: "hotel", label: "Hotel / Albergo", atecoCode: "55.10.00" },
   { value: "pastry", label: "Pasticceria / Gelateria", atecoCode: "56.10.30" },
@@ -89,6 +90,7 @@ function inferActivityFromAteco(atecoCode?: string | null): ActivityTypeOption {
   if (normalized.startsWith("56.29.10")) return "canteen";
   if (normalized.startsWith("56.21.00")) return "event_catering";
   if (normalized.startsWith("56.10.42")) return "food_truck";
+  if (normalized.startsWith("56.10.41")) return "ambulant_pastry";
   if (normalized.startsWith("56.30")) return "bar";
   if (normalized.startsWith("56.10")) return "restaurant";
   return "custom";

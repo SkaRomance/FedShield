@@ -117,6 +117,15 @@ async function run() {
       procedureCoverageMustContain: ["HACCP", "Allergeni", "Rintracciabilita", "Temperature", "CCP"],
       documentKeywordsMustContain: ["HACCP", "allergen", "tracciabil", "ambulante", "MOCA"],
     },
+    {
+      ateco: "56.10.41",
+      templateKeyword: "Gelateria/Pasticceria Ambulante",
+      macroGroup: "PASTICCERIA_AMBULANTE",
+      minimumCategoryDocs: 13,
+      premisesCoverageMustContain: ["Vetrine refrigerate", "Catena del freddo", "Mezzo mobile", "Impianti elettrici", "MOCA"],
+      procedureCoverageMustContain: ["HACCP", "Allergeni", "Rintracciabilita", "Temperature", "CCP"],
+      documentKeywordsMustContain: ["HACCP", "allergen", "tracciabil", "ambulante", "MOCA"],
+    },
   ];
 
   for (const category of categories) {
