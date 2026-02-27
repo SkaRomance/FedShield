@@ -1132,7 +1132,7 @@ async function main() {
     },
   ];
 
-  const hotelPremisesItems = [
+  const hotelPremisesItemsBase = [
     {
       templateId: hotelPremisesTemplate.id,
       orderIndex: 1,
@@ -1315,7 +1315,7 @@ async function main() {
     },
   ];
 
-  const hotelProcedureItems = [
+  const hotelProcedureItemsBase = [
     {
       templateId: hotelProceduresTemplate.id,
       orderIndex: 1,
@@ -1498,6 +1498,62 @@ async function main() {
     },
   ];
 
+  const hotelPremisesDomainByOrder: Record<number, ComplianceDomain> = {
+    1: ComplianceDomain.both,
+    2: ComplianceDomain.safety,
+    3: ComplianceDomain.safety,
+    4: ComplianceDomain.safety,
+    5: ComplianceDomain.both,
+    6: ComplianceDomain.safety,
+    7: ComplianceDomain.safety,
+    8: ComplianceDomain.safety,
+    9: ComplianceDomain.safety,
+    10: ComplianceDomain.safety,
+    11: ComplianceDomain.safety,
+    12: ComplianceDomain.safety,
+    13: ComplianceDomain.haccp,
+    14: ComplianceDomain.haccp,
+    15: ComplianceDomain.safety,
+    16: ComplianceDomain.safety,
+    17: ComplianceDomain.safety,
+    18: ComplianceDomain.safety,
+    19: ComplianceDomain.both,
+    20: ComplianceDomain.safety,
+  };
+
+  const hotelProcedureDomainByOrder: Record<number, ComplianceDomain> = {
+    1: ComplianceDomain.haccp,
+    2: ComplianceDomain.haccp,
+    3: ComplianceDomain.haccp,
+    4: ComplianceDomain.haccp,
+    5: ComplianceDomain.haccp,
+    6: ComplianceDomain.haccp,
+    7: ComplianceDomain.haccp,
+    8: ComplianceDomain.haccp,
+    9: ComplianceDomain.haccp,
+    10: ComplianceDomain.haccp,
+    11: ComplianceDomain.both,
+    12: ComplianceDomain.both,
+    13: ComplianceDomain.safety,
+    14: ComplianceDomain.both,
+    15: ComplianceDomain.both,
+    16: ComplianceDomain.safety,
+    17: ComplianceDomain.safety,
+    18: ComplianceDomain.safety,
+    19: ComplianceDomain.both,
+    20: ComplianceDomain.both,
+  };
+
+  const hotelPremisesItems = hotelPremisesItemsBase.map((item) => ({
+    ...item,
+    domain: hotelPremisesDomainByOrder[item.orderIndex] ?? ComplianceDomain.both,
+  }));
+
+  const hotelProcedureItems = hotelProcedureItemsBase.map((item) => ({
+    ...item,
+    domain: hotelProcedureDomainByOrder[item.orderIndex] ?? ComplianceDomain.both,
+  }));
+
   for (const item of [
     ...generalItems,
     ...restaurantPremisesItems,
@@ -1507,10 +1563,11 @@ async function main() {
     ...hotelPremisesItems,
     ...hotelProcedureItems,
   ]) {
+    const explicitDomain = (item as { domain?: ComplianceDomain }).domain;
     await prisma.checklistItem.create({
       data: {
         ...item,
-        domain: inferChecklistDomain(item.area, item.question),
+        domain: explicitDomain ?? inferChecklistDomain(item.area, item.question),
       },
     });
   }
@@ -1752,6 +1809,7 @@ async function main() {
       name: "SCIA / titolo autorizzativo struttura ricettiva",
       isGeneral: false,
       isRequired: true,
+      domain: ComplianceDomain.safety,
       atecoCode: "55.10.00",
       macroGroup: "HOTEL",
     },
@@ -1759,6 +1817,7 @@ async function main() {
       name: "Valutazione rischio incendio struttura ricettiva",
       isGeneral: false,
       isRequired: true,
+      domain: ComplianceDomain.safety,
       atecoCode: "55.10.00",
       macroGroup: "HOTEL",
     },
@@ -1766,6 +1825,7 @@ async function main() {
       name: "Piano emergenza ed evacuazione hotel",
       isGeneral: false,
       isRequired: true,
+      domain: ComplianceDomain.safety,
       atecoCode: "55.10.00",
       macroGroup: "HOTEL",
     },
@@ -1773,6 +1833,7 @@ async function main() {
       name: "Registro controlli antincendio e illuminazione emergenza",
       isGeneral: false,
       isRequired: true,
+      domain: ComplianceDomain.safety,
       atecoCode: "55.10.00",
       macroGroup: "HOTEL",
     },
@@ -1780,6 +1841,7 @@ async function main() {
       name: "Registro manutenzione ascensori/montacarichi",
       isGeneral: false,
       isRequired: true,
+      domain: ComplianceDomain.safety,
       atecoCode: "55.10.00",
       macroGroup: "HOTEL",
     },
@@ -1787,6 +1849,7 @@ async function main() {
       name: "Manuale HACCP area colazioni/bar interno",
       isGeneral: false,
       isRequired: true,
+      domain: ComplianceDomain.haccp,
       atecoCode: "55.10.00",
       macroGroup: "HOTEL",
     },
@@ -1794,6 +1857,7 @@ async function main() {
       name: "Analisi pericoli e punti di controllo buffet colazioni",
       isGeneral: false,
       isRequired: true,
+      domain: ComplianceDomain.haccp,
       atecoCode: "55.10.00",
       macroGroup: "HOTEL",
     },
@@ -1801,6 +1865,7 @@ async function main() {
       name: "Registro temperature frigoriferi e conservazione alimenti hotel",
       isGeneral: false,
       isRequired: true,
+      domain: ComplianceDomain.haccp,
       atecoCode: "55.10.00",
       macroGroup: "HOTEL",
     },
@@ -1808,6 +1873,7 @@ async function main() {
       name: "Procedure allergeni per servizio colazioni",
       isGeneral: false,
       isRequired: true,
+      domain: ComplianceDomain.haccp,
       atecoCode: "55.10.00",
       macroGroup: "HOTEL",
     },
@@ -1815,6 +1881,7 @@ async function main() {
       name: "Piano pulizie e sanificazioni camere/aree comuni/colazioni",
       isGeneral: false,
       isRequired: true,
+      domain: ComplianceDomain.both,
       atecoCode: "55.10.00",
       macroGroup: "HOTEL",
     },
@@ -1822,6 +1889,7 @@ async function main() {
       name: "Tracciabilita lotti fornitori alimenti e bevande hotel",
       isGeneral: false,
       isRequired: true,
+      domain: ComplianceDomain.haccp,
       atecoCode: "55.10.00",
       macroGroup: "HOTEL",
     },
@@ -1829,6 +1897,7 @@ async function main() {
       name: "Attestati formazione HACCP e sicurezza personale hotel",
       isGeneral: false,
       isRequired: true,
+      domain: ComplianceDomain.both,
       atecoCode: "55.10.00",
       macroGroup: "HOTEL",
     },
@@ -1838,7 +1907,7 @@ async function main() {
     data: documentTemplates.map((doc) => ({
       name: doc.name,
       description: `Template documento: ${doc.name}`,
-      domain: inferDocumentDomain(doc.name),
+      domain: (doc as { domain?: ComplianceDomain }).domain ?? inferDocumentDomain(doc.name),
       isGeneral: doc.isGeneral,
       isRequired: doc.isRequired,
       atecoCode: doc.atecoCode ?? null,
