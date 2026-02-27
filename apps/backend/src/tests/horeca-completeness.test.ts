@@ -108,6 +108,15 @@ async function run() {
       procedureCoverageMustContain: ["HACCP", "Allergeni", "Rintracciabilita", "Trasporto pasti", "CCP"],
       documentKeywordsMustContain: ["HACCP", "allergen", "tracciabil", "evento", "MOCA"],
     },
+    {
+      ateco: "56.10.42",
+      templateKeyword: "Food Truck/Ristorazione Ambulante",
+      macroGroup: "FOOD_TRUCK",
+      minimumCategoryDocs: 13,
+      premisesCoverageMustContain: ["Impianti elettrici", "Impianti gas", "Mezzo mobile", "Stoccaggio", "MOCA"],
+      procedureCoverageMustContain: ["HACCP", "Allergeni", "Rintracciabilita", "Temperature", "CCP"],
+      documentKeywordsMustContain: ["HACCP", "allergen", "tracciabil", "ambulante", "MOCA"],
+    },
   ];
 
   for (const category of categories) {

@@ -57,6 +57,13 @@ async function run() {
       minSafetyItems: 24,
       minDocsPerMode: 9,
     },
+    {
+      ateco: "56.10.42",
+      templateKeyword: "Food Truck/Ristorazione Ambulante",
+      minHaccpItems: 24,
+      minSafetyItems: 24,
+      minDocsPerMode: 9,
+    },
   ];
 
   for (const category of categories) {
