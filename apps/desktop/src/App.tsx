@@ -116,19 +116,15 @@ export default function App() {
   }
 
   if (licenseLoading) {
-    return <div style={{ padding: 24, fontFamily: "Segoe UI" }}>Verifica licenza device in corso...</div>;
+    return <div className="app-screen-msg">Verifica licenza device in corso...</div>;
   }
 
   if (licenseError) {
-    return <div style={{ padding: 24, fontFamily: "Segoe UI", color: "#b42318" }}>Errore licenza: {licenseError}</div>;
+    return <div className="app-screen-error">Errore licenza: {licenseError}</div>;
   }
 
   if (deviceContext && !deviceContext.isActive && !deviceContext.isWithinGrace) {
-    return (
-      <div style={{ padding: 24, fontFamily: "Segoe UI", color: "#b42318" }}>
-        Licenza dispositivo non attiva. Stato: {deviceContext.status ?? "sconosciuto"}.
-      </div>
-    );
+    return <div className="app-screen-error">Licenza dispositivo non attiva. Stato: {deviceContext.status ?? "sconosciuto"}.</div>;
   }
 
   if (!session) {

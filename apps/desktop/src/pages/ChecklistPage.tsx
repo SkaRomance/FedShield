@@ -668,7 +668,7 @@ export default function ChecklistPage({ token, user, companies, inspections, onR
                 Crea
               </button>
             </div>
-            <p style={{ marginTop: 8, color: "#4b5563", fontSize: 13 }}>
+            <p className="template-hint">
               Template caricati: {templates.map((template) => template.name).join(" • ") || "nessuno"}
             </p>
           </div>
