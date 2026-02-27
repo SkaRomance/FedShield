@@ -58,6 +58,7 @@ const DOCUMENT_STATUS_OPTIONS: Array<{ value: InspectionDocumentRequirement["sta
 const ACTIVITY_TYPE_OPTIONS = [
   { value: "restaurant", label: "Ristorante", atecoCode: "56.10.11" },
   { value: "bar", label: "Bar / Caffetteria", atecoCode: "56.30" },
+  { value: "hotel", label: "Hotel / Albergo", atecoCode: "55.10.00" },
   { value: "custom", label: "Altro (ATECO manuale)", atecoCode: "" },
 ] as const;
 
@@ -77,6 +78,7 @@ function checklistModeLabel(mode?: InspectionChecklistMode) {
 
 function inferActivityFromAteco(atecoCode?: string | null): ActivityTypeOption {
   const normalized = atecoCode?.trim() ?? "";
+  if (normalized.startsWith("55.10")) return "hotel";
   if (normalized.startsWith("56.30")) return "bar";
   if (normalized.startsWith("56.10")) return "restaurant";
   return "custom";
