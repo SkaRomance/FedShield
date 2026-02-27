@@ -43,6 +43,13 @@ async function run() {
       minSafetyItems: 24,
       minDocsPerMode: 9,
     },
+    {
+      ateco: "56.29.10",
+      templateKeyword: "Mense/Catering",
+      minHaccpItems: 24,
+      minSafetyItems: 24,
+      minDocsPerMode: 9,
+    },
   ];
 
   for (const category of categories) {

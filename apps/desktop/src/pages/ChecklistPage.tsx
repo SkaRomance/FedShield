@@ -58,6 +58,7 @@ const DOCUMENT_STATUS_OPTIONS: Array<{ value: InspectionDocumentRequirement["sta
 const ACTIVITY_TYPE_OPTIONS = [
   { value: "restaurant", label: "Ristorante", atecoCode: "56.10.11" },
   { value: "pizzeria", label: "Pizzeria / Asporto", atecoCode: "56.10.20" },
+  { value: "canteen", label: "Mense / Catering", atecoCode: "56.29.10" },
   { value: "bar", label: "Bar / Caffetteria", atecoCode: "56.30" },
   { value: "hotel", label: "Hotel / Albergo", atecoCode: "55.10.00" },
   { value: "pastry", label: "Pasticceria / Gelateria", atecoCode: "56.10.30" },
@@ -83,6 +84,7 @@ function inferActivityFromAteco(atecoCode?: string | null): ActivityTypeOption {
   if (normalized.startsWith("55.10")) return "hotel";
   if (normalized.startsWith("56.10.30")) return "pastry";
   if (normalized.startsWith("56.10.20")) return "pizzeria";
+  if (normalized.startsWith("56.29.10")) return "canteen";
   if (normalized.startsWith("56.30")) return "bar";
   if (normalized.startsWith("56.10")) return "restaurant";
   return "custom";

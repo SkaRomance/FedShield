@@ -90,6 +90,15 @@ async function run() {
       procedureCoverageMustContain: ["HACCP", "Allergeni", "Rintracciabilita", "Consegna", "CCP"],
       documentKeywordsMustContain: ["HACCP", "allergen", "tracciabil", "asporto", "MOCA"],
     },
+    {
+      ateco: "56.29.10",
+      templateKeyword: "Mense/Catering",
+      macroGroup: "MENSE_CATERING",
+      minimumCategoryDocs: 13,
+      premisesCoverageMustContain: ["Impianti", "Attrezzature", "Distribuzione pasti", "Trasporto pasti", "MOCA"],
+      procedureCoverageMustContain: ["HACCP", "Allergeni", "Rintracciabilita", "Trasporto pasti", "CCP"],
+      documentKeywordsMustContain: ["HACCP", "allergen", "tracciabil", "trasporto pasti", "MOCA"],
+    },
   ];
 
   for (const category of categories) {
