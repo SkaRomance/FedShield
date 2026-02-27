@@ -1,5 +1,6 @@
 import { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
+import { ComplianceDomain, InspectionChecklistMode } from "@prisma/client";
 
 function buildAtecoVariants(atecoCode?: string) {
   if (!atecoCode) {
@@ -25,6 +26,22 @@ function buildAtecoVariants(atecoCode?: string) {
   return [...variants];
 }
 
+function buildDomainFilterByChecklistMode(checklistMode?: InspectionChecklistMode) {
+  if (!checklistMode || checklistMode === InspectionChecklistMode.unified) {
+    return undefined;
+  }
+
+  if (checklistMode === InspectionChecklistMode.haccp_only) {
+    return {
+      in: [ComplianceDomain.haccp, ComplianceDomain.both],
+    };
+  }
+
+  return {
+    in: [ComplianceDomain.safety, ComplianceDomain.both],
+  };
+}
+
 const checklistRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get(
     "/checklists/templates",
@@ -33,6 +50,7 @@ const checklistRoutes: FastifyPluginAsync = async (fastify) => {
       const query = z
         .object({
           atecoCode: z.string().optional(),
+          checklistMode: z.nativeEnum(InspectionChecklistMode).optional(),
         })
         .safeParse(request.query);
 
@@ -41,6 +59,7 @@ const checklistRoutes: FastifyPluginAsync = async (fastify) => {
       }
 
       const atecoVariants = buildAtecoVariants(query.data.atecoCode);
+      const domainFilter = buildDomainFilterByChecklistMode(query.data.checklistMode);
       const where =
         atecoVariants.length > 0
           ? {
@@ -50,9 +69,11 @@ const checklistRoutes: FastifyPluginAsync = async (fastify) => {
                 { atecoCode: { in: atecoVariants } },
                 { macroGroup: { in: atecoVariants } },
               ],
+              ...(domainFilter ? { items: { some: { domain: domainFilter } } } : {}),
             }
           : {
               isActive: true,
+              ...(domainFilter ? { items: { some: { domain: domainFilter } } } : {}),
             };
 
       return fastify.prisma.checklistTemplate.findMany({
@@ -74,8 +95,16 @@ const checklistRoutes: FastifyPluginAsync = async (fastify) => {
     { preHandler: [fastify.authenticate] },
     async (request, reply) => {
       const params = z.object({ id: z.string().min(1) }).safeParse(request.params);
+      const query = z
+        .object({
+          checklistMode: z.nativeEnum(InspectionChecklistMode).optional(),
+        })
+        .safeParse(request.query);
       if (!params.success) {
         return reply.badRequest("Template ID non valido.");
+      }
+      if (!query.success) {
+        return reply.badRequest("Query non valida.");
       }
 
       const template = await fastify.prisma.checklistTemplate.findUnique({
@@ -86,8 +115,12 @@ const checklistRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.notFound("Checklist template non trovata.");
       }
 
+      const domainFilter = buildDomainFilterByChecklistMode(query.data.checklistMode);
       const items = await fastify.prisma.checklistItem.findMany({
-        where: { templateId: template.id },
+        where: {
+          templateId: template.id,
+          ...(domainFilter ? { domain: domainFilter } : {}),
+        },
         orderBy: { orderIndex: "asc" },
       });
 
@@ -105,6 +138,7 @@ const checklistRoutes: FastifyPluginAsync = async (fastify) => {
       const query = z
         .object({
           atecoCode: z.string().optional(),
+          checklistMode: z.nativeEnum(InspectionChecklistMode).optional(),
         })
         .safeParse(request.query);
 
@@ -113,6 +147,7 @@ const checklistRoutes: FastifyPluginAsync = async (fastify) => {
       }
 
       const atecoVariants = buildAtecoVariants(query.data.atecoCode);
+      const domainFilter = buildDomainFilterByChecklistMode(query.data.checklistMode);
       const where =
         atecoVariants.length > 0
           ? {
@@ -122,9 +157,11 @@ const checklistRoutes: FastifyPluginAsync = async (fastify) => {
                 { atecoCode: { in: atecoVariants } },
                 { macroGroup: { in: atecoVariants } },
               ],
+              ...(domainFilter ? { domain: domainFilter } : {}),
             }
           : {
               isActive: true,
+              ...(domainFilter ? { domain: domainFilter } : {}),
             };
 
       return fastify.prisma.documentTemplate.findMany({

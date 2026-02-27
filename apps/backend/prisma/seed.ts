@@ -1,7 +1,99 @@
 import bcrypt from "bcryptjs";
-import { ChecklistSection, PrismaClient, UserRole } from "@prisma/client";
+import { ChecklistSection, ComplianceDomain, PrismaClient, UserRole } from "@prisma/client";
 
 const prisma = new PrismaClient();
+
+function inferChecklistDomain(area: string, question: string): ComplianceDomain {
+  const text = `${area} ${question}`.toLowerCase();
+  const haccpKeywords = [
+    "haccp",
+    "allergen",
+    "temperatur",
+    "ccp",
+    "cp",
+    "rintracciabil",
+    "ritiro",
+    "richiamo",
+    "ricevimento merci",
+    "crudo",
+    "cotto",
+    "abbatt",
+    "sanific",
+    "igien",
+    "aliment",
+    "frigor",
+    "congel",
+    "vetrine refrigerate",
+    "ghiaccio",
+    "lotti",
+    "menu",
+    "deperibil",
+    "deratt",
+    "disinfest",
+    "contaminazione",
+    "pulizie",
+    "stoccaggio",
+  ];
+  const safetyKeywords = [
+    "dvr",
+    "rspp",
+    "antincendio",
+    "primo soccorso",
+    "sorveglianza sanitaria",
+    "impiant",
+    "duvri",
+    "idoneita",
+    "uscite di emergenza",
+    "vie di esodo",
+    "dispositivi di sicurezza",
+    "cassetta",
+    "co2",
+    "spogliatoi",
+  ];
+
+  const hasHaccp = haccpKeywords.some((keyword) => text.includes(keyword));
+  const hasSafety = safetyKeywords.some((keyword) => text.includes(keyword));
+
+  if (hasHaccp && hasSafety) return ComplianceDomain.both;
+  if (hasHaccp) return ComplianceDomain.haccp;
+  if (hasSafety) return ComplianceDomain.safety;
+  return ComplianceDomain.both;
+}
+
+function inferDocumentDomain(name: string): ComplianceDomain {
+  const text = name.toLowerCase();
+  const haccpKeywords = [
+    "haccp",
+    "allergen",
+    "temperatur",
+    "tracciabil",
+    "ritiro",
+    "richiamo",
+    "sanific",
+    "ghiaccio",
+    "aliment",
+    "deratt",
+    "disinfest",
+  ];
+  const safetyKeywords = [
+    "dvr",
+    "rspp",
+    "antincendio",
+    "primo soccorso",
+    "sorveglianza sanitaria",
+    "impiant",
+    "unilav",
+    "manutenzion",
+  ];
+
+  const hasHaccp = haccpKeywords.some((keyword) => text.includes(keyword));
+  const hasSafety = safetyKeywords.some((keyword) => text.includes(keyword));
+
+  if (hasHaccp && hasSafety) return ComplianceDomain.both;
+  if (hasHaccp) return ComplianceDomain.haccp;
+  if (hasSafety) return ComplianceDomain.safety;
+  return ComplianceDomain.both;
+}
 
 async function main() {
   const passwordHash = await bcrypt.hash("fedshield123", 10);
@@ -995,7 +1087,10 @@ async function main() {
     ...barProcedureItems,
   ]) {
     await prisma.checklistItem.create({
-      data: item,
+      data: {
+        ...item,
+        domain: inferChecklistDomain(item.area, item.question),
+      },
     });
   }
 
@@ -1238,6 +1333,7 @@ async function main() {
     data: documentTemplates.map((doc) => ({
       name: doc.name,
       description: `Template documento: ${doc.name}`,
+      domain: inferDocumentDomain(doc.name),
       isGeneral: doc.isGeneral,
       isRequired: doc.isRequired,
       atecoCode: doc.atecoCode ?? null,

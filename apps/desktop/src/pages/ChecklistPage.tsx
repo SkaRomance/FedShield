@@ -63,6 +63,17 @@ const ACTIVITY_TYPE_OPTIONS = [
 
 type ActivityTypeOption = (typeof ACTIVITY_TYPE_OPTIONS)[number]["value"];
 type ChecklistActivityFilter = "company" | ActivityTypeOption;
+type InspectionChecklistMode = "unified" | "haccp_only" | "safety_only";
+
+const CHECKLIST_MODE_OPTIONS: Array<{ value: InspectionChecklistMode; label: string }> = [
+  { value: "unified", label: "Checklist unificata (HACCP + Sicurezza)" },
+  { value: "haccp_only", label: "Solo HACCP" },
+  { value: "safety_only", label: "Solo Sicurezza lavoro" },
+];
+
+function checklistModeLabel(mode?: InspectionChecklistMode) {
+  return CHECKLIST_MODE_OPTIONS.find((option) => option.value === mode)?.label ?? "Checklist unificata";
+}
 
 function inferActivityFromAteco(atecoCode?: string | null): ActivityTypeOption {
   const normalized = atecoCode?.trim() ?? "";
@@ -89,6 +100,7 @@ export default function ChecklistPage({ token, user, companies, inspections, onR
   const [companyId, setCompanyId] = useState<string>(companies[0]?.id ?? "");
   const [selectedInspectionId, setSelectedInspectionId] = useState<string>("");
   const [title, setTitle] = useState("Sopralluogo Antisanzione");
+  const [newInspectionChecklistMode, setNewInspectionChecklistMode] = useState<InspectionChecklistMode>("unified");
 
   const [templates, setTemplates] = useState<ChecklistTemplate[]>([]);
   const [allItems, setAllItems] = useState<ChecklistItem[]>([]);
@@ -132,6 +144,11 @@ export default function ChecklistPage({ token, user, companies, inspections, onR
     return atecoFromActivity(checklistActivityFilter);
   }, [checklistActivityFilter, customChecklistAteco, selectedCompany?.atecoCode]);
 
+  const effectiveChecklistMode = useMemo<InspectionChecklistMode>(
+    () => selectedInspection?.checklistMode ?? newInspectionChecklistMode,
+    [selectedInspection?.checklistMode, newInspectionChecklistMode],
+  );
+
   const premisesItems = useMemo(
     () => allItems.filter((item) => item.section === "premises_equipment"),
     [allItems],
@@ -162,10 +179,12 @@ export default function ChecklistPage({ token, user, companies, inspections, onR
     async function loadChecklistTemplates() {
       if (!companyId) return;
 
-      const nextTemplates = await fetchChecklistTemplates(token, effectiveChecklistAteco);
+      const nextTemplates = await fetchChecklistTemplates(token, effectiveChecklistAteco, effectiveChecklistMode);
       setTemplates(nextTemplates);
 
-      const loadedItems = await Promise.all(nextTemplates.map((template) => fetchChecklistItems(token, template.id)));
+      const loadedItems = await Promise.all(
+        nextTemplates.map((template) => fetchChecklistItems(token, template.id, effectiveChecklistMode)),
+      );
       const mergedItems = loadedItems.flatMap((entry) => entry.items);
       setAllItems(mergedItems);
 
@@ -191,7 +210,7 @@ export default function ChecklistPage({ token, user, companies, inspections, onR
     loadChecklistTemplates().catch((error) => {
       setMessage(`Errore caricamento checklist: ${error instanceof Error ? error.message : "errore"}`);
     });
-  }, [token, companyId, effectiveChecklistAteco, selectedInspection?.answers]);
+  }, [token, companyId, effectiveChecklistAteco, effectiveChecklistMode, selectedInspection?.answers]);
 
   useEffect(() => {
     async function loadDocumentsAndSummary() {
@@ -272,12 +291,13 @@ export default function ChecklistPage({ token, user, companies, inspections, onR
       const created = await createInspection(token, {
         companyId,
         title,
+        checklistMode: newInspectionChecklistMode,
       });
       queueSyncEvent({
         eventType: "inspection.created",
         entityType: "inspection",
         entityId: created.id,
-        payload: { companyId, title },
+        payload: { companyId, title, checklistMode: newInspectionChecklistMode },
       });
       await onReload();
       setSelectedInspectionId(created.id);
@@ -524,7 +544,7 @@ export default function ChecklistPage({ token, user, companies, inspections, onR
             <option value="">Seleziona sopralluogo...</option>
             {inspectionsForCompany.map((inspection) => (
               <option key={inspection.id} value={inspection.id}>
-                {inspection.title} - {inspection.status}
+                {inspection.title} - {inspection.status} - {checklistModeLabel(inspection.checklistMode)}
               </option>
             ))}
           </select>
@@ -617,6 +637,17 @@ export default function ChecklistPage({ token, user, companies, inspections, onR
           <div className="panel section-panel">
             <h3>1B. Crea sopralluogo</h3>
             <label>Titolo sopralluogo</label>
+            <label>Ambito sopralluogo</label>
+            <select
+              value={newInspectionChecklistMode}
+              onChange={(event) => setNewInspectionChecklistMode(event.target.value as InspectionChecklistMode)}
+            >
+              {CHECKLIST_MODE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
             <div className="inline-actions">
               <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Sopralluogo Antisanzione" />
               <button className="secondary-btn" onClick={handleCreateInspection} disabled={loading}>

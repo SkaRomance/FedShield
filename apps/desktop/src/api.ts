@@ -29,6 +29,7 @@ export interface Inspection {
   id: string;
   title: string;
   status: "draft" | "pending_validation" | "validated";
+  checklistMode: "unified" | "haccp_only" | "safety_only";
   happenedAt: string;
   companyId?: string;
   company: { name: string };
@@ -303,24 +304,59 @@ export function fetchInspections(token: string): Promise<Inspection[]> {
   return authedFetch<Inspection[]>("/inspections", token);
 }
 
-export function createInspection(token: string, payload: { companyId: string; title: string; notes?: string }) {
+export function createInspection(
+  token: string,
+  payload: {
+    companyId: string;
+    title: string;
+    notes?: string;
+    checklistMode?: "unified" | "haccp_only" | "safety_only";
+  },
+) {
   return authedFetch<Inspection>("/inspections", token, {
     method: "POST",
     body: JSON.stringify(payload),
   });
 }
 
-export function fetchChecklistTemplates(token: string, atecoCode?: string) {
-  const query = atecoCode ? `?atecoCode=${encodeURIComponent(atecoCode)}` : "";
+export function fetchChecklistTemplates(
+  token: string,
+  atecoCode?: string,
+  checklistMode?: "unified" | "haccp_only" | "safety_only",
+) {
+  const params = new URLSearchParams();
+  if (atecoCode) {
+    params.set("atecoCode", atecoCode);
+  }
+  if (checklistMode) {
+    params.set("checklistMode", checklistMode);
+  }
+  const query = params.toString() ? `?${params.toString()}` : "";
   return authedFetch<ChecklistTemplate[]>(`/checklists/templates${query}`, token);
 }
 
-export function fetchChecklistItems(token: string, templateId: string) {
-  return authedFetch<ChecklistTemplateDetails>(`/checklists/templates/${templateId}/items`, token);
+export function fetchChecklistItems(
+  token: string,
+  templateId: string,
+  checklistMode?: "unified" | "haccp_only" | "safety_only",
+) {
+  const query = checklistMode ? `?checklistMode=${encodeURIComponent(checklistMode)}` : "";
+  return authedFetch<ChecklistTemplateDetails>(`/checklists/templates/${templateId}/items${query}`, token);
 }
 
-export function fetchDocumentTemplates(token: string, atecoCode?: string) {
-  const query = atecoCode ? `?atecoCode=${encodeURIComponent(atecoCode)}` : "";
+export function fetchDocumentTemplates(
+  token: string,
+  atecoCode?: string,
+  checklistMode?: "unified" | "haccp_only" | "safety_only",
+) {
+  const params = new URLSearchParams();
+  if (atecoCode) {
+    params.set("atecoCode", atecoCode);
+  }
+  if (checklistMode) {
+    params.set("checklistMode", checklistMode);
+  }
+  const query = params.toString() ? `?${params.toString()}` : "";
   return authedFetch<
     Array<{
       id: string;

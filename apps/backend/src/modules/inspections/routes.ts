@@ -1,4 +1,10 @@
-import { ChecklistAnswerValue, InspectionDocumentStatus, UserRole } from "@prisma/client";
+import {
+  ChecklistAnswerValue,
+  ComplianceDomain,
+  InspectionChecklistMode,
+  InspectionDocumentStatus,
+  UserRole,
+} from "@prisma/client";
 import { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 import {
@@ -19,6 +25,7 @@ const createInspectionSchema = z.object({
   companyId: z.string().min(1),
   title: z.string().min(3),
   notes: z.string().optional(),
+  checklistMode: z.nativeEnum(InspectionChecklistMode).optional(),
 });
 
 const validateInspectionSchema = z.object({
@@ -94,6 +101,22 @@ function buildAtecoVariants(atecoCode?: string | null) {
   return [...variants];
 }
 
+function buildDomainFilterByChecklistMode(checklistMode: InspectionChecklistMode) {
+  if (checklistMode === InspectionChecklistMode.unified) {
+    return undefined;
+  }
+
+  if (checklistMode === InspectionChecklistMode.haccp_only) {
+    return {
+      in: [ComplianceDomain.haccp, ComplianceDomain.both],
+    };
+  }
+
+  return {
+    in: [ComplianceDomain.safety, ComplianceDomain.both],
+  };
+}
+
 const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get(
     "/inspections",
@@ -145,6 +168,7 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
       }
 
       const atecoVariants = buildAtecoVariants(inspection.company.atecoCode);
+      const domainFilter = buildDomainFilterByChecklistMode(inspection.checklistMode);
       const templates = await fastify.prisma.documentTemplate.findMany({
         where:
           atecoVariants.length > 0
@@ -155,8 +179,12 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
                   { atecoCode: { in: atecoVariants } },
                   { macroGroup: { in: atecoVariants } },
                 ],
+                ...(domainFilter ? { domain: domainFilter } : {}),
               }
-            : { isActive: true },
+            : {
+                isActive: true,
+                ...(domainFilter ? { domain: domainFilter } : {}),
+              },
         orderBy: [{ isRequired: "desc" }, { name: "asc" }],
       });
 
@@ -250,6 +278,7 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
           companyId: parsed.data.companyId,
           title: parsed.data.title,
           notes: parsed.data.notes,
+          checklistMode: parsed.data.checklistMode ?? InspectionChecklistMode.unified,
           authorId: auth.sub,
           status: "draft",
           validatorId: null,

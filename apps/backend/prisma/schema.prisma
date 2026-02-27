@@ -30,6 +30,18 @@ enum ChecklistSection {
   procedures_hygiene
 }
 
+enum ComplianceDomain {
+  safety
+  haccp
+  both
+}
+
+enum InspectionChecklistMode {
+  unified
+  haccp_only
+  safety_only
+}
+
 enum InspectionDocumentStatus {
   viewed_on_site
   requested_later
@@ -106,6 +118,7 @@ model Inspection {
   authorId          String
   validatorId       String?
   status            InspectionStatus @default(draft)
+  checklistMode     InspectionChecklistMode @default(unified)
   title             String
   happenedAt        DateTime         @default(now())
   notes             String?
@@ -161,6 +174,7 @@ model ChecklistItem {
   id                 String             @id @default(cuid())
   templateId         String
   section            ChecklistSection   @default(premises_equipment)
+  domain             ComplianceDomain   @default(both)
   area               String
   question           String
   orderIndex         Int
@@ -179,6 +193,7 @@ model DocumentTemplate {
   id          String               @id @default(cuid())
   name        String
   description String?
+  domain      ComplianceDomain     @default(both)
   atecoCode   String?
   macroGroup  String?
   isGeneral   Boolean              @default(true)
