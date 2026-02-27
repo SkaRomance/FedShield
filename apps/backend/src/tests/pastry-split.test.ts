@@ -50,6 +50,13 @@ async function run() {
       minSafetyItems: 24,
       minDocsPerMode: 9,
     },
+    {
+      ateco: "56.21.00",
+      templateKeyword: "Catering Eventi",
+      minHaccpItems: 24,
+      minSafetyItems: 24,
+      minDocsPerMode: 9,
+    },
   ];
 
   for (const category of categories) {

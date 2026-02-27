@@ -99,6 +99,15 @@ async function run() {
       procedureCoverageMustContain: ["HACCP", "Allergeni", "Rintracciabilita", "Trasporto pasti", "CCP"],
       documentKeywordsMustContain: ["HACCP", "allergen", "tracciabil", "trasporto pasti", "MOCA"],
     },
+    {
+      ateco: "56.21.00",
+      templateKeyword: "Catering Eventi",
+      macroGroup: "CATERING_EVENTI",
+      minimumCategoryDocs: 13,
+      premisesCoverageMustContain: ["Impianti", "Attrezzature", "Trasporto pasti", "Allestimento evento", "MOCA"],
+      procedureCoverageMustContain: ["HACCP", "Allergeni", "Rintracciabilita", "Trasporto pasti", "CCP"],
+      documentKeywordsMustContain: ["HACCP", "allergen", "tracciabil", "evento", "MOCA"],
+    },
   ];
 
   for (const category of categories) {
