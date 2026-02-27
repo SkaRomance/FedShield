@@ -2,6 +2,13 @@ import assert from "node:assert/strict";
 import { buildApp } from "../app.js";
 
 type ChecklistDomain = "haccp" | "safety" | "both";
+type HorecaCategory = {
+  ateco: string;
+  templateKeyword: string;
+  minHaccpItems: number;
+  minSafetyItems: number;
+  minDocsPerMode: number;
+};
 
 async function run() {
   const app = buildApp();
@@ -18,84 +25,116 @@ async function run() {
   const { token } = login.json();
 
   const headers = { authorization: `Bearer ${token}` };
-  const ateco = "56.10.30";
+  const categories: HorecaCategory[] = [
+    { ateco: "56.10.11", templateKeyword: "Ristorante", minHaccpItems: 24, minSafetyItems: 24, minDocsPerMode: 10 },
+    { ateco: "56.30", templateKeyword: "Bar", minHaccpItems: 24, minSafetyItems: 24, minDocsPerMode: 9 },
+    { ateco: "55.10.00", templateKeyword: "Hotel", minHaccpItems: 20, minSafetyItems: 20, minDocsPerMode: 8 },
+    {
+      ateco: "56.10.30",
+      templateKeyword: "Pasticceria/Gelateria",
+      minHaccpItems: 24,
+      minSafetyItems: 24,
+      minDocsPerMode: 10,
+    },
+    {
+      ateco: "56.10.20",
+      templateKeyword: "Pizzeria/Asporto",
+      minHaccpItems: 24,
+      minSafetyItems: 24,
+      minDocsPerMode: 9,
+    },
+  ];
 
-  const haccpTemplatesRes = await app.inject({
-    method: "GET",
-    url: `/api/checklists/templates?atecoCode=${encodeURIComponent(ateco)}&checklistMode=haccp_only`,
-    headers,
-  });
-  assert.equal(haccpTemplatesRes.statusCode, 200);
-  const haccpTemplates = haccpTemplatesRes.json() as Array<{ id: string; name: string }>;
-  assert.ok(haccpTemplates.some((template) => template.name.includes("Pasticceria/Gelateria")));
-
-  const safetyTemplatesRes = await app.inject({
-    method: "GET",
-    url: `/api/checklists/templates?atecoCode=${encodeURIComponent(ateco)}&checklistMode=safety_only`,
-    headers,
-  });
-  assert.equal(safetyTemplatesRes.statusCode, 200);
-  const safetyTemplates = safetyTemplatesRes.json() as Array<{ id: string; name: string }>;
-  assert.ok(safetyTemplates.some((template) => template.name.includes("Pasticceria/Gelateria")));
-
-  let haccpItemsCount = 0;
-  for (const template of haccpTemplates) {
-    const itemsRes = await app.inject({
+  for (const category of categories) {
+    const haccpTemplatesRes = await app.inject({
       method: "GET",
-      url: `/api/checklists/templates/${template.id}/items?checklistMode=haccp_only`,
+      url: `/api/checklists/templates?atecoCode=${encodeURIComponent(category.ateco)}&checklistMode=haccp_only`,
       headers,
     });
-    assert.equal(itemsRes.statusCode, 200);
-    const items = itemsRes.json().items as Array<{ domain?: ChecklistDomain }>;
-    for (const item of items) {
-      assert.notEqual(item.domain, "safety");
-    }
-    haccpItemsCount += items.length;
-  }
+    assert.equal(haccpTemplatesRes.statusCode, 200);
+    const haccpTemplates = haccpTemplatesRes.json() as Array<{ id: string; name: string }>;
+    assert.ok(
+      haccpTemplates.some((template) => template.name.includes(category.templateKeyword)),
+      `Template HACCP mancante per ${category.ateco}`,
+    );
 
-  let safetyItemsCount = 0;
-  for (const template of safetyTemplates) {
-    const itemsRes = await app.inject({
+    const safetyTemplatesRes = await app.inject({
       method: "GET",
-      url: `/api/checklists/templates/${template.id}/items?checklistMode=safety_only`,
+      url: `/api/checklists/templates?atecoCode=${encodeURIComponent(category.ateco)}&checklistMode=safety_only`,
       headers,
     });
-    assert.equal(itemsRes.statusCode, 200);
-    const items = itemsRes.json().items as Array<{ domain?: ChecklistDomain }>;
-    for (const item of items) {
-      assert.notEqual(item.domain, "haccp");
+    assert.equal(safetyTemplatesRes.statusCode, 200);
+    const safetyTemplates = safetyTemplatesRes.json() as Array<{ id: string; name: string }>;
+    assert.ok(
+      safetyTemplates.some((template) => template.name.includes(category.templateKeyword)),
+      `Template safety mancante per ${category.ateco}`,
+    );
+
+    let haccpItemsCount = 0;
+    for (const template of haccpTemplates) {
+      const itemsRes = await app.inject({
+        method: "GET",
+        url: `/api/checklists/templates/${template.id}/items?checklistMode=haccp_only`,
+        headers,
+      });
+      assert.equal(itemsRes.statusCode, 200);
+      const items = itemsRes.json().items as Array<{ domain?: ChecklistDomain }>;
+      for (const item of items) {
+        assert.notEqual(item.domain, "safety");
+      }
+      haccpItemsCount += items.length;
     }
-    safetyItemsCount += items.length;
+
+    let safetyItemsCount = 0;
+    for (const template of safetyTemplates) {
+      const itemsRes = await app.inject({
+        method: "GET",
+        url: `/api/checklists/templates/${template.id}/items?checklistMode=safety_only`,
+        headers,
+      });
+      assert.equal(itemsRes.statusCode, 200);
+      const items = itemsRes.json().items as Array<{ domain?: ChecklistDomain }>;
+      for (const item of items) {
+        assert.notEqual(item.domain, "haccp");
+      }
+      safetyItemsCount += items.length;
+    }
+
+    assert.ok(
+      haccpItemsCount >= category.minHaccpItems,
+      `HACCP items insufficienti per ${category.ateco}: ${haccpItemsCount}`,
+    );
+    assert.ok(
+      safetyItemsCount >= category.minSafetyItems,
+      `Safety items insufficienti per ${category.ateco}: ${safetyItemsCount}`,
+    );
+
+    const haccpDocsRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/document-templates?atecoCode=${encodeURIComponent(category.ateco)}&checklistMode=haccp_only`,
+      headers,
+    });
+    assert.equal(haccpDocsRes.statusCode, 200);
+    const haccpDocs = haccpDocsRes.json() as Array<{ domain?: ChecklistDomain }>;
+    assert.ok(haccpDocs.length >= category.minDocsPerMode);
+    for (const doc of haccpDocs) {
+      assert.notEqual(doc.domain, "safety");
+    }
+
+    const safetyDocsRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/document-templates?atecoCode=${encodeURIComponent(category.ateco)}&checklistMode=safety_only`,
+      headers,
+    });
+    assert.equal(safetyDocsRes.statusCode, 200);
+    const safetyDocs = safetyDocsRes.json() as Array<{ domain?: ChecklistDomain }>;
+    assert.ok(safetyDocs.length >= category.minDocsPerMode);
+    for (const doc of safetyDocs) {
+      assert.notEqual(doc.domain, "haccp");
+    }
   }
 
-  assert.ok(haccpItemsCount >= 20);
-  assert.ok(safetyItemsCount >= 20);
-
-  const haccpDocsRes = await app.inject({
-    method: "GET",
-    url: `/api/checklists/document-templates?atecoCode=${encodeURIComponent(ateco)}&checklistMode=haccp_only`,
-    headers,
-  });
-  assert.equal(haccpDocsRes.statusCode, 200);
-  const haccpDocs = haccpDocsRes.json() as Array<{ domain?: ChecklistDomain }>;
-  assert.ok(haccpDocs.length > 0);
-  for (const doc of haccpDocs) {
-    assert.notEqual(doc.domain, "safety");
-  }
-
-  const safetyDocsRes = await app.inject({
-    method: "GET",
-    url: `/api/checklists/document-templates?atecoCode=${encodeURIComponent(ateco)}&checklistMode=safety_only`,
-    headers,
-  });
-  assert.equal(safetyDocsRes.statusCode, 200);
-  const safetyDocs = safetyDocsRes.json() as Array<{ domain?: ChecklistDomain }>;
-  assert.ok(safetyDocs.length > 0);
-  for (const doc of safetyDocs) {
-    assert.notEqual(doc.domain, "haccp");
-  }
-
-  console.log("Pastry split test passed");
+  console.log("HoReCa split test passed");
   await app.close();
 }
 
@@ -103,4 +142,3 @@ run().catch((error) => {
   console.error(error);
   process.exit(1);
 });
-
