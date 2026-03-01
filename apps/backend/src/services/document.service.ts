@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createHash, randomUUID } from "node:crypto";
 import { GeneratedDocumentKind, MallevaReason, Prisma } from "@prisma/client";
@@ -21,31 +21,87 @@ function createDocumentSeal(payload: Record<string, unknown>): { sealHash: strin
   return { sealHash, sealedAt };
 }
 
+function toPdfSafeLine(line: string): string {
+  return line
+    .replace(/[\u2018\u2019\u0060\u00B4]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[\u2013\u2014]/g, "-")
+    .replace(/\u2026/g, "...")
+    .replace(/[\u2022\u25CF]/g, "-")
+    .replace(/[\u2605\u2606]/g, "*")
+    .replace(/\u00A0/g, " ")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\x20-\x7E\xA0-\xFF]/g, "?");
+}
+
+function wrapLine(line: string, maxChars = 100): string[] {
+  const safe = toPdfSafeLine(line);
+  if (safe.length <= maxChars) {
+    return [safe];
+  }
+
+  const words = safe.split(" ");
+  const rows: string[] = [];
+  let current = "";
+
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (candidate.length <= maxChars) {
+      current = candidate;
+      continue;
+    }
+    if (current) {
+      rows.push(current);
+    }
+    current = word;
+  }
+  if (current) {
+    rows.push(current);
+  }
+
+  return rows.length > 0 ? rows : [safe.slice(0, maxChars)];
+}
+
 async function savePdf(lines: string[], filePrefix: string): Promise<{ fileName: string; relativePath: string }> {
   const doc = await PDFDocument.create();
-  const page = doc.addPage([595, 842]);
   const font = await doc.embedFont(StandardFonts.Helvetica);
+  const pageSize: [number, number] = [595, 842];
+  const x = 40;
+  const yStart = 770;
+  const yMin = 40;
+  const lineHeight = 16;
+  let page = doc.addPage(pageSize);
+  let y = yStart;
 
-  page.drawText("FedShield", {
-    x: 40,
-    y: 800,
-    size: 20,
-    font,
-    color: rgb(0.48, 0.08, 0.14),
-  });
-
-  let y = 770;
-  for (const line of lines) {
-    page.drawText(line.slice(0, 130), {
-      x: 40,
-      y,
-      size: 11,
+  const drawHeader = () => {
+    page.drawText("FedShield", {
+      x,
+      y: 800,
+      size: 20,
       font,
-      color: rgb(0.1, 0.1, 0.1),
+      color: rgb(0.48, 0.08, 0.14),
     });
-    y -= 16;
-    if (y < 40) {
-      break;
+  };
+
+  drawHeader();
+
+  for (const line of lines) {
+    const wrapped = wrapLine(line, 102);
+    for (const row of wrapped) {
+      if (y < yMin) {
+        page = doc.addPage(pageSize);
+        y = yStart;
+        drawHeader();
+      }
+      page.drawText(row, {
+        x,
+        y,
+        size: 11,
+        font,
+        color: rgb(0.1, 0.1, 0.1),
+      });
+      y -= lineHeight;
     }
   }
 
@@ -62,6 +118,210 @@ async function savePdf(lines: string[], filePrefix: string): Promise<{ fileName:
   await writeFile(absolutePath, bytes);
 
   return { fileName, relativePath };
+}
+
+async function savePdfBytes(bytes: Uint8Array, filePrefix: string): Promise<{ fileName: string; relativePath: string }> {
+  const now = new Date();
+  const dateFolder = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const relativeDir = path.join("documents", dateFolder);
+  const absoluteDir = toAbsoluteStoragePath(relativeDir);
+  await mkdir(absoluteDir, { recursive: true });
+
+  const fileName = `${filePrefix}_${now.getTime()}_${randomUUID().slice(0, 8)}.pdf`;
+  const relativePath = path.join(relativeDir, fileName);
+  const absolutePath = toAbsoluteStoragePath(relativePath);
+  await writeFile(absolutePath, bytes);
+
+  return { fileName, relativePath };
+}
+
+function formatAnswerValue(value: string): string {
+  if (value === "yes") return "SI";
+  if (value === "no") return "NO";
+  return "N.A.";
+}
+
+function formatSectionLabel(section: string): string {
+  if (section === "premises_equipment") {
+    return "Locali / Attrezzature";
+  }
+  return "Procedure / Igiene";
+}
+
+function formatDomainLabel(domain: string): string {
+  if (domain === "safety") return "Sicurezza";
+  if (domain === "haccp") return "HACCP";
+  return "Unificata";
+}
+
+function formatItalyDate(date: Date): string {
+  return new Intl.DateTimeFormat("it-IT", {
+    timeZone: "Europe/Rome",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+}
+
+function formatItalyTime(date: Date): string {
+  return new Intl.DateTimeFormat("it-IT", {
+    timeZone: "Europe/Rome",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
+async function ensureInspectionClosedAt(
+  fastify: FastifyInstance,
+  inspectionId: string,
+  finalizedAt: Date | null | undefined,
+): Promise<Date> {
+  if (finalizedAt) {
+    return finalizedAt;
+  }
+
+  const now = new Date();
+  await fastify.prisma.inspection.update({
+    where: { id: inspectionId },
+    data: { finalizedAt: now },
+  });
+  return now;
+}
+
+export function buildAttestatoVerificationToken(payload: {
+  inspectionId: string;
+  closedAtIso: string;
+  score: number;
+  stars: number;
+}): string {
+  return createHash("sha256")
+    .update(
+      `${payload.inspectionId}|${payload.closedAtIso}|${payload.score}|${payload.stars}|${config.documentSealSecret}`,
+    )
+    .digest("hex")
+    .slice(0, 32);
+}
+
+function buildAttestatoVerificationUrl(inspectionId: string, verificationToken: string): string {
+  const base = config.verificationBaseUrl.replace(/\/+$/, "");
+  return `${base}/api/verify/attestato/${inspectionId}?token=${verificationToken}`;
+}
+
+async function readAttestatoDocxTemplate(): Promise<{ templatePath: string; templateHash: string }> {
+  const templatePath = path.isAbsolute(config.attestatoTemplateDocxPath)
+    ? config.attestatoTemplateDocxPath
+    : path.resolve(process.cwd(), config.attestatoTemplateDocxPath);
+  const bytes = await readFile(templatePath);
+  const templateHash = createHash("sha256").update(bytes).digest("hex");
+  return { templatePath, templateHash };
+}
+
+async function fetchQrPng(verificationUrl: string): Promise<Uint8Array | null> {
+  const qrEndpoint = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&format=png&data=${encodeURIComponent(
+    verificationUrl,
+  )}`;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 4000);
+  try {
+    const response = await fetch(qrEndpoint, {
+      method: "GET",
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      return null;
+    }
+    return new Uint8Array(await response.arrayBuffer());
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function generateAttestatoTemplatePdf(params: {
+  companyName: string;
+  vatNumber: string;
+  inspectionDate: string;
+  score: number;
+  stars: number;
+  verificationUrl: string;
+}): Promise<{ fileName: string; relativePath: string }> {
+  const doc = await PDFDocument.create();
+  const page = doc.addPage([595, 842]);
+  const { width, height } = page.getSize();
+
+  const colorNavy = rgb(0x1d / 255, 0x2f / 255, 0x54 / 255);
+  const colorOrange = rgb(0xef / 255, 0x59 / 255, 0x00 / 255);
+
+  const bold = await doc.embedFont(StandardFonts.HelveticaBold);
+  const regular = await doc.embedFont(StandardFonts.Helvetica);
+  const logoPath = path.isAbsolute(config.attestatoLogoPath)
+    ? config.attestatoLogoPath
+    : path.resolve(process.cwd(), config.attestatoLogoPath);
+  const logoPng = await readFile(logoPath);
+  const logoImage = await doc.embedPng(logoPng);
+
+  const drawCentered = (text: string, y: number, size: number, color: ReturnType<typeof rgb>, font = bold) => {
+    const safeText = toPdfSafeLine(text);
+    const textWidth = font.widthOfTextAtSize(safeText, size);
+    const x = (width - textWidth) / 2;
+    page.drawText(safeText, { x, y, size, color, font });
+  };
+
+  // Background and frame
+  page.drawRectangle({ x: 0, y: 0, width, height, color: rgb(0.98, 0.98, 0.98) });
+  page.drawRectangle({ x: 8, y: 8, width: width - 16, height: height - 16, borderWidth: 1, borderColor: rgb(0.65, 0.65, 0.65) });
+
+  // Logo
+  const logoWidth = 350;
+  const logoHeight = (logoImage.height / logoImage.width) * logoWidth;
+  page.drawImage(logoImage, {
+    x: (width - logoWidth) / 2,
+    y: 740,
+    width: logoWidth,
+    height: logoHeight,
+  });
+  page.drawLine({
+    start: { x: 145, y: 705 },
+    end: { x: width - 145, y: 705 },
+    thickness: 2,
+    color: colorOrange,
+  });
+
+  drawCentered("ATTESTATO ANTISANZIONE", 670, 34, colorNavy, bold);
+  drawCentered(params.companyName, 618, 40, colorNavy, bold);
+  drawCentered(`P. IVA ${params.vatNumber}`, 585, 16, colorNavy, regular);
+  drawCentered(`a seguito del sopralluogo antisanzione svolto in data ${params.inspectionDate}`, 532, 14, colorNavy, regular);
+  drawCentered("HA TOTALIZZATO", 472, 20, colorOrange, bold);
+  drawCentered(`UN FED-SCORE DI ${params.score}/100`, 430, 42, colorNavy, bold);
+  drawCentered(`FED STARS: ${params.stars}/5`, 380, 30, colorOrange, bold);
+  drawCentered("Verifica attestato tramite QR Code", 302, 12, colorNavy, regular);
+
+  const qrPng = await fetchQrPng(params.verificationUrl);
+  if (qrPng) {
+    const qrImage = await doc.embedPng(qrPng);
+    page.drawImage(qrImage, {
+      x: (width / 2) - 52,
+      y: 178,
+      width: 104,
+      height: 104,
+    });
+  } else {
+    drawCentered("QR non disponibile", 218, 10, colorNavy, regular);
+  }
+
+  page.drawLine({
+    start: { x: 28, y: 54 },
+    end: { x: width - 28, y: 54 },
+    thickness: 1,
+    color: rgb(0.35, 0.35, 0.35),
+  });
+  drawCentered("FacileSicurezza by FEDINVEST S.r.l. - Viale Affaccio, 59 - 89900 Vibo Valentia", 40, 8, colorNavy, regular);
+
+  const bytes = await doc.save();
+  return savePdfBytes(bytes, "attestato");
 }
 
 export async function generateInspectionReportPdf(
@@ -122,10 +382,15 @@ export async function generateInspectionReportPdf(
     })),
   });
 
+  const closedAt = await ensureInspectionClosedAt(fastify, inspection.id, inspection.finalizedAt);
+  const closedDate = formatItalyDate(closedAt);
+  const closedTime = formatItalyTime(closedAt);
+
   const lines = [
     `Verbale sopralluogo: ${inspection.title}`,
     `Azienda: ${inspection.company.name} (P.IVA ${inspection.company.vatNumber})`,
-    `Data: ${inspection.happenedAt.toLocaleDateString("it-IT")}`,
+    `Data sopralluogo: ${formatItalyDate(inspection.happenedAt)}`,
+    `Data chiusura sopralluogo: ${closedDate} - Ora chiusura (Italia): ${closedTime}`,
     `Consulente: ${inspection.author.fullName}`,
     `Stato: ${inspection.status}`,
     `NC Totali: ${report.summary.totalNc}`,
@@ -165,6 +430,7 @@ export async function generateInspectionReportPdf(
         sanctionableNc: report.summary.sanctionableNc,
         score: report.summary.score,
         stars: report.summary.stars,
+        closedAt: closedAt.toISOString(),
         requestedDocuments: report.documents.requestedLater.length,
         ...seal,
       }),
@@ -202,20 +468,50 @@ export async function generateAttestatoPdf(
   }
 
   const stars = starsFromScore(score);
+  const closedAt = await ensureInspectionClosedAt(fastify, inspection.id, inspection.finalizedAt);
+  const closedAtIso = closedAt.toISOString();
+  const docxTemplate = await readAttestatoDocxTemplate();
+  const verificationToken = buildAttestatoVerificationToken({
+    inspectionId: inspection.id,
+    closedAtIso,
+    score,
+    stars,
+  });
+  const verificationUrl = buildAttestatoVerificationUrl(inspection.id, verificationToken);
 
-  const lines = [
-    "ATTESTATO ANTISANZIONE",
-    `Azienda: ${inspection.company.name}`,
-    `P.IVA: ${inspection.company.vatNumber}`,
-    `Data valutazione: ${inspection.happenedAt.toLocaleDateString("it-IT")}`,
-    `Rating compliance: ${score}/100`,
-    `FED Stars: ${"★".repeat(stars)}${"☆".repeat(5 - stars)}`,
-    "",
-    "FacileSicurezza by FEDINVEST S.r.l. attesta il livello di compliance",
-    "normativa secondo i controlli eseguiti nel sopralluogo antisanzione.",
-  ];
+  let fileName: string;
+  let relativePath: string;
+  try {
+    const generated = await generateAttestatoTemplatePdf({
+      companyName: inspection.company.name,
+      vatNumber: inspection.company.vatNumber,
+      inspectionDate: formatItalyDate(inspection.happenedAt),
+      score,
+      stars,
+      verificationUrl,
+    });
+    fileName = generated.fileName;
+    relativePath = generated.relativePath;
+  } catch {
+    const fallbackLines = [
+      "ATTESTATO ANTISANZIONE",
+      `Azienda: ${inspection.company.name}`,
+      `P.IVA: ${inspection.company.vatNumber}`,
+      `Data sopralluogo: ${formatItalyDate(inspection.happenedAt)}`,
+      `Data chiusura sopralluogo: ${formatItalyDate(closedAt)} - Ora chiusura (Italia): ${formatItalyTime(closedAt)}`,
+      `Rating compliance: ${score}/100`,
+      `FED Stars: ${"*".repeat(stars)}${"-".repeat(5 - stars)} (${stars}/5)`,
+      "",
+      "FacileSicurezza by FEDINVEST S.r.l. attesta il livello di compliance",
+      "normativa secondo i controlli eseguiti nel sopralluogo antisanzione.",
+      "",
+      `Verifica QR: ${verificationUrl}`,
+    ];
+    const generated = await savePdf(fallbackLines, "attestato");
+    fileName = generated.fileName;
+    relativePath = generated.relativePath;
+  }
 
-  const { fileName, relativePath } = await savePdf(lines, "attestato");
   const seal = createDocumentSeal({
     type: "attestato",
     inspectionId: inspection.id,
@@ -231,7 +527,143 @@ export async function generateAttestatoPdf(
       filePath: relativePath,
       inspectionId: inspection.id,
       createdById: userId,
-      metadataJson: JSON.stringify({ score, stars, ...seal }),
+      metadataJson: JSON.stringify({
+        score,
+        stars,
+        inspectionDate: inspection.happenedAt.toISOString(),
+        closedAt: closedAtIso,
+        verificationToken,
+        verificationUrl,
+        templateDocxPath: docxTemplate.templatePath,
+        templateDocxHash: docxTemplate.templateHash,
+        templateLogoPath: config.attestatoLogoPath,
+        ...seal,
+      }),
+    },
+  });
+}
+
+export async function generateInspectionChecklistPdf(
+  fastify: FastifyInstance,
+  inspectionId: string,
+  userId?: string,
+) {
+  const inspection = await fastify.prisma.inspection.findUnique({
+    where: { id: inspectionId },
+    include: {
+      company: true,
+      author: { select: { fullName: true, role: true } },
+      validator: { select: { fullName: true, role: true } },
+      answers: {
+        include: {
+          checklistItem: {
+            select: {
+              question: true,
+              area: true,
+              section: true,
+              domain: true,
+              orderIndex: true,
+            },
+          },
+          nonConformity: {
+            select: {
+              severity: true,
+              isSanctionable: true,
+              description: true,
+            },
+          },
+        },
+        orderBy: [{ checklistItem: { section: "asc" } }, { checklistItem: { orderIndex: "asc" } }],
+      },
+    },
+  });
+
+  if (!inspection) {
+    throw new Error("Sopralluogo non trovato.");
+  }
+
+  const closedAt = await ensureInspectionClosedAt(fastify, inspection.id, inspection.finalizedAt);
+
+  const lines: string[] = [
+    "CHECKLIST COMPILATA - DETTAGLIO RISPOSTE",
+    `Sopralluogo: ${inspection.title}`,
+    `Azienda: ${inspection.company.name} (P.IVA ${inspection.company.vatNumber})`,
+    `Data sopralluogo: ${formatItalyDate(inspection.happenedAt)}`,
+    `Data chiusura sopralluogo: ${formatItalyDate(closedAt)} - Ora chiusura (Italia): ${formatItalyTime(closedAt)}`,
+    `Consulente: ${inspection.author.fullName}`,
+    `Stato sopralluogo: ${inspection.status}`,
+    `Modalita checklist: ${inspection.checklistMode}`,
+    "",
+  ];
+
+  if (inspection.answers.length === 0) {
+    lines.push("Nessuna risposta checklist disponibile per questo sopralluogo.");
+  } else {
+    let currentSection = "";
+    inspection.answers.forEach((answer, index) => {
+      const sectionLabel = formatSectionLabel(answer.checklistItem.section);
+      const domainLabel = formatDomainLabel(answer.checklistItem.domain);
+      if (sectionLabel !== currentSection) {
+        currentSection = sectionLabel;
+        lines.push(`=== ${sectionLabel.toUpperCase()} ===`);
+      }
+
+      const progressive = String(index + 1).padStart(3, "0");
+      lines.push(
+        `[${progressive}] [${domainLabel}] [Area: ${answer.checklistItem.area}] ${answer.checklistItem.question}`,
+      );
+      lines.push(`Risposta: ${formatAnswerValue(answer.value)}`);
+      if (answer.note?.trim()) {
+        lines.push(`Nota consulente: ${answer.note.trim()}`);
+      }
+      if (answer.value === "no") {
+        const severity = answer.severity ?? answer.nonConformity?.severity ?? 1;
+        const isSanctionable = answer.isSanctionable ?? answer.nonConformity?.isSanctionable ?? false;
+        lines.push(`NC correlata: SI | Gravita: ${severity} | Sanzionabile: ${isSanctionable ? "SI" : "NO"}`);
+        if (answer.nonConformity?.description?.trim()) {
+          lines.push(`Dettaglio NC: ${answer.nonConformity.description.trim()}`);
+        }
+      }
+      lines.push("");
+    });
+  }
+
+  const totals = {
+    answers: inspection.answers.length,
+    noAnswers: inspection.answers.filter((answer) => answer.value === "no").length,
+    sanctionableNoAnswers: inspection.answers.filter(
+      (answer) => answer.value === "no" && (answer.isSanctionable ?? answer.nonConformity?.isSanctionable),
+    ).length,
+  };
+
+  lines.push("RIEPILOGO FINALE");
+  lines.push(`Risposte compilate: ${totals.answers}`);
+  lines.push(`Risposte NO: ${totals.noAnswers}`);
+  lines.push(`Risposte NO sanzionabili: ${totals.sanctionableNoAnswers}`);
+
+  const { fileName, relativePath } = await savePdf(lines, "checklist");
+  const seal = createDocumentSeal({
+    type: "inspection_checklist_full",
+    inspectionId: inspection.id,
+    filePath: relativePath,
+    answers: totals.answers,
+    noAnswers: totals.noAnswers,
+    sanctionableNoAnswers: totals.sanctionableNoAnswers,
+  });
+
+  return fastify.prisma.generatedDocument.create({
+    data: {
+      kind: GeneratedDocumentKind.inspection_report,
+      fileName,
+      filePath: relativePath,
+      inspectionId: inspection.id,
+      createdById: userId,
+      metadataJson: JSON.stringify({
+        documentType: "checklist_full",
+        ...totals,
+        closedAt: closedAt.toISOString(),
+        ...seal,
+      }),
     },
   });
 }

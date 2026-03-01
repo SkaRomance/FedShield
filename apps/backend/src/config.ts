@@ -13,6 +13,19 @@ export const config = {
   port: Number(readEnv("PORT", "4000")),
   jwtSecret: readEnv("JWT_SECRET"),
   storageDir: readEnv("STORAGE_DIR", "storage"),
+  verificationBaseUrl: readEnv("VERIFICATION_BASE_URL", "http://localhost:4000"),
+  attestatoTemplatePdfPath: readEnv(
+    "ATTESTATO_TEMPLATE_PDF_PATH",
+    "assets/templates/attestato_antisanzione_template.pdf",
+  ),
+  attestatoTemplateDocxPath: readEnv(
+    "ATTESTATO_TEMPLATE_DOCX_PATH",
+    "assets/templates/attestato_antisanzione_template_placeholders.docx",
+  ),
+  attestatoLogoPath: readEnv(
+    "ATTESTATO_LOGO_PATH",
+    "assets/templates/attestato_template_logo.png",
+  ),
   quoteSweepSeconds: Number(readEnv("QUOTE_SWEEP_SECONDS", "60")),
   documentSealSecret: readEnv("DOCUMENT_SEAL_SECRET", "fedshield-local-seal"),
   attestatoMinScore: Number(readEnv("ATTESTATO_MIN_SCORE", "75")),
