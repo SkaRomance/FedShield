@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createHash, randomUUID } from "node:crypto";
 import { GeneratedDocumentKind, MallevaReason, Prisma } from "@prisma/client";
-import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { PDFDocument, PDFPage, StandardFonts, rgb } from "pdf-lib";
 import type { FastifyInstance } from "fastify";
 import { config } from "../config.js";
 import { buildInspectionReport, computeInspectionComplianceScore, starsFromScore } from "./report.service.js";
@@ -270,6 +270,44 @@ async function generateAttestatoTemplatePdf(params: {
     page.drawText(safeText, { x, y, size, color, font });
   };
 
+  const buildStarPath = (cx: number, cy: number, outerRadius: number, innerRadius: number): string => {
+    const points: Array<{ x: number; y: number }> = [];
+    for (let i = 0; i < 10; i += 1) {
+      const angle = -Math.PI / 2 + (i * Math.PI) / 5;
+      const radius = i % 2 === 0 ? outerRadius : innerRadius;
+      points.push({
+        x: cx + Math.cos(angle) * radius,
+        y: cy + Math.sin(angle) * radius,
+      });
+    }
+    return points
+      .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`)
+      .join(" ")
+      .concat(" Z");
+  };
+
+  const drawStarsRow = (
+    targetPage: PDFPage,
+    options: { centerX: number; centerY: number; filledStars: number; totalStars?: number },
+  ) => {
+    const totalStars = options.totalStars ?? 5;
+    const starSize = 11;
+    const starGap = 10;
+    const rowWidth = totalStars * (starSize * 2) + (totalStars - 1) * starGap;
+    let cursorX = options.centerX - rowWidth / 2 + starSize;
+
+    for (let i = 0; i < totalStars; i += 1) {
+      const path = buildStarPath(cursorX, options.centerY, starSize, starSize * 0.48);
+      const filled = i < options.filledStars;
+      targetPage.drawSvgPath(path, {
+        color: filled ? colorOrange : rgb(0.9, 0.9, 0.9),
+        borderColor: colorOrange,
+        borderWidth: 0.8,
+      });
+      cursorX += starSize * 2 + starGap;
+    }
+  };
+
   // Background and frame
   page.drawRectangle({ x: 0, y: 0, width, height, color: rgb(0.98, 0.98, 0.98) });
   page.drawRectangle({ x: 8, y: 8, width: width - 16, height: height - 16, borderWidth: 1, borderColor: rgb(0.65, 0.65, 0.65) });
@@ -295,8 +333,13 @@ async function generateAttestatoTemplatePdf(params: {
   drawCentered(`P. IVA ${params.vatNumber}`, 585, 16, colorNavy, regular);
   drawCentered(`a seguito del sopralluogo antisanzione svolto in data ${params.inspectionDate}`, 532, 14, colorNavy, regular);
   drawCentered("HA TOTALIZZATO", 472, 20, colorOrange, bold);
-  drawCentered(`UN FED-SCORE DI ${params.score}/100`, 430, 42, colorNavy, bold);
-  drawCentered(`FED STARS: ${params.stars}/5`, 380, 30, colorOrange, bold);
+  drawCentered(`UN FED-SCORE DI ${params.score}/100`, 430, 30, colorNavy, bold);
+  drawStarsRow(page, {
+    centerX: width / 2,
+    centerY: 387,
+    filledStars: Math.max(0, Math.min(params.stars, 5)),
+    totalStars: 5,
+  });
   drawCentered("Verifica attestato tramite QR Code", 302, 12, colorNavy, regular);
 
   const qrPng = await fetchQrPng(params.verificationUrl);
