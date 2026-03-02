@@ -7,6 +7,41 @@ const API_BASE = isDesktopRuntime
   ? (desktopOverride?.trim() || DESKTOP_LOCAL_API_BASE)
   : (genericOverride?.trim() || "http://localhost:4000/api");
 
+export class ApiError extends Error {
+  statusCode: number;
+  responseBody?: string;
+
+  constructor(statusCode: number, message: string, responseBody?: string) {
+    super(message);
+    this.name = "ApiError";
+    this.statusCode = statusCode;
+    this.responseBody = responseBody;
+  }
+}
+
+function parseApiErrorMessage(raw: string, statusCode: number): string {
+  if (!raw) return `Errore API ${statusCode}`;
+  try {
+    const parsed = JSON.parse(raw) as { message?: string };
+    if (typeof parsed.message === "string" && parsed.message.trim().length > 0) {
+      return parsed.message;
+    }
+  } catch {
+    // fallback to raw body
+  }
+  return raw;
+}
+
+export function isUnauthorizedError(error: unknown): boolean {
+  if (error instanceof ApiError) {
+    return error.statusCode === 401;
+  }
+  if (error instanceof Error) {
+    return /token non valido o assente|unauthorized|401/i.test(error.message);
+  }
+  return false;
+}
+
 export interface LoginResponse {
   token: string;
   user: {
@@ -293,8 +328,8 @@ async function publicFetch<T>(path: string, init?: RequestInit): Promise<T> {
   }
 
   if (!res.ok) {
-    const message = await res.text();
-    throw new Error(message || `Errore API ${res.status}`);
+    const body = await res.text();
+    throw new ApiError(res.status, parseApiErrorMessage(body, res.status), body);
   }
 
   return res.json();
@@ -321,8 +356,8 @@ async function authedFetch<T>(path: string, token: string, init?: RequestInit): 
   }
 
   if (!res.ok) {
-    const message = await res.text();
-    throw new Error(message || `Errore API ${res.status}`);
+    const body = await res.text();
+    throw new ApiError(res.status, parseApiErrorMessage(body, res.status), body);
   }
 
   return res.json();
@@ -533,8 +568,8 @@ export async function downloadGeneratedDocument(
   }
 
   if (!res.ok) {
-    const message = await res.text();
-    throw new Error(message || `Download documento fallito (${res.status})`);
+    const body = await res.text();
+    throw new ApiError(res.status, parseApiErrorMessage(body, res.status), body);
   }
 
   if (typeof document === "undefined") {

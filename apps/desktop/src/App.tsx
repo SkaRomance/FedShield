@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { apiLogin, Company, fetchCompanies, fetchInspections, Inspection, LoginResponse } from "./api";
+import {
+  apiLogin,
+  Company,
+  fetchCompanies,
+  fetchInspections,
+  Inspection,
+  isUnauthorizedError,
+  LoginResponse,
+} from "./api";
 import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
 import {
@@ -49,10 +57,34 @@ export default function App() {
       });
   }, []);
 
+  function clearSessionState() {
+    setSession(null);
+    setCompanies([]);
+    setInspections([]);
+    localStorage.removeItem("fedshield_session");
+  }
+
+  function handleUnauthorizedSession(error: unknown): boolean {
+    if (!isUnauthorizedError(error)) {
+      return false;
+    }
+    clearSessionState();
+    setSyncQueueSize(getSyncQueueSize());
+    setSyncMessage("Sessione scaduta o token non valido. Effettua di nuovo il login.");
+    return true;
+  }
+
   async function loadDashboard(token: string) {
-    const [companiesData, inspectionsData] = await Promise.all([fetchCompanies(token), fetchInspections(token)]);
-    setCompanies(companiesData);
-    setInspections(inspectionsData);
+    try {
+      const [companiesData, inspectionsData] = await Promise.all([fetchCompanies(token), fetchInspections(token)]);
+      setCompanies(companiesData);
+      setInspections(inspectionsData);
+    } catch (error) {
+      if (handleUnauthorizedSession(error)) {
+        return;
+      }
+      throw error;
+    }
   }
 
   async function runSyncCycle(token: string) {
@@ -72,6 +104,9 @@ export default function App() {
       // Refresh rapido per allineare la UI con i delta appena ricevuti.
       await loadDashboard(token);
     } catch (error) {
+      if (handleUnauthorizedSession(error)) {
+        return;
+      }
       setSyncQueueSize(getSyncQueueSize());
       setSyncMessage(`Sync in errore: ${error instanceof Error ? error.message : "errore"}`);
     }
@@ -109,10 +144,8 @@ export default function App() {
   }
 
   function handleLogout() {
-    setSession(null);
-    setCompanies([]);
-    setInspections([]);
-    localStorage.removeItem("fedshield_session");
+    clearSessionState();
+    setSyncMessage("Sync non avviata.");
   }
 
   if (licenseLoading) {
