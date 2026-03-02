@@ -101,7 +101,26 @@ model Company {
   id            String       @id @default(cuid())
   name          String
   vatNumber     String       @unique
+  legalForm     String?
+  reaNumber     String?
+  employeesInfo String?
+  email         String?
+  pec           String?
+  phone         String?
   atecoCode     String?
+  riskLevel     String?
+  description   String?
+  legalAddress  String?
+  localUnitAddress String?
+  preventionSystemSubjects String?
+  employerRsppPreposto String?
+  occupationalDoctor String?
+  rls           String?
+  emergencyTeam String?
+  firstAidTeam  String?
+  haccpResponsabileAutocontrollo String?
+  haccpConsulenteEsterno String?
+  haccpAdditionalResponsabili String?
   contractStart DateTime?
   city          String?
   createdAt     DateTime     @default(now())

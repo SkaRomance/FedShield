@@ -561,6 +561,258 @@ async function main() {
     },
   });
 
+  const gastronomyProductionPremisesTemplate = await prisma.checklistTemplate.upsert({
+    where: { id: "gastronomy-production-premises-template-seed" },
+    update: {
+      name: "Checklist Gastronomia/Produzione Alimentare - Locali e Attrezzature",
+      description: "Controlli strutturali, tecnologici e sicurezza impianti per produzione alimentare",
+      atecoCode: "10.85",
+      macroGroup: "GASTRONOMIA_PRODUZIONE",
+      isGeneral: false,
+      isActive: true,
+    },
+    create: {
+      id: "gastronomy-production-premises-template-seed",
+      name: "Checklist Gastronomia/Produzione Alimentare - Locali e Attrezzature",
+      description: "Controlli strutturali, tecnologici e sicurezza impianti per produzione alimentare",
+      atecoCode: "10.85",
+      macroGroup: "GASTRONOMIA_PRODUZIONE",
+      isGeneral: false,
+      isActive: true,
+    },
+  });
+
+  const gastronomyProductionProceduresTemplate = await prisma.checklistTemplate.upsert({
+    where: { id: "gastronomy-production-procedures-template-seed" },
+    update: {
+      name: "Checklist Gastronomia/Produzione Alimentare - Procedure e Igiene",
+      description: "Controlli HACCP, GMP, PRP e sicurezza operativa per industria alimentare",
+      atecoCode: "10.85",
+      macroGroup: "GASTRONOMIA_PRODUZIONE",
+      isGeneral: false,
+      isActive: true,
+    },
+    create: {
+      id: "gastronomy-production-procedures-template-seed",
+      name: "Checklist Gastronomia/Produzione Alimentare - Procedure e Igiene",
+      description: "Controlli HACCP, GMP, PRP e sicurezza operativa per industria alimentare",
+      atecoCode: "10.85",
+      macroGroup: "GASTRONOMIA_PRODUZIONE",
+      isGeneral: false,
+      isActive: true,
+    },
+  });
+
+  const bnbPremisesTemplate = await prisma.checklistTemplate.upsert({
+    where: { id: "bnb-premises-template-seed" },
+    update: {
+      name: "Checklist B&B/Affittacamere - Locali e Attrezzature",
+      description: "Controlli strutturali, impiantistici e sicurezza per strutture extra-alberghiere",
+      atecoCode: "55.20.51",
+      macroGroup: "BEB_AFFITTACAMERE",
+      isGeneral: false,
+      isActive: true,
+    },
+    create: {
+      id: "bnb-premises-template-seed",
+      name: "Checklist B&B/Affittacamere - Locali e Attrezzature",
+      description: "Controlli strutturali, impiantistici e sicurezza per strutture extra-alberghiere",
+      atecoCode: "55.20.51",
+      macroGroup: "BEB_AFFITTACAMERE",
+      isGeneral: false,
+      isActive: true,
+    },
+  });
+
+  const bnbProceduresTemplate = await prisma.checklistTemplate.upsert({
+    where: { id: "bnb-procedures-template-seed" },
+    update: {
+      name: "Checklist B&B/Affittacamere - Procedure e Igiene",
+      description: "Controlli HACCP e sicurezza operativa per servizio colazioni e ospitalita extra-alberghiera",
+      atecoCode: "55.20.51",
+      macroGroup: "BEB_AFFITTACAMERE",
+      isGeneral: false,
+      isActive: true,
+    },
+    create: {
+      id: "bnb-procedures-template-seed",
+      name: "Checklist B&B/Affittacamere - Procedure e Igiene",
+      description: "Controlli HACCP e sicurezza operativa per servizio colazioni e ospitalita extra-alberghiera",
+      atecoCode: "55.20.51",
+      macroGroup: "BEB_AFFITTACAMERE",
+      isGeneral: false,
+      isActive: true,
+    },
+  });
+
+  const hostelResidencePremisesTemplate = await prisma.checklistTemplate.upsert({
+    where: { id: "hostel-residence-premises-template-seed" },
+    update: {
+      name: "Checklist Ostelli/Residence - Locali e Attrezzature",
+      description: "Controlli strutturali e sicurezza per ostelli e residence",
+      atecoCode: "55.20.20",
+      macroGroup: "OSTELLI_RESIDENCE",
+      isGeneral: false,
+      isActive: true,
+    },
+    create: {
+      id: "hostel-residence-premises-template-seed",
+      name: "Checklist Ostelli/Residence - Locali e Attrezzature",
+      description: "Controlli strutturali e sicurezza per ostelli e residence",
+      atecoCode: "55.20.20",
+      macroGroup: "OSTELLI_RESIDENCE",
+      isGeneral: false,
+      isActive: true,
+    },
+  });
+
+  const hostelResidenceProceduresTemplate = await prisma.checklistTemplate.upsert({
+    where: { id: "hostel-residence-procedures-template-seed" },
+    update: {
+      name: "Checklist Ostelli/Residence - Procedure e Igiene",
+      description: "Controlli HACCP e sicurezza operativa per aree comuni e servizi alimentari",
+      atecoCode: "55.20.20",
+      macroGroup: "OSTELLI_RESIDENCE",
+      isGeneral: false,
+      isActive: true,
+    },
+    create: {
+      id: "hostel-residence-procedures-template-seed",
+      name: "Checklist Ostelli/Residence - Procedure e Igiene",
+      description: "Controlli HACCP e sicurezza operativa per aree comuni e servizi alimentari",
+      atecoCode: "55.20.20",
+      macroGroup: "OSTELLI_RESIDENCE",
+      isGeneral: false,
+      isActive: true,
+    },
+  });
+
+  const campingVillagePremisesTemplate = await prisma.checklistTemplate.upsert({
+    where: { id: "camping-village-premises-template-seed" },
+    update: {
+      name: "Checklist Campeggi/Villaggi - Locali e Attrezzature",
+      description: "Controlli strutturali, impiantistici e sicurezza per campeggi e villaggi turistici",
+      atecoCode: "55.30.00",
+      macroGroup: "CAMPEGGI_VILLAGGI",
+      isGeneral: false,
+      isActive: true,
+    },
+    create: {
+      id: "camping-village-premises-template-seed",
+      name: "Checklist Campeggi/Villaggi - Locali e Attrezzature",
+      description: "Controlli strutturali, impiantistici e sicurezza per campeggi e villaggi turistici",
+      atecoCode: "55.30.00",
+      macroGroup: "CAMPEGGI_VILLAGGI",
+      isGeneral: false,
+      isActive: true,
+    },
+  });
+
+  const campingVillageProceduresTemplate = await prisma.checklistTemplate.upsert({
+    where: { id: "camping-village-procedures-template-seed" },
+    update: {
+      name: "Checklist Campeggi/Villaggi - Procedure e Igiene",
+      description: "Controlli HACCP e sicurezza operativa per servizi comuni e ristorazione interna",
+      atecoCode: "55.30.00",
+      macroGroup: "CAMPEGGI_VILLAGGI",
+      isGeneral: false,
+      isActive: true,
+    },
+    create: {
+      id: "camping-village-procedures-template-seed",
+      name: "Checklist Campeggi/Villaggi - Procedure e Igiene",
+      description: "Controlli HACCP e sicurezza operativa per servizi comuni e ristorazione interna",
+      atecoCode: "55.30.00",
+      macroGroup: "CAMPEGGI_VILLAGGI",
+      isGeneral: false,
+      isActive: true,
+    },
+  });
+
+  const beachClubPremisesTemplate = await prisma.checklistTemplate.upsert({
+    where: { id: "beach-club-premises-template-seed" },
+    update: {
+      name: "Checklist Stabilimenti Balneari - Locali e Attrezzature",
+      description: "Controlli strutturali, attrezzature e sicurezza per stabilimenti balneari con somministrazione",
+      atecoCode: "93.29.20",
+      macroGroup: "STABILIMENTI_BALNEARI",
+      isGeneral: false,
+      isActive: true,
+    },
+    create: {
+      id: "beach-club-premises-template-seed",
+      name: "Checklist Stabilimenti Balneari - Locali e Attrezzature",
+      description: "Controlli strutturali, attrezzature e sicurezza per stabilimenti balneari con somministrazione",
+      atecoCode: "93.29.20",
+      macroGroup: "STABILIMENTI_BALNEARI",
+      isGeneral: false,
+      isActive: true,
+    },
+  });
+
+  const beachClubProceduresTemplate = await prisma.checklistTemplate.upsert({
+    where: { id: "beach-club-procedures-template-seed" },
+    update: {
+      name: "Checklist Stabilimenti Balneari - Procedure e Igiene",
+      description: "Controlli HACCP, GMP e sicurezza operativa per servizio bar/ristorazione in stabilimento",
+      atecoCode: "93.29.20",
+      macroGroup: "STABILIMENTI_BALNEARI",
+      isGeneral: false,
+      isActive: true,
+    },
+    create: {
+      id: "beach-club-procedures-template-seed",
+      name: "Checklist Stabilimenti Balneari - Procedure e Igiene",
+      description: "Controlli HACCP, GMP e sicurezza operativa per servizio bar/ristorazione in stabilimento",
+      atecoCode: "93.29.20",
+      macroGroup: "STABILIMENTI_BALNEARI",
+      isGeneral: false,
+      isActive: true,
+    },
+  });
+
+  const nightlifePremisesTemplate = await prisma.checklistTemplate.upsert({
+    where: { id: "nightlife-premises-template-seed" },
+    update: {
+      name: "Checklist Locali Serali/Discoteca - Locali e Attrezzature",
+      description: "Controlli strutturali, impiantistici e sicurezza per locali serali con somministrazione",
+      atecoCode: "93.29.10",
+      macroGroup: "LOCALI_SERALI",
+      isGeneral: false,
+      isActive: true,
+    },
+    create: {
+      id: "nightlife-premises-template-seed",
+      name: "Checklist Locali Serali/Discoteca - Locali e Attrezzature",
+      description: "Controlli strutturali, impiantistici e sicurezza per locali serali con somministrazione",
+      atecoCode: "93.29.10",
+      macroGroup: "LOCALI_SERALI",
+      isGeneral: false,
+      isActive: true,
+    },
+  });
+
+  const nightlifeProceduresTemplate = await prisma.checklistTemplate.upsert({
+    where: { id: "nightlife-procedures-template-seed" },
+    update: {
+      name: "Checklist Locali Serali/Discoteca - Procedure e Igiene",
+      description: "Controlli HACCP, GMP e sicurezza operativa per servizio beverage/food in fascia serale",
+      atecoCode: "93.29.10",
+      macroGroup: "LOCALI_SERALI",
+      isGeneral: false,
+      isActive: true,
+    },
+    create: {
+      id: "nightlife-procedures-template-seed",
+      name: "Checklist Locali Serali/Discoteca - Procedure e Igiene",
+      description: "Controlli HACCP, GMP e sicurezza operativa per servizio beverage/food in fascia serale",
+      atecoCode: "93.29.10",
+      macroGroup: "LOCALI_SERALI",
+      isGeneral: false,
+      isActive: true,
+    },
+  });
+
   await prisma.checklistItem.deleteMany({
     where: {
       templateId: {
@@ -584,6 +836,18 @@ async function main() {
           foodTruckProceduresTemplate.id,
           ambulantPastryPremisesTemplate.id,
           ambulantPastryProceduresTemplate.id,
+          gastronomyProductionPremisesTemplate.id,
+          gastronomyProductionProceduresTemplate.id,
+          bnbPremisesTemplate.id,
+          bnbProceduresTemplate.id,
+          hostelResidencePremisesTemplate.id,
+          hostelResidenceProceduresTemplate.id,
+          campingVillagePremisesTemplate.id,
+          campingVillageProceduresTemplate.id,
+          beachClubPremisesTemplate.id,
+          beachClubProceduresTemplate.id,
+          nightlifePremisesTemplate.id,
+          nightlifeProceduresTemplate.id,
         ],
       },
     },
@@ -4768,6 +5032,462 @@ async function main() {
     },
   ];
 
+  const gastronomyProductionPremisesItemsBase = [
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 1,
+      section: ChecklistSection.premises_equipment,
+      area: "Layout produttivo",
+      question: "Layout stabilimento separa chiaramente crudo/cotto, allergeni e flussi pulito/sporco?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 2,
+      section: ChecklistSection.premises_equipment,
+      area: "Zonizzazione",
+      question: "Aree ricevimento, preparazione, cottura, raffreddamento, confezionamento e spedizione sono fisicamente/functionalmente distinte?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 3,
+      section: ChecklistSection.premises_equipment,
+      area: "Superfici",
+      question: "Pavimenti, pareti e piani lavoro sono integri, lavabili e in materiale idoneo alimentare?",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 4,
+      section: ChecklistSection.premises_equipment,
+      area: "Condense e infiltrazioni",
+      question: "Soffitti e impianti aerei sono privi di condensa, muffe o gocciolamenti nelle aree alimento?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 5,
+      section: ChecklistSection.premises_equipment,
+      area: "Infestanti",
+      question: "Porte, finestre, varchi tecnici e baie carico sono protetti contro infestanti con sistemi efficienti?",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 6,
+      section: ChecklistSection.premises_equipment,
+      area: "Impianti aria",
+      question: "Ventilazione/estrazione e ricambi aria nelle aree produttive sono adeguati e manutenuti?",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 7,
+      section: ChecklistSection.premises_equipment,
+      area: "Acqua di processo",
+      question: "Disponibilita di acqua potabile e punti di erogazione controllati con evidenze analitiche periodiche?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 8,
+      section: ChecklistSection.premises_equipment,
+      area: "Scarichi",
+      question: "Rete scarichi/sifoni funziona correttamente senza reflussi o ristagni nelle aree di produzione?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 9,
+      section: ChecklistSection.premises_equipment,
+      area: "Impianto elettrico",
+      question: "Impianti elettrici quadro-linee prese in area umida sono conformi e verificati periodicamente?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 10,
+      section: ChecklistSection.premises_equipment,
+      area: "Impianti termici",
+      question: "Linee gas/vapore/oli diatermici sono certificate e sottoposte a manutenzione programmata?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 11,
+      section: ChecklistSection.premises_equipment,
+      area: "Sicurezza antincendio",
+      question: "Presidi antincendio, rilevazione e compartimentazioni sono presenti, accessibili e in scadenza valida?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 12,
+      section: ChecklistSection.premises_equipment,
+      area: "Emergenze",
+      question: "Vie di esodo, uscite emergenza e illuminazione di sicurezza sono sempre libere e funzionanti?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 13,
+      section: ChecklistSection.premises_equipment,
+      area: "Primo soccorso",
+      question: "Cassetta primo soccorso, doccia lavaocchi e presidi emergenza chimica sono disponibili e completi?",
+      defaultSeverity: 3,
+      defaultSanctionable: false,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 14,
+      section: ChecklistSection.premises_equipment,
+      area: "Catena del freddo",
+      question: "Celle frigorifere e freezer hanno monitoraggio continuo temperatura con allarmi e registrazione?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 15,
+      section: ChecklistSection.premises_equipment,
+      area: "Raffreddamento rapido",
+      question: "Abbattitori di temperatura sono dimensionati, efficienti e con manutenzioni documentate?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 16,
+      section: ChecklistSection.premises_equipment,
+      area: "Cottura",
+      question: "Forni, bollitori e cuocitori industriali dispongono di protezioni, blocchi e pulsanti emergenza funzionanti?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 17,
+      section: ChecklistSection.premises_equipment,
+      area: "Macchine preparazione",
+      question: "Impastatrici, cutter, tritacarne, affettatrici hanno microinterruttori/protezioni integri?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 18,
+      section: ChecklistSection.premises_equipment,
+      area: "Confezionamento",
+      question: "Linee confezionamento e termosaldatura garantiscono igiene, sicurezza operatore e integrita del pack?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 19,
+      section: ChecklistSection.premises_equipment,
+      area: "Corpi estranei",
+      question: "Setacci, filtri, metal detector o sistemi equivalenti sono presenti e verificati secondo piano?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 20,
+      section: ChecklistSection.premises_equipment,
+      area: "MOCA",
+      question: "Materiali a contatto alimenti (MOCA) usati in produzione/confezionamento sono conformi e rintracciabili?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 21,
+      section: ChecklistSection.premises_equipment,
+      area: "Magazzino materie prime",
+      question: "Stoccaggio materie prime avviene con FEFO/FIFO, segregazione allergeni e separazione da chimici?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 22,
+      section: ChecklistSection.premises_equipment,
+      area: "Magazzino prodotti finiti",
+      question: "Prodotti finiti e aree quarantena NC sono identificate, separate e tracciate?",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 23,
+      section: ChecklistSection.premises_equipment,
+      area: "Rifiuti e sottoprodotti",
+      question: "Rifiuti, sottoprodotti e resi sono gestiti in aree dedicate con contenitori idonei e flussi separati?",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 24,
+      section: ChecklistSection.premises_equipment,
+      area: "Spogliatoi e servizi",
+      question: "Spogliatoi, servizi igienici e lavamani personale sono adeguati, separati e mantenuti igienicamente?",
+      defaultSeverity: 3,
+      defaultSanctionable: false,
+    },
+    {
+      templateId: gastronomyProductionPremisesTemplate.id,
+      orderIndex: 25,
+      section: ChecklistSection.premises_equipment,
+      area: "PMP",
+      question: "Piano monitoraggio infestanti con mappe, trend e azioni correttive e disponibile e aggiornato?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+  ];
+
+  const gastronomyProductionProcedureItemsBase = [
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 1,
+      section: ChecklistSection.procedures_hygiene,
+      area: "HACCP",
+      question: "Manuale HACCP aggiornato e coerente con processi reali e layout dello stabilimento?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 2,
+      section: ChecklistSection.procedures_hygiene,
+      area: "Analisi pericoli",
+      question: "Analisi pericoli e diagrammi di flusso sono validati e riesaminati quando cambia il processo?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 3,
+      section: ChecklistSection.procedures_hygiene,
+      area: "CCP cottura",
+      question: "CCP di cottura ha limiti critici, monitoraggi e registrazioni complete per ogni lotto?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 4,
+      section: ChecklistSection.procedures_hygiene,
+      area: "CCP raffreddamento",
+      question: "Raffreddamento rapido/abbattimento e gestito con limiti tempo-temperatura e registri verificabili?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 5,
+      section: ChecklistSection.procedures_hygiene,
+      area: "Catena del freddo",
+      question: "Conservazione refrigerata/congelata e distribuzione interna rispettano limiti e tempi definiti?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 6,
+      section: ChecklistSection.procedures_hygiene,
+      area: "GMP",
+      question: "Procedure GMP su manipolazione, utensili e flussi operatori sono formalizzate e applicate?",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 7,
+      section: ChecklistSection.procedures_hygiene,
+      area: "Allergeni",
+      question: "Piano allergeni con matrice ingredienti/prodotti e etichettatura e aggiornato e condiviso?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 8,
+      section: ChecklistSection.procedures_hygiene,
+      area: "Allergeni",
+      question: "Cambio produzione e sanificazione anti cross-contact allergeni sono validati e registrati?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 9,
+      section: ChecklistSection.procedures_hygiene,
+      area: "Fornitori",
+      question: "Qualifica fornitori e controlli in ingresso (documentali e fisici) risultano attivi e tracciati?",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 10,
+      section: ChecklistSection.procedures_hygiene,
+      area: "Ricevimento merci",
+      question: "Controlli su temperatura, integrita imballi, scadenze e conformita lotti sono registrati in accettazione?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 11,
+      section: ChecklistSection.procedures_hygiene,
+      area: "Rintracciabilita",
+      question: "Tracciabilita one-step-back/one-step-forward e garantita per ogni lotto prodotto?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 12,
+      section: ChecklistSection.procedures_hygiene,
+      area: "Ritiro/Richiamo",
+      question: "Procedura ritiro/richiamo con ruoli, tempi e test periodici (mock recall) e operativa?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 13,
+      section: ChecklistSection.procedures_hygiene,
+      area: "Sanificazione",
+      question: "Master sanitation schedule definisce frequenze, responsabilita, metodi e verifiche efficacia?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 14,
+      section: ChecklistSection.procedures_hygiene,
+      area: "Sanificazione",
+      question: "Concentrazione e tempi contatto detergenti/disinfettanti sono controllati e registrati?",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 15,
+      section: ChecklistSection.procedures_hygiene,
+      area: "Monitoraggi micro",
+      question: "Piano monitoraggio microbiologico superfici/prodotto/acqua e definito con trend e azioni?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 16,
+      section: ChecklistSection.procedures_hygiene,
+      area: "Igiene personale",
+      question: "Procedure igiene personale, idoneita sanitaria e gestione sintomi sono formalizzate e applicate?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 17,
+      section: ChecklistSection.procedures_hygiene,
+      area: "Igiene personale",
+      question: "Protocollo lavaggio mani, cambio guanti/indumenti e ingresso in aree ad alto rischio e rispettato?",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 18,
+      section: ChecklistSection.procedures_hygiene,
+      area: "Manutenzioni",
+      question: "Piano manutenzione preventiva con rilascio igienico post-intervento e attivo su tutte le macchine?",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 19,
+      section: ChecklistSection.procedures_hygiene,
+      area: "Tarature",
+      question: "Bilance, sonde e strumenti critici sono tarati/verificati con evidenze aggiornate?",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 20,
+      section: ChecklistSection.procedures_hygiene,
+      area: "Corpi estranei",
+      question: "Programma controllo corpi estranei (vetro/plastica dura/metalli) e implementato e verificato?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 21,
+      section: ChecklistSection.procedures_hygiene,
+      area: "Etichettatura",
+      question: "Etichettatura prodotto (allergeni, lotto, TMC/scadenza, conservazione) e verificata prima del rilascio?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 22,
+      section: ChecklistSection.procedures_hygiene,
+      area: "Non conformita",
+      question: "Gestione NC, blocco/quarantena lotti e CAPA sono tracciati con verifica efficacia?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 23,
+      section: ChecklistSection.procedures_hygiene,
+      area: "Food defense/fraud",
+      question: "Misure di food defense e prevenzione frodi alimentari sono definite e riesaminate periodicamente?",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 24,
+      section: ChecklistSection.procedures_hygiene,
+      area: "Sicurezza lavoro",
+      question: "Procedure sicurezza per LOTO, attrezzature in movimento, rischio ustione/taglio/chimico sono applicate?",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+    },
+    {
+      templateId: gastronomyProductionProceduresTemplate.id,
+      orderIndex: 25,
+      section: ChecklistSection.procedures_hygiene,
+      area: "Formazione",
+      question: "Formazione HACCP, GMP, PRP e sicurezza del personale e aggiornata e con prove di efficacia?",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+    },
+  ];
+
   const restaurantPremisesDomainByOrder: Record<number, ComplianceDomain> = {
     1: ComplianceDomain.haccp,
     2: ComplianceDomain.both,
@@ -5216,6 +5936,62 @@ async function main() {
     25: ComplianceDomain.haccp,
   };
 
+  const gastronomyProductionPremisesDomainByOrder: Record<number, ComplianceDomain> = {
+    1: ComplianceDomain.both,
+    2: ComplianceDomain.both,
+    3: ComplianceDomain.haccp,
+    4: ComplianceDomain.haccp,
+    5: ComplianceDomain.haccp,
+    6: ComplianceDomain.both,
+    7: ComplianceDomain.haccp,
+    8: ComplianceDomain.haccp,
+    9: ComplianceDomain.safety,
+    10: ComplianceDomain.safety,
+    11: ComplianceDomain.safety,
+    12: ComplianceDomain.safety,
+    13: ComplianceDomain.safety,
+    14: ComplianceDomain.haccp,
+    15: ComplianceDomain.haccp,
+    16: ComplianceDomain.safety,
+    17: ComplianceDomain.safety,
+    18: ComplianceDomain.both,
+    19: ComplianceDomain.haccp,
+    20: ComplianceDomain.haccp,
+    21: ComplianceDomain.haccp,
+    22: ComplianceDomain.haccp,
+    23: ComplianceDomain.both,
+    24: ComplianceDomain.both,
+    25: ComplianceDomain.both,
+  };
+
+  const gastronomyProductionProcedureDomainByOrder: Record<number, ComplianceDomain> = {
+    1: ComplianceDomain.haccp,
+    2: ComplianceDomain.haccp,
+    3: ComplianceDomain.haccp,
+    4: ComplianceDomain.haccp,
+    5: ComplianceDomain.haccp,
+    6: ComplianceDomain.both,
+    7: ComplianceDomain.haccp,
+    8: ComplianceDomain.haccp,
+    9: ComplianceDomain.haccp,
+    10: ComplianceDomain.haccp,
+    11: ComplianceDomain.haccp,
+    12: ComplianceDomain.haccp,
+    13: ComplianceDomain.haccp,
+    14: ComplianceDomain.haccp,
+    15: ComplianceDomain.haccp,
+    16: ComplianceDomain.haccp,
+    17: ComplianceDomain.haccp,
+    18: ComplianceDomain.both,
+    19: ComplianceDomain.both,
+    20: ComplianceDomain.haccp,
+    21: ComplianceDomain.haccp,
+    22: ComplianceDomain.both,
+    23: ComplianceDomain.both,
+    24: ComplianceDomain.safety,
+    25: ComplianceDomain.both,
+  };
+
   const restaurantPremisesItems = restaurantPremisesItemsBase.map((item) => ({
     ...item,
     domain: restaurantPremisesDomainByOrder[item.orderIndex] ?? ComplianceDomain.both,
@@ -5362,6 +6138,88 @@ async function main() {
     domain: ambulantPastryProcedureDomainByOrder[item.orderIndex] ?? ComplianceDomain.both,
   }));
 
+  const gastronomyProductionPremisesItems = gastronomyProductionPremisesItemsBase.map((item) => ({
+    ...item,
+    domain: gastronomyProductionPremisesDomainByOrder[item.orderIndex] ?? ComplianceDomain.both,
+  }));
+
+  const gastronomyProductionProcedureItems = gastronomyProductionProcedureItemsBase.map((item) => ({
+    ...item,
+    domain: gastronomyProductionProcedureDomainByOrder[item.orderIndex] ?? ComplianceDomain.both,
+  }));
+
+  const remapChecklistItems = <
+    T extends {
+      templateId: string;
+      question: string;
+      domain: ComplianceDomain;
+    },
+  >(
+    items: T[],
+    targetTemplateId: string,
+    replacements: Array<[RegExp, string]>,
+  ): T[] =>
+    items.map((item) => {
+      let nextQuestion = item.question;
+      for (const [pattern, value] of replacements) {
+        nextQuestion = nextQuestion.replace(pattern, value);
+      }
+      return {
+        ...item,
+        templateId: targetTemplateId,
+        question: nextQuestion,
+      };
+    });
+
+  const bnbPremisesItems = remapChecklistItems(hotelPremisesItems, bnbPremisesTemplate.id, [
+    [/hotel/gi, "B&B/Affittacamere"],
+    [/struttura ricettiva/gi, "struttura extra-alberghiera"],
+  ]);
+  const bnbProcedureItems = remapChecklistItems(hotelProcedureItems, bnbProceduresTemplate.id, [
+    [/hotel/gi, "B&B/Affittacamere"],
+    [/struttura ricettiva/gi, "struttura extra-alberghiera"],
+  ]);
+
+  const hostelResidencePremisesItems = remapChecklistItems(
+    hotelPremisesItems,
+    hostelResidencePremisesTemplate.id,
+    [
+      [/hotel/gi, "ostello/residence"],
+      [/struttura ricettiva/gi, "struttura ostello/residence"],
+    ],
+  );
+  const hostelResidenceProcedureItems = remapChecklistItems(
+    hotelProcedureItems,
+    hostelResidenceProceduresTemplate.id,
+    [
+      [/hotel/gi, "ostello/residence"],
+      [/struttura ricettiva/gi, "struttura ostello/residence"],
+    ],
+  );
+
+  const campingVillagePremisesItems = remapChecklistItems(hotelPremisesItems, campingVillagePremisesTemplate.id, [
+    [/hotel/gi, "campeggio/villaggio turistico"],
+    [/struttura ricettiva/gi, "struttura open-air"],
+  ]);
+  const campingVillageProcedureItems = remapChecklistItems(hotelProcedureItems, campingVillageProceduresTemplate.id, [
+    [/hotel/gi, "campeggio/villaggio turistico"],
+    [/struttura ricettiva/gi, "struttura open-air"],
+  ]);
+
+  const beachClubPremisesItems = remapChecklistItems(barPremisesItems, beachClubPremisesTemplate.id, [
+    [/bar/gi, "stabilimento balneare"],
+  ]);
+  const beachClubProcedureItems = remapChecklistItems(barProcedureItems, beachClubProceduresTemplate.id, [
+    [/bar/gi, "stabilimento balneare"],
+  ]);
+
+  const nightlifePremisesItems = remapChecklistItems(barPremisesItems, nightlifePremisesTemplate.id, [
+    [/bar/gi, "locale serale/discoteca"],
+  ]);
+  const nightlifeProcedureItems = remapChecklistItems(barProcedureItems, nightlifeProceduresTemplate.id, [
+    [/bar/gi, "locale serale/discoteca"],
+  ]);
+
   for (const item of [
     ...generalItems,
     ...restaurantPremisesItems,
@@ -5382,6 +6240,18 @@ async function main() {
     ...foodTruckProcedureItems,
     ...ambulantPastryPremisesItems,
     ...ambulantPastryProcedureItems,
+    ...gastronomyProductionPremisesItems,
+    ...gastronomyProductionProcedureItems,
+    ...bnbPremisesItems,
+    ...bnbProcedureItems,
+    ...hostelResidencePremisesItems,
+    ...hostelResidenceProcedureItems,
+    ...campingVillagePremisesItems,
+    ...campingVillageProcedureItems,
+    ...beachClubPremisesItems,
+    ...beachClubProcedureItems,
+    ...nightlifePremisesItems,
+    ...nightlifeProcedureItems,
   ]) {
     const explicitDomain = (item as { domain?: ComplianceDomain }).domain;
     await prisma.checklistItem.create({
@@ -6553,10 +7423,198 @@ async function main() {
       atecoCode: "56.10.41",
       macroGroup: "PASTICCERIA_AMBULANTE",
     },
+    {
+      name: "SCIA / notifica sanitaria stabilimento gastronomia-produzione alimentare",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.haccp,
+      atecoCode: "10.85",
+      macroGroup: "GASTRONOMIA_PRODUZIONE",
+    },
+    {
+      name: "Manuale HACCP e piano autocontrollo industria alimentare",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.haccp,
+      atecoCode: "10.85",
+      macroGroup: "GASTRONOMIA_PRODUZIONE",
+    },
+    {
+      name: "Analisi pericoli con diagrammi di flusso e CCP/CP validati",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.haccp,
+      atecoCode: "10.85",
+      macroGroup: "GASTRONOMIA_PRODUZIONE",
+    },
+    {
+      name: "Registri CCP cottura, raffreddamento e conservazione",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.haccp,
+      atecoCode: "10.85",
+      macroGroup: "GASTRONOMIA_PRODUZIONE",
+    },
+    {
+      name: "Piano allergeni con matrice ingredienti/prodotti e validazione changeover",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.haccp,
+      atecoCode: "10.85",
+      macroGroup: "GASTRONOMIA_PRODUZIONE",
+    },
+    {
+      name: "Tracciabilita lotti e procedura ritiro/richiamo con mock recall",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.haccp,
+      atecoCode: "10.85",
+      macroGroup: "GASTRONOMIA_PRODUZIONE",
+    },
+    {
+      name: "Master sanitation schedule e verifiche efficacia sanificazione",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.haccp,
+      atecoCode: "10.85",
+      macroGroup: "GASTRONOMIA_PRODUZIONE",
+    },
+    {
+      name: "Piano monitoraggio microbiologico superfici/prodotti/acqua",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.haccp,
+      atecoCode: "10.85",
+      macroGroup: "GASTRONOMIA_PRODUZIONE",
+    },
+    {
+      name: "Piano monitoraggio infestanti (PMP) con trend e azioni correttive",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.both,
+      atecoCode: "10.85",
+      macroGroup: "GASTRONOMIA_PRODUZIONE",
+    },
+    {
+      name: "Dichiarazioni MOCA e schede tecniche packaging primario/secondario",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.haccp,
+      atecoCode: "10.85",
+      macroGroup: "GASTRONOMIA_PRODUZIONE",
+    },
+    {
+      name: "Procedure controllo corpi estranei (vetro/plastica/metalli) e verifiche",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.haccp,
+      atecoCode: "10.85",
+      macroGroup: "GASTRONOMIA_PRODUZIONE",
+    },
+    {
+      name: "Schede tecniche e SDS detergenti/disinfettanti usati in stabilimento",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.both,
+      atecoCode: "10.85",
+      macroGroup: "GASTRONOMIA_PRODUZIONE",
+    },
+    {
+      name: "Registro taratura bilance, sonde, termometri e data logger",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.both,
+      atecoCode: "10.85",
+      macroGroup: "GASTRONOMIA_PRODUZIONE",
+    },
+    {
+      name: "Registro manutenzioni impianti produttivi, linee termiche e confezionamento",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.safety,
+      atecoCode: "10.85",
+      macroGroup: "GASTRONOMIA_PRODUZIONE",
+    },
+    {
+      name: "Dichiarazioni conformita impianti elettrici, gas e vapore dello stabilimento",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.safety,
+      atecoCode: "10.85",
+      macroGroup: "GASTRONOMIA_PRODUZIONE",
+    },
+    {
+      name: "DVR e valutazioni rischi specifici macchine/chimico/ustioni/movimentazione",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.safety,
+      atecoCode: "10.85",
+      macroGroup: "GASTRONOMIA_PRODUZIONE",
+    },
+    {
+      name: "Piano emergenza ed evacuazione con prove periodiche e registro antincendio",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.safety,
+      atecoCode: "10.85",
+      macroGroup: "GASTRONOMIA_PRODUZIONE",
+    },
+    {
+      name: "Attestati formazione HACCP, GMP e sicurezza lavoro personale produzione",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.both,
+      atecoCode: "10.85",
+      macroGroup: "GASTRONOMIA_PRODUZIONE",
+    },
   ];
 
+  const remapDocumentsForCategory = (
+    sourceMacroGroup: string,
+    targetMacroGroup: string,
+    targetAteco: string,
+    replacements: Array<[RegExp, string]>,
+  ) =>
+    documentTemplates
+      .filter((doc) => doc.macroGroup === sourceMacroGroup)
+      .map((doc) => {
+        let nextName = doc.name;
+        for (const [pattern, value] of replacements) {
+          nextName = nextName.replace(pattern, value);
+        }
+        return {
+          ...doc,
+          name: nextName,
+          atecoCode: targetAteco,
+          macroGroup: targetMacroGroup,
+        };
+      });
+
+  const extraDocumentTemplates = [
+    ...remapDocumentsForCategory("HOTEL", "BEB_AFFITTACAMERE", "55.20.51", [
+      [/hotel/gi, "B&B/Affittacamere"],
+      [/struttura ricettiva/gi, "struttura extra-alberghiera"],
+    ]),
+    ...remapDocumentsForCategory("HOTEL", "OSTELLI_RESIDENCE", "55.20.20", [
+      [/hotel/gi, "ostello/residence"],
+      [/struttura ricettiva/gi, "struttura ostello/residence"],
+    ]),
+    ...remapDocumentsForCategory("HOTEL", "CAMPEGGI_VILLAGGI", "55.30.00", [
+      [/hotel/gi, "campeggio/villaggio"],
+      [/struttura ricettiva/gi, "struttura open-air"],
+    ]),
+    ...remapDocumentsForCategory("BAR", "STABILIMENTI_BALNEARI", "93.29.20", [
+      [/bar/gi, "stabilimento balneare"],
+    ]),
+    ...remapDocumentsForCategory("BAR", "LOCALI_SERALI", "93.29.10", [
+      [/bar/gi, "locale serale/discoteca"],
+    ]),
+  ];
+
+  const allDocumentTemplates = [...documentTemplates, ...extraDocumentTemplates];
+
   await prisma.documentTemplate.createMany({
-    data: documentTemplates.map((doc) => ({
+    data: allDocumentTemplates.map((doc) => ({
       name: doc.name,
       description: `Template documento: ${doc.name}`,
       domain: (doc as { domain?: ComplianceDomain }).domain ?? inferDocumentDomain(doc.name),

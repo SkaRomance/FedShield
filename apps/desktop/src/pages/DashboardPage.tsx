@@ -1,13 +1,14 @@
 import { useMemo, useState } from "react";
 import {
   Company,
+  downloadGeneratedDocument,
   generateAttestatoPdf,
   generateInspectionReportPdf,
   Inspection,
 } from "../api";
 import { queueSyncEvent } from "../services/syncManager";
 import ChecklistPage from "./ChecklistPage";
-import CustomersPage from "./CustomersPage";
+import CustomerRegistryPage from "./CustomerRegistryPage";
 import KpiPage from "./KpiPage";
 import OdvPage from "./OdvPage";
 import QuotesPage from "./QuotesPage";
@@ -30,6 +31,17 @@ interface DashboardProps {
   onLogout: () => void;
 }
 
+const SIDEBAR_LOGO_CANDIDATES = [
+  "/fedshield-logo-clean.png",
+  "/fedshield-logo.png",
+  "/fedshield-logo.jpg",
+  "/fedshield-logo.jpeg",
+  "/fedshield-logo.webp",
+  "/fedshield-logo.svg",
+  "/logo.png",
+  "/logo.jpg",
+];
+
 function roleLabel(role: string): string {
   if (role === "admin") return "Admin";
   if (role === "senior") return "Consulente Senior";
@@ -47,9 +59,10 @@ export default function DashboardPage({
   onLogout,
 }: DashboardProps) {
   const [activeView, setActiveView] = useState<
-    "dashboard" | "customers" | "checklist" | "quotes" | "kpi" | "odv"
+    "dashboard" | "registry" | "checklist" | "quotes" | "kpi" | "odv"
   >("dashboard");
   const [statusMessage, setStatusMessage] = useState<string>("");
+  const [logoIndex, setLogoIndex] = useState(0);
   const [checklistSelection, setChecklistSelection] = useState<{
     companyId?: string;
     inspectionId?: string;
@@ -63,14 +76,15 @@ export default function DashboardPage({
 
   async function handleGenerateReportPdf(inspectionId: string) {
     try {
-      await generateInspectionReportPdf(token, inspectionId);
+      const generated = await generateInspectionReportPdf(token, inspectionId);
+      await downloadGeneratedDocument(token, generated.id, generated.fileName);
       queueSyncEvent({
         eventType: "document.generated",
         entityType: "inspection",
         entityId: inspectionId,
         payload: { kind: "inspection_report" },
       });
-      setStatusMessage("Verbale PDF generato correttamente.");
+      setStatusMessage("Verbale PDF generato e scaricato.");
     } catch (error) {
       setStatusMessage(`Errore verbale PDF: ${error instanceof Error ? error.message : "errore"}`);
     }
@@ -78,14 +92,15 @@ export default function DashboardPage({
 
   async function handleGenerateAttestato(inspectionId: string) {
     try {
-      await generateAttestatoPdf(token, inspectionId);
+      const generated = await generateAttestatoPdf(token, inspectionId);
+      await downloadGeneratedDocument(token, generated.id, generated.fileName);
       queueSyncEvent({
         eventType: "document.generated",
         entityType: "inspection",
         entityId: inspectionId,
         payload: { kind: "attestato" },
       });
-      setStatusMessage("Attestato PDF generato correttamente.");
+      setStatusMessage("Attestato PDF generato e scaricato.");
     } catch (error) {
       setStatusMessage(`Errore attestato: ${error instanceof Error ? error.message : "errore"}`);
     }
@@ -104,7 +119,25 @@ export default function DashboardPage({
   return (
     <div className="layout">
       <aside className="sidebar">
-        <div className="brand">FedShield</div>
+        <div className="brand">
+          <img
+            className="brand-logo"
+            src={SIDEBAR_LOGO_CANDIDATES[logoIndex]}
+            alt="FedShield"
+            onError={(event) => {
+              if (logoIndex < SIDEBAR_LOGO_CANDIDATES.length - 1) {
+                setLogoIndex((current) => current + 1);
+              } else {
+                event.currentTarget.style.display = "none";
+                const fallback = event.currentTarget.nextElementSibling as HTMLElement | null;
+                if (fallback) {
+                  fallback.style.display = "block";
+                }
+              }
+            }}
+          />
+          <span className="brand-fallback">FedShield</span>
+        </div>
         <nav>
           <button
             className={`nav-item ${activeView === "dashboard" ? "nav-item-active" : ""}`}
@@ -113,10 +146,10 @@ export default function DashboardPage({
             Dashboard
           </button>
           <button
-            className={`nav-item ${activeView === "customers" ? "nav-item-active" : ""}`}
-            onClick={() => setActiveView("customers")}
+            className={`nav-item ${activeView === "registry" ? "nav-item-active" : ""}`}
+            onClick={() => setActiveView("registry")}
           >
-            Anagrafiche clienti
+            Anagrafica Clienti
           </button>
           <button
             className={`nav-item ${activeView === "checklist" ? "nav-item-active" : ""}`}
@@ -248,8 +281,6 @@ export default function DashboardPage({
               {statusMessage ? <p className="status-message">{statusMessage}</p> : null}
             </section>
           </>
-        ) : activeView === "customers" ? (
-          <CustomersPage companies={companies} inspections={inspections} onUseForInspection={handleUseForInspection} />
         ) : activeView === "checklist" ? (
           <ChecklistPage
             token={token}
@@ -260,6 +291,13 @@ export default function DashboardPage({
             initialInspectionId={checklistSelection.inspectionId}
             selectionToken={checklistSelection.token}
             onReload={onReload}
+          />
+        ) : activeView === "registry" ? (
+          <CustomerRegistryPage
+            token={token}
+            companies={companies}
+            inspections={inspections}
+            onUseForInspection={handleUseForInspection}
           />
         ) : activeView === "quotes" ? (
           <QuotesPage token={token} companies={companies} />

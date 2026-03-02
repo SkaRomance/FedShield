@@ -3,12 +3,19 @@ import {
   ComplianceDomain,
   InspectionChecklistMode,
   InspectionDocumentStatus,
+  Inspection as PrismaInspection,
+  GeneratedDocument as PrismaGeneratedDocument,
   UserRole,
 } from "@prisma/client";
-import { FastifyPluginAsync } from "fastify";
+import { createReadStream } from "node:fs";
+import { access } from "node:fs/promises";
+import path from "node:path";
+import type { FastifyInstance, FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 import {
+  buildAttestatoVerificationToken,
   generateAttestatoPdf,
+  generateInspectionChecklistPdf,
   generateInspectionReportPdf,
   listDocuments,
 } from "../../services/document.service.js";
@@ -76,6 +83,102 @@ const upsertDocumentsSchema = z.object({
     .min(1),
 });
 
+function parseMetadataJson(value?: string | null): Record<string, unknown> {
+  if (!value) {
+    return {};
+  }
+  try {
+    const parsed = JSON.parse(value);
+    return typeof parsed === "object" && parsed ? (parsed as Record<string, unknown>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function resolveDocumentPath(filePath: string): { storageRoot: string; absolutePath: string } {
+  const storageRoot = path.resolve(process.cwd(), config.storageDir);
+  const absolutePath = path.resolve(storageRoot, filePath);
+  return { storageRoot, absolutePath };
+}
+
+type AttestatoVerificationResolution =
+  | { status: "inspection_not_found" }
+  | { status: "attestato_not_found"; inspection: PrismaInspection & { company: { name: string; vatNumber: string } } }
+  | {
+      status: "ok";
+      inspection: PrismaInspection & { company: { name: string; vatNumber: string } };
+      attestato: PrismaGeneratedDocument;
+      score: number;
+      stars: number;
+      inspectionDate: Date;
+      isValid: boolean;
+    };
+
+async function resolveAttestatoVerification(
+  fastify: FastifyInstance,
+  inspectionId: string,
+  token: string,
+): Promise<AttestatoVerificationResolution> {
+  const inspection = await fastify.prisma.inspection.findUnique({
+    where: { id: inspectionId },
+    include: { company: true },
+  });
+
+  if (!inspection) {
+    return { status: "inspection_not_found" };
+  }
+
+  const attestato = await fastify.prisma.generatedDocument.findFirst({
+    where: {
+      inspectionId: inspection.id,
+      kind: "attestato",
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  if (!attestato) {
+    return { status: "attestato_not_found", inspection };
+  }
+
+  const metadata = parseMetadataJson(attestato.metadataJson);
+  const score = Number(metadata.score);
+  const stars = Number(metadata.stars);
+  const closedAtIso = typeof metadata.closedAt === "string" ? metadata.closedAt : null;
+  const storedToken = typeof metadata.verificationToken === "string" ? metadata.verificationToken : null;
+  const expectedToken =
+    closedAtIso && Number.isFinite(score) && Number.isFinite(stars)
+      ? buildAttestatoVerificationToken({
+          inspectionId: inspection.id,
+          closedAtIso,
+          score,
+          stars,
+        })
+      : null;
+
+  const inspectionDate =
+    typeof metadata.inspectionDate === "string" ? new Date(metadata.inspectionDate) : inspection.happenedAt;
+  const isValid = Boolean(storedToken && expectedToken && token === storedToken && token === expectedToken);
+
+  return {
+    status: "ok",
+    inspection,
+    attestato,
+    score: Number.isFinite(score) ? score : 0,
+    stars: Number.isFinite(stars) ? stars : 0,
+    inspectionDate,
+    isValid,
+  };
+}
+
 function buildAtecoVariants(atecoCode?: string | null) {
   if (!atecoCode) {
     return [];
@@ -118,6 +221,177 @@ function buildDomainFilterByChecklistMode(checklistMode: InspectionChecklistMode
 }
 
 const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
+  fastify.get(
+    "/verify/attestato/:inspectionId",
+    async (request, reply) => {
+      const params = z.object({ inspectionId: z.string().min(1) }).safeParse(request.params);
+      const query = z.object({ token: z.string().min(8) }).safeParse(request.query ?? {});
+      if (!params.success || !query.success) {
+        return reply
+          .type("text/html; charset=utf-8")
+          .code(400)
+          .send(
+            "<!doctype html><html><body><h1>Attestato non verificabile</h1><p>Token o ID non validi.</p></body></html>",
+          );
+      }
+
+      const token = query.data.token.trim();
+      const resolved = await resolveAttestatoVerification(fastify, params.data.inspectionId, token);
+
+      if (resolved.status === "inspection_not_found") {
+        return reply
+          .type("text/html; charset=utf-8")
+          .code(404)
+          .send("<!doctype html><html><body><h1>Attestato non trovato</h1><p>Inspection inesistente.</p></body></html>");
+      }
+
+      if (resolved.status === "attestato_not_found") {
+        return reply
+          .type("text/html; charset=utf-8")
+          .code(404)
+          .send(
+            "<!doctype html><html><body><h1>Attestato non presente</h1><p>Non risulta alcun attestato valido per questo sopralluogo.</p></body></html>",
+          );
+      }
+
+      const { inspection, attestato, score, stars, inspectionDate, isValid } = resolved;
+
+      const title = isValid ? "Attestato verificato" : "Attestato non valido";
+      const message = isValid
+        ? "Documento autentico rilasciato da FedShield by FEDINVEST."
+        : "Il QR non corrisponde a un attestato valido.";
+      const safeCompany = escapeHtml(inspection.company.name);
+      const safeVat = escapeHtml(inspection.company.vatNumber);
+      const safeDate = inspectionDate.toLocaleDateString("it-IT", { timeZone: "Europe/Rome" });
+      const safeScore = `${score}/100`;
+      const safeStars = `${stars}/5`;
+      const downloadHref = `/api/verify/attestato/${encodeURIComponent(inspection.id)}/pdf?token=${encodeURIComponent(token)}`;
+
+      const html = `<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>${escapeHtml(title)}</title>
+    <style>
+      :root { color-scheme: light; }
+      body { margin:0; font-family: Arial, sans-serif; background:#FEFEFE; color:#212D52; }
+      .hero { background:#212D52; color:#FEFEFE; padding:24px 16px; text-align:center; }
+      .hero .brand { color:#E65712; font-weight:700; letter-spacing:.02em; }
+      .card { max-width: 820px; margin: 24px auto; background:#FEFEFE; border:1px solid #969CAD; border-radius:12px; padding:24px; }
+      h1 { margin:0 0 8px 0; color:${isValid ? "#212D52" : "#E65712"}; }
+      p { margin: 0 0 16px 0; }
+      .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+      .row { background:#FEFEFE; border:1px solid #969CAD; border-radius:8px; padding:10px 12px; }
+      .label { font-size:12px; color:#6D748D; margin-bottom:4px; text-transform:uppercase; letter-spacing:.03em; }
+      .value { font-weight:700; }
+      .footer { margin-top:16px; font-size:12px; color:#6D748D; }
+      .actions { margin-top: 18px; display:flex; gap:10px; flex-wrap:wrap; }
+      .btn { display:inline-block; background:#212D52; color:#FEFEFE; border-radius:8px; padding:10px 14px; text-decoration:none; font-weight:700; }
+      .btn:hover { background:#394264; }
+      .btn.secondary { background:#E65712; }
+      .btn.secondary:hover { background:#EE8F5F; }
+      .invalid-note { margin-top: 12px; color:#E65712; font-weight:700; }
+      @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <div class="hero">Verifica attestato <span class="brand">FedShield by FEDINVEST</span></div>
+    <div class="card">
+      <h1>${escapeHtml(title)}</h1>
+      <p>${escapeHtml(message)}</p>
+      <div class="grid">
+        <div class="row"><div class="label">Ragione Sociale</div><div class="value">${safeCompany}</div></div>
+        <div class="row"><div class="label">Partita IVA</div><div class="value">${safeVat}</div></div>
+        <div class="row"><div class="label">Data sopralluogo</div><div class="value">${escapeHtml(safeDate)}</div></div>
+        <div class="row"><div class="label">Fed Score</div><div class="value">${escapeHtml(safeScore)}</div></div>
+        <div class="row"><div class="label">Stelline</div><div class="value">${escapeHtml(safeStars)}</div></div>
+        <div class="row"><div class="label">ID attestato</div><div class="value">${escapeHtml(attestato.id)}</div></div>
+      </div>
+      <div class="actions">
+        <a class="btn${isValid ? "" : " secondary"}" href="${downloadHref}">Scarica attestato PDF</a>
+      </div>
+      ${isValid ? "" : '<div class="invalid-note">Download non disponibile: QR non valido.</div>'}
+      <div class="footer">FedShield by FEDINVEST S.r.l.</div>
+    </div>
+  </body>
+</html>`;
+
+      return reply.type("text/html; charset=utf-8").code(isValid ? 200 : 400).send(html);
+    },
+  );
+
+  fastify.get(
+    "/verify/attestato/:inspectionId/pdf",
+    async (request, reply) => {
+      const params = z.object({ inspectionId: z.string().min(1) }).safeParse(request.params);
+      const query = z.object({ token: z.string().min(8) }).safeParse(request.query ?? {});
+      if (!params.success || !query.success) {
+        return reply.badRequest("Token o ID non validi.");
+      }
+
+      const token = query.data.token.trim();
+      const resolved = await resolveAttestatoVerification(fastify, params.data.inspectionId, token);
+      if (resolved.status === "inspection_not_found") {
+        return reply.notFound("Inspection inesistente.");
+      }
+      if (resolved.status === "attestato_not_found") {
+        return reply.notFound("Attestato non presente.");
+      }
+      if (!resolved.isValid) {
+        return reply.badRequest("Token di verifica non valido.");
+      }
+
+      const { storageRoot, absolutePath } = resolveDocumentPath(resolved.attestato.filePath);
+      if (!absolutePath.startsWith(storageRoot)) {
+        return reply.forbidden("Percorso documento non valido.");
+      }
+
+      try {
+        await access(absolutePath);
+      } catch {
+        return reply.notFound("File attestato non presente su disco.");
+      }
+
+      reply.header("Content-Type", "application/pdf");
+      reply.header("Content-Disposition", `attachment; filename="${resolved.attestato.fileName}"`);
+      return reply.send(createReadStream(absolutePath));
+    },
+  );
+
+  fastify.get(
+    "/documents/:documentId/download",
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const params = z.object({ documentId: z.string().min(1) }).safeParse(request.params);
+      if (!params.success) {
+        return reply.badRequest("ID documento non valido.");
+      }
+
+      const document = await fastify.prisma.generatedDocument.findUnique({
+        where: { id: params.data.documentId },
+      });
+      if (!document) {
+        return reply.notFound("Documento non trovato.");
+      }
+
+      const { storageRoot, absolutePath } = resolveDocumentPath(document.filePath);
+      if (!absolutePath.startsWith(storageRoot)) {
+        return reply.forbidden("Percorso documento non valido.");
+      }
+
+      try {
+        await access(absolutePath);
+      } catch {
+        return reply.notFound("File documento non presente su disco.");
+      }
+
+      reply.header("Content-Type", "application/pdf");
+      reply.header("Content-Disposition", `attachment; filename="${document.fileName}"`);
+      return reply.send(createReadStream(absolutePath));
+    },
+  );
+
   fastify.get(
     "/inspections",
     { preHandler: [fastify.authenticate] },
@@ -551,6 +825,34 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
   );
 
   fastify.post(
+    "/inspections/:id/checklist/pdf",
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const params = z.object({ id: z.string().min(1) }).safeParse(request.params);
+      if (!params.success) {
+        return reply.badRequest("ID sopralluogo non valido.");
+      }
+
+      const auth = request.user as { sub?: string };
+      try {
+        const generated = await generateInspectionChecklistPdf(fastify, params.data.id, auth.sub);
+        await writeAudit(fastify, {
+          userId: auth.sub,
+          action: "inspection.checklist.pdf.generate",
+          entityType: "inspection",
+          entityId: params.data.id,
+          data: { documentId: generated.id },
+        });
+        return generated;
+      } catch (error) {
+        return reply.badRequest(
+          error instanceof Error ? error.message : "Generazione checklist PDF non riuscita.",
+        );
+      }
+    },
+  );
+
+  fastify.post(
     "/inspections/:id/report/pdf",
     { preHandler: [fastify.authenticate] },
     async (request, reply) => {
@@ -675,6 +977,7 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
         data: {
           status,
           validatorId: parsed.data.approved ? auth.sub : null,
+          finalizedAt: parsed.data.approved ? inspection.finalizedAt ?? new Date() : null,
           notes: parsed.data.notes
             ? `${inspection.notes ?? ""}\n[VALIDATION NOTE] ${parsed.data.notes}`.trim()
             : inspection.notes,

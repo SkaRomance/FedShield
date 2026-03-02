@@ -21,7 +21,26 @@ export interface Company {
   id: string;
   name: string;
   vatNumber: string;
+  legalForm?: string;
+  reaNumber?: string;
+  employeesInfo?: string;
+  email?: string;
+  pec?: string;
+  phone?: string;
   atecoCode?: string;
+  riskLevel?: string;
+  description?: string;
+  legalAddress?: string;
+  localUnitAddress?: string;
+  preventionSystemSubjects?: string;
+  employerRsppPreposto?: string;
+  occupationalDoctor?: string;
+  rls?: string;
+  emergencyTeam?: string;
+  firstAidTeam?: string;
+  haccpResponsabileAutocontrollo?: string;
+  haccpConsulenteEsterno?: string;
+  haccpAdditionalResponsabili?: string;
   city?: string;
 }
 
@@ -106,6 +125,14 @@ export interface InspectionSummary {
     reason: string;
     minScore: number;
   };
+}
+
+export interface GeneratedDocument {
+  id: string;
+  kind: "inspection_report" | "attestato" | "malleva";
+  fileName: string;
+  filePath: string;
+  createdAt: string;
 }
 
 export interface ChecklistTemplateDetails {
@@ -247,13 +274,23 @@ export async function apiLogin(email: string, password: string): Promise<LoginRe
 }
 
 async function publicFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(init?.headers ?? {}),
-    },
-  });
+  const hasBody = init?.body !== undefined && init.body !== null;
+  const headers = new Headers(init?.headers ?? {});
+  if (hasBody && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      ...init,
+      headers,
+    });
+  } catch (error) {
+    throw new Error(
+      `Connessione API non riuscita su ${API_BASE}${path}: ${error instanceof Error ? error.message : "errore rete"}`,
+    );
+  }
 
   if (!res.ok) {
     const message = await res.text();
@@ -264,14 +301,24 @@ async function publicFetch<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 async function authedFetch<T>(path: string, token: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-      ...(init?.headers ?? {}),
-    },
-  });
+  const hasBody = init?.body !== undefined && init.body !== null;
+  const headers = new Headers(init?.headers ?? {});
+  headers.set("Authorization", `Bearer ${token}`);
+  if (hasBody && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      ...init,
+      headers,
+    });
+  } catch (error) {
+    throw new Error(
+      `Connessione API non riuscita su ${API_BASE}${path}: ${error instanceof Error ? error.message : "errore rete"}`,
+    );
+  }
 
   if (!res.ok) {
     const message = await res.text();
@@ -290,12 +337,66 @@ export function createCompany(
   payload: {
     name: string;
     vatNumber: string;
+    legalForm?: string;
+    reaNumber?: string;
+    employeesInfo?: string;
+    email?: string;
+    pec?: string;
+    phone?: string;
     atecoCode?: string;
+    riskLevel?: string;
+    description?: string;
+    legalAddress?: string;
+    localUnitAddress?: string;
+    preventionSystemSubjects?: string;
+    employerRsppPreposto?: string;
+    occupationalDoctor?: string;
+    rls?: string;
+    emergencyTeam?: string;
+    firstAidTeam?: string;
+    haccpResponsabileAutocontrollo?: string;
+    haccpConsulenteEsterno?: string;
+    haccpAdditionalResponsabili?: string;
     city?: string;
   },
 ): Promise<Company> {
   return authedFetch<Company>("/companies", token, {
     method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateCompany(
+  token: string,
+  companyId: string,
+  payload: {
+    name?: string;
+    vatNumber?: string;
+    legalForm?: string;
+    reaNumber?: string;
+    employeesInfo?: string;
+    email?: string;
+    pec?: string;
+    phone?: string;
+    atecoCode?: string;
+    riskLevel?: string;
+    description?: string;
+    legalAddress?: string;
+    localUnitAddress?: string;
+    preventionSystemSubjects?: string;
+    employerRsppPreposto?: string;
+    occupationalDoctor?: string;
+    rls?: string;
+    emergencyTeam?: string;
+    firstAidTeam?: string;
+    haccpResponsabileAutocontrollo?: string;
+    haccpConsulenteEsterno?: string;
+    haccpAdditionalResponsabili?: string;
+    city?: string;
+  },
+): Promise<Company> {
+  return authedFetch<Company>(`/companies/${companyId}`, token, {
+    method: "PATCH",
     body: JSON.stringify(payload),
   });
 }
@@ -390,15 +491,65 @@ export function fetchInspectionReport(token: string, inspectionId: string) {
 }
 
 export function generateInspectionReportPdf(token: string, inspectionId: string) {
-  return authedFetch(`/inspections/${inspectionId}/report/pdf`, token, {
+  return authedFetch<GeneratedDocument>(`/inspections/${inspectionId}/report/pdf`, token, {
     method: "POST",
+    body: "{}",
+  });
+}
+
+export function generateInspectionChecklistPdf(token: string, inspectionId: string) {
+  return authedFetch<GeneratedDocument>(`/inspections/${inspectionId}/checklist/pdf`, token, {
+    method: "POST",
+    body: "{}",
   });
 }
 
 export function generateAttestatoPdf(token: string, inspectionId: string) {
-  return authedFetch(`/inspections/${inspectionId}/attestato/pdf`, token, {
+  return authedFetch<GeneratedDocument>(`/inspections/${inspectionId}/attestato/pdf`, token, {
     method: "POST",
+    body: "{}",
   });
+}
+
+export async function downloadGeneratedDocument(
+  token: string,
+  documentId: string,
+  suggestedFileName?: string,
+): Promise<void> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}/documents/${documentId}/download`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  } catch (error) {
+    throw new Error(
+      `Connessione API non riuscita su ${API_BASE}/documents/${documentId}/download: ${
+        error instanceof Error ? error.message : "errore rete"
+      }`,
+    );
+  }
+
+  if (!res.ok) {
+    const message = await res.text();
+    throw new Error(message || `Download documento fallito (${res.status})`);
+  }
+
+  if (typeof document === "undefined") {
+    throw new Error("Download non supportato in questo ambiente.");
+  }
+
+  const blob = await res.blob();
+  const objectUrl = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = objectUrl;
+  anchor.download = suggestedFileName ?? `${documentId}.pdf`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(objectUrl);
 }
 
 export function fetchInspectionDocumentRequirements(token: string, inspectionId: string) {
