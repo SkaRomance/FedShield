@@ -351,7 +351,6 @@ export default function ChecklistPage({
   const safetyProgress = useMemo(() => {
     if (!showSafetyRoleBlock) return { total: 0, completed: 0 };
     const checks = [
-      newCompanyPreventionSubjects.trim().length > 0,
       hasPersonContent(newCompanyEmployerRsppPreposto),
       hasPersonContent(newCompanyOccupationalDoctor),
       hasPersonContent(newCompanyRls),
@@ -361,7 +360,6 @@ export default function ChecklistPage({
     return { total: checks.length, completed: checks.filter(Boolean).length };
   }, [
     showSafetyRoleBlock,
-    newCompanyPreventionSubjects,
     newCompanyEmployerRsppPreposto,
     newCompanyOccupationalDoctor,
     newCompanyRls,
@@ -372,7 +370,6 @@ export default function ChecklistPage({
   const haccpProgress = useMemo(() => {
     if (!showHaccpRoleBlock) return { total: 0, completed: 0 };
     const checks = [
-      newCompanyPreventionSubjects.trim().length > 0,
       hasPersonContent(newCompanyHaccpResponsabileAutocontrollo),
       hasPersonContent(newCompanyHaccpConsulenteEsterno),
       newCompanyHaccpAdditionalRoles.some((item) => item.role.trim() || hasPersonContent(item)),
@@ -380,7 +377,6 @@ export default function ChecklistPage({
     return { total: checks.length, completed: checks.filter(Boolean).length };
   }, [
     showHaccpRoleBlock,
-    newCompanyPreventionSubjects,
     newCompanyHaccpResponsabileAutocontrollo,
     newCompanyHaccpConsulenteEsterno,
     newCompanyHaccpAdditionalRoles,
@@ -1423,8 +1419,6 @@ export default function ChecklistPage({
                   <p className="template-hint">Task non richiesta per l’ambito selezionato.</p>
                 ) : (
                   <>
-                    <label>Soggetti coinvolti nel Sistema di Prevenzione e Protezione aziendale</label>
-                    <textarea rows={2} value={newCompanyPreventionSubjects} onChange={(event) => setNewCompanyPreventionSubjects(event.target.value)} />
                     <div className="person-card-grid">
                       <div className="person-card">
                         <h4>Datore/RSPP/Preposto</h4>
@@ -1510,8 +1504,6 @@ export default function ChecklistPage({
                   <p className="template-hint">Task non richiesta per l’ambito selezionato.</p>
                 ) : (
                   <>
-                    <label>Soggetti coinvolti nel Sistema di Autocontrollo HACCP</label>
-                    <textarea rows={2} value={newCompanyPreventionSubjects} onChange={(event) => setNewCompanyPreventionSubjects(event.target.value)} />
                     <div className="person-card-grid">
                       <div className="person-card">
                         <h4>Responsabile Autocontrollo</h4>
