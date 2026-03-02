@@ -1,11 +1,16 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createHash, randomUUID } from "node:crypto";
+import { execFile } from "node:child_process";
+import { tmpdir } from "node:os";
+import { promisify } from "node:util";
 import { GeneratedDocumentKind, MallevaReason, Prisma } from "@prisma/client";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import type { FastifyInstance } from "fastify";
 import { config } from "../config.js";
 import { buildInspectionReport, computeInspectionComplianceScore, starsFromScore } from "./report.service.js";
+
+const execFileAsync = promisify(execFile);
 
 function toAbsoluteStoragePath(relativePath: string): string {
   return path.resolve(process.cwd(), config.storageDir, relativePath);
@@ -233,6 +238,22 @@ async function readAttestatoDocxTemplate(): Promise<{ templatePath: string; temp
   return { templatePath, templateHash };
 }
 
+async function resolveBackendScriptPath(scriptFileName: string): Promise<string> {
+  const candidates = [
+    path.resolve(process.cwd(), "scripts", scriptFileName),
+    path.resolve(process.cwd(), "apps", "backend", "scripts", scriptFileName),
+  ];
+  for (const candidate of candidates) {
+    try {
+      await readFile(candidate);
+      return candidate;
+    } catch {
+      // Try next candidate.
+    }
+  }
+  throw new Error(`Script backend non trovato: ${scriptFileName}`);
+}
+
 async function fetchQrPng(verificationUrl: string): Promise<Uint8Array | null> {
   const endpoints = [
     `https://api.qrserver.com/v1/create-qr-code/?size=240x240&format=png&data=${encodeURIComponent(verificationUrl)}`,
@@ -265,6 +286,86 @@ async function fetchQrPng(verificationUrl: string): Promise<Uint8Array | null> {
 }
 
 async function generateAttestatoTemplatePdf(params: {
+  templateDocxPath: string;
+  companyName: string;
+  vatNumber: string;
+  inspectionDate: string;
+  score: number;
+  stars: number;
+  verificationUrl: string;
+}): Promise<{ fileName: string; relativePath: string }> {
+  const workDir = await mkdtemp(path.join(tmpdir(), "fedshield-attestato-"));
+  const filledDocxPath = path.join(workDir, "attestato_filled.docx");
+  const scriptPath = await resolveBackendScriptPath("fill_attestato_template.py");
+  const qrImagePath = path.join(workDir, "attestato_qr.png");
+  let hasQrImage = false;
+
+  try {
+    const qrPng = await fetchQrPng(params.verificationUrl);
+    if (qrPng) {
+      await writeFile(qrImagePath, qrPng);
+      hasQrImage = true;
+    }
+
+    const pythonArgs = [
+      scriptPath,
+      "--template",
+      params.templateDocxPath,
+      "--output-docx",
+      filledDocxPath,
+      "--company-name",
+      params.companyName,
+      "--partita-iva",
+      params.vatNumber,
+      "--data-sopralluogo",
+      params.inspectionDate,
+      "--fed-score",
+      String(params.score),
+      "--fed-stars",
+      String(clampAttestatoStars(params.stars)),
+      "--work-dir",
+      workDir,
+    ];
+
+    if (hasQrImage) {
+      pythonArgs.push("--qr-image", qrImagePath);
+    }
+
+    await execFileAsync("python", pythonArgs, {
+      windowsHide: true,
+      maxBuffer: 10 * 1024 * 1024,
+    });
+
+    await execFileAsync(
+      "soffice",
+      ["--headless", "--convert-to", "pdf", "--outdir", workDir, filledDocxPath],
+      {
+        windowsHide: true,
+        maxBuffer: 10 * 1024 * 1024,
+      },
+    );
+
+    const expectedPdfPath = path.join(workDir, "attestato_filled.pdf");
+    let pdfPath = expectedPdfPath;
+    try {
+      await readFile(expectedPdfPath);
+    } catch {
+      const files = await readdir(workDir);
+      const detectedPdf = files.find((fileName) => fileName.toLowerCase().endsWith(".pdf"));
+      if (!detectedPdf) {
+        throw new Error("Conversione template DOCX->PDF non riuscita.");
+      }
+      pdfPath = path.join(workDir, detectedPdf);
+    }
+
+    const pdfBytes = await readFile(pdfPath);
+    return savePdfBytes(pdfBytes, "attestato");
+  } finally {
+    await rm(workDir, { recursive: true, force: true });
+  }
+}
+
+async function generateAttestatoTemplateFallbackPdf(params: {
   companyName: string;
   vatNumber: string;
   inspectionDate: string;
@@ -544,6 +645,7 @@ export async function generateAttestatoPdf(
   let renderError: string | null = null;
   try {
     const generated = await generateAttestatoTemplatePdf({
+      templateDocxPath: docxTemplate.templatePath,
       companyName: inspection.company.name,
       vatNumber: inspection.company.vatNumber,
       inspectionDate: formatItalyDate(inspection.happenedAt),
@@ -556,23 +658,39 @@ export async function generateAttestatoPdf(
   } catch (error) {
     renderMode = "fallback";
     renderError = error instanceof Error ? error.message : "unknown_template_error";
-    const fallbackLines = [
-      "ATTESTATO ANTISANZIONE",
-      `Azienda: ${inspection.company.name}`,
-      `P.IVA: ${inspection.company.vatNumber}`,
-      `Data sopralluogo: ${formatItalyDate(inspection.happenedAt)}`,
-      `Data chiusura sopralluogo: ${formatItalyDate(closedAt)} - Ora chiusura (Italia): ${formatItalyTime(closedAt)}`,
-      `Rating compliance: ${score}/100`,
-      `FED Stars: ${"*".repeat(stars)}${"-".repeat(5 - stars)} (${stars}/5)`,
-      "",
-      "FacileSicurezza by FEDINVEST S.r.l. attesta il livello di compliance",
-      "normativa secondo i controlli eseguiti nel sopralluogo antisanzione.",
-      "",
-      `Verifica QR: ${verificationUrl}`,
-    ];
-    const generated = await savePdf(fallbackLines, "attestato");
-    fileName = generated.fileName;
-    relativePath = generated.relativePath;
+    try {
+      const generatedFallback = await generateAttestatoTemplateFallbackPdf({
+        companyName: inspection.company.name,
+        vatNumber: inspection.company.vatNumber,
+        inspectionDate: formatItalyDate(inspection.happenedAt),
+        score,
+        stars,
+        verificationUrl,
+      });
+      fileName = generatedFallback.fileName;
+      relativePath = generatedFallback.relativePath;
+    } catch (fallbackError) {
+      renderError = `${renderError}; styled_fallback_error=${
+        fallbackError instanceof Error ? fallbackError.message : "unknown_styled_fallback_error"
+      }`;
+      const fallbackLines = [
+        "ATTESTATO ANTISANZIONE",
+        `Azienda: ${inspection.company.name}`,
+        `P.IVA: ${inspection.company.vatNumber}`,
+        `Data sopralluogo: ${formatItalyDate(inspection.happenedAt)}`,
+        `Data chiusura sopralluogo: ${formatItalyDate(closedAt)} - Ora chiusura (Italia): ${formatItalyTime(closedAt)}`,
+        `Rating compliance: ${score}/100`,
+        `FED Stars: ${"*".repeat(stars)}${"-".repeat(5 - stars)} (${stars}/5)`,
+        "",
+        "FacileSicurezza by FEDINVEST S.r.l. attesta il livello di compliance",
+        "normativa secondo i controlli eseguiti nel sopralluogo antisanzione.",
+        "",
+        `Verifica QR: ${verificationUrl}`,
+      ];
+      const generated = await savePdf(fallbackLines, "attestato");
+      fileName = generated.fileName;
+      relativePath = generated.relativePath;
+    }
   }
 
   const seal = createDocumentSeal({
