@@ -190,6 +190,14 @@ export default function ChecklistPage({
   }, [companies, companyId]);
 
   useEffect(() => {
+    if (!companySearch.trim()) return;
+    const firstMatch = filteredCompanies[0];
+    if (firstMatch && firstMatch.id !== companyId) {
+      setCompanyId(firstMatch.id);
+    }
+  }, [companySearch, filteredCompanies, companyId]);
+
+  useEffect(() => {
     if (!initialCompanyId) return;
     setCompanyId(initialCompanyId);
   }, [initialCompanyId, selectionToken]);
@@ -564,35 +572,18 @@ export default function ChecklistPage({
         ))}
       </div>
 
-      <div className="grid-two" style={{ marginTop: 10 }}>
-        <div>
-          <label>Ricerca cliente</label>
-          <input
-            value={companySearch}
-            onChange={(event) => setCompanySearch(event.target.value)}
-            placeholder="Cerca per ragione sociale, P.IVA, ATECO o citta"
-          />
-          <label>Azienda attiva</label>
-          <select value={companyId} onChange={(event) => setCompanyId(event.target.value)}>
-            {filteredCompanies.map((company) => (
-              <option key={company.id} value={company.id}>
-                {company.name} ({company.atecoCode ?? "ATECO n/d"})
-              </option>
-            ))}
-          </select>
-          {filteredCompanies.length === 0 && <p className="status-message">Nessun cliente trovato.</p>}
-        </div>
-        <div>
-          <label>Sopralluogo attivo</label>
-          <select value={selectedInspectionId} onChange={(event) => setSelectedInspectionId(event.target.value)}>
-            <option value="">Seleziona sopralluogo...</option>
-            {inspectionsForCompany.map((inspection) => (
-              <option key={inspection.id} value={inspection.id}>
-                {inspection.title} - {inspection.status} - {checklistModeLabel(inspection.checklistMode)}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div style={{ marginTop: 10 }}>
+        <label>Ricerca cliente</label>
+        <input
+          value={companySearch}
+          onChange={(event) => setCompanySearch(event.target.value)}
+          placeholder="Cerca per ragione sociale, P.IVA, ATECO o citta"
+        />
+        {filteredCompanies.length === 0 ? (
+          <p className="status-message">Nessun cliente trovato.</p>
+        ) : (
+          <p className="status-message">Cliente attivo: {selectedCompany?.name ?? filteredCompanies[0]?.name}</p>
+        )}
       </div>
       <div className="grid-two" style={{ marginTop: 10 }}>
         <div>
