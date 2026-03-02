@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
 import {
   ChecklistItem,
   ChecklistTemplate,
@@ -260,6 +260,8 @@ export default function ChecklistPage({
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const previousSelectedCompanyIdRef = useRef<string | null>(null);
+  const skipNextRegistrationResetRef = useRef(false);
 
   const selectedCompany = useMemo(
     () => companies.find((company) => company.id === companyId),
@@ -411,8 +413,13 @@ export default function ChecklistPage({
   }, [initialInspectionId, selectionToken]);
 
   useEffect(() => {
-    if (isNewCompanyDraft) return;
+    if (isNewCompanyDraft) {
+      previousSelectedCompanyIdRef.current = null;
+      return;
+    }
     if (!selectedCompany) return;
+    const companyChanged = previousSelectedCompanyIdRef.current !== selectedCompany.id;
+    previousSelectedCompanyIdRef.current = selectedCompany.id;
 
     setNewCompanyName(selectedCompany.name ?? "");
     setNewCompanyVat(selectedCompany.vatNumber ?? "");
@@ -438,6 +445,11 @@ export default function ChecklistPage({
     setNewCompanyHaccpAdditionalRoles(parseRolePersonCards(selectedCompany.haccpAdditionalResponsabili));
     setNewCompanyActivity(inferActivityFromAteco(selectedCompany.atecoCode));
     setNewCompanyCity(selectedCompany.city ?? "");
+    if (!companyChanged) return;
+    if (skipNextRegistrationResetRef.current) {
+      skipNextRegistrationResetRef.current = false;
+      return;
+    }
     setTaskLastSavedAt({});
     setRegistrationTaskOrder([]);
     setActiveRegistrationTask(null);
@@ -772,6 +784,10 @@ export default function ChecklistPage({
   }
 
   async function handleSaveRegistrationTask(taskKey: RegistrationTaskKey, moveNext = true) {
+    const preserveTaskNavigationOnSave = taskKey === "general" && moveNext && isNewCompanyDraft;
+    if (preserveTaskNavigationOnSave) {
+      skipNextRegistrationResetRef.current = true;
+    }
     setLoading(true);
     setMessage("");
     try {
@@ -804,6 +820,9 @@ export default function ChecklistPage({
         if (moveNext) setActiveRegistrationTask(null);
       }
     } catch (error) {
+      if (preserveTaskNavigationOnSave) {
+        skipNextRegistrationResetRef.current = false;
+      }
       setMessage(error instanceof Error ? error.message : "Errore salvataggio task.");
     } finally {
       setLoading(false);
