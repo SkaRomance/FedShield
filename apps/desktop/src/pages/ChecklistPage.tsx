@@ -771,7 +771,7 @@ export default function ChecklistPage({
     setMessage("Task Soggetti HACCP salvata.");
   }
 
-  async function handleSaveRegistrationTask(taskKey: RegistrationTaskKey, moveNext?: boolean) {
+  async function handleSaveRegistrationTask(taskKey: RegistrationTaskKey, moveNext = true) {
     setLoading(true);
     setMessage("");
     try {
