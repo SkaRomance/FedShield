@@ -190,8 +190,31 @@ function parseRetailAdditionalScopes(jsonValue?: string | null): string[] {
   }
 }
 
+function parseCompanyActivities(jsonValue?: string | null): ActivityTypeOption[] {
+  if (!jsonValue) return [];
+  const validValues = new Set<ActivityTypeOption>(ACTIVITY_TYPE_OPTIONS.map((option) => option.value));
+  try {
+    const parsed = JSON.parse(jsonValue) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((item) => (typeof item === "string" ? item : ""))
+      .filter((item): item is ActivityTypeOption => validValues.has(item as ActivityTypeOption));
+  } catch {
+    return [];
+  }
+}
+
+function inferActivitiesFromAteco(atecoCode?: string | null): ActivityTypeOption[] {
+  const inferred = inferActivityFromAteco(atecoCode);
+  return inferred === "custom" ? [] : [inferred];
+}
+
 function retailScopesStorageKey(companyId: string): string {
   return `fedshield.retailScopes.${companyId}`;
+}
+
+function companyActivitiesStorageKey(companyId: string): string {
+  return `fedshield.companyActivities.${companyId}`;
 }
 
 function checklistModeLabel(mode?: InspectionChecklistMode) {
@@ -281,11 +304,10 @@ export default function ChecklistPage({
   const [newCompanyHaccpConsulenteEsterno, setNewCompanyHaccpConsulenteEsterno] = useState<PersonCardData>(emptyPersonCard());
   const [newCompanyHaccpAdditionalRoles, setNewCompanyHaccpAdditionalRoles] = useState<RolePersonCardData[]>([]);
   const [newCompanyHaccpCustomRole, setNewCompanyHaccpCustomRole] = useState("");
-  const [newCompanyActivity, setNewCompanyActivity] = useState<ActivityTypeOption>("restaurant");
+  const [newCompanyActivities, setNewCompanyActivities] = useState<ActivityTypeOption[]>(["restaurant"]);
   const [newCompanyCity, setNewCompanyCity] = useState("");
   const [newCompanyRetailScopes, setNewCompanyRetailScopes] = useState<string[]>([]);
   const [activeRegistrationTask, setActiveRegistrationTask] = useState<RegistrationTaskKey | null>(null);
-  const [registrationTaskOrder, setRegistrationTaskOrder] = useState<RegistrationTaskKey[]>([]);
   const [taskLastSavedAt, setTaskLastSavedAt] = useState<Partial<Record<RegistrationTaskKey, string>>>({});
   const [checklistActivityFilter, setChecklistActivityFilter] = useState<ChecklistActivityFilter>("company");
   const [customChecklistAteco, setCustomChecklistAteco] = useState("");
@@ -474,8 +496,16 @@ export default function ChecklistPage({
     setNewCompanyHaccpResponsabileAutocontrollo(parsePersonCard(selectedCompany.haccpResponsabileAutocontrollo));
     setNewCompanyHaccpConsulenteEsterno(parsePersonCard(selectedCompany.haccpConsulenteEsterno));
     setNewCompanyHaccpAdditionalRoles(parseRolePersonCards(selectedCompany.haccpAdditionalResponsabili));
-    setNewCompanyActivity(inferActivityFromAteco(selectedCompany.atecoCode));
     setNewCompanyCity(selectedCompany.city ?? "");
+    if (typeof window !== "undefined") {
+      const rawActivities = window.localStorage.getItem(companyActivitiesStorageKey(selectedCompany.id));
+      const parsedActivities = parseCompanyActivities(rawActivities);
+      setNewCompanyActivities(
+        parsedActivities.length > 0 ? parsedActivities : inferActivitiesFromAteco(selectedCompany.atecoCode),
+      );
+    } else {
+      setNewCompanyActivities(inferActivitiesFromAteco(selectedCompany.atecoCode));
+    }
     if (user.role === "admin") {
       setNewCompanyRetailScopes([]);
     } else if (typeof window !== "undefined") {
@@ -490,7 +520,6 @@ export default function ChecklistPage({
       return;
     }
     setTaskLastSavedAt({});
-    setRegistrationTaskOrder([]);
     setActiveRegistrationTask(null);
   }, [selectedCompany, isNewCompanyDraft, user.role]);
 
@@ -510,6 +539,17 @@ export default function ChecklistPage({
       setNewCompanyRetailScopes([]);
     }
   }, [showRetailAdditionalScopes, newCompanyRetailScopes.length]);
+
+  useEffect(() => {
+    if (!selectedCompany?.id) return;
+    if (typeof window === "undefined") return;
+    const storageKey = companyActivitiesStorageKey(selectedCompany.id);
+    if (newCompanyActivities.length === 0) {
+      window.localStorage.removeItem(storageKey);
+      return;
+    }
+    window.localStorage.setItem(storageKey, JSON.stringify(newCompanyActivities));
+  }, [selectedCompany?.id, newCompanyActivities]);
 
   useEffect(() => {
     if (user.role === "admin") return;
@@ -643,20 +683,14 @@ export default function ChecklistPage({
     setNewCompanyHaccpConsulenteEsterno(emptyPersonCard());
     setNewCompanyHaccpAdditionalRoles([]);
     setNewCompanyHaccpCustomRole("");
-    setNewCompanyActivity("restaurant");
+    setNewCompanyActivities(["restaurant"]);
     setNewCompanyCity("");
     setNewCompanyRetailScopes([]);
     setTaskLastSavedAt({});
-    setRegistrationTaskOrder([]);
     setActiveRegistrationTask(null);
   }
 
-  function promoteRegistrationTask(taskKey: RegistrationTaskKey) {
-    setRegistrationTaskOrder((current) => (current.includes(taskKey) ? current : [...current, taskKey]));
-  }
-
   function openRegistrationTask(taskKey: RegistrationTaskKey) {
-    promoteRegistrationTask(taskKey);
     setActiveRegistrationTask(taskKey);
   }
 
@@ -782,6 +816,14 @@ export default function ChecklistPage({
       entityId: savedCompany.id,
       payload: savedCompany,
     });
+    if (typeof window !== "undefined") {
+      const activitiesStorageKey = companyActivitiesStorageKey(savedCompany.id);
+      if (newCompanyActivities.length > 0) {
+        window.localStorage.setItem(activitiesStorageKey, JSON.stringify(newCompanyActivities));
+      } else {
+        window.localStorage.removeItem(activitiesStorageKey);
+      }
+    }
     if (user.role !== "admin" && typeof window !== "undefined") {
       const storageKey = retailScopesStorageKey(savedCompany.id);
       if (/^47\.11(\.|$)/.test((savedCompany.atecoCode ?? "").trim()) && newCompanyRetailScopes.length > 0) {
@@ -1202,14 +1244,12 @@ export default function ChecklistPage({
     { key: "haccp", title: "Soggetti Igiene Alimenti (HACCP)", status: haccpTaskStatus, progress: haccpProgress },
   ];
 
-  const topRegistrationTasks = registrationTaskOrder
-    .map((taskKey) => registrationTasks.find((item) => item.key === taskKey))
-    .filter((item): item is NonNullable<typeof item> => Boolean(item));
-
-  const bottomRegistrationTasks = registrationTasks.filter(
-    (item) => !registrationTaskOrder.includes(item.key),
-  );
   const registrationTaskSequence: RegistrationTaskKey[] = ["general", "safety", "haccp"];
+  const activeTaskIndex =
+    activeRegistrationTask !== null ? registrationTaskSequence.indexOf(activeRegistrationTask) : -1;
+  const visibleTasksBeforeBody =
+    activeTaskIndex >= 0 ? registrationTasks.slice(0, activeTaskIndex + 1) : registrationTasks;
+  const visibleTasksAfterBody = activeTaskIndex >= 0 ? registrationTasks.slice(activeTaskIndex + 1) : [];
 
   function moveRegistrationTask(currentKey: RegistrationTaskKey, direction: -1 | 1) {
     const currentIndex = registrationTaskSequence.indexOf(currentKey);
@@ -1367,13 +1407,11 @@ export default function ChecklistPage({
                 )
               ) : null}
             </div>
-            {topRegistrationTasks.length > 0 && (
-              <div className="task-accordion-list">
-                {topRegistrationTasks.map((task) =>
-                  renderTaskHeader(task.key, task.title, task.status, task.progress),
-                )}
-              </div>
-            )}
+            <div className="task-accordion-list">
+              {visibleTasksBeforeBody.map((task) =>
+                renderTaskHeader(task.key, task.title, task.status, task.progress),
+              )}
+            </div>
             {!activeRegistrationTask && (
               <p className="template-hint">Seleziona un task per iniziare la compilazione.</p>
             )}
@@ -1413,24 +1451,36 @@ export default function ChecklistPage({
                     <label>Telefono</label>
                     <input value={newCompanyPhone} onChange={(event) => setNewCompanyPhone(event.target.value)} />
                   </div>
-                  <div>
-                    <label>Tipo attivita</label>
-                    <select
-                      value={newCompanyActivity}
-                      onChange={(event) => {
-                        const next = event.target.value as ActivityTypeOption;
-                        setNewCompanyActivity(next);
-                        if (next !== "custom") {
-                          setNewCompanyAteco(atecoFromActivity(next));
-                        }
-                      }}
-                    >
+                  <div style={{ gridColumn: "span 2" }}>
+                    <label>Tipo attivita (selezione multipla)</label>
+                    <div className="haccp-role-options">
                       {ACTIVITY_TYPE_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
+                        <label key={option.value} className="haccp-role-option">
+                          <input
+                            type="checkbox"
+                            checked={newCompanyActivities.includes(option.value)}
+                            onChange={(event) => {
+                              const checked = event.target.checked;
+                              setNewCompanyActivities((current) => {
+                                const exists = current.includes(option.value);
+                                if (checked && !exists) {
+                                  const next = [...current, option.value];
+                                  if (next.length === 1 && option.value !== "custom") {
+                                    setNewCompanyAteco(atecoFromActivity(option.value));
+                                  }
+                                  return next;
+                                }
+                                if (!checked && exists) {
+                                  return current.filter((value) => value !== option.value);
+                                }
+                                return current;
+                              });
+                            }}
+                          />
                           {option.label}
-                        </option>
+                        </label>
                       ))}
-                    </select>
+                    </div>
                   </div>
                   <div>
                     <label>Codice ATECO</label>
@@ -1439,7 +1489,6 @@ export default function ChecklistPage({
                       onChange={(event) => {
                         const value = event.target.value;
                         setNewCompanyAteco(value);
-                        setNewCompanyActivity(inferActivityFromAteco(value));
                       }}
                     />
                   </div>
@@ -1672,9 +1721,11 @@ export default function ChecklistPage({
                 </div>
               </div>
             )}
-            <div className="task-accordion-list">
-              {bottomRegistrationTasks.map((task) => renderTaskHeader(task.key, task.title, task.status, task.progress))}
-            </div>
+            {visibleTasksAfterBody.length > 0 && (
+              <div className="task-accordion-list">
+                {visibleTasksAfterBody.map((task) => renderTaskHeader(task.key, task.title, task.status, task.progress))}
+              </div>
+            )}
           </div>
 
           <div className="panel section-panel">
