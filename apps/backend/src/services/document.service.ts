@@ -63,6 +63,22 @@ function wrapLine(line: string, maxChars = 100): string[] {
   return rows.length > 0 ? rows : [safe.slice(0, maxChars)];
 }
 
+function clampAttestatoStars(stars: number): number {
+  return Math.max(0, Math.min(5, Math.round(stars)));
+}
+
+function buildStarSvgPath(centerX: number, centerY: number, outerRadius: number, innerRadius: number): string {
+  const commands: string[] = [];
+  for (let pointIndex = 0; pointIndex < 10; pointIndex += 1) {
+    const angle = ((-90 + pointIndex * 36) * Math.PI) / 180;
+    const radius = pointIndex % 2 === 0 ? outerRadius : innerRadius;
+    const x = centerX + Math.cos(angle) * radius;
+    const y = centerY + Math.sin(angle) * radius;
+    commands.push(`${pointIndex === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(2)}`);
+  }
+  return `${commands.join(" ")} Z`;
+}
+
 async function savePdf(lines: string[], filePrefix: string): Promise<{ fileName: string; relativePath: string }> {
   const doc = await PDFDocument.create();
   const font = await doc.embedFont(StandardFonts.Helvetica);
@@ -270,6 +286,28 @@ async function generateAttestatoTemplatePdf(params: {
     page.drawText(safeText, { x, y, size, color, font });
   };
 
+  const drawFedStarsRow = (stars: number, centerY: number) => {
+    const maxStars = 5;
+    const clampedStars = clampAttestatoStars(stars);
+    const outerRadius = 13;
+    const innerRadius = 5.4;
+    const gap = 8;
+    const starWidth = outerRadius * 2;
+    const totalWidth = maxStars * starWidth + (maxStars - 1) * gap;
+    const startX = (width - totalWidth) / 2;
+
+    for (let index = 0; index < maxStars; index += 1) {
+      const centerX = startX + outerRadius + index * (starWidth + gap);
+      const path = buildStarSvgPath(centerX, centerY, outerRadius, innerRadius);
+      const filled = index < clampedStars;
+      page.drawSvgPath(path, {
+        color: filled ? colorOrange : rgb(0.94, 0.94, 0.94),
+        borderColor: filled ? colorOrange : rgb(0.78, 0.78, 0.78),
+        borderWidth: 1,
+      });
+    }
+  };
+
   // Background and frame
   page.drawRectangle({ x: 0, y: 0, width, height, color: rgb(0.98, 0.98, 0.98) });
   page.drawRectangle({ x: 8, y: 8, width: width - 16, height: height - 16, borderWidth: 1, borderColor: rgb(0.65, 0.65, 0.65) });
@@ -296,7 +334,7 @@ async function generateAttestatoTemplatePdf(params: {
   drawCentered(`a seguito del sopralluogo antisanzione svolto in data ${params.inspectionDate}`, 532, 14, colorNavy, regular);
   drawCentered("HA TOTALIZZATO", 472, 20, colorOrange, bold);
   drawCentered(`UN FED-SCORE DI ${params.score}/100`, 430, 42, colorNavy, bold);
-  drawCentered(`FED STARS: ${params.stars}/5`, 380, 30, colorOrange, bold);
+  drawFedStarsRow(params.stars, 384);
   drawCentered("Verifica attestato tramite QR Code", 302, 12, colorNavy, regular);
 
   const qrPng = await fetchQrPng(params.verificationUrl);
