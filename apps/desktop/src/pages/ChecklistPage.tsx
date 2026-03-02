@@ -120,6 +120,7 @@ export default function ChecklistPage({
   const [documents, setDocuments] = useState<InspectionDocumentRequirement[]>([]);
   const [summary, setSummary] = useState<InspectionSummary | null>(null);
   const [companySearch, setCompanySearch] = useState("");
+  const [showNewCompanyForm, setShowNewCompanyForm] = useState(false);
   const [newCompanyName, setNewCompanyName] = useState("");
   const [newCompanyVat, setNewCompanyVat] = useState("");
   const [newCompanyAteco, setNewCompanyAteco] = useState("56.10.11");
@@ -579,12 +580,46 @@ export default function ChecklistPage({
           onChange={(event) => setCompanySearch(event.target.value)}
           placeholder="Cerca per ragione sociale, P.IVA, ATECO o citta"
         />
+        <div className="footer-actions" style={{ marginTop: 8 }}>
+          <button onClick={() => setShowNewCompanyForm((current) => !current)} disabled={loading}>
+            {showNewCompanyForm ? "Chiudi registrazione cliente" : "Registra nuovo cliente"}
+          </button>
+        </div>
         {filteredCompanies.length === 0 ? (
           <p className="status-message">Nessun cliente trovato.</p>
         ) : (
           <p className="status-message">Cliente attivo: {selectedCompany?.name ?? filteredCompanies[0]?.name}</p>
         )}
       </div>
+
+      {showNewCompanyForm && (
+        <div className="panel section-panel">
+          <h3>Registra nuovo cliente</h3>
+          <div className="grid-two">
+            <div>
+              <label>Ragione sociale</label>
+              <input value={newCompanyName} onChange={(event) => setNewCompanyName(event.target.value)} />
+            </div>
+            <div>
+              <label>P.IVA</label>
+              <input value={newCompanyVat} onChange={(event) => setNewCompanyVat(event.target.value)} />
+            </div>
+            <div>
+              <label>ATECO</label>
+              <input value={newCompanyAteco} onChange={(event) => setNewCompanyAteco(event.target.value)} />
+            </div>
+            <div>
+              <label>Citta</label>
+              <input value={newCompanyCity} onChange={(event) => setNewCompanyCity(event.target.value)} />
+            </div>
+          </div>
+          <div className="footer-actions">
+            <button onClick={handleCreateCompany} disabled={loading}>
+              Conferma nuovo cliente
+            </button>
+          </div>
+        </div>
+      )}
       <div className="grid-two" style={{ marginTop: 10 }}>
         <div>
           <label>Tipo attivita checklist</label>
@@ -615,59 +650,30 @@ export default function ChecklistPage({
       </div>
 
       {step === 0 && (
-        <>
-          <div className="panel section-panel">
-            <h3>1. Registra nuovo cliente</h3>
-            <div className="grid-two">
-              <div>
-                <label>Ragione sociale</label>
-                <input value={newCompanyName} onChange={(event) => setNewCompanyName(event.target.value)} />
-              </div>
-              <div>
-                <label>P.IVA</label>
-                <input value={newCompanyVat} onChange={(event) => setNewCompanyVat(event.target.value)} />
-              </div>
-              <div>
-                <label>ATECO</label>
-                <input value={newCompanyAteco} onChange={(event) => setNewCompanyAteco(event.target.value)} />
-              </div>
-              <div>
-                <label>Citta</label>
-                <input value={newCompanyCity} onChange={(event) => setNewCompanyCity(event.target.value)} />
-              </div>
-            </div>
-            <div className="footer-actions">
-              <button onClick={handleCreateCompany} disabled={loading}>
-                Registra nuovo cliente
-              </button>
-            </div>
+        <div className="panel section-panel">
+          <h3>1. Crea sopralluogo</h3>
+          <label>Titolo sopralluogo</label>
+          <label>Ambito sopralluogo</label>
+          <select
+            value={newInspectionChecklistMode}
+            onChange={(event) => setNewInspectionChecklistMode(event.target.value as InspectionChecklistMode)}
+          >
+            {CHECKLIST_MODE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <div className="inline-actions">
+            <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Sopralluogo Antisanzione" />
+            <button className="secondary-btn" onClick={handleCreateInspection} disabled={loading}>
+              Crea
+            </button>
           </div>
-
-          <div className="panel section-panel">
-            <h3>2. Crea sopralluogo</h3>
-            <label>Titolo sopralluogo</label>
-            <label>Ambito sopralluogo</label>
-            <select
-              value={newInspectionChecklistMode}
-              onChange={(event) => setNewInspectionChecklistMode(event.target.value as InspectionChecklistMode)}
-            >
-              {CHECKLIST_MODE_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <div className="inline-actions">
-              <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Sopralluogo Antisanzione" />
-              <button className="secondary-btn" onClick={handleCreateInspection} disabled={loading}>
-                Crea
-              </button>
-            </div>
-            <p className="template-hint">
-              Template caricati: {templates.map((template) => template.name).join(" • ") || "nessuno"}
-            </p>
-          </div>
-        </>
+          <p className="template-hint">
+            Template caricati: {templates.map((template) => template.name).join(" • ") || "nessuno"}
+          </p>
+        </div>
       )}
 
       {step === 1 && (
