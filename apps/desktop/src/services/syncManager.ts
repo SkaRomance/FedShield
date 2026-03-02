@@ -77,9 +77,9 @@ function saveDeviceContext(context: DeviceContext): void {
 
 export async function ensureLicenseActivation(): Promise<DeviceContext> {
   const context = getDeviceContext();
+  const activationCode = import.meta.env.VITE_LICENSE_ACTIVATION_CODE ?? "FEDSHIELD-DEMO-KEY";
 
-  if (!context.heartbeatToken) {
-    const activationCode = import.meta.env.VITE_LICENSE_ACTIVATION_CODE ?? "FEDSHIELD-DEMO-KEY";
+  const activateFreshLicense = async (): Promise<DeviceContext> => {
     const activated = await activateDeviceLicense({
       deviceId: context.deviceId,
       deviceName: context.deviceName,
@@ -98,12 +98,20 @@ export async function ensureLicenseActivation(): Promise<DeviceContext> {
     };
     saveDeviceContext(next);
     return next;
+  };
+
+  if (!context.heartbeatToken) {
+    return activateFreshLicense();
   }
 
   const validation = await validateDeviceLicense({
     deviceId: context.deviceId,
     heartbeatToken: context.heartbeatToken,
   });
+
+  if (!validation.found) {
+    return activateFreshLicense();
+  }
 
   const next: DeviceContext = {
     ...context,
