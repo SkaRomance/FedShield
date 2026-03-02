@@ -11,6 +11,7 @@ import { config } from "../config.js";
 import { buildInspectionReport, computeInspectionComplianceScore, starsFromScore } from "./report.service.js";
 
 const execFileAsync = promisify(execFile);
+let cachedSofficeBinary: string | null = null;
 
 function toAbsoluteStoragePath(relativePath: string): string {
   return path.resolve(process.cwd(), config.storageDir, relativePath);
@@ -230,9 +231,34 @@ function buildAttestatoVerificationUrl(inspectionId: string, verificationToken: 
 }
 
 async function readAttestatoDocxTemplate(): Promise<{ templatePath: string; templateHash: string }> {
-  const templatePath = path.isAbsolute(config.attestatoTemplateDocxPath)
+  const configuredTemplatePath = path.isAbsolute(config.attestatoTemplateDocxPath)
     ? config.attestatoTemplateDocxPath
     : path.resolve(process.cwd(), config.attestatoTemplateDocxPath);
+  const inputTemplatePath = path.resolve(
+    process.cwd(),
+    "input",
+    "Format per Generazione Attestati",
+    "Attestato_Antisanzione_TEMPLATE_PLACEHOLDERS.docx",
+  );
+  const backendRelativeInputTemplatePath = path.resolve(
+    process.cwd(),
+    "..",
+    "..",
+    "input",
+    "Format per Generazione Attestati",
+    "Attestato_Antisanzione_TEMPLATE_PLACEHOLDERS.docx",
+  );
+  const candidates = [inputTemplatePath, backendRelativeInputTemplatePath, configuredTemplatePath];
+  let templatePath = configuredTemplatePath;
+  for (const candidate of candidates) {
+    try {
+      await readFile(candidate);
+      templatePath = candidate;
+      break;
+    } catch {
+      // Try next candidate.
+    }
+  }
   const bytes = await readFile(templatePath);
   const templateHash = createHash("sha256").update(bytes).digest("hex");
   return { templatePath, templateHash };
@@ -252,6 +278,40 @@ async function resolveBackendScriptPath(scriptFileName: string): Promise<string>
     }
   }
   throw new Error(`Script backend non trovato: ${scriptFileName}`);
+}
+
+async function resolveSofficeBinary(): Promise<string> {
+  if (cachedSofficeBinary) {
+    return cachedSofficeBinary;
+  }
+
+  const envCandidate = process.env.SOFFICE_PATH?.trim();
+  const windowsCandidates = process.platform === "win32"
+    ? [
+        "C:\\Program Files\\LibreOffice\\program\\soffice.com",
+        "C:\\Program Files\\LibreOffice\\program\\soffice.exe",
+      ]
+    : [];
+  const candidates = [envCandidate, ...windowsCandidates, "soffice", "soffice.com"].filter(
+    (value): value is string => Boolean(value && value.length > 0),
+  );
+
+  for (const candidate of candidates) {
+    try {
+      await execFileAsync(candidate, ["--version"], {
+        windowsHide: true,
+        maxBuffer: 1024 * 1024,
+      });
+      cachedSofficeBinary = candidate;
+      return candidate;
+    } catch {
+      // Try next candidate.
+    }
+  }
+
+  throw new Error(
+    "LibreOffice soffice non trovato. Imposta SOFFICE_PATH o installa LibreOffice.",
+  );
 }
 
 async function fetchQrPng(verificationUrl: string): Promise<Uint8Array | null> {
@@ -297,6 +357,7 @@ async function generateAttestatoTemplatePdf(params: {
   const workDir = await mkdtemp(path.join(tmpdir(), "fedshield-attestato-"));
   const filledDocxPath = path.join(workDir, "attestato_filled.docx");
   const scriptPath = await resolveBackendScriptPath("fill_attestato_template.py");
+  const sofficeBinary = await resolveSofficeBinary();
   const qrImagePath = path.join(workDir, "attestato_qr.png");
   let hasQrImage = false;
 
@@ -337,7 +398,7 @@ async function generateAttestatoTemplatePdf(params: {
     });
 
     await execFileAsync(
-      "soffice",
+      sofficeBinary,
       ["--headless", "--convert-to", "pdf", "--outdir", workDir, filledDocxPath],
       {
         windowsHide: true,
