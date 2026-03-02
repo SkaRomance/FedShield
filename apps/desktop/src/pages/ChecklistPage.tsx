@@ -1375,11 +1375,8 @@ export default function ChecklistPage({
                   </div>
                 </div>
                 <div className="footer-actions" style={{ justifyContent: "flex-end", flexWrap: "wrap" }}>
-                  <button onClick={() => handleSaveRegistrationTask("general")} disabled={loading}>
+                  <button onClick={() => handleSaveRegistrationTask("general", true)} disabled={loading}>
                     Salva task
-                  </button>
-                  <button className="secondary-btn" onClick={() => handleSaveRegistrationTask("general", true)} disabled={loading}>
-                    Salva e vai alla successiva
                   </button>
                   <button
                     type="button"
@@ -1388,14 +1385,6 @@ export default function ChecklistPage({
                     disabled
                   >
                     Indietro
-                  </button>
-                  <button
-                    type="button"
-                    className="secondary-btn"
-                    onClick={() => moveRegistrationTask("general", 1)}
-                    disabled={loading}
-                  >
-                    Avanti
                   </button>
                   <button
                     type="button"
@@ -1473,11 +1462,8 @@ export default function ChecklistPage({
                   </>
                 )}
                 <div className="footer-actions" style={{ justifyContent: "flex-end", flexWrap: "wrap" }}>
-                  <button onClick={() => handleSaveRegistrationTask("safety")} disabled={loading}>
+                  <button onClick={() => handleSaveRegistrationTask("safety", true)} disabled={loading}>
                     Salva task
-                  </button>
-                  <button className="secondary-btn" onClick={() => handleSaveRegistrationTask("safety", true)} disabled={loading}>
-                    Salva e vai alla successiva
                   </button>
                   <button
                     type="button"
@@ -1486,14 +1472,6 @@ export default function ChecklistPage({
                     disabled={loading}
                   >
                     Indietro
-                  </button>
-                  <button
-                    type="button"
-                    className="secondary-btn"
-                    onClick={() => moveRegistrationTask("safety", 1)}
-                    disabled={loading}
-                  >
-                    Avanti
                   </button>
                   <button
                     type="button"
@@ -1561,11 +1539,8 @@ export default function ChecklistPage({
                   </>
                 )}
                 <div className="footer-actions" style={{ justifyContent: "flex-end", flexWrap: "wrap" }}>
-                  <button onClick={() => handleSaveRegistrationTask("haccp")} disabled={loading}>
+                  <button onClick={() => handleSaveRegistrationTask("haccp", true)} disabled={loading}>
                     Salva task
-                  </button>
-                  <button className="secondary-btn" onClick={() => handleSaveRegistrationTask("haccp", true)} disabled={loading}>
-                    Salva e vai alla successiva
                   </button>
                   <button
                     type="button"
@@ -1574,14 +1549,6 @@ export default function ChecklistPage({
                     disabled={loading}
                   >
                     Indietro
-                  </button>
-                  <button
-                    type="button"
-                    className="secondary-btn"
-                    onClick={() => moveRegistrationTask("haccp", 1)}
-                    disabled
-                  >
-                    Avanti
                   </button>
                   <button
                     type="button"
