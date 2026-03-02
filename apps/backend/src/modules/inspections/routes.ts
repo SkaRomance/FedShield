@@ -220,6 +220,43 @@ function buildDomainFilterByChecklistMode(checklistMode: InspectionChecklistMode
   };
 }
 
+function parseRetailScopes(raw?: string | null): string[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((item) => (typeof item === "string" ? item.trim() : ""))
+      .filter((item) => item.length > 0);
+  } catch {
+    return raw
+      .split(",")
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+  }
+}
+
+function buildRetailScopeVariants(scopes: string[]): string[] {
+  const mapping: Record<string, string[]> = {
+    retail_butcher_counter: ["RETAIL_LARGE_BUTCHER"],
+    retail_fish_counter: ["RETAIL_LARGE_FISH"],
+    retail_produce_counter: ["RETAIL_LARGE_PRODUCE"],
+    retail_deli_counter: ["RETAIL_LARGE_DELI"],
+  };
+
+  const variants = new Set<string>();
+  for (const scope of scopes) {
+    const key = scope.toLowerCase();
+    const mapped = mapping[key];
+    if (mapped) {
+      mapped.forEach((value) => variants.add(value));
+      continue;
+    }
+    variants.add(scope);
+  }
+  return [...variants];
+}
+
 const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get(
     "/verify/attestato/:inspectionId",
@@ -425,8 +462,12 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
     { preHandler: [fastify.authenticate] },
     async (request, reply) => {
       const params = z.object({ id: z.string().min(1) }).safeParse(request.params);
+      const query = z.object({ retailScopes: z.string().optional() }).safeParse(request.query ?? {});
       if (!params.success) {
         return reply.badRequest("ID sopralluogo non valido.");
+      }
+      if (!query.success) {
+        return reply.badRequest("Query requisiti documentali non valida.");
       }
 
       const inspection = await fastify.prisma.inspection.findUnique({
@@ -442,6 +483,12 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
       }
 
       const atecoVariants = buildAtecoVariants(inspection.company.atecoCode);
+      const auth = request.user as { sub?: string; role?: UserRole };
+      const retailScopeVariants =
+        auth.role === UserRole.admin
+          ? []
+          : buildRetailScopeVariants(parseRetailScopes(query.data.retailScopes));
+      const macroGroupVariants = [...new Set([...atecoVariants, ...retailScopeVariants])];
       const domainFilter = buildDomainFilterByChecklistMode(inspection.checklistMode);
       const templates = await fastify.prisma.documentTemplate.findMany({
         where:
@@ -451,7 +498,7 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
                 OR: [
                   { isGeneral: true },
                   { atecoCode: { in: atecoVariants } },
-                  { macroGroup: { in: atecoVariants } },
+                  ...(macroGroupVariants.length > 0 ? [{ macroGroup: { in: macroGroupVariants } }] : []),
                 ],
                 ...(domainFilter ? { domain: domainFilter } : {}),
               }

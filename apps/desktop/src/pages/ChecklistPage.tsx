@@ -74,6 +74,8 @@ const DOCUMENT_STATUS_OPTIONS: Array<{ value: InspectionDocumentRequirement["sta
 ];
 
 const ACTIVITY_TYPE_OPTIONS = [
+  { value: "hypermarket", label: "Ipermercato", atecoCode: "47.11.1" },
+  { value: "supermarket", label: "Supermercato", atecoCode: "47.11.2" },
   { value: "restaurant", label: "Ristorante", atecoCode: "56.10.11" },
   { value: "pizzeria", label: "Pizzeria / Asporto", atecoCode: "56.10.20" },
   { value: "canteen", label: "Mense / Catering", atecoCode: "56.29.10" },
@@ -109,6 +111,13 @@ const HACCP_ROLE_OPTIONS = [
   "Responsabile bar",
   "Responsabile pasticceria",
   "Responsabile gelateria",
+] as const;
+
+const RETAIL_ADDITIONAL_SCOPE_OPTIONS = [
+  { value: "retail_butcher_counter", label: "Macelleria interna" },
+  { value: "retail_fish_counter", label: "Pescheria interna" },
+  { value: "retail_produce_counter", label: "Ortofrutta assistita" },
+  { value: "retail_deli_counter", label: "Salumeria/Gastronomia assistita" },
 ] as const;
 
 function emptyPersonCard(): PersonCardData {
@@ -165,12 +174,34 @@ function parseRolePersonCards(jsonValue?: string | null): RolePersonCardData[] {
   }
 }
 
+function parseRetailAdditionalScopes(jsonValue?: string | null): string[] {
+  if (!jsonValue) return [];
+  try {
+    const parsed = JSON.parse(jsonValue) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((item) => (typeof item === "string" ? item.trim() : ""))
+      .filter((item) => item.length > 0);
+  } catch {
+    return jsonValue
+      .split(",")
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+  }
+}
+
+function retailScopesStorageKey(companyId: string): string {
+  return `fedshield.retailScopes.${companyId}`;
+}
+
 function checklistModeLabel(mode?: InspectionChecklistMode) {
   return CHECKLIST_MODE_OPTIONS.find((option) => option.value === mode)?.label ?? "Checklist unificata";
 }
 
 function inferActivityFromAteco(atecoCode?: string | null): ActivityTypeOption {
   const normalized = atecoCode?.trim() ?? "";
+  if (normalized.startsWith("47.11.1")) return "hypermarket";
+  if (normalized.startsWith("47.11.2")) return "supermarket";
   if (normalized.startsWith("55.10")) return "hotel";
   if (normalized.startsWith("55.20.51")) return "bnb_guesthouse";
   if (normalized.startsWith("55.20.20")) return "hostel_residence";
@@ -252,6 +283,7 @@ export default function ChecklistPage({
   const [newCompanyHaccpCustomRole, setNewCompanyHaccpCustomRole] = useState("");
   const [newCompanyActivity, setNewCompanyActivity] = useState<ActivityTypeOption>("restaurant");
   const [newCompanyCity, setNewCompanyCity] = useState("");
+  const [newCompanyRetailScopes, setNewCompanyRetailScopes] = useState<string[]>([]);
   const [activeRegistrationTask, setActiveRegistrationTask] = useState<RegistrationTaskKey | null>(null);
   const [registrationTaskOrder, setRegistrationTaskOrder] = useState<RegistrationTaskKey[]>([]);
   const [taskLastSavedAt, setTaskLastSavedAt] = useState<Partial<Record<RegistrationTaskKey, string>>>({});
@@ -311,6 +343,9 @@ export default function ChecklistPage({
   const isInspectionValidated = selectedInspection?.status === "validated";
   const showSafetyRoleBlock = effectiveChecklistMode !== "haccp_only";
   const showHaccpRoleBlock = effectiveChecklistMode !== "safety_only";
+  const isRetailLargeFoodAteco = /^47\.11(\.|$)/.test(newCompanyAteco.trim());
+  const showRetailAdditionalScopes = user.role !== "admin" && isRetailLargeFoodAteco;
+  const effectiveRetailScopes = user.role === "admin" ? [] : newCompanyRetailScopes;
 
   const generalProgress = useMemo(() => {
     const fields = [
@@ -441,6 +476,14 @@ export default function ChecklistPage({
     setNewCompanyHaccpAdditionalRoles(parseRolePersonCards(selectedCompany.haccpAdditionalResponsabili));
     setNewCompanyActivity(inferActivityFromAteco(selectedCompany.atecoCode));
     setNewCompanyCity(selectedCompany.city ?? "");
+    if (user.role === "admin") {
+      setNewCompanyRetailScopes([]);
+    } else if (typeof window !== "undefined") {
+      const rawScopes = window.localStorage.getItem(retailScopesStorageKey(selectedCompany.id));
+      setNewCompanyRetailScopes(parseRetailAdditionalScopes(rawScopes));
+    } else {
+      setNewCompanyRetailScopes([]);
+    }
     if (!companyChanged) return;
     if (skipNextRegistrationResetRef.current) {
       skipNextRegistrationResetRef.current = false;
@@ -449,7 +492,7 @@ export default function ChecklistPage({
     setTaskLastSavedAt({});
     setRegistrationTaskOrder([]);
     setActiveRegistrationTask(null);
-  }, [selectedCompany, isNewCompanyDraft]);
+  }, [selectedCompany, isNewCompanyDraft, user.role]);
 
   useEffect(() => {
     if (!companyId) return;
@@ -463,10 +506,33 @@ export default function ChecklistPage({
   }, [companyId]);
 
   useEffect(() => {
+    if (!showRetailAdditionalScopes && newCompanyRetailScopes.length > 0) {
+      setNewCompanyRetailScopes([]);
+    }
+  }, [showRetailAdditionalScopes, newCompanyRetailScopes.length]);
+
+  useEffect(() => {
+    if (user.role === "admin") return;
+    if (!selectedCompany?.id) return;
+    if (typeof window === "undefined") return;
+    const storageKey = retailScopesStorageKey(selectedCompany.id);
+    if (!isRetailLargeFoodAteco || newCompanyRetailScopes.length === 0) {
+      window.localStorage.removeItem(storageKey);
+      return;
+    }
+    window.localStorage.setItem(storageKey, JSON.stringify(newCompanyRetailScopes));
+  }, [user.role, selectedCompany?.id, isRetailLargeFoodAteco, newCompanyRetailScopes]);
+
+  useEffect(() => {
     async function loadChecklistTemplates() {
       if (!companyId) return;
 
-      const nextTemplates = await fetchChecklistTemplates(token, effectiveChecklistAteco, effectiveChecklistMode);
+      const nextTemplates = await fetchChecklistTemplates(
+        token,
+        effectiveChecklistAteco,
+        effectiveChecklistMode,
+        effectiveRetailScopes,
+      );
       setTemplates(nextTemplates);
 
       const loadedItems = await Promise.all(
@@ -497,7 +563,7 @@ export default function ChecklistPage({
     loadChecklistTemplates().catch((error) => {
       setMessage(`Errore caricamento checklist: ${error instanceof Error ? error.message : "errore"}`);
     });
-  }, [token, companyId, effectiveChecklistAteco, effectiveChecklistMode, selectedInspection?.answers]);
+  }, [token, companyId, effectiveChecklistAteco, effectiveChecklistMode, effectiveRetailScopes, selectedInspection?.answers]);
 
   useEffect(() => {
     async function loadDocumentsAndSummary() {
@@ -508,7 +574,7 @@ export default function ChecklistPage({
       }
 
       const [requirements, nextSummary] = await Promise.all([
-        fetchInspectionDocumentRequirements(token, selectedInspectionId),
+        fetchInspectionDocumentRequirements(token, selectedInspectionId, effectiveRetailScopes),
         fetchInspectionSummary(token, selectedInspectionId),
       ]);
       setDocuments(requirements);
@@ -518,7 +584,7 @@ export default function ChecklistPage({
     loadDocumentsAndSummary().catch((error) => {
       setMessage(`Errore caricamento dettaglio sopralluogo: ${error instanceof Error ? error.message : "errore"}`);
     });
-  }, [token, selectedInspectionId]);
+  }, [token, selectedInspectionId, effectiveRetailScopes]);
 
   function updateAnswer(itemId: string, partial: Partial<LocalAnswer>) {
     setAnswers((current) => ({
@@ -579,6 +645,7 @@ export default function ChecklistPage({
     setNewCompanyHaccpCustomRole("");
     setNewCompanyActivity("restaurant");
     setNewCompanyCity("");
+    setNewCompanyRetailScopes([]);
     setTaskLastSavedAt({});
     setRegistrationTaskOrder([]);
     setActiveRegistrationTask(null);
@@ -715,6 +782,14 @@ export default function ChecklistPage({
       entityId: savedCompany.id,
       payload: savedCompany,
     });
+    if (user.role !== "admin" && typeof window !== "undefined") {
+      const storageKey = retailScopesStorageKey(savedCompany.id);
+      if (/^47\.11(\.|$)/.test((savedCompany.atecoCode ?? "").trim()) && newCompanyRetailScopes.length > 0) {
+        window.localStorage.setItem(storageKey, JSON.stringify(newCompanyRetailScopes));
+      } else {
+        window.localStorage.removeItem(storageKey);
+      }
+    }
     await onReload();
     setIsNewCompanyDraft(false);
     setCompanyId(savedCompany.id);
@@ -1368,6 +1443,31 @@ export default function ChecklistPage({
                       }}
                     />
                   </div>
+                  {showRetailAdditionalScopes && (
+                    <div style={{ gridColumn: "span 2" }}>
+                      <label>Reparti aggiuntivi presenti (attivano domande e requisiti extra)</label>
+                      <div className="haccp-role-options">
+                        {RETAIL_ADDITIONAL_SCOPE_OPTIONS.map((option) => (
+                          <label key={option.value} className="haccp-role-option">
+                            <input
+                              type="checkbox"
+                              checked={newCompanyRetailScopes.includes(option.value)}
+                              onChange={(event) => {
+                                const checked = event.target.checked;
+                                setNewCompanyRetailScopes((current) => {
+                                  if (checked) {
+                                    return current.includes(option.value) ? current : [...current, option.value];
+                                  }
+                                  return current.filter((value) => value !== option.value);
+                                });
+                              }}
+                            />
+                            {option.label}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <div>
                     <label>Livello di rischi dell’attivita</label>
                     <input value={newCompanyRiskLevel} onChange={(event) => setNewCompanyRiskLevel(event.target.value)} />

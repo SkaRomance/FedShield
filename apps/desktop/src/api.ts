@@ -459,6 +459,7 @@ export function fetchChecklistTemplates(
   token: string,
   atecoCode?: string,
   checklistMode?: "unified" | "haccp_only" | "safety_only",
+  retailScopes?: string[],
 ) {
   const params = new URLSearchParams();
   if (atecoCode) {
@@ -466,6 +467,9 @@ export function fetchChecklistTemplates(
   }
   if (checklistMode) {
     params.set("checklistMode", checklistMode);
+  }
+  if (retailScopes && retailScopes.length > 0) {
+    params.set("retailScopes", retailScopes.join(","));
   }
   const query = params.toString() ? `?${params.toString()}` : "";
   return authedFetch<ChecklistTemplate[]>(`/checklists/templates${query}`, token);
@@ -484,6 +488,7 @@ export function fetchDocumentTemplates(
   token: string,
   atecoCode?: string,
   checklistMode?: "unified" | "haccp_only" | "safety_only",
+  retailScopes?: string[],
 ) {
   const params = new URLSearchParams();
   if (atecoCode) {
@@ -491,6 +496,9 @@ export function fetchDocumentTemplates(
   }
   if (checklistMode) {
     params.set("checklistMode", checklistMode);
+  }
+  if (retailScopes && retailScopes.length > 0) {
+    params.set("retailScopes", retailScopes.join(","));
   }
   const query = params.toString() ? `?${params.toString()}` : "";
   return authedFetch<
@@ -587,8 +595,20 @@ export async function downloadGeneratedDocument(
   URL.revokeObjectURL(objectUrl);
 }
 
-export function fetchInspectionDocumentRequirements(token: string, inspectionId: string) {
-  return authedFetch<InspectionDocumentRequirement[]>(`/inspections/${inspectionId}/documents/requirements`, token);
+export function fetchInspectionDocumentRequirements(
+  token: string,
+  inspectionId: string,
+  retailScopes?: string[],
+) {
+  const params = new URLSearchParams();
+  if (retailScopes && retailScopes.length > 0) {
+    params.set("retailScopes", retailScopes.join(","));
+  }
+  const query = params.toString() ? `?${params.toString()}` : "";
+  return authedFetch<InspectionDocumentRequirement[]>(
+    `/inspections/${inspectionId}/documents/requirements${query}`,
+    token,
+  );
 }
 
 export function upsertInspectionDocuments(

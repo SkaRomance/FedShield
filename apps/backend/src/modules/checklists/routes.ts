@@ -42,6 +42,35 @@ function buildDomainFilterByChecklistMode(checklistMode?: InspectionChecklistMod
   };
 }
 
+function parseRetailScopes(raw?: string): string[] {
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
+}
+
+function buildRetailScopeVariants(scopes: string[]): string[] {
+  const mapping: Record<string, string[]> = {
+    retail_butcher_counter: ["RETAIL_LARGE_BUTCHER"],
+    retail_fish_counter: ["RETAIL_LARGE_FISH"],
+    retail_produce_counter: ["RETAIL_LARGE_PRODUCE"],
+    retail_deli_counter: ["RETAIL_LARGE_DELI"],
+  };
+
+  const variants = new Set<string>();
+  for (const scope of scopes) {
+    const key = scope.toLowerCase();
+    const mapped = mapping[key];
+    if (mapped) {
+      mapped.forEach((value) => variants.add(value));
+      continue;
+    }
+    variants.add(scope);
+  }
+  return [...variants];
+}
+
 const checklistRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get(
     "/checklists/templates",
@@ -51,6 +80,7 @@ const checklistRoutes: FastifyPluginAsync = async (fastify) => {
         .object({
           atecoCode: z.string().optional(),
           checklistMode: z.nativeEnum(InspectionChecklistMode).optional(),
+          retailScopes: z.string().optional(),
         })
         .safeParse(request.query);
 
@@ -59,6 +89,10 @@ const checklistRoutes: FastifyPluginAsync = async (fastify) => {
       }
 
       const atecoVariants = buildAtecoVariants(query.data.atecoCode);
+      const auth = request.user as { role?: "junior" | "senior" | "admin" };
+      const retailScopeVariants =
+        auth.role === "admin" ? [] : buildRetailScopeVariants(parseRetailScopes(query.data.retailScopes));
+      const macroGroupVariants = [...new Set([...atecoVariants, ...retailScopeVariants])];
       const domainFilter = buildDomainFilterByChecklistMode(query.data.checklistMode);
       const where =
         atecoVariants.length > 0
@@ -67,7 +101,7 @@ const checklistRoutes: FastifyPluginAsync = async (fastify) => {
               OR: [
                 { isGeneral: true },
                 { atecoCode: { in: atecoVariants } },
-                { macroGroup: { in: atecoVariants } },
+                ...(macroGroupVariants.length > 0 ? [{ macroGroup: { in: macroGroupVariants } }] : []),
               ],
               ...(domainFilter ? { items: { some: { domain: domainFilter } } } : {}),
             }
@@ -139,6 +173,7 @@ const checklistRoutes: FastifyPluginAsync = async (fastify) => {
         .object({
           atecoCode: z.string().optional(),
           checklistMode: z.nativeEnum(InspectionChecklistMode).optional(),
+          retailScopes: z.string().optional(),
         })
         .safeParse(request.query);
 
@@ -147,6 +182,10 @@ const checklistRoutes: FastifyPluginAsync = async (fastify) => {
       }
 
       const atecoVariants = buildAtecoVariants(query.data.atecoCode);
+      const auth = request.user as { role?: "junior" | "senior" | "admin" };
+      const retailScopeVariants =
+        auth.role === "admin" ? [] : buildRetailScopeVariants(parseRetailScopes(query.data.retailScopes));
+      const macroGroupVariants = [...new Set([...atecoVariants, ...retailScopeVariants])];
       const domainFilter = buildDomainFilterByChecklistMode(query.data.checklistMode);
       const where =
         atecoVariants.length > 0
@@ -155,7 +194,7 @@ const checklistRoutes: FastifyPluginAsync = async (fastify) => {
               OR: [
                 { isGeneral: true },
                 { atecoCode: { in: atecoVariants } },
-                { macroGroup: { in: atecoVariants } },
+                ...(macroGroupVariants.length > 0 ? [{ macroGroup: { in: macroGroupVariants } }] : []),
               ],
               ...(domainFilter ? { domain: domainFilter } : {}),
             }
