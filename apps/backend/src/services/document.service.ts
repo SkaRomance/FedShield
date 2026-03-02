@@ -218,26 +218,34 @@ async function readAttestatoDocxTemplate(): Promise<{ templatePath: string; temp
 }
 
 async function fetchQrPng(verificationUrl: string): Promise<Uint8Array | null> {
-  const qrEndpoint = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&format=png&data=${encodeURIComponent(
-    verificationUrl,
-  )}`;
+  const endpoints = [
+    `https://api.qrserver.com/v1/create-qr-code/?size=240x240&format=png&data=${encodeURIComponent(verificationUrl)}`,
+    `https://quickchart.io/qr?size=240&text=${encodeURIComponent(verificationUrl)}`,
+  ];
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 4000);
-  try {
-    const response = await fetch(qrEndpoint, {
-      method: "GET",
-      signal: controller.signal,
-    });
-    if (!response.ok) {
-      return null;
+  for (const endpoint of endpoints) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 6000);
+    try {
+      const response = await fetch(endpoint, {
+        method: "GET",
+        signal: controller.signal,
+      });
+      if (!response.ok) {
+        continue;
+      }
+      const contentType = response.headers.get("content-type") ?? "";
+      if (!contentType.includes("image")) {
+        continue;
+      }
+      return new Uint8Array(await response.arrayBuffer());
+    } catch {
+      // Try next provider
+    } finally {
+      clearTimeout(timeout);
     }
-    return new Uint8Array(await response.arrayBuffer());
-  } catch {
-    return null;
-  } finally {
-    clearTimeout(timeout);
   }
+  return null;
 }
 
 async function generateAttestatoTemplatePdf(params: {
@@ -291,19 +299,33 @@ async function generateAttestatoTemplatePdf(params: {
     options: { centerX: number; centerY: number; filledStars: number; totalStars?: number },
   ) => {
     const totalStars = options.totalStars ?? 5;
-    const starSize = 11;
-    const starGap = 10;
+    const starSize = 16;
+    const starGap = 12;
     const rowWidth = totalStars * (starSize * 2) + (totalStars - 1) * starGap;
     let cursorX = options.centerX - rowWidth / 2 + starSize;
 
     for (let i = 0; i < totalStars; i += 1) {
-      const path = buildStarPath(cursorX, options.centerY, starSize, starSize * 0.48);
-      const filled = i < options.filledStars;
-      targetPage.drawSvgPath(path, {
-        color: filled ? colorOrange : rgb(0.9, 0.9, 0.9),
-        borderColor: colorOrange,
-        borderWidth: 0.8,
-      });
+      try {
+        const path = buildStarPath(cursorX, options.centerY, starSize, starSize * 0.48);
+        const filled = i < options.filledStars;
+        targetPage.drawSvgPath(path, {
+          color: filled ? colorOrange : rgb(0.9, 0.9, 0.9),
+          borderColor: colorOrange,
+          borderWidth: 1.2,
+        });
+      } catch {
+        // Fallback grafico (non testo): blocchetto pieno/vuoto.
+        const filled = i < options.filledStars;
+        targetPage.drawRectangle({
+          x: cursorX - starSize + 1,
+          y: options.centerY - starSize + 1,
+          width: starSize * 2 - 2,
+          height: starSize * 2 - 2,
+          color: filled ? colorOrange : rgb(0.95, 0.95, 0.95),
+          borderColor: colorOrange,
+          borderWidth: 1,
+        });
+      }
       cursorX += starSize * 2 + starGap;
     }
   };
@@ -336,7 +358,7 @@ async function generateAttestatoTemplatePdf(params: {
   drawCentered(`UN FED-SCORE DI ${params.score}/100`, 430, 30, colorNavy, bold);
   drawStarsRow(page, {
     centerX: width / 2,
-    centerY: 387,
+    centerY: 386,
     filledStars: Math.max(0, Math.min(params.stars, 5)),
     totalStars: 5,
   });
@@ -524,6 +546,8 @@ export async function generateAttestatoPdf(
 
   let fileName: string;
   let relativePath: string;
+  let renderMode: "template" | "fallback" = "template";
+  let renderError: string | null = null;
   try {
     const generated = await generateAttestatoTemplatePdf({
       companyName: inspection.company.name,
@@ -535,7 +559,9 @@ export async function generateAttestatoPdf(
     });
     fileName = generated.fileName;
     relativePath = generated.relativePath;
-  } catch {
+  } catch (error) {
+    renderMode = "fallback";
+    renderError = error instanceof Error ? error.message : "unknown_template_error";
     const fallbackLines = [
       "ATTESTATO ANTISANZIONE",
       `Azienda: ${inspection.company.name}`,
@@ -580,6 +606,8 @@ export async function generateAttestatoPdf(
         templateDocxPath: docxTemplate.templatePath,
         templateDocxHash: docxTemplate.templateHash,
         templateLogoPath: config.attestatoLogoPath,
+        renderMode,
+        renderError,
         ...seal,
       }),
     },
