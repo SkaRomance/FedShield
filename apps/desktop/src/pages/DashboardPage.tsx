@@ -7,6 +7,7 @@ import {
 } from "../api";
 import { queueSyncEvent } from "../services/syncManager";
 import ChecklistPage from "./ChecklistPage";
+import CustomersPage from "./CustomersPage";
 import KpiPage from "./KpiPage";
 import OdvPage from "./OdvPage";
 import QuotesPage from "./QuotesPage";
@@ -46,9 +47,14 @@ export default function DashboardPage({
   onLogout,
 }: DashboardProps) {
   const [activeView, setActiveView] = useState<
-    "dashboard" | "checklist" | "quotes" | "kpi" | "odv"
+    "dashboard" | "customers" | "checklist" | "quotes" | "kpi" | "odv"
   >("dashboard");
   const [statusMessage, setStatusMessage] = useState<string>("");
+  const [checklistSelection, setChecklistSelection] = useState<{
+    companyId?: string;
+    inspectionId?: string;
+    token: number;
+  }>({ token: 0 });
 
   const sanctionableNc = useMemo(
     () => inspections.flatMap((item) => item.nonConformities).filter((nc) => nc.isSanctionable).length,
@@ -85,6 +91,16 @@ export default function DashboardPage({
     }
   }
 
+  function handleUseForInspection(companyId: string, inspectionId?: string) {
+    setChecklistSelection((current) => ({
+      companyId,
+      inspectionId,
+      token: current.token + 1,
+    }));
+    setActiveView("checklist");
+    setStatusMessage("");
+  }
+
   return (
     <div className="layout">
       <aside className="sidebar">
@@ -95,6 +111,12 @@ export default function DashboardPage({
             onClick={() => setActiveView("dashboard")}
           >
             Dashboard
+          </button>
+          <button
+            className={`nav-item ${activeView === "customers" ? "nav-item-active" : ""}`}
+            onClick={() => setActiveView("customers")}
+          >
+            Anagrafiche clienti
           </button>
           <button
             className={`nav-item ${activeView === "checklist" ? "nav-item-active" : ""}`}
@@ -226,8 +248,19 @@ export default function DashboardPage({
               {statusMessage ? <p className="status-message">{statusMessage}</p> : null}
             </section>
           </>
+        ) : activeView === "customers" ? (
+          <CustomersPage companies={companies} inspections={inspections} onUseForInspection={handleUseForInspection} />
         ) : activeView === "checklist" ? (
-          <ChecklistPage token={token} user={user} companies={companies} inspections={inspections} onReload={onReload} />
+          <ChecklistPage
+            token={token}
+            user={user}
+            companies={companies}
+            inspections={inspections}
+            initialCompanyId={checklistSelection.companyId}
+            initialInspectionId={checklistSelection.inspectionId}
+            selectionToken={checklistSelection.token}
+            onReload={onReload}
+          />
         ) : activeView === "quotes" ? (
           <QuotesPage token={token} companies={companies} />
         ) : activeView === "kpi" ? (

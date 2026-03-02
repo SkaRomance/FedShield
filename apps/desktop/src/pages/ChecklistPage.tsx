@@ -6,7 +6,6 @@ import {
   Inspection,
   InspectionDocumentRequirement,
   InspectionSummary,
-  createCompany,
   createInspection,
   fetchChecklistItems,
   fetchChecklistTemplates,
@@ -28,6 +27,9 @@ interface ChecklistPageProps {
   };
   companies: Company[];
   inspections: Inspection[];
+  initialCompanyId?: string;
+  initialInspectionId?: string;
+  selectionToken?: number;
   onReload: () => Promise<void>;
 }
 
@@ -82,20 +84,6 @@ function checklistModeLabel(mode?: InspectionChecklistMode) {
   return CHECKLIST_MODE_OPTIONS.find((option) => option.value === mode)?.label ?? "Checklist unificata";
 }
 
-function inferActivityFromAteco(atecoCode?: string | null): ActivityTypeOption {
-  const normalized = atecoCode?.trim() ?? "";
-  if (normalized.startsWith("55.10")) return "hotel";
-  if (normalized.startsWith("56.10.30")) return "pastry";
-  if (normalized.startsWith("56.10.20")) return "pizzeria";
-  if (normalized.startsWith("56.29.10")) return "canteen";
-  if (normalized.startsWith("56.21.00")) return "event_catering";
-  if (normalized.startsWith("56.10.42")) return "food_truck";
-  if (normalized.startsWith("56.10.41")) return "ambulant_pastry";
-  if (normalized.startsWith("56.30")) return "bar";
-  if (normalized.startsWith("56.10")) return "restaurant";
-  return "custom";
-}
-
 function atecoFromActivity(activity: ActivityTypeOption): string {
   return ACTIVITY_TYPE_OPTIONS.find((option) => option.value === activity)?.atecoCode ?? "";
 }
@@ -109,10 +97,19 @@ function defaultAnswer(item: ChecklistItem): LocalAnswer {
   };
 }
 
-export default function ChecklistPage({ token, user, companies, inspections, onReload }: ChecklistPageProps) {
+export default function ChecklistPage({
+  token,
+  user,
+  companies,
+  inspections,
+  initialCompanyId,
+  initialInspectionId,
+  selectionToken,
+  onReload,
+}: ChecklistPageProps) {
   const [step, setStep] = useState(0);
-  const [companyId, setCompanyId] = useState<string>(companies[0]?.id ?? "");
-  const [selectedInspectionId, setSelectedInspectionId] = useState<string>("");
+  const [companyId, setCompanyId] = useState<string>(initialCompanyId ?? companies[0]?.id ?? "");
+  const [selectedInspectionId, setSelectedInspectionId] = useState<string>(initialInspectionId ?? "");
   const [title, setTitle] = useState("Sopralluogo Antisanzione");
   const [newInspectionChecklistMode, setNewInspectionChecklistMode] = useState<InspectionChecklistMode>("unified");
 
@@ -122,11 +119,6 @@ export default function ChecklistPage({ token, user, companies, inspections, onR
   const [documents, setDocuments] = useState<InspectionDocumentRequirement[]>([]);
   const [summary, setSummary] = useState<InspectionSummary | null>(null);
 
-  const [newCompanyName, setNewCompanyName] = useState("");
-  const [newCompanyVat, setNewCompanyVat] = useState("");
-  const [newCompanyAteco, setNewCompanyAteco] = useState("56.10.11");
-  const [newCompanyActivity, setNewCompanyActivity] = useState<ActivityTypeOption>("restaurant");
-  const [newCompanyCity, setNewCompanyCity] = useState("");
   const [checklistActivityFilter, setChecklistActivityFilter] = useState<ChecklistActivityFilter>("company");
   const [customChecklistAteco, setCustomChecklistAteco] = useState("");
 
@@ -179,10 +171,22 @@ export default function ChecklistPage({ token, user, companies, inspections, onR
   }, [companies, companyId]);
 
   useEffect(() => {
+    if (!initialCompanyId) return;
+    setCompanyId(initialCompanyId);
+  }, [initialCompanyId, selectionToken]);
+
+  useEffect(() => {
     if (!companyId) return;
-    const latest = inspectionsForCompany[0];
-    setSelectedInspectionId((current) => current || latest?.id || "");
-  }, [companyId, inspectionsForCompany]);
+    const hasCurrentSelection = inspectionsForCompany.some((inspection) => inspection.id === selectedInspectionId);
+    if (!hasCurrentSelection) {
+      setSelectedInspectionId(inspectionsForCompany[0]?.id ?? "");
+    }
+  }, [companyId, inspectionsForCompany, selectedInspectionId]);
+
+  useEffect(() => {
+    if (selectionToken === undefined) return;
+    setSelectedInspectionId(initialInspectionId ?? "");
+  }, [initialInspectionId, selectionToken]);
 
   useEffect(() => {
     setChecklistActivityFilter("company");
@@ -255,42 +259,6 @@ export default function ChecklistPage({ token, user, companies, inspections, onR
         ...partial,
       },
     }));
-  }
-
-  async function handleCreateCompany() {
-    if (!newCompanyName || !newCompanyVat) {
-      setMessage("Inserisci almeno ragione sociale e partita IVA.");
-      return;
-    }
-
-    setLoading(true);
-    setMessage("");
-    try {
-      const created = await createCompany(token, {
-        name: newCompanyName.trim(),
-        vatNumber: newCompanyVat.trim(),
-        atecoCode: newCompanyAteco.trim() || undefined,
-        city: newCompanyCity.trim() || undefined,
-      });
-      queueSyncEvent({
-        eventType: "company.created",
-        entityType: "company",
-        entityId: created.id,
-        payload: created,
-      });
-      await onReload();
-      setCompanyId(created.id);
-      setNewCompanyName("");
-      setNewCompanyVat("");
-      setNewCompanyActivity("restaurant");
-      setNewCompanyAteco("56.10.11");
-      setNewCompanyCity("");
-      setMessage("Azienda registrata correttamente.");
-    } catch (error) {
-      setMessage(`Errore creazione azienda: ${error instanceof Error ? error.message : "errore"}`);
-    } finally {
-      setLoading(false);
-    }
   }
 
   async function handleCreateInspection() {
@@ -594,85 +562,30 @@ export default function ChecklistPage({ token, user, companies, inspections, onR
       </div>
 
       {step === 0 && (
-        <>
-          <div className="panel section-panel">
-            <h3>1A. Registrazione nuovo cliente</h3>
-            <div className="grid-two">
-              <div>
-                <label>Ragione sociale</label>
-                <input value={newCompanyName} onChange={(event) => setNewCompanyName(event.target.value)} />
-              </div>
-              <div>
-                <label>Partita IVA</label>
-                <input value={newCompanyVat} onChange={(event) => setNewCompanyVat(event.target.value)} />
-              </div>
-              <div>
-                <label>Tipo attivita</label>
-                <select
-                  value={newCompanyActivity}
-                  onChange={(event) => {
-                    const next = event.target.value as ActivityTypeOption;
-                    setNewCompanyActivity(next);
-                    if (next !== "custom") {
-                      setNewCompanyAteco(atecoFromActivity(next));
-                    }
-                  }}
-                >
-                  {ACTIVITY_TYPE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label>Codice ATECO</label>
-                <input
-                  value={newCompanyAteco}
-                  onChange={(event) => {
-                    const value = event.target.value;
-                    setNewCompanyAteco(value);
-                    setNewCompanyActivity(inferActivityFromAteco(value));
-                  }}
-                />
-              </div>
-              <div>
-                <label>Citta</label>
-                <input value={newCompanyCity} onChange={(event) => setNewCompanyCity(event.target.value)} />
-              </div>
-            </div>
-            <div className="footer-actions">
-              <button onClick={handleCreateCompany} disabled={loading}>
-                Registra Azienda
-              </button>
-            </div>
+        <div className="panel section-panel">
+          <h3>1. Crea sopralluogo</h3>
+          <label>Titolo sopralluogo</label>
+          <label>Ambito sopralluogo</label>
+          <select
+            value={newInspectionChecklistMode}
+            onChange={(event) => setNewInspectionChecklistMode(event.target.value as InspectionChecklistMode)}
+          >
+            {CHECKLIST_MODE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <div className="inline-actions">
+            <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Sopralluogo Antisanzione" />
+            <button className="secondary-btn" onClick={handleCreateInspection} disabled={loading}>
+              Crea
+            </button>
           </div>
-
-          <div className="panel section-panel">
-            <h3>1B. Crea sopralluogo</h3>
-            <label>Titolo sopralluogo</label>
-            <label>Ambito sopralluogo</label>
-            <select
-              value={newInspectionChecklistMode}
-              onChange={(event) => setNewInspectionChecklistMode(event.target.value as InspectionChecklistMode)}
-            >
-              {CHECKLIST_MODE_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <div className="inline-actions">
-              <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Sopralluogo Antisanzione" />
-              <button className="secondary-btn" onClick={handleCreateInspection} disabled={loading}>
-                Crea
-              </button>
-            </div>
-            <p className="template-hint">
-              Template caricati: {templates.map((template) => template.name).join(" • ") || "nessuno"}
-            </p>
-          </div>
-        </>
+          <p className="template-hint">
+            Template caricati: {templates.map((template) => template.name).join(" • ") || "nessuno"}
+          </p>
+        </div>
       )}
 
       {step === 1 && (
