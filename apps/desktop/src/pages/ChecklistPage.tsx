@@ -1119,6 +1119,19 @@ export default function ChecklistPage({
   const bottomRegistrationTasks = registrationTasks.filter(
     (item) => !registrationTaskOrder.includes(item.key),
   );
+  const registrationTaskSequence: RegistrationTaskKey[] = ["general", "safety", "haccp"];
+
+  function moveRegistrationTask(currentKey: RegistrationTaskKey, direction: -1 | 1) {
+    const currentIndex = registrationTaskSequence.indexOf(currentKey);
+    if (currentIndex < 0) return;
+    const nextIndex = currentIndex + direction;
+    if (nextIndex < 0 || nextIndex >= registrationTaskSequence.length) return;
+    openRegistrationTask(registrationTaskSequence[nextIndex]);
+  }
+
+  function closeRegistrationTaskPanel() {
+    setActiveRegistrationTask(null);
+  }
 
   function renderTaskHeader(
     taskKey: RegistrationTaskKey,
@@ -1361,12 +1374,36 @@ export default function ChecklistPage({
                     <textarea rows={2} value={newCompanyLocalUnitAddress} onChange={(event) => setNewCompanyLocalUnitAddress(event.target.value)} />
                   </div>
                 </div>
-                <div className="footer-actions">
+                <div className="footer-actions" style={{ justifyContent: "flex-end", flexWrap: "wrap" }}>
                   <button onClick={() => handleSaveRegistrationTask("general")} disabled={loading}>
                     Salva task
                   </button>
                   <button className="secondary-btn" onClick={() => handleSaveRegistrationTask("general", true)} disabled={loading}>
                     Salva e vai alla successiva
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    onClick={() => moveRegistrationTask("general", -1)}
+                    disabled
+                  >
+                    Indietro
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    onClick={() => moveRegistrationTask("general", 1)}
+                    disabled={loading}
+                  >
+                    Avanti
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    onClick={closeRegistrationTaskPanel}
+                    disabled={loading}
+                  >
+                    Chiudi/Riduci
                   </button>
                 </div>
               </div>
@@ -1435,12 +1472,36 @@ export default function ChecklistPage({
                     ))}
                   </>
                 )}
-                <div className="footer-actions">
+                <div className="footer-actions" style={{ justifyContent: "flex-end", flexWrap: "wrap" }}>
                   <button onClick={() => handleSaveRegistrationTask("safety")} disabled={loading}>
                     Salva task
                   </button>
                   <button className="secondary-btn" onClick={() => handleSaveRegistrationTask("safety", true)} disabled={loading}>
                     Salva e vai alla successiva
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    onClick={() => moveRegistrationTask("safety", -1)}
+                    disabled={loading}
+                  >
+                    Indietro
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    onClick={() => moveRegistrationTask("safety", 1)}
+                    disabled={loading}
+                  >
+                    Avanti
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    onClick={closeRegistrationTaskPanel}
+                    disabled={loading}
+                  >
+                    Chiudi/Riduci
                   </button>
                 </div>
               </div>
@@ -1499,12 +1560,36 @@ export default function ChecklistPage({
                     ))}
                   </>
                 )}
-                <div className="footer-actions">
+                <div className="footer-actions" style={{ justifyContent: "flex-end", flexWrap: "wrap" }}>
                   <button onClick={() => handleSaveRegistrationTask("haccp")} disabled={loading}>
                     Salva task
                   </button>
                   <button className="secondary-btn" onClick={() => handleSaveRegistrationTask("haccp", true)} disabled={loading}>
                     Salva e vai alla successiva
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    onClick={() => moveRegistrationTask("haccp", -1)}
+                    disabled={loading}
+                  >
+                    Indietro
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    onClick={() => moveRegistrationTask("haccp", 1)}
+                    disabled
+                  >
+                    Avanti
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    onClick={closeRegistrationTaskPanel}
+                    disabled={loading}
+                  >
+                    Chiudi/Riduci
                   </button>
                 </div>
               </div>
@@ -1688,14 +1773,19 @@ export default function ChecklistPage({
         </div>
       )}
 
-      <div className="footer-actions">
+      <div className="footer-actions" style={{ justifyContent: "flex-end", flexWrap: "wrap" }}>
+        {message ? <span className="status-message" style={{ marginRight: "auto" }}>{message}</span> : null}
         <button onClick={() => setStep((current) => Math.max(0, current - 1))} disabled={step === 0}>
           Indietro
         </button>
         <button onClick={() => setStep((current) => Math.min(STEPS.length - 1, current + 1))} disabled={step === STEPS.length - 1}>
           Avanti
         </button>
-        {message ? <span className="status-message">{message}</span> : null}
+        {step === 0 && activeRegistrationTask ? (
+          <button className="secondary-btn" onClick={closeRegistrationTaskPanel} disabled={loading}>
+            Chiudi/Riduci task
+          </button>
+        ) : null}
       </div>
     </section>
   );
