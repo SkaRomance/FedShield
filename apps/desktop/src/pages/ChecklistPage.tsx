@@ -6,7 +6,6 @@ import {
   Inspection,
   InspectionDocumentRequirement,
   InspectionSummary,
-  createCompany,
   createInspection,
   fetchChecklistItems,
   fetchChecklistTemplates,
@@ -120,11 +119,6 @@ export default function ChecklistPage({
   const [documents, setDocuments] = useState<InspectionDocumentRequirement[]>([]);
   const [summary, setSummary] = useState<InspectionSummary | null>(null);
   const [companySearch, setCompanySearch] = useState("");
-  const [showNewCompanyForm, setShowNewCompanyForm] = useState(false);
-  const [newCompanyName, setNewCompanyName] = useState("");
-  const [newCompanyVat, setNewCompanyVat] = useState("");
-  const [newCompanyAteco, setNewCompanyAteco] = useState("56.10.11");
-  const [newCompanyCity, setNewCompanyCity] = useState("");
 
   const [checklistActivityFilter, setChecklistActivityFilter] = useState<ChecklistActivityFilter>("company");
   const [customChecklistAteco, setCustomChecklistAteco] = useState("");
@@ -189,14 +183,6 @@ export default function ChecklistPage({
       setCompanyId(companies[0].id);
     }
   }, [companies, companyId]);
-
-  useEffect(() => {
-    if (!companySearch.trim()) return;
-    const firstMatch = filteredCompanies[0];
-    if (firstMatch && firstMatch.id !== companyId) {
-      setCompanyId(firstMatch.id);
-    }
-  }, [companySearch, filteredCompanies, companyId]);
 
   useEffect(() => {
     if (!initialCompanyId) return;
@@ -287,42 +273,6 @@ export default function ChecklistPage({
         ...partial,
       },
     }));
-  }
-
-  async function handleCreateCompany() {
-    if (!newCompanyName.trim() || !newCompanyVat.trim()) {
-      setMessage("Inserisci almeno ragione sociale e partita IVA.");
-      return;
-    }
-
-    setLoading(true);
-    setMessage("");
-    try {
-      const created = await createCompany(token, {
-        name: newCompanyName.trim(),
-        vatNumber: newCompanyVat.trim(),
-        atecoCode: newCompanyAteco.trim() || undefined,
-        city: newCompanyCity.trim() || undefined,
-      });
-      queueSyncEvent({
-        eventType: "company.created",
-        entityType: "company",
-        entityId: created.id,
-        payload: created,
-      });
-      await onReload();
-      setCompanyId(created.id);
-      setCompanySearch(created.name);
-      setNewCompanyName("");
-      setNewCompanyVat("");
-      setNewCompanyAteco("56.10.11");
-      setNewCompanyCity("");
-      setMessage("Nuovo cliente registrato.");
-    } catch (error) {
-      setMessage(`Errore creazione azienda: ${error instanceof Error ? error.message : "errore"}`);
-    } finally {
-      setLoading(false);
-    }
   }
 
   async function handleCreateInspection() {
@@ -580,46 +530,24 @@ export default function ChecklistPage({
           onChange={(event) => setCompanySearch(event.target.value)}
           placeholder="Cerca per ragione sociale, P.IVA, ATECO o citta"
         />
-        <div className="footer-actions" style={{ marginTop: 8 }}>
-          <button onClick={() => setShowNewCompanyForm((current) => !current)} disabled={loading}>
-            {showNewCompanyForm ? "Chiudi registrazione cliente" : "Registra nuovo cliente"}
-          </button>
-        </div>
-        {filteredCompanies.length === 0 ? (
-          <p className="status-message">Nessun cliente trovato.</p>
-        ) : (
-          <p className="status-message">Cliente attivo: {selectedCompany?.name ?? filteredCompanies[0]?.name}</p>
-        )}
+        {companySearch.trim() ? (
+          filteredCompanies.length > 0 ? (
+            <div style={{ marginTop: 8 }}>
+              <label>Risultati ricerca</label>
+              <select value={companyId} onChange={(event) => setCompanyId(event.target.value)}>
+                {filteredCompanies.map((company) => (
+                  <option key={company.id} value={company.id}>
+                    {company.name} - P.IVA {company.vatNumber}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <p className="status-message">Nessun cliente trovato.</p>
+          )
+        ) : null}
+        <p className="status-message">Cliente attivo: {selectedCompany?.name ?? "nessuno"}</p>
       </div>
-
-      {showNewCompanyForm && (
-        <div className="panel section-panel">
-          <h3>Registra nuovo cliente</h3>
-          <div className="grid-two">
-            <div>
-              <label>Ragione sociale</label>
-              <input value={newCompanyName} onChange={(event) => setNewCompanyName(event.target.value)} />
-            </div>
-            <div>
-              <label>P.IVA</label>
-              <input value={newCompanyVat} onChange={(event) => setNewCompanyVat(event.target.value)} />
-            </div>
-            <div>
-              <label>ATECO</label>
-              <input value={newCompanyAteco} onChange={(event) => setNewCompanyAteco(event.target.value)} />
-            </div>
-            <div>
-              <label>Citta</label>
-              <input value={newCompanyCity} onChange={(event) => setNewCompanyCity(event.target.value)} />
-            </div>
-          </div>
-          <div className="footer-actions">
-            <button onClick={handleCreateCompany} disabled={loading}>
-              Conferma nuovo cliente
-            </button>
-          </div>
-        </div>
-      )}
       <div className="grid-two" style={{ marginTop: 10 }}>
         <div>
           <label>Tipo attivita checklist</label>
