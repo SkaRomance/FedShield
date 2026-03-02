@@ -91,7 +91,7 @@ export default function DashboardPage({
     }
   }
 
-  function handleUseForInspection(companyId: string, inspectionId?: string) {
+  function handleUseForInspection(companyId: string, inspectionId: string) {
     setChecklistSelection((current) => ({
       companyId,
       inspectionId,

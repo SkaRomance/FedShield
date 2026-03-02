@@ -6,6 +6,7 @@ import {
   Inspection,
   InspectionDocumentRequirement,
   InspectionSummary,
+  createCompany,
   createInspection,
   fetchChecklistItems,
   fetchChecklistTemplates,
@@ -118,6 +119,11 @@ export default function ChecklistPage({
   const [answers, setAnswers] = useState<Record<string, LocalAnswer>>({});
   const [documents, setDocuments] = useState<InspectionDocumentRequirement[]>([]);
   const [summary, setSummary] = useState<InspectionSummary | null>(null);
+  const [companySearch, setCompanySearch] = useState("");
+  const [newCompanyName, setNewCompanyName] = useState("");
+  const [newCompanyVat, setNewCompanyVat] = useState("");
+  const [newCompanyAteco, setNewCompanyAteco] = useState("56.10.11");
+  const [newCompanyCity, setNewCompanyCity] = useState("");
 
   const [checklistActivityFilter, setChecklistActivityFilter] = useState<ChecklistActivityFilter>("company");
   const [customChecklistAteco, setCustomChecklistAteco] = useState("");
@@ -139,6 +145,19 @@ export default function ChecklistPage({
     () => inspections.find((inspection) => inspection.id === selectedInspectionId),
     [inspections, selectedInspectionId],
   );
+
+  const filteredCompanies = useMemo(() => {
+    const query = companySearch.trim().toLowerCase();
+    if (!query) return companies;
+    return companies.filter((company) => {
+      return (
+        company.name.toLowerCase().includes(query) ||
+        company.vatNumber.toLowerCase().includes(query) ||
+        (company.atecoCode?.toLowerCase().includes(query) ?? false) ||
+        (company.city?.toLowerCase().includes(query) ?? false)
+      );
+    });
+  }, [companies, companySearch]);
 
   const effectiveChecklistAteco = useMemo(() => {
     if (checklistActivityFilter === "company") {
@@ -259,6 +278,42 @@ export default function ChecklistPage({
         ...partial,
       },
     }));
+  }
+
+  async function handleCreateCompany() {
+    if (!newCompanyName.trim() || !newCompanyVat.trim()) {
+      setMessage("Inserisci almeno ragione sociale e partita IVA.");
+      return;
+    }
+
+    setLoading(true);
+    setMessage("");
+    try {
+      const created = await createCompany(token, {
+        name: newCompanyName.trim(),
+        vatNumber: newCompanyVat.trim(),
+        atecoCode: newCompanyAteco.trim() || undefined,
+        city: newCompanyCity.trim() || undefined,
+      });
+      queueSyncEvent({
+        eventType: "company.created",
+        entityType: "company",
+        entityId: created.id,
+        payload: created,
+      });
+      await onReload();
+      setCompanyId(created.id);
+      setCompanySearch(created.name);
+      setNewCompanyName("");
+      setNewCompanyVat("");
+      setNewCompanyAteco("56.10.11");
+      setNewCompanyCity("");
+      setMessage("Nuovo cliente registrato.");
+    } catch (error) {
+      setMessage(`Errore creazione azienda: ${error instanceof Error ? error.message : "errore"}`);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleCreateInspection() {
@@ -511,14 +566,21 @@ export default function ChecklistPage({
 
       <div className="grid-two" style={{ marginTop: 10 }}>
         <div>
+          <label>Ricerca cliente</label>
+          <input
+            value={companySearch}
+            onChange={(event) => setCompanySearch(event.target.value)}
+            placeholder="Cerca per ragione sociale, P.IVA, ATECO o citta"
+          />
           <label>Azienda attiva</label>
           <select value={companyId} onChange={(event) => setCompanyId(event.target.value)}>
-            {companies.map((company) => (
+            {filteredCompanies.map((company) => (
               <option key={company.id} value={company.id}>
                 {company.name} ({company.atecoCode ?? "ATECO n/d"})
               </option>
             ))}
           </select>
+          {filteredCompanies.length === 0 && <p className="status-message">Nessun cliente trovato.</p>}
         </div>
         <div>
           <label>Sopralluogo attivo</label>
@@ -562,30 +624,59 @@ export default function ChecklistPage({
       </div>
 
       {step === 0 && (
-        <div className="panel section-panel">
-          <h3>1. Crea sopralluogo</h3>
-          <label>Titolo sopralluogo</label>
-          <label>Ambito sopralluogo</label>
-          <select
-            value={newInspectionChecklistMode}
-            onChange={(event) => setNewInspectionChecklistMode(event.target.value as InspectionChecklistMode)}
-          >
-            {CHECKLIST_MODE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <div className="inline-actions">
-            <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Sopralluogo Antisanzione" />
-            <button className="secondary-btn" onClick={handleCreateInspection} disabled={loading}>
-              Crea
-            </button>
+        <>
+          <div className="panel section-panel">
+            <h3>1. Registra nuovo cliente</h3>
+            <div className="grid-two">
+              <div>
+                <label>Ragione sociale</label>
+                <input value={newCompanyName} onChange={(event) => setNewCompanyName(event.target.value)} />
+              </div>
+              <div>
+                <label>P.IVA</label>
+                <input value={newCompanyVat} onChange={(event) => setNewCompanyVat(event.target.value)} />
+              </div>
+              <div>
+                <label>ATECO</label>
+                <input value={newCompanyAteco} onChange={(event) => setNewCompanyAteco(event.target.value)} />
+              </div>
+              <div>
+                <label>Citta</label>
+                <input value={newCompanyCity} onChange={(event) => setNewCompanyCity(event.target.value)} />
+              </div>
+            </div>
+            <div className="footer-actions">
+              <button onClick={handleCreateCompany} disabled={loading}>
+                Registra nuovo cliente
+              </button>
+            </div>
           </div>
-          <p className="template-hint">
-            Template caricati: {templates.map((template) => template.name).join(" • ") || "nessuno"}
-          </p>
-        </div>
+
+          <div className="panel section-panel">
+            <h3>2. Crea sopralluogo</h3>
+            <label>Titolo sopralluogo</label>
+            <label>Ambito sopralluogo</label>
+            <select
+              value={newInspectionChecklistMode}
+              onChange={(event) => setNewInspectionChecklistMode(event.target.value as InspectionChecklistMode)}
+            >
+              {CHECKLIST_MODE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <div className="inline-actions">
+              <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Sopralluogo Antisanzione" />
+              <button className="secondary-btn" onClick={handleCreateInspection} disabled={loading}>
+                Crea
+              </button>
+            </div>
+            <p className="template-hint">
+              Template caricati: {templates.map((template) => template.name).join(" • ") || "nessuno"}
+            </p>
+          </div>
+        </>
       )}
 
       {step === 1 && (

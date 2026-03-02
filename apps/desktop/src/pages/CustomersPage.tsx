@@ -3,7 +3,7 @@ import { Company, Inspection } from "../api";
 interface CustomersPageProps {
   companies: Company[];
   inspections: Inspection[];
-  onUseForInspection: (companyId: string, inspectionId?: string) => void;
+  onUseForInspection: (companyId: string, inspectionId: string) => void;
 }
 
 function inspectionsForCompany(inspections: Inspection[], company: Company): Inspection[] {
@@ -19,7 +19,6 @@ export default function CustomersPage({ companies, inspections, onUseForInspecti
 
       {companies.map((company) => {
         const companyInspections = inspectionsForCompany(inspections, company);
-        const lastInspection = companyInspections[0];
 
         return (
           <article key={company.id} className="panel section-panel">
@@ -53,6 +52,7 @@ export default function CustomersPage({ companies, inspections, onUseForInspecti
                         <th>Data</th>
                         <th>Stato</th>
                         <th>NC</th>
+                        <th>Azione</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -62,6 +62,14 @@ export default function CustomersPage({ companies, inspections, onUseForInspecti
                           <td>{new Date(inspection.happenedAt).toLocaleDateString("it-IT")}</td>
                           <td>{inspection.status}</td>
                           <td>{inspection.nonConformities.length}</td>
+                          <td>
+                            <button
+                              className="ghost-btn"
+                              onClick={() => onUseForInspection(company.id, inspection.id)}
+                            >
+                              Usa check per sopralluogo
+                            </button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -70,10 +78,6 @@ export default function CustomersPage({ companies, inspections, onUseForInspecti
               ) : (
                 <p className="status-message">Nessun sopralluogo presente per questa anagrafica.</p>
               )}
-            </div>
-
-            <div className="footer-actions">
-              <button onClick={() => onUseForInspection(company.id, lastInspection?.id)}>Usa per sopralluogo</button>
             </div>
           </article>
         );
