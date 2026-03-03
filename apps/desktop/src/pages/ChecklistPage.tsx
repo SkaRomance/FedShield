@@ -113,11 +113,23 @@ const HACCP_ROLE_OPTIONS = [
   "Responsabile gelateria",
 ] as const;
 
-const RETAIL_ADDITIONAL_SCOPE_OPTIONS = [
+const SUPERMARKET_INTERNAL_SCOPE_OPTIONS = [
   { value: "retail_butcher_counter", label: "Macelleria interna" },
   { value: "retail_fish_counter", label: "Pescheria interna" },
   { value: "retail_produce_counter", label: "Ortofrutta assistita" },
   { value: "retail_deli_counter", label: "Salumeria/Gastronomia assistita" },
+] as const;
+
+const HYPERMARKET_INTERNAL_SCOPE_OPTIONS = [
+  { value: "retail_restaurant", label: "Ristorante" },
+  { value: "retail_pizzeria", label: "Pizzeria" },
+  { value: "retail_bar", label: "Bar" },
+  { value: "retail_butcher_counter", label: "Macelleria" },
+  { value: "retail_fish_counter", label: "Pescheria" },
+  { value: "retail_produce_counter", label: "Ortofrutta" },
+  { value: "retail_deli_counter", label: "Gastronomia" },
+  { value: "retail_icecream", label: "Gelateria" },
+  { value: "retail_pastry", label: "Pasticceria" },
 ] as const;
 
 function emptyPersonCard(): PersonCardData {
@@ -365,8 +377,16 @@ export default function ChecklistPage({
   const isInspectionValidated = selectedInspection?.status === "validated";
   const showSafetyRoleBlock = effectiveChecklistMode !== "haccp_only";
   const showHaccpRoleBlock = effectiveChecklistMode !== "safety_only";
+  const isHypermarketAteco = /^47\.11\.1(\.|$)/.test(newCompanyAteco.trim());
   const isRetailLargeFoodAteco = /^47\.11(\.|$)/.test(newCompanyAteco.trim());
   const showRetailAdditionalScopes = user.role !== "admin" && isRetailLargeFoodAteco;
+  const retailAdditionalScopeOptions = isHypermarketAteco
+    ? HYPERMARKET_INTERNAL_SCOPE_OPTIONS
+    : SUPERMARKET_INTERNAL_SCOPE_OPTIONS;
+  const retailAdditionalScopeValues = useMemo(
+    () => new Set(retailAdditionalScopeOptions.map((option) => option.value)),
+    [retailAdditionalScopeOptions],
+  );
   const effectiveRetailScopes = user.role === "admin" ? [] : newCompanyRetailScopes;
 
   const generalProgress = useMemo(() => {
@@ -535,10 +555,15 @@ export default function ChecklistPage({
   }, [companyId]);
 
   useEffect(() => {
-    if (!showRetailAdditionalScopes && newCompanyRetailScopes.length > 0) {
-      setNewCompanyRetailScopes([]);
+    if (!showRetailAdditionalScopes) {
+      if (newCompanyRetailScopes.length > 0) setNewCompanyRetailScopes([]);
+      return;
     }
-  }, [showRetailAdditionalScopes, newCompanyRetailScopes.length]);
+    setNewCompanyRetailScopes((current) => {
+      const filtered = current.filter((value) => retailAdditionalScopeValues.has(value));
+      return filtered.length === current.length ? current : filtered;
+    });
+  }, [showRetailAdditionalScopes, retailAdditionalScopeValues, newCompanyRetailScopes.length]);
 
   useEffect(() => {
     if (!selectedCompany?.id) return;
@@ -1494,9 +1519,9 @@ export default function ChecklistPage({
                   </div>
                   {showRetailAdditionalScopes && (
                     <div style={{ gridColumn: "span 2" }}>
-                      <label>Reparti aggiuntivi presenti (attivano domande e requisiti extra)</label>
+                      <label>Attivita interne presenti (attivano domande e requisiti extra)</label>
                       <div className="haccp-role-options">
-                        {RETAIL_ADDITIONAL_SCOPE_OPTIONS.map((option) => (
+                        {retailAdditionalScopeOptions.map((option) => (
                           <label key={option.value} className="haccp-role-option">
                             <input
                               type="checkbox"

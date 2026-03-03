@@ -52,10 +52,15 @@ function parseRetailScopes(raw?: string): string[] {
 
 function buildRetailScopeVariants(scopes: string[]): string[] {
   const mapping: Record<string, string[]> = {
+    retail_restaurant: ["RISTORANTI"],
+    retail_pizzeria: ["PIZZERIA_ASPORTO"],
+    retail_bar: ["BAR"],
     retail_butcher_counter: ["RETAIL_LARGE_BUTCHER"],
     retail_fish_counter: ["RETAIL_LARGE_FISH"],
     retail_produce_counter: ["RETAIL_LARGE_PRODUCE"],
     retail_deli_counter: ["RETAIL_LARGE_DELI"],
+    retail_icecream: ["PASTICCERIA_GELATERIA"],
+    retail_pastry: ["PASTICCERIA_GELATERIA"],
   };
 
   const variants = new Set<string>();
