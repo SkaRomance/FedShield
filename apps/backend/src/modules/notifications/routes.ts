@@ -16,10 +16,24 @@ const notificationsRoutes: FastifyPluginAsync = async (fastify) => {
     "/notifications/alerts",
     { preHandler: [fastify.authenticate] },
     async (request, reply) => {
-      const user = request.user as { sub?: string };
+      const _user = request.user as { sub?: string };
       const { companyId } = request.query as { companyId?: string };
       if (!companyId) {
         return reply.badRequest("companyId richiesto.");
+      }
+
+      // Verifica che la company esista — evita query inutili e dà 404 chiaro
+      // se il consulente passa un id errato. (Il modello attuale non ha
+      // relation User→Company: tutti i consulenti accedono a tutte le
+      // aziende, è strumento interno della società di consulenza.
+      // Quando in futuro si introdurrà un filtro ownership a livello User,
+      // l'enforcement va aggiunto qui.)
+      const company = await fastify.prisma.company.findUnique({
+        where: { id: companyId },
+        select: { id: true },
+      });
+      if (!company) {
+        return reply.notFound("Azienda non trovata.");
       }
 
       const alerts: Alert[] = [];
