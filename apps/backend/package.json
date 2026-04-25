@@ -11,7 +11,7 @@
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "lint": "echo 'No lint configured for backend yet'",
-    "test": "tsx src/tests/checklists.test.ts && tsx src/tests/pastry-split.test.ts && tsx src/tests/horeca-completeness.test.ts && tsx src/tests/quotes.test.ts && tsx src/tests/kpi-odv.test.ts && tsx src/tests/licensing-sync.test.ts"
+    "test": "tsx src/tests/checklists.test.ts && tsx src/tests/pastry-split.test.ts && tsx src/tests/horeca-completeness.test.ts && tsx src/tests/quotes.test.ts && tsx src/tests/kpi-odv.test.ts && tsx src/tests/licensing-sync.test.ts && tsx src/tests/auth-matrix.test.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.1.0",
