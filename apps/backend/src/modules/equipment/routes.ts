@@ -68,7 +68,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
     "/equipment",
     { preHandler: [fastify.authenticate] },
     async (request) => {
-      const { companyId, status } = request.query as { companyId?: string; status?: string };
+      const { companyId, status } = request.query as { companyId?: string; status?: "active" | "under_maintenance" | "expired" | "decommissioned" };
       return fastify.prisma.equipment.findMany({
         where: {
           ...(companyId ? { companyId } : {}),
@@ -104,7 +104,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
     "/machines",
     { preHandler: [fastify.authenticate] },
     async (request) => {
-      const { companyId, status } = request.query as { companyId?: string; status?: string };
+      const { companyId, status } = request.query as { companyId?: string; status?: "active" | "under_maintenance" | "expired" | "decommissioned" };
       return fastify.prisma.machine.findMany({
         where: {
           ...(companyId ? { companyId } : {}),
@@ -143,7 +143,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
     "/fire-extinguishers",
     { preHandler: [fastify.authenticate] },
     async (request) => {
-      const { companyId, status } = request.query as { companyId?: string; status?: string };
+      const { companyId, status } = request.query as { companyId?: string; status?: "active" | "under_maintenance" | "expired" | "decommissioned" };
       return fastify.prisma.fireExtinguisher.findMany({
         where: {
           ...(companyId ? { companyId } : {}),
@@ -179,7 +179,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
     "/first-aid-kits",
     { preHandler: [fastify.authenticate] },
     async (request) => {
-      const { companyId, status } = request.query as { companyId?: string; status?: string };
+      const { companyId, status } = request.query as { companyId?: string; status?: "active" | "under_maintenance" | "expired" | "decommissioned" };
       return fastify.prisma.firstAidKit.findMany({
         where: {
           ...(companyId ? { companyId } : {}),
