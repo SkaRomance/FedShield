@@ -30,7 +30,7 @@ const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
     async (request) => {
       const { status } = request.query as { status?: string };
       return fastify.prisma.normativePatchProposal.findMany({
-        where: status ? { status } : {},
+        where: status ? { status: status as "pending" | "approved" | "rejected" } : {},
         orderBy: { createdAt: "desc" },
         include: { source: true },
       });
@@ -419,7 +419,7 @@ Ricorda: una dichiarazione di conformita NON esonera da responsabilita in caso d
 Mancanza parapetti/robustezza = NC sanzionabile pericolo caduta.`,
       };
 
-      function findAnswer(query: string): string {
+      function findAnswer(query: string): string | null {
         const clean = query.toLowerCase();
         // Cerca match esatto keyword
         for (const [key, text] of Object.entries(knowledge)) {

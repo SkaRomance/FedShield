@@ -58,7 +58,7 @@ const notificationsRoutes: FastifyPluginAsync = async (fastify) => {
 
       // 2. Scadenze asset generici
       const equipment = await fastify.prisma.equipment.findMany({
-        where: { companyId, status: { in: ["active", "maintenance"] } },
+        where: { companyId, status: { in: ["active", "under_maintenance"] } },
       });
       for (const e of equipment) {
         if (!e.nextCheckAt) continue;
@@ -81,7 +81,7 @@ const notificationsRoutes: FastifyPluginAsync = async (fastify) => {
 
       // 3. Estintori
       const extinguishers = await fastify.prisma.fireExtinguisher.findMany({
-        where: { companyId, status: { in: ["active", "maintenance"] } },
+        where: { companyId, status: { in: ["active", "under_maintenance"] } },
       });
       for (const ex of extinguishers) {
         if (!ex.nextCheckAt) continue;
@@ -104,7 +104,7 @@ const notificationsRoutes: FastifyPluginAsync = async (fastify) => {
 
       // 4. Cassette PS
       const kits = await fastify.prisma.firstAidKit.findMany({
-        where: { companyId, status: { in: ["active", "maintenance"] } },
+        where: { companyId, status: { in: ["active", "under_maintenance"] } },
       });
       for (const k of kits) {
         if (!k.nextCheckAt) continue;
