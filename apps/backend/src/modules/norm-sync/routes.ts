@@ -1,5 +1,6 @@
 import { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
+import { writeAudit } from "../../plugins/audit.js";
 
 const createProposalSchema = z.object({
   sourceId: z.string().optional(),
@@ -71,6 +72,13 @@ const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
 
       const created = await fastify.prisma.normativePatchProposal.create({
         data: parsed.data,
+      });
+      await writeAudit(fastify, {
+        userId: (request.user as { sub?: string })?.sub,
+        action: "normProposal.create",
+        entityType: "normativePatchProposal",
+        entityId: created.id,
+        data: { source: apiKey === expectedKey ? "n8n" : "admin", ...parsed.data },
       });
       return reply.code(201).send(created);
     },
@@ -151,6 +159,14 @@ const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
         },
       });
 
+      await writeAudit(fastify, {
+        userId: (request.user as { sub?: string })?.sub,
+        action: parsed.data.status === "approved" ? "normProposal.approve" : "normProposal.reject",
+        entityType: "normativePatchProposal",
+        entityId: updated.id,
+        data: { status: parsed.data.status, note: parsed.data.note },
+      });
+
       return updated;
     },
   );
@@ -168,6 +184,13 @@ const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
           reviewedAt: new Date(),
           reviewedById: (request.user as { sub?: string })?.sub || null,
         },
+      });
+      await writeAudit(fastify, {
+        userId: (request.user as { sub?: string })?.sub,
+        action: "normProposal.reject",
+        entityType: "normativePatchProposal",
+        entityId: updated.id,
+        data: { note },
       });
       return updated;
     },

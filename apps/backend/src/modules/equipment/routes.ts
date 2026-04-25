@@ -1,6 +1,7 @@
 import { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 import { requireSeniorOrAdmin } from "../../plugins/auth.js";
+import { writeAudit } from "../../plugins/audit.js";
 
 const createEquipmentSchema = z.object({
   companyId: z.string().min(1),
@@ -87,6 +88,13 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
       const created = await fastify.prisma.equipment.create({
         data: parseDates(parsed.data, ["lastCheckAt", "nextCheckAt"]),
       });
+      await writeAudit(fastify, {
+        userId: (request.user as { sub?: string })?.sub,
+        action: "equipment.create",
+        entityType: "equipment",
+        entityId: created.id,
+        data: parsed.data,
+      });
       return reply.code(201).send(created);
     },
   );
@@ -119,6 +127,13 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
           "lastSafetyCheckAt", "nextSafetyCheckAt",
         ]),
       });
+      await writeAudit(fastify, {
+        userId: (request.user as { sub?: string })?.sub,
+        action: "machine.create",
+        entityType: "machine",
+        entityId: created.id,
+        data: parsed.data,
+      });
       return reply.code(201).send(created);
     },
   );
@@ -148,6 +163,13 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
       const created = await fastify.prisma.fireExtinguisher.create({
         data: parseDates(parsed.data, ["manufactureDate", "lastCheckAt", "nextCheckAt", "lastRechargeAt"]),
       });
+      await writeAudit(fastify, {
+        userId: (request.user as { sub?: string })?.sub,
+        action: "fireExtinguisher.create",
+        entityType: "fireExtinguisher",
+        entityId: created.id,
+        data: parsed.data,
+      });
       return reply.code(201).send(created);
     },
   );
@@ -176,6 +198,13 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
       if (!parsed.success) return reply.badRequest("Dati cassetta PS non validi.");
       const created = await fastify.prisma.firstAidKit.create({
         data: parseDates(parsed.data, ["lastCheckAt", "nextCheckAt", "replenishedAt"]),
+      });
+      await writeAudit(fastify, {
+        userId: (request.user as { sub?: string })?.sub,
+        action: "firstAidKit.create",
+        entityType: "firstAidKit",
+        entityId: created.id,
+        data: parsed.data,
       });
       return reply.code(201).send(created);
     },

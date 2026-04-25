@@ -1,6 +1,7 @@
 import { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 import { requireSeniorOrAdmin } from "../../plugins/auth.js";
+import { writeAudit } from "../../plugins/audit.js";
 
 const createCourseSchema = z.object({
   name: z.string().min(2),
@@ -69,6 +70,13 @@ const trainingCourseRoutes: FastifyPluginAsync = async (fastify) => {
       const created = await fastify.prisma.trainingCourse.create({
         data: parsed.data,
       });
+      await writeAudit(fastify, {
+        userId: (request.user as { sub?: string })?.sub,
+        action: "trainingCourse.create",
+        entityType: "trainingCourse",
+        entityId: created.id,
+        data: parsed.data,
+      });
       return reply.code(201).send(created);
     },
   );
@@ -101,6 +109,13 @@ const trainingCourseRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.badRequest("Dati requisito non validi.");
       }
       const created = await fastify.prisma.trainingRequirement.create({
+        data: parsed.data,
+      });
+      await writeAudit(fastify, {
+        userId: (request.user as { sub?: string })?.sub,
+        action: "trainingRequirement.create",
+        entityType: "trainingRequirement",
+        entityId: created.id,
         data: parsed.data,
       });
       return reply.code(201).send(created);
@@ -143,6 +158,13 @@ const trainingCourseRoutes: FastifyPluginAsync = async (fastify) => {
       if (data.completedAt) data.completedAt = new Date(data.completedAt);
       if (data.expiresAt) data.expiresAt = new Date(data.expiresAt);
       const created = await fastify.prisma.employeeTrainingRecord.create({ data });
+      await writeAudit(fastify, {
+        userId: (request.user as { sub?: string })?.sub,
+        action: "trainingRecord.create",
+        entityType: "trainingRecord",
+        entityId: created.id,
+        data: parsed.data,
+      });
       return reply.code(201).send(created);
     },
   );

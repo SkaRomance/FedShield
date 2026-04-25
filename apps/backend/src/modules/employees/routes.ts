@@ -1,6 +1,7 @@
 import { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 import { requireSeniorOrAdmin } from "../../plugins/auth.js";
+import { writeAudit } from "../../plugins/audit.js";
 
 const createEmployeeSchema = z.object({
   companyId: z.string().min(1),
@@ -67,6 +68,13 @@ const employeeRoutes: FastifyPluginAsync = async (fastify) => {
       const data: any = { ...parsed.data };
       if (data.hireDate) data.hireDate = new Date(data.hireDate);
       const created = await fastify.prisma.employee.create({ data });
+      await writeAudit(fastify, {
+        userId: (request.user as { sub?: string })?.sub,
+        action: "employee.create",
+        entityType: "employee",
+        entityId: created.id,
+        data: parsed.data,
+      });
       return reply.code(201).send(created);
     },
   );
@@ -87,6 +95,13 @@ const employeeRoutes: FastifyPluginAsync = async (fastify) => {
         where: { id },
         data,
       });
+      await writeAudit(fastify, {
+        userId: (request.user as { sub?: string })?.sub,
+        action: "employee.update",
+        entityType: "employee",
+        entityId: updated.id,
+        data: parsed.data,
+      });
       return updated;
     },
   );
@@ -99,6 +114,12 @@ const employeeRoutes: FastifyPluginAsync = async (fastify) => {
       await fastify.prisma.employee.update({
         where: { id },
         data: { isActive: false, leftDate: new Date() },
+      });
+      await writeAudit(fastify, {
+        userId: (request.user as { sub?: string })?.sub,
+        action: "employee.softDelete",
+        entityType: "employee",
+        entityId: id,
       });
       return reply.code(204).send();
     },
