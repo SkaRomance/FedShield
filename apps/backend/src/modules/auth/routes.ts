@@ -9,7 +9,18 @@ const loginSchema = z.object({
 });
 
 const authRoutes: FastifyPluginAsync = async (fastify) => {
-  fastify.post("/auth/login", async (request, reply) => {
+  fastify.post(
+    "/auth/login",
+    {
+      // Anti-brute-force: max 5 tentativi al minuto per IP.
+      config: {
+        rateLimit: {
+          max: 5,
+          timeWindow: "1 minute",
+        },
+      },
+    },
+    async (request, reply) => {
     const parseResult = loginSchema.safeParse(request.body);
     if (!parseResult.success) {
       return reply.badRequest("Payload login non valido.");
@@ -44,7 +55,8 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
         role: user.role,
       },
     };
-  });
+    },
+  );
 };
 
 export default authRoutes;
