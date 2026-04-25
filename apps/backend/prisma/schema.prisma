@@ -129,6 +129,11 @@ model Company {
   quotes        Quote[]
   odvInspections OdvInspection[]
   companyKpiSnapshots CompanyKpiSnapshot[]
+  employees      Employee[]
+  equipment      Equipment[]
+  fireExtinguishers FireExtinguisher[]
+  firstAidKits   FirstAidKit[]
+  machines       Machine[]
 }
 
 model Inspection {
@@ -437,4 +442,254 @@ model AuditLog {
 
   @@index([entityType, entityId])
   @@index([createdAt])
+}
+
+model Employee {
+  id            String       @id @default(cuid())
+  companyId     String
+  firstName     String
+  lastName      String
+  fiscalCode    String?
+  role          String?
+  department    String?
+  hireDate      DateTime?
+  leftDate      DateTime?
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  company       Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  trainingRecords EmployeeTrainingRecord[]
+
+  @@index([companyId, isActive])
+}
+
+model TrainingCourse {
+  id            String       @id @default(cuid())
+  name          String
+  description   String?
+  targetAudience String
+  minHours      Int
+  frequencyYears Int
+  normReference String
+  domain        ComplianceDomain @default(safety)
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  requirements  TrainingRequirement[]
+  records       EmployeeTrainingRecord[]
+}
+
+model TrainingRequirement {
+  id            String       @id @default(cuid())
+  courseId      String
+  atecoCode     String
+  macroGroup    String?
+  riskLevel     String?
+  isMandatory   Boolean      @default(true)
+  conditionalOn String?
+  createdAt     DateTime     @default(now())
+  course        TrainingCourse @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([atecoCode, macroGroup])
+  @@index([courseId])
+}
+
+model EmployeeTrainingRecord {
+  id            String       @id @default(cuid())
+  employeeId    String
+  courseId      String
+  completedAt   DateTime     @default(now())
+  expiresAt     DateTime?
+  hoursDone     Int?
+  certificateNumber String?
+  note          String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  employee      Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  course        TrainingCourse @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId])
+  @@index([expiresAt])
+}
+
+enum TrainingChecklistSection {
+  safety_training
+  haccp_training
+  emergency_training
+  specific_training
+  refresher_training
+}
+
+model TrainingChecklistTemplate {
+  id          String                  @id @default(cuid())
+  name        String
+  description String?
+  atecoCode   String?
+  macroGroup  String?
+  isGeneral   Boolean                 @default(false)
+  isActive    Boolean                 @default(true)
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  items       TrainingChecklistItem[]
+
+  @@index([isGeneral, atecoCode, macroGroup])
+}
+
+model TrainingChecklistItem {
+  id                 String                    @id @default(cuid())
+  templateId         String
+  section            TrainingChecklistSection  @default(safety_training)
+  domain             ComplianceDomain          @default(both)
+  area               String
+  question           String
+  orderIndex         Int
+  isRequired         Boolean                   @default(true)
+  defaultSeverity    Int                       @default(1)
+  defaultSanctionable Boolean                  @default(false)
+  targetAudience     String?
+  minHours           Int?
+  frequencyYears     Int?
+  normReference      String?
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+  template           TrainingChecklistTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@unique([templateId, orderIndex])
+}
+
+enum EquipmentStatus {
+  active
+  under_maintenance
+  expired
+  decommissioned
+}
+
+model Equipment {
+  id          String          @id @default(cuid())
+  companyId   String
+  name        String
+  type        String
+  model       String?
+  serialNumber String?
+  location    String?
+  status      EquipmentStatus @default(active)
+  lastCheckAt DateTime?
+  nextCheckAt DateTime?
+  note        String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  company     Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, status])
+  @@index([nextCheckAt])
+}
+
+model Machine {
+  id          String          @id @default(cuid())
+  companyId   String
+  name        String
+  type        String
+  model       String?
+  serialNumber String?
+  manufacturer String?
+  location    String?
+  status      EquipmentStatus @default(active)
+  lastMaintenanceAt DateTime?
+  nextMaintenanceAt DateTime?
+  lastSafetyCheckAt DateTime?
+  nextSafetyCheckAt DateTime?
+  riskLevel   String?
+  note        String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  company     Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, status])
+  @@index([nextMaintenanceAt])
+}
+
+model FireExtinguisher {
+  id          String          @id @default(cuid())
+  companyId   String
+  code        String
+  type        String
+  location    String
+  capacity    String?
+  manufactureDate DateTime?
+  lastCheckAt DateTime?
+  nextCheckAt DateTime?
+  lastRechargeAt DateTime?
+  status      EquipmentStatus @default(active)
+  note        String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  company     Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, status])
+  @@index([nextCheckAt])
+}
+
+model FirstAidKit {
+  id          String          @id @default(cuid())
+  companyId   String
+  location    String
+  contents    String?
+  lastCheckAt DateTime?
+  nextCheckAt DateTime?
+  replenishedAt DateTime?
+  status      EquipmentStatus @default(active)
+  note        String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  company     Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, status])
+  @@index([nextCheckAt])
+}
+
+enum NormativePatchStatus {
+  pending
+  approved
+  rejected
+}
+
+enum NormativeSourceType {
+  gazzetta_ufficiale
+  inail
+  inps
+  ministero_salute
+  custom
+}
+
+model NormativeSource {
+  id          String                    @id @default(cuid())
+  name        String
+  type        NormativeSourceType        @default(custom)
+  url         String?
+  description String?
+  isActive    Boolean                    @default(true)
+  createdAt   DateTime                   @default(now())
+  updatedAt   DateTime                   @updatedAt
+  proposals   NormativePatchProposal[]
+
+  @@index([type, isActive])
+}
+
+model NormativePatchProposal {
+  id              String                @id @default(cuid())
+  sourceId        String?
+  normTitle       String
+  normReference   String
+  normText        String?
+  changeSummary   String
+  proposedChanges Json?
+  status          NormativePatchStatus  @default(pending)
+  reviewedAt      DateTime?
+  reviewedById    String?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  source          NormativeSource?      @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([sourceId])
 }
