@@ -474,18 +474,23 @@ Mancanza parapetti/robustezza = NC sanzionabile pericolo caduta.`,
       }
 
       // Se nessun match ma c'e n8n configurato → prova n8n
+      // Sicurezza: NON propagare il JWT del client. Backend → n8n autentica
+      // server-side con FEDSHIELD_N8N_API_KEY (header X-API-KEY); il consulente
+      // utente è già stato autenticato da fastify.authenticate sopra.
       const n8nWebhook = process.env.N8N_AUDITBOT_WEBHOOK;
       if (n8nWebhook) {
         try {
+          const n8nApiKey = process.env.FEDSHIELD_N8N_API_KEY;
+          const headers: Record<string, string> = { "Content-Type": "application/json" };
+          if (n8nApiKey) headers["X-API-KEY"] = n8nApiKey;
           const res = await fetch(n8nWebhook, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers,
             body: JSON.stringify({
               companyId,
               question,
               inspectionId,
               history: history || [],
-              token: (request as any).headers.authorization?.replace("Bearer ", ""),
             }),
           });
           const data = await res.json();
@@ -507,8 +512,6 @@ Mancanza parapetti/robustezza = NC sanzionabile pericolo caduta.`,
         source: "fallback",
         timestamp: new Date().toISOString(),
       });
-    },
-  );
     },
   );
 };
