@@ -1,6 +1,7 @@
 import { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 import { writeAudit } from "../../plugins/audit.js";
+import { requireSeniorOrAdmin } from "../../plugins/auth.js";
 
 const createCompanySchema = z.object({
   name: z.string().min(2),
@@ -45,7 +46,7 @@ const companyRoutes: FastifyPluginAsync = async (fastify) => {
 
   fastify.post(
     "/companies",
-    { preHandler: [fastify.authenticate] },
+    { preHandler: [fastify.authenticate, requireSeniorOrAdmin] },
     async (request, reply) => {
       const parsed = createCompanySchema.safeParse(request.body);
       if (!parsed.success) {
@@ -69,7 +70,7 @@ const companyRoutes: FastifyPluginAsync = async (fastify) => {
 
   fastify.patch(
     "/companies/:id",
-    { preHandler: [fastify.authenticate] },
+    { preHandler: [fastify.authenticate, requireSeniorOrAdmin] },
     async (request, reply) => {
       const params = companyParamsSchema.safeParse(request.params);
       if (!params.success) {
