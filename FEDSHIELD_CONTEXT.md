@@ -191,11 +191,24 @@ Audit completo: `docs/audit/AUDIT_2026-04-25.md` (39 feature PRD verificate, 47 
 
 ### 📋 Backlog priorizzato (dopo P0)
 
-Sprint 1 — Auth & ownership: helper `requireRole`, role check su POST/PATCH/DELETE in 5 moduli, CompanyOwnership guard, Helmet + rate-limit, audit logging completo.
+**Sprint 1 ✅ Completato** (branch `fix/audit-p0-runtime-breakers` commits `d083e10..690d792`):
+
+| # | Tema | Commit |
+|---|------|--------|
+| S1-1 | Helper `requireRole(roles)`, `requireAdmin`, `requireSeniorOrAdmin` in `plugins/auth.ts` | `d083e10` |
+| S1-2 | Role check senior+admin su 12 mutazioni master-data (employees, companies, equipment×4, training-courses×2) | `d083e10` |
+| S1-3 | Validazione `companyId` esiste in `/notifications/alerts` (pre-flight 404) | `757a83f` |
+| S1-4 | DTO whitelisting su companies.PATCH — DIFFERITO a Sprint 3 (breaking change frontend) | — |
+| S1-5 | Helmet + rate-limit (100/min globale, 5/min su /auth/login anti-brute-force) | `728d24e` |
+| S1-6 | `writeAudit` su tutte le 13 mutazioni dei nuovi moduli + `writeAudit` fail-soft (errori loggati, mai propagati come 500) | `e6370c2`, `690d792` |
+| S1-7 | Auth-matrix test (5 test, 5 pass): 401 senza JWT, 403 junior, 403 senior su admin-only, GET pubblici per junior | `690d792` |
+| S1-8 | Fix debiti TS pre-esistenti: import `.js` su seed.ts, status enum cast in equipment, esclusione prisma da tsconfig | `9aca204` |
+
+**`tsc --noEmit`: 0 errori** sul codice runtime.
 
 Sprint 2 — CRUD frontend: `EmployeesPage`, `TrainingCoursesPage`, `AssetsPage`, wiring `AssetQrPage` in `App.tsx`, sostituire localhost hardcoded.
 
-Sprint 3 — Production hardening: HTTPS reverse proxy n8n VPS, schema validation risposte n8n, sanitization HTML chatbot, unique constraints schema, E2E test, eventuale migrazione `bcryptjs → argon2`.
+Sprint 3 — Production hardening: HTTPS reverse proxy n8n VPS, schema validation risposte n8n, sanitization HTML chatbot, unique constraints schema, E2E test, eventuale migrazione `bcryptjs → argon2`, DTO whitelisting companies.PATCH (breaking + frontend coordinato).
 
 ---
 
