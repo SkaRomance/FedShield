@@ -2,6 +2,7 @@ import { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 import { requireSeniorOrAdmin } from "../../plugins/auth.js";
 import { writeAudit } from "../../plugins/audit.js";
+import { replyOnUniqueViolation } from "../../plugins/prisma-errors.js";
 
 const createEmployeeSchema = z.object({
   companyId: z.string().min(1),
@@ -67,7 +68,15 @@ const employeeRoutes: FastifyPluginAsync = async (fastify) => {
       }
       const data: any = { ...parsed.data };
       if (data.hireDate) data.hireDate = new Date(data.hireDate);
-      const created = await fastify.prisma.employee.create({ data });
+      let created;
+      try {
+        created = await fastify.prisma.employee.create({ data });
+      } catch (err) {
+        if (replyOnUniqueViolation(reply, err, "Codice fiscale già registrato per questa azienda.")) {
+          return;
+        }
+        throw err;
+      }
       await writeAudit(fastify, {
         userId: (request.user as { sub?: string })?.sub,
         action: "employee.create",
@@ -91,10 +100,18 @@ const employeeRoutes: FastifyPluginAsync = async (fastify) => {
       const data: any = { ...parsed.data };
       if (data.hireDate) data.hireDate = new Date(data.hireDate);
       if (data.leftDate) data.leftDate = new Date(data.leftDate);
-      const updated = await fastify.prisma.employee.update({
-        where: { id },
-        data,
-      });
+      let updated;
+      try {
+        updated = await fastify.prisma.employee.update({
+          where: { id },
+          data,
+        });
+      } catch (err) {
+        if (replyOnUniqueViolation(reply, err, "Codice fiscale già registrato per questa azienda.")) {
+          return;
+        }
+        throw err;
+      }
       await writeAudit(fastify, {
         userId: (request.user as { sub?: string })?.sub,
         action: "employee.update",

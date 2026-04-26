@@ -2,6 +2,7 @@ import { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 import { requireSeniorOrAdmin } from "../../plugins/auth.js";
 import { writeAudit } from "../../plugins/audit.js";
+import { replyOnUniqueViolation } from "../../plugins/prisma-errors.js";
 
 const createEquipmentSchema = z.object({
   companyId: z.string().min(1),
@@ -85,9 +86,17 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
     async (request, reply) => {
       const parsed = createEquipmentSchema.safeParse(request.body);
       if (!parsed.success) return reply.badRequest("Dati equipaggiamento non validi.");
-      const created = await fastify.prisma.equipment.create({
-        data: parseDates(parsed.data, ["lastCheckAt", "nextCheckAt"]),
-      });
+      let created;
+      try {
+        created = await fastify.prisma.equipment.create({
+          data: parseDates(parsed.data, ["lastCheckAt", "nextCheckAt"]),
+        });
+      } catch (err) {
+        if (replyOnUniqueViolation(reply, err, "Numero di serie già usato per un'attrezzatura della stessa azienda.")) {
+          return;
+        }
+        throw err;
+      }
       await writeAudit(fastify, {
         userId: (request.user as { sub?: string })?.sub,
         action: "equipment.create",
@@ -121,12 +130,20 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
     async (request, reply) => {
       const parsed = createMachineSchema.safeParse(request.body);
       if (!parsed.success) return reply.badRequest("Dati macchina non validi.");
-      const created = await fastify.prisma.machine.create({
-        data: parseDates(parsed.data, [
-          "lastMaintenanceAt", "nextMaintenanceAt",
-          "lastSafetyCheckAt", "nextSafetyCheckAt",
-        ]),
-      });
+      let created;
+      try {
+        created = await fastify.prisma.machine.create({
+          data: parseDates(parsed.data, [
+            "lastMaintenanceAt", "nextMaintenanceAt",
+            "lastSafetyCheckAt", "nextSafetyCheckAt",
+          ]),
+        });
+      } catch (err) {
+        if (replyOnUniqueViolation(reply, err, "Numero di serie già usato per una macchina della stessa azienda.")) {
+          return;
+        }
+        throw err;
+      }
       await writeAudit(fastify, {
         userId: (request.user as { sub?: string })?.sub,
         action: "machine.create",
@@ -160,9 +177,17 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
     async (request, reply) => {
       const parsed = createFireExtinguisherSchema.safeParse(request.body);
       if (!parsed.success) return reply.badRequest("Dati estintore non validi.");
-      const created = await fastify.prisma.fireExtinguisher.create({
-        data: parseDates(parsed.data, ["manufactureDate", "lastCheckAt", "nextCheckAt", "lastRechargeAt"]),
-      });
+      let created;
+      try {
+        created = await fastify.prisma.fireExtinguisher.create({
+          data: parseDates(parsed.data, ["manufactureDate", "lastCheckAt", "nextCheckAt", "lastRechargeAt"]),
+        });
+      } catch (err) {
+        if (replyOnUniqueViolation(reply, err, "Codice estintore già registrato per questa azienda.")) {
+          return;
+        }
+        throw err;
+      }
       await writeAudit(fastify, {
         userId: (request.user as { sub?: string })?.sub,
         action: "fireExtinguisher.create",

@@ -460,6 +460,7 @@ model Employee {
   company       Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
   trainingRecords EmployeeTrainingRecord[]
 
+  @@unique([companyId, fiscalCode])
   @@index([companyId, isActive])
 }
 
@@ -580,6 +581,7 @@ model Equipment {
   updatedAt   DateTime        @updatedAt
   company     Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
+  @@unique([companyId, serialNumber])
   @@index([companyId, status])
   @@index([nextCheckAt])
 }
@@ -604,6 +606,7 @@ model Machine {
   updatedAt   DateTime        @updatedAt
   company     Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
+  @@unique([companyId, serialNumber])
   @@index([companyId, status])
   @@index([nextMaintenanceAt])
 }
@@ -625,6 +628,7 @@ model FireExtinguisher {
   updatedAt   DateTime        @updatedAt
   company     Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
+  @@unique([companyId, code])
   @@index([companyId, status])
   @@index([nextCheckAt])
 }
