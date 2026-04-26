@@ -339,16 +339,34 @@ Totale 28 test su 10 file, tutti pass. HoReCa coverage: 15 categorie ATECO (rist
 
 **Test suite Sprint 9**: backend 28/28 pass + desktop 10/10 pass. Backend+desktop tsc 0 errori.
 
-### Backlog residuo (Sprint 10+)
+**Sprint 10 ✅ Completato — Cleanup MEDIUM/LOW + docs P1** (branch `feat/sprint-10-cleanup`, commits `cd54aa5..d6c56d6`):
+
+| # | Tema | Commit |
+|---|------|--------|
+| S10-A1 (MEDIUM-02) | GET asset list endpoints ora restituiscono header `X-Total-Count`, `X-Limit`, `X-Truncated`. Client può rilevare troncamento e mostrare warning UI. Promise.all(findMany, count). | `cd54aa5` |
+| S10-A2 (MEDIUM-03) | Uniformati 5 accessi diretti `request.user.sub` in norm-sync a `const auth = request.user` pattern + `?? null` consistente. | `cd54aa5` |
+| S10-A3 (LOW-03/04/05) | companies.ts:102 `request.user?.role` (idiom robustezza); rimossa variabile `_user` mai usata in notifications.ts; seed-checklist.ts ora usa enum tipati `ChecklistSection`/`ComplianceDomain` invece di `as any`. | `cd54aa5` |
+| S10-B1 | README.md: aggiunte 4 sezioni P1 (Sicurezza, Strategia Test, Strategia Seed, Variabili Ambiente) con tabelle complete, riferimenti file, comandi dev. | `d6c56d6` |
+| S10-B2 | QUICKSTART.md: riscritto con setup 3-step, login dev unificato, test detail, troubleshooting table. | `d6c56d6` |
+
+**Differiti** (documentati nel REVIEW.md sezione finale):
+- MEDIUM-05: 12 PrismaClient instances scattered nei seed (refactor invasivo, low priority)
+- MEDIUM-06: HORECA_GENERIC_DOC_NAMES whitelist fragile (richiede schema column `seedSource`)
+- LOW-01: AuthenticatedUser shape vs FastifyJWT.payload (defensive future-proofing)
+- LOW-02: markdown.ts hookRegistered thread-safety (Web Worker scenario teorico)
+
+**Test suite Sprint 10**: backend 28/28 pass + desktop 10/10 pass. Backend+desktop tsc 0 errori.
+
+### Backlog residuo (Sprint 11+)
 
 - HTTPS reverse proxy n8n VPS (richiede accesso infra)
 - Playwright E2E browser-level (defense-in-depth oltre golden-path API)
 - Eventuale rimozione finale di `bcryptjs` quando il DB sarà tutto argon2 (audit DB password hashes prima)
 - Stampabilità QR per estintori/kits / dark mode / migrazione SQLite → Postgres prod
-- Restore seed HoReCa generic doc templates (rimossi in S7 perché non scoped — ora con HORECA_GENERIC_DOC_NAMES posso re-includerli safely)
-- Code review residuals: MEDIUM-02 (header pagination su take:200), MEDIUM-05 (12 PrismaClient instances scattered nei seed), MEDIUM-06 (whitelist nomi HoReCa fragile), 5 LOW (logging/magic strings)
-- Doc P1 da DOCS_AUDIT: sezioni mancanti README (Security Model, Test Strategy, Seed Strategy, Env Vars completi), QUICKSTART setup steps (cross-env, pretest, argon2 native build)
+- Restore seed HoReCa generic doc templates (rimossi in S7 perché non scoped)
+- Refactor seed PrismaClient singletons (MEDIUM-05) + seedSource discriminator (MEDIUM-06)
 - Push CI workflow a origin (richiede decisione sull'attivazione auto su PR)
+- Frontend AssetsPage UI per consumare X-Truncated header (warning "Visualizzati primi 200 di X")
 
 ---
 

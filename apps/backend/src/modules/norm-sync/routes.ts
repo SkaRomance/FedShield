@@ -128,8 +128,9 @@ const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
       const created = await fastify.prisma.normativePatchProposal.create({
         data: parsed.data,
       });
+      const auth = request.user;
       await writeAudit(fastify, {
-        userId: request.user.sub,
+        userId: auth.sub,
         action: "normProposal.create",
         entityType: "normativePatchProposal",
         entityId: created.id,
@@ -211,17 +212,18 @@ const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
         }
       }
 
+      const auth = request.user;
       const updated = await fastify.prisma.normativePatchProposal.update({
         where: { id },
         data: {
           status: parsed.data.status,
           reviewedAt: new Date(),
-          reviewedById: request.user.sub || null,
+          reviewedById: auth.sub ?? null,
         },
       });
 
       await writeAudit(fastify, {
-        userId: request.user.sub,
+        userId: auth.sub,
         action: parsed.data.status === "approved" ? "normProposal.approve" : "normProposal.reject",
         entityType: "normativePatchProposal",
         entityId: updated.id,
@@ -238,16 +240,17 @@ const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
     async (request, reply) => {
       const { id } = request.params as { id: string };
       const note = (request.body as { note?: string })?.note;
+      const auth = request.user;
       const updated = await fastify.prisma.normativePatchProposal.update({
         where: { id },
         data: {
           status: "rejected",
           reviewedAt: new Date(),
-          reviewedById: request.user.sub || null,
+          reviewedById: auth.sub ?? null,
         },
       });
       await writeAudit(fastify, {
-        userId: request.user.sub,
+        userId: auth.sub,
         action: "normProposal.reject",
         entityType: "normativePatchProposal",
         entityId: updated.id,
