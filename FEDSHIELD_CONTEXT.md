@@ -326,14 +326,29 @@ Totale 28 test su 10 file, tutti pass. HoReCa coverage: 15 categorie ATECO (rist
 
 **Test suite finale Sprint 8**: backend 28/28 pass + desktop 10/10 pass (jsdom). Vite build desktop 376.74 kB → 110.54 kB gzip in 2.14s. Backend tsc 0 errori, desktop tsc 0 errori. `pnpm db:seed` produce 31 corsi training + 68 requirements + 100 checklist item sectorial + 20 training items.
 
-### Backlog residuo (Sprint 9+)
+**Sprint 9 ✅ Completato — QA + docs + CI** (branch `feat/sprint-9-qa-docs`, commits `beb2aa1..bd83a67`):
+
+3 agent paralleli (gsd-code-reviewer + general-purpose + Plan) hanno prodotto findings che sono stati sintetizzati e applicati.
+
+| # | Tema | Commit |
+|---|------|--------|
+| S9-1 | Code review Sprint 7+8 (REVIEW.md, 18 finding). Fix HIGH-01 (`seed.ts` rifiuta NODE_ENV=production senza FEDSHIELD_ALLOW_PROD_SEED, mitiga cascade delete EmployeeTrainingRecord) + MEDIUM-01 (rimossi 4 cast residui `request.user as { sub: string }`, aggiunto guard) + MEDIUM-04 (golden-path test cleanup company.delete in finally). | `beb2aa1` |
+| S9-2 | Doc P0 fix da DOCS_AUDIT.md (general-purpose agent): password demo `fedshield2026` → `fedshield123` su README/PROMPT/CONTEXT (Sprint 5 unificata); FILE_CONTEXT.md aggiornato albero file con plugin/modules/test/pages reali. | `da7a1c1` |
+| S9-3 | `.github/workflows/ci.yml` — workflow GitHub Actions con 2 job paralleli (test-backend + test-desktop), cache pnpm/Prisma, Node 24, pnpm 10.29.2, type-check pre-test, ELECTRON_SKIP_BINARY_DOWNLOAD per desktop. ~3min warm run. NON pushato (richiede review umano). | `ddc3394` |
+| S9-4 | REVIEW.md + DOCS_AUDIT.md committati come reference Sprint 9. | `bd83a67` |
+
+**Test suite Sprint 9**: backend 28/28 pass + desktop 10/10 pass. Backend+desktop tsc 0 errori.
+
+### Backlog residuo (Sprint 10+)
 
 - HTTPS reverse proxy n8n VPS (richiede accesso infra)
 - Playwright E2E browser-level (defense-in-depth oltre golden-path API)
 - Eventuale rimozione finale di `bcryptjs` quando il DB sarà tutto argon2 (audit DB password hashes prima)
 - Stampabilità QR per estintori/kits / dark mode / migrazione SQLite → Postgres prod
-- Restore seed HoReCa generic doc templates (rimossi in S7 perché non scoped — ora con HORECA_GENERIC_DOC_NAMES posso re-includerli safely se serve allineare con dataset originale)
-- Rifinitura UX validate inspection workflow (oltre il golden path)
+- Restore seed HoReCa generic doc templates (rimossi in S7 perché non scoped — ora con HORECA_GENERIC_DOC_NAMES posso re-includerli safely)
+- Code review residuals: MEDIUM-02 (header pagination su take:200), MEDIUM-05 (12 PrismaClient instances scattered nei seed), MEDIUM-06 (whitelist nomi HoReCa fragile), 5 LOW (logging/magic strings)
+- Doc P1 da DOCS_AUDIT: sezioni mancanti README (Security Model, Test Strategy, Seed Strategy, Env Vars completi), QUICKSTART setup steps (cross-env, pretest, argon2 native build)
+- Push CI workflow a origin (richiede decisione sull'attivazione auto su PR)
 
 ---
 
