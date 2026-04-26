@@ -16,6 +16,24 @@ const reviewSchema = z.object({
   note: z.string().optional(),
 });
 
+// Schema risposta n8n AuditBot: validiamo prima di inoltrare al client
+// per non propagare payload inattesi (XSS riflessi, prompt injection, etc.)
+const n8nChatbotResponseSchema = z.object({
+  answer: z.string().min(1).max(20000),
+  source: z.string().max(64).optional(),
+  citations: z
+    .array(
+      z.object({
+        title: z.string().max(500).optional(),
+        url: z.string().url().max(2000).optional(),
+        snippet: z.string().max(2000).optional(),
+      }),
+    )
+    .max(20)
+    .optional(),
+  timestamp: z.string().max(64).optional(),
+});
+
 const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
   // Middleware: solo admin puo gestire proposte
   async function requireAdmin(request: any, reply: any) {
@@ -506,21 +524,43 @@ Mancanza parapetti/robustezza = NC sanzionabile pericolo caduta.`,
           const n8nApiKey = process.env.FEDSHIELD_N8N_API_KEY;
           const headers: Record<string, string> = { "Content-Type": "application/json" };
           if (n8nApiKey) headers["X-API-KEY"] = n8nApiKey;
-          const res = await fetch(n8nWebhook, {
-            method: "POST",
-            headers,
-            body: JSON.stringify({
-              companyId,
-              question,
-              inspectionId,
-              history: history || [],
-            }),
-          });
-          const data = await res.json();
-          return reply.send(data);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 15000);
+          let res: Response;
+          try {
+            res = await fetch(n8nWebhook, {
+              method: "POST",
+              headers,
+              body: JSON.stringify({
+                companyId,
+                question,
+                inspectionId,
+                history: history || [],
+              }),
+              signal: controller.signal,
+            });
+          } finally {
+            clearTimeout(timeoutId);
+          }
+          if (!res.ok) {
+            throw new Error(`n8n responded with ${res.status}`);
+          }
+          const rawData = await res.json();
+          const validated = n8nChatbotResponseSchema.safeParse(rawData);
+          if (!validated.success) {
+            fastify.log.warn(
+              { issues: validated.error.issues, source: "n8n-auditbot" },
+              "n8n chatbot response failed validation",
+            );
+            return reply.send({
+              answer: `Il servizio AI remoto ha risposto con un formato inatteso.\n\nNon ho trovato una risposta specifica per "${question}" nella knowledge base locale.\nProva a riformulare con termini piu tecnici (es. "DPI", "DVR", "estintore", "formazione").`,
+              source: "offline",
+              timestamp: new Date().toISOString(),
+            });
+          }
+          return reply.send(validated.data);
         } catch (e) {
-          console.error("Errore chiamata n8n AuditBot:", e);
-          // Fallback finale se n8n non risponde
+          fastify.log.error({ err: e }, "Errore chiamata n8n AuditBot");
           return reply.send({
             answer: `Il servizio AI remoto non e al momento disponibile.\n\nNon ho trovato una risposta specifica per "${question}" nella knowledge base locale.\nProva a riformulare con termini piu tecnici (es. "DPI", "DVR", "estintore", "formazione") o annota il dubbio nelle note del sopralluogo per approfondimento successivo.`,
             source: "offline",
