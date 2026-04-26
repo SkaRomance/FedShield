@@ -278,13 +278,27 @@ Smoke: 8/8 pass
 ```
 Nessun fallimento. I 2 skip restano valid quando il seed HoReCa verrà ricostruito (vedi backlog).
 
-### Backlog residuo (Sprint 6+)
+**Sprint 6 ✅ Completato — Code review MEDIUM/LOW cleanup** (commits `8299f2e..051c08f`):
+
+| # | Tema | Commit |
+|---|------|--------|
+| S6-1 (M1) | Anti-timing user enumeration su `/auth/login`: `consumeDummyVerify()` esegue argon2.verify su hash dummy cached quando email non registrata, uniformando latenza. Test che confronta dummy vs real verify (rapporto <4×) | `8299f2e` |
+| S6-2 (M2) | `n8nChatbotResponseSchema.timestamp` ora `z.string().datetime()`; backend defaulta `new Date().toISOString()` se omesso da n8n | `374f332` |
+| S6-3 (M3) | `GET /companies` redige nominativi HACCP+medico competente al ruolo junior (`redactForJunior` + `toCompanyDtoFor`). Senior/admin invariati. Test policy 1/1 pass | `374f332` |
+| S6-4 (M5) | `proposals/approve` rimuove `JSON.parse(JSON.stringify)` ridondante; `Array.isArray` check su `proposedChanges` previene bug se Prisma deserializza un oggetto invece di array | `051c08f` |
+| S6-5 (L1+L4) | DOMPurify hook globale forza `rel="noopener noreferrer"` sui link `target="_blank"` chatbot; `console.error` → `fastify.log.error` in norm-sync | `051c08f` |
+
+Test backend totali: auth-matrix 6/6, password 6/6, smoke 8/8, legacy/quotes/kpi-odv/licensing pass, 2 HoReCa skip puliti.
+
+### Backlog residuo (Sprint 7+)
 
 - HTTPS reverse proxy n8n VPS (richiede accesso infra)
 - E2E test Playwright (flusso login → create company → create employee → record formazione)
 - Ricostruire seed HoReCa monolitico cancellato (`pastry-split` e `horeca-completeness` test auto-skippati nel frattempo)
 - Riparare `seed-metalmeccanico.ts` (enum `section` invalida → seed full broken)
-- Code review MEDIUM (M1 anti user-enumeration timing, M5 fix `JSON.parse(JSON.stringify)` proposals/approve, M2 `n8nChatbotResponseSchema.timestamp` strict ISO, M3 policy HACCP nominativi su junior)
+- L5 (review): tipare `request.user` con module-augmentation Fastify (sostituisce gli `any` ricorrenti)
+- L3 (review): cap `take: 200` o `companyId` obbligatorio su GET equipment list (default cap)
+- L2 (review): test ChatbotPage con jsdom per `renderAssistantMarkdown`
 - Eventuale rimozione finale di `bcryptjs` quando il DB sarà tutto argon2
 - Stampabilità QR per estintori/kits / dark mode / migrazione SQLite → Postgres prod
 
@@ -296,8 +310,10 @@ Nessun fallimento. I 2 skip restano valid quando il seed HoReCa verrà ricostrui
 |----------|------|-----------------|
 | Alta | Import workflow n8n sul VPS + HTTPS reverse proxy | docker-development |
 | Alta | Test E2E (Playwright) — flusso login → create company → create employee → record formazione | qa + test-driven-development |
-| Media | Code review MEDIUM (M1/M2/M5) — anti-timing user enumeration, JSON.parse fix, timestamp strict | senior-backend |
-| Media | Policy review M3: filtrare nominativi HACCP per ruolo `junior` su `/companies` | senior-backend |
+| Alta | Ricostruire seed HoReCa monolitico (`pastry-split`, `horeca-completeness` riattivabili) | senior-backend |
+| Media | Riparare `seed-metalmeccanico.ts` (enum `section` invalida) | senior-backend |
+| Media | Tipare `request.user` con module-augmentation Fastify (L5) | senior-backend |
+| Media | Cap `take: 200` o `companyId` obbligatorio su GET equipment list (L3) | senior-backend |
 | Media | QR code stampabile per estintori/kits | frontend-design |
 | Bassa | Rimozione finale `bcryptjs` quando il DB sarà tutto argon2 | senior-backend |
 | Bassa | Dark mode / tema personalizzabile | ui-ux-pro-max |
