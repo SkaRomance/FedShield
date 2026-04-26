@@ -597,7 +597,8 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.badRequest("Payload sopralluogo non valido.");
       }
 
-      const auth = request.user as { sub: string; role: UserRole };
+      const auth = request.user;
+      if (!auth.sub) return reply.unauthorized("JWT senza subject — login non valido.");
 
       const created = await fastify.prisma.inspection.create({
         data: {
@@ -1009,7 +1010,7 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.badRequest("Payload validazione non valido.");
       }
 
-      const auth = request.user as { sub: string; role: UserRole };
+      const auth = request.user;
       if (auth.role === UserRole.junior) {
         return reply.forbidden("Un utente junior non puo validare sopralluoghi.");
       }

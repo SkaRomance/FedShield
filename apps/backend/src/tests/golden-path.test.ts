@@ -17,6 +17,10 @@ test("Golden path: login senior → company → employee → corso → record", 
   const app = buildApp();
   await app.ready();
 
+  // S9 (MEDIUM-04): traccia entità create per cleanup finale e prevenire
+  // accumulo righe DB su run multipli (CI usa db file persistente).
+  const cleanup: { companyId?: string } = {};
+
   try {
     // 1. Login senior
     const loginRes = await app.inject({
@@ -48,6 +52,7 @@ test("Golden path: login senior → company → employee → corso → record", 
     assert.strictEqual(companyRes.statusCode, 201, `create company: ${companyRes.body}`);
     const company = companyRes.json() as { id: string; name: string };
     assert.ok(company.id, "company.id deve esistere");
+    cleanup.companyId = company.id;
 
     // 3. Create employee
     const employeeRes = await app.inject({
@@ -142,7 +147,14 @@ test("Golden path: login senior → company → employee → corso → record", 
       courseId: course.id,
       recordId: record.id,
     });
+
+    // S9: cleanup espliciti del corso (no FK company → cancella manualmente).
+    // Employee + training records seguono via cascade da company.delete.
+    await app.prisma.trainingCourse.delete({ where: { id: course.id } }).catch(() => {});
   } finally {
+    if (cleanup.companyId) {
+      await app.prisma.company.delete({ where: { id: cleanup.companyId } }).catch(() => {});
+    }
     await app.close();
   }
 });

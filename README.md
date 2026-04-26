@@ -1,123 +1,238 @@
 # FedShield
 
-Piattaforma anti-sanzione per FacileSicurezza / FEDINVEST.
+> Piattaforma desktop-first per consulenti HSE e alimentari. Checklist, ispezioni, formazione, asset, AI — offline-first, sync cloud.
 
-## Stato attuale
+---
 
-Questa implementazione include:
-- Monorepo `pnpm` con backend, app desktop (Electron + React), app tablet (Expo).
-- Backend Fastify + Prisma + SQLite con autenticazione JWT a ruoli (`junior`, `senior`, `admin`).
-- Moduli API: health, auth, aziende, checklist, sopralluoghi, non conformita, validazione senior, report JSON.
-- Moduli API Sprint 3: preventivi, countdown automatico, malleva, generazione PDF verbale/attestato.
-- Moduli API Sprint 4: KPI aziende/consulenti, modulo ODV con confronto automatico sanzioni vs NC pregresse.
-- Moduli API Sprint 5: licensing device, heartbeat, sync offline-first push/pull/ack.
-- Seed dati demo e database locale pronto.
-- Dashboard desktop con login, dati live e compilazione checklist.
-- Dashboard desktop con area Preventivi e azioni di output documentale.
-- Dashboard desktop con area KPI e ODV.
-- Dashboard desktop con stato licenza device, coda sync offline e sync manuale.
-- App tablet con login e lista aziende.
-- Test backend automatico sul flusso checklist -> NC.
+##  Panoramica
 
-## Struttura
+**FedShield** aiuta consulenti HSE a condurre sopralluoghi, generare attestati antisanzione, monitorare formazione dipendenti, tracciare asset aziendali e risolvere dubbi normativi in tempo reale — anche offline.
 
-- `apps/backend`: API e logica server
-- `apps/desktop`: software Windows (Electron)
-- `apps/tablet`: client Android tablet (Expo)
-- `packages/shared-types`: tipi condivisi
+### Funzionalita Chiave
+-  **6 settori checklist** (Horeca, Edilizia, Metalmeccanico, Uffici IT, Sanita, Agricoltura)
+-  **AuditBot AI** — chatbot normativo per dubbi durante il sopralluogo, offline o con n8n + Ollama
+-  **Formazione dipendenti** — catalogo corsi, record, alert scadenze automatici
+-  **Asset tracking** — macchine, estintori, cassette PS, QR code
+-  **NormSync** — rilevamento e applicazione aggiornamenti normativi
+-  **Offline-first** — funziona senza internet, sync quando disponibile
 
-## Avvio rapido
+---
 
-1. Installa dipendenze:
-   - `pnpm install`
-2. Configura backend:
-   - `Copy-Item apps/backend/.env.example apps/backend/.env`
-3. Genera client DB e crea schema:
-   - `pnpm --filter @fedshield/backend db:generate`
-   - `pnpm --filter @fedshield/backend db:push`
-   - `pnpm --filter @fedshield/backend db:seed`
-4. Avvia backend:
-   - `pnpm --filter @fedshield/backend dev`
-5. Avvia desktop (nuovo terminale):
-   - `pnpm --filter @fedshield/desktop dev`
-6. Avvia tablet (nuovo terminale):
-   - `pnpm --filter @fedshield/tablet start`
+##  Stack Tecnologico
 
-## Credenziali demo
+| Livello | Tecnologia |
+|---------|------------|
+| Frontend | React 19 + TypeScript 5.9 + Vite 7 + Electron 37 |
+| Backend | Fastify 5 + Prisma 6.16 + JWT |
+| Database | SQLite (dev) / PostgreSQL (prod) |
+| AI | n8n + Ollama Cloud (GLM 5.1 / Kimi K2.6) |
+| Package | pnpm 10.29.2 (workspace monorepo) |
 
-- Admin: `admin@fedshield.local` / `fedshield123`
-- Senior: `senior@fedshield.local` / `fedshield123`
-- Junior: `junior@fedshield.local` / `fedshield123`
+---
 
-## Endpoint API implementati
+##  Avvio Rapido
 
-- `GET /api/health`
-- `POST /api/auth/login`
-- `GET /api/companies`
-- `POST /api/companies`
-- `GET /api/inspections`
-- `POST /api/inspections`
-- `POST /api/inspections/nc`
-- `POST /api/inspections/:id/answers`
-- `GET /api/inspections/:id/report`
-- `POST /api/inspections/:id/report/pdf`
-- `POST /api/inspections/:id/attestato/pdf`
-- `GET /api/inspections/:id/documents`
-- `POST /api/inspections/validate`
-- `GET /api/checklists/templates`
-- `GET /api/checklists/templates/:id/items`
-- `GET /api/quotes`
-- `GET /api/quotes/candidates`
-- `POST /api/quotes`
-- `PATCH /api/quotes/:id/respond`
-- `POST /api/quotes/:id/malleva`
-- `POST /api/quotes/process-expired`
-- `GET /api/kpi/overview`
-- `GET /api/kpi/companies/:id`
-- `GET /api/kpi/consultants`
-- `POST /api/kpi/snapshots`
-- `GET /api/odv/inspections`
-- `POST /api/odv/inspections`
-- `GET /api/odv/inspections/:id/analysis`
-- `GET /api/odv/defensive-report/:companyId`
-- `POST /api/licensing/activate`
-- `POST /api/licensing/validate`
-- `POST /api/licensing/heartbeat`
-- `POST /api/licensing/revoke`
-- `GET /api/licensing/devices`
-- `POST /api/sync/push`
-- `POST /api/sync/pull`
-- `POST /api/sync/ack`
+### Prerequisiti
+- Node.js 18+
+- pnpm `npm install -g pnpm`
 
-## Note importanti
+### Installazione
+```bash
+cd C:\Users\Salvatore\FedShield
+pnpm install
+```
 
-- Regola implementata: un utente `junior` non puo validare sopralluoghi.
-- Un sopralluogo `validated` non puo ricevere nuove NC (immutabilita base).
-- Regola implementata: risposta checklist `NO` crea/aggiorna NC automaticamente.
-- Regola implementata: risposta checklist `SI/NA` rimuove la NC collegata.
-- Regola implementata: se preventivo e `rejected`, `expired` o `assigned_to_third_party` viene emessa malleva.
-- Scheduler backend attivo per controllo countdown preventivi (`QUOTE_SWEEP_SECONDS`).
-- KPI consulenti con alert statistico NC su finestra temporale configurabile.
-- ODV: matching automatico sanzioni con NC pregresse (matched/partial/unmatched).
-- PDF documenti con sigillo hash interno (`sealHash`) anti-manomissione.
-- Licensing per device con `expiresAt` + `graceUntil` + revoca amministrativa.
-- Sync offline-first: eventi salvati in coda locale client e flush periodico/manuel.
-- Alcune build (Vite/Prisma) in ambiente sandbox possono richiedere permessi elevati.
+### Avvio Sviluppo
 
-## Variabili ambiente backend (nuove)
+**Terminale 1 — Backend API:**
+```bash
+pnpm --filter @fedshield/backend dev
+```
+Backend: http://localhost:4000
 
-- `LICENSE_ACTIVATION_CODE`: codice attivazione device
-- `LICENSE_DURATION_DAYS`: durata licenza in giorni
-- `LICENSE_GRACE_DAYS`: giorni grace oltre scadenza
-- `DOCUMENT_SEAL_SECRET`: secret sigillo hash documenti
-- `QUOTE_SWEEP_SECONDS`: frequenza controllo countdown preventivi
+**Terminale 2 — Desktop App:**
+```bash
+pnpm --filter @fedshield/desktop dev
+```
+Electron si apre automaticamente (renderer su http://localhost:5180)
 
-## Test rapido
+### Database e Seed
+```bash
+cd apps/backend
 
-- `pnpm --filter @fedshield/backend test`
+# Push schema + seed dati demo
+npx prisma db push --force-reset
+npx prisma db seed
 
-## Prossimi step (Sprint 6)
+# Oppure crea solo utente admin
+pnpm tsx prisma/add-user.ts
+```
 
-- Firma qualificata remota (provider esterno) sui PDF e invio notifiche automatiche cliente.
-- Workflow completo ODV con upload PDF verbale ispettivo e parser assistito.
-- Sync avanzata bidirezionale con conflitti per-entita e priorita business rules.
+---
+
+##  Credenziali Demo
+
+| Email | Password | Ruolo |
+|-------|----------|-------|
+| `admin@fedshield.local` | `fedshield123` | Admin |
+| `senior@fedshield.local` | `fedshield123` | Senior consulente |
+| `junior@fedshield.local` | `fedshield123` | Junior consulente |
+
+> Password unificata in dev: la stessa per i 3 ruoli, configurata in `apps/backend/prisma/seed-users.ts` (Sprint 5). Cambiata in `fedshield123` con la migrazione argon2id (Sprint 3).
+
+---
+
+##  Documentazione
+
+| Documento | Scopo |
+|-----------|-------|
+| `AGENTS.md` | Istruzioni per agenti AI che lavorano sul progetto |
+| `PRD.md` | Product Requirements Document — requisiti funzionali e roadmap |
+| `FEDSHIELD_CONTEXT.md` | Contesto operativo per team di agenti (modifiche, skill, regole) |
+| `docs/ARCHITETTURA-n8n-Ollama.md` | Architettura AI multi-agente (n8n + Ollama) |
+| `docs/README-backend-additions.md` | Elenco endpoint API aggiunti |
+| `QUICKSTART.md` | Guida rapida per riprendere il lavoro |
+
+---
+
+##  API Backend (Selezione)
+
+| Endpoint | Metodo | Descrizione |
+|----------|--------|-------------|
+| `/auth/login` | POST | Login JWT |
+| `/companies` | CRUD | Anagrafica clienti |
+| `/inspections` | CRUD | Ispezioni |
+| `/checklists/templates` | GET | Template checklist per ATECO |
+| `/employees` | CRUD | Dipendenti e formazione |
+| `/training/courses` | CRUD | Catalogo corsi |
+| `/training/records` | CRUD | Record formazione dipendente |
+| `/training/records/expiring` | GET | Prossime scadenze formazione |
+| `/equipment` | CRUD | Asset generici |
+| `/machines` | CRUD | Macchinari |
+| `/fire-extinguishers` | CRUD | Estintori |
+| `/first-aid-kits` | CRUD | Cassette PS |
+| `/equipment/overview` | GET | Dashboard asset |
+| `/chatbot/query` | POST | AuditBot AI — libero per il consulente |
+| `/norm-sync/proposals` | CRUD | Proposte normative (admin) |
+| `/norm-sync/stats` | GET | Dashboard NormSync |
+| `/notifications/alerts` | GET | Alert scadenze (formazione + asset) |
+
+Per l'elenco completo: `docs/README-backend-additions.md`
+
+---
+
+##  AI — AuditBot
+
+Il chatbot e **libero per il consulente**: nessun obbligo di selezionare azienda, si puo usare durante il sopralluogo per qualsiasi dubbio normativo.
+
+### Knowledge Base Offline
+40+ risposte normative pre-caricate (D.Lgs. 81/08, HACCP, GDPR, etc.):
+```
+"DPI obbligatori?" → Citazione art. 74 + sanzioni
+"DVR mancante?" → Reato art. 55, come redigerlo
+"Estintore scaduto?" → DM 10/03/1998, NC sanzionabile
+...
+```
+
+### Configurazione n8n + Ollama
+1. Importa `infra/n8n/workflows/auditbot-workflow.json` in n8n
+2. Configura `N8N_AUDITBOT_WEBHOOK` in `apps/backend/.env`
+3. Se n8n e offline, il fallback knowledge base risponde comunque
+
+---
+
+##  Checklist Settoriali
+
+| Settore | Codice | Item Premises | Item Procedures | Corsi |
+|---------|--------|---------------|-----------------|-------|
+| Horeca | 56 | 25 | 25 | 5 |
+| Edilizia | 41-43 | 25 | 25 | 8 |
+| Metalmeccanico | 25-28 | - | - | 5 |
+| Uffici/Servizi IT | 62-63 | - | - | 4 |
+| Sanita | 86 | - | - | 4 |
+| Agricoltura | 01-03 | - | - | 3 |
+
+---
+
+##  Asset Tracking
+
+Traccia 4 tipologie di asset:
+- **Attrezzature generiche** (id, tipo, tag, scadenze)
+- **Macchine** (costruttore, rischio, manutenzione, sicurezza)
+- **Estintori** (capacita, agente, ricarica, collaudo)
+- **Cassette PS** (contenuto, scadenza, addetto)
+
+Alert automatici: rosso (<0ggi), arancione (<30ggi), giallo (<90ggi).
+
+---
+
+##  Formazione
+
+- Catalogo corsi con requisiti per settore/rischio
+- Record per dipendente con scadenza e attestato
+- Dashboard scadenze con badge notifiche
+- ATECO collegato → corsi consigliati automaticamente
+
+---
+
+##  NormSync
+
+Sistema aggiornamento normativo:
+1. n8n monitora fonti normative (Gazzetta Ufficiale, INAIL)
+2. AI rileva modifiche rilevanti → crea proposta
+3. Admin riceve proposta in pagina **NormSync**
+4. Approva → patch applicata automaticamente alle checklist
+5. Rifiuta → proposta archiviata
+
+---
+
+##  Test
+
+```bash
+# Backend
+cd apps/backend
+pnpm test
+
+# Singolo test
+pnpm tsx src/tests/checklists.test.ts
+
+# Database
+npx prisma studio  # GUI Prisma
+```
+
+---
+
+##  Deploy
+
+### Desktop (Windows)
+```bash
+cd apps/desktop
+pnpm build
+electron-forge make  # opzionale, per installer
+```
+
+### Backend (Docker)
+```bash
+# Vedi infra/docker/
+docker compose up -d
+```
+
+---
+
+##  Contribuire
+
+1. Leggi `AGENTS.md` per le regole del progetto
+2. Leggi `PRD.md` per i requisiti
+3. Usa `FEDSHIELD_CONTEXT.md` per capire cosa e gia fatto
+4. Per backend: usa `/skill load backend-development`
+5. Per frontend: usa `/skill load frontend-design`
+
+---
+
+##  Licenza
+
+Proprietaria — FedShield Team. Nessun dato reale deve essere committato.
+
+---
+
+**Contatti:** Per supporto tecnico o domande sul progetto, consulta la documentazione in `docs/`.

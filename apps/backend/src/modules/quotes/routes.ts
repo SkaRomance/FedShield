@@ -132,7 +132,7 @@ const quotesRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.badRequest("Payload preventivo non valido.");
       }
 
-      const auth = request.user as { sub: string; role: UserRole };
+      const auth = request.user;
       const nc = await fastify.prisma.nonConformity.findUnique({
         where: { id: parsed.data.nonConformityId },
         include: {
@@ -197,7 +197,7 @@ const quotesRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.badRequest("Payload risposta preventivo non valido.");
       }
 
-      const auth = request.user as { sub: string };
+      const auth = request.user;
       const quote = await fastify.prisma.quote.findUnique({ where: { id: params.data.id } });
 
       if (!quote) {
