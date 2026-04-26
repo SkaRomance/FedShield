@@ -7,11 +7,17 @@ import {
   Inspection,
 } from "../api";
 import { queueSyncEvent } from "../services/syncManager";
+import { useNotificationBadge } from "../hooks/useNotificationBadge";
 import ChecklistPage from "./ChecklistPage";
 import CustomerRegistryPage from "./CustomerRegistryPage";
 import KpiPage from "./KpiPage";
 import OdvPage from "./OdvPage";
 import QuotesPage from "./QuotesPage";
+import TrainingPage from "./TrainingPage";
+import ChatbotPage from "./ChatbotPage";
+import NormSyncAdminPage from "./NormSyncAdminPage";
+import AssetsPage from "./AssetsPage";
+import AssetQrPage from "./AssetQrPage";
 
 interface DashboardProps {
   token: string;
@@ -59,8 +65,19 @@ export default function DashboardPage({
   onLogout,
 }: DashboardProps) {
   const [activeView, setActiveView] = useState<
-    "dashboard" | "registry" | "checklist" | "quotes" | "kpi" | "odv"
+    | "dashboard"
+    | "registry"
+    | "checklist"
+    | "quotes"
+    | "kpi"
+    | "odv"
+    | "training"
+    | "chatbot"
+    | "normsync"
+    | "assets"
+    | "assetQr"
   >("dashboard");
+  const [qrAssetId, setQrAssetId] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string>("");
   const [logoIndex, setLogoIndex] = useState(0);
   const [checklistSelection, setChecklistSelection] = useState<{
@@ -69,8 +86,13 @@ export default function DashboardPage({
     token: number;
   }>({ token: 0 });
 
+  const { count: alertCount } = useNotificationBadge(token);
+
   const sanctionableNc = useMemo(
-    () => inspections.flatMap((item) => item.nonConformities).filter((nc) => nc.isSanctionable).length,
+    () =>
+      inspections
+        .flatMap((item) => item.nonConformities)
+        .filter((nc) => nc.isSanctionable).length,
     [inspections],
   );
 
@@ -86,7 +108,9 @@ export default function DashboardPage({
       });
       setStatusMessage("Verbale PDF generato e scaricato.");
     } catch (error) {
-      setStatusMessage(`Errore verbale PDF: ${error instanceof Error ? error.message : "errore"}`);
+      setStatusMessage(
+        `Errore verbale PDF: ${error instanceof Error ? error.message : "errore"}`,
+      );
     }
   }
 
@@ -102,7 +126,9 @@ export default function DashboardPage({
       });
       setStatusMessage("Attestato PDF generato e scaricato.");
     } catch (error) {
-      setStatusMessage(`Errore attestato: ${error instanceof Error ? error.message : "errore"}`);
+      setStatusMessage(
+        `Errore attestato: ${error instanceof Error ? error.message : "errore"}`,
+      );
     }
   }
 
@@ -175,10 +201,39 @@ export default function DashboardPage({
           >
             ODV
           </button>
+          <button
+            className={`nav-item ${activeView === "training" ? "nav-item-active" : ""}`}
+            onClick={() => setActiveView("training")}
+          >
+            Formazione
+          </button>
+          <button
+            className={`nav-item ${activeView === "assets" || activeView === "assetQr" ? "nav-item-active" : ""}`}
+            onClick={() => {
+              setActiveView("assets");
+              setQrAssetId(null);
+            }}
+          >
+            Asset & Attrezzature
+          </button>
+          <button
+            className={`nav-item ${activeView === "chatbot" ? "nav-item-active" : ""}`}
+            onClick={() => setActiveView("chatbot")}
+          >
+            🤖 AuditBot
+          </button>
           {user.role === "admin" && (
-            <button className="nav-item" disabled>
-              Admin KPI
-            </button>
+            <>
+              <button
+                className={`nav-item ${activeView === "normsync" ? "nav-item-active" : ""}`}
+                onClick={() => setActiveView("normsync")}
+              >
+                📜 NormSync
+              </button>
+              <button className="nav-item" disabled>
+                Admin KPI
+              </button>
+            </>
           )}
         </nav>
       </aside>
@@ -189,7 +244,21 @@ export default function DashboardPage({
             <h1>Benvenuto {user.fullName}</h1>
             <p>{roleLabel(user.role)} • Piattaforma Antisanzione</p>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            {alertCount > 0 && (
+              <span
+                style={{
+                  background: "crimson",
+                  color: "white",
+                  borderRadius: "50%",
+                  padding: "4px 10px",
+                  fontSize: 14,
+                  fontWeight: "bold",
+                }}
+              >
+                {alertCount}
+              </span>
+            )}
             <button onClick={onSyncNow} className="logout-btn">
               Sync ora
             </button>
@@ -256,15 +325,23 @@ export default function DashboardPage({
                     <tr key={inspection.id}>
                       <td>{inspection.title}</td>
                       <td>{inspection.company.name}</td>
-                      <td>{new Date(inspection.happenedAt).toLocaleDateString("it-IT")}</td>
+                      <td>
+                        {new Date(inspection.happenedAt).toLocaleDateString("it-IT")}
+                      </td>
                       <td>{inspection.status}</td>
                       <td>{inspection.nonConformities.length}</td>
                       <td>
                         <div className="row-actions">
-                          <button className="ghost-btn" onClick={() => handleGenerateReportPdf(inspection.id)}>
+                          <button
+                            className="ghost-btn"
+                            onClick={() => handleGenerateReportPdf(inspection.id)}
+                          >
                             Verbale PDF
                           </button>
-                          <button className="ghost-btn" onClick={() => handleGenerateAttestato(inspection.id)}>
+                          <button
+                            className="ghost-btn"
+                            onClick={() => handleGenerateAttestato(inspection.id)}
+                          >
                             Attestato
                           </button>
                         </div>
@@ -303,6 +380,31 @@ export default function DashboardPage({
           <QuotesPage token={token} companies={companies} />
         ) : activeView === "kpi" ? (
           <KpiPage token={token} companies={companies} />
+        )         : activeView === "training" ? (
+          <TrainingPage token={token} companies={companies} />
+        ) : activeView === "chatbot" ? (
+          <ChatbotPage token={token} />
+        ) : activeView === "normsync" ? (
+          <NormSyncAdminPage token={token} />
+        ) : activeView === "assets" ? (
+          <AssetsPage
+            token={token}
+            companies={companies}
+            onOpenQr={(id) => {
+              setQrAssetId(id);
+              setActiveView("assetQr");
+            }}
+          />
+        ) : activeView === "assetQr" ? (
+          <AssetQrPage
+            token={token}
+            companies={companies}
+            assetId={qrAssetId}
+            onBack={() => {
+              setActiveView("assets");
+              setQrAssetId(null);
+            }}
+          />
         ) : (
           <OdvPage token={token} companies={companies} />
         )}

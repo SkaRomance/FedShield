@@ -383,7 +383,7 @@ export default function ChecklistPage({
   const retailAdditionalScopeOptions = isHypermarketAteco
     ? HYPERMARKET_INTERNAL_SCOPE_OPTIONS
     : SUPERMARKET_INTERNAL_SCOPE_OPTIONS;
-  const retailAdditionalScopeValues = useMemo(
+  const retailAdditionalScopeValues = useMemo<Set<string>>(
     () => new Set(retailAdditionalScopeOptions.map((option) => option.value)),
     [retailAdditionalScopeOptions],
   );
