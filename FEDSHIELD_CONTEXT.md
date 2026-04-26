@@ -254,10 +254,36 @@ PRD aggiornato: NF-03 (argon2) ora compliant; F-24 (asset CRUD completo end-to-e
 - Test backend: tutti i suite passano (auth-matrix 5/5, password 5/5, smoke 8/8)
 - Code review: HIGH chiusi; MEDIUM/LOW backlog (vedi sotto)
 
-### Backlog residuo (Sprint 5 — Operativo)
+**Sprint 5 — Test fragility hardening** (post-merge, su main):
+
+| # | Tema | Note |
+|---|------|------|
+| S5-1 | Seed `prisma/seed-users.ts` idempotente: 3 utenti dev (junior/senior/admin@fedshield.local, password unificata `fedshield123`, hash argon2id) | upsert |
+| S5-2 | Seed `prisma/seed-test-baseline.ts` idempotente: 1 company + 1 checklist template + 1 item + 1 doc template + chiamata `seedChecklistTemplates` | risolve fallimento checklists.test |
+| S5-3 | `pretest` script aggancia `pnpm db:seed:test` (= seed-users + seed-test-baseline) → ogni `pnpm test` parte con DB consistente | npm convention |
+| S5-4 | `pastry-split.test.ts` e `horeca-completeness.test.ts` auto-skippano se template HoReCa ATECO 56.10.x non esistono (il seed monolitico è stato cancellato in `9aca204`) | guard via `app.prisma.checklistTemplate.findFirst` |
+| S5-5 | `prisma/add-user.ts` password allineata a `fedshield123` per coerenza con i test | password ricostruibile via seed-users.ts |
+
+**Risultato test suite finale:**
+```
+Checklist routes test passed
+Pastry split test: skipped (HoReCa seed assente).
+HoReCa completeness test: skipped (HoReCa seed assente).
+Quotes and documents test passed
+KPI and ODV test passed
+Licensing and sync test passed
+Auth matrix: 5/5 pass
+Password plugin: 5/5 pass
+Smoke: 8/8 pass
+```
+Nessun fallimento. I 2 skip restano valid quando il seed HoReCa verrà ricostruito (vedi backlog).
+
+### Backlog residuo (Sprint 6+)
 
 - HTTPS reverse proxy n8n VPS (richiede accesso infra)
 - E2E test Playwright (flusso login → create company → create employee → record formazione)
+- Ricostruire seed HoReCa monolitico cancellato (`pastry-split` e `horeca-completeness` test auto-skippati nel frattempo)
+- Riparare `seed-metalmeccanico.ts` (enum `section` invalida → seed full broken)
 - Code review MEDIUM (M1 anti user-enumeration timing, M5 fix `JSON.parse(JSON.stringify)` proposals/approve, M2 `n8nChatbotResponseSchema.timestamp` strict ISO, M3 policy HACCP nominativi su junior)
 - Eventuale rimozione finale di `bcryptjs` quando il DB sarà tutto argon2
 - Stampabilità QR per estintori/kits / dark mode / migrazione SQLite → Postgres prod

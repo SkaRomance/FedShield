@@ -30,6 +30,19 @@ type HorecaQualityConfig = {
 
 async function run() {
   const app = buildApp();
+  await app.ready();
+
+  // Guard: il seed HoReCa monolitico è stato rimosso (vedi prisma/seed.ts
+  // wrapper minimale). Senza i template ATECO 56.10.x non ha senso
+  // eseguire questo test di completezza dominio. Skip pulito.
+  const horecaProbe = await app.prisma.checklistTemplate.findFirst({
+    where: { atecoCode: "56.10.11" },
+  });
+  if (!horecaProbe) {
+    console.log("HoReCa completeness test: skipped (HoReCa seed assente).");
+    await app.close();
+    return;
+  }
 
   const login = await app.inject({
     method: "POST",

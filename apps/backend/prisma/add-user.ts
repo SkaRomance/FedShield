@@ -5,7 +5,9 @@ const prisma = new PrismaClient();
 
 async function main() {
   const email = "admin@fedshield.local";
-  const password = "fedshield2026";
+  // Allineata alla convention dei test legacy (junior/senior/admin tutti con
+  // questa stessa password in dev). Per production cambiare via /auth/* admin.
+  const password = "fedshield123";
   const hash = await argon2.hash(password, {
     type: argon2.argon2id,
     memoryCost: 19_456,
