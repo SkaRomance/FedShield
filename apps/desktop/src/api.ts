@@ -1168,3 +1168,64 @@ export function createFirstAidKit(
     body: JSON.stringify(payload),
   });
 }
+
+type EquipmentUpdate = Partial<Omit<Equipment, "id" | "companyId" | "createdAt" | "updatedAt">>;
+type MachineUpdate = Partial<Omit<Machine, "id" | "companyId" | "createdAt" | "updatedAt">>;
+type FireExtinguisherUpdate = Partial<Omit<FireExtinguisher, "id" | "companyId" | "createdAt" | "updatedAt">>;
+type FirstAidKitUpdate = Partial<Omit<FirstAidKit, "id" | "companyId" | "createdAt" | "updatedAt">>;
+
+export function updateEquipment(token: string, id: string, payload: EquipmentUpdate) {
+  return authedFetch<Equipment>(`/equipment/${id}`, token, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteEquipment(token: string, id: string) {
+  return authedFetch<void>(`/equipment/${id}`, token, { method: "DELETE" });
+}
+
+export function fetchMachineById(token: string, id: string) {
+  return authedFetch<Machine>(`/machines/${id}`, token);
+}
+
+export function updateMachine(token: string, id: string, payload: MachineUpdate) {
+  return authedFetch<Machine>(`/machines/${id}`, token, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteMachine(token: string, id: string) {
+  return authedFetch<void>(`/machines/${id}`, token, { method: "DELETE" });
+}
+
+export function fetchFireExtinguisherById(token: string, id: string) {
+  return authedFetch<FireExtinguisher>(`/fire-extinguishers/${id}`, token);
+}
+
+export function updateFireExtinguisher(token: string, id: string, payload: FireExtinguisherUpdate) {
+  return authedFetch<FireExtinguisher>(`/fire-extinguishers/${id}`, token, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteFireExtinguisher(token: string, id: string) {
+  return authedFetch<void>(`/fire-extinguishers/${id}`, token, { method: "DELETE" });
+}
+
+export function fetchFirstAidKitById(token: string, id: string) {
+  return authedFetch<FirstAidKit>(`/first-aid-kits/${id}`, token);
+}
+
+export function updateFirstAidKit(token: string, id: string, payload: FirstAidKitUpdate) {
+  return authedFetch<FirstAidKit>(`/first-aid-kits/${id}`, token, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteFirstAidKit(token: string, id: string) {
+  return authedFetch<void>(`/first-aid-kits/${id}`, token, { method: "DELETE" });
+}
