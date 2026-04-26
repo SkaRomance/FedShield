@@ -57,16 +57,24 @@ pnpm --filter @fedshield/desktop dev
 Electron si apre automaticamente (renderer su http://localhost:5180)
 
 ### Database e Seed
+
 ```bash
 cd apps/backend
 
-# Push schema + seed dati demo
-npx prisma db push --force-reset
-npx prisma db seed
+# 1. Applica schema a SQLite vuoto
+pnpm db:push
 
-# Oppure crea solo utente admin
-pnpm tsx prisma/add-user.ts
+# 2. Seed completo (HoReCa + verticali + corsi formazione)
+pnpm db:seed
+
+# 3. Solo utenti dev (idempotente, da solo)
+pnpm db:seed:users
+
+# 4. Setup minimo per i test (utenti + baseline + HoReCa)
+pnpm db:seed:test
 ```
+
+**Strategia seed** (dettagli sotto): `db:seed:test` è idempotente e veloce (~5s), pensato per girare prima dei test (`pretest` hook). `db:seed` esegue tutti i settori (~30s) ed è bloccato in `NODE_ENV=production` per evitare cascade delete (vedi S9 HIGH-01).
 
 ---
 
@@ -186,7 +194,104 @@ Sistema aggiornamento normativo:
 
 ---
 
-##  Test
+## Sicurezza
+
+| Layer | Implementazione |
+|-------|-----------------|
+| Password | `argon2id` (Sprint 3, NF-03), verifier dual-format con re-hash opportunistico per hash bcrypt legacy |
+| JWT | `@fastify/jwt` con secret env `JWT_SECRET`; payload tipato via module augmentation (Sprint 8 L5) |
+| Rate limit | `@fastify/rate-limit` 100/min globale + 5/min su `/auth/login` (anti-brute force); skippato in `NODE_ENV=test` |
+| Anti-timing | `consumeDummyVerify` su login con email non registrata (Sprint 6 M1) — uniforma latency response |
+| HTTP headers | `@fastify/helmet` (CSP off su API JSON) |
+| RBAC | `requireRole(roles)` / `requireSeniorOrAdmin` / `requireAdmin` — 401 senza JWT, 403 ruolo insufficiente |
+| Output PII | DTO whitelist Zod su `/companies` (Sprint 3 S3-5); ruolo junior redige nominativi HACCP (Sprint 6 M3) |
+| Markdown XSS | DOMPurify allowlist su risposte chatbot AI (`apps/desktop/src/lib/markdown.ts`); link `target=_blank` ottengono `rel=noopener noreferrer` |
+| SSRF | `isSafeOutboundUrl` allowlist su `N8N_AUDITBOT_WEBHOOK` (Sprint 4 H1) |
+| Audit log | `writeAudit` fail-soft su tutte le mutazioni (insert in `AuditLog`, errori loggati ma mai propagati) |
+| Pagination cap | GET asset list cappati `take:200` default, max 500 via `?limit=N` (Sprint 8 L3); header `X-Total-Count` + `X-Truncated` (Sprint 10 MEDIUM-02) |
+
+Per dettagli vedi `apps/backend/src/plugins/auth.ts`, `password.ts`, `apps/desktop/src/lib/markdown.ts`.
+
+---
+
+## Strategia Test
+
+| Tipo | Tool | File | Coverage |
+|------|------|------|----------|
+| Backend integration | `node:test` + `app.inject()` | `apps/backend/src/tests/*.test.ts` | 28 test su 10 file |
+| Backend pretest seed | `tsx prisma/seed-users.ts` + `seed-test-baseline.ts` | npm `pretest` hook | idempotente, ~5s |
+| Desktop unit | `node:test` + `jsdom` | `apps/desktop/src/lib/*.test.ts` | 10 test markdown XSS sanitization |
+| TypeScript | `tsc --noEmit` | `tsconfig.json` per ogni app | 0 errori backend + desktop |
+
+```bash
+# Backend completo (28 test)
+cd apps/backend && pnpm test
+
+# Desktop (10 test jsdom)
+cd apps/desktop && pnpm test
+
+# Singolo test backend
+cd apps/backend && pnpm exec cross-env NODE_ENV=test tsx src/tests/golden-path.test.ts
+
+# Type check
+pnpm --filter @fedshield/backend exec tsc --noEmit -p tsconfig.json
+pnpm --filter @fedshield/desktop exec tsc --noEmit -p tsconfig.json
+
+# DB GUI
+cd apps/backend && pnpm exec prisma studio
+```
+
+**Note importanti**:
+- `cross-env NODE_ENV=test` è REQUIRED per skippare rate-limit nei test (Sprint 7 S7-2)
+- `pretest` hook auto-esegue `db:seed:test` prima di `pnpm test` — DB sempre consistente
+- I test HoReCa (`pastry-split.test.ts`, `horeca-completeness.test.ts`) verificano 15 categorie ATECO
+
+---
+
+## Strategia Seed
+
+| Comando | Cosa fa | Quando usarlo |
+|---------|---------|---------------|
+| `pnpm db:seed` | Orchestrator: HoReCa + 5 settori verticali + training cross-settore | Setup ambiente dev completo |
+| `pnpm db:seed:users` | Solo 3 utenti dev (junior/senior/admin@fedshield.local) | Reset password / onboarding rapido |
+| `pnpm db:seed:test` | Users + baseline minima + HoReCa | Auto-eseguito dal `pretest` hook |
+
+**File di seed** (`apps/backend/prisma/`):
+- `seed.ts` — orchestrator (rifiuta NODE_ENV=production senza FEDSHIELD_ALLOW_PROD_SEED)
+- `seed-users.ts` — 3 utenti idempotenti, password `fedshield123` argon2id
+- `seed-test-baseline.ts` — 1 company + template + item + doc minimi
+- `seed-horeca.ts` — 15 categorie ATECO HoReCa (8200+ righe)
+- `seed-checklist.ts` — checklist generica + re-export seedHoreca
+- `seed-edilizia.ts`, `seed-metalmeccanico.ts`, `seed-sanita.ts`, `seed-uffici.ts`, `seed-agricoltura.ts` — settori verticali (idempotenti)
+- `seed-training.ts` — 31 corsi formazione + 68 requisiti ATECO
+
+**Sicurezza seed**: HIGH-01 (Sprint 9) — `db:seed` rifiuta esecuzione in produzione perché i seed verticali fanno cascade delete su `EmployeeTrainingRecord`. Override esplicito: `FEDSHIELD_ALLOW_PROD_SEED=1`.
+
+---
+
+## Variabili d'Ambiente
+
+`apps/backend/.env`:
+
+| Variabile | Required | Default | Scopo |
+|-----------|----------|---------|-------|
+| `DATABASE_URL` | ✅ | `file:./prisma/dev.db` | Connection string Prisma (SQLite dev / Postgres prod) |
+| `JWT_SECRET` | ✅ | — | Secret firma JWT (cambia in prod, min 32 char random) |
+| `NODE_ENV` | ⬜ | `development` | `test` skippa rate-limit; `production` blocca seed |
+| `N8N_AUDITBOT_WEBHOOK` | ⬜ | — | URL webhook n8n per AuditBot AI; se assente fallback knowledge base |
+| `FEDSHIELD_N8N_API_KEY` | ⬜ | — | Header `X-API-KEY` server-side a n8n (sostituisce JWT client, Sprint 0 P0-4) |
+| `FEDSHIELD_N8N_ALLOWED_HOSTS` | ⬜ | `87.106.168.71` | Allowlist host SSRF (Sprint 4 H1) |
+| `FEDSHIELD_ALLOW_PROD_SEED` | ⬜ | — | Override per `db:seed` in `NODE_ENV=production` (rischio data-loss) |
+
+`apps/desktop/.env` (renderer Vite, prefix `VITE_`):
+
+| Variabile | Required | Default | Scopo |
+|-----------|----------|---------|-------|
+| `VITE_DEV_SERVER_URL` | ⬜ | `http://localhost:5180` | URL renderer per Electron in dev |
+
+---
+
+##  Test rapido
 
 ```bash
 # Backend
@@ -194,11 +299,13 @@ cd apps/backend
 pnpm test
 
 # Singolo test
-pnpm tsx src/tests/checklists.test.ts
+pnpm exec cross-env NODE_ENV=test tsx src/tests/checklists.test.ts
 
-# Database
-npx prisma studio  # GUI Prisma
+# Database GUI
+pnpm exec prisma studio
 ```
+
+Vedi sopra "Strategia Test" per il dettaglio.
 
 ---
 
