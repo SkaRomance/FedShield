@@ -290,12 +290,36 @@ Nessun fallimento. I 2 skip restano valid quando il seed HoReCa verrà ricostrui
 
 Test backend totali: auth-matrix 6/6, password 6/6, smoke 8/8, legacy/quotes/kpi-odv/licensing pass, 2 HoReCa skip puliti.
 
-### Backlog residuo (Sprint 7+)
+**Sprint 7 ✅ Completato — Test coverage HoReCa + golden-path** (branch `feat/sprint-7-test-coverage`, commits `012fa17..1fd6729`):
+
+| # | Tema | Commit |
+|---|------|--------|
+| S7-1 | Restore seed HoReCa monolitico cancellato in `9aca204` (8265 righe). Recuperato da git history come `seed-horeca.ts`, rimosso user seeding bcrypt (delegato a `seed-users.ts`), wrap in `export async function seedHoreca()`, `documentTemplate.deleteMany` scoped sui macroGroup HoReCa + 11 nomi generici per non wipiare doc di altri moduli. `seed-checklist.ts` ora re-exporta `seedHoreca` dal nuovo modulo. | `012fa17` |
+| S7-2 | Rate-limit globale + per-route (`/auth/login` 5/min anti-brute) saltato quando `NODE_ENV=test`: i test legacy sforavano la soglia con centinaia di `app.inject()` consecutivi (429 invece dei codici business). `cross-env` aggiunto come devDep (Windows non accetta `VAR=val tsx`); script `test` prefixato. | `7b7f085` |
+| S7-3 | Estensione enum `ChecklistSection` con 18 valori sectorial (`machinery_safety`, `welding_thermal`, `chemical_fitosanitary`, `electrical`, `ergonomics`, `fire_prevention`, etc.) usati dai seed verticali (metalmeccanico/sanita/uffici/agricoltura). SQLite tratta enum come TEXT → nessuna migrazione dati. Note: `seed-metalmeccanico.ts` ha residui schema mismatch separati (campo `sector` su TrainingCourse, `severity`/`sanctionable` vs `defaultSeverity`/`defaultSanctionable`) — fuori scope. | `e96bc82` |
+| S7-4 | Golden-path integration test cross-modulo: login senior → create company → create employee → create training course → record formazione → list employees with records. + Negative test: junior 403 su tutti e tre i POST master-data. | `1fd6729` |
+
+**Risultato test suite Sprint 7:**
+```
+Checklist routes test passed
+HoReCa split test passed                          ← era skip in S6
+HoReCa completeness test passed                   ← era skip in S6
+Quotes and documents test passed
+KPI and ODV test passed
+Licensing and sync test passed
+Auth matrix: 6/6 pass
+Password plugin: 6/6 pass
+Smoke: 8/8 pass
+Golden path: 2/2 pass                             ← NEW
+```
+
+Totale 28 test su 10 file, tutti pass. HoReCa coverage: 15 categorie ATECO (ristoranti, bar, hotel, B&B, ostelli, campeggi, pasticcerie, pizzerie, mense, catering, food truck, pasticcerie ambulanti, gastronomia, balneari, locali serali) ora effettivamente verificate.
+
+### Backlog residuo (Sprint 8+)
 
 - HTTPS reverse proxy n8n VPS (richiede accesso infra)
-- E2E test Playwright (flusso login → create company → create employee → record formazione)
-- Ricostruire seed HoReCa monolitico cancellato (`pastry-split` e `horeca-completeness` test auto-skippati nel frattempo)
-- Riparare `seed-metalmeccanico.ts` (enum `section` invalida → seed full broken)
+- Playwright E2E browser-level (deferred Sprint 7 → API-level integration test sufficiente per ora)
+- Riparare schema mismatch in `seed-metalmeccanico.ts` (e seed-sanita/uffici/agricoltura): campo `sector` su TrainingCourse, `severity`/`sanctionable` → `defaultSeverity`/`defaultSanctionable`, eventuali altre divergenze schema
 - L5 (review): tipare `request.user` con module-augmentation Fastify (sostituisce gli `any` ricorrenti)
 - L3 (review): cap `take: 200` o `companyId` obbligatorio su GET equipment list (default cap)
 - L2 (review): test ChatbotPage con jsdom per `renderAssistantMarkdown`
