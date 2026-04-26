@@ -150,7 +150,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         throw err;
       }
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "equipment.create",
         entityType: "equipment",
         entityId: created.id,
@@ -197,7 +197,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         throw err;
       }
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "machine.create",
         entityType: "machine",
         entityId: created.id,
@@ -241,7 +241,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         throw err;
       }
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "fireExtinguisher.create",
         entityType: "fireExtinguisher",
         entityId: created.id,
@@ -277,7 +277,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         data: parseDates(parsed.data, ["lastCheckAt", "nextCheckAt", "replenishedAt"]),
       });
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "firstAidKit.create",
         entityType: "firstAidKit",
         entityId: created.id,
@@ -322,7 +322,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         throw err;
       }
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "equipment.update",
         entityType: "equipment",
         entityId: updated.id,
@@ -342,7 +342,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         data: { status: "decommissioned" },
       });
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "equipment.decommission",
         entityType: "equipment",
         entityId: id,
@@ -386,7 +386,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         throw err;
       }
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "machine.update",
         entityType: "machine",
         entityId: updated.id,
@@ -406,7 +406,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         data: { status: "decommissioned" },
       });
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "machine.decommission",
         entityType: "machine",
         entityId: id,
@@ -447,7 +447,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         throw err;
       }
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "fireExtinguisher.update",
         entityType: "fireExtinguisher",
         entityId: updated.id,
@@ -467,7 +467,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         data: { status: "decommissioned" },
       });
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "fireExtinguisher.decommission",
         entityType: "fireExtinguisher",
         entityId: id,
@@ -500,7 +500,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         data: parseDates(parsed.data, ["lastCheckAt", "nextCheckAt", "replenishedAt"]),
       });
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "firstAidKit.update",
         entityType: "firstAidKit",
         entityId: updated.id,
@@ -520,7 +520,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         data: { status: "decommissioned" },
       });
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "firstAidKit.decommission",
         entityType: "firstAidKit",
         entityId: id,

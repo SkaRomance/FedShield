@@ -73,7 +73,7 @@ const licensingRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.badRequest("Payload revoca licenza non valido.");
       }
 
-      const auth = request.user as { sub?: string; role?: UserRole };
+      const auth = request.user;
       if (auth.role !== UserRole.admin) {
         return reply.forbidden("Solo admin puo revocare licenze device.");
       }
@@ -98,7 +98,7 @@ const licensingRoutes: FastifyPluginAsync = async (fastify) => {
     "/licensing/devices",
     { preHandler: [fastify.authenticate] },
     async (request, reply) => {
-      const auth = request.user as { role?: UserRole };
+      const auth = request.user;
       if (auth.role !== UserRole.admin) {
         return reply.forbidden("Solo admin puo consultare le licenze device.");
       }

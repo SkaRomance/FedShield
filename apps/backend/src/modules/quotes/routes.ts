@@ -289,7 +289,7 @@ const quotesRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.badRequest("Payload malleva non valido.");
       }
 
-      const auth = request.user as { sub?: string };
+      const auth = request.user;
       const malleva = await generateMallevaPdf(fastify, {
         quoteId: params.data.id,
         reason: body.data.reason,

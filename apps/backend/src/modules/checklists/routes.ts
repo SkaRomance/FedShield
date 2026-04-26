@@ -94,7 +94,7 @@ const checklistRoutes: FastifyPluginAsync = async (fastify) => {
       }
 
       const atecoVariants = buildAtecoVariants(query.data.atecoCode);
-      const auth = request.user as { role?: "junior" | "senior" | "admin" };
+      const auth = request.user;
       const retailScopeVariants =
         auth.role === "admin" ? [] : buildRetailScopeVariants(parseRetailScopes(query.data.retailScopes));
       const macroGroupVariants = [...new Set([...atecoVariants, ...retailScopeVariants])];
@@ -187,7 +187,7 @@ const checklistRoutes: FastifyPluginAsync = async (fastify) => {
       }
 
       const atecoVariants = buildAtecoVariants(query.data.atecoCode);
-      const auth = request.user as { role?: "junior" | "senior" | "admin" };
+      const auth = request.user;
       const retailScopeVariants =
         auth.role === "admin" ? [] : buildRetailScopeVariants(parseRetailScopes(query.data.retailScopes));
       const macroGroupVariants = [...new Set([...atecoVariants, ...retailScopeVariants])];

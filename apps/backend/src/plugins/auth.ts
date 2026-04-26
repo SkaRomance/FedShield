@@ -7,7 +7,18 @@ export type UserRole = "junior" | "senior" | "admin";
 
 export interface AuthenticatedUser {
   sub?: string;
+  email?: string;
   role?: UserRole;
+}
+
+// S8 (L5): module augmentation @fastify/jwt — tipiamo request.user a livello
+// globale così i route handler possono accedere a request.user.sub /
+// .role senza cast `as { sub?: string }`.
+declare module "@fastify/jwt" {
+  interface FastifyJWT {
+    payload: AuthenticatedUser;
+    user: AuthenticatedUser;
+  }
 }
 
 export default fp(async (fastify) => {
@@ -33,7 +44,7 @@ export default fp(async (fastify) => {
  */
 export function requireRole(allowedRoles: UserRole[]) {
   return async function rolePreHandler(request: FastifyRequest, reply: FastifyReply) {
-    const user = request.user as AuthenticatedUser | undefined;
+    const user = request.user;
     if (!user?.role || !allowedRoles.includes(user.role)) {
       return reply.forbidden(
         `Operazione riservata ai ruoli: ${allowedRoles.join(", ")}.`,

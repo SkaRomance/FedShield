@@ -16,7 +16,7 @@ const notificationsRoutes: FastifyPluginAsync = async (fastify) => {
     "/notifications/alerts",
     { preHandler: [fastify.authenticate] },
     async (request, reply) => {
-      const _user = request.user as { sub?: string };
+      const _user = request.user;
       const { companyId } = request.query as { companyId?: string };
       if (!companyId) {
         return reply.badRequest("companyId richiesto.");

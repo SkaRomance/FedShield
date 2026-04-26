@@ -60,7 +60,7 @@ const syncRoutes: FastifyPluginAsync = async (fastify) => {
         events: parsed.data.events,
       });
 
-      const auth = request.user as { sub?: string };
+      const auth = request.user;
       await writeAudit(fastify, {
         userId: auth.sub,
         action: "sync.push",
