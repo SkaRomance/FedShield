@@ -221,7 +221,30 @@ Audit completo: `docs/audit/AUDIT_2026-04-25.md` (39 feature PRD verificate, 47 
 
 PRD chiuso: F-15 (CRUD frontend dipendenti), F-16 (CRUD frontend corsi), F-22 (QR raggiungibile da nav), F-24 (CRUD frontend asset).
 
-Sprint 3 — Production hardening: HTTPS reverse proxy n8n VPS, schema validation risposte n8n, sanitization HTML chatbot, unique constraints schema, E2E test, eventuale migrazione `bcryptjs → argon2`, DTO whitelisting companies.PATCH (breaking + frontend coordinato), risolvere 7 errori TS pre-esistenti in ChecklistPage/syncManager.
+**Sprint 3 ✅ Completato** (commits `9932f32..a253b9e`):
+
+| # | Tema | Commit |
+|---|------|--------|
+| S3-1 | Zod validation su risposte n8n AuditBot (whitelist `answer`/`source`/`citations`/`timestamp`); aggiunto timeout 15s + check `res.ok` | `9932f32` |
+| S3-2 | DOMPurify + marked nel chatbot desktop: messaggi AI renderizzati come HTML markdown sanitizzato (whitelist tag/attr conservativa, URL solo http/mailto/tel) | `2d47434` |
+| S3-3 | Unique constraints Prisma: `Employee[companyId,fiscalCode]`, `Equipment[companyId,serialNumber]`, `Machine[companyId,serialNumber]`, `FireExtinguisher[companyId,code]` + helper `replyOnUniqueViolation` (P2002 → 409 Conflict) | `3a02929` |
+| S3-4 | Endpoint PATCH/DELETE per Equipment/Machine/FireExtinguisher/FirstAidKit con role guards, audit log, soft-delete (status=decommissioned) + GET singolo per parità + helper desktop `update*`/`delete*` | `a374911` |
+| S3-5 | DTO whitelist su companies (output schema Zod): GET/POST/PATCH restituiscono solo i campi esplicitamente whitelistati | `c3d2c54` |
+| S3-6 | Risolti 7 errori TS pre-esistenti desktop: `heartbeatDeviceLicense` ora tipizzato con `DeviceHeartbeatResponse`, `reduce<number>` in syncManager, `Set<string>` widening in ChecklistPage. **Desktop tsc --noEmit pulito.** | `f7e7337` |
+| S3-7 | Migrazione `bcryptjs → argon2id` (PRD NF-03): plugin `password.ts` con verifier dual-format (riconosce hash bcrypt legacy + argon2 via prefix), re-hash opportunistico al login OK, `prisma/add-user.ts` aggiornato. 5 test password tutti passano. | `a253b9e` |
+
+**Vite build desktop: 373 KB → 110 KB gzipped (DOMPurify + marked: +24 KB gzip) in ~1.4s. Backend tsc runtime pulito; test pre-esistenti su `auth-matrix.test.ts` (errori InjectPayload/statusCode tipi `light/inject` Fastify) restano da raffinare.**
+
+PRD aggiornato: NF-03 (argon2) ora compliant; F-24 (asset CRUD completo end-to-end con edit/delete).
+
+### Backlog residuo (Sprint 4 — Operativo)
+
+- HTTPS reverse proxy n8n VPS (richiede accesso infra)
+- E2E test Playwright (flusso login → create company → create employee → record formazione)
+- Edit/delete UI desktop per asset (backend pronto, frontend ancora con solo create)
+- Risolvere 6 errori TS in `auth-matrix.test.ts` (tipi inject/statusCode Fastify)
+- Eventuale rimozione finale di `bcryptjs` quando il DB sarà tutto argon2
+- Stampabilità QR per estintori/kits / dark mode / migrazione SQLite → Postgres prod
 
 ---
 
@@ -230,14 +253,13 @@ Sprint 3 — Production hardening: HTTPS reverse proxy n8n VPS, schema validatio
 | Priorita | Task | Skill Suggerite |
 |----------|------|-----------------|
 | Alta | Import workflow n8n sul VPS + HTTPS reverse proxy | docker-development |
-| Alta | Schema validation risposte n8n + sanitization HTML chatbot | senior-backend |
-| Alta | Risolvere 7 errori TS pre-esistenti in ChecklistPage/syncManager | senior-backend |
-| Media | Edit/delete macchine/estintori/cassette PS (Sprint 2 ha solo create) | frontend-design |
+| Alta | Test E2E (Playwright) — flusso login → create company → create employee → record formazione | qa + test-driven-development |
+| Media | UI edit/delete asset desktop (backend pronto in Sprint 3, manca solo frontend) | frontend-design |
+| Media | Risolvere 6 errori TS in `auth-matrix.test.ts` (tipi `light/inject`) | senior-backend |
 | Media | QR code stampabile per estintori/kits | frontend-design |
-| Media | Test E2E (Playwright) — flusso login → create company → create employee → record formazione | qa + test-driven-development |
-| Media | DTO whitelisting companies.PATCH (breaking, coordinato col frontend) | senior-backend |
+| Bassa | Rimozione finale `bcryptjs` quando il DB sarà tutto argon2 | senior-backend |
 | Bassa | Dark mode / tema personalizzabile | ui-ux-pro-max |
-| Bassa | Migrazione bcryptjs → argon2 (PRD NF-03 strict compliance) | senior-backend |
+| Bassa | Migrazione SQLite → Postgres per ambiente production | senior-backend |
 
 ---
 
