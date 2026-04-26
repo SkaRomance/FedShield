@@ -1,6 +1,5 @@
-import { ChecklistSection, ComplianceDomain, PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { ChecklistSection, ComplianceDomain } from "@prisma/client";
+import { prisma } from "./_client.js";
 
 export async function seedChecklistTemplates() {
   // Crea il template generico se manca, altrimenti aggiorna

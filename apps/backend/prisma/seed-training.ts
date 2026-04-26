@@ -1,0 +1,427 @@
+import { ComplianceDomain, TrainingSection } from "@prisma/client";
+import { prisma } from "./_client.js";
+
+export async function seedTrainingData() {
+  console.log("Seeding training courses...");
+
+  // === CORSI UNIVERSALI (tutti i settori) ===
+  const courses = [
+    {
+      id: "course-gen-worker",
+      name: "Formazione generale lavoratori",
+      description: "Informazione e formazione generale sui rischi lavorativi, diritti/doveri, organizzazione prevenzione.",
+      targetAudience: "Tutti i lavoratori",
+      minHours: 4,
+      frequencyYears: 5,
+      normReference: "D.Lgs. 81/2008, art. 36; Accordo Stato-Regioni 21/12/2011, Modulo A",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-spec-low",
+      name: "Formazione specifica rischio basso",
+      description: "Formazione sui rischi specifici del proprio posto di lavoro per settore a basso rischio.",
+      targetAudience: "Tutti i lavoratori (basso rischio)",
+      minHours: 4,
+      frequencyYears: 5,
+      normReference: "D.Lgs. 81/2008, art. 36; Accordo Stato-Regioni 21/12/2011, Modulo B",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-spec-med",
+      name: "Formazione specifica rischio medio",
+      description: "Formazione sui rischi specifici del proprio posto di lavoro per settore a medio rischio.",
+      targetAudience: "Tutti i lavoratori (medio rischio)",
+      minHours: 8,
+      frequencyYears: 5,
+      normReference: "D.Lgs. 81/2008, art. 36; Accordo Stato-Regioni 21/12/2011, Modulo B",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-spec-high",
+      name: "Formazione specifica rischio alto",
+      description: "Formazione sui rischi specifici del proprio posto di lavoro per settore ad alto rischio.",
+      targetAudience: "Tutti i lavoratori (alto rischio)",
+      minHours: 12,
+      frequencyYears: 5,
+      normReference: "D.Lgs. 81/2008, art. 36; Accordo Stato-Regioni 21/12/2011, Modulo B",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-preposto",
+      name: "Formazione preposti",
+      description: "Formazione per i preposti alla vigilanza sui lavoratori e sull'applicazione delle misure antinfortunistiche.",
+      targetAudience: "Preposti (supervisori)",
+      minHours: 8,
+      frequencyYears: 5,
+      normReference: "D.Lgs. 81/2008, art. 37; Accordo Stato-Regioni 21/12/2011, Modulo C",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-rspp",
+      name: "Formazione RSPP",
+      description: "Corso per il Responsabile del Servizio Prevenzione e Protezione.",
+      targetAudience: "RSPP",
+      minHours: 48,
+      frequencyYears: 5,
+      normReference: "D.Lgs. 81/2008, art. 32; DM 388/2003",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-rls",
+      name: "Formazione RLS",
+      description: "Corso per il Rappresentante dei Lavoratori per la Sicurezza.",
+      targetAudience: "RLS",
+      minHours: 32,
+      frequencyYears: 5,
+      normReference: "D.Lgs. 81/2008, art. 47; Accordo Stato-Regioni 21/12/2011",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-antincendio-basso",
+      name: "Addetto antincendio rischio basso",
+      description: "Formazione per addetti squadra antincendio in attivita a basso rischio.",
+      targetAudience: "Addetti antincendio",
+      minHours: 4,
+      frequencyYears: 5,
+      normReference: "DM 10/03/1998; DM 02/09/2021",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-antincendio-medio",
+      name: "Addetto antincendio rischio medio",
+      description: "Formazione per addetti squadra antincendio in attivita a medio rischio.",
+      targetAudience: "Addetti antincendio",
+      minHours: 8,
+      frequencyYears: 2,
+      normReference: "DM 10/03/1998; DM 02/09/2021",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-antincendio-alto",
+      name: "Addetto antincendio rischio alto",
+      description: "Formazione per addetti squadra antincendio in attivita ad alto rischio.",
+      targetAudience: "Addetti antincendio",
+      minHours: 16,
+      frequencyYears: 2,
+      normReference: "DM 10/03/1998; DM 02/09/2021",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-primo-soccorso",
+      name: "Primo soccorso",
+      description: "Corso per addetti al primo soccorso aziendale.",
+      targetAudience: "Addetti primo soccorso",
+      minHours: 12,
+      frequencyYears: 3,
+      normReference: "D.Lgs. 81/2008, art. 43; DM 388/2003",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-evacuazione",
+      name: "Addetto evacuazione/emergenza",
+      description: "Formazione per addetti alla gestione emergenze ed evacuazione.",
+      targetAudience: "Addetti emergenza",
+      minHours: 4,
+      frequencyYears: 3,
+      normReference: "D.Lgs. 81/2008, art. 43; Accordo Stato-Regioni 21/12/2011",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-haccp-a",
+      name: "HACCP Gruppo A - Base",
+      description: "Corso base per operatori del settore alimentare (manipolatori, addetti).",
+      targetAudience: "Tutti gli operatori alimentari",
+      minHours: 4,
+      frequencyYears: 3,
+      normReference: "Reg. CE 852/2004, art. 5; D.Lgs. 193/2007",
+      domain: ComplianceDomain.haccp,
+    },
+    {
+      id: "course-haccp-b",
+      name: "HACCP Gruppo B - Intermedio",
+      description: "Corso intermedio per responsabili HACCP aziendali.",
+      targetAudience: "Responsabili HACCP",
+      minHours: 16,
+      frequencyYears: 3,
+      normReference: "Reg. CE 852/2004, art. 5",
+      domain: ComplianceDomain.haccp,
+    },
+    {
+      id: "course-haccp-c",
+      name: "HACCP Gruppo C - Avanzato",
+      description: "Corso avanzato per consulenti/formatori HACCP autorizzati.",
+      targetAudience: "Consulenti/formatori HACCP",
+      minHours: 40,
+      frequencyYears: 3,
+      normReference: "Reg. CE 852/2004, art. 5; Linee guida regionali",
+      domain: ComplianceDomain.haccp,
+    },
+    {
+      id: "course-allergeni",
+      name: "Gestione allergeni settore alimentare",
+      description: "Formazione su mappatura, comunicazione e prevenzione contaminazione crociata allergeni.",
+      targetAudience: "Personale alimentare e sala",
+      minHours: 4,
+      frequencyYears: 3,
+      normReference: "Reg. UE 1169/2011",
+      domain: ComplianceDomain.haccp,
+    },
+    {
+      id: "course-moca",
+      name: "MOCA - Materiali a contatto alimenti",
+      description: "Formazione su materiali e oggetti a contatto con alimenti.",
+      targetAudience: "Responsabili qualita/produzione",
+      minHours: 4,
+      frequencyYears: 5,
+      normReference: "Reg. (CE) 1935/2004",
+      domain: ComplianceDomain.haccp,
+    },
+    {
+      id: "course-videoterminali",
+      name: "Formazione uso videoterminali",
+      description: "Formazione per lavoratori che utilizzano schermi VDT.",
+      targetAudience: "Operatori VDT",
+      minHours: 1,
+      frequencyYears: 5,
+      normReference: "D.Lgs. 81/2008, art. 174-175",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-trattori",
+      name: "Patentino trattori agricoli",
+      description: "Corso per la conduzione di trattori agricoli/forestali.",
+      targetAudience: "Operatori trattori",
+      minHours: 12,
+      frequencyYears: 10,
+      normReference: "D.Lgs. 81/2008, Titolo III; Accordo Stato-Regioni",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-muletto",
+      name: "Patentino carrelli elevatori",
+      description: "Corso per la conduzione di carrelli elevatori semoventi.",
+      targetAudience: "Operatori carrelli elevatori",
+      minHours: 12,
+      frequencyYears: 5,
+      normReference: "DM 11/04/2011; Accordo Stato-Regioni",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-pes-pav",
+      name: "PES / PAV / PEI - Lavori elettrici",
+      description: "Formazione per personale elettrico: PES (persona esperta), PAV (persona avvertita), PEI (persona idonea).",
+      targetAudience: "Personale elettrico",
+      minHours: 16,
+      frequencyYears: 5,
+      normReference: "CEI 11-27; DM 37/2008",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-lavori-quota",
+      name: "Lavori in quota e DPI anticaduta",
+      description: "Formazione per lavoratori che svolgono attivita in quota.",
+      targetAudience: "Lavoratori in quota",
+      minHours: 8,
+      frequencyYears: 2,
+      normReference: "D.Lgs. 81/2008, Titolo IV, Capo II; UNI EN 365",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-spazi-confinati",
+      name: "Lavoro in spazi confinati",
+      description: "Formazione specifica per lavoratori in spazi confinati.",
+      targetAudience: "Lavoratori spazi confinati",
+      minHours: 8,
+      frequencyYears: 2,
+      normReference: "D.Lgs. 81/2008, Titolo IV, Capo V",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-amianto",
+      name: "Rischio amianto",
+      description: "Formazione per lavoratori esposti a rischio amianto.",
+      targetAudience: "Lavoratori esposti amianto",
+      minHours: 12,
+      frequencyYears: 3,
+      normReference: "D.Lgs. 81/2008, Titolo IX; DM 06/09/1994",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-dpo",
+      name: "Data Protection Officer (DPO)",
+      description: "Corso per il Responsabile della Protezione Dati.",
+      targetAudience: "DPO",
+      minHours: 40,
+      frequencyYears: 2,
+      normReference: "Reg. UE 2016/679, art. 37-39",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-gdpr",
+      name: "Privacy e GDPR aziendale",
+      description: "Formazione base privacy per tutto il personale aziendale.",
+      targetAudience: "Tutti i lavoratori",
+      minHours: 2,
+      frequencyYears: 3,
+      normReference: "Reg. UE 2016/679, art. 39",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-duvri",
+      name: "Coordinamento DUVRI / CSC",
+      description: "Formazione per coordinatori sicurezza cantieri e committenti.",
+      targetAudience: "Coordinatori sicurezza / Committenti",
+      minHours: 40,
+      frequencyYears: 5,
+      normReference: "D.Lgs. 81/2008, artt. 90-95; DM 388/2003",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-adr",
+      name: "Trasporto merci pericolose ADR",
+      description: "Formazione per conducenti e addetti al trasporto di merci pericolose.",
+      targetAudience: "Conducenti / Addetti ADR",
+      minHours: 16,
+      frequencyYears: 5,
+      normReference: "D.Lgs. 35/2010 (ADR); Accordo Stato-Regioni",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-rumore",
+      name: "Rumore e vibrazioni",
+      description: "Formazione per lavoratori esposti a rumore e vibrazioni.",
+      targetAudience: "Lavoratori esposti rumore/vibrazioni",
+      minHours: 4,
+      frequencyYears: 5,
+      normReference: "D.Lgs. 81/2008, Titolo VIII, Capo II",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-rischio-biologico",
+      name: "Rischio biologico",
+      description: "Formazione per lavoratori esposti ad agenti biologici.",
+      targetAudience: "Lavoratori esposti rischio biologico",
+      minHours: 4,
+      frequencyYears: 5,
+      normReference: "D.Lgs. 81/2008, Titolo X, Capo I",
+      domain: ComplianceDomain.safety,
+    },
+    {
+      id: "course-appalti",
+      name: "Sicurezza in appalti",
+      description: "Formazione per datore di lavoro/imprese appaltatrici sulla sicurezza nei cantieri.",
+      targetAudience: "Imprese appaltatrici / Preposti cantieri",
+      minHours: 8,
+      frequencyYears: 5,
+      normReference: "D.Lgs. 81/2008, Titolo IV, Capo IV",
+      domain: ComplianceDomain.safety,
+    },
+  ];
+
+  for (const course of courses) {
+    await prisma.trainingCourse.upsert({
+      where: { id: course.id },
+      update: course,
+      create: course,
+    });
+  }
+
+  // === COLLEGAMENTO CORSI → ATECO (TrainingRequirement) ===
+  // Ogni ATECO ha le proprie regole su quali corsi servono
+  const reqs: any[] = [];
+
+  // -- Settore RISTORANTE (56.10.11) - basso rischio HACCP, basso rischio sicurezza --
+  const ristoranteCourses = [
+    { courseId: "course-gen-worker", atecoCode: "56.10.11", macroGroup: "RISTORANTI", isMandatory: true },
+    { courseId: "course-spec-low", atecoCode: "56.10.11", macroGroup: "RISTORANTI", isMandatory: true },
+    { courseId: "course-preposto", atecoCode: "56.10.11", macroGroup: "RISTORANTI", isMandatory: true },
+    { courseId: "course-haccp-a", atecoCode: "56.10.11", macroGroup: "RISTORANTI", isMandatory: true },
+    { courseId: "course-haccp-b", atecoCode: "56.10.11", macroGroup: "RISTORANTI", isMandatory: false, conditionalOn: "responsabile_haccp" },
+    { courseId: "course-allergeni", atecoCode: "56.10.11", macroGroup: "RISTORANTI", isMandatory: true },
+    { courseId: "course-moca", atecoCode: "56.10.11", macroGroup: "RISTORANTI", isMandatory: false, conditionalOn: "usa_moca" },
+    { courseId: "course-antincendio-basso", atecoCode: "56.10.11", macroGroup: "RISTORANTI", isMandatory: true },
+    { courseId: "course-primo-soccorso", atecoCode: "56.10.11", macroGroup: "RISTORANTI", isMandatory: true },
+    { courseId: "course-evacuazione", atecoCode: "56.10.11", macroGroup: "RISTORANTI", isMandatory: true },
+    { courseId: "course-rls", atecoCode: "56.10.11", macroGroup: "RISTORANTI", isMandatory: false, conditionalOn: "esiste_rls" },
+    { courseId: "course-rspp", atecoCode: "56.10.11", macroGroup: "RISTORANTI", isMandatory: false, conditionalOn: "datore_di_lavoro_non_esterno" },
+    { courseId: "course-gdpr", atecoCode: "56.10.11", macroGroup: "RISTORANTI", isMandatory: false },
+  ];
+
+  // -- Settore BAR (56.30) - stesso pattern --
+  const barCourses = ristoranteCourses.map((r) => ({ ...r, atecoCode: "56.30", macroGroup: "BAR" }));
+
+  // -- Settore HOTEL (55.10.00) - HACCP per colazioni, sicurezza per hotel --
+  const hotelCourses = [
+    { courseId: "course-gen-worker", atecoCode: "55.10.00", macroGroup: "HOTEL", isMandatory: true },
+    { courseId: "course-spec-low", atecoCode: "55.10.00", macroGroup: "HOTEL", isMandatory: true },
+    { courseId: "course-preposto", atecoCode: "55.10.00", macroGroup: "HOTEL", isMandatory: true },
+    { courseId: "course-haccp-a", atecoCode: "55.10.00", macroGroup: "HOTEL", isMandatory: true, conditionalOn: "somministrazione_alimenti" },
+    { courseId: "course-haccp-b", atecoCode: "55.10.00", macroGroup: "HOTEL", isMandatory: false, conditionalOn: "responsabile_haccp" },
+    { courseId: "course-antincendio-basso", atecoCode: "55.10.00", macroGroup: "HOTEL", isMandatory: true },
+    { courseId: "course-primo-soccorso", atecoCode: "55.10.00", macroGroup: "HOTEL", isMandatory: true },
+    { courseId: "course-evacuazione", atecoCode: "55.10.00", macroGroup: "HOTEL", isMandatory: true },
+    { courseId: "course-gdpr", atecoCode: "55.10.00", macroGroup: "HOTEL", isMandatory: true },
+  ];
+
+  // -- Settore EDILIZIA (41.x / 42.x / 43.x) - ALTO RISCHIO --
+  const ediliziaCourses = [
+    { courseId: "course-gen-worker", atecoCode: "41.20", macroGroup: "EDILIZIA", isMandatory: true },
+    { courseId: "course-spec-high", atecoCode: "41.20", macroGroup: "EDILIZIA", isMandatory: true },
+    { courseId: "course-preposto", atecoCode: "41.20", macroGroup: "EDILIZIA", isMandatory: true },
+    { courseId: "course-antincendio-medio", atecoCode: "41.20", macroGroup: "EDILIZIA", isMandatory: true },
+    { courseId: "course-primo-soccorso", atecoCode: "41.20", macroGroup: "EDILIZIA", isMandatory: true },
+    { courseId: "course-evacuazione", atecoCode: "41.20", macroGroup: "EDILIZIA", isMandatory: true },
+    { courseId: "course-lavori-quota", atecoCode: "41.20", macroGroup: "EDILIZIA", isMandatory: true },
+    { courseId: "course-pes-pav", atecoCode: "41.20", macroGroup: "EDILIZIA", isMandatory: false, conditionalOn: "lavori_elettrici" },
+    { courseId: "course-duvri", atecoCode: "41.20", macroGroup: "EDILIZIA", isMandatory: true, conditionalOn: "committente_coordinatore" },
+    { courseId: "course-muletto", atecoCode: "41.20", macroGroup: "EDILIZIA", isMandatory: false, conditionalOn: "usa_carrello_elevatore" },
+    { courseId: "course-rspp", atecoCode: "41.20", macroGroup: "EDILIZIA", isMandatory: true },
+    { courseId: "course-rls", atecoCode: "41.20", macroGroup: "EDILIZIA", isMandatory: true },
+  ];
+
+  // -- Settore METALMECCANICO (25.x) - MEDIO RISCHIO --
+  const metalCourses = [
+    { courseId: "course-gen-worker", atecoCode: "25.11", macroGroup: "METALMECCANICO", isMandatory: true },
+    { courseId: "course-spec-med", atecoCode: "25.11", macroGroup: "METALMECCANICO", isMandatory: true },
+    { courseId: "course-preposto", atecoCode: "25.11", macroGroup: "METALMECCANICO", isMandatory: true },
+    { courseId: "course-antincendio-medio", atecoCode: "25.11", macroGroup: "METALMECCANICO", isMandatory: true },
+    { courseId: "course-primo-soccorso", atecoCode: "25.11", macroGroup: "METALMECCANICO", isMandatory: true },
+    { courseId: "course-evacuazione", atecoCode: "25.11", macroGroup: "METALMECCANICO", isMandatory: true },
+    { courseId: "course-pes-pav", atecoCode: "25.11", macroGroup: "METALMECCANICO", isMandatory: false, conditionalOn: "lavori_elettrici" },
+    { courseId: "course-muletto", atecoCode: "25.11", macroGroup: "METALMECCANICO", isMandatory: false, conditionalOn: "usa_carrello" },
+    { courseId: "course-rumore", atecoCode: "25.11", macroGroup: "METALMECCANICO", isMandatory: false, conditionalOn: "esposizione_rumore" },
+    { courseId: "course-rspp", atecoCode: "25.11", macroGroup: "METALMECCANICO", isMandatory: true },
+    { courseId: "course-rls", atecoCode: "25.11", macroGroup: "METALMECCANICO", isMandatory: true },
+  ];
+
+  // -- Settore UFFICI (62.x) - BASSO RISCHIO --
+  const ufficioCourses = [
+    { courseId: "course-gen-worker", atecoCode: "62.01", macroGroup: "UFFICI", isMandatory: true },
+    { courseId: "course-spec-low", atecoCode: "62.01", macroGroup: "UFFICI", isMandatory: true },
+    { courseId: "course-preposto", atecoCode: "62.01", macroGroup: "UFFICI", isMandatory: true },
+    { courseId: "course-videoterminali", atecoCode: "62.01", macroGroup: "UFFICI", isMandatory: true },
+    { courseId: "course-antincendio-basso", atecoCode: "62.01", macroGroup: "UFFICI", isMandatory: true },
+    { courseId: "course-primo-soccorso", atecoCode: "62.01", macroGroup: "UFFICI", isMandatory: true },
+    { courseId: "course-evacuazione", atecoCode: "62.01", macroGroup: "UFFICI", isMandatory: true },
+    { courseId: "course-gdpr", atecoCode: "62.01", macroGroup: "UFFICI", isMandatory: true },
+    { courseId: "course-dpo", atecoCode: "62.01", macroGroup: "UFFICI", isMandatory: false, conditionalOn: "necessita_dpo" },
+    { courseId: "course-rls", atecoCode: "62.01", macroGroup: "UFFICI", isMandatory: true },
+  ];
+
+  const allReqs = [...ristoranteCourses, ...barCourses, ...hotelCourses, ...ediliziaCourses, ...metalCourses, ...ufficioCourses];
+
+  for (const req of allReqs) {
+    await prisma.trainingRequirement.upsert({
+      where: {
+        id: `${req.courseId}-${req.atecoCode}`,
+      },
+      update: req,
+      create: {
+        id: `${req.courseId}-${req.atecoCode}`,
+        ...req,
+      },
+    });
+  }
+
+  console.log(`Seeded ${courses.length} courses and ${allReqs.length} requirements.`);
+}

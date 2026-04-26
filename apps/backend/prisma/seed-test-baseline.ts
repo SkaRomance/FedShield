@@ -10,10 +10,8 @@
 // su seed-metalmeccanico per enum mismatch). Riusa seed-checklist.ts per
 // il dominio HoReCa, che è funzionante.
 
-import { PrismaClient } from "@prisma/client";
 import { seedChecklistTemplates, seedHoreca } from "./seed-checklist.js";
-
-const prisma = new PrismaClient();
+import { prisma, disconnectPrisma } from "./_client.js";
 
 const COMPANY_ID = "test-baseline-company";
 const TEMPLATE_ID = "test-baseline-template";
@@ -87,5 +85,5 @@ main()
     process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect();
+    await disconnectPrisma();
   });

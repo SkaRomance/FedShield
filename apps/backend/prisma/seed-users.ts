@@ -10,10 +10,8 @@
 // Idempotente: rieseguibile in sicurezza. Aggiorna sempre l'hash password
 // (utile dopo rotazione chiavi o cambio algoritmo).
 
-import { PrismaClient } from "@prisma/client";
 import argon2 from "argon2";
-
-const prisma = new PrismaClient();
+import { prisma, disconnectPrisma } from "./_client.js";
 
 // Password unificata per dev/test. Combacia con quella usata nei test
 // legacy (`junior/senior/admin` tutti con fedshield123) — non usare in
@@ -83,5 +81,5 @@ main()
     process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect();
+    await disconnectPrisma();
   });

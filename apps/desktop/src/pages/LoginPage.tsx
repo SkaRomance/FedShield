@@ -5,9 +5,15 @@ interface LoginPageProps {
   onSubmit: (email: string, password: string) => Promise<void>;
 }
 
+// S11 (UI-REVIEW): credenziali pre-popolate solo in dev (Vite injecta
+// import.meta.env.DEV). In production il form parte vuoto.
+const DEV_DEFAULTS = import.meta.env.DEV
+  ? { email: "admin@fedshield.local", password: "fedshield123" }
+  : { email: "", password: "" };
+
 export default function LoginPage({ loading, onSubmit }: LoginPageProps) {
-  const [email, setEmail] = useState("admin@fedshield.local");
-  const [password, setPassword] = useState("fedshield123");
+  const [email, setEmail] = useState(DEV_DEFAULTS.email);
+  const [password, setPassword] = useState(DEV_DEFAULTS.password);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {

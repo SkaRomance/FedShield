@@ -363,6 +363,55 @@ export async function authedFetch<T>(path: string, token: string, init?: Request
   return res.json();
 }
 
+// S11 (MEDIUM-02 client): variante che espone i metadati di paginazione
+// dal backend (X-Total-Count, X-Limit, X-Truncated) — usata da AssetsPage
+// per mostrare warning quando i risultati sono troncati.
+export interface PagedResponse<T> {
+  items: T;
+  total: number | null;
+  limit: number | null;
+  truncated: boolean;
+}
+
+export async function authedFetchPaged<T>(
+  path: string,
+  token: string,
+  init?: RequestInit,
+): Promise<PagedResponse<T>> {
+  const hasBody = init?.body !== undefined && init.body !== null;
+  const headers = new Headers(init?.headers ?? {});
+  headers.set("Authorization", `Bearer ${token}`);
+  if (hasBody && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, { ...init, headers });
+  } catch (error) {
+    throw new Error(
+      `Connessione API non riuscita su ${API_BASE}${path}: ${error instanceof Error ? error.message : "errore rete"}`,
+    );
+  }
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new ApiError(res.status, parseApiErrorMessage(body, res.status), body);
+  }
+
+  const items = (await res.json()) as T;
+  const totalHeader = res.headers.get("X-Total-Count");
+  const limitHeader = res.headers.get("X-Limit");
+  const truncatedHeader = res.headers.get("X-Truncated");
+
+  return {
+    items,
+    total: totalHeader ? Number.parseInt(totalHeader, 10) : null,
+    limit: limitHeader ? Number.parseInt(limitHeader, 10) : null,
+    truncated: truncatedHeader === "true",
+  };
+}
+
 export function fetchCompanies(token: string): Promise<Company[]> {
   return authedFetch<Company[]>("/companies", token);
 }
@@ -1107,6 +1156,11 @@ export function fetchEquipment(token: string, filters?: { companyId?: string; st
   return authedFetch<Equipment[]>(`/equipment${buildAssetQuery(filters)}`, token);
 }
 
+// S11: variante con metadati paginazione per UI warning truncated.
+export function fetchEquipmentPaged(token: string, filters?: { companyId?: string; status?: EquipmentStatus }) {
+  return authedFetchPaged<Equipment[]>(`/equipment${buildAssetQuery(filters)}`, token);
+}
+
 export function fetchEquipmentById(token: string, id: string) {
   return authedFetch<Equipment>(`/equipment/${id}`, token);
 }
@@ -1123,6 +1177,10 @@ export function createEquipment(
 
 export function fetchMachines(token: string, filters?: { companyId?: string; status?: EquipmentStatus }) {
   return authedFetch<Machine[]>(`/machines${buildAssetQuery(filters)}`, token);
+}
+
+export function fetchMachinesPaged(token: string, filters?: { companyId?: string; status?: EquipmentStatus }) {
+  return authedFetchPaged<Machine[]>(`/machines${buildAssetQuery(filters)}`, token);
 }
 
 export function createMachine(
@@ -1147,6 +1205,13 @@ export function fetchFireExtinguishers(
   return authedFetch<FireExtinguisher[]>(`/fire-extinguishers${buildAssetQuery(filters)}`, token);
 }
 
+export function fetchFireExtinguishersPaged(
+  token: string,
+  filters?: { companyId?: string; status?: EquipmentStatus },
+) {
+  return authedFetchPaged<FireExtinguisher[]>(`/fire-extinguishers${buildAssetQuery(filters)}`, token);
+}
+
 export function createFireExtinguisher(
   token: string,
   payload: Omit<FireExtinguisher, "id" | "status" | "createdAt" | "updatedAt"> & {
@@ -1167,6 +1232,13 @@ export function fetchFirstAidKits(
   filters?: { companyId?: string; status?: EquipmentStatus },
 ) {
   return authedFetch<FirstAidKit[]>(`/first-aid-kits${buildAssetQuery(filters)}`, token);
+}
+
+export function fetchFirstAidKitsPaged(
+  token: string,
+  filters?: { companyId?: string; status?: EquipmentStatus },
+) {
+  return authedFetchPaged<FirstAidKit[]>(`/first-aid-kits${buildAssetQuery(filters)}`, token);
 }
 
 export function createFirstAidKit(

@@ -6,7 +6,8 @@
 //   - documentTemplate.deleteMany ora scoped sui macroGroup HoReCa per non
 //     wipeare documenti seedati da altri moduli (test-baseline, etc.)
 //   - Prisma client istanziato e disconnesso dal caller (seed.ts)
-import { ChecklistSection, ComplianceDomain, PrismaClient } from "@prisma/client";
+import { ChecklistSection, ComplianceDomain } from "@prisma/client";
+import { prisma } from "./_client.js";
 
 const HORECA_MACRO_GROUPS = [
   "BAR",
@@ -31,7 +32,6 @@ const HORECA_MACRO_GROUPS = [
   "STABILIMENTI_BALNEARI",
 ];
 
-const prisma = new PrismaClient();
 
 function inferChecklistDomain(area: string, question: string): ComplianceDomain {
   const text = `${area} ${question}`.toLowerCase();

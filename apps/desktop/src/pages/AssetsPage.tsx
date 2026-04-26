@@ -10,10 +10,10 @@ import {
   deleteFirstAidKit,
   deleteMachine,
   Equipment,
-  fetchEquipment,
-  fetchFireExtinguishers,
-  fetchFirstAidKits,
-  fetchMachines,
+  fetchEquipmentPaged,
+  fetchFireExtinguishersPaged,
+  fetchFirstAidKitsPaged,
+  fetchMachinesPaged,
   FireExtinguisher,
   FirstAidKit,
   Machine,
@@ -38,6 +38,14 @@ export default function AssetsPage({ token, companies, onOpenQr }: AssetsPagePro
   const [machines, setMachines] = useState<Machine[]>([]);
   const [extinguishers, setExtinguishers] = useState<FireExtinguisher[]>([]);
   const [firstAidKits, setFirstAidKits] = useState<FirstAidKit[]>([]);
+  // S11: meta paginazione per ogni tab — { total, truncated } per warning UI
+  // quando il backend cappa take:200 (vedi MEDIUM-02 review).
+  const [meta, setMeta] = useState<{
+    equipment?: { total: number | null; truncated: boolean };
+    machines?: { total: number | null; truncated: boolean };
+    extinguishers?: { total: number | null; truncated: boolean };
+    firstAidKits?: { total: number | null; truncated: boolean };
+  }>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,20 +63,47 @@ export default function AssetsPage({ token, companies, onOpenQr }: AssetsPagePro
     setError(null);
     try {
       const [eq, ma, ex, kits] = await Promise.all([
-        fetchEquipment(token, { companyId: companyFilter }),
-        fetchMachines(token, { companyId: companyFilter }),
-        fetchFireExtinguishers(token, { companyId: companyFilter }),
-        fetchFirstAidKits(token, { companyId: companyFilter }),
+        fetchEquipmentPaged(token, { companyId: companyFilter }),
+        fetchMachinesPaged(token, { companyId: companyFilter }),
+        fetchFireExtinguishersPaged(token, { companyId: companyFilter }),
+        fetchFirstAidKitsPaged(token, { companyId: companyFilter }),
       ]);
-      setEquipment(eq);
-      setMachines(ma);
-      setExtinguishers(ex);
-      setFirstAidKits(kits);
+      setEquipment(eq.items);
+      setMachines(ma.items);
+      setExtinguishers(ex.items);
+      setFirstAidKits(kits.items);
+      setMeta({
+        equipment: { total: eq.total, truncated: eq.truncated },
+        machines: { total: ma.total, truncated: ma.truncated },
+        extinguishers: { total: ex.total, truncated: ex.truncated },
+        firstAidKits: { total: kits.total, truncated: kits.truncated },
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Errore caricamento asset");
     } finally {
       setLoading(false);
     }
+  }
+
+  // S11: helper UI per warning truncated.
+  function TruncatedBanner({ shown, total, label }: { shown: number; total: number | null; label: string }) {
+    return (
+      <div
+        role="status"
+        style={{
+          background: "#fef3c7",
+          border: "1px solid #fbbf24",
+          color: "#92400e",
+          padding: "8px 12px",
+          borderRadius: 6,
+          marginBottom: 12,
+          fontSize: 14,
+        }}
+      >
+        ⚠️ Visualizzati i primi <strong>{shown}</strong>{total != null ? <> di <strong>{total}</strong></> : null} {label}.
+        Affina il filtro per azienda o aggiungi <code>?limit=500</code> alla URL backend per vederne di più.
+      </div>
+    );
   }
 
   if (companies.length === 0) {
@@ -120,38 +155,58 @@ export default function AssetsPage({ token, companies, onOpenQr }: AssetsPagePro
       {error ? <p style={{ color: "crimson" }}>{error}</p> : null}
 
       {tab === "equipment" ? (
-        <EquipmentTab
-          token={token}
-          companyId={companyFilter}
-          items={equipment}
-          onChanged={reload}
-          onError={setError}
-          onOpenQr={onOpenQr}
-        />
+        <>
+          {meta.equipment?.truncated ? (
+            <TruncatedBanner shown={equipment.length} total={meta.equipment.total} label="attrezzature" />
+          ) : null}
+          <EquipmentTab
+            token={token}
+            companyId={companyFilter}
+            items={equipment}
+            onChanged={reload}
+            onError={setError}
+            onOpenQr={onOpenQr}
+          />
+        </>
       ) : tab === "machines" ? (
-        <MachinesTab
-          token={token}
-          companyId={companyFilter}
-          items={machines}
-          onChanged={reload}
-          onError={setError}
-        />
+        <>
+          {meta.machines?.truncated ? (
+            <TruncatedBanner shown={machines.length} total={meta.machines.total} label="macchine" />
+          ) : null}
+          <MachinesTab
+            token={token}
+            companyId={companyFilter}
+            items={machines}
+            onChanged={reload}
+            onError={setError}
+          />
+        </>
       ) : tab === "extinguishers" ? (
-        <ExtinguishersTab
-          token={token}
-          companyId={companyFilter}
-          items={extinguishers}
-          onChanged={reload}
-          onError={setError}
-        />
+        <>
+          {meta.extinguishers?.truncated ? (
+            <TruncatedBanner shown={extinguishers.length} total={meta.extinguishers.total} label="estintori" />
+          ) : null}
+          <ExtinguishersTab
+            token={token}
+            companyId={companyFilter}
+            items={extinguishers}
+            onChanged={reload}
+            onError={setError}
+          />
+        </>
       ) : (
-        <FirstAidTab
-          token={token}
-          companyId={companyFilter}
-          items={firstAidKits}
-          onChanged={reload}
-          onError={setError}
-        />
+        <>
+          {meta.firstAidKits?.truncated ? (
+            <TruncatedBanner shown={firstAidKits.length} total={meta.firstAidKits.total} label="cassette PS" />
+          ) : null}
+          <FirstAidTab
+            token={token}
+            companyId={companyFilter}
+            items={firstAidKits}
+            onChanged={reload}
+            onError={setError}
+          />
+        </>
       )}
     </div>
   );
