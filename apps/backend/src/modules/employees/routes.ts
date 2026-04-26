@@ -78,7 +78,7 @@ const employeeRoutes: FastifyPluginAsync = async (fastify) => {
         throw err;
       }
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "employee.create",
         entityType: "employee",
         entityId: created.id,
@@ -113,7 +113,7 @@ const employeeRoutes: FastifyPluginAsync = async (fastify) => {
         throw err;
       }
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "employee.update",
         entityType: "employee",
         entityId: updated.id,
@@ -133,7 +133,7 @@ const employeeRoutes: FastifyPluginAsync = async (fastify) => {
         data: { isActive: false, leftDate: new Date() },
       });
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "employee.softDelete",
         entityType: "employee",
         entityId: id,

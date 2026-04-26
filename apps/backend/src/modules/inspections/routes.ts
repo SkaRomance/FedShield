@@ -488,7 +488,7 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
       }
 
       const atecoVariants = buildAtecoVariants(inspection.company.atecoCode);
-      const auth = request.user as { sub?: string; role?: UserRole };
+      const auth = request.user;
       const retailScopeVariants =
         auth.role === UserRole.admin
           ? []
@@ -572,7 +572,7 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
         });
       }
 
-      const auth = request.user as { sub?: string };
+      const auth = request.user;
       await writeAudit(fastify, {
         userId: auth.sub,
         action: "inspection.documents.upsert",
@@ -651,7 +651,7 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
         },
       });
 
-      const auth = request.user as { sub?: string };
+      const auth = request.user;
       await writeAudit(fastify, {
         userId: auth.sub,
         action: "nc.create",
@@ -760,7 +760,7 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
         }
       }
 
-      const auth = request.user as { sub?: string };
+      const auth = request.user;
       await writeAudit(fastify, {
         userId: auth.sub,
         action: "inspection.answers.upsert",
@@ -885,7 +885,7 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.badRequest("ID sopralluogo non valido.");
       }
 
-      const auth = request.user as { sub?: string };
+      const auth = request.user;
       try {
         const generated = await generateInspectionChecklistPdf(fastify, params.data.id, auth.sub);
         await writeAudit(fastify, {
@@ -913,7 +913,7 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.badRequest("ID sopralluogo non valido.");
       }
 
-      const auth = request.user as { sub?: string };
+      const auth = request.user;
       try {
         const generated = await generateInspectionReportPdf(fastify, params.data.id, auth.sub);
         await writeAudit(fastify, {
@@ -939,7 +939,7 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.badRequest("ID sopralluogo non valido.");
       }
 
-      const auth = request.user as { sub?: string };
+      const auth = request.user;
       try {
         const generated = await generateAttestatoPdf(fastify, params.data.id, auth.sub);
         await writeAudit(fastify, {
@@ -988,7 +988,7 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
         data: { sentToAdminAt: new Date() },
       });
 
-      const auth = request.user as { sub?: string };
+      const auth = request.user;
       await writeAudit(fastify, {
         userId: auth.sub,
         action: "inspection.send_to_admin",

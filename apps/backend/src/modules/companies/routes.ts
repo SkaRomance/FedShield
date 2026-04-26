@@ -99,7 +99,7 @@ const companyRoutes: FastifyPluginAsync = async (fastify) => {
     "/companies",
     { preHandler: [fastify.authenticate] },
     async (request) => {
-      const role = (request.user as { role?: string })?.role;
+      const role = request.user.role;
       const records = await fastify.prisma.company.findMany({
         orderBy: { createdAt: "desc" },
       });
@@ -117,7 +117,7 @@ const companyRoutes: FastifyPluginAsync = async (fastify) => {
       }
 
       const created = await fastify.prisma.company.create({ data: parsed.data });
-      const auth = request.user as { sub?: string };
+      const auth = request.user;
 
       await writeAudit(fastify, {
         userId: auth?.sub,
@@ -158,7 +158,7 @@ const companyRoutes: FastifyPluginAsync = async (fastify) => {
         where: { id: params.data.id },
         data: parsed.data,
       });
-      const auth = request.user as { sub?: string };
+      const auth = request.user;
 
       await writeAudit(fastify, {
         userId: auth?.sub,

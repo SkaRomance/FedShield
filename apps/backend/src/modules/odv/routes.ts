@@ -61,7 +61,7 @@ const odvRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.notFound("Azienda non trovata.");
       }
 
-      const auth = request.user as { sub?: string };
+      const auth = request.user;
       const createdInspection = await fastify.prisma.odvInspection.create({
         data: {
           companyId: parsed.data.companyId,

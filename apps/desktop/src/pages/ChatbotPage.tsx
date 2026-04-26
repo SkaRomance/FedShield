@@ -1,34 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import DOMPurify from "dompurify";
-import { marked } from "marked";
 import { chatbotQuery } from "../api";
-
-marked.setOptions({ gfm: true, breaks: true });
-
-// L1 (review): se il chatbot risponde con link target="_blank", forziamo
-// rel="noopener noreferrer" così il tab nuovo non eredita window.opener.
-// Hook globale registrato una sola volta a module-load.
-DOMPurify.addHook("afterSanitizeAttributes", (node) => {
-  if (node.tagName === "A" && node.getAttribute("target") === "_blank") {
-    node.setAttribute("rel", "noopener noreferrer");
-  }
-});
-
-function renderAssistantMarkdown(content: string): string {
-  const html = marked.parse(content, { async: false }) as string;
-  return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: [
-      "p", "br", "strong", "em", "u", "code", "pre",
-      "ul", "ol", "li", "blockquote",
-      "h1", "h2", "h3", "h4", "h5", "h6",
-      "a", "table", "thead", "tbody", "tr", "th", "td",
-      "hr", "span",
-    ],
-    ALLOWED_ATTR: ["href", "title", "target", "rel"],
-    ALLOWED_URI_REGEXP: /^(?:https?:|mailto:|tel:)/i,
-    ADD_ATTR: ["target"],
-  });
-}
+import { renderAssistantMarkdown } from "../lib/markdown";
 
 interface Message {
   role: "user" | "assistant";

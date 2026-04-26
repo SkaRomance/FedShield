@@ -71,7 +71,7 @@ const trainingCourseRoutes: FastifyPluginAsync = async (fastify) => {
         data: parsed.data,
       });
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "trainingCourse.create",
         entityType: "trainingCourse",
         entityId: created.id,
@@ -112,7 +112,7 @@ const trainingCourseRoutes: FastifyPluginAsync = async (fastify) => {
         data: parsed.data,
       });
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "trainingRequirement.create",
         entityType: "trainingRequirement",
         entityId: created.id,
@@ -159,7 +159,7 @@ const trainingCourseRoutes: FastifyPluginAsync = async (fastify) => {
       if (data.expiresAt) data.expiresAt = new Date(data.expiresAt);
       const created = await fastify.prisma.employeeTrainingRecord.create({ data });
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "trainingRecord.create",
         entityType: "trainingRecord",
         entityId: created.id,

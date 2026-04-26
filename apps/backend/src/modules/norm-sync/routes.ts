@@ -74,7 +74,7 @@ const n8nChatbotResponseSchema = z.object({
 const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
   // Middleware: solo admin puo gestire proposte
   async function requireAdmin(request: any, reply: any) {
-    const user = request.user as { role?: string };
+    const user = request.user;
     if (user?.role !== "admin") {
       return reply.forbidden("Solo admin possono gestire aggiornamenti normativi.");
     }
@@ -114,7 +114,7 @@ const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
       // Verifica API key per n8n (o admin)
       const apiKey = request.headers["x-api-key"] as string;
       const expectedKey = process.env.FEDSHIELD_N8N_API_KEY;
-      const user = request.user as { role?: string };
+      const user = request.user;
 
       if (apiKey !== expectedKey && user?.role !== "admin") {
         return reply.unauthorized("API key non valida.");
@@ -129,7 +129,7 @@ const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
         data: parsed.data,
       });
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user.sub,
         action: "normProposal.create",
         entityType: "normativePatchProposal",
         entityId: created.id,
@@ -216,12 +216,12 @@ const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
         data: {
           status: parsed.data.status,
           reviewedAt: new Date(),
-          reviewedById: (request.user as { sub?: string })?.sub || null,
+          reviewedById: request.user.sub || null,
         },
       });
 
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user.sub,
         action: parsed.data.status === "approved" ? "normProposal.approve" : "normProposal.reject",
         entityType: "normativePatchProposal",
         entityId: updated.id,
@@ -243,11 +243,11 @@ const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
         data: {
           status: "rejected",
           reviewedAt: new Date(),
-          reviewedById: (request.user as { sub?: string })?.sub || null,
+          reviewedById: request.user.sub || null,
         },
       });
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user.sub,
         action: "normProposal.reject",
         entityType: "normativePatchProposal",
         entityId: updated.id,

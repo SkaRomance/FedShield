@@ -115,19 +115,28 @@ function parseDates(data: any, fields: string[]) {
   return result;
 }
 
+// S8 (L3): cap risultati lista asset per prevenire payload massivi
+// quando il client non passa companyId. Default 200, max 500 via ?limit=
+function parseLimit(query: { limit?: string }, defaultLimit = 200, maxLimit = 500): number {
+  const raw = query.limit ? Number.parseInt(query.limit, 10) : defaultLimit;
+  if (!Number.isFinite(raw) || raw <= 0) return defaultLimit;
+  return Math.min(raw, maxLimit);
+}
+
 const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
   // === GENERIC EQUIPMENT ===
   fastify.get(
     "/equipment",
     { preHandler: [fastify.authenticate] },
     async (request) => {
-      const { companyId, status } = request.query as { companyId?: string; status?: "active" | "under_maintenance" | "expired" | "decommissioned" };
+      const query = request.query as { companyId?: string; status?: "active" | "under_maintenance" | "expired" | "decommissioned"; limit?: string };
       return fastify.prisma.equipment.findMany({
         where: {
-          ...(companyId ? { companyId } : {}),
-          ...(status ? { status } : {}),
+          ...(query.companyId ? { companyId: query.companyId } : {}),
+          ...(query.status ? { status: query.status } : {}),
         },
         orderBy: { nextCheckAt: "asc" },
+        take: parseLimit(query),
       });
     },
   );
@@ -150,7 +159,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         throw err;
       }
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "equipment.create",
         entityType: "equipment",
         entityId: created.id,
@@ -165,13 +174,14 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
     "/machines",
     { preHandler: [fastify.authenticate] },
     async (request) => {
-      const { companyId, status } = request.query as { companyId?: string; status?: "active" | "under_maintenance" | "expired" | "decommissioned" };
+      const query = request.query as { companyId?: string; status?: "active" | "under_maintenance" | "expired" | "decommissioned"; limit?: string };
       return fastify.prisma.machine.findMany({
         where: {
-          ...(companyId ? { companyId } : {}),
-          ...(status ? { status } : {}),
+          ...(query.companyId ? { companyId: query.companyId } : {}),
+          ...(query.status ? { status: query.status } : {}),
         },
         orderBy: [{ nextMaintenanceAt: "asc" }, { nextSafetyCheckAt: "asc" }],
+        take: parseLimit(query),
       });
     },
   );
@@ -197,7 +207,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         throw err;
       }
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "machine.create",
         entityType: "machine",
         entityId: created.id,
@@ -212,13 +222,14 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
     "/fire-extinguishers",
     { preHandler: [fastify.authenticate] },
     async (request) => {
-      const { companyId, status } = request.query as { companyId?: string; status?: "active" | "under_maintenance" | "expired" | "decommissioned" };
+      const query = request.query as { companyId?: string; status?: "active" | "under_maintenance" | "expired" | "decommissioned"; limit?: string };
       return fastify.prisma.fireExtinguisher.findMany({
         where: {
-          ...(companyId ? { companyId } : {}),
-          ...(status ? { status } : {}),
+          ...(query.companyId ? { companyId: query.companyId } : {}),
+          ...(query.status ? { status: query.status } : {}),
         },
         orderBy: { nextCheckAt: "asc" },
+        take: parseLimit(query),
       });
     },
   );
@@ -241,7 +252,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         throw err;
       }
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "fireExtinguisher.create",
         entityType: "fireExtinguisher",
         entityId: created.id,
@@ -256,13 +267,14 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
     "/first-aid-kits",
     { preHandler: [fastify.authenticate] },
     async (request) => {
-      const { companyId, status } = request.query as { companyId?: string; status?: "active" | "under_maintenance" | "expired" | "decommissioned" };
+      const query = request.query as { companyId?: string; status?: "active" | "under_maintenance" | "expired" | "decommissioned"; limit?: string };
       return fastify.prisma.firstAidKit.findMany({
         where: {
-          ...(companyId ? { companyId } : {}),
-          ...(status ? { status } : {}),
+          ...(query.companyId ? { companyId: query.companyId } : {}),
+          ...(query.status ? { status: query.status } : {}),
         },
         orderBy: { nextCheckAt: "asc" },
+        take: parseLimit(query),
       });
     },
   );
@@ -277,7 +289,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         data: parseDates(parsed.data, ["lastCheckAt", "nextCheckAt", "replenishedAt"]),
       });
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "firstAidKit.create",
         entityType: "firstAidKit",
         entityId: created.id,
@@ -322,7 +334,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         throw err;
       }
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "equipment.update",
         entityType: "equipment",
         entityId: updated.id,
@@ -342,7 +354,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         data: { status: "decommissioned" },
       });
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "equipment.decommission",
         entityType: "equipment",
         entityId: id,
@@ -386,7 +398,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         throw err;
       }
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "machine.update",
         entityType: "machine",
         entityId: updated.id,
@@ -406,7 +418,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         data: { status: "decommissioned" },
       });
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "machine.decommission",
         entityType: "machine",
         entityId: id,
@@ -447,7 +459,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         throw err;
       }
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "fireExtinguisher.update",
         entityType: "fireExtinguisher",
         entityId: updated.id,
@@ -467,7 +479,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         data: { status: "decommissioned" },
       });
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "fireExtinguisher.decommission",
         entityType: "fireExtinguisher",
         entityId: id,
@@ -500,7 +512,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         data: parseDates(parsed.data, ["lastCheckAt", "nextCheckAt", "replenishedAt"]),
       });
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "firstAidKit.update",
         entityType: "firstAidKit",
         entityId: updated.id,
@@ -520,7 +532,7 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
         data: { status: "decommissioned" },
       });
       await writeAudit(fastify, {
-        userId: (request.user as { sub?: string })?.sub,
+        userId: request.user?.sub,
         action: "firstAidKit.decommission",
         entityType: "firstAidKit",
         entityId: id,

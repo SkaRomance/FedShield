@@ -59,7 +59,7 @@ const kpiRoutes: FastifyPluginAsync = async (fastify) => {
     "/kpi/snapshots",
     { preHandler: [fastify.authenticate] },
     async (request) => {
-      const auth = request.user as { sub?: string };
+      const auth = request.user;
       const result = await persistKpiSnapshots(fastify);
 
       await writeAudit(fastify, {
