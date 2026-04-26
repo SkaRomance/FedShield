@@ -26,11 +26,13 @@ async function setup() {
 
 // Casi di test condivisi: route mutating master-data che richiedono
 // senior+admin (audit § P1-1).
-const masterDataMutations: Array<{
+type Mutation = {
   method: "POST" | "PATCH" | "DELETE";
   url: string;
-  payload?: unknown;
-}> = [
+  payload?: Record<string, unknown>;
+};
+
+const masterDataMutations: Mutation[] = [
   {
     method: "POST",
     url: "/api/employees",
