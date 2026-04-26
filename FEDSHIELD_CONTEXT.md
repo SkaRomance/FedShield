@@ -315,16 +315,25 @@ Golden path: 2/2 pass                             ← NEW
 
 Totale 28 test su 10 file, tutti pass. HoReCa coverage: 15 categorie ATECO (ristoranti, bar, hotel, B&B, ostelli, campeggi, pasticcerie, pizzerie, mense, catering, food truck, pasticcerie ambulanti, gastronomia, balneari, locali serali) ora effettivamente verificate.
 
-### Backlog residuo (Sprint 8+)
+**Sprint 8 ✅ Completato — Code quality residuals** (branch `feat/sprint-8-code-quality`, commits `3391e34..f44e2a8`):
+
+| # | Tema | Commit |
+|---|------|--------|
+| S8-1 | Allineamento dei 4 seed verticali (metalmeccanico/sanita/uffici/agricoltura) al schema Prisma corrente: `durationHours` → `minHours`, drop `isMandatory`, default `targetAudience`/`normReference` per settore, `severity`/`sanctionable` → `defaultSeverity`/`defaultSanctionable`. Aggiunto `normReference` a ChecklistItem (utile audit). Esteso `TrainingChecklistSection` con `health_surveillance`. Idempotenza scoped (deleteMany su templateId noti + targetAudience univoco). `pnpm db:seed` ora gira end-to-end (HoReCa + edilizia + training + 4 verticali). | `3391e34` |
+| S8-2 (L5) | Module augmentation `@fastify/jwt` per `request.user` come `AuthenticatedUser` ({ sub?, email?, role? }). Rimossi 28 cast `(request.user as { sub?: string })` su 14 file di route. Restano 4 cast non-optional (inspections L600/L1012, quotes L135/L200) che documentano contract più forte. | `f02a436` |
+| S8-3 (L3) | GET `/equipment`, `/machines`, `/fire-extinguishers`, `/first-aid-kits` cappati con `take: 200` default, override via `?limit=N` (max 500). Helper `parseLimit` centralizzato. Previene download massivo cross-tenant. | `ff58af9` |
+| S8-4 (L2) | Estratto `renderAssistantMarkdown` da ChatbotPage in `src/lib/markdown.ts` per testabilità. Aggiunti 10 test jsdom: rendering markdown base + sanitizzazione XSS (script, javascript:, img onerror, iframe) + URL whitelist (mailto/tel ok, data: bloccato). Desktop test script ora esegue la suite. | `f44e2a8` |
+
+**Test suite finale Sprint 8**: backend 28/28 pass + desktop 10/10 pass (jsdom). Vite build desktop 376.74 kB → 110.54 kB gzip in 2.14s. Backend tsc 0 errori, desktop tsc 0 errori. `pnpm db:seed` produce 31 corsi training + 68 requirements + 100 checklist item sectorial + 20 training items.
+
+### Backlog residuo (Sprint 9+)
 
 - HTTPS reverse proxy n8n VPS (richiede accesso infra)
-- Playwright E2E browser-level (deferred Sprint 7 → API-level integration test sufficiente per ora)
-- Riparare schema mismatch in `seed-metalmeccanico.ts` (e seed-sanita/uffici/agricoltura): campo `sector` su TrainingCourse, `severity`/`sanctionable` → `defaultSeverity`/`defaultSanctionable`, eventuali altre divergenze schema
-- L5 (review): tipare `request.user` con module-augmentation Fastify (sostituisce gli `any` ricorrenti)
-- L3 (review): cap `take: 200` o `companyId` obbligatorio su GET equipment list (default cap)
-- L2 (review): test ChatbotPage con jsdom per `renderAssistantMarkdown`
-- Eventuale rimozione finale di `bcryptjs` quando il DB sarà tutto argon2
+- Playwright E2E browser-level (defense-in-depth oltre golden-path API)
+- Eventuale rimozione finale di `bcryptjs` quando il DB sarà tutto argon2 (audit DB password hashes prima)
 - Stampabilità QR per estintori/kits / dark mode / migrazione SQLite → Postgres prod
+- Restore seed HoReCa generic doc templates (rimossi in S7 perché non scoped — ora con HORECA_GENERIC_DOC_NAMES posso re-includerli safely se serve allineare con dataset originale)
+- Rifinitura UX validate inspection workflow (oltre il golden path)
 
 ---
 
