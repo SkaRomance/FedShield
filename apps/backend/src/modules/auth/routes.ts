@@ -1,7 +1,12 @@
 import { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 import { writeAudit } from "../../plugins/audit.js";
-import { hashPassword, shouldRehash, verifyPassword } from "../../plugins/password.js";
+import {
+  consumeDummyVerify,
+  hashPassword,
+  shouldRehash,
+  verifyPassword,
+} from "../../plugins/password.js";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -29,7 +34,14 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
     const { email, password } = parseResult.data;
     const user = await fastify.prisma.user.findUnique({ where: { email } });
 
-    if (!user || !(await verifyPassword(password, user.passwordHash))) {
+    // Anti-timing user enumeration (M1): se l'email non è registrata
+    // eseguiamo comunque un verify argon2 dummy per uniformare la latenza
+    // di risposta tra "email inesistente" e "password sbagliata".
+    if (!user) {
+      await consumeDummyVerify(password);
+      return reply.unauthorized("Credenziali non valide.");
+    }
+    if (!(await verifyPassword(password, user.passwordHash))) {
       return reply.unauthorized("Credenziali non valide.");
     }
 

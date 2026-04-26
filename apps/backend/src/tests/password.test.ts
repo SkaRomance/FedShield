@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import bcrypt from "bcryptjs";
 import argon2 from "argon2";
 import {
+  consumeDummyVerify,
   hashPassword,
   isArgon2Hash,
   isBcryptHash,
@@ -41,5 +42,30 @@ describe("password plugin", () => {
 
   it("verifyPassword ritorna false per hash con prefisso sconosciuto", async () => {
     assert.equal(await verifyPassword(PASSWORD, "not-an-actual-hash"), false);
+  });
+
+  it("consumeDummyVerify uniforma la latenza al verify reale (anti-timing M1)", async () => {
+    // Warmup per ammortizzare init JIT/cache argon2
+    await consumeDummyVerify("warmup-1");
+    const realHash = await hashPassword(PASSWORD);
+    await verifyPassword("warmup", realHash);
+
+    const t0 = process.hrtime.bigint();
+    await consumeDummyVerify("anything");
+    const dummyMs = Number(process.hrtime.bigint() - t0) / 1e6;
+
+    const t1 = process.hrtime.bigint();
+    await verifyPassword("wrong-password", realHash);
+    const realMs = Number(process.hrtime.bigint() - t1) / 1e6;
+
+    // Tolleranza generosa (entrambi devono essere "lenti" — non submillisecond)
+    assert.ok(dummyMs > 5, `dummy verify troppo veloce: ${dummyMs}ms`);
+    assert.ok(realMs > 5, `real verify troppo veloce: ${realMs}ms`);
+    // I tempi devono essere nello stesso ordine di grandezza (rapporto < 4×)
+    const ratio = Math.max(dummyMs, realMs) / Math.min(dummyMs, realMs);
+    assert.ok(
+      ratio < 4,
+      `latenza non uniforme: dummy=${dummyMs.toFixed(1)}ms real=${realMs.toFixed(1)}ms (ratio ${ratio.toFixed(2)})`,
+    );
   });
 });

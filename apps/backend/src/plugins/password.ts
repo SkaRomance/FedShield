@@ -51,3 +51,31 @@ export async function verifyPassword(plain: string, hash: string): Promise<boole
 export async function shouldRehash(currentHash: string): Promise<boolean> {
   return isBcryptHash(currentHash);
 }
+
+// Hash dummy precomputato di una password che NON corrisponde a nessun utente,
+// usato solo per uniformare i tempi di risposta nel ramo "user not found"
+// di /auth/login (anti user-enumeration timing-side, OWASP). Ricomputarlo
+// ogni volta sarebbe costoso e darebbe latenza diversa.
+let cachedDummyHash: string | null = null;
+async function getDummyHash(): Promise<string> {
+  if (!cachedDummyHash) {
+    cachedDummyHash = await argon2.hash("not-a-real-password", ARGON2_OPTS);
+  }
+  return cachedDummyHash;
+}
+
+/**
+ * Esegue argon2.verify su un hash dummy noto-non-matching così che il tempo
+ * speso nel ramo "email non registrata" di /auth/login sia indistinguibile
+ * da una verifica reale fallita. Sempre ritorna false. Errori soppressi
+ * (verify può lanciare se l'hash è malformato — qui non succede).
+ */
+export async function consumeDummyVerify(plain: string): Promise<false> {
+  try {
+    const dummy = await getDummyHash();
+    await argon2.verify(dummy, plain);
+  } catch {
+    /* swallow: non vogliamo che la verifica dummy sollevi 500 */
+  }
+  return false;
+}
