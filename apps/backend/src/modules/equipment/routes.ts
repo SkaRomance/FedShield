@@ -57,30 +57,60 @@ const createFirstAidKitSchema = z.object({
 
 const equipmentStatusEnum = z.enum(["active", "under_maintenance", "expired", "decommissioned"]);
 
+// H3 (review): nelle PATCH consentire null su campi data per "resettare"
+// (es. cancellare nextCheckAt finché un estintore non viene ricaricato).
+const nullableDate = z.union([z.string().datetime(), z.null()]).optional();
+
 const updateEquipmentSchema = createEquipmentSchema
   .partial()
   .omit({ companyId: true })
-  .extend({ status: equipmentStatusEnum.optional() });
+  .extend({
+    status: equipmentStatusEnum.optional(),
+    lastCheckAt: nullableDate,
+    nextCheckAt: nullableDate,
+  });
 
 const updateMachineSchema = createMachineSchema
   .partial()
   .omit({ companyId: true })
-  .extend({ status: equipmentStatusEnum.optional() });
+  .extend({
+    status: equipmentStatusEnum.optional(),
+    lastMaintenanceAt: nullableDate,
+    nextMaintenanceAt: nullableDate,
+    lastSafetyCheckAt: nullableDate,
+    nextSafetyCheckAt: nullableDate,
+  });
 
 const updateFireExtinguisherSchema = createFireExtinguisherSchema
   .partial()
   .omit({ companyId: true })
-  .extend({ status: equipmentStatusEnum.optional() });
+  .extend({
+    status: equipmentStatusEnum.optional(),
+    manufactureDate: nullableDate,
+    lastCheckAt: nullableDate,
+    nextCheckAt: nullableDate,
+    lastRechargeAt: nullableDate,
+  });
 
 const updateFirstAidKitSchema = createFirstAidKitSchema
   .partial()
   .omit({ companyId: true })
-  .extend({ status: equipmentStatusEnum.optional() });
+  .extend({
+    status: equipmentStatusEnum.optional(),
+    lastCheckAt: nullableDate,
+    nextCheckAt: nullableDate,
+    replenishedAt: nullableDate,
+  });
 
 function parseDates(data: any, fields: string[]) {
   const result = { ...data };
   for (const f of fields) {
-    if (result[f]) result[f] = new Date(result[f]);
+    if (result[f] === null) {
+      // explicit reset
+      result[f] = null;
+    } else if (result[f]) {
+      result[f] = new Date(result[f]);
+    }
   }
   return result;
 }

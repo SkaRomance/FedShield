@@ -1,6 +1,41 @@
-import { FastifyPluginAsync } from "fastify";
+import { FastifyPluginAsync, FastifyBaseLogger } from "fastify";
 import { z } from "zod";
 import { writeAudit } from "../../plugins/audit.js";
+
+// H1 (review): allowlist hosts per il webhook n8n. Evita SSRF se mai la
+// URL diventa configurabile da utente o se NODE_ENV=development consente
+// http://. In production esige https:// e (se settata) FEDSHIELD_N8N_ALLOWED_HOSTS.
+function isSafeOutboundUrl(rawUrl: string, log: FastifyBaseLogger): boolean {
+  let url: URL;
+  try {
+    url = new URL(rawUrl);
+  } catch {
+    log.warn({ rawUrl }, "n8n webhook URL malformata");
+    return false;
+  }
+
+  if (process.env.NODE_ENV === "production" && url.protocol !== "https:") {
+    log.warn({ rawUrl }, "n8n webhook in produzione deve essere HTTPS");
+    return false;
+  }
+  if (url.protocol !== "https:" && url.protocol !== "http:") {
+    log.warn({ rawUrl, protocol: url.protocol }, "n8n webhook protocollo non ammesso");
+    return false;
+  }
+
+  const allowed = (process.env.FEDSHIELD_N8N_ALLOWED_HOSTS || "")
+    .split(",")
+    .map((h) => h.trim().toLowerCase())
+    .filter(Boolean);
+  if (allowed.length > 0 && !allowed.includes(url.hostname.toLowerCase())) {
+    log.warn(
+      { host: url.hostname, allowed },
+      "n8n webhook host non in FEDSHIELD_N8N_ALLOWED_HOSTS",
+    );
+    return false;
+  }
+  return true;
+}
 
 const createProposalSchema = z.object({
   sourceId: z.string().optional(),
@@ -228,6 +263,12 @@ const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
 
       if (!question || typeof question !== "string" || question.trim().length === 0) {
         return reply.badRequest("question obbligatoria.");
+      }
+
+      // H2 (review): length cap per evitare DoS lato CPU su marked.parse
+      // (sia backend nel ramo fallback offline, sia desktop renderer).
+      if (question.length > 4000) {
+        return reply.badRequest("Domanda troppo lunga (max 4000 caratteri).");
       }
 
       const q = question.toLowerCase();
@@ -519,7 +560,7 @@ Mancanza parapetti/robustezza = NC sanzionabile pericolo caduta.`,
       // server-side con FEDSHIELD_N8N_API_KEY (header X-API-KEY); il consulente
       // utente è già stato autenticato da fastify.authenticate sopra.
       const n8nWebhook = process.env.N8N_AUDITBOT_WEBHOOK;
-      if (n8nWebhook) {
+      if (n8nWebhook && isSafeOutboundUrl(n8nWebhook, fastify.log)) {
         try {
           const n8nApiKey = process.env.FEDSHIELD_N8N_API_KEY;
           const headers: Record<string, string> = { "Content-Type": "application/json" };
