@@ -158,7 +158,13 @@ const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
       if (parsed.data.status === "approved") {
         // Applica patch: aggiungi item alle checklist
         try {
-          const changes = JSON.parse(JSON.stringify(proposal.proposedChanges ?? []));
+          // M5 (review): proposedChanges è già un valore JSON deserializzato
+          // da Prisma, no deep-clone necessario. Se non è un array salta:
+          // un oggetto/null porterebbe a iterare le chiavi e creare record garbage.
+          const rawChanges = proposal.proposedChanges;
+          const changes: Array<Record<string, any>> = Array.isArray(rawChanges)
+            ? (rawChanges as Array<Record<string, any>>)
+            : [];
           for (const change of changes) {
             if (change.checklistType === "training") {
               await fastify.prisma.trainingChecklistItem.create({
@@ -199,8 +205,8 @@ const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
               }
             }
           }
-        } catch (e) {
-          console.error("Errore applicazione patch:", e);
+        } catch (err) {
+          fastify.log.error({ err, proposalId: proposal.id }, "Errore applicazione patch normativa");
           return reply.internalServerError("Errore nell'applicare la patch.");
         }
       }
