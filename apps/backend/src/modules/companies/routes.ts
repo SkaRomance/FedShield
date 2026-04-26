@@ -69,15 +69,41 @@ function toCompanyDto(record: unknown) {
   return companyOutputSchema.parse(record);
 }
 
+// M3 (review): policy PII per ruolo. I nominativi HACCP e il medico
+// competente sono dati personali di persone fisiche (referenti aziendali).
+// Il consulente junior può vedere l'azienda ma NON questi nominativi —
+// la rifinitura HACCP/sanità è competenza senior+admin.
+type CompanyDto = z.infer<typeof companyOutputSchema>;
+const HACCP_PII_FIELDS: ReadonlyArray<keyof CompanyDto> = [
+  "occupationalDoctor",
+  "haccpResponsabileAutocontrollo",
+  "haccpConsulenteEsterno",
+  "haccpAdditionalResponsabili",
+];
+
+function redactForJunior(dto: CompanyDto): CompanyDto {
+  const result = { ...dto };
+  for (const field of HACCP_PII_FIELDS) {
+    (result as Record<keyof CompanyDto, unknown>)[field] = null;
+  }
+  return result;
+}
+
+function toCompanyDtoFor(record: unknown, role: string | undefined): CompanyDto {
+  const dto = toCompanyDto(record);
+  return role === "junior" ? redactForJunior(dto) : dto;
+}
+
 const companyRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get(
     "/companies",
     { preHandler: [fastify.authenticate] },
-    async () => {
+    async (request) => {
+      const role = (request.user as { role?: string })?.role;
       const records = await fastify.prisma.company.findMany({
         orderBy: { createdAt: "desc" },
       });
-      return records.map(toCompanyDto);
+      return records.map((r) => toCompanyDtoFor(r, role));
     },
   );
 

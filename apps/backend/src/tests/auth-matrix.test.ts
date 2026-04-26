@@ -182,6 +182,53 @@ test("Auth: GET pubblici (junior può leggere)", async () => {
   }
 });
 
+test("Policy: GET /companies redige nominativi HACCP per junior (M3)", async () => {
+  const { app, sign } = await setup();
+  try {
+    // Crea via prisma una company con nominativi HACCP popolati
+    await app.prisma.company.create({
+      data: {
+        name: "M3 Policy Test Srl",
+        vatNumber: `M3-${Date.now()}`,
+        occupationalDoctor: "Dr. Mario Rossi",
+        haccpResponsabileAutocontrollo: "Anna Bianchi",
+        haccpConsulenteEsterno: "Luca Verdi",
+        haccpAdditionalResponsabili: "Giulio Neri",
+      },
+    });
+
+    const juniorToken = sign("junior");
+    const seniorToken = sign("senior");
+
+    const juniorRes = await app.inject({
+      method: "GET",
+      url: "/api/companies",
+      headers: { authorization: `Bearer ${juniorToken}` },
+    });
+    assert.strictEqual(juniorRes.statusCode, 200);
+    const juniorList = juniorRes.json() as Array<Record<string, unknown>>;
+    const juniorRow = juniorList.find((c) => c.name === "M3 Policy Test Srl");
+    assert.ok(juniorRow, "junior dovrebbe vedere la company");
+    assert.strictEqual(juniorRow!.occupationalDoctor, null, "junior NON deve vedere medico competente");
+    assert.strictEqual(juniorRow!.haccpResponsabileAutocontrollo, null);
+    assert.strictEqual(juniorRow!.haccpConsulenteEsterno, null);
+    assert.strictEqual(juniorRow!.haccpAdditionalResponsabili, null);
+
+    const seniorRes = await app.inject({
+      method: "GET",
+      url: "/api/companies",
+      headers: { authorization: `Bearer ${seniorToken}` },
+    });
+    const seniorRow = (seniorRes.json() as Array<Record<string, unknown>>).find(
+      (c) => c.name === "M3 Policy Test Srl",
+    );
+    assert.strictEqual(seniorRow!.occupationalDoctor, "Dr. Mario Rossi", "senior deve vedere medico competente");
+    assert.strictEqual(seniorRow!.haccpResponsabileAutocontrollo, "Anna Bianchi");
+  } finally {
+    await app.close();
+  }
+});
+
 test("Auth: norm-sync proposals admin-only (junior bloccato)", async () => {
   const { app, sign } = await setup();
   try {

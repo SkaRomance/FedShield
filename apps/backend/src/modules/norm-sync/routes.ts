@@ -66,7 +66,9 @@ const n8nChatbotResponseSchema = z.object({
     )
     .max(20)
     .optional(),
-  timestamp: z.string().max(64).optional(),
+  // M2: validato come ISO 8601 stretto. Il client fa new Date(timestamp)
+  // e mostrerebbe "Invalid Date" se il backend accettasse stringhe libere.
+  timestamp: z.string().datetime().optional(),
 });
 
 const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
@@ -599,7 +601,12 @@ Mancanza parapetti/robustezza = NC sanzionabile pericolo caduta.`,
               timestamp: new Date().toISOString(),
             });
           }
-          return reply.send(validated.data);
+          // Garantisce sempre un timestamp ISO valido al client (M2),
+          // anche se n8n l'ha omesso.
+          return reply.send({
+            ...validated.data,
+            timestamp: validated.data.timestamp ?? new Date().toISOString(),
+          });
         } catch (e) {
           fastify.log.error({ err: e }, "Errore chiamata n8n AuditBot");
           return reply.send({
