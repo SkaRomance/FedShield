@@ -1,7 +1,7 @@
-import bcrypt from "bcryptjs";
 import { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 import { writeAudit } from "../../plugins/audit.js";
+import { hashPassword, shouldRehash, verifyPassword } from "../../plugins/password.js";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -29,8 +29,22 @@ const authRoutes: FastifyPluginAsync = async (fastify) => {
     const { email, password } = parseResult.data;
     const user = await fastify.prisma.user.findUnique({ where: { email } });
 
-    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+    if (!user || !(await verifyPassword(password, user.passwordHash))) {
       return reply.unauthorized("Credenziali non valide.");
+    }
+
+    // Migrazione opportunistica bcrypt → argon2id sui login andati a buon fine.
+    if (await shouldRehash(user.passwordHash)) {
+      try {
+        const newHash = await hashPassword(password);
+        await fastify.prisma.user.update({
+          where: { id: user.id },
+          data: { passwordHash: newHash },
+        });
+        fastify.log.info({ userId: user.id }, "Password rehashed bcrypt → argon2id");
+      } catch (err) {
+        fastify.log.error({ err, userId: user.id }, "Re-hash argon2 failed (login proceeds anyway)");
+      }
     }
 
     const token = await reply.jwtSign({
