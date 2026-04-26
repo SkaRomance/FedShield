@@ -13,7 +13,16 @@
   --color-accent: #e65712;
   --color-accent-hover: #ee8f5f;
   --color-focus-ring: #ee8f5f;
-  --color-content-text: #e65712;
+  /* S11 (UI-REVIEW BLOCK): era #e65712 (arancione) — forzava arancione su
+     TUTTO il body text dentro .content, contrast 3.0:1 sotto WCAG AA.
+     Allineato a --color-text (dark blue) per leggibilità. */
+  --color-content-text: #212d52;
+  /* Status semantic tokens (S11 UI-REVIEW): per stati pendente/successo/
+     errore/warning oltre il branding accent. */
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-error: #dc2626;
+  --color-pending: #2563eb;
   --color-sidebar-bg: #fefefe;
 
   --color-on-primary: #fefefe;
@@ -604,4 +613,49 @@ textarea,
 
 .content :is(h1, h2, h3, p, label, th, td, .status-message, .template-hint, .kpi-card strong, .kpi-card h3) {
   color: var(--color-content-text);
+}
+
+/* S11 (UI-REVIEW Quick Win 1): definizione di .btn-primary mancante
+   — usata 13 volte (Asset/Training/Chatbot/NormSync/etc.) ma senza
+   styling cadeva al default browser. Allineata ai token brand. */
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--color-on-primary);
+  border: 1px solid var(--color-accent);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+.btn-primary:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* S11 (UI-REVIEW Quick Win 4): wrapper tabelle con scroll orizzontale
+   per evitare overflow su viewport stretto (Anagrafica, NormSync,
+   AssetsPage, TrainingPage scadenze). */
+.table-wrap {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+
+.table-wrap > table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
 }
