@@ -204,11 +204,24 @@ Audit completo: `docs/audit/AUDIT_2026-04-25.md` (39 feature PRD verificate, 47 
 | S1-7 | Auth-matrix test (5 test, 5 pass): 401 senza JWT, 403 junior, 403 senior su admin-only, GET pubblici per junior | `690d792` |
 | S1-8 | Fix debiti TS pre-esistenti: import `.js` su seed.ts, status enum cast in equipment, esclusione prisma da tsconfig | `9aca204` |
 
-**`tsc --noEmit`: 0 errori** sul codice runtime.
+**`tsc --noEmit` backend: 0 errori** sul codice runtime.
 
-Sprint 2 — CRUD frontend: `EmployeesPage`, `TrainingCoursesPage`, `AssetsPage`, wiring `AssetQrPage` in `App.tsx`, sostituire localhost hardcoded.
+**Sprint 2 ✅ Completato** (commit `e92a18b`):
 
-Sprint 3 — Production hardening: HTTPS reverse proxy n8n VPS, schema validation risposte n8n, sanitization HTML chatbot, unique constraints schema, E2E test, eventuale migrazione `bcryptjs → argon2`, DTO whitelisting companies.PATCH (breaking + frontend coordinato).
+| # | Tema | File |
+|---|------|------|
+| S2-0 | Mapping pattern frontend (DashboardPage routing state-based, authedFetch, no-form-library) | — |
+| S2-1+S2-2 | TrainingPage rifatta con 3 tab (Scadenze / Dipendenti CRUD / Catalogo corsi CRUD) — soft-delete, registrazione formazione con auto-calcolo `expiresAt` | `pages/TrainingPage.tsx` |
+| S2-3 | AssetsPage nuova con 4 tab (Attrezzature / Macchine / Estintori / Cassette PS) — filtro per company, form create per ogni tipo, highlighting righe per scadenza | `pages/AssetsPage.tsx` |
+| S2-4 | Wiring AssetQrPage in DashboardPage: nav "Asset & Attrezzature", click QR row → assetQr view, pulsante "← Torna agli asset" | `pages/DashboardPage.tsx` |
+| S2-5 | AssetQrPage fix: `localhost:4000` → `fetchEquipmentById` (authedFetch), allineamento schema (`nextCheckAt`, `serialNumber`) | `pages/AssetQrPage.tsx` |
+| extra | api.ts: 12+ helper tipizzati per employees/equipment×4/training-courses; tsconfig desktop override `moduleResolution: bundler` per Vite | `src/api.ts`, `tsconfig.json` |
+
+**Vite build desktop: ✅ 44 modules, 306 KB → 86 KB gzipped in 1.15s.**
+
+PRD chiuso: F-15 (CRUD frontend dipendenti), F-16 (CRUD frontend corsi), F-22 (QR raggiungibile da nav), F-24 (CRUD frontend asset).
+
+Sprint 3 — Production hardening: HTTPS reverse proxy n8n VPS, schema validation risposte n8n, sanitization HTML chatbot, unique constraints schema, E2E test, eventuale migrazione `bcryptjs → argon2`, DTO whitelisting companies.PATCH (breaking + frontend coordinato), risolvere 7 errori TS pre-esistenti in ChecklistPage/syncManager.
 
 ---
 
@@ -216,14 +229,15 @@ Sprint 3 — Production hardening: HTTPS reverse proxy n8n VPS, schema validatio
 
 | Priorita | Task | Skill Suggerite |
 |----------|------|-----------------|
-| Alta | Form CRUD dipendenti in TrainingPage | frontend-design |
-| Alta | Form CRUD corsi in TrainingPage | frontend-design |
-| Alta | Form CRUD asset in AssetQrPage | frontend-design |
-| Media | Import workflow n8n sul VPS | docker-development |
+| Alta | Import workflow n8n sul VPS + HTTPS reverse proxy | docker-development |
+| Alta | Schema validation risposte n8n + sanitization HTML chatbot | senior-backend |
+| Alta | Risolvere 7 errori TS pre-esistenti in ChecklistPage/syncManager | senior-backend |
+| Media | Edit/delete macchine/estintori/cassette PS (Sprint 2 ha solo create) | frontend-design |
 | Media | QR code stampabile per estintori/kits | frontend-design |
-| Media | Aggiungere data picker/calendario scadenze | frontend-design |
+| Media | Test E2E (Playwright) — flusso login → create company → create employee → record formazione | qa + test-driven-development |
+| Media | DTO whitelisting companies.PATCH (breaking, coordinato col frontend) | senior-backend |
 | Bassa | Dark mode / tema personalizzabile | ui-ux-pro-max |
-| Bassa | Test E2E per training + asset | qa + test-driven-development |
+| Bassa | Migrazione bcryptjs → argon2 (PRD NF-03 strict compliance) | senior-backend |
 
 ---
 
