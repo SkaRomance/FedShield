@@ -335,7 +335,7 @@ async function publicFetch<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json();
 }
 
-async function authedFetch<T>(path: string, token: string, init?: RequestInit): Promise<T> {
+export async function authedFetch<T>(path: string, token: string, init?: RequestInit): Promise<T> {
   const hasBody = init?.body !== undefined && init.body !== null;
   const headers = new Headers(init?.headers ?? {});
   headers.set("Authorization", `Bearer ${token}`);
@@ -845,6 +845,325 @@ export function syncAck(
   },
 ) {
   return authedFetch<{ acknowledged: boolean; cursor: string }>("/sync/ack", token, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+// === CHATBOT ===
+export interface ChatbotResponse {
+  answer: string;
+  source?: string;
+  timestamp: string;
+}
+
+export function chatbotQuery(
+  token: string,
+  payload: {
+    companyId?: string;
+    question: string;
+    inspectionId?: string;
+    history?: Array<{ role: string; content: string }>;
+  },
+): Promise<ChatbotResponse> {
+  return authedFetch<ChatbotResponse>("/chatbot/query", token, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+// === NORM-SYNC ===
+export interface NormativeProposal {
+  id: string;
+  sourceId?: string;
+  normTitle: string;
+  normReference: string;
+  normText?: string;
+  changeSummary: string;
+  proposedChanges: unknown;
+  status: "pending" | "approved" | "rejected";
+  createdAt: string;
+  reviewedAt?: string | null;
+}
+
+export function fetchNormSyncProposals(token: string, status?: string): Promise<NormativeProposal[]> {
+  const query = status ? `?status=${encodeURIComponent(status)}` : "";
+  return authedFetch<NormativeProposal[]>(`/norm-sync/proposals${query}`, token);
+}
+
+export function approveNormSyncProposal(token: string, proposalId: string, note?: string) {
+  return authedFetch<NormativeProposal>(`/norm-sync/proposals/${proposalId}/approve`, token, {
+    method: "PATCH",
+    body: JSON.stringify({ status: "approved", note }),
+  });
+}
+
+export function rejectNormSyncProposal(token: string, proposalId: string, note?: string) {
+  return authedFetch<NormativeProposal>(`/norm-sync/proposals/${proposalId}/reject`, token, {
+    method: "PATCH",
+    body: JSON.stringify({ note }),
+  });
+}
+
+// === EMPLOYEES (Sprint 2) ===
+export interface TrainingRecord {
+  id: string;
+  course: { id: string; name: string; minHours: number; frequencyYears: number };
+  completedAt: string | null;
+  expiresAt: string | null;
+  hoursDone: number | null;
+  certificateNumber: string | null;
+}
+
+export interface Employee {
+  id: string;
+  companyId: string;
+  firstName: string;
+  lastName: string;
+  fiscalCode?: string | null;
+  role?: string | null;
+  department?: string | null;
+  isActive: boolean;
+  hireDate?: string | null;
+  leftDate?: string | null;
+  trainingRecords?: TrainingRecord[];
+}
+
+export interface EmployeePayload {
+  companyId: string;
+  firstName: string;
+  lastName: string;
+  fiscalCode?: string;
+  role?: string;
+  department?: string;
+  hireDate?: string;
+}
+
+export function fetchEmployees(
+  token: string,
+  filters?: { companyId?: string; isActive?: boolean },
+): Promise<Employee[]> {
+  const params = new URLSearchParams();
+  if (filters?.companyId) params.set("companyId", filters.companyId);
+  if (filters?.isActive !== undefined) params.set("isActive", String(filters.isActive));
+  const query = params.toString() ? `?${params.toString()}` : "";
+  return authedFetch<Employee[]>(`/employees${query}`, token);
+}
+
+export function createEmployee(token: string, payload: EmployeePayload): Promise<Employee> {
+  return authedFetch<Employee>("/employees", token, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateEmployee(
+  token: string,
+  employeeId: string,
+  payload: Partial<Omit<EmployeePayload, "companyId">>,
+): Promise<Employee> {
+  return authedFetch<Employee>(`/employees/${employeeId}`, token, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteEmployee(token: string, employeeId: string): Promise<void> {
+  return authedFetch<void>(`/employees/${employeeId}`, token, { method: "DELETE" });
+}
+
+// === TRAINING COURSES (Sprint 2) ===
+export interface TrainingCourse {
+  id: string;
+  name: string;
+  description?: string | null;
+  targetAudience: string;
+  minHours: number;
+  frequencyYears: number;
+  normReference: string;
+  domain?: "safety" | "haccp" | "both" | null;
+  isActive?: boolean;
+}
+
+export interface TrainingCoursePayload {
+  name: string;
+  description?: string;
+  targetAudience: string;
+  minHours: number;
+  frequencyYears: number;
+  normReference: string;
+  domain?: "safety" | "haccp" | "both";
+}
+
+export function fetchTrainingCourses(token: string): Promise<TrainingCourse[]> {
+  return authedFetch<TrainingCourse[]>("/training/courses", token);
+}
+
+export function createTrainingCourse(
+  token: string,
+  payload: TrainingCoursePayload,
+): Promise<TrainingCourse> {
+  return authedFetch<TrainingCourse>("/training/courses", token, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function createTrainingRecord(
+  token: string,
+  payload: {
+    employeeId: string;
+    courseId: string;
+    completedAt?: string;
+    expiresAt?: string;
+    hoursDone?: number;
+    certificateNumber?: string;
+    note?: string;
+  },
+) {
+  return authedFetch<TrainingRecord>("/training/records", token, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+// === EQUIPMENT / ASSETS (Sprint 2) ===
+export type EquipmentStatus = "active" | "under_maintenance" | "expired" | "decommissioned";
+
+interface BaseAsset {
+  id: string;
+  companyId: string;
+  status: EquipmentStatus;
+  note?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface Equipment extends BaseAsset {
+  name: string;
+  type: string;
+  model?: string | null;
+  serialNumber?: string | null;
+  location?: string | null;
+  lastCheckAt?: string | null;
+  nextCheckAt?: string | null;
+}
+
+export interface Machine extends BaseAsset {
+  name: string;
+  type: string;
+  model?: string | null;
+  serialNumber?: string | null;
+  manufacturer?: string | null;
+  location?: string | null;
+  riskLevel?: string | null;
+  lastMaintenanceAt?: string | null;
+  nextMaintenanceAt?: string | null;
+  lastSafetyCheckAt?: string | null;
+  nextSafetyCheckAt?: string | null;
+}
+
+export interface FireExtinguisher extends BaseAsset {
+  code: string;
+  type: string;
+  location: string;
+  capacity?: string | null;
+  manufactureDate?: string | null;
+  lastCheckAt?: string | null;
+  nextCheckAt?: string | null;
+  lastRechargeAt?: string | null;
+}
+
+export interface FirstAidKit extends BaseAsset {
+  location: string;
+  contents?: string | null;
+  lastCheckAt?: string | null;
+  nextCheckAt?: string | null;
+  replenishedAt?: string | null;
+}
+
+function buildAssetQuery(filters?: { companyId?: string; status?: EquipmentStatus }) {
+  const params = new URLSearchParams();
+  if (filters?.companyId) params.set("companyId", filters.companyId);
+  if (filters?.status) params.set("status", filters.status);
+  return params.toString() ? `?${params.toString()}` : "";
+}
+
+export function fetchEquipment(token: string, filters?: { companyId?: string; status?: EquipmentStatus }) {
+  return authedFetch<Equipment[]>(`/equipment${buildAssetQuery(filters)}`, token);
+}
+
+export function fetchEquipmentById(token: string, id: string) {
+  return authedFetch<Equipment>(`/equipment/${id}`, token);
+}
+
+export function createEquipment(
+  token: string,
+  payload: Omit<Equipment, "id" | "status" | "createdAt" | "updatedAt"> & { lastCheckAt?: string; nextCheckAt?: string },
+) {
+  return authedFetch<Equipment>("/equipment", token, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function fetchMachines(token: string, filters?: { companyId?: string; status?: EquipmentStatus }) {
+  return authedFetch<Machine[]>(`/machines${buildAssetQuery(filters)}`, token);
+}
+
+export function createMachine(
+  token: string,
+  payload: Omit<Machine, "id" | "status" | "createdAt" | "updatedAt"> & {
+    lastMaintenanceAt?: string;
+    nextMaintenanceAt?: string;
+    lastSafetyCheckAt?: string;
+    nextSafetyCheckAt?: string;
+  },
+) {
+  return authedFetch<Machine>("/machines", token, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function fetchFireExtinguishers(
+  token: string,
+  filters?: { companyId?: string; status?: EquipmentStatus },
+) {
+  return authedFetch<FireExtinguisher[]>(`/fire-extinguishers${buildAssetQuery(filters)}`, token);
+}
+
+export function createFireExtinguisher(
+  token: string,
+  payload: Omit<FireExtinguisher, "id" | "status" | "createdAt" | "updatedAt"> & {
+    manufactureDate?: string;
+    lastCheckAt?: string;
+    nextCheckAt?: string;
+    lastRechargeAt?: string;
+  },
+) {
+  return authedFetch<FireExtinguisher>("/fire-extinguishers", token, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function fetchFirstAidKits(
+  token: string,
+  filters?: { companyId?: string; status?: EquipmentStatus },
+) {
+  return authedFetch<FirstAidKit[]>(`/first-aid-kits${buildAssetQuery(filters)}`, token);
+}
+
+export function createFirstAidKit(
+  token: string,
+  payload: Omit<FirstAidKit, "id" | "status" | "createdAt" | "updatedAt"> & {
+    lastCheckAt?: string;
+    nextCheckAt?: string;
+    replenishedAt?: string;
+  },
+) {
+  return authedFetch<FirstAidKit>("/first-aid-kits", token, {
     method: "POST",
     body: JSON.stringify(payload),
   });
