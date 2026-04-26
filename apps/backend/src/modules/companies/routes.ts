@@ -33,14 +33,51 @@ const companyParamsSchema = z.object({
   id: z.string().min(1),
 });
 
+// DTO output: solo i campi pubblici. Eventuali nuovi campi dello schema Prisma
+// non vengono restituiti finché non sono aggiunti esplicitamente qui (deny-by-default).
+const companyOutputSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  vatNumber: z.string(),
+  legalForm: z.string().nullable(),
+  reaNumber: z.string().nullable(),
+  employeesInfo: z.string().nullable(),
+  email: z.string().nullable(),
+  pec: z.string().nullable(),
+  phone: z.string().nullable(),
+  atecoCode: z.string().nullable(),
+  riskLevel: z.string().nullable(),
+  description: z.string().nullable(),
+  legalAddress: z.string().nullable(),
+  localUnitAddress: z.string().nullable(),
+  city: z.string().nullable(),
+  preventionSystemSubjects: z.string().nullable(),
+  employerRsppPreposto: z.string().nullable(),
+  occupationalDoctor: z.string().nullable(),
+  rls: z.string().nullable(),
+  emergencyTeam: z.string().nullable(),
+  firstAidTeam: z.string().nullable(),
+  haccpResponsabileAutocontrollo: z.string().nullable(),
+  haccpConsulenteEsterno: z.string().nullable(),
+  haccpAdditionalResponsabili: z.string().nullable(),
+  contractStart: z.date().nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+function toCompanyDto(record: unknown) {
+  return companyOutputSchema.parse(record);
+}
+
 const companyRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get(
     "/companies",
     { preHandler: [fastify.authenticate] },
     async () => {
-      return fastify.prisma.company.findMany({
+      const records = await fastify.prisma.company.findMany({
         orderBy: { createdAt: "desc" },
       });
+      return records.map(toCompanyDto);
     },
   );
 
@@ -64,7 +101,7 @@ const companyRoutes: FastifyPluginAsync = async (fastify) => {
         data: parsed.data,
       });
 
-      return reply.code(201).send(created);
+      return reply.code(201).send(toCompanyDto(created));
     },
   );
 
@@ -105,7 +142,7 @@ const companyRoutes: FastifyPluginAsync = async (fastify) => {
         data: parsed.data,
       });
 
-      return reply.send(updated);
+      return reply.send(toCompanyDto(updated));
     },
   );
 };
