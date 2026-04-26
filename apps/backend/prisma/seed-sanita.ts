@@ -1,6 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "./_client.js";
 
 export async function seedSanita() {
   const sectorName = "Sanita e Farmacie";

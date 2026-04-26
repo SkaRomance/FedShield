@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
 import argon2 from "argon2";
-
-const prisma = new PrismaClient();
+import { prisma, disconnectPrisma } from "./_client.js";
 
 async function main() {
   const email = "admin@fedshield.local";
@@ -41,5 +39,5 @@ main()
     process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect();
+    await disconnectPrisma();
   });
