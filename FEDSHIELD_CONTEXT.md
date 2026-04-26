@@ -357,16 +357,31 @@ Totale 28 test su 10 file, tutti pass. HoReCa coverage: 15 categorie ATECO (rist
 
 **Test suite Sprint 10**: backend 28/28 pass + desktop 10/10 pass. Backend+desktop tsc 0 errori.
 
-### Backlog residuo (Sprint 11+)
+**Sprint 11 ✅ Completato — Quality audit + UI loop closure + tech debt** (branch `feat/sprint-11-debt-and-ui`, commits `355bf23..1dd2b05`):
+
+3 agent paralleli (gsd-ui-auditor + general-purpose + Plan) hanno prodotto report attuati nello stesso sprint.
+
+| # | Tema | Commit |
+|---|------|--------|
+| S11-A3 (MEDIUM-05) | PrismaClient singleton refactor: nuovo `_client.ts` esporta singleton + `disconnectPrisma()`. Tutti i 12 file (4 entry-point + 8 verticali) ora importano dal singleton. Da 12 connessioni a 1 per `pnpm db:seed`. Backward compat 100% standalone. | `355bf23` |
+| S11-B1 | Frontend X-Truncated consumer: `authedFetchPaged<T>` + 4 helper paged-aware (`fetchEquipmentPaged`, etc.). AssetsPage mostra `TruncatedBanner` warning quando il backend cappa a 200. Closes loop con S10-A1 (MEDIUM-02). | `1517327` |
+| S11-A1 (UI-REVIEW BLOCK) | Color & contrast fix: `--color-content-text` da `#e65712` (arancione 3.0:1) a `#212d52` (dark blue WCAG AA). Aggiunti token semantici `--color-success/warning/error/pending`. Definita `.btn-primary` mancante (usata 13× ma assente in CSS). Helper `.table-wrap`. LoginPage credenziali dev-only via `import.meta.env.DEV`. | `184d1fb` |
+| S11-A2 (BCRYPT_AUDIT) | Audit bcryptjs: solo 2 file usano runtime (password.ts verifier + test fixtures). Decisione: NEEDS-PROD-VERIFY — rimozione safe in dev ma serve audit prod prima. Effort ~2h coding, 2-6 settimane calendar (re-hash organico via login). Documento BCRYPT_AUDIT.md include script Prisma allegato. | `1dd2b05` (artifact) |
+
+**Test suite Sprint 11**: backend 28/28 pass + desktop 10/10 pass. Vite build 378.59 KB → 110.99 KB gzip in 4.81s. `pnpm db:seed` 1 sola PrismaClient connection. Backend+desktop tsc 0 errori.
+
+### Backlog residuo (Sprint 12+)
 
 - HTTPS reverse proxy n8n VPS (richiede accesso infra)
 - Playwright E2E browser-level (defense-in-depth oltre golden-path API)
-- Eventuale rimozione finale di `bcryptjs` quando il DB sarà tutto argon2 (audit DB password hashes prima)
+- bcryptjs removal: aggiungere `apps/backend/scripts/audit-password-hashes.ts` (script allegato in BCRYPT_AUDIT.md), monitor settimanale, rimuovere bcrypt branch quando audit prod = exit 0
 - Stampabilità QR per estintori/kits / dark mode / migrazione SQLite → Postgres prod
-- Restore seed HoReCa generic doc templates (rimossi in S7 perché non scoped)
-- Refactor seed PrismaClient singletons (MEDIUM-05) + seedSource discriminator (MEDIUM-06)
-- Push CI workflow a origin (richiede decisione sull'attivazione auto su PR)
-- Frontend AssetsPage UI per consumare X-Truncated header (warning "Visualizzati primi 200 di X")
+- Restore seed HoReCa generic doc templates (rimossi in S7)
+- MEDIUM-06 seedSource discriminator (richiede schema column + migration)
+- UI-REVIEW quick wins residui: status semantic tokens (`role="status"`), aria-label sugli select, refactor `.tab-btn` con var(--color-accent)
+- UI-REVIEW long-term: spezzare AssetsPage (1059 LOC), ChecklistPage (1946 LOC), TrainingPage (829 LOC) in componenti per tab
+- Push CI workflow a origin
+- Rimozione `CustomersPage.tsx` (89 LOC dead code, non importata in DashboardPage)
 
 ---
 
