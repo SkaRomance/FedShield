@@ -148,7 +148,7 @@ test-driven-development → apps/backend/src/tests/ + nuove feature
 #### Configurazione
 - **Environment**: `N8N_AUDITBOT_WEBHOOK="http://87.106.168.71:5678/webhook/chatbot-query"`
 - **Workflow n8n**: `infra/n8n/workflows/auditbot-workflow.json` (aggiornato con IP VPS)
-- **Credenziali test**: `admin@fedshield.local` / `fedshield2026`
+- **Credenziali test**: `{admin,senior,junior}@fedshield.local` / `fedshield123` (unificata da S5)
 
 ### 🔧 Fix Applicati
 1. `TrainingPage.tsx`: rimosso import `{ api }` inesistente → `authedFetch`
@@ -363,7 +363,7 @@ Se sei un agente che prende in mano questo progetto:
 3. **Leggi questo file** per capire cosa e gia stato fatto
 4. **Verifica backend attivo**: `curl http://localhost:4000/api/health`
 5. **Verifica desktop**: `pnpm --filter @fedshield/desktop dev`
-6. **Login test**: `admin@fedshield.local` / `fedshield2026`
+6. **Login test**: `admin@fedshield.local` / `fedshield123` (anche junior/senior, stessa password)
 7. **Prima di modificare**: load skill pertinenti con `/skill load <name>`
 8. **Se non sai quale skill**: usa `/find-skills <cosa cerchi>`
 9. **Non inventare normative** — consulta agenti in `.claude/agents/`
