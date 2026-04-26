@@ -14,7 +14,7 @@
     "db:seed:test": "tsx prisma/seed-users.ts && tsx prisma/seed-test-baseline.ts",
     "lint": "echo 'No lint configured for backend yet'",
     "pretest": "pnpm db:seed:test",
-    "test": "tsx src/tests/checklists.test.ts && tsx src/tests/pastry-split.test.ts && tsx src/tests/horeca-completeness.test.ts && tsx src/tests/quotes.test.ts && tsx src/tests/kpi-odv.test.ts && tsx src/tests/licensing-sync.test.ts && tsx src/tests/auth-matrix.test.ts && tsx src/tests/password.test.ts && tsx src/tests/smoke.test.ts"
+    "test": "cross-env NODE_ENV=test tsx src/tests/checklists.test.ts && cross-env NODE_ENV=test tsx src/tests/pastry-split.test.ts && cross-env NODE_ENV=test tsx src/tests/horeca-completeness.test.ts && cross-env NODE_ENV=test tsx src/tests/quotes.test.ts && cross-env NODE_ENV=test tsx src/tests/kpi-odv.test.ts && cross-env NODE_ENV=test tsx src/tests/licensing-sync.test.ts && cross-env NODE_ENV=test tsx src/tests/auth-matrix.test.ts && cross-env NODE_ENV=test tsx src/tests/password.test.ts && cross-env NODE_ENV=test tsx src/tests/smoke.test.ts && cross-env NODE_ENV=test tsx src/tests/golden-path.test.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.1.0",
@@ -34,6 +34,7 @@
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^24.3.3",
+    "cross-env": "^10.1.0",
     "prisma": "^6.16.2",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"

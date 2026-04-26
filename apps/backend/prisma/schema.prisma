@@ -28,6 +28,27 @@ enum ChecklistAnswerValue {
 enum ChecklistSection {
   premises_equipment
   procedures_hygiene
+  // S7: sezioni verticali per i seed sectorial (metalmeccanico, sanita, etc.).
+  // SQLite tratta gli enum come TEXT lato DB, quindi l'estensione non richiede
+  // migrazione dati: i record esistenti restano validi.
+  access_security
+  chemical_fitosanitary
+  documentation
+  electrical
+  environment
+  environmental
+  ergonomics
+  fire_prevention
+  first_aid
+  gdpr_privacy
+  health_surveillance
+  it_security
+  machinery_safety
+  ppe
+  safety_training
+  training_emergency
+  welding_thermal
+  workstations
 }
 
 enum ComplianceDomain {
