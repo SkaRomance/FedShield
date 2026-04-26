@@ -32,14 +32,19 @@ export function buildApp() {
     // deploy web del backend.
     contentSecurityPolicy: false, // CSP custom non necessaria per API JSON
   });
-  app.register(rateLimit, {
-    global: true,
-    max: 100,
-    timeWindow: "1 minute",
-    // L'app desktop in dev può sforare facilmente: alziamo un po' la finestra.
-    // Override aggressivo su /auth/login configurato a livello di route.
-    cache: 10000,
-  });
+  // Rate limit disabilitato in test env: i test legacy fanno centinaia di
+  // request rapidi via inject e sforerebbero soglia globale, restituendo
+  // 429 invece dei codici di risposta business. In prod/dev rimane attivo.
+  if (process.env.NODE_ENV !== "test") {
+    app.register(rateLimit, {
+      global: true,
+      max: 100,
+      timeWindow: "1 minute",
+      // L'app desktop in dev può sforare facilmente: alziamo un po' la finestra.
+      // Override aggressivo su /auth/login configurato a livello di route.
+      cache: 10000,
+    });
+  }
   app.register(cors, {
     origin: true,
     methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
