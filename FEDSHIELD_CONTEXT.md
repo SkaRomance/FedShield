@@ -237,12 +237,28 @@ PRD chiuso: F-15 (CRUD frontend dipendenti), F-16 (CRUD frontend corsi), F-22 (Q
 
 PRD aggiornato: NF-03 (argon2) ora compliant; F-24 (asset CRUD completo end-to-end con edit/delete).
 
-### Backlog residuo (Sprint 4 — Operativo)
+**Sprint 4 ✅ Completato** (commits `1455665..a116d3d`):
+
+| # | Tema | Commit |
+|---|------|--------|
+| S4-1 | Tipizza payload mutations in `auth-matrix.test`: `Record<string, unknown>` invece di `unknown` → 0 errori TS sull'intero backend (incluso test) | `1455665` |
+| S4-2 | UI edit/delete asset desktop: 4 tab di `AssetsPage` ora con pulsanti Modifica/Elimina, form pre-compilato per editing, soft-delete con confirm | `2c3601c` |
+| S4-3 | Smoke test backend: 8 test che booteano `buildApp()` + verificano `/api/health`, `/api/companies`, regressioni Sprint 0 (P0-1/P0-2/P0-3), chatbot length cap | `a116d3d` |
+| S4-4 | Code review pre-merge delegata ad agent `gsd-code-reviewer`: 23 commit Sprint 0-3 analizzati. **Verdict**: 0 critical, 3 HIGH, 5 medium, 5 low | — (review eseguita) |
+| S4-7 | Fix dei 3 finding HIGH della review: H1 SSRF allowlist su `N8N_AUDITBOT_WEBHOOK` (`isSafeOutboundUrl`), H2 length cap 4000 char su question chatbot (DoS marked.parse), H3 `nullableDate` per consentire reset di campi data nelle PATCH asset | `2e0ac58` |
+
+**Stato finale pre-merge:**
+- Backend `tsc --noEmit`: **0 errori** (incluso file di test)
+- Desktop `tsc --noEmit`: **0 errori**
+- Vite build desktop: 376 KB → 110 KB gzip in ~1.25s
+- Test backend: tutti i suite passano (auth-matrix 5/5, password 5/5, smoke 8/8)
+- Code review: HIGH chiusi; MEDIUM/LOW backlog (vedi sotto)
+
+### Backlog residuo (Sprint 5 — Operativo)
 
 - HTTPS reverse proxy n8n VPS (richiede accesso infra)
 - E2E test Playwright (flusso login → create company → create employee → record formazione)
-- Edit/delete UI desktop per asset (backend pronto, frontend ancora con solo create)
-- Risolvere 6 errori TS in `auth-matrix.test.ts` (tipi inject/statusCode Fastify)
+- Code review MEDIUM (M1 anti user-enumeration timing, M5 fix `JSON.parse(JSON.stringify)` proposals/approve, M2 `n8nChatbotResponseSchema.timestamp` strict ISO, M3 policy HACCP nominativi su junior)
 - Eventuale rimozione finale di `bcryptjs` quando il DB sarà tutto argon2
 - Stampabilità QR per estintori/kits / dark mode / migrazione SQLite → Postgres prod
 
@@ -254,8 +270,8 @@ PRD aggiornato: NF-03 (argon2) ora compliant; F-24 (asset CRUD completo end-to-e
 |----------|------|-----------------|
 | Alta | Import workflow n8n sul VPS + HTTPS reverse proxy | docker-development |
 | Alta | Test E2E (Playwright) — flusso login → create company → create employee → record formazione | qa + test-driven-development |
-| Media | UI edit/delete asset desktop (backend pronto in Sprint 3, manca solo frontend) | frontend-design |
-| Media | Risolvere 6 errori TS in `auth-matrix.test.ts` (tipi `light/inject`) | senior-backend |
+| Media | Code review MEDIUM (M1/M2/M5) — anti-timing user enumeration, JSON.parse fix, timestamp strict | senior-backend |
+| Media | Policy review M3: filtrare nominativi HACCP per ruolo `junior` su `/companies` | senior-backend |
 | Media | QR code stampabile per estintori/kits | frontend-design |
 | Bassa | Rimozione finale `bcryptjs` quando il DB sarà tutto argon2 | senior-backend |
 | Bassa | Dark mode / tema personalizzabile | ui-ux-pro-max |
