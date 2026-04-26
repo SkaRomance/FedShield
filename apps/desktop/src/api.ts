@@ -781,12 +781,26 @@ export function validateDeviceLicense(payload: {
   });
 }
 
+export interface DeviceHeartbeatResponse {
+  found: boolean;
+  isActive: boolean;
+  isWithinGrace?: boolean;
+  status?: "active" | "expired" | "revoked";
+  expiresAt?: string | null;
+  graceUntil?: string | null;
+  revokedAt?: string | null;
+  revokedReason?: string | null;
+  reason?: string;
+  serverTime: string;
+  heartbeatAccepted?: boolean;
+}
+
 export function heartbeatDeviceLicense(payload: {
   deviceId: string;
   heartbeatToken: string;
   appVersion?: string;
 }) {
-  return publicFetch("/licensing/heartbeat", {
+  return publicFetch<DeviceHeartbeatResponse>("/licensing/heartbeat", {
     method: "POST",
     body: JSON.stringify(payload),
   });

@@ -220,7 +220,7 @@ export async function pullAndAcknowledge(token: string): Promise<{ received: num
 
   localStorage.setItem(SYNC_CURSOR_KEY, delta.nextCursor);
 
-  const received = Object.values(delta.data).reduce((sum, value) => {
+  const received = Object.values(delta.data).reduce<number>((sum, value) => {
     if (Array.isArray(value)) {
       return sum + value.length;
     }
