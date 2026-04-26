@@ -5,6 +5,10 @@ import {
   createFireExtinguisher,
   createFirstAidKit,
   createMachine,
+  deleteEquipment,
+  deleteFireExtinguisher,
+  deleteFirstAidKit,
+  deleteMachine,
   Equipment,
   fetchEquipment,
   fetchFireExtinguishers,
@@ -13,6 +17,10 @@ import {
   FireExtinguisher,
   FirstAidKit,
   Machine,
+  updateEquipment,
+  updateFireExtinguisher,
+  updateFirstAidKit,
+  updateMachine,
 } from "../api";
 
 interface AssetsPageProps {
@@ -195,13 +203,35 @@ function EquipmentTab({
   onOpenQr: (assetId: string) => void;
 }) {
   const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<Equipment | null>(null);
+
+  function startEdit(item: Equipment) {
+    setEditing(item);
+    setShowForm(true);
+  }
+
+  function startCreate() {
+    setEditing(null);
+    setShowForm((s) => !s);
+  }
+
+  async function handleDelete(item: Equipment) {
+    if (!window.confirm(`Eliminare l'attrezzatura "${item.name}"?`)) return;
+    onError(null);
+    try {
+      await deleteEquipment(token, item.id);
+      await onChanged();
+    } catch (err) {
+      onError(err instanceof Error ? err.message : "Errore eliminazione");
+    }
+  }
 
   return (
     <section className="panel">
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h3>Attrezzature generiche</h3>
-        <button className="btn-primary" onClick={() => setShowForm((s) => !s)}>
-          {showForm ? "Chiudi" : "+ Nuova attrezzatura"}
+        <button className="btn-primary" onClick={startCreate}>
+          {showForm && !editing ? "Chiudi" : "+ Nuova attrezzatura"}
         </button>
       </header>
 
@@ -209,9 +239,14 @@ function EquipmentTab({
         <EquipmentForm
           token={token}
           companyId={companyId}
-          onClose={() => setShowForm(false)}
+          existing={editing}
+          onClose={() => {
+            setShowForm(false);
+            setEditing(null);
+          }}
           onSaved={async () => {
             setShowForm(false);
+            setEditing(null);
             await onChanged();
           }}
           onError={onError}
@@ -244,9 +279,11 @@ function EquipmentTab({
               <td>{formatDate(eq.nextCheckAt)}</td>
               <td>{eq.status}</td>
               <td>
-                <button className="ghost-btn" onClick={() => onOpenQr(eq.id)}>
-                  QR
-                </button>
+                <RowActions
+                  onQr={() => onOpenQr(eq.id)}
+                  onEdit={() => startEdit(eq)}
+                  onDelete={() => handleDelete(eq)}
+                />
               </td>
             </tr>
           ))}
@@ -264,32 +301,38 @@ function EquipmentTab({
 function EquipmentForm({
   token,
   companyId,
+  existing,
   onClose,
   onSaved,
   onError,
-}: FormCommon) {
-  const [name, setName] = useState("");
-  const [type, setType] = useState("");
-  const [model, setModel] = useState("");
-  const [serialNumber, setSerialNumber] = useState("");
-  const [location, setLocation] = useState("");
-  const [nextCheckAt, setNextCheckAt] = useState("");
+}: FormCommon & { existing?: Equipment | null }) {
+  const [name, setName] = useState(existing?.name ?? "");
+  const [type, setType] = useState(existing?.type ?? "");
+  const [model, setModel] = useState(existing?.model ?? "");
+  const [serialNumber, setSerialNumber] = useState(existing?.serialNumber ?? "");
+  const [location, setLocation] = useState(existing?.location ?? "");
+  const [nextCheckAt, setNextCheckAt] = useState(toDateInput(existing?.nextCheckAt));
   const [busy, setBusy] = useState(false);
+  const isEdit = Boolean(existing);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     onError(null);
     try {
-      await createEquipment(token, {
-        companyId,
+      const payload = {
         name: name.trim(),
         type: type.trim(),
         model: model.trim() || undefined,
         serialNumber: serialNumber.trim() || undefined,
         location: location.trim() || undefined,
         nextCheckAt: nextCheckAt ? new Date(nextCheckAt).toISOString() : undefined,
-      });
+      };
+      if (existing) {
+        await updateEquipment(token, existing.id, payload);
+      } else {
+        await createEquipment(token, { companyId, ...payload });
+      }
       await onSaved();
     } catch (err) {
       onError(err instanceof Error ? err.message : "Errore salvataggio");
@@ -300,7 +343,7 @@ function EquipmentForm({
 
   return (
     <form onSubmit={submit} style={formStyle}>
-      <h4>Nuova attrezzatura</h4>
+      <h4>{isEdit ? `Modifica: ${existing?.name}` : "Nuova attrezzatura"}</h4>
       <div style={gridStyle}>
         <Field label="Nome *">
           <input required value={name} onChange={(e) => setName(e.target.value)} />
@@ -321,7 +364,7 @@ function EquipmentForm({
           <input type="date" value={nextCheckAt} onChange={(e) => setNextCheckAt(e.target.value)} />
         </Field>
       </div>
-      <FormActions busy={busy} onClose={onClose} editing={false} />
+      <FormActions busy={busy} onClose={onClose} editing={isEdit} />
     </form>
   );
 }
@@ -342,13 +385,35 @@ function MachinesTab({
   onError: (msg: string | null) => void;
 }) {
   const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<Machine | null>(null);
+
+  function startEdit(item: Machine) {
+    setEditing(item);
+    setShowForm(true);
+  }
+
+  function startCreate() {
+    setEditing(null);
+    setShowForm((s) => !s);
+  }
+
+  async function handleDelete(item: Machine) {
+    if (!window.confirm(`Eliminare la macchina "${item.name}"?`)) return;
+    onError(null);
+    try {
+      await deleteMachine(token, item.id);
+      await onChanged();
+    } catch (err) {
+      onError(err instanceof Error ? err.message : "Errore eliminazione");
+    }
+  }
 
   return (
     <section className="panel">
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h3>Macchine (manutenzione + sicurezza)</h3>
-        <button className="btn-primary" onClick={() => setShowForm((s) => !s)}>
-          {showForm ? "Chiudi" : "+ Nuova macchina"}
+        <button className="btn-primary" onClick={startCreate}>
+          {showForm && !editing ? "Chiudi" : "+ Nuova macchina"}
         </button>
       </header>
 
@@ -356,9 +421,14 @@ function MachinesTab({
         <MachineForm
           token={token}
           companyId={companyId}
-          onClose={() => setShowForm(false)}
+          existing={editing}
+          onClose={() => {
+            setShowForm(false);
+            setEditing(null);
+          }}
           onSaved={async () => {
             setShowForm(false);
+            setEditing(null);
             await onChanged();
           }}
           onError={onError}
@@ -376,6 +446,7 @@ function MachinesTab({
             <th>Prossima manutenzione</th>
             <th>Prossimo controllo sicurezza</th>
             <th>Stato</th>
+            <th>Azioni</th>
           </tr>
         </thead>
         <tbody>
@@ -393,12 +464,15 @@ function MachinesTab({
                 <td>{formatDate(m.nextMaintenanceAt)}</td>
                 <td>{formatDate(m.nextSafetyCheckAt)}</td>
                 <td>{m.status}</td>
+                <td>
+                  <RowActions onEdit={() => startEdit(m)} onDelete={() => handleDelete(m)} />
+                </td>
               </tr>
             );
           })}
           {items.length === 0 ? (
             <tr>
-              <td colSpan={8}>Nessuna macchina registrata.</td>
+              <td colSpan={9}>Nessuna macchina registrata.</td>
             </tr>
           ) : null}
         </tbody>
@@ -407,23 +481,30 @@ function MachinesTab({
   );
 }
 
-function MachineForm({ token, companyId, onClose, onSaved, onError }: FormCommon) {
-  const [name, setName] = useState("");
-  const [type, setType] = useState("");
-  const [manufacturer, setManufacturer] = useState("");
-  const [riskLevel, setRiskLevel] = useState("");
-  const [location, setLocation] = useState("");
-  const [nextMaintenanceAt, setNextMaintenanceAt] = useState("");
-  const [nextSafetyCheckAt, setNextSafetyCheckAt] = useState("");
+function MachineForm({
+  token,
+  companyId,
+  existing,
+  onClose,
+  onSaved,
+  onError,
+}: FormCommon & { existing?: Machine | null }) {
+  const [name, setName] = useState(existing?.name ?? "");
+  const [type, setType] = useState(existing?.type ?? "");
+  const [manufacturer, setManufacturer] = useState(existing?.manufacturer ?? "");
+  const [riskLevel, setRiskLevel] = useState(existing?.riskLevel ?? "");
+  const [location, setLocation] = useState(existing?.location ?? "");
+  const [nextMaintenanceAt, setNextMaintenanceAt] = useState(toDateInput(existing?.nextMaintenanceAt));
+  const [nextSafetyCheckAt, setNextSafetyCheckAt] = useState(toDateInput(existing?.nextSafetyCheckAt));
   const [busy, setBusy] = useState(false);
+  const isEdit = Boolean(existing);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     onError(null);
     try {
-      await createMachine(token, {
-        companyId,
+      const payload = {
         name: name.trim(),
         type: type.trim(),
         manufacturer: manufacturer.trim() || undefined,
@@ -431,7 +512,12 @@ function MachineForm({ token, companyId, onClose, onSaved, onError }: FormCommon
         location: location.trim() || undefined,
         nextMaintenanceAt: nextMaintenanceAt ? new Date(nextMaintenanceAt).toISOString() : undefined,
         nextSafetyCheckAt: nextSafetyCheckAt ? new Date(nextSafetyCheckAt).toISOString() : undefined,
-      });
+      };
+      if (existing) {
+        await updateMachine(token, existing.id, payload);
+      } else {
+        await createMachine(token, { companyId, ...payload });
+      }
       await onSaved();
     } catch (err) {
       onError(err instanceof Error ? err.message : "Errore salvataggio");
@@ -442,7 +528,7 @@ function MachineForm({ token, companyId, onClose, onSaved, onError }: FormCommon
 
   return (
     <form onSubmit={submit} style={formStyle}>
-      <h4>Nuova macchina</h4>
+      <h4>{isEdit ? `Modifica: ${existing?.name}` : "Nuova macchina"}</h4>
       <div style={gridStyle}>
         <Field label="Nome *">
           <input required value={name} onChange={(e) => setName(e.target.value)} />
@@ -479,7 +565,7 @@ function MachineForm({ token, companyId, onClose, onSaved, onError }: FormCommon
           />
         </Field>
       </div>
-      <FormActions busy={busy} onClose={onClose} editing={false} />
+      <FormActions busy={busy} onClose={onClose} editing={isEdit} />
     </form>
   );
 }
@@ -500,13 +586,35 @@ function ExtinguishersTab({
   onError: (msg: string | null) => void;
 }) {
   const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<FireExtinguisher | null>(null);
+
+  function startEdit(item: FireExtinguisher) {
+    setEditing(item);
+    setShowForm(true);
+  }
+
+  function startCreate() {
+    setEditing(null);
+    setShowForm((s) => !s);
+  }
+
+  async function handleDelete(item: FireExtinguisher) {
+    if (!window.confirm(`Eliminare l'estintore "${item.code}"?`)) return;
+    onError(null);
+    try {
+      await deleteFireExtinguisher(token, item.id);
+      await onChanged();
+    } catch (err) {
+      onError(err instanceof Error ? err.message : "Errore eliminazione");
+    }
+  }
 
   return (
     <section className="panel">
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h3>Estintori</h3>
-        <button className="btn-primary" onClick={() => setShowForm((s) => !s)}>
-          {showForm ? "Chiudi" : "+ Nuovo estintore"}
+        <button className="btn-primary" onClick={startCreate}>
+          {showForm && !editing ? "Chiudi" : "+ Nuovo estintore"}
         </button>
       </header>
 
@@ -514,9 +622,14 @@ function ExtinguishersTab({
         <ExtinguisherForm
           token={token}
           companyId={companyId}
-          onClose={() => setShowForm(false)}
+          existing={editing}
+          onClose={() => {
+            setShowForm(false);
+            setEditing(null);
+          }}
           onSaved={async () => {
             setShowForm(false);
+            setEditing(null);
             await onChanged();
           }}
           onError={onError}
@@ -533,6 +646,7 @@ function ExtinguishersTab({
             <th>Prossimo controllo</th>
             <th>Ultima ricarica</th>
             <th>Stato</th>
+            <th>Azioni</th>
           </tr>
         </thead>
         <tbody>
@@ -547,11 +661,14 @@ function ExtinguishersTab({
               <td>{formatDate(ex.nextCheckAt)}</td>
               <td>{formatDate(ex.lastRechargeAt)}</td>
               <td>{ex.status}</td>
+              <td>
+                <RowActions onEdit={() => startEdit(ex)} onDelete={() => handleDelete(ex)} />
+              </td>
             </tr>
           ))}
           {items.length === 0 ? (
             <tr>
-              <td colSpan={7}>Nessun estintore registrato.</td>
+              <td colSpan={8}>Nessun estintore registrato.</td>
             </tr>
           ) : null}
         </tbody>
@@ -560,23 +677,30 @@ function ExtinguishersTab({
   );
 }
 
-function ExtinguisherForm({ token, companyId, onClose, onSaved, onError }: FormCommon) {
-  const [code, setCode] = useState("");
-  const [type, setType] = useState("polvere ABC");
-  const [capacity, setCapacity] = useState("");
-  const [location, setLocation] = useState("");
-  const [manufactureDate, setManufactureDate] = useState("");
-  const [nextCheckAt, setNextCheckAt] = useState("");
-  const [lastRechargeAt, setLastRechargeAt] = useState("");
+function ExtinguisherForm({
+  token,
+  companyId,
+  existing,
+  onClose,
+  onSaved,
+  onError,
+}: FormCommon & { existing?: FireExtinguisher | null }) {
+  const [code, setCode] = useState(existing?.code ?? "");
+  const [type, setType] = useState(existing?.type ?? "polvere ABC");
+  const [capacity, setCapacity] = useState(existing?.capacity ?? "");
+  const [location, setLocation] = useState(existing?.location ?? "");
+  const [manufactureDate, setManufactureDate] = useState(toDateInput(existing?.manufactureDate));
+  const [nextCheckAt, setNextCheckAt] = useState(toDateInput(existing?.nextCheckAt));
+  const [lastRechargeAt, setLastRechargeAt] = useState(toDateInput(existing?.lastRechargeAt));
   const [busy, setBusy] = useState(false);
+  const isEdit = Boolean(existing);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     onError(null);
     try {
-      await createFireExtinguisher(token, {
-        companyId,
+      const payload = {
         code: code.trim(),
         type: type.trim(),
         location: location.trim(),
@@ -584,7 +708,12 @@ function ExtinguisherForm({ token, companyId, onClose, onSaved, onError }: FormC
         manufactureDate: manufactureDate ? new Date(manufactureDate).toISOString() : undefined,
         nextCheckAt: nextCheckAt ? new Date(nextCheckAt).toISOString() : undefined,
         lastRechargeAt: lastRechargeAt ? new Date(lastRechargeAt).toISOString() : undefined,
-      });
+      };
+      if (existing) {
+        await updateFireExtinguisher(token, existing.id, payload);
+      } else {
+        await createFireExtinguisher(token, { companyId, ...payload });
+      }
       await onSaved();
     } catch (err) {
       onError(err instanceof Error ? err.message : "Errore salvataggio");
@@ -595,7 +724,7 @@ function ExtinguisherForm({ token, companyId, onClose, onSaved, onError }: FormC
 
   return (
     <form onSubmit={submit} style={formStyle}>
-      <h4>Nuovo estintore</h4>
+      <h4>{isEdit ? `Modifica: ${existing?.code}` : "Nuovo estintore"}</h4>
       <div style={gridStyle}>
         <Field label="Codice / matricola *">
           <input required value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="EST-001" />
@@ -625,7 +754,7 @@ function ExtinguisherForm({ token, companyId, onClose, onSaved, onError }: FormC
           <input type="date" value={lastRechargeAt} onChange={(e) => setLastRechargeAt(e.target.value)} />
         </Field>
       </div>
-      <FormActions busy={busy} onClose={onClose} editing={false} />
+      <FormActions busy={busy} onClose={onClose} editing={isEdit} />
     </form>
   );
 }
@@ -646,13 +775,35 @@ function FirstAidTab({
   onError: (msg: string | null) => void;
 }) {
   const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<FirstAidKit | null>(null);
+
+  function startEdit(item: FirstAidKit) {
+    setEditing(item);
+    setShowForm(true);
+  }
+
+  function startCreate() {
+    setEditing(null);
+    setShowForm((s) => !s);
+  }
+
+  async function handleDelete(item: FirstAidKit) {
+    if (!window.confirm(`Eliminare la cassetta PS in "${item.location}"?`)) return;
+    onError(null);
+    try {
+      await deleteFirstAidKit(token, item.id);
+      await onChanged();
+    } catch (err) {
+      onError(err instanceof Error ? err.message : "Errore eliminazione");
+    }
+  }
 
   return (
     <section className="panel">
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h3>Cassette pronto soccorso</h3>
-        <button className="btn-primary" onClick={() => setShowForm((s) => !s)}>
-          {showForm ? "Chiudi" : "+ Nuova cassetta PS"}
+        <button className="btn-primary" onClick={startCreate}>
+          {showForm && !editing ? "Chiudi" : "+ Nuova cassetta PS"}
         </button>
       </header>
 
@@ -660,9 +811,14 @@ function FirstAidTab({
         <FirstAidForm
           token={token}
           companyId={companyId}
-          onClose={() => setShowForm(false)}
+          existing={editing}
+          onClose={() => {
+            setShowForm(false);
+            setEditing(null);
+          }}
           onSaved={async () => {
             setShowForm(false);
+            setEditing(null);
             await onChanged();
           }}
           onError={onError}
@@ -677,6 +833,7 @@ function FirstAidTab({
             <th>Prossimo controllo</th>
             <th>Ultimo riassortimento</th>
             <th>Stato</th>
+            <th>Azioni</th>
           </tr>
         </thead>
         <tbody>
@@ -689,11 +846,14 @@ function FirstAidTab({
               <td>{formatDate(k.nextCheckAt)}</td>
               <td>{formatDate(k.replenishedAt)}</td>
               <td>{k.status}</td>
+              <td>
+                <RowActions onEdit={() => startEdit(k)} onDelete={() => handleDelete(k)} />
+              </td>
             </tr>
           ))}
           {items.length === 0 ? (
             <tr>
-              <td colSpan={5}>Nessuna cassetta PS registrata.</td>
+              <td colSpan={6}>Nessuna cassetta PS registrata.</td>
             </tr>
           ) : null}
         </tbody>
@@ -702,25 +862,37 @@ function FirstAidTab({
   );
 }
 
-function FirstAidForm({ token, companyId, onClose, onSaved, onError }: FormCommon) {
-  const [location, setLocation] = useState("");
-  const [contents, setContents] = useState("");
-  const [nextCheckAt, setNextCheckAt] = useState("");
-  const [replenishedAt, setReplenishedAt] = useState("");
+function FirstAidForm({
+  token,
+  companyId,
+  existing,
+  onClose,
+  onSaved,
+  onError,
+}: FormCommon & { existing?: FirstAidKit | null }) {
+  const [location, setLocation] = useState(existing?.location ?? "");
+  const [contents, setContents] = useState(existing?.contents ?? "");
+  const [nextCheckAt, setNextCheckAt] = useState(toDateInput(existing?.nextCheckAt));
+  const [replenishedAt, setReplenishedAt] = useState(toDateInput(existing?.replenishedAt));
   const [busy, setBusy] = useState(false);
+  const isEdit = Boolean(existing);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     onError(null);
     try {
-      await createFirstAidKit(token, {
-        companyId,
+      const payload = {
         location: location.trim(),
         contents: contents.trim() || undefined,
         nextCheckAt: nextCheckAt ? new Date(nextCheckAt).toISOString() : undefined,
         replenishedAt: replenishedAt ? new Date(replenishedAt).toISOString() : undefined,
-      });
+      };
+      if (existing) {
+        await updateFirstAidKit(token, existing.id, payload);
+      } else {
+        await createFirstAidKit(token, { companyId, ...payload });
+      }
       await onSaved();
     } catch (err) {
       onError(err instanceof Error ? err.message : "Errore salvataggio");
@@ -731,7 +903,7 @@ function FirstAidForm({ token, companyId, onClose, onSaved, onError }: FormCommo
 
   return (
     <form onSubmit={submit} style={formStyle}>
-      <h4>Nuova cassetta PS</h4>
+      <h4>{isEdit ? `Modifica: ${existing?.location}` : "Nuova cassetta PS"}</h4>
       <div style={gridStyle}>
         <Field label="Ubicazione *">
           <input required value={location} onChange={(e) => setLocation(e.target.value)} />
@@ -751,7 +923,7 @@ function FirstAidForm({ token, companyId, onClose, onSaved, onError }: FormCommo
           <input type="date" value={replenishedAt} onChange={(e) => setReplenishedAt(e.target.value)} />
         </Field>
       </div>
-      <FormActions busy={busy} onClose={onClose} editing={false} />
+      <FormActions busy={busy} onClose={onClose} editing={isEdit} />
     </form>
   );
 }
@@ -843,4 +1015,45 @@ function statusRowStyle(nextDate?: string | null): React.CSSProperties {
   if (days <= 30) return { background: "#fff3d6" };
   if (days <= 90) return { background: "#fffbe1" };
   return {};
+}
+
+function toDateInput(iso?: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function RowActions({
+  onQr,
+  onEdit,
+  onDelete,
+}: {
+  onQr?: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <div style={{ display: "flex", gap: 4 }}>
+      {onQr ? (
+        <button type="button" className="ghost-btn" onClick={onQr}>
+          QR
+        </button>
+      ) : null}
+      <button type="button" className="ghost-btn" onClick={onEdit}>
+        Modifica
+      </button>
+      <button
+        type="button"
+        className="ghost-btn"
+        onClick={onDelete}
+        style={{ color: "crimson" }}
+      >
+        Elimina
+      </button>
+    </div>
+  );
 }
