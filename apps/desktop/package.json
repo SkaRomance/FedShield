@@ -13,10 +13,13 @@
     "test": "echo 'No tests for desktop yet'"
   },
   "dependencies": {
+    "dompurify": "^3.4.1",
+    "marked": "^18.0.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },
   "devDependencies": {
+    "@types/dompurify": "^3.2.0",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.2",
