@@ -226,6 +226,9 @@ model ChecklistItem {
   isRequired         Boolean            @default(true)
   defaultSeverity    Int                @default(1)
   defaultSanctionable Boolean           @default(false)
+  // S8: riferimento normativo (es: "D.Lgs. 81/2008, art. 71") — usato dal
+  // report d'ispezione per citare la fonte regolatoria di ogni controllo.
+  normReference      String?
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
   template           ChecklistTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
@@ -540,6 +543,9 @@ enum TrainingChecklistSection {
   emergency_training
   specific_training
   refresher_training
+  // S8: usato dai seed verticali per il modulo "sorveglianza sanitaria"
+  // (visite mediche periodiche, idoneità lavorativa).
+  health_surveillance
 }
 
 model TrainingChecklistTemplate {
