@@ -99,7 +99,7 @@ const companyRoutes: FastifyPluginAsync = async (fastify) => {
     "/companies",
     { preHandler: [fastify.authenticate] },
     async (request) => {
-      const role = request.user.role;
+      const role = request.user?.role;
       const records = await fastify.prisma.company.findMany({
         orderBy: { createdAt: "desc" },
       });

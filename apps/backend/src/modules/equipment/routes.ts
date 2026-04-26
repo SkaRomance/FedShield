@@ -128,16 +128,21 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get(
     "/equipment",
     { preHandler: [fastify.authenticate] },
-    async (request) => {
+    async (request, reply) => {
       const query = request.query as { companyId?: string; status?: "active" | "under_maintenance" | "expired" | "decommissioned"; limit?: string };
-      return fastify.prisma.equipment.findMany({
-        where: {
-          ...(query.companyId ? { companyId: query.companyId } : {}),
-          ...(query.status ? { status: query.status } : {}),
-        },
-        orderBy: { nextCheckAt: "asc" },
-        take: parseLimit(query),
-      });
+      const where = {
+        ...(query.companyId ? { companyId: query.companyId } : {}),
+        ...(query.status ? { status: query.status } : {}),
+      };
+      const limit = parseLimit(query);
+      const [items, total] = await Promise.all([
+        fastify.prisma.equipment.findMany({ where, orderBy: { nextCheckAt: "asc" }, take: limit }),
+        fastify.prisma.equipment.count({ where }),
+      ]);
+      reply.header("X-Total-Count", total.toString());
+      reply.header("X-Limit", limit.toString());
+      if (total > items.length) reply.header("X-Truncated", "true");
+      return items;
     },
   );
 
@@ -173,16 +178,25 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get(
     "/machines",
     { preHandler: [fastify.authenticate] },
-    async (request) => {
+    async (request, reply) => {
       const query = request.query as { companyId?: string; status?: "active" | "under_maintenance" | "expired" | "decommissioned"; limit?: string };
-      return fastify.prisma.machine.findMany({
-        where: {
-          ...(query.companyId ? { companyId: query.companyId } : {}),
-          ...(query.status ? { status: query.status } : {}),
-        },
-        orderBy: [{ nextMaintenanceAt: "asc" }, { nextSafetyCheckAt: "asc" }],
-        take: parseLimit(query),
-      });
+      const where = {
+        ...(query.companyId ? { companyId: query.companyId } : {}),
+        ...(query.status ? { status: query.status } : {}),
+      };
+      const limit = parseLimit(query);
+      const [items, total] = await Promise.all([
+        fastify.prisma.machine.findMany({
+          where,
+          orderBy: [{ nextMaintenanceAt: "asc" }, { nextSafetyCheckAt: "asc" }],
+          take: limit,
+        }),
+        fastify.prisma.machine.count({ where }),
+      ]);
+      reply.header("X-Total-Count", total.toString());
+      reply.header("X-Limit", limit.toString());
+      if (total > items.length) reply.header("X-Truncated", "true");
+      return items;
     },
   );
 
@@ -221,16 +235,21 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get(
     "/fire-extinguishers",
     { preHandler: [fastify.authenticate] },
-    async (request) => {
+    async (request, reply) => {
       const query = request.query as { companyId?: string; status?: "active" | "under_maintenance" | "expired" | "decommissioned"; limit?: string };
-      return fastify.prisma.fireExtinguisher.findMany({
-        where: {
-          ...(query.companyId ? { companyId: query.companyId } : {}),
-          ...(query.status ? { status: query.status } : {}),
-        },
-        orderBy: { nextCheckAt: "asc" },
-        take: parseLimit(query),
-      });
+      const where = {
+        ...(query.companyId ? { companyId: query.companyId } : {}),
+        ...(query.status ? { status: query.status } : {}),
+      };
+      const limit = parseLimit(query);
+      const [items, total] = await Promise.all([
+        fastify.prisma.fireExtinguisher.findMany({ where, orderBy: { nextCheckAt: "asc" }, take: limit }),
+        fastify.prisma.fireExtinguisher.count({ where }),
+      ]);
+      reply.header("X-Total-Count", total.toString());
+      reply.header("X-Limit", limit.toString());
+      if (total > items.length) reply.header("X-Truncated", "true");
+      return items;
     },
   );
 
@@ -266,16 +285,21 @@ const equipmentRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get(
     "/first-aid-kits",
     { preHandler: [fastify.authenticate] },
-    async (request) => {
+    async (request, reply) => {
       const query = request.query as { companyId?: string; status?: "active" | "under_maintenance" | "expired" | "decommissioned"; limit?: string };
-      return fastify.prisma.firstAidKit.findMany({
-        where: {
-          ...(query.companyId ? { companyId: query.companyId } : {}),
-          ...(query.status ? { status: query.status } : {}),
-        },
-        orderBy: { nextCheckAt: "asc" },
-        take: parseLimit(query),
-      });
+      const where = {
+        ...(query.companyId ? { companyId: query.companyId } : {}),
+        ...(query.status ? { status: query.status } : {}),
+      };
+      const limit = parseLimit(query);
+      const [items, total] = await Promise.all([
+        fastify.prisma.firstAidKit.findMany({ where, orderBy: { nextCheckAt: "asc" }, take: limit }),
+        fastify.prisma.firstAidKit.count({ where }),
+      ]);
+      reply.header("X-Total-Count", total.toString());
+      reply.header("X-Limit", limit.toString());
+      if (total > items.length) reply.header("X-Truncated", "true");
+      return items;
     },
   );
 
