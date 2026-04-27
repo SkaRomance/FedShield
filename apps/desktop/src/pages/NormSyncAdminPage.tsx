@@ -61,17 +61,30 @@ export default function NormSyncAdminPage({ token }: NormSyncAdminPageProps) {
 
       {error && <div className="status-message" style={{ color: "crimson" }}>{error}</div>}
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-        {(["all", "pending", "approved", "rejected"] as const).map((s) => (
-          <button
-            key={s}
-            className={`ghost-btn ${statusFilter === s ? "nav-item-active" : ""}`}
-            onClick={() => setStatusFilter(s)}
-            style={{ textTransform: "capitalize" }}
-          >
-            {s === "all" ? "Tutte" : s}
-          </button>
-        ))}
+      <div
+        role="tablist"
+        aria-label="Filtra per stato proposte"
+        style={{ display: "flex", gap: 8, marginBottom: 12 }}
+      >
+        {(["all", "pending", "approved", "rejected"] as const).map((s) => {
+          const labels: Record<typeof s, string> = {
+            all: "Tutte",
+            pending: "In attesa",
+            approved: "Approvate",
+            rejected: "Rifiutate",
+          };
+          return (
+            <button
+              key={s}
+              role="tab"
+              aria-selected={statusFilter === s}
+              className={`ghost-btn ${statusFilter === s ? "nav-item-active" : ""}`}
+              onClick={() => setStatusFilter(s)}
+            >
+              {labels[s]}
+            </button>
+          );
+        })}
       </div>
 
       {loading ? (
@@ -79,6 +92,7 @@ export default function NormSyncAdminPage({ token }: NormSyncAdminPageProps) {
       ) : proposals.length === 0 ? (
         <p style={{ color: "gray" }}>Nessuna proposta normativa trovata.</p>
       ) : (
+        <div className="table-wrap">
         <table className="training-table" style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ background: "#f0f0f0" }}>
@@ -145,6 +159,7 @@ export default function NormSyncAdminPage({ token }: NormSyncAdminPageProps) {
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   );
