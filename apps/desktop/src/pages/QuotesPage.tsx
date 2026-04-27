@@ -154,7 +154,11 @@ export default function QuotesPage({ token, companies }: QuotesPageProps) {
       <div className="grid-two">
         <div>
           <label>Azienda</label>
-          <select value={companyId} onChange={(event) => setCompanyId(event.target.value)}>
+          <select
+            value={companyId}
+            onChange={(event) => setCompanyId(event.target.value)}
+            aria-label="Azienda"
+          >
             {companies.map((company) => (
               <option key={company.id} value={company.id}>
                 {company.name}
@@ -164,7 +168,11 @@ export default function QuotesPage({ token, companies }: QuotesPageProps) {
         </div>
         <div>
           <label>NC candidata</label>
-          <select value={selectedNcId} onChange={(event) => setSelectedNcId(event.target.value)}>
+          <select
+            value={selectedNcId}
+            onChange={(event) => setSelectedNcId(event.target.value)}
+            aria-label="Non conformita candidata"
+          >
             <option value="">Seleziona NC...</option>
             {candidates.map((candidate) => (
               <option key={candidate.id} value={candidate.id}>
