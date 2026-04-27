@@ -9,29 +9,10 @@
 import { ChecklistSection, ComplianceDomain } from "@prisma/client";
 import { prisma } from "./_client.js";
 
-const HORECA_MACRO_GROUPS = [
-  "BAR",
-  "BEB_AFFITTACAMERE",
-  "CAMPEGGI_VILLAGGI",
-  "CATERING_EVENTI",
-  "FOOD_TRUCK",
-  "GASTRONOMIA_PRODUZIONE",
-  "HOTEL",
-  "LOCALI_SERALI",
-  "MENSE_CATERING",
-  "OSTELLI_RESIDENCE",
-  "PASTICCERIA_AMBULANTE",
-  "PASTICCERIA_GELATERIA",
-  "PIZZERIA_ASPORTO",
-  "RETAIL_LARGE_BUTCHER",
-  "RETAIL_LARGE_DELI",
-  "RETAIL_LARGE_FISH",
-  "RETAIL_LARGE_FOOD",
-  "RETAIL_LARGE_PRODUCE",
-  "RISTORANTI",
-  "STABILIMENTI_BALNEARI",
-];
-
+// S12 (MEDIUM-06): HORECA_MACRO_GROUPS rimosso. Era usato solo nella
+// whitelist deleteMany che e' stata sostituita dal discriminator
+// seedSource. Se in futuro serve un elenco macroGroup HoReCa, derivarlo
+// dai records seedati invece di hardcodare.
 
 function inferChecklistDomain(area: string, question: string): ComplianceDomain {
   const text = `${area} ${question}`.toLowerCase();
@@ -6811,29 +6792,13 @@ export async function seedHoreca() {
     });
   }
 
-  // Scope: doc HoReCa per macroGroup + i generic docs di dominio HoReCa
-  // identificati per nome. Non wipiamo documenti seedati da altri moduli
-  // (test-baseline ha id "test-baseline-doc", training ha nomi diversi).
-  const HORECA_GENERIC_DOC_NAMES = [
-    "Visura camerale aggiornata",
-    "Planimetria aggiornata dei locali",
-    "Relazione tecnica attivita",
-    "UNILAV dipendenti",
-    "DVR e allegati (rischi specifici ristorazione)",
-    "Nomina RSPP e deleghe sicurezza",
-    "Nomina addetti antincendio e primo soccorso",
-    "Attestati formazione sicurezza lavoratori",
-    "Sorveglianza sanitaria e giudizi di idoneita",
-    "Dichiarazioni conformita impianti elettrico e gas",
-    "Registro manutenzioni attrezzature",
-  ];
+  // S12 (MEDIUM-06): wipe scoped sul discriminator seedSource invece che su
+  // whitelist di nomi/macroGroup. La whitelist precedente era fragile
+  // rispetto a rinomine future (un rename non matchava la deleteMany e
+  // generava duplicati al reseed). seedSource e' popolato dal createMany
+  // sotto e da nessun'altra fonte (record API hanno seedSource: null).
   await prisma.documentTemplate.deleteMany({
-    where: {
-      OR: [
-        { macroGroup: { in: HORECA_MACRO_GROUPS } },
-        { name: { in: HORECA_GENERIC_DOC_NAMES } },
-      ],
-    },
+    where: { seedSource: "horeca" },
   });
 
   const documentTemplates = [
@@ -8290,6 +8255,7 @@ export async function seedHoreca() {
       atecoCode: doc.atecoCode ?? null,
       macroGroup: doc.macroGroup ?? null,
       isActive: true,
+      seedSource: "horeca",
     })),
   });
 
