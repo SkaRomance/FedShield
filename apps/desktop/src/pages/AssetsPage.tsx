@@ -225,15 +225,7 @@ function TabButton({
     <button
       type="button"
       onClick={onClick}
-      style={{
-        padding: "8px 16px",
-        background: active ? "#1f4ad6" : "#eee",
-        color: active ? "white" : "#333",
-        border: "none",
-        borderRadius: 4,
-        cursor: "pointer",
-        fontWeight: active ? "bold" : "normal",
-      }}
+      className={`tab-btn ${active ? "tab-btn-active" : ""}`}
     >
       {children}
     </button>
