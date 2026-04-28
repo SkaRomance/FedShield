@@ -68,7 +68,11 @@ export default function KpiPage({ token, companies }: KpiPageProps) {
       <div className="grid-two" style={{ marginTop: 12 }}>
         <div>
           <label>Azienda</label>
-          <select value={companyId} onChange={(event) => setCompanyId(event.target.value)}>
+          <select
+            value={companyId}
+            onChange={(event) => setCompanyId(event.target.value)}
+            aria-label="Azienda"
+          >
             {companies.map((company) => (
               <option key={company.id} value={company.id}>
                 {company.name}

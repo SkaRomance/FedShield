@@ -1,7 +1,7 @@
 # FedShield — Contesto Operativo per Agent Team
 
-> Ultimo aggiornamento: 2026-04-25 (sessione P0 fix)
-> Sessione: chatbot + backend + training + normsync + audit P0
+> Ultimo aggiornamento: 2026-04-28 (Sprint 12 close-out)
+> Sessione: residual cleanup + UI long-term refactor + bcryptjs monitor + seedSource discriminator
 
 ---
 
@@ -370,18 +370,33 @@ Totale 28 test su 10 file, tutti pass. HoReCa coverage: 15 categorie ATECO (rist
 
 **Test suite Sprint 11**: backend 28/28 pass + desktop 10/10 pass. Vite build 378.59 KB → 110.99 KB gzip in 4.81s. `pnpm db:seed` 1 sola PrismaClient connection. Backend+desktop tsc 0 errori.
 
-### Backlog residuo (Sprint 12+)
+**Sprint 12 ✅ Completato — Residual cleanup + UI long-term refactor + bcrypt monitor + seedSource** (branch `feat/sprint-12-residual-cleanup`, commits `5f41d57..38f1f82`):
+
+4 wave parallele orchestrate da 4 agent + 1 manual: Wave A (3 task indipendenti), Wave B (backend schema), Wave C (2 split frontend pesanti, C1 ricaricato dopo watchdog stall del primo run).
+
+| # | Tema | Commit |
+|---|------|--------|
+| S12-A1 | Rimozione `CustomersPage.tsx` (89 LOC dead code, non importata in DashboardPage). Confermato zero riferimenti via grep cross-repo. | `5f41d57` |
+| S12-A2/1 (UI-REVIEW Quick Win 2 + Pattern 2) | `.tab-btn` + `.tab-btn-active` estratti in styles.css con `var(--color-accent)`. Banditi `#1f4ad6` da AssetsPage/TrainingPage TabButton e `#2563eb` da ChatbotPage user-bubble. | `0aec638` |
+| S12-A2/2 (UI-REVIEW Quick Win 3) | NormSync status pills semantiche con `role="status"`, `aria-label`, `<span aria-hidden="true">🟡</span>` e classi `.status-pill-pending/approved/rejected/info` con color-mix sui token. | `75eb0e5` |
+| S12-A2/3 (UI-REVIEW Quick Win 4) | NormSync `<table>` in `.table-wrap`, filtri stato in container `role="tablist"` con `role="tab"` + `aria-selected`. Label italianizzati ("In attesa", "Approvate", "Rifiutate", "Tutte"). | `1894e94` |
+| S12-A2/4 (UI-REVIEW Quick Win 5) | `aria-label` ai 3 select standalone di QuotesPage + KpiPage (companyId, selectedNcId). | `7162df9` |
+| S12-A3 (BCRYPT_AUDIT §2.2) | `apps/backend/scripts/audit-password-hashes.ts` read-only che conta hash per algoritmo + script npm `db:audit:passwords`. Run dev: 100% argon2id, exit 0. Pre-rimozione bcryptjs gate. | `dd3ee5f` |
+| S12-B (MEDIUM-06) | Schema: `seedSource String?` su DocumentTemplate. seed-horeca usa ora `where: { seedSource: "horeca" }` invece di whitelist nomi/macroGroup. Forward-compatible (edilizia/sanita potranno usare la stessa pattern). Idempotenza confermata 2x run. Rimosse 2 costanti dead code (HORECA_MACRO_GROUPS, HORECA_GENERIC_DOC_NAMES). | `90d7278` |
+| S12-C2 (UI-REVIEW Long-term #1) | AssetsPage 1059 → 225 LOC. 4 tab estratti in `pages/assets/{Equipment,Machines,Extinguishers,FirstAid}Tab.tsx` + `_shared.tsx` (130 LOC helper). State sharing via lift-up; X-Truncated meta resta nel parent. | `0a692b9` |
+| S12-C1 (UI-REVIEW Long-term #1) | TrainingPage 829 → 94 LOC. 3 tab estratti in `pages/training/{Scadenze,Employees,Courses}Tab.tsx` + `_shared.tsx` (60 LOC). `getStatusColor`/`getStatusText` lasciati locali a ScadenzeTab (specifici scadenze formazione, non condivisi). | `38f1f82` |
+
+**Test suite Sprint 12**: backend tutti i 10 file di test pass (chain `&&`), exit 0. Desktop tsc 0 errori. Vite build 56 modules (era 52 pre-split) → 378.93 KB / 110.98 KB gzip in 1.41s — bundle size identico al pre-split nonostante +1700 LOC distribuiti, conferma che il code splitting non aumenta payload finale.
+
+### Backlog residuo (Sprint 13+)
 
 - HTTPS reverse proxy n8n VPS (richiede accesso infra)
 - Playwright E2E browser-level (defense-in-depth oltre golden-path API)
-- bcryptjs removal: aggiungere `apps/backend/scripts/audit-password-hashes.ts` (script allegato in BCRYPT_AUDIT.md), monitor settimanale, rimuovere bcrypt branch quando audit prod = exit 0
+- bcryptjs final removal: pipeline pronto (script audit S12-A3 committato), waiting for prod audit + finestra re-hash organico (2-6 settimane). Quando `db:audit:passwords` su prod = exit 0, procedere con rimozione branch in `plugins/password.ts` + dep dal `package.json`.
 - Stampabilità QR per estintori/kits / dark mode / migrazione SQLite → Postgres prod
-- Restore seed HoReCa generic doc templates (rimossi in S7)
-- MEDIUM-06 seedSource discriminator (richiede schema column + migration)
-- UI-REVIEW quick wins residui: status semantic tokens (`role="status"`), aria-label sugli select, refactor `.tab-btn` con var(--color-accent)
-- UI-REVIEW long-term: spezzare AssetsPage (1059 LOC), ChecklistPage (1946 LOC), TrainingPage (829 LOC) in componenti per tab
-- Push CI workflow a origin
-- Rimozione `CustomersPage.tsx` (89 LOC dead code, non importata in DashboardPage)
+- Restore seed HoReCa generic doc templates (rimossi in S7) — ora **safe** grazie a seedSource (S12-B): si possono ricreare con `seedSource: "horeca"` senza rischio duplicati su rinomina
+- ChecklistPage split (1946 LOC) — file più grande del desktop, deferred per heavy review
+- Push CI workflow a origin (richiede autorizzazione esplicita user)
 
 ---
 
