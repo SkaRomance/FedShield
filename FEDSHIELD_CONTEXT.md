@@ -1,7 +1,7 @@
 # FedShield — Contesto Operativo per Agent Team
 
-> Ultimo aggiornamento: 2026-04-29 (Sprint 13 close-out)
-> Sessione: ChecklistPage split (UI-REVIEW Long-term #1 chiuso) + HoReCa templates audit (N/A no-op verificato)
+> Ultimo aggiornamento: 2026-04-29 (Sprint 14 close-out)
+> Sessione: QR multi-asset (4 tipi) + dark mode toggle WCAG-AA
 
 ---
 
@@ -401,15 +401,30 @@ Totale 28 test su 10 file, tutti pass. HoReCa coverage: 15 categorie ATECO (rist
 
 ChecklistPage era il file più grande del desktop e l'ultimo refactor pesante deferred. Con questo split la **UI-REVIEW Long-term #1 è chiusa**: tutte le 3 pagine multi-tab/multi-step (AssetsPage, TrainingPage, ChecklistPage) sono ora orchestratrici thin con sub-component co-located in `pages/<page-dir>/`.
 
-### Backlog residuo (Sprint 14+)
+**Sprint 14 ✅ Completato — QR multi-asset + dark mode toggle** (branch `feat/sprint-14-qr-multi-asset-and-dark-mode`, commits `5af505f..26ef21e`):
+
+2 wave parallele in background, entrambe pulite, zero conflitti su DashboardPage condiviso.
+
+| # | Tema | Commit |
+|---|------|--------|
+| S14-A (backlog QR estintori/kits) | AssetQrPage 146 → 242 LOC. Aggiunto discriminator `assetKind: "equipment"\|"machine"\|"extinguisher"\|"firstAid"`, dispatch sui 4 fetchById già esistenti, render fields per kind (S/N per Equipment/Machine, Codice per FireExtinguisher con `manufactureDate` etichetta "Costruzione" — schema **non ha** `expiryDate`; FirstAidKit usa primi 8 char dell'`id` come Codice). qrData JSON e legacy URL `?id=...&kind=...` propagano il kind. `onOpenQr` signature aggiornata a `(id, kind) => void`; pulsante 🏷️ QR aggiunto nelle 3 tab orfane (Machines/Extinguishers/FirstAid), nascosto su `status === "decommissioned"` via prop conditional. DashboardPage propaga `qrAssetKind` state in parallelo a `qrAssetId`. | `26ef21e` |
+| S14-B (backlog dark mode) | Aggiunto blocco `[data-theme="dark"]` (62 LOC) in styles.css con override completo dei token semantici (bg `#0f1729`, surface `#1a2440`, text `#e7ebf5`, primary `#8a9bd1`, accent `#ff7a3d`, border, shadow, soft-bg/border, sidebar variants). Hook `useTheme` (61 LOC) in `src/hooks/`: persiste in localStorage chiave `fedshield-theme`, rispetta `prefers-color-scheme` se assente, applica `data-theme` attribute su `<html>`. Toggle ☀️/🌙 in DashboardPage header (leftmost actions group). `@media print` resetta forzatamente i token a light per stampe pulite. **WCAG AA confermato**: text/bg 13.9:1 (AAA), text-muted 7.1:1, primary 5.6:1, accent 6.3:1, on-primary su accent 6.3:1. | `5af505f` |
+
+**Test suite Sprint 14**: desktop tsc 0 errori, backend tsc 0 errori (no backend mod). Vite build 63 modules → **387.37 KB / 113.40 KB gzip** in 3.93s (era 62/384.23/112.71 in S13: +1 module, +3.14 KB raw, +0.69 KB gzip per useTheme hook + dark CSS block + assetKind discriminator).
+
+**Ergonomia**: il consulente in cantiere ora può stampare QR per qualunque asset (estintori e cassette PS in particolare, dove è normativamente utile la verifica scadenze via QR scan). Dark mode sblocca uso prolungato in ambienti poco illuminati o con schermi OLED.
+
+### Backlog residuo (Sprint 15+)
 
 - HTTPS reverse proxy n8n VPS (richiede accesso infra)
 - Playwright E2E browser-level (defense-in-depth oltre golden-path API)
 - bcryptjs final removal: pipeline pronto (script audit S12-A3 committato), waiting for prod audit + finestra re-hash organico (2-6 settimane). Quando `db:audit:passwords` su prod = exit 0, procedere con rimozione branch in `plugins/password.ts` + dep dal `package.json`.
-- Stampabilità QR per estintori/kits / dark mode / migrazione SQLite → Postgres prod
+- Migrazione SQLite → Postgres prod
 - Push CI workflow a origin (richiede autorizzazione esplicita user)
 - ~~Restore seed HoReCa generic doc templates~~ — **chiuso S13-B** (no-op verificato)
 - ~~ChecklistPage split (1946 LOC)~~ — **completato S13-A** (1946 → 1309 LOC parent + 5 step)
+- ~~Stampabilità QR estintori/kits~~ — **completato S14-A**
+- ~~Dark mode~~ — **completato S14-B** (toggle in header, persistenza localStorage, WCAG AA)
 
 ---
 
