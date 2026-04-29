@@ -35,6 +35,69 @@
   --color-status-soft-border: rgba(238, 143, 95, 0.55);
 }
 
+/* S14-B: tema scuro. Attivazione via attributo [data-theme="dark"] su <html>
+   (gestito da useTheme + persistenza localStorage). Light resta default
+   (assenza attributo). Tutti i token semantici vengono ridefiniti qui:
+   ogni componente che usa var(--color-...) eredita automaticamente.
+   Contrasti verificati WCAG AA sui pair principali:
+     - text (#e7ebf5) on bg (#0f1729)         ~13.9:1  AAA
+     - text-muted (#a3acc4) on bg (#0f1729)    ~7.1:1   AAA
+     - primary (#8a9bd1) on bg (#0f1729)       ~5.6:1   AA
+     - accent (#ff7a3d) on bg (#0f1729)        ~6.3:1   AA
+     - on-primary (#0f1729) on accent (#ff7a3d) ~6.3:1  AA
+*/
+[data-theme="dark"] {
+  --color-bg: #0f1729;
+  --color-surface: #1a2440;
+  --color-primary: #8a9bd1;
+  --color-primary-600: #a4b3de;
+  --color-primary-500: #b8c4e6;
+  --color-text: #e7ebf5;
+  --color-text-muted: #a3acc4;
+  --color-border: #3a4566;
+  --color-accent: #ff7a3d;
+  --color-accent-hover: #ffa472;
+  --color-focus-ring: #ffa472;
+  --color-content-text: #e7ebf5;
+  --color-success: #4ade80;
+  --color-warning: #fbbf24;
+  --color-error: #f87171;
+  --color-pending: #60a5fa;
+  --color-sidebar-bg: #131c33;
+
+  --color-on-primary: #0f1729;
+  --color-surface-muted: rgba(184, 196, 230, 0.10);
+  --color-sidebar-hover: rgba(184, 196, 230, 0.10);
+  --color-sidebar-active: rgba(255, 122, 61, 0.28);
+  --color-shadow: rgba(0, 0, 0, 0.55);
+  --color-row-divider: rgba(184, 196, 230, 0.18);
+  --color-status-soft-bg: rgba(255, 164, 114, 0.14);
+  --color-status-soft-border: rgba(255, 164, 114, 0.55);
+}
+
+/* S14-B: stampa SEMPRE in light. Forziamo i token a valori chiari sia su
+   :root sia su [data-theme="dark"] cosi' i report PDF/print non escono
+   con sfondo scuro che brucia toner e riduce leggibilita'. */
+@media print {
+  :root,
+  [data-theme="dark"] {
+    color-scheme: light;
+    --color-bg: #ffffff;
+    --color-surface: #ffffff;
+    --color-text: #000000;
+    --color-text-muted: #333333;
+    --color-primary: #212d52;
+    --color-primary-600: #394264;
+    --color-primary-500: #4e5674;
+    --color-content-text: #000000;
+    --color-border: #888888;
+    --color-row-divider: rgba(0, 0, 0, 0.25);
+    --color-shadow: transparent;
+    --color-sidebar-bg: #ffffff;
+    --color-on-primary: #ffffff;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
