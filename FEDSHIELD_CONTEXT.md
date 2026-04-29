@@ -1,7 +1,7 @@
 # FedShield — Contesto Operativo per Agent Team
 
-> Ultimo aggiornamento: 2026-04-28 (Sprint 12 close-out)
-> Sessione: residual cleanup + UI long-term refactor + bcryptjs monitor + seedSource discriminator
+> Ultimo aggiornamento: 2026-04-29 (Sprint 13 close-out)
+> Sessione: ChecklistPage split (UI-REVIEW Long-term #1 chiuso) + HoReCa templates audit (N/A no-op verificato)
 
 ---
 
@@ -388,15 +388,28 @@ Totale 28 test su 10 file, tutti pass. HoReCa coverage: 15 categorie ATECO (rist
 
 **Test suite Sprint 12**: backend tutti i 10 file di test pass (chain `&&`), exit 0. Desktop tsc 0 errori. Vite build 56 modules (era 52 pre-split) → 378.93 KB / 110.98 KB gzip in 1.41s — bundle size identico al pre-split nonostante +1700 LOC distribuiti, conferma che il code splitting non aumenta payload finale.
 
-### Backlog residuo (Sprint 13+)
+**Sprint 13 ✅ Completato — ChecklistPage split + HoReCa templates audit** (branch `feat/sprint-13-checklist-split-and-horeca-templates`, commit `9b51a33`):
+
+2 wave parallele in background. Wave B in stall watchdog ma research già conclusiva, recuperata in-context dal parent.
+
+| # | Tema | Commit |
+|---|------|--------|
+| S13-A (UI-REVIEW Long-term #1, chiusura) | ChecklistPage 1946 → 1309 LOC. 5 step estratti in `pages/checklist/Step{0DatiAzienda,1Documenti,2LocaliAttrezzature,3ProcedureIgiene,4RiepilogoInvio}.tsx` + `_shared.tsx` (236 LOC: parsePersonCard, parseRolePersonCards, defaultAnswer, inferActivityFromAteco, atecoFromActivity, checklistModeLabel, ACTIVITY_TYPE_OPTIONS, STEPS, ...). State, ~30 handler closures e wizard chrome (stepper L1319, prev/next L1932-1937, registration footer L1938+) restano nel parent per lift-up rule. Pure JSX extraction, zero logic change. Step 0 "Dati Azienda" è il più pesante (654 LOC, ~50 props) come da struttura wizard originale. | `9b51a33` |
+| S13-B (backlog HoReCa templates) | Audit research-only (no commit): comparato `seed-horeca.ts` corrente (8263 LOC) con versione pre-9aca204 (8278 LOC, dump tmp). 220 nomi `name: "..."` univoci coincidono **set-identicamente** (zero `^<` e `^>` su `diff` ordinato). Conclusione: la S7 restoration era completa, **nessun template HoReCa è stato perso**. Backlog item chiuso come N/A no-op verificato. La differenza `-15 LOC` è imputabile a S7-1 (rimozione bcrypt user seed) + S11-A3 (singleton client refactor) + S12-B (aggiunta `seedSource: "horeca"`). | — |
+
+**Test suite Sprint 13**: desktop tsc 0 errori, backend tsc 0 errori (no backend mod). Vite build 62 modules → 384.23 KB / 112.71 KB gzip in 2.06s (era 56 mod / 378.93 / 110.98 in S12: +6 modules, +5.30 KB raw, +1.73 KB gzip imputabili a prop interfaces dei 5 step component).
+
+ChecklistPage era il file più grande del desktop e l'ultimo refactor pesante deferred. Con questo split la **UI-REVIEW Long-term #1 è chiusa**: tutte le 3 pagine multi-tab/multi-step (AssetsPage, TrainingPage, ChecklistPage) sono ora orchestratrici thin con sub-component co-located in `pages/<page-dir>/`.
+
+### Backlog residuo (Sprint 14+)
 
 - HTTPS reverse proxy n8n VPS (richiede accesso infra)
 - Playwright E2E browser-level (defense-in-depth oltre golden-path API)
 - bcryptjs final removal: pipeline pronto (script audit S12-A3 committato), waiting for prod audit + finestra re-hash organico (2-6 settimane). Quando `db:audit:passwords` su prod = exit 0, procedere con rimozione branch in `plugins/password.ts` + dep dal `package.json`.
 - Stampabilità QR per estintori/kits / dark mode / migrazione SQLite → Postgres prod
-- Restore seed HoReCa generic doc templates (rimossi in S7) — ora **safe** grazie a seedSource (S12-B): si possono ricreare con `seedSource: "horeca"` senza rischio duplicati su rinomina
-- ChecklistPage split (1946 LOC) — file più grande del desktop, deferred per heavy review
 - Push CI workflow a origin (richiede autorizzazione esplicita user)
+- ~~Restore seed HoReCa generic doc templates~~ — **chiuso S13-B** (no-op verificato)
+- ~~ChecklistPage split (1946 LOC)~~ — **completato S13-A** (1946 → 1309 LOC parent + 5 step)
 
 ---
 

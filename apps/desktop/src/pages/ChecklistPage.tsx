@@ -22,6 +22,37 @@ import {
   validateInspection,
 } from "../api";
 import { queueSyncEvent } from "../services/syncManager";
+import Step0DatiAzienda from "./checklist/Step0DatiAzienda";
+import Step1Documenti from "./checklist/Step1Documenti";
+import Step2LocaliAttrezzature from "./checklist/Step2LocaliAttrezzature";
+import Step3ProcedureIgiene from "./checklist/Step3ProcedureIgiene";
+import Step4RiepilogoInvio from "./checklist/Step4RiepilogoInvio";
+import {
+  ACTIVITY_TYPE_OPTIONS,
+  ActivityTypeOption,
+  AnswerValue,
+  ChecklistActivityFilter,
+  HYPERMARKET_INTERNAL_SCOPE_OPTIONS,
+  InspectionChecklistMode,
+  LocalAnswer,
+  PersonCardData,
+  RegistrationTaskKey,
+  RolePersonCardData,
+  STEPS,
+  SUPERMARKET_INTERNAL_SCOPE_OPTIONS,
+  atecoFromActivity,
+  companyActivitiesStorageKey,
+  defaultAnswer,
+  emptyPersonCard,
+  emptyRolePersonCard,
+  hasPersonContent,
+  inferActivitiesFromAteco,
+  parseCompanyActivities,
+  parsePersonCard,
+  parseRetailAdditionalScopes,
+  parseRolePersonCards,
+  retailScopesStorageKey,
+} from "./checklist/_shared";
 
 interface ChecklistPageProps {
   token: string;
@@ -34,238 +65,6 @@ interface ChecklistPageProps {
   initialInspectionId?: string;
   selectionToken?: number;
   onReload: () => Promise<void>;
-}
-
-type AnswerValue = "yes" | "no" | "na";
-
-interface LocalAnswer {
-  value: AnswerValue;
-  note: string;
-  severity?: number;
-  isSanctionable?: boolean;
-}
-
-type RegistrationTaskKey = "general" | "safety" | "haccp";
-
-interface PersonCardData {
-  fullName: string;
-  taxCode: string;
-  contact: string;
-  notes: string;
-}
-
-interface RolePersonCardData extends PersonCardData {
-  role: string;
-}
-
-const STEPS = [
-  "1. Dati Azienda",
-  "2. Documenti",
-  "3. Locali e Attrezzature",
-  "4. Procedure e Igiene",
-  "5. Riepilogo e Invio",
-] as const;
-
-const DOCUMENT_STATUS_OPTIONS: Array<{ value: InspectionDocumentRequirement["status"]; label: string }> = [
-  { value: "viewed_on_site", label: "Visionato in sede" },
-  { value: "requested_later", label: "Richiesto in differita" },
-  { value: "not_available", label: "Non disponibile" },
-  { value: "not_applicable", label: "Non applicabile" },
-];
-
-const ACTIVITY_TYPE_OPTIONS = [
-  { value: "hypermarket", label: "Ipermercato", atecoCode: "47.11.1" },
-  { value: "supermarket", label: "Supermercato", atecoCode: "47.11.2" },
-  { value: "restaurant", label: "Ristorante", atecoCode: "56.10.11" },
-  { value: "pizzeria", label: "Pizzeria / Asporto", atecoCode: "56.10.20" },
-  { value: "canteen", label: "Mense / Catering", atecoCode: "56.29.10" },
-  { value: "event_catering", label: "Catering Eventi", atecoCode: "56.21.00" },
-  { value: "food_truck", label: "Food Truck / Street Food", atecoCode: "56.10.42" },
-  { value: "ambulant_pastry", label: "Gelateria/Pasticceria Ambulante", atecoCode: "56.10.41" },
-  { value: "bar", label: "Bar / Caffetteria", atecoCode: "56.30" },
-  { value: "hotel", label: "Hotel / Albergo", atecoCode: "55.10.00" },
-  { value: "bnb_guesthouse", label: "B&B / Affittacamere", atecoCode: "55.20.51" },
-  { value: "hostel_residence", label: "Ostello / Residence", atecoCode: "55.20.20" },
-  { value: "camping_village", label: "Campeggio / Villaggio turistico", atecoCode: "55.30.00" },
-  { value: "beach_club", label: "Stabilimento balneare con somministrazione", atecoCode: "93.29.20" },
-  { value: "nightlife_venue", label: "Locale serale / Discoteca con somministrazione", atecoCode: "93.29.10" },
-  { value: "pastry", label: "Pasticceria / Gelateria", atecoCode: "56.10.30" },
-  { value: "gastronomy_production", label: "Gastronomia / Produzione alimentare", atecoCode: "10.85" },
-  { value: "custom", label: "Altro (ATECO manuale)", atecoCode: "" },
-] as const;
-
-type ActivityTypeOption = (typeof ACTIVITY_TYPE_OPTIONS)[number]["value"];
-type ChecklistActivityFilter = "company" | ActivityTypeOption;
-type InspectionChecklistMode = "unified" | "haccp_only" | "safety_only";
-
-const CHECKLIST_MODE_OPTIONS: Array<{ value: InspectionChecklistMode; label: string }> = [
-  { value: "unified", label: "Checklist unificata (HACCP + Sicurezza)" },
-  { value: "haccp_only", label: "Solo HACCP" },
-  { value: "safety_only", label: "Solo Sicurezza lavoro" },
-];
-
-const HACCP_ROLE_OPTIONS = [
-  "Responsabile produzione",
-  "Responsabile industria alimentare",
-  "Responsabile cucina",
-  "Responsabile bar",
-  "Responsabile pasticceria",
-  "Responsabile gelateria",
-] as const;
-
-const SUPERMARKET_INTERNAL_SCOPE_OPTIONS = [
-  { value: "retail_butcher_counter", label: "Macelleria interna" },
-  { value: "retail_fish_counter", label: "Pescheria interna" },
-  { value: "retail_produce_counter", label: "Ortofrutta assistita" },
-  { value: "retail_deli_counter", label: "Salumeria/Gastronomia assistita" },
-] as const;
-
-const HYPERMARKET_INTERNAL_SCOPE_OPTIONS = [
-  { value: "retail_restaurant", label: "Ristorante" },
-  { value: "retail_pizzeria", label: "Pizzeria" },
-  { value: "retail_bar", label: "Bar" },
-  { value: "retail_butcher_counter", label: "Macelleria" },
-  { value: "retail_fish_counter", label: "Pescheria" },
-  { value: "retail_produce_counter", label: "Ortofrutta" },
-  { value: "retail_deli_counter", label: "Gastronomia" },
-  { value: "retail_icecream", label: "Gelateria" },
-  { value: "retail_pastry", label: "Pasticceria" },
-] as const;
-
-function emptyPersonCard(): PersonCardData {
-  return {
-    fullName: "",
-    taxCode: "",
-    contact: "",
-    notes: "",
-  };
-}
-
-function emptyRolePersonCard(role = ""): RolePersonCardData {
-  return {
-    role,
-    ...emptyPersonCard(),
-  };
-}
-
-function hasPersonContent(person: PersonCardData | RolePersonCardData): boolean {
-  return Boolean(person.fullName.trim() || person.taxCode.trim() || person.contact.trim() || person.notes.trim());
-}
-
-function parsePersonCard(jsonValue?: string | null): PersonCardData {
-  if (!jsonValue) return emptyPersonCard();
-  try {
-    const parsed = JSON.parse(jsonValue) as Partial<PersonCardData>;
-    return {
-      fullName: parsed.fullName?.toString() ?? "",
-      taxCode: parsed.taxCode?.toString() ?? "",
-      contact: parsed.contact?.toString() ?? "",
-      notes: parsed.notes?.toString() ?? "",
-    };
-  } catch {
-    return emptyPersonCard();
-  }
-}
-
-function parseRolePersonCards(jsonValue?: string | null): RolePersonCardData[] {
-  if (!jsonValue) return [];
-  try {
-    const parsed = JSON.parse(jsonValue) as Array<Partial<RolePersonCardData>>;
-    if (!Array.isArray(parsed)) return [];
-    return parsed
-      .map((item) => ({
-        role: item.role?.toString() ?? "",
-        fullName: item.fullName?.toString() ?? "",
-        taxCode: item.taxCode?.toString() ?? "",
-        contact: item.contact?.toString() ?? "",
-        notes: item.notes?.toString() ?? "",
-      }))
-      .filter((item) => item.role.trim() || hasPersonContent(item));
-  } catch {
-    return [];
-  }
-}
-
-function parseRetailAdditionalScopes(jsonValue?: string | null): string[] {
-  if (!jsonValue) return [];
-  try {
-    const parsed = JSON.parse(jsonValue) as unknown;
-    if (!Array.isArray(parsed)) return [];
-    return parsed
-      .map((item) => (typeof item === "string" ? item.trim() : ""))
-      .filter((item) => item.length > 0);
-  } catch {
-    return jsonValue
-      .split(",")
-      .map((item) => item.trim())
-      .filter((item) => item.length > 0);
-  }
-}
-
-function parseCompanyActivities(jsonValue?: string | null): ActivityTypeOption[] {
-  if (!jsonValue) return [];
-  const validValues = new Set<ActivityTypeOption>(ACTIVITY_TYPE_OPTIONS.map((option) => option.value));
-  try {
-    const parsed = JSON.parse(jsonValue) as unknown;
-    if (!Array.isArray(parsed)) return [];
-    return parsed
-      .map((item) => (typeof item === "string" ? item : ""))
-      .filter((item): item is ActivityTypeOption => validValues.has(item as ActivityTypeOption));
-  } catch {
-    return [];
-  }
-}
-
-function inferActivitiesFromAteco(atecoCode?: string | null): ActivityTypeOption[] {
-  const inferred = inferActivityFromAteco(atecoCode);
-  return inferred === "custom" ? [] : [inferred];
-}
-
-function retailScopesStorageKey(companyId: string): string {
-  return `fedshield.retailScopes.${companyId}`;
-}
-
-function companyActivitiesStorageKey(companyId: string): string {
-  return `fedshield.companyActivities.${companyId}`;
-}
-
-function checklistModeLabel(mode?: InspectionChecklistMode) {
-  return CHECKLIST_MODE_OPTIONS.find((option) => option.value === mode)?.label ?? "Checklist unificata";
-}
-
-function inferActivityFromAteco(atecoCode?: string | null): ActivityTypeOption {
-  const normalized = atecoCode?.trim() ?? "";
-  if (normalized.startsWith("47.11.1")) return "hypermarket";
-  if (normalized.startsWith("47.11.2")) return "supermarket";
-  if (normalized.startsWith("55.10")) return "hotel";
-  if (normalized.startsWith("55.20.51")) return "bnb_guesthouse";
-  if (normalized.startsWith("55.20.20")) return "hostel_residence";
-  if (normalized.startsWith("55.30")) return "camping_village";
-  if (normalized.startsWith("93.29.20")) return "beach_club";
-  if (normalized.startsWith("93.29.10")) return "nightlife_venue";
-  if (normalized.startsWith("56.10.30")) return "pastry";
-  if (normalized.startsWith("56.10.20")) return "pizzeria";
-  if (normalized.startsWith("56.29.10")) return "canteen";
-  if (normalized.startsWith("56.21.00")) return "event_catering";
-  if (normalized.startsWith("56.10.42")) return "food_truck";
-  if (normalized.startsWith("56.10.41")) return "ambulant_pastry";
-  if (normalized.startsWith("10.85")) return "gastronomy_production";
-  if (normalized.startsWith("56.30")) return "bar";
-  if (normalized.startsWith("56.10")) return "restaurant";
-  return "custom";
-}
-
-function atecoFromActivity(activity: ActivityTypeOption): string {
-  return ACTIVITY_TYPE_OPTIONS.find((option) => option.value === activity)?.atecoCode ?? "";
-}
-
-function defaultAnswer(item: ChecklistItem): LocalAnswer {
-  return {
-    value: "na",
-    note: "",
-    severity: item.defaultSeverity,
-    isSanctionable: item.defaultSanctionable,
-  };
 }
 
 export default function ChecklistPage({
@@ -1362,569 +1161,133 @@ export default function ChecklistPage({
       </div>
 
       {step === 0 && (
-        <>
-          <div className="panel section-panel">
-            <h3>1A. Registrazione nuovo cliente</h3>
-            <div className="person-list-header" style={{ marginBottom: 8 }}>
-              <p className="template-hint" style={{ margin: 0 }}>
-                {isNewCompanyDraft
-                  ? "Modalita nuovo cliente"
-                  : `Modifica anagrafica: ${selectedCompany?.name ?? "cliente selezionato"}`}
-              </p>
-              <button
-                type="button"
-                className="secondary-btn"
-                onClick={() => {
-                  setIsNewCompanyDraft(true);
-                  setCompanyId("");
-                  setSelectedInspectionId("");
-                  setCompanySearchQuery("");
-                  resetCompanyRegistrationForm();
-                }}
-              >
-                Nuovo cliente
-              </button>
-            </div>
-            <div style={{ marginBottom: 10 }}>
-              <label htmlFor="checklist-company-search">Ricerca cliente gia registrato</label>
-              <input
-                id="checklist-company-search"
-                type="text"
-                list="checklist-company-search-suggestions"
-                value={companySearchQuery}
-                onChange={(event) => handleCompanySearchChange(event.target.value)}
-                placeholder="Digita ragione sociale, P.IVA, ATECO o citta..."
-              />
-              <datalist id="checklist-company-search-suggestions">
-                {companies.slice(0, 200).map((company) => (
-                  <option key={company.id} value={company.name}>
-                    {company.name}
-                  </option>
-                ))}
-              </datalist>
-              {companySearchQuery.trim().length > 0 ? (
-                filteredCompanyMatches.length > 0 ? (
-                  <div style={{ marginTop: 8 }}>
-                    <label htmlFor="checklist-company-results">Risultati ricerca</label>
-                    <select
-                      id="checklist-company-results"
-                      value={companyId || filteredCompanyMatches[0]?.id || ""}
-                      onChange={(event) => {
-                        const nextId = event.target.value;
-                        const nextCompany = companies.find((company) => company.id === nextId);
-                        if (nextCompany) {
-                          setCompanySearchQuery(nextCompany.name);
-                          selectExistingCompanyForInspection(nextCompany.id);
-                        }
-                      }}
-                    >
-                      {filteredCompanyMatches.map((company) => (
-                        <option key={company.id} value={company.id}>
-                          {company.name || "-"} - P.IVA {company.vatNumber || "-"} - ATECO {company.atecoCode || "-"}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                ) : (
-                  <p className="template-hint" style={{ marginTop: 6 }}>
-                    Nessun cliente corrisponde ai criteri di ricerca.
-                  </p>
-                )
-              ) : null}
-            </div>
-            <div className="task-accordion-list">
-              {visibleTasksBeforeBody.map((task) =>
-                renderTaskHeader(task.key, task.title, task.status, task.progress),
-              )}
-            </div>
-            {!activeRegistrationTask && (
-              <p className="template-hint">Seleziona un task per iniziare la compilazione.</p>
-            )}
-
-            {activeRegistrationTask === "general" && (
-              <div className="task-accordion-body">
-                <div className="grid-two">
-                  <div>
-                    <label>Ragione sociale</label>
-                    <input value={newCompanyName} onChange={(event) => setNewCompanyName(event.target.value)} />
-                  </div>
-                  <div>
-                    <label>Codice fiscale, Partita IVA e n. Iscr. Al Registro delle Imprese</label>
-                    <input value={newCompanyVat} onChange={(event) => setNewCompanyVat(event.target.value)} />
-                  </div>
-                  <div>
-                    <label>Forma Giuridica</label>
-                    <input value={newCompanyLegalForm} onChange={(event) => setNewCompanyLegalForm(event.target.value)} />
-                  </div>
-                  <div>
-                    <label>Numero REA</label>
-                    <input value={newCompanyReaNumber} onChange={(event) => setNewCompanyReaNumber(event.target.value)} />
-                  </div>
-                  <div>
-                    <label>Totale dipendenti</label>
-                    <input value={newCompanyEmployeesInfo} onChange={(event) => setNewCompanyEmployeesInfo(event.target.value)} />
-                  </div>
-                  <div>
-                    <label>Indirizzo e-mail</label>
-                    <input value={newCompanyEmail} onChange={(event) => setNewCompanyEmail(event.target.value)} />
-                  </div>
-                  <div>
-                    <label>Indirizzo PEC</label>
-                    <input value={newCompanyPec} onChange={(event) => setNewCompanyPec(event.target.value)} />
-                  </div>
-                  <div>
-                    <label>Telefono</label>
-                    <input value={newCompanyPhone} onChange={(event) => setNewCompanyPhone(event.target.value)} />
-                  </div>
-                  <div style={{ gridColumn: "span 2" }}>
-                    <label>Tipo attivita (selezione multipla)</label>
-                    <div className="haccp-role-options">
-                      {ACTIVITY_TYPE_OPTIONS.map((option) => (
-                        <label key={option.value} className="haccp-role-option">
-                          <input
-                            type="checkbox"
-                            checked={newCompanyActivities.includes(option.value)}
-                            onChange={(event) => {
-                              const checked = event.target.checked;
-                              setNewCompanyActivities((current) => {
-                                const exists = current.includes(option.value);
-                                if (checked && !exists) {
-                                  const next = [...current, option.value];
-                                  if (next.length === 1 && option.value !== "custom") {
-                                    setNewCompanyAteco(atecoFromActivity(option.value));
-                                  }
-                                  return next;
-                                }
-                                if (!checked && exists) {
-                                  return current.filter((value) => value !== option.value);
-                                }
-                                return current;
-                              });
-                            }}
-                          />
-                          {option.label}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <label>Codice ATECO</label>
-                    <input
-                      value={newCompanyAteco}
-                      onChange={(event) => {
-                        const value = event.target.value;
-                        setNewCompanyAteco(value);
-                      }}
-                    />
-                  </div>
-                  {showRetailAdditionalScopes && (
-                    <div style={{ gridColumn: "span 2" }}>
-                      <label>Attivita interne presenti (attivano domande e requisiti extra)</label>
-                      <div className="haccp-role-options">
-                        {retailAdditionalScopeOptions.map((option) => (
-                          <label key={option.value} className="haccp-role-option">
-                            <input
-                              type="checkbox"
-                              checked={newCompanyRetailScopes.includes(option.value)}
-                              onChange={(event) => {
-                                const checked = event.target.checked;
-                                setNewCompanyRetailScopes((current) => {
-                                  if (checked) {
-                                    return current.includes(option.value) ? current : [...current, option.value];
-                                  }
-                                  return current.filter((value) => value !== option.value);
-                                });
-                              }}
-                            />
-                            {option.label}
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  <div>
-                    <label>Livello di rischi dell’attivita</label>
-                    <input value={newCompanyRiskLevel} onChange={(event) => setNewCompanyRiskLevel(event.target.value)} />
-                  </div>
-                  <div>
-                    <label>Citta</label>
-                    <input value={newCompanyCity} onChange={(event) => setNewCompanyCity(event.target.value)} />
-                  </div>
-                  <div style={{ gridColumn: "span 2" }}>
-                    <label>Descrizione</label>
-                    <textarea rows={3} value={newCompanyDescription} onChange={(event) => setNewCompanyDescription(event.target.value)} />
-                  </div>
-                  <div style={{ gridColumn: "span 2" }}>
-                    <label>Sede legale - Indirizzo</label>
-                    <textarea rows={2} value={newCompanyLegalAddress} onChange={(event) => setNewCompanyLegalAddress(event.target.value)} />
-                  </div>
-                  <div style={{ gridColumn: "span 2" }}>
-                    <label>Unita locale - Indirizzo</label>
-                    <textarea rows={2} value={newCompanyLocalUnitAddress} onChange={(event) => setNewCompanyLocalUnitAddress(event.target.value)} />
-                  </div>
-                </div>
-                <div className="footer-actions" style={{ justifyContent: "flex-end", flexWrap: "wrap" }}>
-                  <button onClick={() => handleSaveRegistrationTask("general", true)} disabled={loading}>
-                    Salva task
-                  </button>
-                  <button
-                    type="button"
-                    className="secondary-btn"
-                    onClick={() => moveRegistrationTask("general", -1)}
-                    disabled
-                  >
-                    Indietro
-                  </button>
-                  <button
-                    type="button"
-                    className="secondary-btn"
-                    onClick={closeRegistrationTaskPanel}
-                    disabled={loading}
-                  >
-                    Chiudi/Riduci
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {activeRegistrationTask === "safety" && (
-              <div className="task-accordion-body">
-                {!showSafetyRoleBlock ? (
-                  <p className="template-hint">Task non richiesta per l’ambito selezionato.</p>
-                ) : (
-                  <>
-                    <div className="person-card-grid">
-                      <div className="person-card">
-                        <h4>Datore/RSPP/Preposto</h4>
-                        <input placeholder="Nominativo" value={newCompanyEmployerRsppPreposto.fullName} onChange={(event) => updatePersonCard(setNewCompanyEmployerRsppPreposto, "fullName", event.target.value)} />
-                        <input placeholder="Codice Fiscale" value={newCompanyEmployerRsppPreposto.taxCode} onChange={(event) => updatePersonCard(setNewCompanyEmployerRsppPreposto, "taxCode", event.target.value)} />
-                        <input placeholder="Recapito" value={newCompanyEmployerRsppPreposto.contact} onChange={(event) => updatePersonCard(setNewCompanyEmployerRsppPreposto, "contact", event.target.value)} />
-                        <textarea rows={2} placeholder="Note" value={newCompanyEmployerRsppPreposto.notes} onChange={(event) => updatePersonCard(setNewCompanyEmployerRsppPreposto, "notes", event.target.value)} />
-                      </div>
-                      <div className="person-card">
-                        <h4>Medico Competente</h4>
-                        <input placeholder="Nominativo" value={newCompanyOccupationalDoctor.fullName} onChange={(event) => updatePersonCard(setNewCompanyOccupationalDoctor, "fullName", event.target.value)} />
-                        <input placeholder="Codice Fiscale" value={newCompanyOccupationalDoctor.taxCode} onChange={(event) => updatePersonCard(setNewCompanyOccupationalDoctor, "taxCode", event.target.value)} />
-                        <input placeholder="Recapito" value={newCompanyOccupationalDoctor.contact} onChange={(event) => updatePersonCard(setNewCompanyOccupationalDoctor, "contact", event.target.value)} />
-                        <textarea rows={2} placeholder="Note" value={newCompanyOccupationalDoctor.notes} onChange={(event) => updatePersonCard(setNewCompanyOccupationalDoctor, "notes", event.target.value)} />
-                      </div>
-                      <div className="person-card">
-                        <h4>RLS</h4>
-                        <input placeholder="Nominativo" value={newCompanyRls.fullName} onChange={(event) => updatePersonCard(setNewCompanyRls, "fullName", event.target.value)} />
-                        <input placeholder="Codice Fiscale" value={newCompanyRls.taxCode} onChange={(event) => updatePersonCard(setNewCompanyRls, "taxCode", event.target.value)} />
-                        <input placeholder="Recapito" value={newCompanyRls.contact} onChange={(event) => updatePersonCard(setNewCompanyRls, "contact", event.target.value)} />
-                        <textarea rows={2} placeholder="Note" value={newCompanyRls.notes} onChange={(event) => updatePersonCard(setNewCompanyRls, "notes", event.target.value)} />
-                      </div>
-                    </div>
-                    <div className="person-list-header">
-                      <h4>Addetti emergenza/antincendio/evacuazione</h4>
-                      <button type="button" className="secondary-btn" onClick={() => addPersonToList(setNewCompanyEmergencyTeam)}>
-                        Aggiungi
-                      </button>
-                    </div>
-                    {newCompanyEmergencyTeam.map((item, index) => (
-                      <div key={`em-${index}`} className="person-card-inline">
-                        <input placeholder="Nominativo" value={item.fullName} onChange={(event) => updatePersonListItem(setNewCompanyEmergencyTeam, index, "fullName", event.target.value)} />
-                        <input placeholder="Codice Fiscale" value={item.taxCode} onChange={(event) => updatePersonListItem(setNewCompanyEmergencyTeam, index, "taxCode", event.target.value)} />
-                        <input placeholder="Recapito" value={item.contact} onChange={(event) => updatePersonListItem(setNewCompanyEmergencyTeam, index, "contact", event.target.value)} />
-                        <input placeholder="Note" value={item.notes} onChange={(event) => updatePersonListItem(setNewCompanyEmergencyTeam, index, "notes", event.target.value)} />
-                        <button type="button" className="ghost-btn" onClick={() => removePersonListItem(setNewCompanyEmergencyTeam, index)}>Rimuovi</button>
-                      </div>
-                    ))}
-                    <div className="person-list-header">
-                      <h4>Addetti pronto soccorso</h4>
-                      <button type="button" className="secondary-btn" onClick={() => addPersonToList(setNewCompanyFirstAidTeam)}>
-                        Aggiungi
-                      </button>
-                    </div>
-                    {newCompanyFirstAidTeam.map((item, index) => (
-                      <div key={`fa-${index}`} className="person-card-inline">
-                        <input placeholder="Nominativo" value={item.fullName} onChange={(event) => updatePersonListItem(setNewCompanyFirstAidTeam, index, "fullName", event.target.value)} />
-                        <input placeholder="Codice Fiscale" value={item.taxCode} onChange={(event) => updatePersonListItem(setNewCompanyFirstAidTeam, index, "taxCode", event.target.value)} />
-                        <input placeholder="Recapito" value={item.contact} onChange={(event) => updatePersonListItem(setNewCompanyFirstAidTeam, index, "contact", event.target.value)} />
-                        <input placeholder="Note" value={item.notes} onChange={(event) => updatePersonListItem(setNewCompanyFirstAidTeam, index, "notes", event.target.value)} />
-                        <button type="button" className="ghost-btn" onClick={() => removePersonListItem(setNewCompanyFirstAidTeam, index)}>Rimuovi</button>
-                      </div>
-                    ))}
-                  </>
-                )}
-                <div className="footer-actions" style={{ justifyContent: "flex-end", flexWrap: "wrap" }}>
-                  <button onClick={() => handleSaveRegistrationTask("safety", true)} disabled={loading}>
-                    Salva task
-                  </button>
-                  <button
-                    type="button"
-                    className="secondary-btn"
-                    onClick={() => moveRegistrationTask("safety", -1)}
-                    disabled={loading}
-                  >
-                    Indietro
-                  </button>
-                  <button
-                    type="button"
-                    className="secondary-btn"
-                    onClick={closeRegistrationTaskPanel}
-                    disabled={loading}
-                  >
-                    Chiudi/Riduci
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {activeRegistrationTask === "haccp" && (
-              <div className="task-accordion-body">
-                {!showHaccpRoleBlock ? (
-                  <p className="template-hint">Task non richiesta per l’ambito selezionato.</p>
-                ) : (
-                  <>
-                    <div className="person-card-grid">
-                      <div className="person-card">
-                        <h4>Responsabile Autocontrollo</h4>
-                        <input placeholder="Nominativo" value={newCompanyHaccpResponsabileAutocontrollo.fullName} onChange={(event) => updatePersonCard(setNewCompanyHaccpResponsabileAutocontrollo, "fullName", event.target.value)} />
-                        <input placeholder="Codice Fiscale" value={newCompanyHaccpResponsabileAutocontrollo.taxCode} onChange={(event) => updatePersonCard(setNewCompanyHaccpResponsabileAutocontrollo, "taxCode", event.target.value)} />
-                        <input placeholder="Recapito" value={newCompanyHaccpResponsabileAutocontrollo.contact} onChange={(event) => updatePersonCard(setNewCompanyHaccpResponsabileAutocontrollo, "contact", event.target.value)} />
-                        <textarea rows={2} placeholder="Note" value={newCompanyHaccpResponsabileAutocontrollo.notes} onChange={(event) => updatePersonCard(setNewCompanyHaccpResponsabileAutocontrollo, "notes", event.target.value)} />
-                      </div>
-                      <div className="person-card">
-                        <h4>Consulente esterno</h4>
-                        <input placeholder="Nominativo" value={newCompanyHaccpConsulenteEsterno.fullName} onChange={(event) => updatePersonCard(setNewCompanyHaccpConsulenteEsterno, "fullName", event.target.value)} />
-                        <input placeholder="Codice Fiscale" value={newCompanyHaccpConsulenteEsterno.taxCode} onChange={(event) => updatePersonCard(setNewCompanyHaccpConsulenteEsterno, "taxCode", event.target.value)} />
-                        <input placeholder="Recapito" value={newCompanyHaccpConsulenteEsterno.contact} onChange={(event) => updatePersonCard(setNewCompanyHaccpConsulenteEsterno, "contact", event.target.value)} />
-                        <textarea rows={2} placeholder="Note" value={newCompanyHaccpConsulenteEsterno.notes} onChange={(event) => updatePersonCard(setNewCompanyHaccpConsulenteEsterno, "notes", event.target.value)} />
-                      </div>
-                    </div>
-                    <label>Altri responsabili HACCP</label>
-                    <div className="haccp-role-options">
-                      {HACCP_ROLE_OPTIONS.map((role) => (
-                        <label key={role} className="haccp-role-option">
-                          <input
-                            type="checkbox"
-                            checked={newCompanyHaccpAdditionalRoles.some((item) => item.role.toLowerCase() === role.toLowerCase())}
-                            onChange={() => toggleHaccpAdditionalRole(role)}
-                          />
-                          {role}
-                        </label>
-                      ))}
-                    </div>
-                    <div className="inline-actions" style={{ marginTop: 8 }}>
-                      <input placeholder="Aggiungi responsabile personalizzato" value={newCompanyHaccpCustomRole} onChange={(event) => setNewCompanyHaccpCustomRole(event.target.value)} />
-                      <button type="button" className="secondary-btn" onClick={addCustomHaccpRole}>Aggiungi</button>
-                    </div>
-                    {newCompanyHaccpAdditionalRoles.map((item, index) => (
-                      <div key={`hr-${index}`} className="person-card-inline">
-                        <input placeholder="Ruolo" value={item.role} onChange={(event) => updateHaccpAdditionalRole(index, "role", event.target.value)} />
-                        <input placeholder="Nominativo" value={item.fullName} onChange={(event) => updateHaccpAdditionalRole(index, "fullName", event.target.value)} />
-                        <input placeholder="Codice Fiscale" value={item.taxCode} onChange={(event) => updateHaccpAdditionalRole(index, "taxCode", event.target.value)} />
-                        <input placeholder="Recapito" value={item.contact} onChange={(event) => updateHaccpAdditionalRole(index, "contact", event.target.value)} />
-                        <input placeholder="Note" value={item.notes} onChange={(event) => updateHaccpAdditionalRole(index, "notes", event.target.value)} />
-                        <button type="button" className="ghost-btn" onClick={() => removeHaccpAdditionalRole(index)}>Rimuovi</button>
-                      </div>
-                    ))}
-                  </>
-                )}
-                <div className="footer-actions" style={{ justifyContent: "flex-end", flexWrap: "wrap" }}>
-                  <button onClick={() => handleSaveRegistrationTask("haccp", true)} disabled={loading}>
-                    Salva task
-                  </button>
-                  <button
-                    type="button"
-                    className="secondary-btn"
-                    onClick={() => moveRegistrationTask("haccp", -1)}
-                    disabled={loading}
-                  >
-                    Indietro
-                  </button>
-                  <button
-                    type="button"
-                    className="secondary-btn"
-                    onClick={closeRegistrationTaskPanel}
-                    disabled={loading}
-                  >
-                    Chiudi/Riduci
-                  </button>
-                </div>
-              </div>
-            )}
-            {visibleTasksAfterBody.length > 0 && (
-              <div className="task-accordion-list">
-                {visibleTasksAfterBody.map((task) => renderTaskHeader(task.key, task.title, task.status, task.progress))}
-              </div>
-            )}
-          </div>
-
-          <div className="panel section-panel">
-            <h3>1B. Crea sopralluogo</h3>
-            <label>Titolo sopralluogo</label>
-            <label>Ambito sopralluogo</label>
-            <select
-              value={newInspectionChecklistMode}
-              onChange={(event) => setNewInspectionChecklistMode(event.target.value as InspectionChecklistMode)}
-            >
-              {CHECKLIST_MODE_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <div className="inline-actions">
-              <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Sopralluogo Antisanzione" />
-              <button className="secondary-btn" onClick={handleCreateInspection} disabled={loading}>
-                Crea
-              </button>
-            </div>
-            <p className="template-hint">
-              Template caricati: {templates.map((template) => template.name).join(" • ") || "nessuno"}
-            </p>
-          </div>
-        </>
+        <Step0DatiAzienda
+          companies={companies}
+          selectedCompany={selectedCompany}
+          companyId={companyId}
+          setCompanyId={setCompanyId}
+          isNewCompanyDraft={isNewCompanyDraft}
+          setIsNewCompanyDraft={setIsNewCompanyDraft}
+          companySearchQuery={companySearchQuery}
+          setCompanySearchQuery={setCompanySearchQuery}
+          setSelectedInspectionId={setSelectedInspectionId}
+          filteredCompanyMatches={filteredCompanyMatches}
+          selectExistingCompanyForInspection={selectExistingCompanyForInspection}
+          handleCompanySearchChange={handleCompanySearchChange}
+          resetCompanyRegistrationForm={resetCompanyRegistrationForm}
+          visibleTasksBeforeBody={visibleTasksBeforeBody}
+          visibleTasksAfterBody={visibleTasksAfterBody}
+          activeRegistrationTask={activeRegistrationTask}
+          renderTaskHeader={renderTaskHeader}
+          handleSaveRegistrationTask={handleSaveRegistrationTask}
+          moveRegistrationTask={moveRegistrationTask}
+          closeRegistrationTaskPanel={closeRegistrationTaskPanel}
+          newCompanyName={newCompanyName}
+          setNewCompanyName={setNewCompanyName}
+          newCompanyVat={newCompanyVat}
+          setNewCompanyVat={setNewCompanyVat}
+          newCompanyLegalForm={newCompanyLegalForm}
+          setNewCompanyLegalForm={setNewCompanyLegalForm}
+          newCompanyReaNumber={newCompanyReaNumber}
+          setNewCompanyReaNumber={setNewCompanyReaNumber}
+          newCompanyEmployeesInfo={newCompanyEmployeesInfo}
+          setNewCompanyEmployeesInfo={setNewCompanyEmployeesInfo}
+          newCompanyEmail={newCompanyEmail}
+          setNewCompanyEmail={setNewCompanyEmail}
+          newCompanyPec={newCompanyPec}
+          setNewCompanyPec={setNewCompanyPec}
+          newCompanyPhone={newCompanyPhone}
+          setNewCompanyPhone={setNewCompanyPhone}
+          newCompanyAteco={newCompanyAteco}
+          setNewCompanyAteco={setNewCompanyAteco}
+          newCompanyRiskLevel={newCompanyRiskLevel}
+          setNewCompanyRiskLevel={setNewCompanyRiskLevel}
+          newCompanyDescription={newCompanyDescription}
+          setNewCompanyDescription={setNewCompanyDescription}
+          newCompanyLegalAddress={newCompanyLegalAddress}
+          setNewCompanyLegalAddress={setNewCompanyLegalAddress}
+          newCompanyLocalUnitAddress={newCompanyLocalUnitAddress}
+          setNewCompanyLocalUnitAddress={setNewCompanyLocalUnitAddress}
+          newCompanyCity={newCompanyCity}
+          setNewCompanyCity={setNewCompanyCity}
+          newCompanyActivities={newCompanyActivities}
+          setNewCompanyActivities={setNewCompanyActivities}
+          newCompanyRetailScopes={newCompanyRetailScopes}
+          setNewCompanyRetailScopes={setNewCompanyRetailScopes}
+          showRetailAdditionalScopes={showRetailAdditionalScopes}
+          retailAdditionalScopeOptions={retailAdditionalScopeOptions}
+          showSafetyRoleBlock={showSafetyRoleBlock}
+          newCompanyEmployerRsppPreposto={newCompanyEmployerRsppPreposto}
+          setNewCompanyEmployerRsppPreposto={setNewCompanyEmployerRsppPreposto}
+          newCompanyOccupationalDoctor={newCompanyOccupationalDoctor}
+          setNewCompanyOccupationalDoctor={setNewCompanyOccupationalDoctor}
+          newCompanyRls={newCompanyRls}
+          setNewCompanyRls={setNewCompanyRls}
+          newCompanyEmergencyTeam={newCompanyEmergencyTeam}
+          setNewCompanyEmergencyTeam={setNewCompanyEmergencyTeam}
+          newCompanyFirstAidTeam={newCompanyFirstAidTeam}
+          setNewCompanyFirstAidTeam={setNewCompanyFirstAidTeam}
+          updatePersonCard={updatePersonCard}
+          addPersonToList={addPersonToList}
+          updatePersonListItem={updatePersonListItem}
+          removePersonListItem={removePersonListItem}
+          showHaccpRoleBlock={showHaccpRoleBlock}
+          newCompanyHaccpResponsabileAutocontrollo={newCompanyHaccpResponsabileAutocontrollo}
+          setNewCompanyHaccpResponsabileAutocontrollo={setNewCompanyHaccpResponsabileAutocontrollo}
+          newCompanyHaccpConsulenteEsterno={newCompanyHaccpConsulenteEsterno}
+          setNewCompanyHaccpConsulenteEsterno={setNewCompanyHaccpConsulenteEsterno}
+          newCompanyHaccpAdditionalRoles={newCompanyHaccpAdditionalRoles}
+          newCompanyHaccpCustomRole={newCompanyHaccpCustomRole}
+          setNewCompanyHaccpCustomRole={setNewCompanyHaccpCustomRole}
+          toggleHaccpAdditionalRole={toggleHaccpAdditionalRole}
+          addCustomHaccpRole={addCustomHaccpRole}
+          updateHaccpAdditionalRole={updateHaccpAdditionalRole}
+          removeHaccpAdditionalRole={removeHaccpAdditionalRole}
+          newInspectionChecklistMode={newInspectionChecklistMode}
+          setNewInspectionChecklistMode={setNewInspectionChecklistMode}
+          title={title}
+          setTitle={setTitle}
+          handleCreateInspection={handleCreateInspection}
+          templates={templates}
+          loading={loading}
+        />
       )}
 
       {step === 1 && (
-        <div className="panel section-panel">
-          <h3>Documenti visionati e richiesti in differita</h3>
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Documento</th>
-                  <th>Obbl.</th>
-                  <th>Stato</th>
-                  <th>Note</th>
-                </tr>
-              </thead>
-              <tbody>
-                {documents.map((doc, idx) => (
-                  <tr key={`${doc.name}-${idx}`}>
-                    <td>{doc.name}</td>
-                    <td>{doc.isRequired ? "SI" : "NO"}</td>
-                    <td>
-                      <select
-                        value={doc.status}
-                        disabled={isInspectionValidated}
-                        onChange={(event) => {
-                          const nextStatus = event.target.value as InspectionDocumentRequirement["status"];
-                          setDocuments((current) =>
-                            current.map((item, itemIdx) =>
-                              itemIdx === idx
-                                ? {
-                                    ...item,
-                                    status: nextStatus,
-                                  }
-                                : item,
-                            ),
-                          );
-                        }}
-                      >
-                        {DOCUMENT_STATUS_OPTIONS.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td>
-                      <input
-                        value={doc.note ?? ""}
-                        disabled={isInspectionValidated}
-                        onChange={(event) =>
-                          setDocuments((current) =>
-                            current.map((item, itemIdx) =>
-                              itemIdx === idx
-                                ? {
-                                    ...item,
-                                    note: event.target.value,
-                                  }
-                                : item,
-                            ),
-                          )
-                        }
-                      />
-                    </td>
-                  </tr>
-                ))}
-                {documents.length === 0 && (
-                  <tr>
-                    <td colSpan={4}>Seleziona un sopralluogo per caricare la checklist documentale.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <Step1Documenti
+          documents={documents}
+          setDocuments={setDocuments}
+          isInspectionValidated={!!isInspectionValidated}
+        />
       )}
 
       {step === 2 && (
-        <div className="panel section-panel">
-          <h3>Requisiti locali e attrezzature</h3>
-          {renderAnswersTable(premisesItems)}
-        </div>
+        <Step2LocaliAttrezzature
+          premisesItems={premisesItems}
+          renderAnswersTable={renderAnswersTable}
+        />
       )}
 
       {step === 3 && (
-        <div className="panel section-panel">
-          <h3>Procedure di lavoro e requisiti igienici</h3>
-          {renderAnswersTable(procedureItems)}
-        </div>
+        <Step3ProcedureIgiene
+          procedureItems={procedureItems}
+          renderAnswersTable={renderAnswersTable}
+        />
       )}
 
       {step === 4 && (
-        <div className="panel section-panel">
-          <h3>Riepilogo finale</h3>
-          {summary ? (
-            <div className="kpi-grid">
-              <article className="kpi-card">
-                <h3>Score compliance</h3>
-                <strong>{summary.score}/100</strong>
-              </article>
-              <article className="kpi-card">
-                <h3>FED Stars</h3>
-                <strong>
-                  {"★".repeat(summary.stars)}
-                  {"☆".repeat(5 - summary.stars)}
-                </strong>
-              </article>
-              <article className="kpi-card">
-                <h3>NC totali</h3>
-                <strong>{summary.totals.nonConformities}</strong>
-              </article>
-              <article className="kpi-card">
-                <h3>NC sanzionabili</h3>
-                <strong>{summary.totals.sanctionableNc}</strong>
-              </article>
-            </div>
-          ) : (
-            <p>Nessun riepilogo disponibile.</p>
-          )}
-
-          <div className={`status-banner ${summary?.attestato.eligible ? "status-banner-ok" : "status-banner-warning"}`}>
-            <strong>Attestato:</strong> {summary?.attestato.reason ?? "Salva la checklist per valutare idoneita attestato."}
-          </div>
-
-          <div className="footer-actions" style={{ flexWrap: "wrap" }}>
-            <button onClick={handleSaveChecklist} disabled={loading || !selectedInspectionId || isInspectionValidated}>
-              Salva checklist completa
-            </button>
-            <button
-              onClick={handleValidateInspection}
-              disabled={loading || !selectedInspectionId || user.role === "junior" || isInspectionValidated}
-            >
-              Valida sopralluogo
-            </button>
-            <button onClick={handleSendToAdmin} disabled={loading || !selectedInspectionId}>
-              Invia ad amministrazione
-            </button>
-            <button onClick={handleGenerateVerbale} disabled={loading || !selectedInspectionId}>
-              Genera verbale cliente
-            </button>
-            <button
-              onClick={handleGenerateAttestato}
-              disabled={loading || !selectedInspectionId || !summary?.attestato.eligible}
-            >
-              Genera attestato
-            </button>
-          </div>
-        </div>
+        <Step4RiepilogoInvio
+          summary={summary}
+          loading={loading}
+          selectedInspectionId={selectedInspectionId}
+          isInspectionValidated={!!isInspectionValidated}
+          user={user}
+          handleSaveChecklist={handleSaveChecklist}
+          handleValidateInspection={handleValidateInspection}
+          handleSendToAdmin={handleSendToAdmin}
+          handleGenerateVerbale={handleGenerateVerbale}
+          handleGenerateAttestato={handleGenerateAttestato}
+        />
       )}
 
       <div className="footer-actions" style={{ justifyContent: "flex-end", flexWrap: "wrap" }}>
