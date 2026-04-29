@@ -1,7 +1,7 @@
 # FedShield — Contesto Operativo per Agent Team
 
-> Ultimo aggiornamento: 2026-04-29 (Sprint 14 close-out)
-> Sessione: QR multi-asset (4 tipi) + dark mode toggle WCAG-AA
+> Ultimo aggiornamento: 2026-04-29 (Sprint 15 close-out)
+> Sessione: Playwright E2E browser-level + a11y fix LoginPage
 
 ---
 
@@ -414,17 +414,32 @@ ChecklistPage era il file più grande del desktop e l'ultimo refactor pesante de
 
 **Ergonomia**: il consulente in cantiere ora può stampare QR per qualunque asset (estintori e cassette PS in particolare, dove è normativamente utile la verifica scadenze via QR scan). Dark mode sblocca uso prolungato in ambienti poco illuminati o con schermi OLED.
 
-### Backlog residuo (Sprint 15+)
+**Sprint 15 ✅ Completato — Playwright E2E browser-level + a11y fix LoginPage** (branch `feat/sprint-15-playwright-e2e`, commit `e7fcbc7`):
+
+| # | Tema | Commit |
+|---|------|--------|
+| S15-A (backlog Playwright) | `@playwright/test` 1.59.1 dev dep + chromium binary 1217. `apps/desktop/playwright.config.ts` con `webServer` array (backend `pnpm --filter @fedshield/backend dev` con `cwd: "../.."` + `env: { NODE_ENV: "test" }` per disabilitare rate-limit, vite `dev:renderer`). `globalSetup` esegue `pnpm db:seed:test` per garantire utenti `admin/senior/junior@fedshield.local` password `fedshield123` + baseline records. 3 spec in `apps/desktop/e2e/login.spec.ts` (3/3 pass in 22.7s, ~1.2-1.6s ciascuno): login OK landing dashboard (cerco toggle tema sun/moon visibile), login KO `.error-box` + form Entra ancora visibile, golden-path click tab "Anagrafica Clienti" verificando `nav-item-active` class shift. Script `pnpm test:e2e` (headless) + `pnpm test:e2e:ui` (visual debug). `.gitignore` ignora `test-results/`, `playwright-report/`, `playwright/.cache/`. | `e7fcbc7` |
+| S15-A (a11y fix collaterale) | LoginPage email/password label senza `htmlFor`/`id` impedivano `getByLabel` di Playwright (e screen reader association). Aggiunti `htmlFor="login-email"` / `id="login-email"` + analogo per password. WCAG win + sblocco E2E. | `e7fcbc7` |
+
+**Test suite Sprint 15**: E2E 3/3 pass + desktop legacy 10/10 pass (markdown.test.ts) + tsc desktop 0 errori. Backend tsc 0 errori (no backend mod). Vite build identica a S14 (frontend non toccato). Playwright bundle deve essere installato 1 volta (`pnpm exec playwright install chromium`).
+
+**Ramping path E2E**: oggi 3 spec coprono auth + 1 navigation. Prossimi candidati naturali (non in questo sprint per scope contenuto):
+- create-company end-to-end (login → form → assert in lista)
+- create-asset + apertura QR (login → AssetsPage → tab Estintori → form → click 🏷️ QR → verifica AssetQrPage)
+- training record creation (golden-path browser-level del sprint S2-S7)
+
+### Backlog residuo (Sprint 16+)
 
 - HTTPS reverse proxy n8n VPS (richiede accesso infra)
-- Playwright E2E browser-level (defense-in-depth oltre golden-path API)
 - bcryptjs final removal: pipeline pronto (script audit S12-A3 committato), waiting for prod audit + finestra re-hash organico (2-6 settimane). Quando `db:audit:passwords` su prod = exit 0, procedere con rimozione branch in `plugins/password.ts` + dep dal `package.json`.
 - Migrazione SQLite → Postgres prod
-- Push CI workflow a origin (richiede autorizzazione esplicita user)
+- Push CI workflow a origin (richiede autorizzazione esplicita user). Quando avvenga, valutare aggiunta job `e2e` con `pnpm exec playwright install --with-deps chromium`.
+- Estensione spec E2E: create-company / create-asset / training-record (vedi "Ramping path E2E" sopra)
 - ~~Restore seed HoReCa generic doc templates~~ — **chiuso S13-B** (no-op verificato)
 - ~~ChecklistPage split (1946 LOC)~~ — **completato S13-A** (1946 → 1309 LOC parent + 5 step)
 - ~~Stampabilità QR estintori/kits~~ — **completato S14-A**
 - ~~Dark mode~~ — **completato S14-B** (toggle in header, persistenza localStorage, WCAG AA)
+- ~~Playwright E2E browser-level~~ — **completato S15-A** (3 spec, webServer + globalSetup)
 
 ---
 
