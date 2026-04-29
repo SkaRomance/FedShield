@@ -23,6 +23,7 @@ export interface ExtinguishersTabProps {
   items: FireExtinguisher[];
   onChanged: () => Promise<void>;
   onError: (msg: string | null) => void;
+  onOpenQr: (assetId: string, kind: "equipment" | "machine" | "extinguisher" | "firstAid") => void;
 }
 
 export default function ExtinguishersTab({
@@ -31,6 +32,7 @@ export default function ExtinguishersTab({
   items,
   onChanged,
   onError,
+  onOpenQr,
 }: ExtinguishersTabProps) {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<FireExtinguisher | null>(null);
@@ -109,7 +111,11 @@ export default function ExtinguishersTab({
               <td>{formatDate(ex.lastRechargeAt)}</td>
               <td>{ex.status}</td>
               <td>
-                <RowActions onEdit={() => startEdit(ex)} onDelete={() => handleDelete(ex)} />
+                <RowActions
+                  onQr={ex.status !== "decommissioned" ? () => onOpenQr(ex.id, "extinguisher") : undefined}
+                  onEdit={() => startEdit(ex)}
+                  onDelete={() => handleDelete(ex)}
+                />
               </td>
             </tr>
           ))}

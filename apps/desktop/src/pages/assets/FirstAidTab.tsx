@@ -23,6 +23,7 @@ export interface FirstAidTabProps {
   items: FirstAidKit[];
   onChanged: () => Promise<void>;
   onError: (msg: string | null) => void;
+  onOpenQr: (assetId: string, kind: "equipment" | "machine" | "extinguisher" | "firstAid") => void;
 }
 
 export default function FirstAidTab({
@@ -31,6 +32,7 @@ export default function FirstAidTab({
   items,
   onChanged,
   onError,
+  onOpenQr,
 }: FirstAidTabProps) {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<FirstAidKit | null>(null);
@@ -105,7 +107,11 @@ export default function FirstAidTab({
               <td>{formatDate(k.replenishedAt)}</td>
               <td>{k.status}</td>
               <td>
-                <RowActions onEdit={() => startEdit(k)} onDelete={() => handleDelete(k)} />
+                <RowActions
+                  onQr={k.status !== "decommissioned" ? () => onOpenQr(k.id, "firstAid") : undefined}
+                  onEdit={() => startEdit(k)}
+                  onDelete={() => handleDelete(k)}
+                />
               </td>
             </tr>
           ))}

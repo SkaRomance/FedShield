@@ -8,6 +8,7 @@ import {
 } from "../api";
 import { queueSyncEvent } from "../services/syncManager";
 import { useNotificationBadge } from "../hooks/useNotificationBadge";
+import { useTheme } from "../hooks/useTheme";
 import ChecklistPage from "./ChecklistPage";
 import CustomerRegistryPage from "./CustomerRegistryPage";
 import KpiPage from "./KpiPage";
@@ -16,7 +17,7 @@ import QuotesPage from "./QuotesPage";
 import TrainingPage from "./TrainingPage";
 import ChatbotPage from "./ChatbotPage";
 import NormSyncAdminPage from "./NormSyncAdminPage";
-import AssetsPage from "./AssetsPage";
+import AssetsPage, { AssetKind } from "./AssetsPage";
 import AssetQrPage from "./AssetQrPage";
 
 interface DashboardProps {
@@ -78,6 +79,7 @@ export default function DashboardPage({
     | "assetQr"
   >("dashboard");
   const [qrAssetId, setQrAssetId] = useState<string | null>(null);
+  const [qrAssetKind, setQrAssetKind] = useState<AssetKind | null>(null);
   const [statusMessage, setStatusMessage] = useState<string>("");
   const [logoIndex, setLogoIndex] = useState(0);
   const [checklistSelection, setChecklistSelection] = useState<{
@@ -87,6 +89,7 @@ export default function DashboardPage({
   }>({ token: 0 });
 
   const { count: alertCount } = useNotificationBadge(token);
+  const { theme, toggle: toggleTheme } = useTheme();
 
   const sanctionableNc = useMemo(
     () =>
@@ -212,6 +215,7 @@ export default function DashboardPage({
             onClick={() => {
               setActiveView("assets");
               setQrAssetId(null);
+              setQrAssetKind(null);
             }}
           >
             Asset & Attrezzature
@@ -259,6 +263,14 @@ export default function DashboardPage({
                 {alertCount}
               </span>
             )}
+            <button
+              onClick={toggleTheme}
+              className="logout-btn"
+              aria-label={theme === "dark" ? "Passa al tema chiaro" : "Passa al tema scuro"}
+              title={theme === "dark" ? "Passa al tema chiaro" : "Passa al tema scuro"}
+            >
+              {theme === "dark" ? "☀️" : "🌙"}
+            </button>
             <button onClick={onSyncNow} className="logout-btn">
               Sync ora
             </button>
@@ -390,8 +402,9 @@ export default function DashboardPage({
           <AssetsPage
             token={token}
             companies={companies}
-            onOpenQr={(id) => {
+            onOpenQr={(id, kind) => {
               setQrAssetId(id);
+              setQrAssetKind(kind);
               setActiveView("assetQr");
             }}
           />
@@ -400,9 +413,11 @@ export default function DashboardPage({
             token={token}
             companies={companies}
             assetId={qrAssetId}
+            assetKind={qrAssetKind}
             onBack={() => {
               setActiveView("assets");
               setQrAssetId(null);
+              setQrAssetKind(null);
             }}
           />
         ) : (

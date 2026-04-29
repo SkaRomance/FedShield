@@ -15,10 +15,12 @@ import MachinesTab from "./assets/MachinesTab";
 import ExtinguishersTab from "./assets/ExtinguishersTab";
 import FirstAidTab from "./assets/FirstAidTab";
 
+export type AssetKind = "equipment" | "machine" | "extinguisher" | "firstAid";
+
 interface AssetsPageProps {
   token: string;
   companies: Company[];
-  onOpenQr: (assetId: string) => void;
+  onOpenQr: (assetId: string, kind: AssetKind) => void;
 }
 
 type Tab = "equipment" | "machines" | "extinguishers" | "firstAid";
@@ -171,6 +173,7 @@ export default function AssetsPage({ token, companies, onOpenQr }: AssetsPagePro
             items={machines}
             onChanged={reload}
             onError={setError}
+            onOpenQr={onOpenQr}
           />
         </>
       ) : tab === "extinguishers" ? (
@@ -184,6 +187,7 @@ export default function AssetsPage({ token, companies, onOpenQr }: AssetsPagePro
             items={extinguishers}
             onChanged={reload}
             onError={setError}
+            onOpenQr={onOpenQr}
           />
         </>
       ) : (
@@ -197,6 +201,7 @@ export default function AssetsPage({ token, companies, onOpenQr }: AssetsPagePro
             items={firstAidKits}
             onChanged={reload}
             onError={setError}
+            onOpenQr={onOpenQr}
           />
         </>
       )}

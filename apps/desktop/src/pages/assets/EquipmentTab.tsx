@@ -23,7 +23,7 @@ export interface EquipmentTabProps {
   items: Equipment[];
   onChanged: () => Promise<void>;
   onError: (msg: string | null) => void;
-  onOpenQr: (assetId: string) => void;
+  onOpenQr: (assetId: string, kind: "equipment" | "machine" | "extinguisher" | "firstAid") => void;
 }
 
 export default function EquipmentTab({
@@ -112,7 +112,7 @@ export default function EquipmentTab({
               <td>{eq.status}</td>
               <td>
                 <RowActions
-                  onQr={() => onOpenQr(eq.id)}
+                  onQr={eq.status !== "decommissioned" ? () => onOpenQr(eq.id, "equipment") : undefined}
                   onEdit={() => startEdit(eq)}
                   onDelete={() => handleDelete(eq)}
                 />
