@@ -24,6 +24,7 @@ export interface MachinesTabProps {
   items: Machine[];
   onChanged: () => Promise<void>;
   onError: (msg: string | null) => void;
+  onOpenQr: (assetId: string, kind: "equipment" | "machine" | "extinguisher" | "firstAid") => void;
 }
 
 export default function MachinesTab({
@@ -32,6 +33,7 @@ export default function MachinesTab({
   items,
   onChanged,
   onError,
+  onOpenQr,
 }: MachinesTabProps) {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Machine | null>(null);
@@ -114,7 +116,11 @@ export default function MachinesTab({
                 <td>{formatDate(m.nextSafetyCheckAt)}</td>
                 <td>{m.status}</td>
                 <td>
-                  <RowActions onEdit={() => startEdit(m)} onDelete={() => handleDelete(m)} />
+                  <RowActions
+                    onQr={m.status !== "decommissioned" ? () => onOpenQr(m.id, "machine") : undefined}
+                    onEdit={() => startEdit(m)}
+                    onDelete={() => handleDelete(m)}
+                  />
                 </td>
               </tr>
             );
