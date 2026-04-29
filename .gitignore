@@ -11,3 +11,9 @@ apps/backend/prisma/migrations/
 apps/backend/storage/documents/
 apps/tablet/.expo/
 apps/tablet/.expo-shared/
+infra/n8n/secrets.md
+
+# Playwright (S15)
+apps/desktop/test-results/
+apps/desktop/playwright-report/
+apps/desktop/playwright/.cache/

@@ -34,11 +34,18 @@ export default function LoginPage({ loading, onSubmit }: LoginPageProps) {
         <h1>FedShield</h1>
         <p>Accesso piattaforma antisanzione</p>
 
-        <label>Email</label>
-        <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" required />
-
-        <label>Password</label>
+        <label htmlFor="login-email">Email</label>
         <input
+          id="login-email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          type="email"
+          required
+        />
+
+        <label htmlFor="login-password">Password</label>
+        <input
+          id="login-password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           type="password"
