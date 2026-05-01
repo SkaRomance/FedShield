@@ -1,0 +1,185 @@
+{
+  "name": "FedShield NormSync v2 (S16 scaffold)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "cronExpression", "expression": "0 6 * * 1" }
+          ]
+        }
+      },
+      "id": "0b0b0b0b-0000-0000-0000-000000000001",
+      "name": "Schedule Mon 06:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [200, 200]
+    },
+    {
+      "parameters": {},
+      "id": "0b0b0b0b-0000-0000-0000-000000000002",
+      "name": "Manual Trigger (test)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [200, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// SCAFFOLD: genera 1 proposta demo. Da sostituire con scraper reali\n// per Normattiva (https://www.normattiva.it/), EUR-Lex (https://eur-lex.europa.eu/),\n// INAIL (https://www.inail.it/cs/internet/atti-e-documenti.html). Usare RSS\n// quando disponibili o HTTP Request + Code parsing per HTML.\nconst now = new Date();\nconst sample = {\n  sourceName: 'Normattiva (demo)',\n  normTitle: 'Decreto Legislativo XX/2026 - Aggiornamento sicurezza chimica',\n  normReference: 'D.Lgs. XX/2026, art. 5',\n  normText: 'Esempio: introduce obbligo di formazione specifica per agenti chimici cancerogeni di categoria 1A/1B con cadenza biennale (era quinquennale).',\n  changeSummary: 'Frequenza formazione cancerogeni 1A/1B: 5 anni -> 2 anni',\n  fetchedAt: now.toISOString(),\n  contentHash: 'demo-' + now.toISOString().slice(0, 10)\n};\nreturn [{ json: { proposal: sample } }];"
+      },
+      "id": "0b0b0b0b-0000-0000-0000-000000000003",
+      "name": "Demo Proposal (TODO scrapers)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const p = $input.first().json.proposal;\nconst systemPrompt = `Sei un esperto normativo HSE italiano. Analizza il testo normativo qui sotto e identifica TUTTI i nuovi/modificati obblighi per le checklist di sicurezza sul lavoro o igiene alimentare. Rispondi in JSON strict con la forma:\\n{\\\"changes\\\": [{\\\"checklistType\\\": \\\"safety|haccp|both\\\", \\\"area\\\": \\\"string\\\", \\\"question\\\": \\\"string\\\", \\\"severity\\\": 1-4, \\\"sanctionable\\\": true|false}]}\\nNessun campo extra, no preambolo, solo JSON.`;\nconst userPrompt = `TITOLO: ${p.normTitle}\\nRIFERIMENTO: ${p.normReference}\\nTESTO: ${p.normText}\\nSINTESI CAMBIO: ${p.changeSummary}`;\nreturn [{ json: { systemPrompt, userPrompt, proposal: p } }];"
+      },
+      "id": "0b0b0b0b-0000-0000-0000-000000000004",
+      "name": "Build AI Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ollama.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'gpt-oss:120b', messages: [{ role: 'system', content: $json.systemPrompt }, { role: 'user', content: $json.userPrompt }], stream: false, max_tokens: 1500, temperature: 0.2, response_format: { type: 'json_object' } }) }}",
+        "options": {
+          "timeout": 45000
+        }
+      },
+      "id": "0b0b0b0b-0000-0000-0000-000000000005",
+      "name": "Ollama Cloud Analyze",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [880, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "J55zUcFo3LRrwMw4",
+          "name": "FedShield Ollama Cloud (S16)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const aiResp = $input.first().json || {};\nconst content = aiResp.choices && aiResp.choices[0] && aiResp.choices[0].message ? aiResp.choices[0].message.content : '';\nlet parsed = { changes: [] };\ntry { parsed = JSON.parse(String(content || '{}')); } catch (e) { /* ignore */ }\nconst changes = Array.isArray(parsed.changes) ? parsed.changes : [];\nconst proposal = $items('Build AI Prompt')[0].json.proposal;\nconst payload = {\n  sourceName: proposal.sourceName,\n  normTitle: proposal.normTitle,\n  normReference: proposal.normReference,\n  normText: proposal.normText,\n  changeSummary: proposal.changeSummary,\n  proposedChanges: changes,\n  contentHash: proposal.contentHash\n};\nreturn [{ json: { payload, hasChanges: changes.length > 0 } }];"
+      },
+      "id": "0b0b0b0b-0000-0000-0000-000000000006",
+      "name": "Validate AI Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "has-changes-cond",
+              "leftValue": "={{ $json.hasChanges }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "0b0b0b0b-0000-0000-0000-000000000007",
+      "name": "Has Changes?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1320, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ ($env.FEDSHIELD_API_URL || 'http://localhost:4000') + '/api/norm-sync/proposals' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.payload) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "0b0b0b0b-0000-0000-0000-000000000008",
+      "name": "POST Proposal to FedShield",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1540, 220],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "4UedXtxQRtHTtbip",
+          "name": "FedShield Backend Auth (S16)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "console.log('[NormSync] Nessuna modifica rilevata');\nreturn [{ json: { status: 'no-changes' } }];"
+      },
+      "id": "0b0b0b0b-0000-0000-0000-000000000009",
+      "name": "Log No Changes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1540, 400]
+    }
+  ],
+  "connections": {
+    "Schedule Mon 06:00": {
+      "main": [[{ "node": "Demo Proposal (TODO scrapers)", "type": "main", "index": 0 }]]
+    },
+    "Manual Trigger (test)": {
+      "main": [[{ "node": "Demo Proposal (TODO scrapers)", "type": "main", "index": 0 }]]
+    },
+    "Demo Proposal (TODO scrapers)": {
+      "main": [[{ "node": "Build AI Prompt", "type": "main", "index": 0 }]]
+    },
+    "Build AI Prompt": {
+      "main": [[{ "node": "Ollama Cloud Analyze", "type": "main", "index": 0 }]]
+    },
+    "Ollama Cloud Analyze": {
+      "main": [[{ "node": "Validate AI Output", "type": "main", "index": 0 }]]
+    },
+    "Validate AI Output": {
+      "main": [[{ "node": "Has Changes?", "type": "main", "index": 0 }]]
+    },
+    "Has Changes?": {
+      "main": [
+        [{ "node": "POST Proposal to FedShield", "type": "main", "index": 0 }],
+        [{ "node": "Log No Changes", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

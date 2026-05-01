@@ -1,7 +1,7 @@
 # FedShield — Contesto Operativo per Agent Team
 
-> Ultimo aggiornamento: 2026-04-29 (Sprint 15 close-out)
-> Sessione: Playwright E2E browser-level + a11y fix LoginPage
+> Ultimo aggiornamento: 2026-05-01 (Sprint 16 close-out)
+> Sessione: deploy n8n+Ollama Cloud LIVE (AuditBot v2 attivo end-to-end + NormSync v2 scaffold)
 
 ---
 
@@ -428,10 +428,33 @@ ChecklistPage era il file più grande del desktop e l'ultimo refactor pesante de
 - create-asset + apertura QR (login → AssetsPage → tab Estintori → form → click 🏷️ QR → verifica AssetQrPage)
 - training record creation (golden-path browser-level del sprint S2-S7)
 
-### Backlog residuo (Sprint 16+)
+**Sprint 16 ✅ Completato — n8n + Ollama Cloud deploy live (AuditBot end-to-end + NormSync scaffold)** (branch `feat/sprint-16-n8n-deploy`):
 
-- HTTPS reverse proxy n8n VPS (richiede accesso infra)
-- bcryptjs final removal: pipeline pronto (script audit S12-A3 committato), waiting for prod audit + finestra re-hash organico (2-6 settimane). Quando `db:audit:passwords` su prod = exit 0, procedere con rimozione branch in `plugins/password.ts` + dep dal `package.json`.
+Lavoro autorizzato esplicitamente dall'utente con consegna chiavi e accesso API. Scoperto che il VPS `87.106.168.71` e' raggiungibile via nginx 80/443 (porta nativa 5678 firewallata) — n8n REST API operativa via `https://87.106.168.71/api/v1/`.
+
+| # | Tema | Artefatti |
+|---|------|-----------|
+| S16-A1 | Strong `FEDSHIELD_N8N_API_KEY` (32 byte hex, `crypto.randomBytes`) generata e scritta in `apps/backend/.env`. Sostituito placeholder `"normsync-n8n-api-key-CHANGE-IN-PRODUCTION!!!"`. Aggiornato `N8N_AUDITBOT_WEBHOOK` da `http://...:5678/webhook/chatbot-query` a `https://.../webhook/fedshield-chatbot-query`. Aggiunto `FEDSHIELD_N8N_ALLOWED_HOSTS=87.106.168.71` per SSRF allowlist (S4-7). | `.env` (gitignored) |
+| S16-A2 | Backend `chatbot/query` arricchisce payload prima di inviare a n8n: `Promise.all([company.findUnique, employeeTrainingRecord.findMany])` + `inspection.findUnique` opzionale → `enrichedContext: { company?, training?, inspection? }`. Best-effort try/catch: errori enrichment loggati ma non bloccano la chiamata. Eliminato il pattern back-call n8n→FedShield (n8n ora e' thin AI router, no auth headache). | `apps/backend/src/modules/norm-sync/routes.ts` |
+| S16-B1 | 2 credenziali n8n create via REST API (`POST /api/v1/credentials`, type `httpHeaderAuth`): **FedShield Backend Auth** (`4UedXtxQRtHTtbip`, header `X-API-KEY`) e **FedShield Ollama Cloud** (`J55zUcFo3LRrwMw4`, header `Authorization: Bearer ...`). I valori restano cifrati nel DB n8n. | n8n VPS DB |
+| S16-B2 | **AuditBot v2** workflow (`JjSWU0EHNiOs08zN`) deployato e **ATTIVO** su VPS via `POST /api/v1/workflows`. 5 nodi: Webhook (auth headerAuth) → Code "Build AI Prompt" → HTTP Request a `https://ollama.com/v1/chat/completions` (model `gpt-oss:120b`, credential FedShield Ollama Cloud) → Code "Format Response Zod" (output match `n8nChatbotResponseSchema`) → Respond to Webhook. Riscritti tutti i bug del placeholder originale (lmChat node fake, hardcoded VPS IP per back-call, Bearer JWT inesistente, output schema mismatch, webhook senza auth). | `infra/n8n/workflows/auditbot-workflow.json` (sanitized) |
+| S16-B3 | **NormSync v2 scaffold** (`LaWCnJLqmybke3Pc`) deployato `active: false` su VPS. 9 nodi: Schedule cron `0 6 * * 1` + Manual Trigger → Code "Demo Proposal (TODO scrapers)" placeholder → Build AI Prompt → Ollama analyze (model `gpt-oss:120b`, JSON object response) → Validate AI Output → IF "Has Changes?" → POST a `={{ $env.FEDSHIELD_API_URL }}/api/norm-sync/proposals` con credential FedShield Backend Auth, oppure Log No Changes. Resta inattivo finche' user non configura `FEDSHIELD_API_URL` su n8n VPS + esposizione backend (ngrok/Cloudflare Tunnel/deploy permanente). | `infra/n8n/workflows/normsync-workflow.json` (sanitized) |
+| S16-C | `infra/n8n/secrets.md` (gitignored) aggiornato con: workflow IDs, credential IDs, chiavi attualmente in produzione, comandi rapidi (`activate`/`deactivate`/smoke-test curl), procedura rotazione chiavi 90gg. | `secrets.md` (gitignored) |
+
+**Smoke test live AuditBot end-to-end** (eseguito 2026-04-29):
+```
+curl -k -X POST -H "X-API-KEY: <strong-key>" -d '{"question":"Quale è la temperatura massima per conservazione di pesce fresco in vetrina HACCP?","companyId":"test-1","history":[]}' https://87.106.168.71/webhook/fedshield-chatbot-query
+```
+Round-trip 8.6s, status 200. Output Zod-compliant: `{answer:string, source:"n8n", citations:[], timestamp:ISO}`. AI risponde in italiano citando Reg. CE 852/2004 art.4, Reg. CE 853/2004 Annex II punto 2.1, D.Lgs. 155/1997 art.6-7-14 con gravita 3, sanzionabilita Si, servizio consigliato (verifica/calibrazione refrigerazione + formazione HACCP + audit interno igiene).
+
+**Test suite Sprint 16**: backend tutti i 10 file di test pass (chain `&&` exit 0) — non-regression delle modifiche enrichment in `norm-sync/routes.ts`. Backend tsc 0 errori, desktop tsc 0 errori. Le `writeAudit` warn P2003 in test sono **pre-esistenti** (S1-6: writeAudit fail-soft per design, test passano comunque).
+
+### Backlog residuo (Sprint 17+)
+
+- HTTPS reverse proxy gia' presente! Il VPS ha nginx 80/443 con cert self-signed davanti a n8n. **Da completare**: cert Let's Encrypt valido (richiede dominio DNS + `certbot`).
+- Esposizione backend FedShield pubblicamente (scelta tra ngrok temporaneo / Cloudflare Tunnel zero-port / deploy permanente Hetzner-Render-Fly) per sbloccare NormSync attivazione
+- Implementazione scrapers reali NormSync (Normattiva GU RSS, EUR-Lex, INAIL circolari) — sostituisce nodo "Demo Proposal (TODO scrapers)"
+- bcryptjs final removal: pipeline pronto (script audit S12-A3 committato), waiting for prod audit + finestra re-hash organico (2-6 settimane).
 - Migrazione SQLite → Postgres prod
 - Push CI workflow a origin (richiede autorizzazione esplicita user). Quando avvenga, valutare aggiunta job `e2e` con `pnpm exec playwright install --with-deps chromium`.
 - Estensione spec E2E: create-company / create-asset / training-record (vedi "Ramping path E2E" sopra)
@@ -440,6 +463,8 @@ ChecklistPage era il file più grande del desktop e l'ultimo refactor pesante de
 - ~~Stampabilità QR estintori/kits~~ — **completato S14-A**
 - ~~Dark mode~~ — **completato S14-B** (toggle in header, persistenza localStorage, WCAG AA)
 - ~~Playwright E2E browser-level~~ — **completato S15-A** (3 spec, webServer + globalSetup)
+- ~~Import workflow n8n sul VPS~~ — **completato S16-B** (AuditBot v2 ACTIVE end-to-end live, NormSync v2 scaffold inactive)
+- ~~AuditBot AI integration con Ollama Cloud~~ — **completato S16-B2** (modello `gpt-oss:120b` via httpRequest credential, 8.6s round-trip)
 
 ---
 
