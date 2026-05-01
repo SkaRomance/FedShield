@@ -1,0 +1,113 @@
+{
+  "name": "FedShield AuditBot v2 (S16)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fedshield-chatbot-query",
+        "responseMode": "responseNode",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "id": "0a0a0a0a-0000-0000-0000-000000000001",
+      "name": "FedShield Chatbot Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "4UedXtxQRtHTtbip",
+          "name": "FedShield Backend Auth (S16)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst question = body.question || '';\nconst companyId = body.companyId || null;\nconst inspectionId = body.inspectionId || null;\nconst history = Array.isArray(body.history) ? body.history : [];\nconst ctx = body.enrichedContext || {};\n\nconst systemPrompt = `Sei un consulente HSE esperto italiano per il software FedShield. Rispondi in italiano citando sempre il riferimento normativo esatto (D.Lgs 81/08, Reg. CE 852/2004, D.Lgs 231/01, ecc.). Per ogni non conformita rilevata suggerisci gravita (1-4), sanzionabilita (si/no) e servizio consigliato. NON inventare norme: se non sei sicuro dichiaralo. Risposte max 300 parole.`;\n\nconst companyLine = ctx.company ? `Nome: ${ctx.company.name}, ATECO: ${ctx.company.atecoCode}, Citta: ${ctx.company.city || 'N/D'}, Rischio: ${ctx.company.riskLevel || 'N/D'}` : 'N/D';\nconst trainingLine = ctx.training ? JSON.stringify(ctx.training).slice(0, 1500) : 'N/D';\nconst inspectionLine = ctx.inspection ? `Titolo: ${ctx.inspection.title}, Stato: ${ctx.inspection.status}` : 'Nessun audit attivo';\nconst historyLines = history.slice(-5).map((h) => `${h.role || 'user'}: ${h.content || h.message || ''}`).join('\\n');\n\nconst userPrompt = `CONTESTO AZIENDA:\\n${companyLine}\\n\\nSTATO FORMAZIONE:\\n${trainingLine}\\n\\nAUDIT IN CORSO:\\n${inspectionLine}\\n\\nSTORICO RECENTE:\\n${historyLines}\\n\\nDOMANDA CONSULENTE: ${question}`;\n\nreturn [{ json: { systemPrompt, userPrompt, _meta: { companyId, inspectionId, hasContext: !!ctx.company } } }];"
+      },
+      "id": "0a0a0a0a-0000-0000-0000-000000000002",
+      "name": "Build AI Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ollama.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'gpt-oss:120b', messages: [{ role: 'system', content: $json.systemPrompt }, { role: 'user', content: $json.userPrompt }], stream: false, max_tokens: 800, temperature: 0.3 }) }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "0a0a0a0a-0000-0000-0000-000000000003",
+      "name": "Ollama Cloud Chat",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "J55zUcFo3LRrwMw4",
+          "name": "FedShield Ollama Cloud (S16)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const aiResp = $input.first().json || {};\nconst choices = aiResp.choices || [];\nconst content = choices[0] && choices[0].message ? (choices[0].message.content || '') : '';\nconst answer = String(content).trim() || 'Il modello AI non ha prodotto una risposta utilizzabile.';\nreturn [{ json: { answer, source: 'n8n', citations: [], timestamp: new Date().toISOString() } }];"
+      },
+      "id": "0a0a0a0a-0000-0000-0000-000000000004",
+      "name": "Format Response Zod",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "0a0a0a0a-0000-0000-0000-000000000005",
+      "name": "Respond to FedShield",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    }
+  ],
+  "connections": {
+    "FedShield Chatbot Webhook": {
+      "main": [
+        [{ "node": "Build AI Prompt", "type": "main", "index": 0 }]
+      ]
+    },
+    "Build AI Prompt": {
+      "main": [
+        [{ "node": "Ollama Cloud Chat", "type": "main", "index": 0 }]
+      ]
+    },
+    "Ollama Cloud Chat": {
+      "main": [
+        [{ "node": "Format Response Zod", "type": "main", "index": 0 }]
+      ]
+    },
+    "Format Response Zod": {
+      "main": [
+        [{ "node": "Respond to FedShield", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

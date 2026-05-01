@@ -573,6 +573,75 @@ Mancanza parapetti/robustezza = NC sanzionabile pericolo caduta.`,
       const n8nWebhook = process.env.N8N_AUDITBOT_WEBHOOK;
       if (n8nWebhook && isSafeOutboundUrl(n8nWebhook, fastify.log)) {
         try {
+          // S16: arricchimento payload prima di inviare a n8n. Il workflow
+          // AuditBot v2 non fa più back-call a FedShield (vedi
+          // infra/n8n/workflows/auditbot-workflow.json): tutto il contesto
+          // serve qui in 1-3 query Prisma rapide. Best-effort: errori
+          // enrichment non bloccano la chiamata, l'AI riceve context vuoto.
+          const enrichedContext: {
+            company?: unknown;
+            training?: unknown;
+            inspection?: unknown;
+          } = {};
+          try {
+            if (companyId) {
+              const [company, trainingAgg] = await Promise.all([
+                fastify.prisma.company.findUnique({
+                  where: { id: companyId },
+                  select: {
+                    id: true,
+                    name: true,
+                    atecoCode: true,
+                    city: true,
+                    riskLevel: true,
+                  },
+                }),
+                fastify.prisma.employeeTrainingRecord.findMany({
+                  where: { employee: { companyId } },
+                  select: {
+                    expiresAt: true,
+                    course: { select: { name: true, normReference: true } },
+                  },
+                  take: 30,
+                  orderBy: { expiresAt: "asc" },
+                }),
+              ]);
+              if (company) enrichedContext.company = company;
+              if (trainingAgg.length > 0) {
+                const ninetyDaysMs = 90 * 24 * 60 * 60 * 1000;
+                const horizon = new Date(Date.now() + ninetyDaysMs);
+                const expiringSoon = trainingAgg.filter(
+                  (r) => r.expiresAt && r.expiresAt <= horizon,
+                );
+                enrichedContext.training = {
+                  totalRecords: trainingAgg.length,
+                  expiringWithin90d: expiringSoon.length,
+                  nextExpiry: trainingAgg[0]?.expiresAt ?? null,
+                  expiringCourses: expiringSoon
+                    .slice(0, 5)
+                    .map((r) => r.course?.name ?? "?"),
+                };
+              }
+            }
+            if (inspectionId) {
+              const inspection = await fastify.prisma.inspection.findUnique({
+                where: { id: inspectionId },
+                select: {
+                  id: true,
+                  title: true,
+                  status: true,
+                  happenedAt: true,
+                },
+              });
+              if (inspection) enrichedContext.inspection = inspection;
+            }
+          } catch (enrichErr) {
+            fastify.log.warn(
+              { err: enrichErr, companyId, inspectionId },
+              "n8n payload enrichment failed; sending without context",
+            );
+          }
+
           const n8nApiKey = process.env.FEDSHIELD_N8N_API_KEY;
           const headers: Record<string, string> = { "Content-Type": "application/json" };
           if (n8nApiKey) headers["X-API-KEY"] = n8nApiKey;
@@ -588,6 +657,7 @@ Mancanza parapetti/robustezza = NC sanzionabile pericolo caduta.`,
                 question,
                 inspectionId,
                 history: history || [],
+                enrichedContext,
               }),
               signal: controller.signal,
             });
