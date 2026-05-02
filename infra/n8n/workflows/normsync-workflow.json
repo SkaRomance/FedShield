@@ -25,23 +25,100 @@
     },
     {
       "parameters": {
-        "jsCode": "// SCAFFOLD: genera 1 proposta demo. Da sostituire con scraper reali\n// per Normattiva (https://www.normattiva.it/), EUR-Lex (https://eur-lex.europa.eu/),\n// INAIL (https://www.inail.it/cs/internet/atti-e-documenti.html). Usare RSS\n// quando disponibili o HTTP Request + Code parsing per HTML.\nconst now = new Date();\nconst sample = {\n  sourceName: 'Normattiva (demo)',\n  normTitle: 'Decreto Legislativo XX/2026 - Aggiornamento sicurezza chimica',\n  normReference: 'D.Lgs. XX/2026, art. 5',\n  normText: 'Esempio: introduce obbligo di formazione specifica per agenti chimici cancerogeni di categoria 1A/1B con cadenza biennale (era quinquennale).',\n  changeSummary: 'Frequenza formazione cancerogeni 1A/1B: 5 anni -> 2 anni',\n  fetchedAt: now.toISOString(),\n  contentHash: 'demo-' + now.toISOString().slice(0, 10)\n};\nreturn [{ json: { proposal: sample } }];"
+        "url": "https://www.gazzettaufficiale.it/rss/SG",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 20000
+        }
       },
-      "id": "0b0b0b0b-0000-0000-0000-000000000003",
-      "name": "Demo Proposal (TODO scrapers)",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [440, 300]
+      "id": "0b0b0b0b-0000-0000-0000-000000000010",
+      "name": "Fetch GU RSS (Serie Generale)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [420, 160]
     },
     {
       "parameters": {
-        "jsCode": "const p = $input.first().json.proposal;\nconst systemPrompt = `Sei un esperto normativo HSE italiano. Analizza il testo normativo qui sotto e identifica TUTTI i nuovi/modificati obblighi per le checklist di sicurezza sul lavoro o igiene alimentare. Rispondi in JSON strict con la forma:\\n{\\\"changes\\\": [{\\\"checklistType\\\": \\\"safety|haccp|both\\\", \\\"area\\\": \\\"string\\\", \\\"question\\\": \\\"string\\\", \\\"severity\\\": 1-4, \\\"sanctionable\\\": true|false}]}\\nNessun campo extra, no preambolo, solo JSON.`;\nconst userPrompt = `TITOLO: ${p.normTitle}\\nRIFERIMENTO: ${p.normReference}\\nTESTO: ${p.normText}\\nSINTESI CAMBIO: ${p.changeSummary}`;\nreturn [{ json: { systemPrompt, userPrompt, proposal: p } }];"
+        "url": "https://eur-lex.europa.eu/IT/display-feed.rss?rssId=222",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 20000
+        }
+      },
+      "id": "0b0b0b0b-0000-0000-0000-000000000011",
+      "name": "Fetch EUR-Lex RSS (OJ L IT)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [420, 360]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parser RSS 2.0 regex-based per Gazzetta Ufficiale (Serie Generale).\n// Estrae i 5 item piu recenti e li normalizza nello shape canonico FedShield.\nconst crypto = require('crypto');\nconst raw = $input.first().json.data || $input.first().json.body || $input.first().json;\nconst xml = typeof raw === 'string' ? raw : JSON.stringify(raw);\nconst MAX_ITEMS = 5;\nconst SOURCE_NAME = 'Normattiva GU (Serie Generale)';\n\nfunction stripCdata(s) {\n  if (!s) return '';\n  return String(s).replace(/^\\s*<!\\[CDATA\\[/, '').replace(/\\]\\]>\\s*$/, '').trim();\n}\nfunction decodeEntities(s) {\n  return String(s || '')\n    .replace(/&lt;/g, '<')\n    .replace(/&gt;/g, '>')\n    .replace(/&quot;/g, '\"')\n    .replace(/&apos;/g, \"'\")\n    .replace(/&amp;/g, '&')\n    .replace(/&#(\\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)));\n}\nfunction extractTag(block, tag) {\n  const re = new RegExp('<' + tag + '(?:\\\\s[^>]*)?>([\\\\s\\\\S]*?)<\\\\/' + tag + '>', 'i');\n  const m = block.match(re);\n  return m ? decodeEntities(stripCdata(m[1])).trim() : '';\n}\n\nconst itemRe = /<item\\b[^>]*>([\\s\\S]*?)<\\/item>/gi;\nconst out = [];\nlet match;\nlet count = 0;\nwhile ((match = itemRe.exec(xml)) !== null && count < MAX_ITEMS) {\n  const block = match[1];\n  const title = extractTag(block, 'title');\n  const link = extractTag(block, 'link');\n  const pubDate = extractTag(block, 'pubDate');\n  const contentEncoded = extractTag(block, 'content:encoded') || extractTag(block, 'description');\n  if (!title) continue;\n  const hashInput = title + '|' + pubDate;\n  const contentHash = crypto.createHash('sha256').update(hashInput).digest('hex');\n  out.push({\n    json: {\n      sourceName: SOURCE_NAME,\n      normTitle: title,\n      normReference: title,\n      normText: contentEncoded || title,\n      changeSummary: contentEncoded ? contentEncoded.slice(0, 500) : title,\n      fetchedAt: new Date().toISOString(),\n      contentHash,\n      link\n    }\n  });\n  count++;\n}\nreturn out;"
+      },
+      "id": "0b0b0b0b-0000-0000-0000-000000000012",
+      "name": "Parse GU RSS",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [640, 160]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parser RSS 2.0 regex-based per EUR-Lex (Official Journal L series, lingua IT).\n// Estrae i 5 item piu recenti e li normalizza nello shape canonico FedShield.\nconst crypto = require('crypto');\nconst raw = $input.first().json.data || $input.first().json.body || $input.first().json;\nconst xml = typeof raw === 'string' ? raw : JSON.stringify(raw);\nconst MAX_ITEMS = 5;\nconst SOURCE_NAME = 'EUR-Lex (OJ L, IT)';\n\nfunction stripCdata(s) {\n  if (!s) return '';\n  return String(s).replace(/^\\s*<!\\[CDATA\\[/, '').replace(/\\]\\]>\\s*$/, '').trim();\n}\nfunction decodeEntities(s) {\n  return String(s || '')\n    .replace(/&lt;/g, '<')\n    .replace(/&gt;/g, '>')\n    .replace(/&quot;/g, '\"')\n    .replace(/&apos;/g, \"'\")\n    .replace(/&amp;/g, '&')\n    .replace(/&#(\\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)));\n}\nfunction extractTag(block, tag) {\n  const re = new RegExp('<' + tag + '(?:\\\\s[^>]*)?>([\\\\s\\\\S]*?)<\\\\/' + tag + '>', 'i');\n  const m = block.match(re);\n  return m ? decodeEntities(stripCdata(m[1])).trim() : '';\n}\nfunction extractCelex(title) {\n  const m = String(title || '').match(/CELEX:([A-Z0-9()]+)/i);\n  return m ? m[1] : '';\n}\n\nconst itemRe = /<item\\b[^>]*>([\\s\\S]*?)<\\/item>/gi;\nconst out = [];\nlet match;\nlet count = 0;\nwhile ((match = itemRe.exec(xml)) !== null && count < MAX_ITEMS) {\n  const block = match[1];\n  const title = extractTag(block, 'title');\n  const link = extractTag(block, 'link');\n  const pubDate = extractTag(block, 'pubDate');\n  const description = extractTag(block, 'description');\n  if (!title) continue;\n  const celex = extractCelex(title);\n  const hashInput = title + '|' + pubDate;\n  const contentHash = crypto.createHash('sha256').update(hashInput).digest('hex');\n  out.push({\n    json: {\n      sourceName: SOURCE_NAME,\n      normTitle: title,\n      normReference: celex || title,\n      normText: description || title,\n      changeSummary: description ? description.slice(0, 500) : title,\n      fetchedAt: new Date().toISOString(),\n      contentHash,\n      link\n    }\n  });\n  count++;\n}\nreturn out;"
+      },
+      "id": "0b0b0b0b-0000-0000-0000-000000000013",
+      "name": "Parse EUR-Lex RSS",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [640, 360]
+    },
+    {
+      "parameters": {
+        "numberInputs": 2
+      },
+      "id": "0b0b0b0b-0000-0000-0000-000000000014",
+      "name": "Merge Sources",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [860, 260]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Dedup persistente: ricorda gli hash gia visti tra esecuzioni via\n// getWorkflowStaticData('global'). Mantiene al massimo 500 hash recenti.\n// NOTA: INAIL e' temporaneamente skippato — il portale espone solo un feed RSS\n// generale di eventi (https://www.inail.it/portale/it/rss.xml) e non un feed\n// dedicato alle circolari. TODO: scraping HTML della pagina circolari quando\n// il team accetta la fragilita' o INAIL pubblichera un feed dedicato.\nconst staticData = $getWorkflowStaticData('global');\nconst seen = Array.isArray(staticData.seenHashes) ? staticData.seenHashes : [];\nconst seenSet = new Set(seen);\nconst items = $input.all();\nconst fresh = [];\nfor (const it of items) {\n  const j = it.json || {};\n  const h = j.contentHash;\n  if (!h) continue;\n  if (seenSet.has(h)) continue;\n  seenSet.add(h);\n  fresh.push({ json: j });\n}\nconst MAX_REMEMBER = 500;\nconst updated = Array.from(seenSet);\nstaticData.seenHashes = updated.slice(Math.max(0, updated.length - MAX_REMEMBER));\nstaticData.lastRunAt = new Date().toISOString();\nif (fresh.length === 0) {\n  return [{ json: { _empty: true, info: 'Nessun nuovo documento normativo' } }];\n}\nreturn fresh;"
+      },
+      "id": "0b0b0b0b-0000-0000-0000-000000000015",
+      "name": "Filter New Documents",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1080, 260]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "0b0b0b0b-0000-0000-0000-000000000016",
+      "name": "Split In Batches (1)",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1300, 260]
+    },
+    {
+      "parameters": {
+        "jsCode": "const p = $input.first().json;\nif (p._empty) {\n  return [{ json: { _skip: true, proposal: null, systemPrompt: '', userPrompt: '' } }];\n}\nconst proposal = {\n  sourceName: p.sourceName,\n  normTitle: p.normTitle,\n  normReference: p.normReference,\n  normText: p.normText,\n  changeSummary: p.changeSummary,\n  contentHash: p.contentHash\n};\nconst systemPrompt = `Sei un esperto normativo HSE italiano. Analizza il testo normativo qui sotto e identifica TUTTI i nuovi/modificati obblighi per le checklist di sicurezza sul lavoro o igiene alimentare. Rispondi in JSON strict con la forma:\\n{\\\"changes\\\": [{\\\"checklistType\\\": \\\"safety|haccp|both\\\", \\\"area\\\": \\\"string\\\", \\\"question\\\": \\\"string\\\", \\\"severity\\\": 1-4, \\\"sanctionable\\\": true|false}]}\\nNessun campo extra, no preambolo, solo JSON.`;\nconst userPrompt = `TITOLO: ${proposal.normTitle}\\nRIFERIMENTO: ${proposal.normReference}\\nTESTO: ${proposal.normText}\\nSINTESI CAMBIO: ${proposal.changeSummary}`;\nreturn [{ json: { systemPrompt, userPrompt, proposal } }];"
       },
       "id": "0b0b0b0b-0000-0000-0000-000000000004",
       "name": "Build AI Prompt",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [660, 300]
+      "position": [1520, 260]
     },
     {
       "parameters": {
@@ -66,7 +143,7 @@
       "name": "Ollama Cloud Analyze",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [880, 300],
+      "position": [1740, 260],
       "credentials": {
         "httpHeaderAuth": {
           "id": "J55zUcFo3LRrwMw4",
@@ -82,7 +159,7 @@
       "name": "Validate AI Output",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1100, 300]
+      "position": [1960, 260]
     },
     {
       "parameters": {
@@ -109,7 +186,7 @@
       "name": "Has Changes?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [1320, 300]
+      "position": [2180, 260]
     },
     {
       "parameters": {
@@ -134,7 +211,7 @@
       "name": "POST Proposal to FedShield",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1540, 220],
+      "position": [2400, 180],
       "credentials": {
         "httpHeaderAuth": {
           "id": "4UedXtxQRtHTtbip",
@@ -150,17 +227,45 @@
       "name": "Log No Changes",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1540, 400]
+      "position": [2400, 360]
     }
   ],
   "connections": {
     "Schedule Mon 06:00": {
-      "main": [[{ "node": "Demo Proposal (TODO scrapers)", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          { "node": "Fetch GU RSS (Serie Generale)", "type": "main", "index": 0 },
+          { "node": "Fetch EUR-Lex RSS (OJ L IT)", "type": "main", "index": 0 }
+        ]
+      ]
     },
     "Manual Trigger (test)": {
-      "main": [[{ "node": "Demo Proposal (TODO scrapers)", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          { "node": "Fetch GU RSS (Serie Generale)", "type": "main", "index": 0 },
+          { "node": "Fetch EUR-Lex RSS (OJ L IT)", "type": "main", "index": 0 }
+        ]
+      ]
     },
-    "Demo Proposal (TODO scrapers)": {
+    "Fetch GU RSS (Serie Generale)": {
+      "main": [[{ "node": "Parse GU RSS", "type": "main", "index": 0 }]]
+    },
+    "Fetch EUR-Lex RSS (OJ L IT)": {
+      "main": [[{ "node": "Parse EUR-Lex RSS", "type": "main", "index": 0 }]]
+    },
+    "Parse GU RSS": {
+      "main": [[{ "node": "Merge Sources", "type": "main", "index": 0 }]]
+    },
+    "Parse EUR-Lex RSS": {
+      "main": [[{ "node": "Merge Sources", "type": "main", "index": 1 }]]
+    },
+    "Merge Sources": {
+      "main": [[{ "node": "Filter New Documents", "type": "main", "index": 0 }]]
+    },
+    "Filter New Documents": {
+      "main": [[{ "node": "Split In Batches (1)", "type": "main", "index": 0 }]]
+    },
+    "Split In Batches (1)": {
       "main": [[{ "node": "Build AI Prompt", "type": "main", "index": 0 }]]
     },
     "Build AI Prompt": {
