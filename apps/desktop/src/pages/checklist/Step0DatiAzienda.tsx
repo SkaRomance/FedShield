@@ -317,36 +317,36 @@ export default function Step0DatiAzienda({
           <div className="task-accordion-body">
             <div className="grid-two">
               <div>
-                <label>Ragione sociale</label>
-                <input value={newCompanyName} onChange={(event) => setNewCompanyName(event.target.value)} />
+                <label htmlFor="checklist-newco-name">Ragione sociale</label>
+                <input id="checklist-newco-name" value={newCompanyName} onChange={(event) => setNewCompanyName(event.target.value)} />
               </div>
               <div>
-                <label>Codice fiscale, Partita IVA e n. Iscr. Al Registro delle Imprese</label>
-                <input value={newCompanyVat} onChange={(event) => setNewCompanyVat(event.target.value)} />
+                <label htmlFor="checklist-newco-vat">Codice fiscale, Partita IVA e n. Iscr. Al Registro delle Imprese</label>
+                <input id="checklist-newco-vat" value={newCompanyVat} onChange={(event) => setNewCompanyVat(event.target.value)} />
               </div>
               <div>
-                <label>Forma Giuridica</label>
-                <input value={newCompanyLegalForm} onChange={(event) => setNewCompanyLegalForm(event.target.value)} />
+                <label htmlFor="checklist-newco-legalform">Forma Giuridica</label>
+                <input id="checklist-newco-legalform" value={newCompanyLegalForm} onChange={(event) => setNewCompanyLegalForm(event.target.value)} />
               </div>
               <div>
-                <label>Numero REA</label>
-                <input value={newCompanyReaNumber} onChange={(event) => setNewCompanyReaNumber(event.target.value)} />
+                <label htmlFor="checklist-newco-rea">Numero REA</label>
+                <input id="checklist-newco-rea" value={newCompanyReaNumber} onChange={(event) => setNewCompanyReaNumber(event.target.value)} />
               </div>
               <div>
-                <label>Totale dipendenti</label>
-                <input value={newCompanyEmployeesInfo} onChange={(event) => setNewCompanyEmployeesInfo(event.target.value)} />
+                <label htmlFor="checklist-newco-employees">Totale dipendenti</label>
+                <input id="checklist-newco-employees" value={newCompanyEmployeesInfo} onChange={(event) => setNewCompanyEmployeesInfo(event.target.value)} />
               </div>
               <div>
-                <label>Indirizzo e-mail</label>
-                <input value={newCompanyEmail} onChange={(event) => setNewCompanyEmail(event.target.value)} />
+                <label htmlFor="checklist-newco-email">Indirizzo e-mail</label>
+                <input id="checklist-newco-email" value={newCompanyEmail} onChange={(event) => setNewCompanyEmail(event.target.value)} />
               </div>
               <div>
-                <label>Indirizzo PEC</label>
-                <input value={newCompanyPec} onChange={(event) => setNewCompanyPec(event.target.value)} />
+                <label htmlFor="checklist-newco-pec">Indirizzo PEC</label>
+                <input id="checklist-newco-pec" value={newCompanyPec} onChange={(event) => setNewCompanyPec(event.target.value)} />
               </div>
               <div>
-                <label>Telefono</label>
-                <input value={newCompanyPhone} onChange={(event) => setNewCompanyPhone(event.target.value)} />
+                <label htmlFor="checklist-newco-phone">Telefono</label>
+                <input id="checklist-newco-phone" value={newCompanyPhone} onChange={(event) => setNewCompanyPhone(event.target.value)} />
               </div>
               <div style={{ gridColumn: "span 2" }}>
                 <label>Tipo attivita (selezione multipla)</label>
@@ -380,8 +380,9 @@ export default function Step0DatiAzienda({
                 </div>
               </div>
               <div>
-                <label>Codice ATECO</label>
+                <label htmlFor="checklist-newco-ateco">Codice ATECO</label>
                 <input
+                  id="checklist-newco-ateco"
                   value={newCompanyAteco}
                   onChange={(event) => {
                     const value = event.target.value;
@@ -415,24 +416,24 @@ export default function Step0DatiAzienda({
                 </div>
               )}
               <div>
-                <label>Livello di rischi dell’attivita</label>
-                <input value={newCompanyRiskLevel} onChange={(event) => setNewCompanyRiskLevel(event.target.value)} />
+                <label htmlFor="checklist-newco-risk">Livello di rischi dell’attivita</label>
+                <input id="checklist-newco-risk" value={newCompanyRiskLevel} onChange={(event) => setNewCompanyRiskLevel(event.target.value)} />
               </div>
               <div>
-                <label>Citta</label>
-                <input value={newCompanyCity} onChange={(event) => setNewCompanyCity(event.target.value)} />
+                <label htmlFor="checklist-newco-city">Citta</label>
+                <input id="checklist-newco-city" value={newCompanyCity} onChange={(event) => setNewCompanyCity(event.target.value)} />
               </div>
               <div style={{ gridColumn: "span 2" }}>
-                <label>Descrizione</label>
-                <textarea rows={3} value={newCompanyDescription} onChange={(event) => setNewCompanyDescription(event.target.value)} />
+                <label htmlFor="checklist-newco-description">Descrizione</label>
+                <textarea id="checklist-newco-description" rows={3} value={newCompanyDescription} onChange={(event) => setNewCompanyDescription(event.target.value)} />
               </div>
               <div style={{ gridColumn: "span 2" }}>
-                <label>Sede legale - Indirizzo</label>
-                <textarea rows={2} value={newCompanyLegalAddress} onChange={(event) => setNewCompanyLegalAddress(event.target.value)} />
+                <label htmlFor="checklist-newco-legaladdr">Sede legale - Indirizzo</label>
+                <textarea id="checklist-newco-legaladdr" rows={2} value={newCompanyLegalAddress} onChange={(event) => setNewCompanyLegalAddress(event.target.value)} />
               </div>
               <div style={{ gridColumn: "span 2" }}>
-                <label>Unita locale - Indirizzo</label>
-                <textarea rows={2} value={newCompanyLocalUnitAddress} onChange={(event) => setNewCompanyLocalUnitAddress(event.target.value)} />
+                <label htmlFor="checklist-newco-localaddr">Unita locale - Indirizzo</label>
+                <textarea id="checklist-newco-localaddr" rows={2} value={newCompanyLocalUnitAddress} onChange={(event) => setNewCompanyLocalUnitAddress(event.target.value)} />
               </div>
             </div>
             <div className="footer-actions" style={{ justifyContent: "flex-end", flexWrap: "wrap" }}>

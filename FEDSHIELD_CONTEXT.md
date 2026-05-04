@@ -1,7 +1,7 @@
 # FedShield — Contesto Operativo per Agent Team
 
-> Ultimo aggiornamento: 2026-05-01 (Sprint 16 close-out)
-> Sessione: deploy n8n+Ollama Cloud LIVE (AuditBot v2 attivo end-to-end + NormSync v2 scaffold)
+> Ultimo aggiornamento: 2026-05-04 (Sprint 17 close-out)
+> Sessione: NormSync scrapers reali (RSS Normattiva GU + EUR-Lex L IT) + estensione E2E +3 spec golden-path
 
 ---
 
@@ -449,15 +449,29 @@ Round-trip 8.6s, status 200. Output Zod-compliant: `{answer:string, source:"n8n"
 
 **Test suite Sprint 16**: backend tutti i 10 file di test pass (chain `&&` exit 0) — non-regression delle modifiche enrichment in `norm-sync/routes.ts`. Backend tsc 0 errori, desktop tsc 0 errori. Le `writeAudit` warn P2003 in test sono **pre-esistenti** (S1-6: writeAudit fail-soft per design, test passano comunque).
 
-### Backlog residuo (Sprint 17+)
+**Sprint 17 ✅ Completato — NormSync scrapers reali + estensione E2E +3 spec** (branch `feat/sprint-17-normsync-scrapers-and-e2e`, commits `33e12b4` + `77c925f`):
 
-- HTTPS reverse proxy gia' presente! Il VPS ha nginx 80/443 con cert self-signed davanti a n8n. **Da completare**: cert Let's Encrypt valido (richiede dominio DNS + `certbot`).
-- Esposizione backend FedShield pubblicamente (scelta tra ngrok temporaneo / Cloudflare Tunnel zero-port / deploy permanente Hetzner-Render-Fly) per sbloccare NormSync attivazione
-- Implementazione scrapers reali NormSync (Normattiva GU RSS, EUR-Lex, INAIL circolari) — sostituisce nodo "Demo Proposal (TODO scrapers)"
+2 wave parallele in background. Wave A (scrapers RSS) e Wave B (E2E) indipendenti, entrambe pulite.
+
+| # | Tema | Commit |
+|---|------|--------|
+| S17-A (backlog NormSync scrapers) | Sostituito nodo "Demo Proposal (TODO scrapers)" del workflow NormSync v2 con 2 RSS feed reali verificati live via WebFetch: **Normattiva GU Serie Generale** (`https://www.gazzettaufficiale.it/rss/SG`, sample DELIBERA CdM 22 aprile 2026) e **EUR-Lex OJ L Series IT** (`https://eur-lex.europa.eu/IT/display-feed.rss?rssId=222`, sample CELEX 32026R0355R(01)). INAIL skip: niente RSS dedicato per circolari (solo events feed generico) — TODO comment nel "Filter New Documents" node. Workflow 9→**15 nodi**: 2 HTTP Fetch + 2 Parse Code (regex RSS 2.0 + sha256 hash via `crypto`) + Merge (numberInputs=2) + Filter New Documents (dedup persistente via `getWorkflowStaticData('global')`, max 500 hashes) + SplitInBatches (batchSize=1) + downstream Sprint 16 invariato (Build AI Prompt → Ollama → Validate → IF → POST/Log). Redeploy via PUT `/api/v1/workflows/LaWCnJLqmybke3Pc` → 200, GET verifica 15 nodi, `active: false` preservato (resta inattivo finche' user configura `FEDSHIELD_API_URL` su VPS). Smoke test execute via API: 405 Method Not Allowed (n8n public API non espone execute, va via UI). | `33e12b4` |
+| S17-B (backlog estensione E2E) | 3 spec golden-path browser-level aggiunte in `apps/desktop/e2e/`: `create-company.spec.ts` (admin login → form Anagrafica → submit → assert in lista), `create-asset-and-qr.spec.ts` (senior login → AssetsPage → tab Estintori → form code+location+type → click 🏷️ QR → assert AssetQrPage con kind=extinguisher), `training-record.spec.ts` (senior login → tab Formazione → tab Dipendenti → registra formazione su corso esistente → assert `expiresAt` auto-calcolato). Dati unique-per-run via `Date.now()` per ripetibilita' senza DB reset. **Test totali: 6/6 pass in 50.2s** (era 3/3 in S15). Eventuali a11y fix collaterali su forms applicati per sbloccare `getByLabel`. | `77c925f` |
+
+**Test suite Sprint 17**: E2E 6/6 pass + desktop tsc 0 errori + backend tsc 0 errori (no backend mod). Vite build invariata vs S16. Workflow JSON 7946 → ~10000+ LOC (15 nodi vs 9).
+
+**Stato n8n VPS post-S17**:
+- AuditBot v2 (`JjSWU0EHNiOs08zN`): **ACTIVE**, end-to-end testato S16
+- NormSync v2 (`LaWCnJLqmybke3Pc`): **inactive**, ora con scrapers reali Normattiva+EUR-Lex pronti. User puo' clickare "Execute Workflow" da UI per smoke test, poi attivare per schedule weekly Mon 6am UTC
+
+### Backlog residuo (Sprint 18+)
+
+- Cert Let's Encrypt valido per VPS (oggi self-signed, curl `-k`) — richiede dominio DNS + `certbot`
+- Esposizione backend FedShield pubblicamente (scelta tra ngrok temporaneo / Cloudflare Tunnel zero-port / deploy permanente Hetzner-Render-Fly) per sbloccare attivazione NormSync
+- INAIL scraper alternativo: HTML scraping fragile dell'index circolari, oppure email digest INAIL → Slack se disponibile
 - bcryptjs final removal: pipeline pronto (script audit S12-A3 committato), waiting for prod audit + finestra re-hash organico (2-6 settimane).
 - Migrazione SQLite → Postgres prod
 - Push CI workflow a origin (richiede autorizzazione esplicita user). Quando avvenga, valutare aggiunta job `e2e` con `pnpm exec playwright install --with-deps chromium`.
-- Estensione spec E2E: create-company / create-asset / training-record (vedi "Ramping path E2E" sopra)
 - ~~Restore seed HoReCa generic doc templates~~ — **chiuso S13-B** (no-op verificato)
 - ~~ChecklistPage split (1946 LOC)~~ — **completato S13-A** (1946 → 1309 LOC parent + 5 step)
 - ~~Stampabilità QR estintori/kits~~ — **completato S14-A**
@@ -465,6 +479,8 @@ Round-trip 8.6s, status 200. Output Zod-compliant: `{answer:string, source:"n8n"
 - ~~Playwright E2E browser-level~~ — **completato S15-A** (3 spec, webServer + globalSetup)
 - ~~Import workflow n8n sul VPS~~ — **completato S16-B** (AuditBot v2 ACTIVE end-to-end live, NormSync v2 scaffold inactive)
 - ~~AuditBot AI integration con Ollama Cloud~~ — **completato S16-B2** (modello `gpt-oss:120b` via httpRequest credential, 8.6s round-trip)
+- ~~Implementazione scrapers reali NormSync~~ — **completato S17-A** (Normattiva GU SG + EUR-Lex L IT live, INAIL deferred)
+- ~~Estensione spec E2E (create-company / create-asset / training-record)~~ — **completato S17-B** (6/6 pass 50.2s)
 
 ---
 
