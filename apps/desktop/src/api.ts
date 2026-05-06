@@ -485,6 +485,49 @@ export function updateCompany(
   });
 }
 
+// === S18-A: Export Danea CSV + NDA PDF (binary downloads) ===
+
+async function authedDownloadBlob(path: string, token: string): Promise<Blob> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch (error) {
+    throw new Error(
+      `Connessione API non riuscita su ${API_BASE}${path}: ${error instanceof Error ? error.message : "errore rete"}`,
+    );
+  }
+  if (!res.ok) {
+    const body = await res.text();
+    throw new ApiError(res.status, parseApiErrorMessage(body, res.status), body);
+  }
+  return res.blob();
+}
+
+export function exportCompaniesCsvDanea(token: string): Promise<Blob> {
+  return authedDownloadBlob("/companies/export-csv", token);
+}
+
+export function generateNdaPdf(token: string, companyId: string): Promise<Blob> {
+  return authedDownloadBlob(`/companies/${companyId}/nda-pdf`, token);
+}
+
+export function triggerBlobDownload(blob: Blob, fileName: string): void {
+  if (typeof document === "undefined") {
+    throw new Error("Download non supportato in questo ambiente.");
+  }
+  const objectUrl = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = objectUrl;
+  anchor.download = fileName;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(objectUrl);
+}
+
 export function fetchInspections(token: string): Promise<Inspection[]> {
   return authedFetch<Inspection[]>("/inspections", token);
 }
