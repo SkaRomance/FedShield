@@ -26,7 +26,9 @@ import Step0DatiAzienda from "./checklist/Step0DatiAzienda";
 import Step1Documenti from "./checklist/Step1Documenti";
 import Step2LocaliAttrezzature from "./checklist/Step2LocaliAttrezzature";
 import Step3ProcedureIgiene from "./checklist/Step3ProcedureIgiene";
-import Step4RiepilogoInvio from "./checklist/Step4RiepilogoInvio";
+import Step4AssetAttrezzature from "./checklist/Step4AssetAttrezzature";
+import Step5Formazione from "./checklist/Step5Formazione";
+import Step6RiepilogoInvio from "./checklist/Step6RiepilogoInvio";
 import {
   ACTIVITY_TYPE_OPTIONS,
   ActivityTypeOption,
@@ -65,6 +67,7 @@ interface ChecklistPageProps {
   initialInspectionId?: string;
   selectionToken?: number;
   onReload: () => Promise<void>;
+  onOpenQr?: (assetId: string, kind: "equipment" | "machine" | "extinguisher" | "firstAid") => void;
 }
 
 export default function ChecklistPage({
@@ -76,6 +79,7 @@ export default function ChecklistPage({
   initialInspectionId,
   selectionToken,
   onReload,
+  onOpenQr,
 }: ChecklistPageProps) {
   const [step, setStep] = useState(0);
   const [companyId, setCompanyId] = useState<string>(initialCompanyId ?? companies[0]?.id ?? "");
@@ -1276,7 +1280,23 @@ export default function ChecklistPage({
       )}
 
       {step === 4 && (
-        <Step4RiepilogoInvio
+        <Step4AssetAttrezzature
+          token={token}
+          companyId={selectedCompany?.id ?? companyId}
+          onOpenQr={onOpenQr ?? (() => undefined)}
+        />
+      )}
+
+      {step === 5 && (
+        <Step5Formazione
+          token={token}
+          companyId={selectedCompany?.id ?? companyId}
+          companies={companies}
+        />
+      )}
+
+      {step === 6 && (
+        <Step6RiepilogoInvio
           summary={summary}
           loading={loading}
           selectedInspectionId={selectedInspectionId}

@@ -30,7 +30,9 @@ export const STEPS = [
   "2. Documenti",
   "3. Locali e Attrezzature",
   "4. Procedure e Igiene",
-  "5. Riepilogo e Invio",
+  "5. Asset & Attrezzature",
+  "6. Formazione",
+  "7. Riepilogo e Invio",
 ] as const;
 
 export const DOCUMENT_STATUS_OPTIONS: Array<{ value: InspectionDocumentRequirement["status"]; label: string }> = [
