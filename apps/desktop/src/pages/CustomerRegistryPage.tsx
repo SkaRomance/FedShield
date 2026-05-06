@@ -1,5 +1,32 @@
 import { useEffect, useMemo, useState } from "react";
-import { Company, downloadGeneratedDocument, generateInspectionChecklistPdf, Inspection } from "../api";
+import {
+  Company,
+  downloadGeneratedDocument,
+  exportCompaniesCsvDanea,
+  generateInspectionChecklistPdf,
+  generateNdaPdf,
+  Inspection,
+  triggerBlobDownload,
+} from "../api";
+
+function pad2(n: number): string {
+  return String(n).padStart(2, "0");
+}
+
+function todayCompactDateClient(): string {
+  const now = new Date();
+  return `${now.getFullYear()}${pad2(now.getMonth() + 1)}${pad2(now.getDate())}`;
+}
+
+function slugifyClient(value: string): string {
+  return (value || "azienda")
+    .normalize("NFKD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60) || "azienda";
+}
 
 interface CustomerRegistryPageProps {
   token: string;
@@ -19,6 +46,8 @@ export default function CustomerRegistryPage({ token, companies, inspections, on
   const [companyQuery, setCompanyQuery] = useState<string>("");
   const [downloadInspectionId, setDownloadInspectionId] = useState<string>("");
   const [statusMessage, setStatusMessage] = useState<string>("");
+  const [exportingCsv, setExportingCsv] = useState<boolean>(false);
+  const [ndaCompanyId, setNdaCompanyId] = useState<string>("");
 
   const normalizedQuery = useMemo(() => companyQuery.trim().toLowerCase(), [companyQuery]);
 
@@ -80,6 +109,35 @@ export default function CustomerRegistryPage({ token, companies, inspections, on
     }
   }
 
+  async function handleExportDaneaCsv() {
+    setStatusMessage("");
+    setExportingCsv(true);
+    try {
+      const blob = await exportCompaniesCsvDanea(token);
+      triggerBlobDownload(blob, `danea-clienti-${todayCompactDateClient()}.csv`);
+      setStatusMessage("CSV Danea Easyfatt esportato con successo.");
+    } catch (error) {
+      setStatusMessage(`Errore export CSV Danea: ${error instanceof Error ? error.message : "errore"}`);
+    } finally {
+      setExportingCsv(false);
+    }
+  }
+
+  async function handleGenerateNda(company: Company) {
+    setStatusMessage("");
+    setNdaCompanyId(company.id);
+    try {
+      const blob = await generateNdaPdf(token, company.id);
+      const fileName = `NDA-${slugifyClient(company.name)}-${todayCompactDateClient()}.pdf`;
+      triggerBlobDownload(blob, fileName);
+      setStatusMessage(`NDA generata per ${company.name}.`);
+    } catch (error) {
+      setStatusMessage(`Errore generazione NDA: ${error instanceof Error ? error.message : "errore"}`);
+    } finally {
+      setNdaCompanyId("");
+    }
+  }
+
   async function handleDownloadChecklistPdf(inspectionId: string) {
     setStatusMessage("");
     setDownloadInspectionId(inspectionId);
@@ -96,7 +154,19 @@ export default function CustomerRegistryPage({ token, companies, inspections, on
 
   return (
     <section className="panel">
-      <h2>Anagrafica e Storico Clienti</h2>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+        <h2 style={{ margin: 0 }}>Anagrafica e Storico Clienti</h2>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            className="secondary-btn"
+            onClick={handleExportDaneaCsv}
+            disabled={exportingCsv || companies.length === 0}
+            title="Esporta tutta l'anagrafica clienti in CSV compatibile Danea Easyfatt"
+          >
+            {exportingCsv ? "Esportazione..." : "Esporta CSV (Danea)"}
+          </button>
+        </div>
+      </div>
 
       <div className="registry-toolbar">
         <div className="registry-search-field">
@@ -122,6 +192,10 @@ export default function CustomerRegistryPage({ token, companies, inspections, on
         </div>
       </div>
 
+      {statusMessage && !selectedCompany ? (
+        <p className="status-message">{statusMessage}</p>
+      ) : null}
+
       <div className="panel section-panel">
         <h3>Elenco completo aziende registrate</h3>
         <table>
@@ -145,9 +219,19 @@ export default function CustomerRegistryPage({ token, companies, inspections, on
                 <td>{company.city || "-"}</td>
                 <td>{company.phone || company.email || "-"}</td>
                 <td>
-                  <button className="ghost-btn" onClick={() => setCompanyId(company.id)}>
-                    Apri anagrafica
-                  </button>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    <button className="ghost-btn" onClick={() => setCompanyId(company.id)}>
+                      Apri anagrafica
+                    </button>
+                    <button
+                      className="ghost-btn"
+                      onClick={() => handleGenerateNda(company)}
+                      disabled={ndaCompanyId === company.id}
+                      title="Genera Accordo di Riservatezza (NDA) PDF precompilato"
+                    >
+                      {ndaCompanyId === company.id ? "Genero..." : "Genera NDA"}
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

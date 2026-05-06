@@ -1,9 +1,10 @@
-// Step 4 "Riepilogo e Invio" extracted from ChecklistPage.tsx during S13-A refactor.
-// Pure JSX extraction: nessun cambio di logica rispetto al monolite originale.
+// Step 6 "Riepilogo e Invio" — originariamente Step 4 (S13-A), rinominato a
+// Step 6 in Sprint 18 Wave B per fare spazio agli step Asset & Attrezzature
+// (Step 4) e Formazione (Step 5). Logica invariata.
 
 import { InspectionSummary } from "../../api";
 
-interface Step4RiepilogoInvioProps {
+interface Step6RiepilogoInvioProps {
   summary: InspectionSummary | null;
   loading: boolean;
   selectedInspectionId: string;
@@ -16,7 +17,7 @@ interface Step4RiepilogoInvioProps {
   handleGenerateAttestato: () => Promise<void>;
 }
 
-export default function Step4RiepilogoInvio({
+export default function Step6RiepilogoInvio({
   summary,
   loading,
   selectedInspectionId,
@@ -27,7 +28,7 @@ export default function Step4RiepilogoInvio({
   handleSendToAdmin,
   handleGenerateVerbale,
   handleGenerateAttestato,
-}: Step4RiepilogoInvioProps) {
+}: Step6RiepilogoInvioProps) {
   return (
     <div className="panel section-panel">
       <h3>Riepilogo finale</h3>

@@ -14,10 +14,9 @@ import CustomerRegistryPage from "./CustomerRegistryPage";
 import KpiPage from "./KpiPage";
 import OdvPage from "./OdvPage";
 import QuotesPage from "./QuotesPage";
-import TrainingPage from "./TrainingPage";
 import ChatbotPage from "./ChatbotPage";
 import NormSyncAdminPage from "./NormSyncAdminPage";
-import AssetsPage, { AssetKind } from "./AssetsPage";
+import { AssetKind } from "./AssetsPage";
 import AssetQrPage from "./AssetQrPage";
 
 interface DashboardProps {
@@ -72,10 +71,8 @@ export default function DashboardPage({
     | "quotes"
     | "kpi"
     | "odv"
-    | "training"
     | "chatbot"
     | "normsync"
-    | "assets"
     | "assetQr"
   >("dashboard");
   const [qrAssetId, setQrAssetId] = useState<string | null>(null);
@@ -203,22 +200,6 @@ export default function DashboardPage({
             onClick={() => setActiveView("odv")}
           >
             ODV
-          </button>
-          <button
-            className={`nav-item ${activeView === "training" ? "nav-item-active" : ""}`}
-            onClick={() => setActiveView("training")}
-          >
-            Formazione
-          </button>
-          <button
-            className={`nav-item ${activeView === "assets" || activeView === "assetQr" ? "nav-item-active" : ""}`}
-            onClick={() => {
-              setActiveView("assets");
-              setQrAssetId(null);
-              setQrAssetKind(null);
-            }}
-          >
-            Asset & Attrezzature
           </button>
           <button
             className={`nav-item ${activeView === "chatbot" ? "nav-item-active" : ""}`}
@@ -380,6 +361,11 @@ export default function DashboardPage({
             initialInspectionId={checklistSelection.inspectionId}
             selectionToken={checklistSelection.token}
             onReload={onReload}
+            onOpenQr={(id, kind) => {
+              setQrAssetId(id);
+              setQrAssetKind(kind);
+              setActiveView("assetQr");
+            }}
           />
         ) : activeView === "registry" ? (
           <CustomerRegistryPage
@@ -392,22 +378,10 @@ export default function DashboardPage({
           <QuotesPage token={token} companies={companies} />
         ) : activeView === "kpi" ? (
           <KpiPage token={token} companies={companies} />
-        )         : activeView === "training" ? (
-          <TrainingPage token={token} companies={companies} />
         ) : activeView === "chatbot" ? (
           <ChatbotPage token={token} />
         ) : activeView === "normsync" ? (
           <NormSyncAdminPage token={token} />
-        ) : activeView === "assets" ? (
-          <AssetsPage
-            token={token}
-            companies={companies}
-            onOpenQr={(id, kind) => {
-              setQrAssetId(id);
-              setQrAssetKind(kind);
-              setActiveView("assetQr");
-            }}
-          />
         ) : activeView === "assetQr" ? (
           <AssetQrPage
             token={token}
@@ -415,7 +389,7 @@ export default function DashboardPage({
             assetId={qrAssetId}
             assetKind={qrAssetKind}
             onBack={() => {
-              setActiveView("assets");
+              setActiveView("checklist");
               setQrAssetId(null);
               setQrAssetKind(null);
             }}

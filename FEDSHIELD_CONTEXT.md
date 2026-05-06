@@ -1,7 +1,7 @@
 # FedShield — Contesto Operativo per Agent Team
 
-> Ultimo aggiornamento: 2026-05-04 (Sprint 17 close-out)
-> Sessione: NormSync scrapers reali (RSS Normattiva GU + EUR-Lex L IT) + estensione E2E +3 spec golden-path
+> Ultimo aggiornamento: 2026-05-04 (Sprint 18 close-out)
+> Sessione: 4 feature dagli APPUNTI utente — CSV Danea + NDA PDF + ChecklistPage 5→7 step (assorbe Formazione+Asset)
 
 ---
 
