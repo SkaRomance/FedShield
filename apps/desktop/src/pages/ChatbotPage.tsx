@@ -77,22 +77,22 @@ export default function ChatbotPage({ token }: ChatbotPageProps) {
         <h2>🤖 AI AuditBot </h2>
       </div>
       <p>Consulente AI a disposizione del consulente HSE: normative, sanzioni, ispezioni, DPI e formazione.</p>
-      {error && <div className="status-message" style={{ color: "crimson" }}>{error}</div>}
+      {error && <div className="status-message" style={{ color: "var(--color-error)" }}>{error}</div>}
 
       <div
         className="chat-messages"
         style={{
           flex: 1,
           overflowY: "auto",
-          border: "1px solid #ddd",
-          borderRadius: 8,
-          padding: 12,
-          marginTop: 8,
-          background: "#fafafa",
+          border: "1px solid var(--color-border)",
+          borderRadius: 12,
+          padding: 16,
+          marginTop: 12,
+          background: "var(--color-surface)",
         }}
       >
         {messages.length === 0 && (
-          <p style={{ color: "gray" }}>
+          <p style={{ color: "var(--color-text-muted)" }}>
             Scrivi una domanda per iniziare, ad esempio:
             <br />
             • "Cosa dice il D.Lgs. 81 sull’uso dei DPI?"
@@ -121,7 +121,7 @@ export default function ChatbotPage({ token }: ChatbotPageProps) {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Scrivi la tua domanda..."
-          style={{ flex: 1, padding: "8px 12px", borderRadius: 6, border: "1px solid #ccc" }}
+          style={{ flex: 1 }}
           disabled={loading}
         />
         <button
@@ -154,12 +154,12 @@ function ChatMessage({ message }: { message: Message }) {
       <div
         style={{
           maxWidth: "80%",
-          padding: "8px 12px",
+          padding: "10px 14px",
           borderRadius: 12,
-          background: isUser ? "var(--color-accent)" : "#fff",
-          color: isUser ? "#fff" : "#111",
-          border: isUser ? "none" : "1px solid #ddd",
-          boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+          background: isUser ? "var(--color-accent)" : "var(--color-surface-muted)",
+          color: isUser ? "var(--color-on-primary)" : "var(--color-text)",
+          border: isUser ? "none" : "1px solid var(--color-border)",
+          boxShadow: "var(--shadow-xs)",
           wordBreak: "break-word",
         }}
       >

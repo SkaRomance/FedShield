@@ -1,5 +1,20 @@
 import { useMemo, useState } from "react";
 import {
+  LayoutDashboard,
+  Users,
+  ClipboardCheck,
+  FileText,
+  BarChart3,
+  ShieldCheck,
+  Bot,
+  ScrollText,
+  RefreshCw,
+  LogOut,
+  Sun,
+  Moon,
+  Bell,
+} from "lucide-react";
+import {
   Company,
   downloadGeneratedDocument,
   generateAttestatoPdf,
@@ -54,6 +69,24 @@ function roleLabel(role: string): string {
   return "Consulente Junior";
 }
 
+function userInitials(fullName: string): string {
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+type NavView =
+  | "dashboard"
+  | "registry"
+  | "checklist"
+  | "quotes"
+  | "kpi"
+  | "odv"
+  | "chatbot"
+  | "normsync"
+  | "assetQr";
+
 export default function DashboardPage({
   token,
   user,
@@ -64,17 +97,7 @@ export default function DashboardPage({
   onSyncNow,
   onLogout,
 }: DashboardProps) {
-  const [activeView, setActiveView] = useState<
-    | "dashboard"
-    | "registry"
-    | "checklist"
-    | "quotes"
-    | "kpi"
-    | "odv"
-    | "chatbot"
-    | "normsync"
-    | "assetQr"
-  >("dashboard");
+  const [activeView, setActiveView] = useState<NavView>("dashboard");
   const [qrAssetId, setQrAssetId] = useState<string | null>(null);
   const [qrAssetKind, setQrAssetKind] = useState<AssetKind | null>(null);
   const [statusMessage, setStatusMessage] = useState<string>("");
@@ -142,6 +165,19 @@ export default function DashboardPage({
     setStatusMessage("");
   }
 
+  function navItem(view: NavView, label: string, Icon: typeof Users) {
+    const active = activeView === view;
+    return (
+      <button
+        className={`nav-item ${active ? "nav-item-active" : ""}`}
+        onClick={() => setActiveView(view)}
+      >
+        <Icon />
+        <span>{label}</span>
+      </button>
+    );
+  }
+
   return (
     <div className="layout">
       <aside className="sidebar">
@@ -164,105 +200,81 @@ export default function DashboardPage({
           />
           <span className="brand-fallback">FedShield</span>
         </div>
+
+        <div className="nav-section-label">Workspace</div>
         <nav>
-          <button
-            className={`nav-item ${activeView === "dashboard" ? "nav-item-active" : ""}`}
-            onClick={() => setActiveView("dashboard")}
-          >
-            Dashboard
-          </button>
-          <button
-            className={`nav-item ${activeView === "registry" ? "nav-item-active" : ""}`}
-            onClick={() => setActiveView("registry")}
-          >
-            Anagrafica Clienti
-          </button>
-          <button
-            className={`nav-item ${activeView === "checklist" ? "nav-item-active" : ""}`}
-            onClick={() => setActiveView("checklist")}
-          >
-            Checklist
-          </button>
-          <button
-            className={`nav-item ${activeView === "quotes" ? "nav-item-active" : ""}`}
-            onClick={() => setActiveView("quotes")}
-          >
-            Preventivi
-          </button>
-          <button
-            className={`nav-item ${activeView === "kpi" ? "nav-item-active" : ""}`}
-            onClick={() => setActiveView("kpi")}
-          >
-            KPI
-          </button>
-          <button
-            className={`nav-item ${activeView === "odv" ? "nav-item-active" : ""}`}
-            onClick={() => setActiveView("odv")}
-          >
-            ODV
-          </button>
-          <button
-            className={`nav-item ${activeView === "chatbot" ? "nav-item-active" : ""}`}
-            onClick={() => setActiveView("chatbot")}
-          >
-            🤖 AuditBot
-          </button>
-          {user.role === "admin" && (
-            <>
-              <button
-                className={`nav-item ${activeView === "normsync" ? "nav-item-active" : ""}`}
-                onClick={() => setActiveView("normsync")}
-              >
-                📜 NormSync
-              </button>
-              <button className="nav-item" disabled>
-                Admin KPI
-              </button>
-            </>
-          )}
+          {navItem("dashboard", "Dashboard", LayoutDashboard)}
+          {navItem("registry", "Anagrafica Clienti", Users)}
+          {navItem("checklist", "Checklist", ClipboardCheck)}
+          {navItem("quotes", "Preventivi", FileText)}
         </nav>
+
+        <div className="nav-section-label">Analisi</div>
+        <nav>
+          {navItem("kpi", "KPI", BarChart3)}
+          {navItem("odv", "ODV", ShieldCheck)}
+        </nav>
+
+        <div className="nav-section-label">Intelligenza</div>
+        <nav>
+          {navItem("chatbot", "AuditBot", Bot)}
+          {user.role === "admin" && navItem("normsync", "NormSync", ScrollText)}
+        </nav>
+
+        <div className="sidebar-spacer" />
+
+        <div className="sidebar-user">
+          <div className="sidebar-user-avatar">{userInitials(user.fullName)}</div>
+          <div className="sidebar-user-meta">
+            <div className="sidebar-user-name">{user.fullName}</div>
+            <div className="sidebar-user-role">{roleLabel(user.role)}</div>
+          </div>
+        </div>
       </aside>
 
       <main className="content">
         <header className="content-header">
           <div>
-            <h1>Benvenuto {user.fullName}</h1>
-            <p>{roleLabel(user.role)} • Piattaforma Antisanzione</p>
+            <h1>Benvenuto {user.fullName.split(/\s+/)[0]}</h1>
+            <p>Piattaforma antisanzione · {roleLabel(user.role)}</p>
           </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <div className="header-actions">
             {alertCount > 0 && (
-              <span
-                style={{
-                  background: "crimson",
-                  color: "white",
-                  borderRadius: "50%",
-                  padding: "4px 10px",
-                  fontSize: 14,
-                  fontWeight: "bold",
-                }}
+              <button
+                className="icon-btn"
+                aria-label={`${alertCount} notifiche`}
+                title={`${alertCount} notifiche`}
               >
-                {alertCount}
-              </span>
+                <Bell />
+                <span
+                  className="notification-badge"
+                  style={{ position: "absolute", top: -6, right: -6 }}
+                >
+                  {alertCount}
+                </span>
+              </button>
             )}
             <button
               onClick={toggleTheme}
-              className="logout-btn"
-              aria-label={theme === "dark" ? "Passa al tema chiaro" : "Passa al tema scuro"}
-              title={theme === "dark" ? "Passa al tema chiaro" : "Passa al tema scuro"}
+              className="icon-btn"
+              aria-label={theme === "dark" ? "Tema chiaro" : "Tema scuro"}
+              title={theme === "dark" ? "Tema chiaro" : "Tema scuro"}
             >
-              {theme === "dark" ? "☀️" : "🌙"}
+              {theme === "dark" ? <Sun /> : <Moon />}
             </button>
             <button onClick={onSyncNow} className="logout-btn">
-              Sync ora
+              <RefreshCw />
+              Sync
             </button>
             <button onClick={onLogout} className="logout-btn">
+              <LogOut />
               Esci
             </button>
           </div>
         </header>
 
-        <section className="panel" style={{ marginTop: 12 }}>
-          <h2>Stato Sync & Licenza</h2>
+        <section className="panel">
+          <h2>Stato Sync &amp; Licenza</h2>
           <div className="kpi-grid">
             <article className="kpi-card">
               <h3>Stato device</h3>
@@ -274,7 +286,9 @@ export default function DashboardPage({
             </article>
             <article className="kpi-card" style={{ gridColumn: "span 2" }}>
               <h3>Ultimo sync</h3>
-              <strong style={{ fontSize: 16 }}>{syncStatus.message}</strong>
+              <strong style={{ fontSize: 15, fontWeight: 500 }}>
+                {syncStatus.message}
+              </strong>
             </article>
           </div>
         </section>
@@ -296,58 +310,64 @@ export default function DashboardPage({
               </article>
               <article className="kpi-card">
                 <h3>Stato sistema</h3>
-                <strong>Online</strong>
+                <strong style={{ fontSize: 22 }}>Online</strong>
               </article>
             </section>
 
             <section className="panel">
               <h2>Ultimi sopralluoghi</h2>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Titolo</th>
-                    <th>Azienda</th>
-                    <th>Data</th>
-                    <th>Stato</th>
-                    <th>NC</th>
-                    <th>Output</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {inspections.slice(0, 8).map((inspection) => (
-                    <tr key={inspection.id}>
-                      <td>{inspection.title}</td>
-                      <td>{inspection.company.name}</td>
-                      <td>
-                        {new Date(inspection.happenedAt).toLocaleDateString("it-IT")}
-                      </td>
-                      <td>{inspection.status}</td>
-                      <td>{inspection.nonConformities.length}</td>
-                      <td>
-                        <div className="row-actions">
-                          <button
-                            className="ghost-btn"
-                            onClick={() => handleGenerateReportPdf(inspection.id)}
-                          >
-                            Verbale PDF
-                          </button>
-                          <button
-                            className="ghost-btn"
-                            onClick={() => handleGenerateAttestato(inspection.id)}
-                          >
-                            Attestato
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                  {inspections.length === 0 && (
+              <div className="table-wrap">
+                <table>
+                  <thead>
                     <tr>
-                      <td colSpan={6}>Nessun sopralluogo presente.</td>
+                      <th>Titolo</th>
+                      <th>Azienda</th>
+                      <th>Data</th>
+                      <th>Stato</th>
+                      <th>NC</th>
+                      <th>Output</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {inspections.slice(0, 8).map((inspection) => (
+                      <tr key={inspection.id}>
+                        <td>{inspection.title}</td>
+                        <td>{inspection.company.name}</td>
+                        <td>
+                          {new Date(inspection.happenedAt).toLocaleDateString("it-IT")}
+                        </td>
+                        <td>
+                          <span className="status-pill-info">{inspection.status}</span>
+                        </td>
+                        <td>{inspection.nonConformities.length}</td>
+                        <td>
+                          <div className="row-actions">
+                            <button
+                              className="ghost-btn"
+                              onClick={() => handleGenerateReportPdf(inspection.id)}
+                            >
+                              Verbale PDF
+                            </button>
+                            <button
+                              className="ghost-btn"
+                              onClick={() => handleGenerateAttestato(inspection.id)}
+                            >
+                              Attestato
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {inspections.length === 0 && (
+                      <tr>
+                        <td colSpan={6} style={{ textAlign: "center", padding: 32, color: "var(--color-text-muted)" }}>
+                          Nessun sopralluogo presente.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
               {statusMessage ? <p className="status-message">{statusMessage}</p> : null}
             </section>
           </>

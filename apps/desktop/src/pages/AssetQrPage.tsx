@@ -105,7 +105,7 @@ export default function AssetQrPage({ token, companies, assetId, assetKind, onBa
   if (error) {
     return (
       <div style={{ padding: 24 }}>
-        <p style={{ color: "crimson" }}>{error}</p>
+        <p style={{ color: "var(--color-error)" }}>{error}</p>
         {onBack ? (
           <button className="ghost-btn" onClick={onBack}>
             ← Torna agli asset
@@ -217,7 +217,7 @@ export default function AssetQrPage({ token, companies, assetId, assetKind, onBa
               (e.target as HTMLImageElement).style.display = "none";
             }}
           />
-          <p style={{ fontSize: 12, color: "#555", marginTop: 8 }}>
+          <p style={{ fontSize: 12, color: "var(--color-text-muted)", marginTop: 8 }}>
             Scansiona per dettagli asset
           </p>
         </div>
