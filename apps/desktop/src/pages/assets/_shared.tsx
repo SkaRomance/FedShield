@@ -41,7 +41,7 @@ export function Field({
         gridColumn: full ? "1 / -1" : undefined,
       }}
     >
-      <span style={{ fontSize: 13, color: "#444" }}>{label}</span>
+      <span style={{ fontSize: 13, color: "var(--color-text-muted)" }}>{label}</span>
       {children}
     </label>
   );
@@ -82,9 +82,9 @@ export function soonest(...dates: Array<string | null | undefined>): string | nu
 export function statusRowStyle(nextDate?: string | null): React.CSSProperties {
   if (!nextDate) return {};
   const days = Math.ceil((new Date(nextDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-  if (days < 0) return { background: "#fde4e4" };
-  if (days <= 30) return { background: "#fff3d6" };
-  if (days <= 90) return { background: "#fffbe1" };
+  if (days < 0) return { background: "var(--color-error-soft)" };
+  if (days <= 30) return { background: "var(--color-warning-soft)" };
+  if (days <= 90) return { background: "var(--color-pending-soft)" };
   return {};
 }
 
@@ -121,7 +121,7 @@ export function RowActions({
         type="button"
         className="ghost-btn"
         onClick={onDelete}
-        style={{ color: "crimson" }}
+        style={{ color: "var(--color-error)" }}
       >
         Elimina
       </button>

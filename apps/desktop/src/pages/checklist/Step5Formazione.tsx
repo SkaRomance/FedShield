@@ -96,7 +96,7 @@ export default function Step5Formazione({ token, companyId, companies }: Step5Fo
         </TabButton>
       </div>
 
-      {error ? <p className="status-message" style={{ color: "crimson" }}>{error}</p> : null}
+      {error ? <p className="status-message" style={{ color: "var(--color-error)" }}>{error}</p> : null}
 
       {tab === "expiry" ? (
         <ScadenzeTab employees={employees} />

@@ -81,18 +81,7 @@ export default function Step4AssetAttrezzature({
 
   function TruncatedBanner({ shown, total, label }: { shown: number; total: number | null; label: string }) {
     return (
-      <div
-        role="status"
-        style={{
-          background: "#fef3c7",
-          border: "1px solid #fbbf24",
-          color: "#92400e",
-          padding: "8px 12px",
-          borderRadius: 6,
-          marginBottom: 12,
-          fontSize: 14,
-        }}
-      >
+      <div role="status" className="status-banner status-banner-warning" style={{ marginBottom: 12 }}>
         Visualizzati i primi <strong>{shown}</strong>
         {total != null ? <> di <strong>{total}</strong></> : null} {label}.
         Affina i criteri lato backend per vederne di piu.
@@ -138,7 +127,7 @@ export default function Step4AssetAttrezzature({
       </div>
 
       {loading ? <p>Caricamento asset...</p> : null}
-      {error ? <p style={{ color: "crimson" }}>{error}</p> : null}
+      {error ? <p style={{ color: "var(--color-error)" }}>{error}</p> : null}
 
       {tab === "equipment" ? (
         <>

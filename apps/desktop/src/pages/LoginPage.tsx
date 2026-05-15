@@ -1,12 +1,11 @@
 import { FormEvent, useState } from "react";
+import { ShieldCheck, Loader2 } from "lucide-react";
 
 interface LoginPageProps {
   loading: boolean;
   onSubmit: (email: string, password: string) => Promise<void>;
 }
 
-// S11 (UI-REVIEW): credenziali pre-popolate solo in dev (Vite injecta
-// import.meta.env.DEV). In production il form parte vuoto.
 const DEV_DEFAULTS = import.meta.env.DEV
   ? { email: "admin@fedshield.local", password: "fedshield123" }
   : { email: "", password: "" };
@@ -31,6 +30,22 @@ export default function LoginPage({ loading, onSubmit }: LoginPageProps) {
   return (
     <div className="login-shell">
       <form className="login-card" onSubmit={handleSubmit}>
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 48,
+            height: 48,
+            borderRadius: 12,
+            background: "linear-gradient(135deg, var(--color-accent), var(--color-secondary))",
+            color: "#fff",
+            marginBottom: 16,
+            boxShadow: "0 8px 24px color-mix(in srgb, var(--color-accent) 35%, transparent)",
+          }}
+        >
+          <ShieldCheck size={26} />
+        </div>
         <h1>FedShield</h1>
         <p>Accesso piattaforma antisanzione</p>
 
@@ -40,7 +55,9 @@ export default function LoginPage({ loading, onSubmit }: LoginPageProps) {
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           type="email"
+          placeholder="nome@fedshield.local"
           required
+          autoComplete="email"
         />
 
         <label htmlFor="login-password">Password</label>
@@ -49,16 +66,38 @@ export default function LoginPage({ loading, onSubmit }: LoginPageProps) {
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           type="password"
+          placeholder="••••••••"
           required
           minLength={8}
+          autoComplete="current-password"
         />
 
         {error && <div className="error-box">{error}</div>}
 
         <button type="submit" disabled={loading}>
-          {loading ? "Accesso..." : "Entra"}
+          {loading ? (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 8, justifyContent: "center" }}>
+              <Loader2 size={16} style={{ animation: "spin 0.8s linear infinite" }} />
+              Accesso in corso…
+            </span>
+          ) : (
+            "Entra"
+          )}
         </button>
+
+        <p
+          style={{
+            margin: "20px 0 0",
+            fontSize: 12,
+            color: "var(--color-text-muted)",
+            textAlign: "center",
+          }}
+        >
+          Versione 1.0 · Compliance HSE
+        </p>
       </form>
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

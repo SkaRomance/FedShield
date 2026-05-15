@@ -53,7 +53,7 @@ export default function ScadenzeTab({ employees }: ScadenzeTabProps) {
                     {emp.lastName} {emp.firstName}
                   </td>
                   <td>{emp.role || "—"}</td>
-                  <td colSpan={6} style={{ color: "gray" }}>
+                  <td colSpan={6} style={{ color: "var(--color-text-muted)" }}>
                     Nessun corso registrato
                   </td>
                 </tr>

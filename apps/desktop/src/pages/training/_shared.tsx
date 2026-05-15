@@ -33,7 +33,7 @@ export function Field({
         gridColumn: full ? "1 / -1" : undefined,
       }}
     >
-      <span style={{ fontSize: 13, color: "#444" }}>{label}</span>
+      <span style={{ fontSize: 13, color: "var(--color-text-muted)" }}>{label}</span>
       {children}
     </label>
   );

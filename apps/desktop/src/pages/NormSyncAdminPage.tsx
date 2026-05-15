@@ -59,7 +59,7 @@ export default function NormSyncAdminPage({ token }: NormSyncAdminPageProps) {
       <h2>📜 NormSync — Gestione Proposte Normative</h2>
       <p>Revisiona e approva le modifiche alle checklist rilevate automaticamente dall'AI.</p>
 
-      {error && <div className="status-message" style={{ color: "crimson" }}>{error}</div>}
+      {error && <div className="status-message" style={{ color: "var(--color-error)" }}>{error}</div>}
 
       <div
         role="tablist"
@@ -90,12 +90,12 @@ export default function NormSyncAdminPage({ token }: NormSyncAdminPageProps) {
       {loading ? (
         <p>Caricamento...</p>
       ) : proposals.length === 0 ? (
-        <p style={{ color: "gray" }}>Nessuna proposta normativa trovata.</p>
+        <p style={{ color: "var(--color-text-muted)", textAlign: "center", padding: "32px 0" }}>Nessuna proposta normativa trovata.</p>
       ) : (
         <div className="table-wrap">
         <table className="training-table" style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ background: "#f0f0f0" }}>
+            <tr>
               <th>Titolo Norma</th>
               <th>Riferimento</th>
               <th>Sommario</th>
@@ -112,7 +112,7 @@ export default function NormSyncAdminPage({ token }: NormSyncAdminPageProps) {
                 <td style={{ maxWidth: 300 }}>
                   <div style={{ fontSize: 14, lineHeight: 1.4 }}>{p.changeSummary}</div>
                   {p.normText && (
-                    <div style={{ marginTop: 4, fontSize: 12, color: "#555" }}>
+                    <div style={{ marginTop: 4, fontSize: 12, color: "var(--color-text-muted)" }}>
                       <em>{p.normText.slice(0, 200)}...</em>
                     </div>
                   )}

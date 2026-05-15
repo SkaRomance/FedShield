@@ -163,7 +163,7 @@ export default function EmployeesTab({
                       className="ghost-btn"
                       onClick={() => handleDelete(emp.id)}
                       disabled={busy}
-                      style={{ color: "crimson" }}
+                      style={{ color: "var(--color-error)" }}
                     >
                       Disattiva
                     </button>
