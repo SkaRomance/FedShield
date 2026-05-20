@@ -3,9 +3,24 @@ const isDesktopRuntime = typeof window !== "undefined" && Boolean(window.fedshie
 const desktopOverride = import.meta.env.VITE_API_BASE_URL_DESKTOP;
 const genericOverride = import.meta.env.VITE_API_BASE_URL;
 
-const API_BASE = isDesktopRuntime
+function inferWebApiBase(): string {
+  if (genericOverride?.trim()) return genericOverride.trim();
+  if (typeof window !== "undefined") {
+    const host = window.location.host;
+    const path = window.location.pathname;
+    // Production: app served under a sub-path (es. /fedshield/) → API a /<base>/api
+    if (!host.startsWith("localhost") && !host.startsWith("127.0.0.1")) {
+      const match = path.match(/^(\/[^/]+\/)/);
+      const base = match ? match[1] : "/";
+      return `${base.replace(/\/+$/, "")}/api`;
+    }
+  }
+  return "http://localhost:4000/api";
+}
+
+export const API_BASE = isDesktopRuntime
   ? (desktopOverride?.trim() || DESKTOP_LOCAL_API_BASE)
-  : (genericOverride?.trim() || "http://localhost:4000/api");
+  : inferWebApiBase();
 
 export class ApiError extends Error {
   statusCode: number;
