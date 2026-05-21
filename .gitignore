@@ -17,3 +17,9 @@ infra/n8n/secrets.md
 apps/desktop/test-results/
 apps/desktop/playwright-report/
 apps/desktop/playwright/.cache/
+
+# User-specific Claude Code config
+.claude/settings.local.json
+
+# Prisma CLI accidental nested dir
+apps/backend/prisma/prisma/
