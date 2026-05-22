@@ -82,9 +82,9 @@ export default function ChecklistPage({
   onOpenQr,
 }: ChecklistPageProps) {
   const [step, setStep] = useState(0);
-  const [companyId, setCompanyId] = useState<string>(initialCompanyId ?? companies[0]?.id ?? "");
+  const [companyId, setCompanyId] = useState<string>(initialCompanyId ?? "");
   const [companySearchQuery, setCompanySearchQuery] = useState("");
-  const [isNewCompanyDraft, setIsNewCompanyDraft] = useState<boolean>(companies.length === 0);
+  const [isNewCompanyDraft, setIsNewCompanyDraft] = useState<boolean>(false);
   const [selectedInspectionId, setSelectedInspectionId] = useState<string>(initialInspectionId ?? "");
   const [title, setTitle] = useState("Sopralluogo Antisanzione");
   const [newInspectionChecklistMode, setNewInspectionChecklistMode] = useState<InspectionChecklistMode>("unified");
@@ -190,7 +190,10 @@ export default function ChecklistPage({
     () => new Set(retailAdditionalScopeOptions.map((option) => option.value)),
     [retailAdditionalScopeOptions],
   );
-  const effectiveRetailScopes = user.role === "admin" ? [] : newCompanyRetailScopes;
+  const effectiveRetailScopes = useMemo(
+    () => (user.role === "admin" ? [] : newCompanyRetailScopes),
+    [user.role, newCompanyRetailScopes],
+  );
 
   const generalProgress = useMemo(() => {
     const fields = [
@@ -272,12 +275,6 @@ export default function ChecklistPage({
   );
 
   useEffect(() => {
-    if (!companyId && companies[0] && !isNewCompanyDraft) {
-      setCompanyId(companies[0].id);
-    }
-  }, [companies, companyId, isNewCompanyDraft]);
-
-  useEffect(() => {
     if (!initialCompanyId) return;
     setIsNewCompanyDraft(false);
     setCompanyId(initialCompanyId);
@@ -320,22 +317,20 @@ export default function ChecklistPage({
     setNewCompanyHaccpConsulenteEsterno(parsePersonCard(selectedCompany.haccpConsulenteEsterno));
     setNewCompanyHaccpAdditionalRoles(parseRolePersonCards(selectedCompany.haccpAdditionalResponsabili));
     setNewCompanyCity(selectedCompany.city ?? "");
-    if (typeof window !== "undefined") {
-      const rawActivities = window.localStorage.getItem(companyActivitiesStorageKey(selectedCompany.id));
-      const parsedActivities = parseCompanyActivities(rawActivities);
-      setNewCompanyActivities(
-        parsedActivities.length > 0 ? parsedActivities : inferActivitiesFromAteco(selectedCompany.atecoCode),
-      );
-    } else {
-      setNewCompanyActivities(inferActivitiesFromAteco(selectedCompany.atecoCode));
-    }
+    const localActivityTypes =
+      typeof window !== "undefined" ? window.localStorage.getItem(companyActivitiesStorageKey(selectedCompany.id)) : null;
+    const rawActivityTypes = selectedCompany.activityTypesJson ?? localActivityTypes;
+    const parsedActivities = parseCompanyActivities(rawActivityTypes);
+    setNewCompanyActivities(
+      parsedActivities.length > 0 ? parsedActivities : inferActivitiesFromAteco(selectedCompany.atecoCode),
+    );
     if (user.role === "admin") {
       setNewCompanyRetailScopes([]);
-    } else if (typeof window !== "undefined") {
-      const rawScopes = window.localStorage.getItem(retailScopesStorageKey(selectedCompany.id));
-      setNewCompanyRetailScopes(parseRetailAdditionalScopes(rawScopes));
     } else {
-      setNewCompanyRetailScopes([]);
+      const localRetailScopes =
+        typeof window !== "undefined" ? window.localStorage.getItem(retailScopesStorageKey(selectedCompany.id)) : null;
+      const rawScopes = selectedCompany.retailScopesJson ?? localRetailScopes;
+      setNewCompanyRetailScopes(parseRetailAdditionalScopes(rawScopes));
     }
     if (!companyChanged) return;
     if (skipNextRegistrationResetRef.current) {
@@ -348,8 +343,9 @@ export default function ChecklistPage({
 
   useEffect(() => {
     if (!companyId) return;
-    const latest = inspectionsForCompany[0];
-    setSelectedInspectionId((current) => current || latest?.id || "");
+    setSelectedInspectionId((current) =>
+      current && inspectionsForCompany.some((inspection) => inspection.id === current) ? current : "",
+    );
   }, [companyId, inspectionsForCompany]);
 
   useEffect(() => {
@@ -393,7 +389,12 @@ export default function ChecklistPage({
 
   useEffect(() => {
     async function loadChecklistTemplates() {
-      if (!companyId) return;
+      if (!companyId) {
+        setTemplates([]);
+        setAllItems([]);
+        setAnswers({});
+        return;
+      }
 
       const nextTemplates = await fetchChecklistTemplates(
         token,
@@ -631,6 +632,15 @@ export default function ChecklistPage({
       legalAddress: optionalText(newCompanyLegalAddress),
       localUnitAddress: optionalText(newCompanyLocalUnitAddress),
       city: optionalText(newCompanyCity),
+      activityTypesJson: newCompanyActivities.length > 0 ? JSON.stringify(newCompanyActivities) : null,
+      ...(user.role === "admin"
+        ? {}
+        : {
+            retailScopesJson:
+              /^47\.11(\.|$)/.test(newCompanyAteco.trim()) && newCompanyRetailScopes.length > 0
+                ? JSON.stringify(newCompanyRetailScopes)
+                : null,
+          }),
     };
 
     const currentCompanyId = isNewCompanyDraft ? undefined : selectedCompany?.id ?? companyId;
@@ -1169,84 +1179,11 @@ export default function ChecklistPage({
           companies={companies}
           selectedCompany={selectedCompany}
           companyId={companyId}
-          setCompanyId={setCompanyId}
-          isNewCompanyDraft={isNewCompanyDraft}
-          setIsNewCompanyDraft={setIsNewCompanyDraft}
           companySearchQuery={companySearchQuery}
           setCompanySearchQuery={setCompanySearchQuery}
-          setSelectedInspectionId={setSelectedInspectionId}
           filteredCompanyMatches={filteredCompanyMatches}
           selectExistingCompanyForInspection={selectExistingCompanyForInspection}
           handleCompanySearchChange={handleCompanySearchChange}
-          resetCompanyRegistrationForm={resetCompanyRegistrationForm}
-          visibleTasksBeforeBody={visibleTasksBeforeBody}
-          visibleTasksAfterBody={visibleTasksAfterBody}
-          activeRegistrationTask={activeRegistrationTask}
-          renderTaskHeader={renderTaskHeader}
-          handleSaveRegistrationTask={handleSaveRegistrationTask}
-          moveRegistrationTask={moveRegistrationTask}
-          closeRegistrationTaskPanel={closeRegistrationTaskPanel}
-          newCompanyName={newCompanyName}
-          setNewCompanyName={setNewCompanyName}
-          newCompanyVat={newCompanyVat}
-          setNewCompanyVat={setNewCompanyVat}
-          newCompanyLegalForm={newCompanyLegalForm}
-          setNewCompanyLegalForm={setNewCompanyLegalForm}
-          newCompanyReaNumber={newCompanyReaNumber}
-          setNewCompanyReaNumber={setNewCompanyReaNumber}
-          newCompanyEmployeesInfo={newCompanyEmployeesInfo}
-          setNewCompanyEmployeesInfo={setNewCompanyEmployeesInfo}
-          newCompanyEmail={newCompanyEmail}
-          setNewCompanyEmail={setNewCompanyEmail}
-          newCompanyPec={newCompanyPec}
-          setNewCompanyPec={setNewCompanyPec}
-          newCompanyPhone={newCompanyPhone}
-          setNewCompanyPhone={setNewCompanyPhone}
-          newCompanyAteco={newCompanyAteco}
-          setNewCompanyAteco={setNewCompanyAteco}
-          newCompanyRiskLevel={newCompanyRiskLevel}
-          setNewCompanyRiskLevel={setNewCompanyRiskLevel}
-          newCompanyDescription={newCompanyDescription}
-          setNewCompanyDescription={setNewCompanyDescription}
-          newCompanyLegalAddress={newCompanyLegalAddress}
-          setNewCompanyLegalAddress={setNewCompanyLegalAddress}
-          newCompanyLocalUnitAddress={newCompanyLocalUnitAddress}
-          setNewCompanyLocalUnitAddress={setNewCompanyLocalUnitAddress}
-          newCompanyCity={newCompanyCity}
-          setNewCompanyCity={setNewCompanyCity}
-          newCompanyActivities={newCompanyActivities}
-          setNewCompanyActivities={setNewCompanyActivities}
-          newCompanyRetailScopes={newCompanyRetailScopes}
-          setNewCompanyRetailScopes={setNewCompanyRetailScopes}
-          showRetailAdditionalScopes={showRetailAdditionalScopes}
-          retailAdditionalScopeOptions={retailAdditionalScopeOptions}
-          showSafetyRoleBlock={showSafetyRoleBlock}
-          newCompanyEmployerRsppPreposto={newCompanyEmployerRsppPreposto}
-          setNewCompanyEmployerRsppPreposto={setNewCompanyEmployerRsppPreposto}
-          newCompanyOccupationalDoctor={newCompanyOccupationalDoctor}
-          setNewCompanyOccupationalDoctor={setNewCompanyOccupationalDoctor}
-          newCompanyRls={newCompanyRls}
-          setNewCompanyRls={setNewCompanyRls}
-          newCompanyEmergencyTeam={newCompanyEmergencyTeam}
-          setNewCompanyEmergencyTeam={setNewCompanyEmergencyTeam}
-          newCompanyFirstAidTeam={newCompanyFirstAidTeam}
-          setNewCompanyFirstAidTeam={setNewCompanyFirstAidTeam}
-          updatePersonCard={updatePersonCard}
-          addPersonToList={addPersonToList}
-          updatePersonListItem={updatePersonListItem}
-          removePersonListItem={removePersonListItem}
-          showHaccpRoleBlock={showHaccpRoleBlock}
-          newCompanyHaccpResponsabileAutocontrollo={newCompanyHaccpResponsabileAutocontrollo}
-          setNewCompanyHaccpResponsabileAutocontrollo={setNewCompanyHaccpResponsabileAutocontrollo}
-          newCompanyHaccpConsulenteEsterno={newCompanyHaccpConsulenteEsterno}
-          setNewCompanyHaccpConsulenteEsterno={setNewCompanyHaccpConsulenteEsterno}
-          newCompanyHaccpAdditionalRoles={newCompanyHaccpAdditionalRoles}
-          newCompanyHaccpCustomRole={newCompanyHaccpCustomRole}
-          setNewCompanyHaccpCustomRole={setNewCompanyHaccpCustomRole}
-          toggleHaccpAdditionalRole={toggleHaccpAdditionalRole}
-          addCustomHaccpRole={addCustomHaccpRole}
-          updateHaccpAdditionalRole={updateHaccpAdditionalRole}
-          removeHaccpAdditionalRole={removeHaccpAdditionalRole}
           newInspectionChecklistMode={newInspectionChecklistMode}
           setNewInspectionChecklistMode={setNewInspectionChecklistMode}
           title={title}

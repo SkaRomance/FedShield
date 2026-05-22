@@ -155,7 +155,7 @@ export default function DashboardPage({
     }
   }
 
-  function handleUseForInspection(companyId: string, inspectionId: string) {
+  function handleUseForInspection(companyId: string, inspectionId?: string) {
     setChecklistSelection((current) => ({
       companyId,
       inspectionId,
@@ -239,21 +239,21 @@ export default function DashboardPage({
             <p>Piattaforma antisanzione · {roleLabel(user.role)}</p>
           </div>
           <div className="header-actions">
-            {alertCount > 0 && (
-              <button
-                className="icon-btn"
-                aria-label={`${alertCount} notifiche`}
-                title={`${alertCount} notifiche`}
-              >
-                <Bell />
+            <button
+              className="icon-btn"
+              aria-label={alertCount > 0 ? `${alertCount} notifiche` : "Nessuna notifica"}
+              title={alertCount > 0 ? `${alertCount} notifiche` : "Nessuna notifica"}
+            >
+              <Bell />
+              {alertCount > 0 ? (
                 <span
                   className="notification-badge"
                   style={{ position: "absolute", top: -6, right: -6 }}
                 >
                   {alertCount}
                 </span>
-              </button>
-            )}
+              ) : null}
+            </button>
             <button
               onClick={toggleTheme}
               className="icon-btn"
@@ -392,6 +392,7 @@ export default function DashboardPage({
             token={token}
             companies={companies}
             inspections={inspections}
+            onReload={onReload}
             onUseForInspection={handleUseForInspection}
           />
         ) : activeView === "quotes" ? (

@@ -4,7 +4,7 @@ const ADMIN_EMAIL = "admin@fedshield.local";
 const ADMIN_PASSWORD = "fedshield123";
 
 test.describe("Create company golden path", () => {
-  test("admin: crea azienda da Checklist e la trova in Anagrafica Clienti", async ({
+  test("admin: crea azienda da Anagrafica e la usa in Checklist", async ({
     page,
   }) => {
     // Login (inline helper, no shared file finché 4+ specs duplicano).
@@ -18,18 +18,11 @@ test.describe("Create company golden path", () => {
       timeout: 15_000,
     });
 
-    // Naviga alla Checklist (è qui che vive il form "Nuovo cliente").
-    await page.getByRole("button", { name: "Checklist" }).click();
+    // Naviga ad Anagrafica Clienti: la registrazione cliente vive qui.
+    await page.getByRole("button", { name: "Anagrafica Clienti" }).click();
     await expect(
-      page.getByRole("heading", { name: /Checklist Ho\.Re\.Ca guidata/i }),
+      page.getByRole("heading", { name: /Anagrafica e Storico Clienti/i }),
     ).toBeVisible();
-
-    // Click "Nuovo cliente" per aprire la modalità draft (azzera form,
-    // chiude eventuali task aperti).
-    await page.getByRole("button", { name: /Nuovo cliente/i }).click();
-
-    // Apri l'accordion "Dati Generali" per esporre i campi del form.
-    await page.getByRole("button", { name: /Dati Generali/ }).click();
 
     // Dati unici per run (ripetibilità senza reset DB).
     const stamp = Date.now();
@@ -51,25 +44,24 @@ test.describe("Create company golden path", () => {
     await page.getByLabel("Codice ATECO").fill(atecoCode);
     await page.getByLabel("Citta").fill(city);
 
-    // Salva task. Triggera POST /api/companies + onReload.
-    await page.getByRole("button", { name: /^Salva task$/ }).click();
+    // Salva anagrafica. Triggera POST /api/companies + onReload.
+    await page.getByRole("button", { name: /^Registra cliente$/ }).click();
 
-    // Aspetta status message di conferma (il ChecklistPage setta "Task Dati
-    // Generali salvata.").
+    // Aspetta status message di conferma.
     await expect(page.locator(".status-message").first()).toContainText(
-      /Task Dati Generali salvata/i,
+      /Cliente registrato in anagrafica/i,
       { timeout: 10_000 },
     );
-
-    // Naviga ad Anagrafica Clienti — la nuova azienda deve apparire in lista.
-    await page.getByRole("button", { name: "Anagrafica Clienti" }).click();
-    await expect(
-      page.getByRole("heading", { name: /Anagrafica e Storico Clienti/i }),
-    ).toBeVisible();
 
     // L'elenco completo include la nuova azienda con il name unico.
     await expect(page.getByRole("cell", { name: companyName })).toBeVisible({
       timeout: 5_000,
     });
+
+    await page.getByRole("button", { name: /^Avvia sopralluogo$/ }).first().click();
+    await expect(
+      page.getByRole("heading", { name: /Checklist Ho\.Re\.Ca guidata/i }),
+    ).toBeVisible();
+    await expect(page.getByText(companyName)).toBeVisible();
   });
 });

@@ -129,6 +129,8 @@ model Company {
   pec           String?
   phone         String?
   atecoCode     String?
+  activityTypesJson String?
+  retailScopesJson String?
   riskLevel     String?
   description   String?
   legalAddress  String?

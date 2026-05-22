@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Company,
+  createCompany,
   downloadGeneratedDocument,
   exportCompaniesCsvDanea,
   generateInspectionChecklistPdf,
   generateNdaPdf,
   Inspection,
   triggerBlobDownload,
+  updateCompany,
 } from "../api";
+import { queueSyncEvent } from "../services/syncManager";
 
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
@@ -32,7 +35,68 @@ interface CustomerRegistryPageProps {
   token: string;
   companies: Company[];
   inspections: Inspection[];
-  onUseForInspection: (companyId: string, inspectionId: string) => void;
+  onReload: () => Promise<void>;
+  onUseForInspection: (companyId: string, inspectionId?: string) => void;
+}
+
+type CompanyFormState = {
+  name: string;
+  vatNumber: string;
+  legalForm: string;
+  reaNumber: string;
+  employeesInfo: string;
+  email: string;
+  pec: string;
+  phone: string;
+  atecoCode: string;
+  riskLevel: string;
+  city: string;
+  description: string;
+  legalAddress: string;
+  localUnitAddress: string;
+};
+
+function emptyCompanyForm(): CompanyFormState {
+  return {
+    name: "",
+    vatNumber: "",
+    legalForm: "",
+    reaNumber: "",
+    employeesInfo: "",
+    email: "",
+    pec: "",
+    phone: "",
+    atecoCode: "56.10.11",
+    riskLevel: "",
+    city: "",
+    description: "",
+    legalAddress: "",
+    localUnitAddress: "",
+  };
+}
+
+function companyToForm(company: Company): CompanyFormState {
+  return {
+    name: company.name ?? "",
+    vatNumber: company.vatNumber ?? "",
+    legalForm: company.legalForm ?? "",
+    reaNumber: company.reaNumber ?? "",
+    employeesInfo: company.employeesInfo ?? "",
+    email: company.email ?? "",
+    pec: company.pec ?? "",
+    phone: company.phone ?? "",
+    atecoCode: company.atecoCode ?? "",
+    riskLevel: company.riskLevel ?? "",
+    city: company.city ?? "",
+    description: company.description ?? "",
+    legalAddress: company.legalAddress ?? "",
+    localUnitAddress: company.localUnitAddress ?? "",
+  };
+}
+
+function optionalText(value: string): string | undefined {
+  const trimmed = value.trim();
+  return trimmed ? trimmed : undefined;
 }
 
 function inspectionModeLabel(mode: Inspection["checklistMode"]) {
@@ -41,13 +105,22 @@ function inspectionModeLabel(mode: Inspection["checklistMode"]) {
   return "Unificata";
 }
 
-export default function CustomerRegistryPage({ token, companies, inspections, onUseForInspection }: CustomerRegistryPageProps) {
+export default function CustomerRegistryPage({
+  token,
+  companies,
+  inspections,
+  onReload,
+  onUseForInspection,
+}: CustomerRegistryPageProps) {
   const [companyId, setCompanyId] = useState<string>("");
   const [companyQuery, setCompanyQuery] = useState<string>("");
   const [downloadInspectionId, setDownloadInspectionId] = useState<string>("");
   const [statusMessage, setStatusMessage] = useState<string>("");
   const [exportingCsv, setExportingCsv] = useState<boolean>(false);
   const [ndaCompanyId, setNdaCompanyId] = useState<string>("");
+  const [editingCompanyId, setEditingCompanyId] = useState<string>("");
+  const [companyForm, setCompanyForm] = useState<CompanyFormState>(() => emptyCompanyForm());
+  const [savingCompany, setSavingCompany] = useState<boolean>(false);
 
   const normalizedQuery = useMemo(() => companyQuery.trim().toLowerCase(), [companyQuery]);
 
@@ -109,6 +182,75 @@ export default function CustomerRegistryPage({ token, companies, inspections, on
     }
   }
 
+  function updateCompanyForm(field: keyof CompanyFormState, value: string) {
+    setCompanyForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  }
+
+  function startNewCompany() {
+    setEditingCompanyId("");
+    setCompanyForm(emptyCompanyForm());
+    setStatusMessage("");
+  }
+
+  function editCompany(company: Company) {
+    setEditingCompanyId(company.id);
+    setCompanyId(company.id);
+    setCompanyQuery(company.name ?? "");
+    setCompanyForm(companyToForm(company));
+    setStatusMessage("");
+  }
+
+  async function handleSaveCompany() {
+    if (!companyForm.name.trim() || !companyForm.vatNumber.trim()) {
+      setStatusMessage("Inserisci almeno ragione sociale e partita IVA.");
+      return;
+    }
+
+    const payload = {
+      name: companyForm.name.trim(),
+      vatNumber: companyForm.vatNumber.trim(),
+      legalForm: optionalText(companyForm.legalForm),
+      reaNumber: optionalText(companyForm.reaNumber),
+      employeesInfo: optionalText(companyForm.employeesInfo),
+      email: optionalText(companyForm.email),
+      pec: optionalText(companyForm.pec),
+      phone: optionalText(companyForm.phone),
+      atecoCode: optionalText(companyForm.atecoCode),
+      riskLevel: optionalText(companyForm.riskLevel),
+      city: optionalText(companyForm.city),
+      description: optionalText(companyForm.description),
+      legalAddress: optionalText(companyForm.legalAddress),
+      localUnitAddress: optionalText(companyForm.localUnitAddress),
+    };
+
+    setSavingCompany(true);
+    setStatusMessage("");
+    try {
+      const savedCompany = editingCompanyId
+        ? await updateCompany(token, editingCompanyId, payload)
+        : await createCompany(token, payload);
+      queueSyncEvent({
+        eventType: editingCompanyId ? "company.updated" : "company.created",
+        entityType: "company",
+        entityId: savedCompany.id,
+        payload: savedCompany,
+      });
+      await onReload();
+      setEditingCompanyId(savedCompany.id);
+      setCompanyId(savedCompany.id);
+      setCompanyQuery(savedCompany.name ?? "");
+      setCompanyForm(companyToForm(savedCompany));
+      setStatusMessage(editingCompanyId ? "Anagrafica cliente aggiornata." : "Cliente registrato in anagrafica.");
+    } catch (error) {
+      setStatusMessage(`Errore salvataggio cliente: ${error instanceof Error ? error.message : "errore"}`);
+    } finally {
+      setSavingCompany(false);
+    }
+  }
+
   async function handleExportDaneaCsv() {
     setStatusMessage("");
     setExportingCsv(true);
@@ -157,6 +299,9 @@ export default function CustomerRegistryPage({ token, companies, inspections, on
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         <h2 style={{ margin: 0 }}>Anagrafica e Storico Clienti</h2>
         <div style={{ display: "flex", gap: 8 }}>
+          <button className="secondary-btn" onClick={startNewCompany}>
+            Nuovo cliente
+          </button>
           <button
             className="secondary-btn"
             onClick={handleExportDaneaCsv}
@@ -165,6 +310,148 @@ export default function CustomerRegistryPage({ token, companies, inspections, on
           >
             {exportingCsv ? "Esportazione..." : "Esporta CSV (Danea)"}
           </button>
+        </div>
+      </div>
+
+      <div className="panel section-panel">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+          <h3 style={{ margin: 0 }}>{editingCompanyId ? "Modifica cliente" : "Registra nuovo cliente"}</h3>
+          {editingCompanyId ? (
+            <button className="secondary-btn" onClick={startNewCompany} disabled={savingCompany}>
+              Pulisci form
+            </button>
+          ) : null}
+        </div>
+        <div className="grid-two" style={{ marginTop: 12 }}>
+          <div>
+            <label htmlFor="registry-company-name">Ragione sociale</label>
+            <input
+              id="registry-company-name"
+              value={companyForm.name}
+              onChange={(event) => updateCompanyForm("name", event.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="registry-company-vat">Codice fiscale, Partita IVA e n. Iscr. Al Registro delle Imprese</label>
+            <input
+              id="registry-company-vat"
+              value={companyForm.vatNumber}
+              onChange={(event) => updateCompanyForm("vatNumber", event.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="registry-company-legalform">Forma Giuridica</label>
+            <input
+              id="registry-company-legalform"
+              value={companyForm.legalForm}
+              onChange={(event) => updateCompanyForm("legalForm", event.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="registry-company-rea">Numero REA</label>
+            <input
+              id="registry-company-rea"
+              value={companyForm.reaNumber}
+              onChange={(event) => updateCompanyForm("reaNumber", event.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="registry-company-employees">Totale dipendenti</label>
+            <input
+              id="registry-company-employees"
+              value={companyForm.employeesInfo}
+              onChange={(event) => updateCompanyForm("employeesInfo", event.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="registry-company-ateco">Codice ATECO</label>
+            <input
+              id="registry-company-ateco"
+              value={companyForm.atecoCode}
+              onChange={(event) => updateCompanyForm("atecoCode", event.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="registry-company-risk">Livello di rischi dell'attivita</label>
+            <input
+              id="registry-company-risk"
+              value={companyForm.riskLevel}
+              onChange={(event) => updateCompanyForm("riskLevel", event.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="registry-company-city">Citta</label>
+            <input
+              id="registry-company-city"
+              value={companyForm.city}
+              onChange={(event) => updateCompanyForm("city", event.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="registry-company-email">Indirizzo e-mail</label>
+            <input
+              id="registry-company-email"
+              value={companyForm.email}
+              onChange={(event) => updateCompanyForm("email", event.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="registry-company-pec">Indirizzo PEC</label>
+            <input
+              id="registry-company-pec"
+              value={companyForm.pec}
+              onChange={(event) => updateCompanyForm("pec", event.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="registry-company-phone">Telefono</label>
+            <input
+              id="registry-company-phone"
+              value={companyForm.phone}
+              onChange={(event) => updateCompanyForm("phone", event.target.value)}
+            />
+          </div>
+          <div style={{ gridColumn: "span 2" }}>
+            <label htmlFor="registry-company-description">Descrizione</label>
+            <textarea
+              id="registry-company-description"
+              rows={3}
+              value={companyForm.description}
+              onChange={(event) => updateCompanyForm("description", event.target.value)}
+            />
+          </div>
+          <div style={{ gridColumn: "span 2" }}>
+            <label htmlFor="registry-company-legaladdr">Sede legale - Indirizzo</label>
+            <textarea
+              id="registry-company-legaladdr"
+              rows={2}
+              value={companyForm.legalAddress}
+              onChange={(event) => updateCompanyForm("legalAddress", event.target.value)}
+            />
+          </div>
+          <div style={{ gridColumn: "span 2" }}>
+            <label htmlFor="registry-company-localaddr">Unita locale - Indirizzo</label>
+            <textarea
+              id="registry-company-localaddr"
+              rows={2}
+              value={companyForm.localUnitAddress}
+              onChange={(event) => updateCompanyForm("localUnitAddress", event.target.value)}
+            />
+          </div>
+        </div>
+        <div className="footer-actions" style={{ justifyContent: "flex-end", flexWrap: "wrap" }}>
+          <button onClick={handleSaveCompany} disabled={savingCompany}>
+            {savingCompany ? "Salvataggio..." : editingCompanyId ? "Salva modifiche" : "Registra cliente"}
+          </button>
+          {editingCompanyId ? (
+            <button
+              className="secondary-btn"
+              onClick={() => onUseForInspection(editingCompanyId)}
+              disabled={savingCompany}
+            >
+              Avvia sopralluogo
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -223,6 +510,12 @@ export default function CustomerRegistryPage({ token, companies, inspections, on
                     <button className="ghost-btn" onClick={() => setCompanyId(company.id)}>
                       Apri anagrafica
                     </button>
+                    <button className="ghost-btn" onClick={() => editCompany(company)}>
+                      Modifica
+                    </button>
+                    <button className="ghost-btn" onClick={() => onUseForInspection(company.id)}>
+                      Avvia sopralluogo
+                    </button>
                     <button
                       className="ghost-btn"
                       onClick={() => handleGenerateNda(company)}
@@ -248,9 +541,17 @@ export default function CustomerRegistryPage({ token, companies, inspections, on
         <div className="panel section-panel">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <h3 style={{ margin: 0 }}>Anagrafica cliente</h3>
-            <button className="secondary-btn" onClick={() => setCompanyId("")}>
-              Chiudi anagrafica
-            </button>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button className="secondary-btn" onClick={() => editCompany(selectedCompany)}>
+                Modifica cliente
+              </button>
+              <button className="secondary-btn" onClick={() => onUseForInspection(selectedCompany.id)}>
+                Avvia sopralluogo
+              </button>
+              <button className="secondary-btn" onClick={() => setCompanyId("")}>
+                Chiudi anagrafica
+              </button>
+            </div>
           </div>
           <table>
             <tbody>
@@ -331,7 +632,7 @@ export default function CustomerRegistryPage({ token, companies, inspections, on
                       className="ghost-btn"
                       onClick={() => onUseForInspection(inspection.companyId ?? companyId, inspection.id)}
                     >
-                      Usa check per sopralluogo
+                      Apri checklist esistente
                     </button>
                   </td>
                   <td>

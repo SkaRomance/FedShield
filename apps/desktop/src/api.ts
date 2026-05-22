@@ -78,6 +78,8 @@ export interface Company {
   pec?: string;
   phone?: string;
   atecoCode?: string;
+  activityTypesJson?: string | null;
+  retailScopesJson?: string | null;
   riskLevel?: string;
   description?: string;
   legalAddress?: string;
@@ -443,6 +445,8 @@ export function createCompany(
     pec?: string;
     phone?: string;
     atecoCode?: string;
+    activityTypesJson?: string | null;
+    retailScopesJson?: string | null;
     riskLevel?: string;
     description?: string;
     legalAddress?: string;
@@ -478,6 +482,8 @@ export function updateCompany(
     pec?: string;
     phone?: string;
     atecoCode?: string;
+    activityTypesJson?: string | null;
+    retailScopesJson?: string | null;
     riskLevel?: string;
     description?: string;
     legalAddress?: string;

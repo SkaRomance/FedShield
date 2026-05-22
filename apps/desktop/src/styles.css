@@ -1415,10 +1415,6 @@ textarea:hover {
   }
 }
 
-.content > * {
-  animation: fade-in var(--t-slow) var(--ease);
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
