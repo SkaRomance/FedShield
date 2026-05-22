@@ -60,6 +60,13 @@ export const ACTIVITY_TYPE_OPTIONS = [
   { value: "nightlife_venue", label: "Locale serale / Discoteca con somministrazione", atecoCode: "93.29.10" },
   { value: "pastry", label: "Pasticceria / Gelateria", atecoCode: "56.10.30" },
   { value: "gastronomy_production", label: "Gastronomia / Produzione alimentare", atecoCode: "10.85" },
+  { value: "non_food_retail", label: "Commercio non alimentare", atecoCode: "47.71" },
+  { value: "logistics_warehouse", label: "Logistica / Magazzino", atecoCode: "52.10" },
+  { value: "cleaning_services", label: "Pulizie / Sanificazione", atecoCode: "81.21" },
+  { value: "personal_services", label: "Parrucchiere / Estetica", atecoCode: "96.02" },
+  { value: "education_training", label: "Scuola / Formazione", atecoCode: "85.59" },
+  { value: "auto_repair", label: "Autoriparazione / Officina", atecoCode: "45.20" },
+  { value: "food_industry", label: "Industria alimentare", atecoCode: "10.71" },
   { value: "custom", label: "Altro (ATECO manuale)", atecoCode: "" },
 ] as const;
 
@@ -219,6 +226,13 @@ export function inferActivityFromAteco(atecoCode?: string | null): ActivityTypeO
   if (normalized.startsWith("56.10.42")) return "food_truck";
   if (normalized.startsWith("56.10.41")) return "ambulant_pastry";
   if (normalized.startsWith("10.85")) return "gastronomy_production";
+  if (normalized.startsWith("47.") && !normalized.startsWith("47.11")) return "non_food_retail";
+  if (normalized.startsWith("49.4") || normalized.startsWith("52") || normalized.startsWith("53")) return "logistics_warehouse";
+  if (normalized.startsWith("81.2")) return "cleaning_services";
+  if (normalized.startsWith("96.02") || normalized.startsWith("96.04")) return "personal_services";
+  if (normalized.startsWith("85")) return "education_training";
+  if (normalized.startsWith("45.2")) return "auto_repair";
+  if (normalized.startsWith("10")) return "food_industry";
   if (normalized.startsWith("56.30")) return "bar";
   if (normalized.startsWith("56.10")) return "restaurant";
   return "custom";

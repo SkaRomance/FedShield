@@ -11,6 +11,7 @@
 // il dominio HoReCa, che è funzionante.
 
 import { seedChecklistTemplates, seedHoreca } from "./seed-checklist.js";
+import { seedMacroSettori } from "./seed-macrosettori.js";
 import { prisma, disconnectPrisma } from "./_client.js";
 
 const COMPANY_ID = "test-baseline-company";
@@ -75,8 +76,9 @@ async function main() {
 
   await seedChecklistTemplates();
   await seedHoreca();
+  await seedMacroSettori();
 
-  console.log("✓ baseline test data seeded (company, template, item, doc, HoReCa)");
+  console.log("✓ baseline test data seeded (company, template, item, doc, HoReCa, macrosettori)");
 }
 
 main()

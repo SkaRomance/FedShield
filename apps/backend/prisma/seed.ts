@@ -5,6 +5,7 @@ import { seedMetalmeccanico } from "./seed-metalmeccanico.js";
 import { seedUffici } from "./seed-uffici.js";
 import { seedSanita } from "./seed-sanita.js";
 import { seedAgricoltura } from "./seed-agricoltura.js";
+import { seedMacroSettori } from "./seed-macrosettori.js";
 import { disconnectPrisma } from "./_client.js";
 
 async function main() {
@@ -28,6 +29,7 @@ async function main() {
   await seedUffici();
   await seedSanita();
   await seedAgricoltura();
+  await seedMacroSettori();
 
   console.log("Seeding completed successfully!");
 }

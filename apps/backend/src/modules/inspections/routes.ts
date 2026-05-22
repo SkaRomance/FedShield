@@ -201,6 +201,28 @@ function buildAtecoVariants(atecoCode?: string | null) {
     variants.add("HORECA");
   }
 
+  if (parts[0] === "47" && !normalized.startsWith("47.11")) {
+    variants.add("COMMERCIO_NON_FOOD");
+  }
+  if (normalized.startsWith("49.4") || parts[0] === "52" || parts[0] === "53") {
+    variants.add("LOGISTICA_MAGAZZINO");
+  }
+  if (normalized.startsWith("81.2")) {
+    variants.add("PULIZIE_SANIFICAZIONE");
+  }
+  if (normalized.startsWith("96.02") || normalized.startsWith("96.04")) {
+    variants.add("SERVIZI_PERSONA");
+  }
+  if (parts[0] === "85") {
+    variants.add("ISTRUZIONE_FORMAZIONE");
+  }
+  if (normalized.startsWith("45.2")) {
+    variants.add("AUTORIPARAZIONE");
+  }
+  if (parts[0] === "10" && !normalized.startsWith("10.85")) {
+    variants.add("INDUSTRIA_ALIMENTARE");
+  }
+
   return [...variants];
 }
 
