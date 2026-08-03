@@ -628,6 +628,15 @@ export async function generateInspectionReportPdf(
     "",
     "Riepilogo non conformita:",
     ...report.findings,
+    "",
+    "Piano servizi consigliati:",
+    ...(report.todo.length > 0
+      ? report.todo.map((item, index) => {
+          const mode = item.serviceDeliveryMode ? ` [${item.serviceDeliveryMode}]` : "";
+          const norm = item.normReference ? ` - Rif. ${item.normReference}` : "";
+          return `${index + 1}. ${item.action}${mode}${norm}`;
+        })
+      : ["- Nessun servizio consigliato"]),
   ];
 
   const { fileName, relativePath } = await savePdf(lines, "verbale");

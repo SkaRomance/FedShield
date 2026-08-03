@@ -7,6 +7,7 @@ import {
   processExpiredQuotes,
   Quote,
   QuoteCandidate,
+  QuoteServiceDeliveryMode,
   respondQuote,
 } from "../api";
 import { queueSyncEvent } from "../services/syncManager";
@@ -16,12 +17,20 @@ interface QuotesPageProps {
   companies: Company[];
 }
 
+function deliveryModeLabel(mode?: QuoteServiceDeliveryMode | null): string {
+  if (mode === "service") return "Service";
+  if (mode === "intermediary") return "Intermediazione";
+  return "Interno";
+}
+
 export default function QuotesPage({ token, companies }: QuotesPageProps) {
   const [companyId, setCompanyId] = useState<string>(companies[0]?.id ?? "");
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [candidates, setCandidates] = useState<QuoteCandidate[]>([]);
   const [selectedNcId, setSelectedNcId] = useState<string>("");
   const [serviceName, setServiceName] = useState("Servizio di adeguamento");
+  const [serviceDescription, setServiceDescription] = useState("");
+  const [serviceDeliveryMode, setServiceDeliveryMode] = useState<QuoteServiceDeliveryMode>("internal");
   const [amount, setAmount] = useState<number>(500);
   const [dueDays, setDueDays] = useState<number>(14);
   const [statusMessage, setStatusMessage] = useState<string>("");
@@ -62,11 +71,17 @@ export default function QuotesPage({ token, companies }: QuotesPageProps) {
   }, [token, companyId]);
 
   useEffect(() => {
-    if (!selectedCandidate?.suggestedService) {
-      return;
+    if (selectedCandidate?.suggestedService) {
+      setServiceName(selectedCandidate.suggestedService);
     }
-    setServiceName(selectedCandidate.suggestedService);
-  }, [selectedCandidate?.id, selectedCandidate?.suggestedService]);
+    setServiceDescription(selectedCandidate?.suggestedServiceDescription ?? "");
+    setServiceDeliveryMode(selectedCandidate?.suggestedServiceDeliveryMode ?? "internal");
+  }, [
+    selectedCandidate?.id,
+    selectedCandidate?.suggestedService,
+    selectedCandidate?.suggestedServiceDescription,
+    selectedCandidate?.suggestedServiceDeliveryMode,
+  ]);
 
   async function handleCreateQuote() {
     if (!selectedNcId) {
@@ -80,6 +95,8 @@ export default function QuotesPage({ token, companies }: QuotesPageProps) {
       await createQuote(token, {
         nonConformityId: selectedNcId,
         serviceName,
+        description: serviceDescription || undefined,
+        serviceDeliveryMode,
         amount,
         dueDays,
       });
@@ -89,6 +106,7 @@ export default function QuotesPage({ token, companies }: QuotesPageProps) {
         payload: {
           nonConformityId: selectedNcId,
           serviceName,
+          serviceDeliveryMode,
           amount,
           dueDays,
         },
@@ -189,6 +207,24 @@ export default function QuotesPage({ token, companies }: QuotesPageProps) {
           <input value={serviceName} onChange={(event) => setServiceName(event.target.value)} />
         </div>
         <div>
+          <label>Erogazione</label>
+          <select
+            value={serviceDeliveryMode}
+            onChange={(event) => setServiceDeliveryMode(event.target.value as QuoteServiceDeliveryMode)}
+          >
+            <option value="internal">Interno</option>
+            <option value="service">Service</option>
+            <option value="intermediary">Intermediazione</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="grid-two" style={{ marginTop: 12 }}>
+        <div>
+          <label>Dettaglio servizio</label>
+          <input value={serviceDescription} onChange={(event) => setServiceDescription(event.target.value)} />
+        </div>
+        <div>
           <label>Importo</label>
           <input type="number" value={amount} onChange={(event) => setAmount(Number(event.target.value))} />
         </div>
@@ -204,6 +240,9 @@ export default function QuotesPage({ token, companies }: QuotesPageProps) {
           </div>
           <div>
             <strong>Servizio consigliato:</strong> {selectedCandidate.suggestedService ?? "n/d"}
+          </div>
+          <div>
+            <strong>Erogazione:</strong> {deliveryModeLabel(selectedCandidate.suggestedServiceDeliveryMode)}
           </div>
         </div>
       ) : null}
@@ -235,6 +274,7 @@ export default function QuotesPage({ token, companies }: QuotesPageProps) {
             <tr>
               <th>Azienda</th>
               <th>Servizio</th>
+              <th>Erogazione</th>
               <th>Stato</th>
               <th>Scadenza</th>
               <th>Rif. norma</th>
@@ -247,6 +287,7 @@ export default function QuotesPage({ token, companies }: QuotesPageProps) {
               <tr key={quote.id}>
                 <td>{quote.company.name}</td>
                 <td>{quote.serviceName}</td>
+                <td>{deliveryModeLabel(quote.serviceDeliveryMode)}</td>
                 <td>{quote.status}</td>
                 <td>{new Date(quote.responseDueAt).toLocaleDateString("it-IT")}</td>
                 <td>{quote.nonConformity.normReference ?? "-"}</td>
@@ -280,7 +321,7 @@ export default function QuotesPage({ token, companies }: QuotesPageProps) {
             ))}
             {filteredQuotes.length === 0 && (
               <tr>
-                <td colSpan={7}>Nessun preventivo presente.</td>
+                <td colSpan={8}>Nessun preventivo presente.</td>
               </tr>
             )}
           </tbody>

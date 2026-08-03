@@ -6,12 +6,15 @@ import {
   Inspection,
   InspectionDocumentRequirement,
   InspectionSummary,
+  QuoteServiceDeliveryMode,
   createCompany,
   createInspection,
+  createManualInspectionRequirement,
   downloadGeneratedDocument,
   fetchChecklistItems,
   fetchChecklistTemplates,
   fetchInspectionDocumentRequirements,
+  fetchManualInspectionRequirements,
   fetchInspectionSummary,
   generateAttestatoPdf,
   generateInspectionReportPdf,
@@ -126,6 +129,19 @@ export default function ChecklistPage({
   const [taskLastSavedAt, setTaskLastSavedAt] = useState<Partial<Record<RegistrationTaskKey, string>>>({});
   const [checklistActivityFilter, setChecklistActivityFilter] = useState<ChecklistActivityFilter>("company");
   const [customChecklistAteco, setCustomChecklistAteco] = useState("");
+  const [manualRequirementRaw, setManualRequirementRaw] = useState("");
+  const [manualRequirementArea, setManualRequirementArea] = useState("");
+  const [manualRequirementSection, setManualRequirementSection] = useState<"premises_equipment" | "procedures_hygiene">(
+    "procedures_hygiene",
+  );
+  const [manualRequirementDomain, setManualRequirementDomain] = useState<"safety" | "haccp" | "both">("both");
+  const [manualRequirementSeverity, setManualRequirementSeverity] = useState(2);
+  const [manualRequirementSanctionable, setManualRequirementSanctionable] = useState(false);
+  const [manualRequirementNorm, setManualRequirementNorm] = useState("");
+  const [manualRequirementServiceName, setManualRequirementServiceName] = useState("");
+  const [manualRequirementServiceDescription, setManualRequirementServiceDescription] = useState("");
+  const [manualRequirementDeliveryMode, setManualRequirementDeliveryMode] =
+    useState<QuoteServiceDeliveryMode>("internal");
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -407,7 +423,10 @@ export default function ChecklistPage({
       const loadedItems = await Promise.all(
         nextTemplates.map((template) => fetchChecklistItems(token, template.id, effectiveChecklistMode)),
       );
-      const mergedItems = loadedItems.flatMap((entry) => entry.items);
+      const manualRequirements = selectedInspectionId
+        ? await fetchManualInspectionRequirements(token, selectedInspectionId)
+        : { items: [] };
+      const mergedItems = [...loadedItems.flatMap((entry) => entry.items), ...manualRequirements.items];
       setAllItems(mergedItems);
 
       const initialAnswers: Record<string, LocalAnswer> = {};
@@ -432,7 +451,15 @@ export default function ChecklistPage({
     loadChecklistTemplates().catch((error) => {
       setMessage(`Errore caricamento checklist: ${error instanceof Error ? error.message : "errore"}`);
     });
-  }, [token, companyId, effectiveChecklistAteco, effectiveChecklistMode, effectiveRetailScopes, selectedInspection?.answers]);
+  }, [
+    token,
+    companyId,
+    effectiveChecklistAteco,
+    effectiveChecklistMode,
+    effectiveRetailScopes,
+    selectedInspectionId,
+    selectedInspection?.answers,
+  ]);
 
   useEffect(() => {
     async function loadDocumentsAndSummary() {
@@ -842,6 +869,63 @@ export default function ChecklistPage({
     });
   }
 
+  async function handleCreateManualRequirement() {
+    if (!selectedInspectionId) {
+      setMessage("Crea o seleziona prima un sopralluogo.");
+      return;
+    }
+    if (isInspectionValidated) {
+      setMessage("Sopralluogo validato: requisiti manuali in sola lettura.");
+      return;
+    }
+    if (!manualRequirementRaw.trim()) {
+      setMessage("Inserisci il requisito da trasformare in domanda.");
+      return;
+    }
+
+    setLoading(true);
+    setMessage("");
+    try {
+      const result = await createManualInspectionRequirement(token, selectedInspectionId, {
+        rawRequirement: manualRequirementRaw.trim(),
+        area: manualRequirementArea.trim() || undefined,
+        section: manualRequirementSection,
+        domain: manualRequirementDomain,
+        normReference: manualRequirementNorm.trim() || undefined,
+        defaultSeverity: manualRequirementSeverity,
+        defaultSanctionable: manualRequirementSanctionable,
+        suggestedServiceName: manualRequirementServiceName.trim() || undefined,
+        suggestedServiceDescription: manualRequirementServiceDescription.trim() || undefined,
+        suggestedServiceDeliveryMode: manualRequirementDeliveryMode,
+      });
+
+      const createdItem = result.item;
+      setAllItems((current) => (current.some((item) => item.id === createdItem.id) ? current : [...current, createdItem]));
+      setAnswers((current) => ({
+        ...current,
+        [createdItem.id]: defaultAnswer(createdItem),
+      }));
+      queueSyncEvent({
+        eventType: "inspection.manual_requirement.created",
+        entityType: "inspection",
+        entityId: selectedInspectionId,
+        payload: {
+          checklistItemId: createdItem.id,
+          serviceDeliveryMode: manualRequirementDeliveryMode,
+        },
+      });
+      setManualRequirementRaw("");
+      setManualRequirementServiceDescription("");
+      setManualRequirementNorm("");
+      setStep(createdItem.section === "premises_equipment" ? 2 : 3);
+      setMessage("Requisito aggiunto alla checklist.");
+    } catch (error) {
+      setMessage(`Errore requisito manuale: ${error instanceof Error ? error.message : "errore"}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleSaveChecklist() {
     if (!selectedInspectionId) {
       setMessage("Crea o seleziona prima un sopralluogo.");
@@ -994,6 +1078,135 @@ export default function ChecklistPage({
     } finally {
       setLoading(false);
     }
+  }
+
+  function renderManualRequirementPanel() {
+    if (!selectedInspectionId || step < 2 || step > 3) {
+      return null;
+    }
+
+    return (
+      <div className="status-banner" style={{ marginTop: 12 }}>
+        <h3 style={{ marginTop: 0 }}>Requisito manuale</h3>
+        <label>Requisito rilevato</label>
+        <textarea
+          value={manualRequirementRaw}
+          disabled={isInspectionValidated}
+          onChange={(event) => setManualRequirementRaw(event.target.value)}
+          placeholder="Es. registro manutenzione estintori aggiornato e disponibile in sede"
+          rows={3}
+        />
+
+        <div className="grid-two" style={{ marginTop: 10 }}>
+          <div>
+            <label>Area</label>
+            <input
+              value={manualRequirementArea}
+              disabled={isInspectionValidated}
+              onChange={(event) => setManualRequirementArea(event.target.value)}
+              placeholder="Es. antincendio"
+            />
+          </div>
+          <div>
+            <label>Sezione checklist</label>
+            <select
+              value={manualRequirementSection}
+              disabled={isInspectionValidated}
+              onChange={(event) =>
+                setManualRequirementSection(event.target.value as "premises_equipment" | "procedures_hygiene")
+              }
+            >
+              <option value="premises_equipment">Locali / attrezzature</option>
+              <option value="procedures_hygiene">Procedure / documenti</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="grid-two" style={{ marginTop: 10 }}>
+          <div>
+            <label>Dominio</label>
+            <select
+              value={manualRequirementDomain}
+              disabled={isInspectionValidated}
+              onChange={(event) => setManualRequirementDomain(event.target.value as "safety" | "haccp" | "both")}
+            >
+              <option value="both">Sicurezza + HACCP</option>
+              <option value="safety">Sicurezza</option>
+              <option value="haccp">HACCP</option>
+            </select>
+          </div>
+          <div>
+            <label>Riferimento normativo</label>
+            <input
+              value={manualRequirementNorm}
+              disabled={isInspectionValidated}
+              onChange={(event) => setManualRequirementNorm(event.target.value)}
+              placeholder="Es. D.Lgs. 81/08, art. 46"
+            />
+          </div>
+        </div>
+
+        <div className="grid-two" style={{ marginTop: 10 }}>
+          <div>
+            <label>Servizio proposto</label>
+            <input
+              value={manualRequirementServiceName}
+              disabled={isInspectionValidated}
+              onChange={(event) => setManualRequirementServiceName(event.target.value)}
+              placeholder="Es. adeguamento antincendio"
+            />
+          </div>
+          <div>
+            <label>Erogazione</label>
+            <select
+              value={manualRequirementDeliveryMode}
+              disabled={isInspectionValidated}
+              onChange={(event) => setManualRequirementDeliveryMode(event.target.value as QuoteServiceDeliveryMode)}
+            >
+              <option value="internal">Interno</option>
+              <option value="service">Service</option>
+              <option value="intermediary">Intermediazione</option>
+            </select>
+          </div>
+        </div>
+
+        <label style={{ marginTop: 10 }}>Dettaglio servizio</label>
+        <textarea
+          value={manualRequirementServiceDescription}
+          disabled={isInspectionValidated}
+          onChange={(event) => setManualRequirementServiceDescription(event.target.value)}
+          placeholder="Intervento, documentazione o professionista da coinvolgere"
+          rows={2}
+        />
+
+        <div className="inline-actions" style={{ marginTop: 10 }}>
+          <label style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+            Gravita
+            <input
+              type="number"
+              min={1}
+              max={4}
+              value={manualRequirementSeverity}
+              disabled={isInspectionValidated}
+              onChange={(event) => setManualRequirementSeverity(Number(event.target.value))}
+              style={{ width: 80 }}
+            />
+          </label>
+          <label style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+            <input
+              type="checkbox"
+              checked={manualRequirementSanctionable}
+              disabled={isInspectionValidated}
+              onChange={(event) => setManualRequirementSanctionable(event.target.checked)}
+            />
+            Sanzionabile
+          </label>
+          <button className="secondary-btn" disabled={loading || isInspectionValidated} onClick={handleCreateManualRequirement}>
+            Aggiungi e riformula
+          </button>
+        </div>
+      </div>
+    );
   }
 
   function renderAnswersTable(items: ChecklistItem[]) {
@@ -1173,6 +1386,8 @@ export default function ChecklistPage({
           )}
         </div>
       </div>
+
+      {renderManualRequirementPanel()}
 
       {step === 0 && (
         <Step0DatiAzienda

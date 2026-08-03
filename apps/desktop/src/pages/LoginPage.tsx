@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { ShieldCheck, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 interface LoginPageProps {
   loading: boolean;
@@ -9,6 +9,7 @@ interface LoginPageProps {
 const DEV_DEFAULTS = import.meta.env.DEV
   ? { email: "admin@fedshield.local", password: "fedshield123" }
   : { email: "", password: "" };
+const LOGO_SRC = `${import.meta.env.BASE_URL || "/"}fedshield-logo-clean.png`;
 
 export default function LoginPage({ loading, onSubmit }: LoginPageProps) {
   const [email, setEmail] = useState(DEV_DEFAULTS.email);
@@ -30,22 +31,7 @@ export default function LoginPage({ loading, onSubmit }: LoginPageProps) {
   return (
     <div className="login-shell">
       <form className="login-card" onSubmit={handleSubmit}>
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 48,
-            height: 48,
-            borderRadius: 12,
-            background: "linear-gradient(135deg, var(--color-accent), var(--color-secondary))",
-            color: "#fff",
-            marginBottom: 16,
-            boxShadow: "0 8px 24px color-mix(in srgb, var(--color-accent) 35%, transparent)",
-          }}
-        >
-          <ShieldCheck size={26} />
-        </div>
+        <img className="login-logo" src={LOGO_SRC} alt="FedShield" />
         <h1>FedShield</h1>
         <p>Accesso piattaforma antisanzione</p>
 

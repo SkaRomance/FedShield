@@ -131,6 +131,10 @@ export function getNcGuidance(question: string, area?: string): NcGuidance {
 export function composeNcDescription(
   note: string | null | undefined,
   guidance: NcGuidance,
+  options?: {
+    suggestedServiceDescription?: string | null;
+    suggestedServiceDeliveryMode?: string | null;
+  },
 ): string {
   const lines = [
     note?.trim() ? `Nota consulente: ${note.trim()}` : "Nota consulente: non specificata",
@@ -138,6 +142,14 @@ export function composeNcDescription(
     `Impatto sanzionatorio: ${guidance.sanctionImpact}`,
     `Servizio Fedinvest consigliato: ${guidance.suggestedService}`,
   ];
+
+  if (options?.suggestedServiceDescription?.trim()) {
+    lines.push(`Descrizione servizio consigliato: ${options.suggestedServiceDescription.trim()}`);
+  }
+
+  if (options?.suggestedServiceDeliveryMode?.trim()) {
+    lines.push(`Modalita erogazione servizio: ${options.suggestedServiceDeliveryMode.trim()}`);
+  }
 
   return lines.join("\n");
 }
@@ -147,12 +159,16 @@ export function parseNcDescription(description?: string | null): {
   normReference: string | null;
   sanctionImpact: string | null;
   suggestedService: string | null;
+  suggestedServiceDescription: string | null;
+  suggestedServiceDeliveryMode: string | null;
 } {
   const fallback = {
     note: description ?? null,
     normReference: null,
     sanctionImpact: null,
     suggestedService: null,
+    suggestedServiceDescription: null,
+    suggestedServiceDeliveryMode: null,
   };
 
   if (!description) {
@@ -169,11 +185,15 @@ export function parseNcDescription(description?: string | null): {
   const normReference = find("Riferimento normativo:");
   const sanctionImpact = find("Impatto sanzionatorio:");
   const suggestedService = find("Servizio Fedinvest consigliato:");
+  const suggestedServiceDescription = find("Descrizione servizio consigliato:");
+  const suggestedServiceDeliveryMode = find("Modalita erogazione servizio:");
 
   return {
     note,
     normReference,
     sanctionImpact,
     suggestedService,
+    suggestedServiceDescription,
+    suggestedServiceDeliveryMode,
   };
 }

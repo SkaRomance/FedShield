@@ -13,7 +13,7 @@ test.describe("Training record golden path", () => {
     await page.getByLabel("Password").fill(SENIOR_PASSWORD);
     await page.getByRole("button", { name: /entra/i }).click();
 
-    await expect(page.getByRole("button", { name: /tema/i })).toBeVisible({
+    await expect(page.getByRole("button", { name: "Dashboard" })).toBeVisible({
       timeout: 15_000,
     });
 

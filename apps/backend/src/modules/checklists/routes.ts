@@ -44,6 +44,82 @@ function buildAtecoVariants(atecoCode?: string) {
   if (parts[0] === "10" && !normalized.startsWith("10.85")) {
     variants.add("INDUSTRIA_ALIMENTARE");
   }
+  if (parts[0] === "41") {
+    variants.add("EDILIZIA_COSTRUZIONI");
+  }
+  if (parts[0] === "42") {
+    variants.add("INGEGNERIA_CIVILE_INFRASTRUTTURE");
+  }
+  if (normalized.startsWith("42.11") || normalized.startsWith("42.99")) {
+    variants.add("ASFALTI_PAVIMENTAZIONI_STRADALI");
+  }
+  if (normalized.startsWith("43.13")) {
+    variants.add("FONDAZIONI_SPECIALI_PERFORAZIONI");
+  }
+  if (normalized.startsWith("43.11") || normalized.startsWith("43.12")) {
+    variants.add("DEMOLIZIONI_SCAVI_PREPARAZIONE");
+  }
+  if (normalized.startsWith("43.2")) {
+    variants.add("IMPIANTISTICA_MANUTENZIONE");
+  }
+  if (normalized.startsWith("43.21")) {
+    variants.add("IMPIANTISTICA_ELETTRICA");
+  }
+  if (normalized.startsWith("43.22")) {
+    variants.add("IMPIANTISTICA_TERMOIDRAULICA");
+  }
+  if (normalized.startsWith("43.3")) {
+    variants.add("FINITURE_EDILI");
+  }
+  if (normalized.startsWith("43.32")) {
+    variants.add("SERRAMENTI_FACCIATE_VETRAZIONI");
+  }
+  if (normalized.startsWith("43.91") || normalized.startsWith("43.99")) {
+    variants.add("OPERE_SPECIALIZZATE_COPERTURE");
+  }
+  if (normalized.startsWith("25.11") || normalized.startsWith("43.99")) {
+    variants.add("CARPENTERIA_METALLICA_PREFABBRICATI");
+  }
+  if (normalized.startsWith("77.32") || normalized.startsWith("43.99")) {
+    variants.add("NOLEGGIO_MEZZI_CANTIERE_OPERATORE");
+  }
+  if (normalized.startsWith("81.30")) {
+    variants.add("VERDE_OPERE_ESTERNE_CANTIERI");
+  }
+  if (parts[0] === "39") {
+    variants.add("BONIFICHE_AMBIENTALI_AMIANTO");
+  }
+  if (parts[0] === "38") {
+    variants.add("RIFIUTI_EDILI_RECUPERO_SMALTIMENTO");
+  }
+  if (normalized.startsWith("38.22")) {
+    variants.add("BONIFICHE_AMBIENTALI_AMIANTO");
+  }
+  if (normalized.startsWith("71.1")) {
+    variants.add("PROGETTAZIONE_DIREZIONE_LAVORI");
+  }
+  if (normalized.startsWith("68.32") || normalized.startsWith("81.10")) {
+    variants.add("GESTIONE_IMMOBILI_CONDOMINI");
+  }
+  if (normalized.startsWith("49.3")) {
+    variants.add("TRASPORTO_PERSONE");
+  }
+  if (parts[0] === "16" || parts[0] === "31") {
+    variants.add("LEGNO_ARREDO");
+  }
+  if (parts[0] === "20") {
+    variants.add("CHIMICA_COSMETICA");
+  }
+  if (normalized.startsWith("96.01")) {
+    variants.add("LAVANDERIE_TINTORIE");
+  }
+  if (
+    normalized.startsWith("90.02") ||
+    normalized.startsWith("82.30") ||
+    (normalized.startsWith("93.29") && !normalized.startsWith("93.29.10") && !normalized.startsWith("93.29.20"))
+  ) {
+    variants.add("EVENTI_ALLESTIMENTI");
+  }
 
   return [...variants];
 }

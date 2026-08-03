@@ -1,10 +1,12 @@
 import {
   ChecklistAnswerValue,
+  ChecklistSection,
   ComplianceDomain,
   InspectionChecklistMode,
   InspectionDocumentStatus,
   Inspection as PrismaInspection,
   GeneratedDocument as PrismaGeneratedDocument,
+  QuoteServiceDeliveryMode,
   UserRole,
 } from "@prisma/client";
 import { createReadStream } from "node:fs";
@@ -45,6 +47,9 @@ const addNcSchema = z.object({
   inspectionId: z.string().min(1),
   title: z.string().min(3),
   description: z.string().optional(),
+  suggestedServiceName: z.string().min(3).max(180).optional(),
+  suggestedServiceDescription: z.string().min(3).max(1_000).optional(),
+  suggestedServiceDeliveryMode: z.nativeEnum(QuoteServiceDeliveryMode).optional(),
   isSanctionable: z.boolean().default(false),
   severity: z.number().int().min(1).max(4).default(1),
 });
@@ -61,6 +66,23 @@ const submitAnswersSchema = z.object({
       }),
     )
     .min(1),
+});
+
+const manualRequirementSchema = z.object({
+  rawRequirement: z.string().min(5).max(2_000),
+  area: z.string().min(2).max(120).optional(),
+  section: z
+    .enum([ChecklistSection.premises_equipment, ChecklistSection.procedures_hygiene])
+    .default(ChecklistSection.procedures_hygiene),
+  domain: z.nativeEnum(ComplianceDomain).default(ComplianceDomain.both),
+  normReference: z.string().min(2).max(500).optional(),
+  defaultSeverity: z.number().int().min(1).max(4).default(2),
+  defaultSanctionable: z.boolean().default(false),
+  suggestedServiceName: z.string().min(3).max(180).optional(),
+  suggestedServiceDescription: z.string().min(3).max(1_000).optional(),
+  suggestedServiceDeliveryMode: z
+    .nativeEnum(QuoteServiceDeliveryMode)
+    .default(QuoteServiceDeliveryMode.internal),
 });
 
 const documentStatusSchema = z.enum([
@@ -222,6 +244,82 @@ function buildAtecoVariants(atecoCode?: string | null) {
   if (parts[0] === "10" && !normalized.startsWith("10.85")) {
     variants.add("INDUSTRIA_ALIMENTARE");
   }
+  if (parts[0] === "41") {
+    variants.add("EDILIZIA_COSTRUZIONI");
+  }
+  if (parts[0] === "42") {
+    variants.add("INGEGNERIA_CIVILE_INFRASTRUTTURE");
+  }
+  if (normalized.startsWith("42.11") || normalized.startsWith("42.99")) {
+    variants.add("ASFALTI_PAVIMENTAZIONI_STRADALI");
+  }
+  if (normalized.startsWith("43.13")) {
+    variants.add("FONDAZIONI_SPECIALI_PERFORAZIONI");
+  }
+  if (normalized.startsWith("43.11") || normalized.startsWith("43.12")) {
+    variants.add("DEMOLIZIONI_SCAVI_PREPARAZIONE");
+  }
+  if (normalized.startsWith("43.2")) {
+    variants.add("IMPIANTISTICA_MANUTENZIONE");
+  }
+  if (normalized.startsWith("43.21")) {
+    variants.add("IMPIANTISTICA_ELETTRICA");
+  }
+  if (normalized.startsWith("43.22")) {
+    variants.add("IMPIANTISTICA_TERMOIDRAULICA");
+  }
+  if (normalized.startsWith("43.3")) {
+    variants.add("FINITURE_EDILI");
+  }
+  if (normalized.startsWith("43.32")) {
+    variants.add("SERRAMENTI_FACCIATE_VETRAZIONI");
+  }
+  if (normalized.startsWith("43.91") || normalized.startsWith("43.99")) {
+    variants.add("OPERE_SPECIALIZZATE_COPERTURE");
+  }
+  if (normalized.startsWith("25.11") || normalized.startsWith("43.99")) {
+    variants.add("CARPENTERIA_METALLICA_PREFABBRICATI");
+  }
+  if (normalized.startsWith("77.32") || normalized.startsWith("43.99")) {
+    variants.add("NOLEGGIO_MEZZI_CANTIERE_OPERATORE");
+  }
+  if (normalized.startsWith("81.30")) {
+    variants.add("VERDE_OPERE_ESTERNE_CANTIERI");
+  }
+  if (parts[0] === "39") {
+    variants.add("BONIFICHE_AMBIENTALI_AMIANTO");
+  }
+  if (parts[0] === "38") {
+    variants.add("RIFIUTI_EDILI_RECUPERO_SMALTIMENTO");
+  }
+  if (normalized.startsWith("38.22")) {
+    variants.add("BONIFICHE_AMBIENTALI_AMIANTO");
+  }
+  if (normalized.startsWith("71.1")) {
+    variants.add("PROGETTAZIONE_DIREZIONE_LAVORI");
+  }
+  if (normalized.startsWith("68.32") || normalized.startsWith("81.10")) {
+    variants.add("GESTIONE_IMMOBILI_CONDOMINI");
+  }
+  if (normalized.startsWith("49.3")) {
+    variants.add("TRASPORTO_PERSONE");
+  }
+  if (parts[0] === "16" || parts[0] === "31") {
+    variants.add("LEGNO_ARREDO");
+  }
+  if (parts[0] === "20") {
+    variants.add("CHIMICA_COSMETICA");
+  }
+  if (normalized.startsWith("96.01")) {
+    variants.add("LAVANDERIE_TINTORIE");
+  }
+  if (
+    normalized.startsWith("90.02") ||
+    normalized.startsWith("82.30") ||
+    (normalized.startsWith("93.29") && !normalized.startsWith("93.29.10") && !normalized.startsWith("93.29.20"))
+  ) {
+    variants.add("EVENTI_ALLESTIMENTI");
+  }
 
   return [...variants];
 }
@@ -282,6 +380,34 @@ function buildRetailScopeVariants(scopes: string[]): string[] {
     variants.add(scope);
   }
   return [...variants];
+}
+
+function normalizeOptionalText(value?: string | null): string | null {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+}
+
+function manualRequirementTemplateId(inspectionId: string): string {
+  return `tmpl-inspection-${inspectionId}-manual-v1`;
+}
+
+function buildManualRequirementQuestion(rawRequirement: string): string {
+  const cleaned = rawRequirement.replace(/\s+/g, " ").trim();
+  if (cleaned.endsWith("?")) {
+    return cleaned;
+  }
+
+  const withoutFinalPunctuation = cleaned.replace(/[.;:]+$/g, "");
+  if (/^(e'|è|sono|risulta|risultano|il|la|lo|i|gli|le|l')\b/i.test(withoutFinalPunctuation)) {
+    return `${withoutFinalPunctuation}?`;
+  }
+
+  return `Il requisito "${withoutFinalPunctuation}" risulta soddisfatto e documentabile?`;
+}
+
+function defaultManualServiceName(question: string): string {
+  const compact = question.replace(/\?$/g, "").slice(0, 90);
+  return `Adeguamento requisito manuale: ${compact}`;
 }
 
 const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
@@ -669,6 +795,9 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
           inspectionId: parsed.data.inspectionId,
           title: parsed.data.title,
           description: parsed.data.description,
+          suggestedServiceName: parsed.data.suggestedServiceName,
+          suggestedServiceDescription: parsed.data.suggestedServiceDescription,
+          suggestedServiceDeliveryMode: parsed.data.suggestedServiceDeliveryMode,
           isSanctionable: parsed.data.isSanctionable,
           severity: parsed.data.severity,
         },
@@ -684,6 +813,124 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
       });
 
       return reply.code(201).send(nc);
+    },
+  );
+
+  fastify.get(
+    "/inspections/:id/manual-requirements",
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const params = z.object({ id: z.string().min(1) }).safeParse(request.params);
+      if (!params.success) {
+        return reply.badRequest("ID sopralluogo non valido.");
+      }
+
+      const inspection = await fastify.prisma.inspection.findUnique({ where: { id: params.data.id } });
+      if (!inspection) {
+        return reply.notFound("Sopralluogo non trovato.");
+      }
+
+      const templateId = manualRequirementTemplateId(params.data.id);
+      const items = await fastify.prisma.checklistItem.findMany({
+        where: { templateId },
+        orderBy: [{ orderIndex: "asc" }],
+      });
+
+      return {
+        templateId,
+        items,
+      };
+    },
+  );
+
+  fastify.post(
+    "/inspections/:id/manual-requirements",
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const params = z.object({ id: z.string().min(1) }).safeParse(request.params);
+      const parsed = manualRequirementSchema.safeParse(request.body);
+
+      if (!params.success || !parsed.success) {
+        return reply.badRequest("Payload requisito manuale non valido.");
+      }
+
+      const inspection = await fastify.prisma.inspection.findUnique({
+        where: { id: params.data.id },
+        include: { company: true },
+      });
+      if (!inspection) {
+        return reply.notFound("Sopralluogo non trovato.");
+      }
+
+      if (inspection.status === "validated") {
+        return reply.conflict("Sopralluogo validato: requisiti manuali non modificabili.");
+      }
+
+      const templateId = manualRequirementTemplateId(inspection.id);
+      await fastify.prisma.checklistTemplate.upsert({
+        where: { id: templateId },
+        update: {
+          name: `Requisiti manuali - ${inspection.title}`,
+          description: "Requisiti inseriti durante il sopralluogo e riformulati come domanda checklist.",
+          atecoCode: inspection.company.atecoCode,
+          isActive: true,
+        },
+        create: {
+          id: templateId,
+          name: `Requisiti manuali - ${inspection.title}`,
+          description: "Requisiti inseriti durante il sopralluogo e riformulati come domanda checklist.",
+          atecoCode: inspection.company.atecoCode,
+          macroGroup: "MANUAL_REQUIREMENTS",
+          isGeneral: false,
+          isActive: true,
+        },
+      });
+
+      const maxOrder = await fastify.prisma.checklistItem.aggregate({
+        where: { templateId },
+        _max: { orderIndex: true },
+      });
+
+      const rawRequirement = parsed.data.rawRequirement.trim();
+      const question = buildManualRequirementQuestion(rawRequirement);
+      const suggestedServiceName =
+        normalizeOptionalText(parsed.data.suggestedServiceName) ?? defaultManualServiceName(question);
+
+      const item = await fastify.prisma.checklistItem.create({
+        data: {
+          templateId,
+          section: parsed.data.section,
+          domain: parsed.data.domain,
+          area: normalizeOptionalText(parsed.data.area) ?? "Requisito manuale",
+          question,
+          orderIndex: (maxOrder._max.orderIndex ?? 0) + 1,
+          defaultSeverity: parsed.data.defaultSeverity,
+          defaultSanctionable: parsed.data.defaultSanctionable,
+          normReference: normalizeOptionalText(parsed.data.normReference),
+          source: "manual_ai_reformulated",
+          rawRequirement,
+          suggestedServiceName,
+          suggestedServiceDescription: normalizeOptionalText(parsed.data.suggestedServiceDescription),
+          suggestedServiceDeliveryMode: parsed.data.suggestedServiceDeliveryMode,
+        },
+      });
+
+      const auth = request.user;
+      await writeAudit(fastify, {
+        userId: auth.sub,
+        action: "inspection.manual_requirement.create",
+        entityType: "inspection",
+        entityId: inspection.id,
+        data: {
+          checklistItemId: item.id,
+          rawRequirement,
+          question,
+          suggestedServiceName,
+          suggestedServiceDeliveryMode: parsed.data.suggestedServiceDeliveryMode,
+        },
+      });
+
+      return reply.code(201).send({ item });
     },
   );
 
@@ -752,8 +999,16 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
         });
 
         if (answerPayload.value === ChecklistAnswerValue.no) {
-          const guidance = getNcGuidance(item.question, item.area);
-          const enrichedDescription = composeNcDescription(answerPayload.note, guidance);
+          const baseGuidance = getNcGuidance(item.question, item.area);
+          const guidance = {
+            normReference: item.normReference ?? baseGuidance.normReference,
+            sanctionImpact: baseGuidance.sanctionImpact,
+            suggestedService: item.suggestedServiceName ?? baseGuidance.suggestedService,
+          };
+          const enrichedDescription = composeNcDescription(answerPayload.note, guidance, {
+            suggestedServiceDescription: item.suggestedServiceDescription,
+            suggestedServiceDeliveryMode: item.suggestedServiceDeliveryMode,
+          });
 
           await fastify.prisma.nonConformity.upsert({
             where: {
@@ -762,6 +1017,9 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
             update: {
               title: item.question,
               description: enrichedDescription,
+              suggestedServiceName: item.suggestedServiceName,
+              suggestedServiceDescription: item.suggestedServiceDescription,
+              suggestedServiceDeliveryMode: item.suggestedServiceDeliveryMode,
               severity: answerPayload.severity ?? item.defaultSeverity,
               isSanctionable: answerPayload.isSanctionable ?? item.defaultSanctionable,
             },
@@ -770,6 +1028,9 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
               answerId: answer.id,
               title: item.question,
               description: enrichedDescription,
+              suggestedServiceName: item.suggestedServiceName,
+              suggestedServiceDescription: item.suggestedServiceDescription,
+              suggestedServiceDeliveryMode: item.suggestedServiceDeliveryMode,
               severity: answerPayload.severity ?? item.defaultSeverity,
               isSanctionable: answerPayload.isSanctionable ?? item.defaultSanctionable,
             },

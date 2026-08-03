@@ -1,4 +1,4 @@
-import { MallevaReason, QuoteStatus, UserRole } from "@prisma/client";
+import { MallevaReason, QuoteServiceDeliveryMode, QuoteStatus, UserRole } from "@prisma/client";
 import { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 import { writeAudit } from "../../plugins/audit.js";
@@ -10,6 +10,7 @@ const createQuoteSchema = z.object({
   nonConformityId: z.string().min(1),
   serviceName: z.string().min(3),
   description: z.string().optional(),
+  serviceDeliveryMode: z.nativeEnum(QuoteServiceDeliveryMode).optional(),
   amount: z.number().nonnegative().optional(),
   dueDays: z.number().int().min(1).max(90).default(14),
 });
@@ -19,6 +20,17 @@ const respondQuoteSchema = z.object({
   note: z.string().optional(),
   dueDays: z.number().int().min(1).max(90).optional(),
 });
+
+function normalizeServiceDeliveryMode(value?: string | null): QuoteServiceDeliveryMode | null {
+  if (
+    value === QuoteServiceDeliveryMode.internal ||
+    value === QuoteServiceDeliveryMode.service ||
+    value === QuoteServiceDeliveryMode.intermediary
+  ) {
+    return value;
+  }
+  return null;
+}
 
 const quotesRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get(
@@ -50,6 +62,9 @@ const quotesRoutes: FastifyPluginAsync = async (fastify) => {
               id: true,
               title: true,
               description: true,
+              suggestedServiceName: true,
+              suggestedServiceDescription: true,
+              suggestedServiceDeliveryMode: true,
               isSanctionable: true,
               severity: true,
             },
@@ -67,6 +82,12 @@ const quotesRoutes: FastifyPluginAsync = async (fastify) => {
           nonConformity: {
             ...quote.nonConformity,
             ...parsed,
+            suggestedService: quote.nonConformity.suggestedServiceName ?? parsed.suggestedService,
+            suggestedServiceDescription:
+              quote.nonConformity.suggestedServiceDescription ?? parsed.suggestedServiceDescription,
+            suggestedServiceDeliveryMode:
+              quote.nonConformity.suggestedServiceDeliveryMode ??
+              normalizeServiceDeliveryMode(parsed.suggestedServiceDeliveryMode),
           },
         };
       });
@@ -117,7 +138,13 @@ const quotesRoutes: FastifyPluginAsync = async (fastify) => {
         return {
           ...candidate,
           ...parsed,
-          suggestedService: parsed.suggestedService ?? "Servizio di adeguamento",
+          suggestedService: candidate.suggestedServiceName ?? parsed.suggestedService ?? "Servizio di adeguamento",
+          suggestedServiceDescription:
+            candidate.suggestedServiceDescription ?? parsed.suggestedServiceDescription,
+          suggestedServiceDeliveryMode:
+            candidate.suggestedServiceDeliveryMode ??
+            normalizeServiceDeliveryMode(parsed.suggestedServiceDeliveryMode) ??
+            QuoteServiceDeliveryMode.internal,
         };
       });
     },
@@ -161,13 +188,21 @@ const quotesRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.conflict("Esiste gia un preventivo aperto per questa NC.");
       }
 
+      const parsedNc = parseNcDescription(nc.description);
+      const serviceDeliveryMode =
+        parsed.data.serviceDeliveryMode ??
+        nc.suggestedServiceDeliveryMode ??
+        normalizeServiceDeliveryMode(parsedNc.suggestedServiceDeliveryMode) ??
+        QuoteServiceDeliveryMode.internal;
+
       const created = await fastify.prisma.quote.create({
         data: {
           nonConformityId: nc.id,
           inspectionId: nc.inspectionId,
           companyId: nc.inspection.companyId,
           serviceName: parsed.data.serviceName,
-          description: parsed.data.description,
+          description: parsed.data.description ?? nc.suggestedServiceDescription,
+          serviceDeliveryMode,
           amount: parsed.data.amount,
           responseDueAt: computeDueDate(parsed.data.dueDays),
           createdById: auth.sub,

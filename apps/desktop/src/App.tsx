@@ -35,6 +35,9 @@ export default function App() {
   const [syncQueueSize, setSyncQueueSize] = useState(0);
 
   useEffect(() => {
+    document.documentElement.removeAttribute("data-theme");
+    localStorage.removeItem("fedshield-theme");
+
     const persisted = localStorage.getItem("fedshield_session");
     if (persisted) {
       try {

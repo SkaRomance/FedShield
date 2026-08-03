@@ -13,9 +13,8 @@ test.describe("Login flow", () => {
     await page.getByRole("button", { name: /entra/i }).click();
 
     // Post-login: il LoginPage smonta e DashboardPage monta. Cerco un
-    // elemento stabile che esiste solo nella DashboardPage (toggle tema
-    // sun/moon o uno qualunque dei link nav).
-    await expect(page.getByRole("button", { name: /tema/i })).toBeVisible({ timeout: 15_000 });
+    // elemento stabile che esiste solo nella DashboardPage.
+    await expect(page.getByRole("button", { name: "Dashboard" })).toBeVisible({ timeout: 15_000 });
   });
 
   test("login con password sbagliata mostra error-box e resta su LoginPage", async ({ page }) => {

@@ -21,6 +21,9 @@ export interface InspectionReportPayload {
     title: string;
     area?: string | null;
     description: string | null;
+    suggestedServiceName?: string | null;
+    suggestedServiceDescription?: string | null;
+    suggestedServiceDeliveryMode?: string | null;
     isSanctionable: boolean;
     severity: number;
   }>;
@@ -82,22 +85,26 @@ export function buildInspectionReport(inspection: InspectionReportPayload) {
 
   const findings = inspection.nonConformities.map((nc, index) => {
     const parsed = parseNcDescription(nc.description);
+    const suggestedService = nc.suggestedServiceName ?? parsed.suggestedService;
     const intro = `NC ${index + 1}: ${nc.title}`;
     const detail = parsed.note ? ` - ${parsed.note}` : "";
     const sanctionTag = nc.isSanctionable ? " (potenzialmente sanzionabile)" : "";
     const normTag = parsed.normReference ? ` [Rif: ${parsed.normReference}]` : "";
-    const serviceTag = parsed.suggestedService ? ` [Servizio: ${parsed.suggestedService}]` : "";
+    const serviceTag = suggestedService ? ` [Servizio: ${suggestedService}]` : "";
     return `${intro}${sanctionTag}${detail}${normTag}${serviceTag}`;
   });
 
   const todo = inspection.nonConformities.map((nc) => {
     const parsed = parseNcDescription(nc.description);
+    const suggestedService = nc.suggestedServiceName ?? parsed.suggestedService;
     return {
       area: nc.severity >= 3 ? "Priorita alta" : "Priorita ordinaria",
-      action: parsed.suggestedService ?? nc.title,
+      action: suggestedService ?? nc.title,
       urgency: nc.severity,
       normReference: parsed.normReference,
       sanctionImpact: parsed.sanctionImpact,
+      serviceDeliveryMode: nc.suggestedServiceDeliveryMode ?? parsed.suggestedServiceDeliveryMode,
+      serviceDescription: nc.suggestedServiceDescription ?? parsed.suggestedServiceDescription,
     };
   });
 

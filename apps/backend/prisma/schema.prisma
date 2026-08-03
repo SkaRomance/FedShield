@@ -79,6 +79,12 @@ enum QuoteStatus {
   assigned_to_third_party
 }
 
+enum QuoteServiceDeliveryMode {
+  internal
+  service
+  intermediary
+}
+
 enum MallevaReason {
   rejected
   expired
@@ -191,6 +197,9 @@ model NonConformity {
   answerId         String?    @unique
   title            String
   description      String?
+  suggestedServiceName String?
+  suggestedServiceDescription String?
+  suggestedServiceDeliveryMode QuoteServiceDeliveryMode?
   isSanctionable   Boolean    @default(false)
   severity         Int        @default(1)
   isResolved       Boolean    @default(false)
@@ -231,6 +240,11 @@ model ChecklistItem {
   // S8: riferimento normativo (es: "D.Lgs. 81/2008, art. 71") — usato dal
   // report d'ispezione per citare la fonte regolatoria di ogni controllo.
   normReference      String?
+  source             String             @default("seed")
+  rawRequirement     String?
+  suggestedServiceName String?
+  suggestedServiceDescription String?
+  suggestedServiceDeliveryMode QuoteServiceDeliveryMode?
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
   template           ChecklistTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
@@ -298,6 +312,7 @@ model Quote {
   companyId       String
   serviceName     String
   description     String?
+  serviceDeliveryMode QuoteServiceDeliveryMode @default(internal)
   amount          Float?
   sentAt          DateTime      @default(now())
   responseDueAt   DateTime

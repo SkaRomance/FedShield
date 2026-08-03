@@ -67,6 +67,29 @@ export const ACTIVITY_TYPE_OPTIONS = [
   { value: "education_training", label: "Scuola / Formazione", atecoCode: "85.59" },
   { value: "auto_repair", label: "Autoriparazione / Officina", atecoCode: "45.20" },
   { value: "food_industry", label: "Industria alimentare", atecoCode: "10.71" },
+  { value: "building_construction", label: "Edilizia / Costruzioni", atecoCode: "41.20" },
+  { value: "civil_engineering", label: "Infrastrutture / Opere civili", atecoCode: "42.11" },
+  { value: "demolition_excavation", label: "Demolizioni / Scavi", atecoCode: "43.11" },
+  { value: "special_foundations", label: "Fondazioni speciali / Perforazioni", atecoCode: "43.13" },
+  { value: "asphalt_paving", label: "Asfalti / Pavimentazioni stradali", atecoCode: "42.11" },
+  { value: "electrical_installation", label: "Impianti elettrici", atecoCode: "43.21" },
+  { value: "thermal_plumbing", label: "Termoidraulica / HVAC", atecoCode: "43.22" },
+  { value: "building_finishing", label: "Finiture / Ristrutturazioni", atecoCode: "43.33" },
+  { value: "windows_facades", label: "Serramenti / Facciate / Vetri", atecoCode: "43.32" },
+  { value: "roofing_specialized", label: "Coperture / Opere specializzate", atecoCode: "43.91" },
+  { value: "metal_carpentry", label: "Carpenteria metallica / Prefabbricati", atecoCode: "25.11" },
+  { value: "equipment_rental", label: "Noleggio mezzi cantiere", atecoCode: "77.32" },
+  { value: "green_works", label: "Verde / Opere esterne", atecoCode: "81.30" },
+  { value: "environmental_remediation", label: "Bonifiche / Amianto", atecoCode: "39.00" },
+  { value: "construction_waste", label: "Rifiuti edili / Recupero", atecoCode: "38.11" },
+  { value: "design_engineering", label: "Progettazione / Direzione lavori", atecoCode: "71.12" },
+  { value: "plant_installation", label: "Impiantistica / Manutenzione", atecoCode: "43.21" },
+  { value: "property_management", label: "Gestione immobili / Condomini", atecoCode: "68.32" },
+  { value: "passenger_transport", label: "Trasporto persone", atecoCode: "49.31" },
+  { value: "wood_furniture", label: "Legno / Arredo", atecoCode: "16.23" },
+  { value: "chemical_cosmetics", label: "Chimica / Cosmetica", atecoCode: "20.42" },
+  { value: "laundry_dry_cleaning", label: "Lavanderia / Tintoria", atecoCode: "96.01" },
+  { value: "events_staging", label: "Eventi / Allestimenti", atecoCode: "90.02" },
   { value: "custom", label: "Altro (ATECO manuale)", atecoCode: "" },
 ] as const;
 
@@ -233,6 +256,35 @@ export function inferActivityFromAteco(atecoCode?: string | null): ActivityTypeO
   if (normalized.startsWith("85")) return "education_training";
   if (normalized.startsWith("45.2")) return "auto_repair";
   if (normalized.startsWith("10")) return "food_industry";
+  if (normalized.startsWith("41")) return "building_construction";
+  if (normalized.startsWith("42.11") || normalized.startsWith("42.99")) return "asphalt_paving";
+  if (normalized.startsWith("42")) return "civil_engineering";
+  if (normalized.startsWith("43.11") || normalized.startsWith("43.12")) return "demolition_excavation";
+  if (normalized.startsWith("43.13")) return "special_foundations";
+  if (normalized.startsWith("43.21")) return "electrical_installation";
+  if (normalized.startsWith("43.22")) return "thermal_plumbing";
+  if (normalized.startsWith("43.32")) return "windows_facades";
+  if (normalized.startsWith("43.3")) return "building_finishing";
+  if (normalized.startsWith("43.91") || normalized.startsWith("43.99")) return "roofing_specialized";
+  if (normalized.startsWith("25.11")) return "metal_carpentry";
+  if (normalized.startsWith("77.32")) return "equipment_rental";
+  if (normalized.startsWith("81.30")) return "green_works";
+  if (normalized.startsWith("39") || normalized.startsWith("38.22")) return "environmental_remediation";
+  if (normalized.startsWith("38")) return "construction_waste";
+  if (normalized.startsWith("71.1")) return "design_engineering";
+  if (normalized.startsWith("43.2")) return "plant_installation";
+  if (normalized.startsWith("68.32") || normalized.startsWith("81.10")) return "property_management";
+  if (normalized.startsWith("49.3")) return "passenger_transport";
+  if (normalized.startsWith("16") || normalized.startsWith("31")) return "wood_furniture";
+  if (normalized.startsWith("20")) return "chemical_cosmetics";
+  if (normalized.startsWith("96.01")) return "laundry_dry_cleaning";
+  if (
+    normalized.startsWith("90.02") ||
+    normalized.startsWith("82.30") ||
+    (normalized.startsWith("93.29") && !normalized.startsWith("93.29.10") && !normalized.startsWith("93.29.20"))
+  ) {
+    return "events_staging";
+  }
   if (normalized.startsWith("56.30")) return "bar";
   if (normalized.startsWith("56.10")) return "restaurant";
   return "custom";

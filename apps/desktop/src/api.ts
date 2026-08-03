@@ -140,11 +140,18 @@ export interface ChecklistTemplate {
 export interface ChecklistItem {
   id: string;
   section: "premises_equipment" | "procedures_hygiene";
+  domain?: "safety" | "haccp" | "both";
   area: string;
   question: string;
   orderIndex: number;
   defaultSeverity: number;
   defaultSanctionable: boolean;
+  normReference?: string | null;
+  source?: string;
+  rawRequirement?: string | null;
+  suggestedServiceName?: string | null;
+  suggestedServiceDescription?: string | null;
+  suggestedServiceDeliveryMode?: QuoteServiceDeliveryMode | null;
 }
 
 export type InspectionDocumentStatus =
@@ -195,9 +202,13 @@ export interface ChecklistTemplateDetails {
   items: ChecklistItem[];
 }
 
+export type QuoteServiceDeliveryMode = "internal" | "service" | "intermediary";
+
 export interface Quote {
   id: string;
   serviceName: string;
+  description?: string | null;
+  serviceDeliveryMode: QuoteServiceDeliveryMode;
   amount?: number;
   status:
     | "pending"
@@ -219,6 +230,8 @@ export interface Quote {
     normReference?: string | null;
     sanctionImpact?: string | null;
     suggestedService?: string | null;
+    suggestedServiceDescription?: string | null;
+    suggestedServiceDeliveryMode?: QuoteServiceDeliveryMode | null;
   };
   malleva?: {
     id: string;
@@ -234,6 +247,8 @@ export interface QuoteCandidate {
   normReference?: string | null;
   sanctionImpact?: string | null;
   suggestedService?: string | null;
+  suggestedServiceDescription?: string | null;
+  suggestedServiceDeliveryMode?: QuoteServiceDeliveryMode | null;
   inspection: {
     id: string;
     title: string;
@@ -597,6 +612,35 @@ export function fetchChecklistItems(
   return authedFetch<ChecklistTemplateDetails>(`/checklists/templates/${templateId}/items${query}`, token);
 }
 
+export function fetchManualInspectionRequirements(token: string, inspectionId: string) {
+  return authedFetch<{ templateId: string; items: ChecklistItem[] }>(
+    `/inspections/${inspectionId}/manual-requirements`,
+    token,
+  );
+}
+
+export function createManualInspectionRequirement(
+  token: string,
+  inspectionId: string,
+  payload: {
+    rawRequirement: string;
+    area?: string;
+    section: "premises_equipment" | "procedures_hygiene";
+    domain: "safety" | "haccp" | "both";
+    normReference?: string;
+    defaultSeverity: number;
+    defaultSanctionable: boolean;
+    suggestedServiceName?: string;
+    suggestedServiceDescription?: string;
+    suggestedServiceDeliveryMode: QuoteServiceDeliveryMode;
+  },
+) {
+  return authedFetch<{ item: ChecklistItem }>(`/inspections/${inspectionId}/manual-requirements`, token, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
 export function fetchDocumentTemplates(
   token: string,
   atecoCode?: string,
@@ -778,6 +822,8 @@ export function createQuote(
   payload: {
     nonConformityId: string;
     serviceName: string;
+    description?: string;
+    serviceDeliveryMode?: QuoteServiceDeliveryMode;
     amount?: number;
     dueDays: number;
   },

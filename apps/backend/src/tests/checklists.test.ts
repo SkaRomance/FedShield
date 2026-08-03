@@ -94,6 +94,71 @@ async function run() {
   assert.equal(answerYes.statusCode, 200);
   assert.equal(answerYes.json().nonConformities.length, 0);
 
+  const manualRequirement = await app.inject({
+    method: "POST",
+    url: `/api/inspections/${inspectionId}/manual-requirements`,
+    headers: { authorization: `Bearer ${token}` },
+    payload: {
+      rawRequirement: "registro manutenzione estintori aggiornato e disponibile in sede",
+      area: "Antincendio",
+      section: "procedures_hygiene",
+      domain: "safety",
+      normReference: "D.Lgs. 81/08, art. 46",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      suggestedServiceName: "Verifica antincendio e registro manutenzioni",
+      suggestedServiceDescription: "Controllo documentale e coordinamento manutentore qualificato",
+      suggestedServiceDeliveryMode: "service",
+    },
+  });
+  assert.equal(manualRequirement.statusCode, 201);
+  const manualItem = manualRequirement.json().item;
+  assert.match(manualItem.question, /risulta soddisfatto e documentabile\?$/);
+
+  const manualRequirements = await app.inject({
+    method: "GET",
+    url: `/api/inspections/${inspectionId}/manual-requirements`,
+    headers: { authorization: `Bearer ${token}` },
+  });
+  assert.equal(manualRequirements.statusCode, 200);
+  assert.ok(manualRequirements.json().items.some((item: { id: string }) => item.id === manualItem.id));
+
+  const manualAnswer = await app.inject({
+    method: "POST",
+    url: `/api/inspections/${inspectionId}/answers`,
+    headers: { authorization: `Bearer ${token}` },
+    payload: {
+      answers: [
+        {
+          checklistItemId: manualItem.id,
+          value: "no",
+          note: "Registro non mostrato durante il sopralluogo",
+          severity: 4,
+          isSanctionable: true,
+        },
+      ],
+    },
+  });
+  assert.equal(manualAnswer.statusCode, 200);
+  const manualNc = manualAnswer
+    .json()
+    .nonConformities.find((nc: { answerId?: string | null; title: string }) => nc.title === manualItem.question);
+  assert.ok(manualNc);
+  assert.equal(manualNc.suggestedServiceDeliveryMode, "service");
+
+  const quoteCandidates = await app.inject({
+    method: "GET",
+    url: "/api/quotes/candidates",
+    headers: { authorization: `Bearer ${token}` },
+  });
+  assert.equal(quoteCandidates.statusCode, 200);
+  const manualCandidate = quoteCandidates
+    .json()
+    .find((candidate: { id: string }) => candidate.id === manualNc.id);
+  assert.ok(manualCandidate);
+  assert.equal(manualCandidate.suggestedService, "Verifica antincendio e registro manutenzioni");
+  assert.equal(manualCandidate.suggestedServiceDeliveryMode, "service");
+
   const docsRequirements = await app.inject({
     method: "GET",
     url: `/api/inspections/${inspectionId}/documents/requirements`,
@@ -127,6 +192,7 @@ async function run() {
   });
   assert.equal(summary.statusCode, 200);
   assert.equal(summary.json().totals.requestedDocuments, 1);
+  assert.ok(summary.json().score < 100);
 
   const sendToAdmin = await app.inject({
     method: "POST",

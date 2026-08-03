@@ -10,8 +10,6 @@ import {
   ScrollText,
   RefreshCw,
   LogOut,
-  Sun,
-  Moon,
   Bell,
 } from "lucide-react";
 import {
@@ -23,7 +21,6 @@ import {
 } from "../api";
 import { queueSyncEvent } from "../services/syncManager";
 import { useNotificationBadge } from "../hooks/useNotificationBadge";
-import { useTheme } from "../hooks/useTheme";
 import ChecklistPage from "./ChecklistPage";
 import CustomerRegistryPage from "./CustomerRegistryPage";
 import KpiPage from "./KpiPage";
@@ -52,16 +49,17 @@ interface DashboardProps {
   onLogout: () => void;
 }
 
+const PUBLIC_ASSET_BASE = import.meta.env.BASE_URL || "/";
 const SIDEBAR_LOGO_CANDIDATES = [
-  "/fedshield-logo-clean.png",
-  "/fedshield-logo.png",
-  "/fedshield-logo.jpg",
-  "/fedshield-logo.jpeg",
-  "/fedshield-logo.webp",
-  "/fedshield-logo.svg",
-  "/logo.png",
-  "/logo.jpg",
-];
+  "fedshield-logo-clean.png",
+  "fedshield-logo.png",
+  "fedshield-logo.jpg",
+  "fedshield-logo.jpeg",
+  "fedshield-logo.webp",
+  "fedshield-logo.svg",
+  "logo.png",
+  "logo.jpg",
+].map((asset) => `${PUBLIC_ASSET_BASE}${asset}`);
 
 function roleLabel(role: string): string {
   if (role === "admin") return "Admin";
@@ -109,7 +107,6 @@ export default function DashboardPage({
   }>({ token: 0 });
 
   const { count: alertCount } = useNotificationBadge(token);
-  const { theme, toggle: toggleTheme } = useTheme();
 
   const sanctionableNc = useMemo(
     () =>
@@ -254,14 +251,6 @@ export default function DashboardPage({
                 </span>
               ) : null}
             </button>
-            <button
-              onClick={toggleTheme}
-              className="icon-btn"
-              aria-label={theme === "dark" ? "Tema chiaro" : "Tema scuro"}
-              title={theme === "dark" ? "Tema chiaro" : "Tema scuro"}
-            >
-              {theme === "dark" ? <Sun /> : <Moon />}
-            </button>
             <button onClick={onSyncNow} className="logout-btn">
               <RefreshCw />
               Sync
@@ -284,7 +273,7 @@ export default function DashboardPage({
               <h3>Eventi in coda</h3>
               <strong>{syncStatus.queueSize}</strong>
             </article>
-            <article className="kpi-card" style={{ gridColumn: "span 2" }}>
+            <article className="kpi-card kpi-card-wide">
               <h3>Ultimo sync</h3>
               <strong style={{ fontSize: 15, fontWeight: 500 }}>
                 {syncStatus.message}

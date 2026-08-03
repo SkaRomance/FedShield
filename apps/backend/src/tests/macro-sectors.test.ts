@@ -75,6 +75,167 @@ async function run() {
       expectedText: ["HACCP", "Allergeni", "Catena freddo"],
       minDocs: 8,
     },
+    {
+      ateco: "41.20",
+      macroGroup: "EDILIZIA_COSTRUZIONI",
+      expectedTemplate: "Edilizia e Costruzioni",
+      expectedText: ["POS", "ponteggi", "scavi"],
+      minDocs: 10,
+    },
+    {
+      ateco: "42.11",
+      macroGroup: "INGEGNERIA_CIVILE_INFRASTRUTTURE",
+      expectedTemplate: "Ingegneria Civile",
+      expectedText: ["traffico", "sottoservizi", "terre e rocce"],
+      minDocs: 8,
+    },
+    {
+      ateco: "42.11",
+      macroGroup: "ASFALTI_PAVIMENTAZIONI_STRADALI",
+      expectedTemplate: "Asfalti",
+      expectedText: ["bitumi", "fresato", "segnaletica"],
+      minDocs: 8,
+    },
+    {
+      ateco: "43.11",
+      macroGroup: "DEMOLIZIONI_SCAVI_PREPARAZIONE",
+      expectedTemplate: "Demolizioni",
+      expectedText: ["demolizione", "amianto", "rifiuti C&D"],
+      minDocs: 8,
+    },
+    {
+      ateco: "43.13",
+      macroGroup: "FONDAZIONI_SPECIALI_PERFORAZIONI",
+      expectedTemplate: "Fondazioni Speciali",
+      expectedText: ["perforatrici", "fanghi", "sottoservizi"],
+      minDocs: 8,
+    },
+    {
+      ateco: "43.21",
+      macroGroup: "IMPIANTISTICA_ELETTRICA",
+      expectedTemplate: "Impiantistica Elettrica",
+      expectedText: ["PES", "lockout", "DiCo"],
+      minDocs: 8,
+    },
+    {
+      ateco: "43.22",
+      macroGroup: "IMPIANTISTICA_TERMOIDRAULICA",
+      expectedTemplate: "Termoidraulica",
+      expectedText: ["F-gas", "gas", "spazi confinati"],
+      minDocs: 8,
+    },
+    {
+      ateco: "43.33",
+      macroGroup: "FINITURE_EDILI",
+      expectedTemplate: "Finiture Edili",
+      expectedText: ["silice", "collanti", "trabattelli"],
+      minDocs: 8,
+    },
+    {
+      ateco: "43.32",
+      macroGroup: "SERRAMENTI_FACCIATE_VETRAZIONI",
+      expectedTemplate: "Serramenti",
+      expectedText: ["vetri", "facciate", "anti-taglio"],
+      minDocs: 8,
+    },
+    {
+      ateco: "43.91",
+      macroGroup: "OPERE_SPECIALIZZATE_COPERTURE",
+      expectedTemplate: "Opere Specializzate",
+      expectedText: ["linee vita", "coperture", "impermeabilizzazioni"],
+      minDocs: 8,
+    },
+    {
+      ateco: "25.11",
+      macroGroup: "CARPENTERIA_METALLICA_PREFABBRICATI",
+      expectedTemplate: "Carpenteria Metallica",
+      expectedText: ["saldatura", "sollevamento", "bulloneria"],
+      minDocs: 8,
+    },
+    {
+      ateco: "77.32",
+      macroGroup: "NOLEGGIO_MEZZI_CANTIERE_OPERATORE",
+      expectedTemplate: "Noleggio Mezzi",
+      expectedText: ["PLE", "autogru", "piazzamento"],
+      minDocs: 8,
+    },
+    {
+      ateco: "81.30",
+      macroGroup: "VERDE_OPERE_ESTERNE_CANTIERI",
+      expectedTemplate: "Verde",
+      expectedText: ["motoseghe", "fitosanitari", "potature"],
+      minDocs: 8,
+    },
+    {
+      ateco: "39.00",
+      macroGroup: "BONIFICHE_AMBIENTALI_AMIANTO",
+      expectedTemplate: "Bonifiche Ambientali",
+      expectedText: ["categoria 9", "categoria 10", "piano di lavoro amianto"],
+      minDocs: 8,
+    },
+    {
+      ateco: "38.11",
+      macroGroup: "RIFIUTI_EDILI_RECUPERO_SMALTIMENTO",
+      expectedTemplate: "Rifiuti Edili",
+      expectedText: ["FIR", "EER", "deposito temporaneo"],
+      minDocs: 8,
+    },
+    {
+      ateco: "71.12",
+      macroGroup: "PROGETTAZIONE_DIREZIONE_LAVORI",
+      expectedTemplate: "Progettazione",
+      expectedText: ["PSC", "CSP", "direzione lavori"],
+      minDocs: 8,
+    },
+    {
+      ateco: "43.21",
+      macroGroup: "IMPIANTISTICA_MANUTENZIONE",
+      expectedTemplate: "Impiantistica e Manutenzione",
+      expectedText: ["PES", "DiCo", "PLE"],
+      minDocs: 6,
+    },
+    {
+      ateco: "68.32",
+      macroGroup: "GESTIONE_IMMOBILI_CONDOMINI",
+      expectedTemplate: "Gestione Immobili e Condomini",
+      expectedText: ["ascensori", "centrale termica", "amianto"],
+      minDocs: 6,
+    },
+    {
+      ateco: "49.31",
+      macroGroup: "TRASPORTO_PERSONE",
+      expectedTemplate: "Trasporto Persone",
+      expectedText: ["Mezzi", "Turni", "passeggeri"],
+      minDocs: 6,
+    },
+    {
+      ateco: "16.23",
+      macroGroup: "LEGNO_ARREDO",
+      expectedTemplate: "Legno e Arredo",
+      expectedText: ["polveri legno", "ATEX", "vernici"],
+      minDocs: 6,
+    },
+    {
+      ateco: "20.42",
+      macroGroup: "CHIMICA_COSMETICA",
+      expectedTemplate: "Chimica e Cosmetica",
+      expectedText: ["CLP", "REACH", "SDS"],
+      minDocs: 6,
+    },
+    {
+      ateco: "96.01",
+      macroGroup: "LAVANDERIE_TINTORIE",
+      expectedTemplate: "Lavanderie e Tintorie",
+      expectedText: ["solventi", "stiratura", "biancheria"],
+      minDocs: 6,
+    },
+    {
+      ateco: "90.02",
+      macroGroup: "EVENTI_ALLESTIMENTI",
+      expectedTemplate: "Eventi e Allestimenti",
+      expectedText: ["carichi sospesi", "palchi", "pubblico"],
+      minDocs: 6,
+    },
   ];
 
   for (const sector of sectors) {
@@ -131,6 +292,19 @@ async function run() {
     supermarketTemplates.some((template) => template.macroGroup === "COMMERCIO_NON_FOOD"),
     false,
     "Food retail must not receive non-food retail checklist",
+  );
+
+  const beachClubResponse = await app.inject({
+    method: "GET",
+    url: "/api/checklists/templates?atecoCode=93.29.20&checklistMode=unified",
+    headers,
+  });
+  assert.equal(beachClubResponse.statusCode, 200);
+  const beachClubTemplates = beachClubResponse.json() as Array<{ macroGroup?: string | null }>;
+  assert.equal(
+    beachClubTemplates.some((template) => template.macroGroup === "EVENTI_ALLESTIMENTI"),
+    false,
+    "Beach club HoReCa must not receive generic events checklist",
   );
 
   console.log("Macro sectors checklist test passed");

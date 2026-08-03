@@ -15,7 +15,7 @@ test.describe("Create asset (estintore) + QR golden path", () => {
     await page.getByRole("button", { name: /entra/i }).click();
 
     // Wait dashboard mounted.
-    await expect(page.getByRole("button", { name: /tema/i })).toBeVisible({
+    await expect(page.getByRole("button", { name: "Dashboard" })).toBeVisible({
       timeout: 15_000,
     });
 
