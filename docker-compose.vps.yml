@@ -1,0 +1,36 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    restart: unless-stopped
+    container_name: fedshield-backend
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=4000
+      - JWT_SECRET=${JWT_SECRET:-fedshield-prod-jwt-secret-secure-2026}
+      - STORAGE_DIR=/app/storage
+      - DATABASE_URL=file:/app/apps/backend/prisma/dev.db
+      - VERIFICATION_BASE_URL=${VERIFICATION_BASE_URL:-http://localhost:8080}
+      - DOCUMENT_SEAL_SECRET=${DOCUMENT_SEAL_SECRET:-fedshield-local-seal-2026}
+    volumes:
+      - fedshield_db:/app/apps/backend/prisma
+      - fedshield_storage:/app/storage
+    ports:
+      - "127.0.0.1:4000:4000"
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    restart: unless-stopped
+    container_name: fedshield-web
+    ports:
+      - "${FEDSHIELD_PORT:-8080}:80"
+    depends_on:
+      - backend
+
+volumes:
+  fedshield_db:
+  fedshield_storage:

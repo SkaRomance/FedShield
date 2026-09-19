@@ -1,0 +1,48 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Install dependencies needed by Prisma on Alpine (OpenSSL)
+RUN apk add --no-cache openssl libc6-compat
+
+# Enable pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Copy workspace manifest files
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY apps/backend/package.json ./apps/backend/
+COPY apps/desktop/package.json ./apps/desktop/
+COPY apps/tablet/package.json ./apps/tablet/
+COPY packages/ ./packages/
+
+# Install workspace dependencies
+RUN pnpm install --frozen-lockfile=false
+
+# Copy backend source code and prisma schema
+COPY apps/backend/ ./apps/backend/
+
+# Generate Prisma client
+RUN pnpm -C apps/backend exec prisma generate
+
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=4000
+ENV STORAGE_DIR=/app/storage
+ENV DATABASE_URL="file:/app/apps/backend/prisma/dev.db"
+
+EXPOSE 4000
+
+# Entrypoint script: esegue sync schema DB + seed se nuovo, poi avvia backend
+RUN echo '#!/bin/sh' > /app/docker-entrypoint.sh && \
+    echo 'set -e' >> /app/docker-entrypoint.sh && \
+    echo 'pnpm -C apps/backend exec prisma db push --accept-data-loss' >> /app/docker-entrypoint.sh && \
+    echo 'if [ ! -f /app/apps/backend/prisma/.seeded ]; then' >> /app/docker-entrypoint.sh && \
+    echo '  echo "Inizializzazione database utenti e checklist baseline..."' >> /app/docker-entrypoint.sh && \
+    echo '  pnpm -C apps/backend exec tsx prisma/seed-users.ts || true' >> /app/docker-entrypoint.sh && \
+    echo '  pnpm -C apps/backend exec tsx prisma/seed-test-baseline.ts || true' >> /app/docker-entrypoint.sh && \
+    echo '  touch /app/apps/backend/prisma/.seeded' >> /app/docker-entrypoint.sh && \
+    echo 'fi' >> /app/docker-entrypoint.sh && \
+    echo 'exec pnpm -C apps/backend exec tsx src/server.ts' >> /app/docker-entrypoint.sh && \
+    chmod +x /app/docker-entrypoint.sh
+
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
