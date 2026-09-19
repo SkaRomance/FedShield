@@ -4,6 +4,7 @@ import {
   createCompany,
   downloadGeneratedDocument,
   exportCompaniesCsvDanea,
+  exportCompaniesXmlDanea,
   generateInspectionChecklistPdf,
   generateNdaPdf,
   Inspection,
@@ -117,6 +118,7 @@ export default function CustomerRegistryPage({
   const [downloadInspectionId, setDownloadInspectionId] = useState<string>("");
   const [statusMessage, setStatusMessage] = useState<string>("");
   const [exportingCsv, setExportingCsv] = useState<boolean>(false);
+  const [exportingXml, setExportingXml] = useState<boolean>(false);
   const [ndaCompanyId, setNdaCompanyId] = useState<string>("");
   const [editingCompanyId, setEditingCompanyId] = useState<string>("");
   const [companyForm, setCompanyForm] = useState<CompanyFormState>(() => emptyCompanyForm());
@@ -265,6 +267,20 @@ export default function CustomerRegistryPage({
     }
   }
 
+  async function handleExportDaneaXml() {
+    setStatusMessage("");
+    setExportingXml(true);
+    try {
+      const blob = await exportCompaniesXmlDanea(token);
+      triggerBlobDownload(blob, `danea-clienti-${todayCompactDateClient()}.xml`);
+      setStatusMessage("XML Danea Easyfatt esportato con successo.");
+    } catch (error) {
+      setStatusMessage(`Errore export XML Danea: ${error instanceof Error ? error.message : "errore"}`);
+    } finally {
+      setExportingXml(false);
+    }
+  }
+
   async function handleGenerateNda(company: Company) {
     setStatusMessage("");
     setNdaCompanyId(company.id);
@@ -309,6 +325,14 @@ export default function CustomerRegistryPage({
             title="Esporta tutta l'anagrafica clienti in CSV compatibile Danea Easyfatt"
           >
             {exportingCsv ? "Esportazione..." : "Esporta CSV (Danea)"}
+          </button>
+          <button
+            className="secondary-btn"
+            onClick={handleExportDaneaXml}
+            disabled={exportingXml || companies.length === 0}
+            title="Esporta tutta l'anagrafica clienti in XML standard compatibile Danea Easyfatt"
+          >
+            {exportingXml ? "Esportazione..." : "Esporta XML (Danea)"}
           </button>
         </div>
       </div>

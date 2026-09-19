@@ -201,6 +201,39 @@ function buildDaneaCsv(rows: DaneaRow[]): string {
   return lines.join("\r\n") + "\r\n";
 }
 
+function buildDaneaXml(rows: DaneaRow[]): string {
+  const escapeXml = (str: string) =>
+    (str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;");
+
+  const customersXml = rows
+    .map(
+      (r) => `  <Customer>
+    <Code>${escapeXml(r.Codice)}</Code>
+    <Company>${escapeXml(r.NomeContoCliente)}</Company>
+    <VatCode>${escapeXml(r.PartitaIVA)}</VatCode>
+    <TaxCode>${escapeXml(r.CodiceFiscale || r.PartitaIVA)}</TaxCode>
+    <Address>${escapeXml(r.Indirizzo)}</Address>
+    <City>${escapeXml(r.Citta)}</City>
+    <Country>${escapeXml(r.Nazione || "IT")}</Country>
+    <Tel>${escapeXml(r.Telefono)}</Tel>
+    <Email>${escapeXml(r.Email)}</Email>
+    <Pec>${escapeXml(r.PEC)}</Pec>
+  </Customer>`,
+    )
+    .join("\n");
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<Easyfatt-Export-Customers version="1.0">
+${customersXml}
+</Easyfatt-Export-Customers>
+`;
+}
+
 function slugifyForFilename(value: string): string {
   const base = (value || "azienda")
     .normalize("NFKD")
@@ -537,6 +570,45 @@ const companyRoutes: FastifyPluginAsync = async (fastify) => {
       reply.header("Content-Type", "text/csv; charset=utf-8");
       reply.header("Content-Disposition", `attachment; filename="${fileName}"`);
       return reply.send(buffer);
+    },
+  );
+
+  fastify.get(
+    "/companies/export-xml",
+    { preHandler: [fastify.authenticate, requireSeniorOrAdmin] },
+    async (request, reply) => {
+      const records = await fastify.prisma.company.findMany({
+        orderBy: { name: "asc" },
+      });
+
+      const rows = records.map((r) =>
+        buildDaneaRow({
+          id: r.id,
+          name: r.name,
+          vatNumber: r.vatNumber,
+          reaNumber: r.reaNumber,
+          legalAddress: r.legalAddress,
+          city: r.city,
+          phone: r.phone,
+          email: r.email,
+          pec: r.pec,
+        }),
+      );
+      const xmlBody = buildDaneaXml(rows);
+      const fileName = `danea-clienti-${todayCompactDate()}.xml`;
+
+      const auth = request.user;
+      await writeAudit(fastify, {
+        userId: auth?.sub,
+        action: "company.export_xml_danea",
+        entityType: "company",
+        entityId: "*",
+        data: { count: rows.length },
+      });
+
+      reply.header("Content-Type", "application/xml; charset=utf-8");
+      reply.header("Content-Disposition", `attachment; filename="${fileName}"`);
+      return reply.send(xmlBody);
     },
   );
 

@@ -534,6 +534,10 @@ export function exportCompaniesCsvDanea(token: string): Promise<Blob> {
   return authedDownloadBlob("/companies/export-csv", token);
 }
 
+export function exportCompaniesXmlDanea(token: string): Promise<Blob> {
+  return authedDownloadBlob("/companies/export-xml", token);
+}
+
 export function generateNdaPdf(token: string, companyId: string): Promise<Blob> {
   return authedDownloadBlob(`/companies/${companyId}/nda-pdf`, token);
 }
