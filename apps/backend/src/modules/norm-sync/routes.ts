@@ -1,6 +1,11 @@
 import { FastifyPluginAsync, FastifyBaseLogger } from "fastify";
 import { z } from "zod";
 import { writeAudit } from "../../plugins/audit.js";
+import {
+  syncNormativeSources,
+  ensureDefaultNormativeSources,
+  DEFAULT_NORMATIVE_SOURCES,
+} from "./normSyncService.js";
 
 // H1 (review): allowlist hosts per il webhook n8n. Evita SSRF se mai la
 // URL diventa configurabile da utente o se NODE_ENV=development consente
@@ -79,6 +84,148 @@ const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.forbidden("Solo admin possono gestire aggiornamenti normativi.");
     }
   }
+
+  async function requireSeniorOrAdmin(request: any, reply: any) {
+    const user = request.user;
+    if (user?.role !== "admin" && user?.role !== "senior") {
+      return reply.forbidden("Operazione riservata a senior e admin.");
+    }
+  }
+
+  // Sincronizzazione immediata da fonti ufficiali (GU, EUR-Lex)
+  fastify.post(
+    "/norm-sync/sync-now",
+    { preHandler: [fastify.authenticate, requireSeniorOrAdmin] },
+    async (request) => {
+      const body = (request.body as { forceSimulate?: boolean } | undefined) || {};
+      const result = await syncNormativeSources(fastify.prisma, {
+        forceSimulate: body.forceSimulate,
+      });
+
+      const auth = request.user;
+      await writeAudit(fastify, {
+        userId: auth.sub,
+        action: "normSync.syncNow",
+        entityType: "normativeSource",
+        data: {
+          sourcesChecked: result.sourcesChecked,
+          itemsFound: result.itemsFound,
+          proposalsCreated: result.proposalsCreated,
+          offlineFallbackUsed: result.offlineFallbackUsed,
+        },
+      });
+
+      return result;
+    },
+  );
+
+  // Stato generale e monitoraggio sincronizzazione fonti
+  fastify.get(
+    "/norm-sync/status",
+    { preHandler: [fastify.authenticate] },
+    async () => {
+      await ensureDefaultNormativeSources(fastify.prisma);
+
+      const [sources, counts, recentProposals] = await Promise.all([
+        fastify.prisma.normativeSource.findMany({
+          orderBy: { createdAt: "asc" },
+        }),
+        Promise.all([
+          fastify.prisma.normativePatchProposal.count({ where: { status: "pending" } }),
+          fastify.prisma.normativePatchProposal.count({ where: { status: "approved" } }),
+          fastify.prisma.normativePatchProposal.count({ where: { status: "rejected" } }),
+        ]),
+        fastify.prisma.normativePatchProposal.findMany({
+          orderBy: { createdAt: "desc" },
+          take: 5,
+          select: {
+            id: true,
+            normTitle: true,
+            normReference: true,
+            changeSummary: true,
+            status: true,
+            createdAt: true,
+          },
+        }),
+      ]);
+
+      const [pendingCount, approvedCount, rejectedCount] = counts;
+
+      return {
+        isOnline: true,
+        counts: {
+          pending: pendingCount,
+          approved: approvedCount,
+          rejected: rejectedCount,
+          total: pendingCount + approvedCount + rejectedCount,
+        },
+        sources: sources.map((s) => ({
+          id: s.id,
+          name: s.name,
+          type: s.type,
+          url: s.url,
+          description: s.description,
+          isActive: s.isActive,
+          lastSyncedAt: s.lastSyncedAt,
+        })),
+        recentProposals,
+        serverTime: new Date().toISOString(),
+      };
+    },
+  );
+
+  // Elenco fonti normative configurate
+  fastify.get(
+    "/norm-sync/sources",
+    { preHandler: [fastify.authenticate] },
+    async () => {
+      await ensureDefaultNormativeSources(fastify.prisma);
+      return fastify.prisma.normativeSource.findMany({
+        orderBy: { createdAt: "asc" },
+      });
+    },
+  );
+
+  // Aggiunta o toggle fonte normativa da parte di admin
+  fastify.post(
+    "/norm-sync/sources",
+    { preHandler: [fastify.authenticate, requireAdmin] },
+    async (request, reply) => {
+      const sourceSchema = z.object({
+        name: z.string().min(1),
+        type: z.enum(["gazzetta_ufficiale", "eur_lex", "inail", "inps", "ministero_salute", "custom"]),
+        url: z.string().url().optional(),
+        description: z.string().optional(),
+        isActive: z.boolean().optional(),
+      });
+
+      const parsed = sourceSchema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply.badRequest("Dati fonte normativa non validi.");
+      }
+
+      const created = await fastify.prisma.normativeSource.create({
+        data: {
+          name: parsed.data.name,
+          type: parsed.data.type,
+          url: parsed.data.url,
+          description: parsed.data.description,
+          isActive: parsed.data.isActive ?? true,
+        },
+      });
+
+      const auth = request.user;
+      await writeAudit(fastify, {
+        userId: auth.sub,
+        action: "normSource.create",
+        entityType: "normativeSource",
+        entityId: created.id,
+        data: parsed.data,
+      });
+
+      return reply.code(201).send(created);
+    },
+  );
 
   fastify.get(
     "/norm-sync/proposals",
@@ -168,6 +315,13 @@ const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
             : [];
           for (const change of changes) {
             if (change.checklistType === "training") {
+              const maxTrainingItem = await fastify.prisma.trainingChecklistItem.findFirst({
+                where: { templateId: change.templateId },
+                orderBy: { orderIndex: "desc" },
+                select: { orderIndex: true },
+              });
+              const nextTrainingOrder = (maxTrainingItem?.orderIndex ?? 0) + 1;
+
               await fastify.prisma.trainingChecklistItem.create({
                 data: {
                   templateId: change.templateId,
@@ -175,7 +329,7 @@ const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
                   domain: change.domain || "safety",
                   area: change.area,
                   question: change.question,
-                  orderIndex: change.orderIndex || 999,
+                  orderIndex: nextTrainingOrder,
                   defaultSeverity: change.severity || 1,
                   defaultSanctionable: change.sanctionable || false,
                   normReference: proposal.normReference,
@@ -191,6 +345,13 @@ const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
                 take: 1,
               });
               if (templates[0]) {
+                const maxItem = await fastify.prisma.checklistItem.findFirst({
+                  where: { templateId: templates[0].id },
+                  orderBy: { orderIndex: "desc" },
+                  select: { orderIndex: true },
+                });
+                const nextOrder = (maxItem?.orderIndex ?? 0) + 1;
+
                 await fastify.prisma.checklistItem.create({
                   data: {
                     templateId: templates[0].id,
@@ -198,7 +359,7 @@ const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
                     domain: change.domain || "both",
                     area: change.area,
                     question: change.question,
-                    orderIndex: change.orderIndex || 999,
+                    orderIndex: nextOrder,
                     defaultSeverity: change.severity || 1,
                     defaultSanctionable: change.sanctionable || false,
                   },

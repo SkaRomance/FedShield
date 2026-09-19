@@ -1035,6 +1035,72 @@ export function rejectNormSyncProposal(token: string, proposalId: string, note?:
   });
 }
 
+export interface NormativeSource {
+  id: string;
+  name: string;
+  type: string;
+  url: string | null;
+  description: string | null;
+  isActive: boolean;
+  lastSyncedAt?: string | null;
+}
+
+export interface NormSyncStatus {
+  isOnline: boolean;
+  counts: {
+    pending: number;
+    approved: number;
+    rejected: number;
+    total: number;
+  };
+  sources: NormativeSource[];
+  recentProposals: {
+    id: string;
+    normTitle: string;
+    normReference: string;
+    changeSummary: string;
+    status: string;
+    createdAt: string;
+  }[];
+  serverTime: string;
+}
+
+export interface NormSyncResult {
+  success: boolean;
+  sourcesChecked: number;
+  itemsFound: number;
+  relevantItems: number;
+  proposalsCreated: number;
+  skippedExisting: number;
+  offlineFallbackUsed: boolean;
+  errors: string[];
+  sources: {
+    id: string;
+    name: string;
+    type: string;
+    url: string | null;
+    itemsFetched: number;
+    newProposals: number;
+    error?: string;
+  }[];
+  syncedAt: string;
+}
+
+export function triggerNormSync(token: string, forceSimulate?: boolean): Promise<NormSyncResult> {
+  return authedFetch<NormSyncResult>("/norm-sync/sync-now", token, {
+    method: "POST",
+    body: JSON.stringify({ forceSimulate }),
+  });
+}
+
+export function fetchNormSyncStatus(token: string): Promise<NormSyncStatus> {
+  return authedFetch<NormSyncStatus>("/norm-sync/status", token);
+}
+
+export function fetchNormSyncSources(token: string): Promise<NormativeSource[]> {
+  return authedFetch<NormativeSource[]>("/norm-sync/sources", token);
+}
+
 // === EMPLOYEES (Sprint 2) ===
 export interface TrainingRecord {
   id: string;
