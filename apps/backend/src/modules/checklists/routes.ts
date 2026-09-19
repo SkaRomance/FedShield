@@ -1,6 +1,7 @@
 import { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
-import { ComplianceDomain, InspectionChecklistMode } from "@prisma/client";
+import { ChecklistSection, ComplianceDomain, InspectionChecklistMode } from "@prisma/client";
+import { writeAudit } from "../../plugins/audit.js";
 
 function buildAtecoVariants(atecoCode?: string) {
   if (!atecoCode) {
@@ -234,6 +235,179 @@ const checklistRoutes: FastifyPluginAsync = async (fastify) => {
         where,
         orderBy: [{ isRequired: "desc" }, { name: "asc" }],
       });
+    },
+  );
+
+  // ---- S20: Aggiunta Volontaria Requisiti Specifici (Custom Checklist Items) ----
+  // Consente al consulente di aggiungere controlli personalizzati / specifici
+  // durante un sopralluogo per una determinata attività.
+  fastify.post(
+    "/checklists/custom-items",
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const schema = z.object({
+        templateId: z.string().min(1),
+        section: z.nativeEnum(ChecklistSection).default(ChecklistSection.premises_equipment),
+        domain: z.nativeEnum(ComplianceDomain).default(ComplianceDomain.both),
+        area: z.string().min(1),
+        question: z.string().min(3),
+        normReference: z.string().optional(),
+        defaultSeverity: z.number().int().min(1).max(4).default(1),
+        defaultSanctionable: z.boolean().default(false),
+      });
+
+      const parsed = schema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply.badRequest("Dati requisito specifico non validi.");
+      }
+
+      const template = await fastify.prisma.checklistTemplate.findUnique({
+        where: { id: parsed.data.templateId },
+      });
+      if (!template) {
+        return reply.notFound("Checklist template non trovata.");
+      }
+
+      const maxItem = await fastify.prisma.checklistItem.findFirst({
+        where: { templateId: template.id },
+        orderBy: { orderIndex: "desc" },
+      });
+      const nextOrderIndex = (maxItem?.orderIndex ?? 0) + 1;
+
+      const created = await fastify.prisma.checklistItem.create({
+        data: {
+          templateId: template.id,
+          section: parsed.data.section,
+          domain: parsed.data.domain,
+          area: parsed.data.area,
+          question: parsed.data.question,
+          normReference: parsed.data.normReference ?? null,
+          defaultSeverity: parsed.data.defaultSeverity,
+          defaultSanctionable: parsed.data.defaultSanctionable,
+          orderIndex: nextOrderIndex,
+          isRequired: false,
+        },
+      });
+
+      const auth = request.user;
+      await writeAudit(fastify, {
+        userId: auth?.sub,
+        action: "checklistItem.create_custom",
+        entityType: "checklistItem",
+        entityId: created.id,
+        data: {
+          templateId: template.id,
+          area: created.area,
+          question: created.question,
+        },
+      });
+
+      return reply.code(201).send(created);
+    },
+  );
+
+  // Bulk creation per inserimento massivo (es. requisiti specifici generati da macchine registrate)
+  fastify.post(
+    "/checklists/custom-items/bulk",
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const schema = z.object({
+        templateId: z.string().min(1),
+        items: z
+          .array(
+            z.object({
+              section: z.nativeEnum(ChecklistSection).default(ChecklistSection.premises_equipment),
+              domain: z.nativeEnum(ComplianceDomain).default(ComplianceDomain.both),
+              area: z.string().min(1),
+              question: z.string().min(3),
+              normReference: z.string().optional(),
+              defaultSeverity: z.number().int().min(1).max(4).default(1),
+              defaultSanctionable: z.boolean().default(false),
+            }),
+          )
+          .min(1),
+      });
+
+      const parsed = schema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply.badRequest("Payload requisiti massivi non valido.");
+      }
+
+      const template = await fastify.prisma.checklistTemplate.findUnique({
+        where: { id: parsed.data.templateId },
+      });
+      if (!template) {
+        return reply.notFound("Checklist template non trovata.");
+      }
+
+      const maxItem = await fastify.prisma.checklistItem.findFirst({
+        where: { templateId: template.id },
+        orderBy: { orderIndex: "desc" },
+      });
+      let currentOrderIndex = maxItem?.orderIndex ?? 0;
+
+      const createdItems = [];
+      for (const item of parsed.data.items) {
+        currentOrderIndex += 1;
+        const created = await fastify.prisma.checklistItem.create({
+          data: {
+            templateId: template.id,
+            section: item.section,
+            domain: item.domain,
+            area: item.area,
+            question: item.question,
+            normReference: item.normReference ?? null,
+            defaultSeverity: item.defaultSeverity,
+            defaultSanctionable: item.defaultSanctionable,
+            orderIndex: currentOrderIndex,
+            isRequired: false,
+          },
+        });
+        createdItems.push(created);
+      }
+
+      const auth = request.user;
+      await writeAudit(fastify, {
+        userId: auth?.sub,
+        action: "checklistItem.create_bulk_custom",
+        entityType: "checklistItem",
+        entityId: template.id,
+        data: { count: createdItems.length },
+      });
+
+      return reply.code(201).send(createdItems);
+    },
+  );
+
+  fastify.delete(
+    "/checklists/custom-items/:id",
+    { preHandler: [fastify.authenticate] },
+    async (request, reply) => {
+      const params = z.object({ id: z.string().min(1) }).safeParse(request.params);
+      if (!params.success) {
+        return reply.badRequest("Item ID non valido.");
+      }
+
+      const existing = await fastify.prisma.checklistItem.findUnique({
+        where: { id: params.data.id },
+      });
+      if (!existing) {
+        return reply.notFound("Requisito non trovato.");
+      }
+
+      await fastify.prisma.checklistItem.delete({
+        where: { id: params.data.id },
+      });
+
+      const auth = request.user;
+      await writeAudit(fastify, {
+        userId: auth?.sub,
+        action: "checklistItem.delete_custom",
+        entityType: "checklistItem",
+        entityId: params.data.id,
+      });
+
+      return reply.send({ success: true, id: params.data.id });
     },
   );
 };

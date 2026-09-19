@@ -139,12 +139,15 @@ export interface ChecklistTemplate {
 
 export interface ChecklistItem {
   id: string;
-  section: "premises_equipment" | "procedures_hygiene";
+  section: "premises_equipment" | "procedures_hygiene" | "machinery_safety" | string;
   area: string;
   question: string;
   orderIndex: number;
   defaultSeverity: number;
   defaultSanctionable: boolean;
+  normReference?: string | null;
+  domain?: "safety" | "haccp" | "both";
+  isRequired?: boolean;
 }
 
 export type InspectionDocumentStatus =
@@ -1378,4 +1381,46 @@ export function updateFirstAidKit(token: string, id: string, payload: FirstAidKi
 
 export function deleteFirstAidKit(token: string, id: string) {
   return authedFetch<void>(`/first-aid-kits/${id}`, token, { method: "DELETE" });
+}
+
+// === S20: Custom Checklist Items API ===
+
+export interface CreateCustomItemPayload {
+  templateId: string;
+  section?: "premises_equipment" | "procedures_hygiene" | "machinery_safety" | string;
+  domain?: "safety" | "haccp" | "both";
+  area: string;
+  question: string;
+  normReference?: string;
+  defaultSeverity?: number;
+  defaultSanctionable?: boolean;
+}
+
+export function createCustomChecklistItem(
+  token: string,
+  payload: CreateCustomItemPayload,
+): Promise<ChecklistItem> {
+  return authedFetch<ChecklistItem>("/checklists/custom-items", token, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function createBulkCustomChecklistItems(
+  token: string,
+  payload: {
+    templateId: string;
+    items: Array<Omit<CreateCustomItemPayload, "templateId">>;
+  },
+): Promise<ChecklistItem[]> {
+  return authedFetch<ChecklistItem[]>("/checklists/custom-items/bulk", token, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteCustomChecklistItem(token: string, id: string): Promise<{ success: boolean; id: string }> {
+  return authedFetch<{ success: boolean; id: string }>(`/checklists/custom-items/${id}`, token, {
+    method: "DELETE",
+  });
 }

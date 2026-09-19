@@ -7,6 +7,8 @@ import {
   InspectionDocumentRequirement,
   InspectionSummary,
   createCompany,
+  createBulkCustomChecklistItems,
+  createCustomChecklistItem,
   createInspection,
   downloadGeneratedDocument,
   fetchChecklistItems,
@@ -266,13 +268,70 @@ export default function ChecklistPage({
   ]);
 
   const premisesItems = useMemo(
-    () => allItems.filter((item) => item.section === "premises_equipment"),
+    () => allItems.filter((item) => item.section === "premises_equipment" || item.section === "machinery_safety"),
     [allItems],
   );
   const procedureItems = useMemo(
     () => allItems.filter((item) => item.section === "procedures_hygiene"),
     [allItems],
   );
+
+  async function handleAddCustomItem(itemData: {
+    section: "premises_equipment" | "procedures_hygiene" | "machinery_safety";
+    area: string;
+    question: string;
+    normReference?: string;
+    defaultSeverity?: number;
+    defaultSanctionable?: boolean;
+    domain?: "safety" | "haccp" | "both";
+  }) {
+    if (templates.length === 0) {
+      throw new Error("Nessuna checklist template attiva selezionata.");
+    }
+    const targetTemplateId = templates[0].id;
+    const created = await createCustomChecklistItem(token, {
+      templateId: targetTemplateId,
+      ...itemData,
+    });
+    setAllItems((prev) => [...prev, created]);
+    setAnswers((prev) => ({
+      ...prev,
+      [created.id]: defaultAnswer(created),
+    }));
+    setMessage(`Requisito specifico "${created.area}" aggiunto alla checklist.`);
+    return created;
+  }
+
+  async function handleAddBulkCustomItems(
+    itemsData: Array<{
+      section?: string;
+      area: string;
+      question: string;
+      normReference?: string;
+      defaultSeverity?: number;
+      defaultSanctionable?: boolean;
+      domain?: "safety" | "haccp" | "both";
+    }>,
+  ) {
+    if (templates.length === 0) {
+      throw new Error("Nessuna checklist template attiva selezionata.");
+    }
+    const targetTemplateId = templates[0].id;
+    const createdList = await createBulkCustomChecklistItems(token, {
+      templateId: targetTemplateId,
+      items: itemsData,
+    });
+    setAllItems((prev) => [...prev, ...createdList]);
+    setAnswers((prev) => {
+      const next = { ...prev };
+      for (const item of createdList) {
+        next[item.id] = defaultAnswer(item);
+      }
+      return next;
+    });
+    setMessage(`${createdList.length} requisiti specifici aggiunti alla checklist.`);
+    return createdList;
+  }
 
   useEffect(() => {
     if (!initialCompanyId) return;
@@ -1206,6 +1265,8 @@ export default function ChecklistPage({
         <Step2LocaliAttrezzature
           premisesItems={premisesItems}
           renderAnswersTable={renderAnswersTable}
+          onAddCustomItem={handleAddCustomItem}
+          isInspectionValidated={!!isInspectionValidated}
         />
       )}
 
@@ -1213,6 +1274,8 @@ export default function ChecklistPage({
         <Step3ProcedureIgiene
           procedureItems={procedureItems}
           renderAnswersTable={renderAnswersTable}
+          onAddCustomItem={handleAddCustomItem}
+          isInspectionValidated={!!isInspectionValidated}
         />
       )}
 
@@ -1221,6 +1284,8 @@ export default function ChecklistPage({
           token={token}
           companyId={selectedCompany?.id ?? companyId}
           onOpenQr={onOpenQr ?? (() => undefined)}
+          onAddCustomItems={handleAddBulkCustomItems}
+          existingChecklistItems={allItems}
         />
       )}
 
