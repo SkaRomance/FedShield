@@ -39,11 +39,69 @@ function buildAtecoVariants(atecoCode?: string) {
   if (parts[0] === "85") {
     variants.add("ISTRUZIONE_FORMAZIONE");
   }
-  if (normalized.startsWith("45.2")) {
+  if (parts[0] === "45" || normalized.startsWith("45.2")) {
     variants.add("AUTORIPARAZIONE");
   }
   if (parts[0] === "10" && !normalized.startsWith("10.85")) {
     variants.add("INDUSTRIA_ALIMENTARE");
+  }
+
+  // EDILIZIA (Costruzioni, cantieri, ingegneria civile, impiantistica)
+  if (parts[0] === "41" || parts[0] === "42" || parts[0] === "43") {
+    variants.add("EDILIZIA");
+    variants.add("construction");
+  }
+
+  // METALMECCANICA (Fabbricazione prodotti in metallo, macchinari, saldatura)
+  if (parts[0] === "25" || parts[0] === "28") {
+    variants.add("metalmechanics");
+    variants.add("METALMECCANICO");
+    variants.add("METALMECCANICA");
+    variants.add("metalworking");
+  }
+
+  // SANITA (Assistenza sanitaria, studi medici, odontoiatria, RSA)
+  if (parts[0] === "86" || parts[0] === "87") {
+    variants.add("healthcare");
+    variants.add("SANITA");
+  }
+
+  // UFFICI / SERVIZI IT (Informatica, software, consulenza, studi professionali)
+  if (
+    parts[0] === "62" ||
+    parts[0] === "69" ||
+    parts[0] === "70" ||
+    parts[0] === "74" ||
+    parts[0] === "58" ||
+    parts[0] === "63"
+  ) {
+    variants.add("office-it");
+    variants.add("office");
+    variants.add("UFFICI");
+  }
+
+  // AGRICOLTURA (Coltivazioni agricole, produzione prodotti animali, vivai, cantine)
+  if (parts[0] === "01") {
+    variants.add("agriculture");
+    variants.add("AGRICOLTURA");
+  }
+
+  // SPORT & FITNESS (Palestre, piscine, circoli sportivi, impianti fitness)
+  if (normalized.startsWith("93.1")) {
+    variants.add("SPORT_FITNESS");
+    variants.add("sport_fitness");
+  }
+
+  // TRASPORTO PERSONE (NCC, taxi, noleggio bus con conducente)
+  if (normalized.startsWith("49.3")) {
+    variants.add("TRASPORTO_PERSONE");
+    variants.add("passenger_transport");
+  }
+
+  // FALEGNAMERIA / LAVORAZIONE LEGNO (Industria del legno, fabbricazione mobili)
+  if (parts[0] === "16" || parts[0] === "31") {
+    variants.add("FALEGNAMERIA_LEGNO");
+    variants.add("woodworking");
   }
 
   return [...variants];

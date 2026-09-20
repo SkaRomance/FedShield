@@ -225,6 +225,157 @@ const sectors: SectorDefinition[] = [
       { name: "Dichiarazioni MOCA e materiali a contatto alimentare", domain: ComplianceDomain.haccp, isRequired: false },
     ],
   },
+  {
+    id: "sport-fitness",
+    name: "Checklist Sport, Fitness e Piscine - Generale",
+    description: "Controlli macro ATECO 93.1: palestre, centri fitness, piscine, circoli sportivi e impianti polivalenti.",
+    macroGroup: "SPORT_FITNESS",
+    items: [
+      item(ChecklistSection.first_aid, ComplianceDomain.safety, "Defibrillatore (DAE)", "E' presente un defibrillatore semiautomatico (DAE) funzionante, segnalato, con verifiche/batterie/piastre entro scadenza e personale formato BLSD?", 4, true, "L. 120/2001; DM 24/04/2013; L. 116/2021"),
+      item(ChecklistSection.procedures_hygiene, ComplianceDomain.both, "Legionellosi e docce", "E' redatto il piano di prevenzione del rischio Legionellosi con campionamenti periodici dell'impianto idrico di docce e spogliatoi?", 4, true, "Linee Guida Legionellosi 07/05/2015; D.Lgs. 81/2008 art. 268"),
+      item(ChecklistSection.machinery_safety, ComplianceDomain.safety, "Macchine fitness", "Attrezzature isotoniche, cardio e pesi sono certificate CE/UNI EN ISO 20957 con cavi, perni e fermi integri e manutenzione programmata?", 4, true, "D.Lgs. 81/2008, art. 71; UNI EN ISO 20957"),
+      item(ChecklistSection.access_security, ComplianceDomain.safety, "Pavimenti e spogliatoi", "I pavimenti di docce, spogliatoi e bordo vasca sono antiscivolo (R11+ / classe C), senza ristagni idrici persistenti ne pericolo inciampo?", 3, true, "D.Lgs. 81/2008, Allegato IV"),
+      item(ChecklistSection.fire_prevention, ComplianceDomain.safety, "Vie di esodo e capienza", "Uscite di sicurezza e maniglioni antipanico sono liberi, dimensionati per il massimo affollamento, con illuminazione emergenza verificata?", 4, true, "D.Lgs. 81/2008, art. 46; DM 03/09/2021; DPR 151/2011"),
+      item(ChecklistSection.environment, ComplianceDomain.safety, "Aerazione e VMC", "I locali di allenamento e gli spogliatoi garantiscono ricambi d'aria adeguati (VMC con filtri regolarmente puliti) e microclima idoneo?", 3, false, "D.Lgs. 81/2008, Allegato IV"),
+      item(ChecklistSection.chemical_fitosanitary, ComplianceDomain.safety, "Prodotti chimici", "I prodotti disinfettanti e per trattamento acqua (cloro, correttori pH per piscine) hanno SDS e stoccaggio con bacino di contenimento?", 4, true, "Reg. CLP 1272/2008; D.Lgs. 81/2008, art. 223"),
+      item(ChecklistSection.electrical, ComplianceDomain.safety, "Impianti elettrici locali umidi", "Gli impianti elettrici in zone docce, saune e vasche rispettano le norme CEI 64-8 per ambienti a maggior rischio elettrico con differenziali 30mA?", 4, true, "CEI 64-8; DPR 462/01; D.Lgs. 81/2008 art. 80"),
+      item(ChecklistSection.procedures_hygiene, ComplianceDomain.both, "Idoneita sportiva", "E' definita e applicata la procedura per la verifica e archiviazione dei certificati medici sportivi in corso di validita per tutti gli iscritti?", 3, false, "DM 24/04/2013; DM 08/08/2014"),
+      item(ChecklistSection.documentation, ComplianceDomain.safety, "Documentazione", "DVR, nomine addetti emergenza/BLSD, registro manutenzioni e procedure per infortuni sono aggiornati per la struttura?", 3, true, "D.Lgs. 81/2008, art. 17 e 28"),
+    ],
+    documents: [
+      { name: "DVR centro sportivo e fitness aggiornato", domain: ComplianceDomain.safety },
+      { name: "Registro verifiche DAE e attestati BLSD addetti", domain: ComplianceDomain.safety },
+      { name: "Piano prevenzione e registro campionamenti Legionella", domain: ComplianceDomain.safety },
+      { name: "Registro verifiche e manutenzione attrezzature fitness", domain: ComplianceDomain.safety },
+      { name: "Piano emergenza, evacuazione e registro antincendio", domain: ComplianceDomain.safety },
+      { name: "Dichiarazione conformita impianti elettrici e verifiche DPR 462/01", domain: ComplianceDomain.safety },
+      { name: "Piano autocontrollo vasca e registro parametri piscina (se presente)", domain: ComplianceDomain.safety, isRequired: false },
+    ],
+  },
+  {
+    id: "passenger-transport",
+    name: "Checklist Trasporto Persone - NCC, Taxi e Bus",
+    description: "Controlli macro ATECO 49.3: autonoleggio con conducente (NCC), taxi, servizi di linea e autobus turistici.",
+    macroGroup: "TRASPORTO_PERSONE",
+    items: [
+      item(ChecklistSection.health_surveillance, ComplianceDomain.safety, "Alcol e tossicodipendenza", "I conducenti sono sottoposti a sorveglianza sanitaria preventiva e periodica con test per assenza di tossicodipendenza e alcol-dipendenza?", 4, true, "D.Lgs. 81/2008, art. 41 c. 4; Intesa Stato-Regioni 30/10/2007"),
+      item(ChecklistSection.machinery_safety, ComplianceDomain.safety, "Manutenzione veicoli", "Tutti i veicoli adibiti a servizio passeggeri hanno revisione periodica regolare (annuale), tagliandi eseguiti e pneumatici conformi?", 4, true, "D.Lgs. 81/2008, art. 71; Codice della Strada art. 80"),
+      item(ChecklistSection.ergonomics, ComplianceDomain.safety, "Tempi guida e riposo", "E' monitorato e documentato il rispetto dei tempi massimi di guida e dei riposi obbligatori dei conducenti (tramite cronotachigrafo ove previsto)?", 4, true, "Reg. CE 561/2006; D.Lgs. 234/2007"),
+      item(ChecklistSection.first_aid, ComplianceDomain.safety, "Primo soccorso di bordo", "Ciascun mezzo e' dotato di pacchetto di medicazione / cassetta primo soccorso a bordo, integro, con presidi entro la data di scadenza?", 3, true, "DM 388/2003, Allegato 2; D.Lgs. 81/2008 art. 45"),
+      item(ChecklistSection.fire_prevention, ComplianceDomain.safety, "Estintori di bordo", "Gli estintori a bordo veicolo sono presenti, saldamente staffati con supporto a sgancio rapido e revisionati semestralmente?", 4, true, "DM 18/04/1977; UNI 9994-1; D.Lgs. 81/2008 art. 46"),
+      item(ChecklistSection.safety_training, ComplianceDomain.safety, "Abilitazioni alla guida", "I conducenti sono in possesso di patenti superiori valide, CQC persone (ove richiesta), CAP KB o iscrizione al ruolo conducenti?", 4, true, "D.Lgs. 285/1992; D.Lgs. 395/2000; D.Lgs. 81/2008 art. 36-37"),
+      item(ChecklistSection.ppe, ComplianceDomain.safety, "DPI e sicurezza stradale", "I veicoli dispongono di giubbotti ad alta visibilita certificati CE, triangolo di emergenza e torcia per fermate accidentali su strada?", 3, true, "Codice della Strada art. 162; Reg. UE 2016/425"),
+      item(ChecklistSection.procedures_hygiene, ComplianceDomain.both, "Igiene dell'abitacolo", "E' attuata una procedura di pulizia, disinfezione dell'abitacolo e manutenzione periodica dei filtri clima del veicolo?", 2, false, "D.Lgs. 81/2008, Allegato IV"),
+      item(ChecklistSection.procedures_hygiene, ComplianceDomain.safety, "Gestione avarie e sinistri", "I conducenti dispongono di istruzioni operative scritte su procedure di sicurezza in caso di guasto, sinistro stradale o malore a bordo?", 3, false, "D.Lgs. 81/2008, art. 43"),
+      item(ChecklistSection.documentation, ComplianceDomain.safety, "Documentazione e DVR", "Il DVR aziendale comprende la valutazione del rischio stradale, stress lavoro-correlato da traffico, lavoro notturno e aggressioni terzi?", 3, true, "D.Lgs. 81/2008, art. 17 e 28"),
+    ],
+    documents: [
+      { name: "DVR trasporto persone con valutazione rischio stradale", domain: ComplianceDomain.safety },
+      { name: "Idoneita sanitaria e accertamenti tossicologici/alcol dei conducenti", domain: ComplianceDomain.safety },
+      { name: "Registro manutenzione e revisioni periodiche parco veicoli", domain: ComplianceDomain.safety },
+      { name: "Elenco patenti, CQC persone e titoli abilitativi conducenti con scadenze", domain: ComplianceDomain.safety },
+      { name: "Registro controlli estintori e cassette pronto soccorso di bordo", domain: ComplianceDomain.safety },
+      { name: "Report scarico dati cronotachigrafo (carte e veicoli)", domain: ComplianceDomain.safety, isRequired: false },
+    ],
+  },
+  {
+    id: "woodworking",
+    name: "Checklist Falegnameria e Lavorazione Legno - Generale",
+    description: "Controlli macro ATECO 16 e 31: falegnamerie, fabbricazione mobili, taglio, fresatura e finitura del legno.",
+    macroGroup: "FALEGNAMERIA_LEGNO",
+    items: [
+      item(ChecklistSection.chemical_fitosanitary, ComplianceDomain.safety, "Polveri di legno duro", "E' presente la valutazione del rischio cancerogeno per polveri di legno duro con registro esposti, misure di aspirazione e rispetto VLEP?", 4, true, "D.Lgs. 81/2008, Titolo IX, Capo II, Allegato XLII"),
+      item(ChecklistSection.premises_equipment, ComplianceDomain.safety, "Aspirazione localizzata", "Tutte le macchine per la lavorazione del legno sono collegate ad impianto di aspirazione localizzata efficiente con manutenzione filtri?", 4, true, "D.Lgs. 81/2008, art. 71 e Allegato IV punto 2"),
+      item(ChecklistSection.fire_prevention, ComplianceDomain.safety, "Rischio esplosione (ATEX)", "Silos segatura, tubazioni e filtri a maniche sono classificati ATEX con pannelli antiscoppio e apparecchiature elettriche antideflagranti?", 4, true, "D.Lgs. 81/2008, Titolo XI, Allegato XLIX"),
+      item(ChecklistSection.machinery_safety, ComplianceDomain.safety, "Seghe circolari e troncatrici", "Le seghe circolari dispongono di cuneo fenditore, cuffia di protezione della lama, spingitoi per pezzi piccoli e arresti di emergenza?", 4, true, "D.Lgs. 81/2008, art. 71 e Allegato V, Parte II"),
+      item(ChecklistSection.machinery_safety, ComplianceDomain.safety, "Pialle e toupie", "Le pialle hanno protezione a ponte o ventaglio sull'albero e le toupie montano guidapezzo e pressori antiritorno del pezzo in lavorazione?", 4, true, "D.Lgs. 81/2008, art. 71 e Allegato V; UNI EN 848-1"),
+      item(ChecklistSection.environment, ComplianceDomain.safety, "Rumore e vibrazioni", "E' presente la valutazione del rischio rumore (con marcatura aree oltre gli 85 dB) e fornitura di DPI otoprotettori specifici?", 3, true, "D.Lgs. 81/2008, Titolo VIII, Capo II"),
+      item(ChecklistSection.chemical_fitosanitary, ComplianceDomain.safety, "Vernici e solventi", "Colle, vernici, solventi e impregnanti sono stoccati in armadi ventilati di sicurezza, con SDS disponibili e applicazione con aspirazione?", 4, true, "D.Lgs. 81/2008, art. 223, 224; Reg. CLP 1272/2008"),
+      item(ChecklistSection.ppe, ComplianceDomain.safety, "DPI falegnameria", "Gli addetti utilizzano occhiali/visiere paraschegge, maschere FFP3 per polveri di legno duro, calzature di sicurezza e cuffie antirumore?", 4, true, "D.Lgs. 81/2008, Titolo III, Capo II; Reg. UE 2016/425"),
+      item(ChecklistSection.fire_prevention, ComplianceDomain.safety, "Antincendio falegnameria", "Deposito legname e officina hanno presidi antincendio adeguati, divieto fumo rigoroso, pulizia quotidiana trucioli e vie di fuga libere?", 4, true, "D.Lgs. 81/2008, art. 46; DM 03/09/2021"),
+      item(ChecklistSection.documentation, ComplianceDomain.safety, "Documentazione", "DVR aggiornato con protocollo sanitario specifico per polveri cancerogene e rumore, nomine sicurezza e formazione addetti attestata?", 4, true, "D.Lgs. 81/2008, art. 17, 28, 41"),
+    ],
+    documents: [
+      { name: "DVR falegnameria con valutazione rischio cancerogeno polveri legno e rumore", domain: ComplianceDomain.safety },
+      { name: "Documento di protezione contro le esplosioni (DVR ATEX silos/polveri)", domain: ComplianceDomain.safety },
+      { name: "Registro degli esposti ad agenti cancerogeni (polveri di legno duro)", domain: ComplianceDomain.safety },
+      { name: "Registro manutenzione impianto aspirazione e macchine per legno", domain: ComplianceDomain.safety },
+      { name: "Schede di sicurezza (SDS) colle, vernici, impregnanti e solventi", domain: ComplianceDomain.safety },
+      { name: "Verbali idoneita sanitaria ed esami audiometrici dei lavoratori", domain: ComplianceDomain.safety },
+    ],
+  },
+];
+
+const additionalSectorDocuments: Array<{
+  macroGroup: string;
+  sectorName: string;
+  documents: SectorDocument[];
+}> = [
+  {
+    macroGroup: "EDILIZIA",
+    sectorName: "Edilizia e Cantieri",
+    documents: [
+      { name: "PSC (Piano di Sicurezza e Coordinamento) o POS (Piano Operativo di Sicurezza)", domain: ComplianceDomain.safety },
+      { name: "Notifica preliminare cantiere ASL e Ispettorato del Lavoro", domain: ComplianceDomain.safety },
+      { name: "Pi.M.U.S. (Piano di Montaggio, Uso e Smontaggio ponteggi)", domain: ComplianceDomain.safety },
+      { name: "Registro verifiche periodiche ponteggi, gru e apparecchi sollevamento", domain: ComplianceDomain.safety },
+      { name: "DURC regolare e verifica idoneita tecnico-professionale imprese", domain: ComplianceDomain.safety },
+      { name: "Libretti di circolazione e verifiche macchine movimento terra e PEMP", domain: ComplianceDomain.safety },
+      { name: "DUVRI cantiere per ditte esterne e subappalti", domain: ComplianceDomain.safety, isRequired: false },
+    ],
+  },
+  {
+    macroGroup: "metalmechanics",
+    sectorName: "Metalmeccanica",
+    documents: [
+      { name: "DVR officina metalmeccanica e valutazione rumore/vibrazioni", domain: ComplianceDomain.safety },
+      { name: "Libretti uso, manutenzione e marcatura CE macchine utensili", domain: ComplianceDomain.safety },
+      { name: "Registro verifiche periodiche attrezzature di lavoro (art. 71 D.Lgs. 81/08)", domain: ComplianceDomain.safety },
+      { name: "Permessi di lavoro a caldo e procedure sicurezza saldatura/taglio", domain: ComplianceDomain.safety },
+      { name: "Schede di sicurezza (SDS) gas tecnici, lubrorefrigeranti, oli e vernici", domain: ComplianceDomain.safety },
+      { name: "Registro carico/scarico rifiuti speciali (FIR) fanghi e oli esausti", domain: ComplianceDomain.safety },
+      { name: "Attestati abilitazione carrellisti, saldatori e conduttori gru/carroponte", domain: ComplianceDomain.safety },
+    ],
+  },
+  {
+    macroGroup: "healthcare",
+    sectorName: "Sanita e Studi Medici",
+    documents: [
+      { name: "Autorizzazione all'esercizio / Accreditamento sanitario regionale", domain: ComplianceDomain.both },
+      { name: "DVR rischio biologico, agenti chimici e radioprotezione", domain: ComplianceDomain.safety },
+      { name: "Registro sterilizzazione e verifiche autoclavi (test Bowie-Dick/spore)", domain: ComplianceDomain.both },
+      { name: "Protocollo e registro rifiuti speciali a rischio infettivo (CER 180103) e FIR", domain: ComplianceDomain.safety },
+      { name: "Piano prevenzione e campionamento Legionellosi rete idrica", domain: ComplianceDomain.safety },
+      { name: "Registro dosimetria e relazione Esperto di Radioprotezione", domain: ComplianceDomain.safety, isRequired: false },
+      { name: "Protocolli igienico-sanitari e procedure disinfezione ambulatoriale", domain: ComplianceDomain.both },
+    ],
+  },
+  {
+    macroGroup: "office-it",
+    sectorName: "Uffici e Servizi IT",
+    documents: [
+      { name: "DVR uffici e valutazione ergonomica videoterminali (VDT)", domain: ComplianceDomain.safety },
+      { name: "Valutazione rischio stress lavoro-correlato", domain: ComplianceDomain.safety },
+      { name: "Piano di emergenza, evacuazione e planimetrie di esodo", domain: ComplianceDomain.safety },
+      { name: "Verbale prova di evacuazione annuale", domain: ComplianceDomain.safety },
+      { name: "Dichiarazione conformita impianto elettrico e verifiche DPR 462/01", domain: ComplianceDomain.safety },
+      { name: "Registro manutenzione presidi antincendio e illuminazione emergenza", domain: ComplianceDomain.safety },
+      { name: "Registro dei trattamenti GDPR e nomine incaricati trattamento dati", domain: ComplianceDomain.safety, isRequired: false },
+    ],
+  },
+  {
+    macroGroup: "agriculture",
+    sectorName: "Agricoltura e Cantine",
+    documents: [
+      { name: "DVR azienda agricola e valutazione rischi specifici", domain: ComplianceDomain.safety },
+      { name: "Registro dei trattamenti fitosanitari (Quaderno di Campagna)", domain: ComplianceDomain.safety },
+      { name: "Abilitazione all'acquisto e utilizzo prodotti fitosanitari (Patentino PAN)", domain: ComplianceDomain.safety },
+      { name: "Schede di sicurezza (SDS) prodotti fitosanitari e fertilizzanti", domain: ComplianceDomain.safety },
+      { name: "Libretti di circolazione e verifiche ROPS/cardani macchine agricole", domain: ComplianceDomain.safety },
+      { name: "Attestati abilitazione alla conduzione trattori agricoli o forestali", domain: ComplianceDomain.safety },
+      { name: "Protocollo stoccaggio carburanti agricoli e vasche contenimento", domain: ComplianceDomain.safety, isRequired: false },
+    ],
+  },
 ];
 
 export async function seedMacroSettori() {
@@ -262,8 +413,8 @@ export async function seedMacroSettori() {
     });
   }
 
-  await prisma.documentTemplate.createMany({
-    data: sectors.flatMap((sector) =>
+  const allDocumentsData = [
+    ...sectors.flatMap((sector) =>
       sector.documents.map((document, index) => ({
         id: `doc-${sector.id}-${String(index + 1).padStart(2, "0")}`,
         name: document.name,
@@ -276,12 +427,29 @@ export async function seedMacroSettori() {
         seedSource: SEED_SOURCE,
       })),
     ),
+    ...additionalSectorDocuments.flatMap((sector) =>
+      sector.documents.map((document, index) => ({
+        id: `doc-${sector.macroGroup.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${String(index + 1).padStart(2, "0")}`,
+        name: document.name,
+        description: `Documento richiesto per ${sector.sectorName}`,
+        domain: document.domain,
+        macroGroup: sector.macroGroup,
+        isGeneral: false,
+        isRequired: document.isRequired ?? true,
+        isActive: true,
+        seedSource: SEED_SOURCE,
+      })),
+    ),
+  ];
+
+  await prisma.documentTemplate.createMany({
+    data: allDocumentsData,
   });
 
   console.log(
-    `Seed macrosettori completato: ${sectors.length} settori, ${sectors.reduce(
+    `Seed macrosettori completato: ${sectors.length} settori (+ ${additionalSectorDocuments.length} settori verticali documentati), ${sectors.reduce(
       (total, sector) => total + sector.items.length,
       0,
-    )} item, ${sectors.reduce((total, sector) => total + sector.documents.length, 0)} documenti.`,
+    )} item, ${allDocumentsData.length} documenti.`,
   );
 }

@@ -75,6 +75,62 @@ async function run() {
       expectedText: ["HACCP", "Allergeni", "Catena freddo"],
       minDocs: 8,
     },
+    {
+      ateco: "93.13",
+      macroGroup: "SPORT_FITNESS",
+      expectedTemplate: "Sport, Fitness e Piscine",
+      expectedText: ["Defibrillatore", "Legionellosi", "fitness"],
+      minDocs: 6,
+    },
+    {
+      ateco: "49.32",
+      macroGroup: "TRASPORTO_PERSONE",
+      expectedTemplate: "Trasporto Persone",
+      expectedText: ["Alcol", "veicoli", "guida"],
+      minDocs: 6,
+    },
+    {
+      ateco: "16.23",
+      macroGroup: "FALEGNAMERIA_LEGNO",
+      expectedTemplate: "Falegnameria",
+      expectedText: ["Polveri", "aspirazione", "circolari"],
+      minDocs: 6,
+    },
+    {
+      ateco: "41.20",
+      macroGroup: "EDILIZIA",
+      expectedTemplate: "Edilizia",
+      expectedText: ["Ponteggi", "DPI", "cadute"],
+      minDocs: 6,
+    },
+    {
+      ateco: "25.62",
+      macroGroup: "metalmechanics",
+      expectedTemplate: "Metalmeccanico",
+      expectedText: ["Macchine", "saldatura", "DPI"],
+      minDocs: 6,
+    },
+    {
+      ateco: "86.21",
+      macroGroup: "healthcare",
+      expectedTemplate: "Sanita",
+      expectedText: ["locali", "biologico", "DPI"],
+      minDocs: 6,
+    },
+    {
+      ateco: "62.01",
+      macroGroup: "office-it",
+      expectedTemplate: "Uffici",
+      expectedText: ["postazioni", "ergonomia", "emergenza"],
+      minDocs: 6,
+    },
+    {
+      ateco: "01.11",
+      macroGroup: "agriculture",
+      expectedTemplate: "Agricoltura",
+      expectedText: ["Trattori", "fitosanitari", "sicurezza"],
+      minDocs: 6,
+    },
   ];
 
   for (const sector of sectors) {

@@ -67,6 +67,14 @@ export const ACTIVITY_TYPE_OPTIONS = [
   { value: "education_training", label: "Scuola / Formazione", atecoCode: "85.59" },
   { value: "auto_repair", label: "Autoriparazione / Officina", atecoCode: "45.20" },
   { value: "food_industry", label: "Industria alimentare", atecoCode: "10.71" },
+  { value: "construction", label: "Edilizia e Cantieri", atecoCode: "41.20" },
+  { value: "metalworking", label: "Metalmeccanica e Lavorazioni", atecoCode: "25.62" },
+  { value: "healthcare", label: "Sanità, Studi Medici e RSA", atecoCode: "86.21" },
+  { value: "office", label: "Uffici e Servizi Professionali / IT", atecoCode: "62.01" },
+  { value: "agriculture", label: "Agricoltura e Cantine", atecoCode: "01.11" },
+  { value: "sport_fitness", label: "Palestre, Piscine e Centri Sportivi", atecoCode: "93.13" },
+  { value: "passenger_transport", label: "Trasporto Persone (NCC, Taxi, Bus)", atecoCode: "49.32" },
+  { value: "woodworking", label: "Falegnameria e Arredo Legno", atecoCode: "16.23" },
   { value: "custom", label: "Altro (ATECO manuale)", atecoCode: "" },
 ] as const;
 
@@ -235,6 +243,21 @@ export function inferActivityFromAteco(atecoCode?: string | null): ActivityTypeO
   if (normalized.startsWith("10")) return "food_industry";
   if (normalized.startsWith("56.30")) return "bar";
   if (normalized.startsWith("56.10")) return "restaurant";
+  if (normalized.startsWith("41") || normalized.startsWith("42") || normalized.startsWith("43")) return "construction";
+  if (normalized.startsWith("25") || normalized.startsWith("28")) return "metalworking";
+  if (normalized.startsWith("86") || normalized.startsWith("87")) return "healthcare";
+  if (
+    normalized.startsWith("62") ||
+    normalized.startsWith("69") ||
+    normalized.startsWith("70") ||
+    normalized.startsWith("74") ||
+    normalized.startsWith("58") ||
+    normalized.startsWith("63")
+  ) return "office";
+  if (normalized.startsWith("01")) return "agriculture";
+  if (normalized.startsWith("93.1")) return "sport_fitness";
+  if (normalized.startsWith("49.3")) return "passenger_transport";
+  if (normalized.startsWith("16") || normalized.startsWith("31")) return "woodworking";
   return "custom";
 }
 

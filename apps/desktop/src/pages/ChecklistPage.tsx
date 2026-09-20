@@ -267,13 +267,26 @@ export default function ChecklistPage({
     newCompanyHaccpAdditionalRoles,
   ]);
 
+  const PREMISES_SECTIONS = useMemo(
+    () =>
+      new Set([
+        "premises_equipment",
+        "machinery_safety",
+        "electrical",
+        "fire_prevention",
+        "workstations",
+        "access_security",
+      ]),
+    [],
+  );
+
   const premisesItems = useMemo(
-    () => allItems.filter((item) => item.section === "premises_equipment" || item.section === "machinery_safety"),
-    [allItems],
+    () => allItems.filter((item) => PREMISES_SECTIONS.has(item.section)),
+    [allItems, PREMISES_SECTIONS],
   );
   const procedureItems = useMemo(
-    () => allItems.filter((item) => item.section === "procedures_hygiene"),
-    [allItems],
+    () => allItems.filter((item) => !PREMISES_SECTIONS.has(item.section)),
+    [allItems, PREMISES_SECTIONS],
   );
 
   async function handleAddCustomItem(itemData: {
