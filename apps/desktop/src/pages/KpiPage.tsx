@@ -86,7 +86,7 @@ export default function KpiPage({ token, companies }: KpiPageProps) {
             ))}
           </select>
         </div>
-        <div className="footer-actions" style={{ alignSelf: "end" }}>
+        <div style={{ alignSelf: "end" }}>
           <button className="btn-primary" onClick={handleSnapshot}>
             Salva rilevazione
           </button>
@@ -129,6 +129,13 @@ export default function KpiPage({ token, companies }: KpiPageProps) {
                     <td>{item.score}</td>
                   </tr>
                 ))}
+                {companyKpi.radar.length === 0 && (
+                  <tr>
+                    <td colSpan={2} className="tabella-vuota">
+                      Nessun punteggio per area: completa un sopralluogo per questa azienda.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -152,6 +159,13 @@ export default function KpiPage({ token, companies }: KpiPageProps) {
                     <td>{item.sanctionableNc}</td>
                   </tr>
                 ))}
+                {companyKpi.trend.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="tabella-vuota">
+                      Nessun andamento disponibile per questa azienda.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -179,6 +193,13 @@ export default function KpiPage({ token, companies }: KpiPageProps) {
                 <td>{siNo(item.lowNcAlert)}</td>
               </tr>
             ))}
+            {(overview?.consultants ?? []).length === 0 && (
+              <tr>
+                <td colSpan={5} className="tabella-vuota">
+                  Nessun consulente monitorato.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
