@@ -882,82 +882,40 @@ th,
   border-left: 1px solid var(--color-border);
 }
 
-/* Riquadro data/ora nel sopralluogo */
-.rilevazione-ora {
+/* Data e ora del sopralluogo: una riga di conferma, non un riquadro.
+   Il momento viene registrato da solo, quindi non deve rubare spazio. */
+.riga-data-ora {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--sp-4);
-  padding: var(--sp-4);
-  border: 1px solid var(--color-border);
-  border-left: 3px solid var(--color-accent-bright);
-  border-radius: var(--r-lg);
-  background: var(--color-surface);
+  gap: var(--sp-2) var(--sp-3);
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-3);
+  border-top: 1px dashed var(--color-border);
 }
 
-.rilevazione-ora-blocco {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.rilevazione-ora-etichetta {
-  font-size: var(--fs-micro);
-  font-weight: var(--fw-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-wide);
-  color: var(--color-text-muted);
-}
-
-.rilevazione-ora-valore {
-  font-size: var(--fs-md);
-  font-weight: var(--fw-semibold);
-  color: var(--color-text);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: var(--ls-snug);
-}
-
-.rilevazione-ora-valore--grande {
-  font-size: 22px;
-  font-weight: var(--fw-bold);
-  letter-spacing: var(--ls-tight);
-}
-
-.rilevazione-ora-nota {
-  flex-basis: 100%;
-  font-size: var(--fs-xs);
-  color: var(--color-text-muted);
-  line-height: 1.6;
-  margin: 0;
-}
-
-.badge-regime {
+.riga-data-ora-testo {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 9px;
-  border-radius: var(--r-full);
-  font-size: var(--fs-micro);
-  font-weight: var(--fw-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-wide);
-  border: 1px solid var(--color-border-strong);
-  background: var(--color-surface-muted);
+  gap: 6px;
+  font-size: var(--fs-sm);
   color: var(--color-text-muted);
-  white-space: nowrap;
 }
 
-.badge-regime--legale {
-  border-color: var(--color-accent-soft-border);
-  background: var(--color-accent-soft);
+.riga-data-ora-testo svg {
   color: var(--color-accent);
+  flex-shrink: 0;
 }
 
-.badge-regime--solare {
-  border-color: var(--color-border-strong);
-  background: var(--color-surface-muted);
-  color: var(--color-secondary);
+.riga-data-ora-testo strong {
+  color: var(--color-text);
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.riga-data-ora-campi {
+  flex-basis: 100%;
+  margin-top: var(--sp-2);
 }
 
 /* ============================================================
@@ -1320,9 +1278,6 @@ input[readonly] {
   }
   .kpi-card {
     padding: var(--sp-4);
-  }
-  .rilevazione-ora {
-    gap: var(--sp-3);
   }
 }
 

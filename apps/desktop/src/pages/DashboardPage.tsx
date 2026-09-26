@@ -13,7 +13,6 @@ import {
   Sun,
   Moon,
   Bell,
-  CalendarClock,
   CloudUpload,
   TriangleAlert,
 } from "lucide-react";
@@ -27,7 +26,6 @@ import {
 import { queueSyncEvent } from "../services/syncManager";
 import { useNotificationBadge } from "../hooks/useNotificationBadge";
 import { useTheme } from "../hooks/useTheme";
-import { useOrologioItaliano } from "../hooks/useOrologioItaliano";
 import { formattaData } from "../lib/oraItalia";
 import {
   etichettaRuolo,
@@ -35,6 +33,7 @@ import {
   etichettaStatoSopralluogo,
   pastigliaStatoSopralluogo,
 } from "../lib/etichette";
+import OrologioTestata from "../components/OrologioTestata";
 import ChecklistPage from "./ChecklistPage";
 import CustomerRegistryPage from "./CustomerRegistryPage";
 import KpiPage from "./KpiPage";
@@ -115,7 +114,6 @@ export default function DashboardPage({
 
   const { count: alertCount } = useNotificationBadge(token);
   const { theme, toggle: toggleTheme } = useTheme();
-  const orologio = useOrologioItaliano();
 
   const ncSanzionabili = useMemo(
     () =>
@@ -259,16 +257,7 @@ export default function DashboardPage({
           <div className="header-actions">
             {/* Data e ora italiane, rilevate da sole e sempre allineate
                 all'ora legale o solare in vigore. */}
-            <div
-              className="orologio-header"
-              title={`Ora italiana (${orologio.regime.sigla}, ${orologio.regime.scarto}) — in vigore l'${orologio.regime.etichetta}`}
-            >
-              <CalendarClock aria-hidden="true" />
-              <time dateTime={orologio.adesso.toISOString()}>
-                {orologio.data} · {orologio.ora}
-              </time>
-              <span className="orologio-regime">{orologio.regime.etichetta}</span>
-            </div>
+            <OrologioTestata />
 
             <button
               className="icon-btn"
@@ -363,12 +352,7 @@ export default function DashboardPage({
             </section>
 
             <section className="panel">
-              <div className="panel-header">
-                <h2>Ultimi sopralluoghi</h2>
-                <span className="template-hint" style={{ margin: 0 }}>
-                  Aggiornato alle {orologio.ora}
-                </span>
-              </div>
+              <h2>Ultimi sopralluoghi</h2>
               <div className="table-wrap">
                 <table>
                   <thead>

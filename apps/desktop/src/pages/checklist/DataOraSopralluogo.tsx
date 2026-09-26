@@ -1,6 +1,5 @@
 import { CalendarClock } from "lucide-react";
 import { useOrologioItaliano } from "../../hooks/useOrologioItaliano";
-import { formattaDataEstesa } from "../../lib/oraItalia";
 
 interface DataOraSopralluogoProps {
   /** true quando il consulente registra un sopralluogo svolto in un altro momento. */
@@ -10,20 +9,20 @@ interface DataOraSopralluogoProps {
   setDataManuale: (valore: string) => void;
   oraManuale: string;
   setOraManuale: (valore: string) => void;
-  /** Disattiva i campi quando il sopralluogo e gia stato creato o validato. */
+  /** Disattiva i campi quando il sopralluogo non e piu modificabile. */
   bloccato?: boolean;
 }
 
 /**
- * Data e ora del sopralluogo.
+ * Data e ora del sopralluogo, in una riga sola.
  *
- * Il consulente non deve scrivere nulla: l'orologio italiano viene letto da
- * solo e resta allineato al secondo. Il passaggio fra ora legale e ora solare
- * e riconosciuto in automatico, quindi la sera del cambio il riquadro si
- * aggiorna senza toccare niente.
+ * Il consulente non deve scrivere nulla: il momento viene rilevato con
+ * l'orologio italiano e registrato insieme al sopralluogo, quindi qui basta
+ * una conferma discreta invece di un riquadro che occupa la schermata.
  *
- * Resta comunque possibile registrare un sopralluogo svolto in un altro
- * momento: il campo compare solo quando serve davvero.
+ * I campi compaiono solo se dichiara di registrare un sopralluogo svolto in
+ * un altro momento: senza questa possibilita il verbale porterebbe la data
+ * di compilazione invece di quella del sopralluogo vero.
  */
 export default function DataOraSopralluogo({
   momentoManuale,
@@ -34,72 +33,39 @@ export default function DataOraSopralluogo({
   setOraManuale,
   bloccato = false,
 }: DataOraSopralluogoProps) {
-  const orologio = useOrologioItaliano();
-  const regime = orologio.regime;
+  // Un aggiornamento al minuto basta: qui si mostrano solo ore e minuti.
+  const orologio = useOrologioItaliano(30_000);
 
   return (
-    <>
-      <h4 style={{ marginTop: "var(--sp-5)", marginBottom: "var(--sp-3)" }}>
-        <CalendarClock
-          aria-hidden="true"
-          size={15}
-          style={{ verticalAlign: "-2px", marginRight: 7, color: "var(--color-accent)" }}
-        />
-        Data e ora del sopralluogo
-      </h4>
+    <div className="riga-data-ora">
+      <span className="riga-data-ora-testo">
+        <CalendarClock aria-hidden="true" size={14} />
+        {momentoManuale ? (
+          "Data e ora indicate a mano"
+        ) : (
+          <>
+            Data e ora del sopralluogo:{" "}
+            <strong>
+              <time dateTime={orologio.adesso.toISOString()}>
+                {orologio.data} · {orologio.ora}
+              </time>
+            </strong>
+            , rilevate in automatico
+          </>
+        )}
+      </span>
 
-      <div className="rilevazione-ora">
-        <div className="rilevazione-ora-blocco">
-          <span className="rilevazione-ora-etichetta">Giorno</span>
-          <span className="rilevazione-ora-valore">{orologio.dataEstesa}</span>
-        </div>
-
-        <div className="rilevazione-ora-blocco">
-          <span className="rilevazione-ora-etichetta">Ora esatta</span>
-          <span className="rilevazione-ora-valore rilevazione-ora-valore--grande">
-            <time dateTime={orologio.adesso.toISOString()}>{orologio.oraConSecondi}</time>
-          </span>
-        </div>
-
-        <div className="rilevazione-ora-blocco">
-          <span className="rilevazione-ora-etichetta">In vigore</span>
-          <span
-            className={`badge-regime ${regime.legale ? "badge-regime--legale" : "badge-regime--solare"}`}
-            title={`Fuso ${regime.sigla} (${regime.scarto})`}
-          >
-            {regime.etichetta}
-          </span>
-        </div>
-
-        <p className="rilevazione-ora-nota">
-          Data e ora vengono rilevate da sole con l&apos;orologio italiano ({regime.sigla},{" "}
-          {regime.scarto}) e restano corrette anche se il computer è impostato su un altro fuso.
-          Il passaggio all&apos;{regime.prossimaEtichetta} è previsto per{" "}
-          {formattaDataEstesa(regime.prossimoCambio)} e verrà applicato da solo.
-        </p>
-      </div>
-
-      <label
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          marginTop: "var(--sp-4)",
-          marginBottom: 0,
-          cursor: bloccato ? "not-allowed" : "pointer",
-        }}
+      <button
+        type="button"
+        className="ghost-btn"
+        disabled={bloccato}
+        onClick={() => setMomentoManuale(!momentoManuale)}
       >
-        <input
-          type="checkbox"
-          checked={momentoManuale}
-          disabled={bloccato}
-          onChange={(event) => setMomentoManuale(event.target.checked)}
-        />
-        Il sopralluogo si è svolto in un altro momento
-      </label>
+        {momentoManuale ? "Torna alla rilevazione automatica" : "Si è svolto in un altro momento"}
+      </button>
 
       {momentoManuale ? (
-        <div className="grid-two" style={{ marginTop: "var(--sp-3)" }}>
+        <div className="grid-two riga-data-ora-campi">
           <div>
             <label htmlFor="sopralluogo-data">Data effettiva</label>
             <input
@@ -122,6 +88,6 @@ export default function DataOraSopralluogo({
           </div>
         </div>
       ) : null}
-    </>
+    </div>
   );
 }
