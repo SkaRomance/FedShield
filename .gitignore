@@ -13,6 +13,10 @@ apps/backend/prisma/dev.db
 apps/backend/prisma/dev.db-journal
 apps/backend/prisma/migrations/
 apps/backend/storage/documents/
+# Nessun database deve finire nel repository, nemmeno quelli di prova.
+*.db
+*.db-journal
+apps/backend/storage-test/
 apps/tablet/.expo/
 apps/tablet/.expo-shared/
 infra/n8n/secrets.md

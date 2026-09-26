@@ -58,7 +58,9 @@ test("Smoke: /api/companies admin → 200", async () => {
   }
 });
 
-test("Smoke: /api/notifications/alerts senza companyId → 400", async () => {
+test("Smoke: /api/notifications/alerts senza companyId → 200 su tutte le aziende", async () => {
+  // La campanella in testata non ha un'azienda selezionata: senza companyId
+  // l'endpoint aggrega le scadenze di tutte le aziende seguite.
   const { app, adminToken } = await setup();
   try {
     const res = await app.inject({
@@ -66,7 +68,31 @@ test("Smoke: /api/notifications/alerts senza companyId → 400", async () => {
       url: "/api/notifications/alerts",
       headers: { authorization: `Bearer ${adminToken}` },
     });
-    assert.strictEqual(res.statusCode, 400);
+    assert.strictEqual(res.statusCode, 200);
+    const body = JSON.parse(res.body);
+    assert.ok(Array.isArray(body.alerts), "atteso array di scadenze");
+    assert.ok(body.summary, "atteso riepilogo per gravita");
+    for (const chiave of ["red", "orange", "yellow"]) {
+      assert.strictEqual(
+        typeof body.summary[chiave],
+        "number",
+        `riepilogo senza conteggio ${chiave}`,
+      );
+    }
+  } finally {
+    await app.close();
+  }
+});
+
+test("Smoke: /api/notifications/alerts con companyId inesistente → 404", async () => {
+  const { app, adminToken } = await setup();
+  try {
+    const res = await app.inject({
+      method: "GET",
+      url: "/api/notifications/alerts?companyId=azienda-che-non-esiste",
+      headers: { authorization: `Bearer ${adminToken}` },
+    });
+    assert.strictEqual(res.statusCode, 404);
   } finally {
     await app.close();
   }

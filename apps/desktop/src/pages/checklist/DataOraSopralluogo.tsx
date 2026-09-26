@@ -74,7 +74,7 @@ export default function DataOraSopralluogo({
         <p className="rilevazione-ora-nota">
           Data e ora vengono rilevate da sole con l&apos;orologio italiano ({regime.sigla},{" "}
           {regime.scarto}) e restano corrette anche se il computer è impostato su un altro fuso.
-          Il passaggio all&apos;{regime.prossimaEtichetta} è previsto per il{" "}
+          Il passaggio all&apos;{regime.prossimaEtichetta} è previsto per{" "}
           {formattaDataEstesa(regime.prossimoCambio)} e verrà applicato da solo.
         </p>
       </div>

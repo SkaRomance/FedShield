@@ -1378,8 +1378,10 @@ export default function ChecklistPage({
         <button onClick={() => setStep((current) => Math.max(0, current - 1))} disabled={step === 0}>
           Indietro
         </button>
+        {/* Nel primo passo l'azione principale e "Crea sopralluogo":
+            qui Avanti resta neutro per non avere due pulsanti in arancio. */}
         <button
-          className="btn-primary"
+          className={step === 0 ? "secondary-btn" : "btn-primary"}
           onClick={() => setStep((current) => Math.min(STEPS.length - 1, current + 1))}
           disabled={step === STEPS.length - 1}
         >

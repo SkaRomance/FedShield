@@ -1142,7 +1142,10 @@ label {
   letter-spacing: var(--ls-normal);
 }
 
+/* Molti campi sono scritti senza attributo type: vanno inclusi, altrimenti
+   restano con l'aspetto grezzo del browser e stonano con il resto. */
 select,
+input:not([type]),
 input[type="text"],
 input[type="number"],
 input[type="email"],
@@ -1151,6 +1154,7 @@ input[type="date"],
 input[type="time"],
 input[type="search"],
 input[type="tel"],
+input[type="url"],
 input[type="datetime-local"],
 textarea,
 .inline-actions input {
@@ -1259,6 +1263,8 @@ input[readonly] {
   gap: var(--sp-2);
 }
 
+/* Su telefono la barra laterale passa sopra al contenuto: va resa compatta,
+   altrimenti bisogna scorrere tutto il menu per arrivare al lavoro. */
 @media (max-width: 720px) {
   .grid-two {
     grid-template-columns: 1fr;
@@ -1272,6 +1278,51 @@ input[readonly] {
   .sidebar {
     position: static;
     height: auto;
+    padding: var(--sp-3);
+  }
+  .brand {
+    margin-bottom: var(--sp-3);
+    padding: var(--sp-2);
+  }
+  .brand-logo {
+    max-width: 132px;
+  }
+  .nav-section-label {
+    padding: var(--sp-3) var(--sp-2) 6px;
+  }
+  .sidebar nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .nav-item {
+    width: auto;
+    flex: 1 1 auto;
+    min-width: 140px;
+  }
+  /* Il filetto arancio sborderebbe fuori: diventa un bordo interno. */
+  .nav-item-active::before {
+    left: 0;
+    width: 3px;
+    height: 100%;
+    border-radius: 2px;
+  }
+  .content-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .header-actions {
+    justify-content: flex-start;
+  }
+  .kpi-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--sp-3);
+  }
+  .kpi-card {
+    padding: var(--sp-4);
+  }
+  .rilevazione-ora {
+    gap: var(--sp-3);
   }
 }
 

@@ -17,23 +17,24 @@ const notificationsRoutes: FastifyPluginAsync = async (fastify) => {
     { preHandler: [fastify.authenticate] },
     async (request, reply) => {
       const { companyId } = request.query as { companyId?: string };
-      if (!companyId) {
-        return reply.badRequest("companyId richiesto.");
-      }
 
-      // Verifica che la company esista — evita query inutili e dà 404 chiaro
-      // se il consulente passa un id errato. (Il modello attuale non ha
-      // relation User→Company: tutti i consulenti accedono a tutte le
-      // aziende, è strumento interno della società di consulenza.
+      // companyId assente = scadenze di tutte le aziende seguite. Serve alla
+      // campanella in testata, che non ha un'azienda selezionata. (Il modello
+      // attuale non ha relation User→Company: tutti i consulenti accedono a
+      // tutte le aziende, è strumento interno della società di consulenza.
       // Quando in futuro si introdurrà un filtro ownership a livello User,
       // l'enforcement va aggiunto qui.)
-      const company = await fastify.prisma.company.findUnique({
-        where: { id: companyId },
-        select: { id: true },
-      });
-      if (!company) {
-        return reply.notFound("Azienda non trovata.");
+      if (companyId) {
+        const company = await fastify.prisma.company.findUnique({
+          where: { id: companyId },
+          select: { id: true },
+        });
+        if (!company) {
+          return reply.notFound("Azienda non trovata.");
+        }
       }
+
+      const filtroAzienda = companyId ? { companyId } : {};
 
       const alerts: Alert[] = [];
       const now = new Date();
@@ -44,7 +45,7 @@ const notificationsRoutes: FastifyPluginAsync = async (fastify) => {
       // 1. Scadenze formazione dipendenti
       const records = await fastify.prisma.employeeTrainingRecord.findMany({
         where: {
-          employee: { companyId, isActive: true },
+          employee: { ...filtroAzienda, isActive: true },
           expiresAt: { not: null },
         },
         include: { employee: true, course: true },
@@ -61,7 +62,7 @@ const notificationsRoutes: FastifyPluginAsync = async (fastify) => {
             entityType: "training",
             entityId: r.id,
             title: `Formazione: ${r.course.name}`,
-            description: `Dipendente ${r.employee.firstName} ${r.employee.lastName} — scade il ${r.expiresAt.toLocaleDateString("it-IT")}`,
+            description: `Dipendente ${r.employee.firstName} ${r.employee.lastName} — scade il ${r.expiresAt.toLocaleDateString("it-IT", { timeZone: "Europe/Rome" })}`,
             dueDate: r.expiresAt.toISOString(),
             severity,
             daysLeft: days,
@@ -71,7 +72,7 @@ const notificationsRoutes: FastifyPluginAsync = async (fastify) => {
 
       // 2. Scadenze asset generici
       const equipment = await fastify.prisma.equipment.findMany({
-        where: { companyId, status: { in: ["active", "under_maintenance"] } },
+        where: { ...filtroAzienda, status: { in: ["active", "under_maintenance"] } },
       });
       for (const e of equipment) {
         if (!e.nextCheckAt) continue;
@@ -83,8 +84,8 @@ const notificationsRoutes: FastifyPluginAsync = async (fastify) => {
           alerts.push({
             entityType: "equipment",
             entityId: e.id,
-            title: `Asset: ${e.name}`,
-            description: `${e.type} — s/n: ${e.serialNumber || "n/d"} — prossimo controllo il ${e.nextCheckAt.toLocaleDateString("it-IT")}`,
+            title: `Attrezzatura: ${e.name}`,
+            description: `${e.type} — s/n: ${e.serialNumber || "n/d"} — prossimo controllo il ${e.nextCheckAt.toLocaleDateString("it-IT", { timeZone: "Europe/Rome" })}`,
             dueDate: e.nextCheckAt.toISOString(),
             severity,
             daysLeft: days,
@@ -94,7 +95,7 @@ const notificationsRoutes: FastifyPluginAsync = async (fastify) => {
 
       // 3. Estintori
       const extinguishers = await fastify.prisma.fireExtinguisher.findMany({
-        where: { companyId, status: { in: ["active", "under_maintenance"] } },
+        where: { ...filtroAzienda, status: { in: ["active", "under_maintenance"] } },
       });
       for (const ex of extinguishers) {
         if (!ex.nextCheckAt) continue;
@@ -107,7 +108,7 @@ const notificationsRoutes: FastifyPluginAsync = async (fastify) => {
             entityType: "fireExtinguisher",
             entityId: ex.id,
             title: `Estintore ${ex.code}: ${ex.capacity ?? ""} ${ex.type}`.trim(),
-            description: `Ubicazione: ${ex.location} — prossimo controllo il ${ex.nextCheckAt.toLocaleDateString("it-IT")}`,
+            description: `Ubicazione: ${ex.location} — prossimo controllo il ${ex.nextCheckAt.toLocaleDateString("it-IT", { timeZone: "Europe/Rome" })}`,
             dueDate: ex.nextCheckAt.toISOString(),
             severity,
             daysLeft: days,
@@ -117,7 +118,7 @@ const notificationsRoutes: FastifyPluginAsync = async (fastify) => {
 
       // 4. Cassette PS
       const kits = await fastify.prisma.firstAidKit.findMany({
-        where: { companyId, status: { in: ["active", "under_maintenance"] } },
+        where: { ...filtroAzienda, status: { in: ["active", "under_maintenance"] } },
       });
       for (const k of kits) {
         if (!k.nextCheckAt) continue;
@@ -130,7 +131,7 @@ const notificationsRoutes: FastifyPluginAsync = async (fastify) => {
             entityType: "firstAidKit",
             entityId: k.id,
             title: `Cassetta PS — ${k.location}`,
-            description: `Prossimo controllo il ${k.nextCheckAt.toLocaleDateString("it-IT")}`,
+            description: `Prossimo controllo il ${k.nextCheckAt.toLocaleDateString("it-IT", { timeZone: "Europe/Rome" })}`,
             dueDate: k.nextCheckAt.toISOString(),
             severity,
             daysLeft: days,
