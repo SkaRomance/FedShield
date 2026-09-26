@@ -1,4 +1,5 @@
 import { ChecklistTemplate, Company } from "../../api";
+import DataOraSopralluogo from "./DataOraSopralluogo";
 import { CHECKLIST_MODE_OPTIONS, InspectionChecklistMode } from "./_shared";
 
 interface Step0DatiAziendaProps {
@@ -17,6 +18,12 @@ interface Step0DatiAziendaProps {
   handleCreateInspection: () => Promise<void>;
   templates: ChecklistTemplate[];
   loading: boolean;
+  momentoManuale: boolean;
+  setMomentoManuale: (valore: boolean) => void;
+  dataManuale: string;
+  setDataManuale: (valore: string) => void;
+  oraManuale: string;
+  setOraManuale: (valore: string) => void;
 }
 
 export default function Step0DatiAzienda({
@@ -35,6 +42,12 @@ export default function Step0DatiAzienda({
   handleCreateInspection,
   templates,
   loading,
+  momentoManuale,
+  setMomentoManuale,
+  dataManuale,
+  setDataManuale,
+  oraManuale,
+  setOraManuale,
 }: Step0DatiAziendaProps) {
   function chooseCompany(nextCompanyId: string) {
     if (!nextCompanyId) {
@@ -55,9 +68,9 @@ export default function Step0DatiAzienda({
         ["Numero REA", selectedCompany.reaNumber],
         ["ATECO", selectedCompany.atecoCode],
         ["Livello rischio", selectedCompany.riskLevel],
-        ["Citta", selectedCompany.city],
+        ["Città", selectedCompany.city],
         ["Sede legale", selectedCompany.legalAddress],
-        ["Unita locale", selectedCompany.localUnitAddress],
+        ["Unità locale", selectedCompany.localUnitAddress],
         ["PEC", selectedCompany.pec],
         ["E-mail", selectedCompany.email],
         ["Telefono", selectedCompany.phone],
@@ -78,7 +91,7 @@ export default function Step0DatiAzienda({
               list="checklist-company-search-suggestions"
               value={companySearchQuery}
               onChange={(event) => handleCompanySearchChange(event.target.value)}
-              placeholder="Ragione sociale, P.IVA, ATECO o citta"
+              placeholder="Ragione sociale, P.IVA, ATECO o città"
             />
             <datalist id="checklist-company-search-suggestions">
               {companies.slice(0, 200).map((company) => (
@@ -170,11 +183,21 @@ export default function Step0DatiAzienda({
             </select>
           </div>
         </div>
+
+        <DataOraSopralluogo
+          momentoManuale={momentoManuale}
+          setMomentoManuale={setMomentoManuale}
+          dataManuale={dataManuale}
+          setDataManuale={setDataManuale}
+          oraManuale={oraManuale}
+          setOraManuale={setOraManuale}
+        />
+
         <div className="footer-actions" style={{ justifyContent: "flex-end", flexWrap: "wrap" }}>
           <span className="template-hint" style={{ marginRight: "auto" }}>
-            Template caricati: {templates.map((template) => template.name).join(" • ") || "nessuno"}
+            Modelli caricati: {templates.map((template) => template.name).join(" • ") || "nessuno"}
           </span>
-          <button className="secondary-btn" onClick={handleCreateInspection} disabled={loading || !companyId}>
+          <button className="btn-primary" onClick={handleCreateInspection} disabled={loading || !companyId}>
             Crea sopralluogo
           </button>
         </div>

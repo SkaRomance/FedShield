@@ -35,7 +35,7 @@ export class ApiError extends Error {
 }
 
 function parseApiErrorMessage(raw: string, statusCode: number): string {
-  if (!raw) return `Errore API ${statusCode}`;
+  if (!raw) return `Errore del servizio (${statusCode})`;
   try {
     const parsed = JSON.parse(raw) as { message?: string };
     if (typeof parsed.message === "string" && parsed.message.trim().length > 0) {
@@ -322,7 +322,7 @@ export async function apiLogin(email: string, password: string): Promise<LoginRe
   });
 
   if (!res.ok) {
-    throw new Error("Login fallito. Verifica credenziali.");
+    throw new Error("Accesso non riuscito. Controlla indirizzo e password.");
   }
 
   return res.json();
@@ -544,7 +544,7 @@ export function generateNdaPdf(token: string, companyId: string): Promise<Blob> 
 
 export function triggerBlobDownload(blob: Blob, fileName: string): void {
   if (typeof document === "undefined") {
-    throw new Error("Download non supportato in questo ambiente.");
+    throw new Error("Scaricamento non supportato in questo ambiente.");
   }
   const objectUrl = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
@@ -567,6 +567,8 @@ export function createInspection(
     title: string;
     notes?: string;
     checklistMode?: "unified" | "haccp_only" | "safety_only";
+    /** Momento del sopralluogo rilevato sul posto, in formato ISO. */
+    happenedAt?: string;
   },
 ) {
   return authedFetch<Inspection>("/inspections", token, {
@@ -701,7 +703,7 @@ export async function downloadGeneratedDocument(
   }
 
   if (typeof document === "undefined") {
-    throw new Error("Download non supportato in questo ambiente.");
+    throw new Error("Scaricamento non supportato in questo ambiente.");
   }
 
   const blob = await res.blob();

@@ -33,6 +33,21 @@ const createInspectionSchema = z.object({
   title: z.string().min(3),
   notes: z.string().optional(),
   checklistMode: z.nativeEnum(InspectionChecklistMode).optional(),
+  // Momento del sopralluogo rilevato dal dispositivo del consulente.
+  // Se assente vale l'orario del server. Le date nel futuro oltre un
+  // giorno e quelle oltre dieci anni indietro vengono rifiutate.
+  happenedAt: z
+    .string()
+    .datetime()
+    .refine(
+      (valore) => {
+        const istante = new Date(valore).getTime();
+        const adesso = Date.now();
+        return istante <= adesso + 24 * 3600_000 && istante >= adesso - 10 * 365 * 24 * 3600_000;
+      },
+      { message: "Data del sopralluogo fuori dall'intervallo consentito." },
+    )
+    .optional(),
 });
 
 const validateInspectionSchema = z.object({
@@ -628,6 +643,7 @@ const inspectionRoutes: FastifyPluginAsync = async (fastify) => {
           title: parsed.data.title,
           notes: parsed.data.notes,
           checklistMode: parsed.data.checklistMode ?? InspectionChecklistMode.unified,
+          happenedAt: parsed.data.happenedAt ? new Date(parsed.data.happenedAt) : undefined,
           authorId: auth.sub,
           status: "draft",
           validatorId: null,

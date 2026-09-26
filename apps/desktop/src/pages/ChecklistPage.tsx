@@ -24,6 +24,7 @@ import {
   validateInspection,
 } from "../api";
 import { queueSyncEvent } from "../services/syncManager";
+import { daOraItaliana, formattaDataOra, perCampoData, perCampoOra } from "../lib/oraItalia";
 import Step0DatiAzienda from "./checklist/Step0DatiAzienda";
 import Step1Documenti from "./checklist/Step1Documenti";
 import Step2LocaliAttrezzature from "./checklist/Step2LocaliAttrezzature";
@@ -128,6 +129,12 @@ export default function ChecklistPage({
   const [taskLastSavedAt, setTaskLastSavedAt] = useState<Partial<Record<RegistrationTaskKey, string>>>({});
   const [checklistActivityFilter, setChecklistActivityFilter] = useState<ChecklistActivityFilter>("company");
   const [customChecklistAteco, setCustomChecklistAteco] = useState("");
+
+  // Data e ora del sopralluogo: rilevate da sole, modificabili solo se il
+  // consulente dichiara di registrare un sopralluogo svolto in un altro momento.
+  const [momentoManuale, setMomentoManuale] = useState(false);
+  const [dataManuale, setDataManuale] = useState(() => perCampoData());
+  const [oraManuale, setOraManuale] = useState(() => perCampoOra());
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -749,7 +756,7 @@ export default function ChecklistPage({
       ...current,
       general: new Date().toLocaleString("it-IT"),
     }));
-    setMessage("Task Dati Generali salvata.");
+    setMessage("Sezione Dati Generali salvata.");
   }
 
   async function saveSafetyTask() {
@@ -777,7 +784,7 @@ export default function ChecklistPage({
       ...current,
       safety: new Date().toLocaleString("it-IT"),
     }));
-    setMessage("Task Soggetti Sicurezza salvata.");
+    setMessage("Sezione Soggetti Sicurezza salvata.");
   }
 
   async function saveHaccpTask() {
@@ -803,7 +810,7 @@ export default function ChecklistPage({
       ...current,
       haccp: new Date().toLocaleString("it-IT"),
     }));
-    setMessage("Task Soggetti HACCP salvata.");
+    setMessage("Sezione Soggetti HACCP salvata.");
   }
 
   async function handleSaveRegistrationTask(taskKey: RegistrationTaskKey, moveNext = true) {
@@ -846,7 +853,7 @@ export default function ChecklistPage({
       if (preserveTaskNavigationOnSave) {
         skipNextRegistrationResetRef.current = false;
       }
-      setMessage(error instanceof Error ? error.message : "Errore salvataggio task.");
+      setMessage(error instanceof Error ? error.message : "Errore nel salvataggio della sezione.");
     } finally {
       setLoading(false);
     }
@@ -858,6 +865,24 @@ export default function ChecklistPage({
       return;
     }
 
+    // Momento del sopralluogo: di regola e l'istante esatto in cui il
+    // consulente lo apre sul posto. Se dichiara di registrarlo in differita,
+    // la data e l'ora scritte vengono lette con l'orologio italiano, quindi
+    // restano corrette sia con l'ora legale sia con l'ora solare.
+    let momentoSopralluogo = new Date();
+    if (momentoManuale) {
+      const indicato = daOraItaliana(dataManuale, oraManuale);
+      if (!indicato) {
+        setMessage("Data od ora del sopralluogo non valide. Controlla i due campi.");
+        return;
+      }
+      if (indicato.getTime() > Date.now() + 60_000) {
+        setMessage("La data del sopralluogo non può essere nel futuro.");
+        return;
+      }
+      momentoSopralluogo = indicato;
+    }
+
     setLoading(true);
     setMessage("");
     try {
@@ -865,17 +890,26 @@ export default function ChecklistPage({
         companyId,
         title,
         checklistMode: newInspectionChecklistMode,
+        happenedAt: momentoSopralluogo.toISOString(),
       });
       queueSyncEvent({
         eventType: "inspection.created",
         entityType: "inspection",
         entityId: created.id,
-        payload: { companyId, title, checklistMode: newInspectionChecklistMode },
+        payload: {
+          companyId,
+          title,
+          checklistMode: newInspectionChecklistMode,
+          happenedAt: momentoSopralluogo.toISOString(),
+        },
       });
       await onReload();
       setSelectedInspectionId(created.id);
       setStep(1);
-      setMessage("Sopralluogo creato. Procedi con i documenti.");
+      setMomentoManuale(false);
+      setMessage(
+        `Sopralluogo creato il ${formattaDataOra(momentoSopralluogo)}. Procedi con i documenti.`,
+      );
     } catch (error) {
       setMessage(`Errore creazione sopralluogo: ${error instanceof Error ? error.message : "errore"}`);
     } finally {
@@ -964,11 +998,11 @@ export default function ChecklistPage({
   async function handleValidateInspection() {
     if (!selectedInspectionId) return;
     if (user.role === "junior") {
-      setMessage("Un utente junior non puo validare il sopralluogo.");
+      setMessage("Un consulente junior non può validare il sopralluogo.");
       return;
     }
     if (isInspectionValidated) {
-      setMessage("Sopralluogo gia validato.");
+      setMessage("Sopralluogo già validato.");
       return;
     }
 
@@ -1060,7 +1094,7 @@ export default function ChecklistPage({
         entityId: selectedInspectionId,
         payload: { kind: "attestato" },
       });
-      setMessage("Attestato compliance generato e scaricato.");
+      setMessage("Attestato di conformità generato e scaricato.");
     } catch (error) {
       setMessage(`Attestato non generato: ${error instanceof Error ? error.message : "errore"}`);
     } finally {
@@ -1078,7 +1112,7 @@ export default function ChecklistPage({
               <th>Requisito</th>
               <th>Esito</th>
               <th>Note</th>
-              <th>Gravita</th>
+              <th>Gravità</th>
               <th>Sanzionabile</th>
             </tr>
           </thead>
@@ -1095,9 +1129,9 @@ export default function ChecklistPage({
                       disabled={isInspectionValidated}
                       onChange={(event) => updateAnswer(item.id, { value: event.target.value as AnswerValue })}
                     >
-                      <option value="yes">SI</option>
+                      <option value="yes">Sì</option>
                       <option value="no">NO</option>
-                      <option value="na">NA</option>
+                      <option value="na">Non applicabile</option>
                     </select>
                   </td>
                   <td>
@@ -1130,7 +1164,7 @@ export default function ChecklistPage({
             })}
             {items.length === 0 && (
               <tr>
-                <td colSpan={6}>Nessun requisito disponibile.</td>
+                <td colSpan={6} className="tabella-vuota">Nessun requisito disponibile.</td>
               </tr>
             )}
           </tbody>
@@ -1198,7 +1232,15 @@ export default function ChecklistPage({
 
   return (
     <section className="panel checklist-panel">
-      <h2>Checklist Ho.Re.Ca guidata</h2>
+      <div className="panel-header">
+        <h2>Sopralluogo guidato</h2>
+        {selectedInspection ? (
+          <span className="template-hint" style={{ margin: 0 }}>
+            {selectedInspection.company?.name ?? "Azienda"} · svolto il{" "}
+            {formattaDataOra(selectedInspection.happenedAt)}
+          </span>
+        ) : null}
+      </div>
 
       <div className="stepper">
         {STEPS.map((label, index) => (
@@ -1219,7 +1261,7 @@ export default function ChecklistPage({
       )}
       <div className="grid-two" style={{ marginTop: 10 }}>
         <div>
-          <label>Tipo attivita checklist</label>
+          <label>Tipo di attività</label>
           <select
             value={checklistActivityFilter}
             onChange={(event) => setChecklistActivityFilter(event.target.value as ChecklistActivityFilter)}
@@ -1233,7 +1275,7 @@ export default function ChecklistPage({
           </select>
         </div>
         <div>
-          <label>ATECO checklist effettivo</label>
+          <label>Codice ATECO applicato</label>
           {checklistActivityFilter === "custom" ? (
             <input
               value={customChecklistAteco}
@@ -1263,6 +1305,12 @@ export default function ChecklistPage({
           handleCreateInspection={handleCreateInspection}
           templates={templates}
           loading={loading}
+          momentoManuale={momentoManuale}
+          setMomentoManuale={setMomentoManuale}
+          dataManuale={dataManuale}
+          setDataManuale={setDataManuale}
+          oraManuale={oraManuale}
+          setOraManuale={setOraManuale}
         />
       )}
 
@@ -1330,12 +1378,16 @@ export default function ChecklistPage({
         <button onClick={() => setStep((current) => Math.max(0, current - 1))} disabled={step === 0}>
           Indietro
         </button>
-        <button onClick={() => setStep((current) => Math.min(STEPS.length - 1, current + 1))} disabled={step === STEPS.length - 1}>
+        <button
+          className="btn-primary"
+          onClick={() => setStep((current) => Math.min(STEPS.length - 1, current + 1))}
+          disabled={step === STEPS.length - 1}
+        >
           Avanti
         </button>
         {step === 0 && activeRegistrationTask ? (
           <button className="secondary-btn" onClick={closeRegistrationTaskPanel} disabled={loading}>
-            Chiudi/Riduci task
+            Chiudi sezione
           </button>
         ) : null}
       </div>
