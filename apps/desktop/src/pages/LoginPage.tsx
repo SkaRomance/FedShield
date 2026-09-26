@@ -30,24 +30,11 @@ export default function LoginPage({ loading, onSubmit }: LoginPageProps) {
   return (
     <div className="login-shell">
       <form className="login-card" onSubmit={handleSubmit}>
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 48,
-            height: 48,
-            borderRadius: 12,
-            background: "linear-gradient(135deg, var(--color-accent), var(--color-secondary))",
-            color: "#fff",
-            marginBottom: 16,
-            boxShadow: "0 8px 24px color-mix(in srgb, var(--color-accent) 35%, transparent)",
-          }}
-        >
-          <ShieldCheck size={26} />
+        <div className="login-brand-mark">
+          <ShieldCheck size={26} aria-hidden="true" />
         </div>
         <h1>FedShield</h1>
-        <p>Accesso piattaforma antisanzione</p>
+        <p>Accedi alla piattaforma antisanzione</p>
 
         <label htmlFor="login-email">Email</label>
         <input
@@ -93,7 +80,7 @@ export default function LoginPage({ loading, onSubmit }: LoginPageProps) {
             textAlign: "center",
           }}
         >
-          Versione 1.0 · Compliance HSE
+          Versione 1.0 · Sicurezza e igiene sul lavoro
         </p>
       </form>
 
