@@ -11,6 +11,8 @@ import {
   fetchMachineById,
 } from "../api";
 
+import { etichettaStatoBene } from "../lib/etichette";
+import { formattaData } from "../lib/oraItalia";
 export type AssetKind = "equipment" | "machine" | "extinguisher" | "firstAid";
 
 type LoadedAsset =
@@ -76,7 +78,7 @@ export default function AssetQrPage({ token, companies, assetId, assetKind, onBa
     // Fallback default: equipment (mantengo behaviour storica per URL `?id=...` senza kind).
     const kind: AssetKind = assetKind ?? (isAssetKind(kindFromQuery) ? kindFromQuery : "equipment");
     if (!id) {
-      setError("Nessun ID asset fornito.");
+      setError("Nessun identificativo del bene fornito.");
       setLoading(false);
       return;
     }
@@ -91,7 +93,7 @@ export default function AssetQrPage({ token, companies, assetId, assetKind, onBa
       const data = await fetchByKind(token, kind, id);
       setLoaded(data);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Errore caricamento asset.");
+      setError(e instanceof Error ? e.message : "Errore nel caricamento del bene.");
     } finally {
       setLoading(false);
     }
@@ -108,13 +110,13 @@ export default function AssetQrPage({ token, companies, assetId, assetKind, onBa
         <p style={{ color: "var(--color-error)" }}>{error}</p>
         {onBack ? (
           <button className="ghost-btn" onClick={onBack}>
-            ← Torna agli asset
+            ← Torna ai beni
           </button>
         ) : null}
       </div>
     );
   }
-  if (!loaded) return <p>Asset non trovato.</p>;
+  if (!loaded) return <p>Bene non trovato.</p>;
 
   const company = companies.find((c) => c.id === loaded.data.companyId);
   const kind = loaded.kind;
@@ -145,10 +147,10 @@ export default function AssetQrPage({ token, companies, assetId, assetKind, onBa
   return (
     <div className="asset-qr-page" style={{ padding: 24 }}>
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h2>🏷️ QR Code {kindLabel(kind)}</h2>
+        <h2>Codice QR — {kindLabel(kind)}</h2>
         {onBack ? (
           <button className="ghost-btn" onClick={onBack}>
-            ← Torna agli asset
+            ← Torna ai beni
           </button>
         ) : null}
       </header>
@@ -182,7 +184,7 @@ export default function AssetQrPage({ token, companies, assetId, assetKind, onBa
             <p>
               <strong>Costruzione:</strong>{" "}
               {loaded.data.manufactureDate
-                ? new Date(loaded.data.manufactureDate).toLocaleDateString("it-IT")
+                ? formattaData(loaded.data.manufactureDate)
                 : "n/d"}
             </p>
           </>
@@ -199,10 +201,10 @@ export default function AssetQrPage({ token, companies, assetId, assetKind, onBa
         </p>
         <p>
           <strong>Prossimo controllo:</strong>{" "}
-          {nextCheck ? new Date(nextCheck).toLocaleDateString("it-IT") : "n/d"}
+          {formattaData(nextCheck)}
         </p>
         <p>
-          <strong>Stato:</strong> {loaded.data.status}
+          <strong>Stato:</strong> {etichettaStatoBene(loaded.data.status)}
         </p>
         <p>
           <strong>Azienda:</strong> {company?.name || loaded.data.companyId}
@@ -211,14 +213,14 @@ export default function AssetQrPage({ token, companies, assetId, assetKind, onBa
         <div style={{ marginTop: 16 }}>
           <img
             src={qrUrl}
-            alt="QR Code Asset"
+            alt="Codice QR del bene"
             style={{ width: 200, height: 200, imageRendering: "pixelated" }}
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = "none";
             }}
           />
           <p style={{ fontSize: 12, color: "var(--color-text-muted)", marginTop: 8 }}>
-            Scansiona per dettagli asset
+            Inquadra il codice per i dettagli del bene
           </p>
         </div>
       </div>

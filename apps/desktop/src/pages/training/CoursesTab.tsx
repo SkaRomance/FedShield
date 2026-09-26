@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createTrainingCourse, TrainingCourse } from "../../api";
 import { Field, formStyle, gridStyle } from "./_shared";
 
+import { etichettaAmbitoNormativo } from "../../lib/etichette";
 interface CoursesTabProps {
   token: string;
   courses: TrainingCourse[];
@@ -42,7 +43,7 @@ export default function CoursesTab({
         <thead>
           <tr>
             <th>Nome corso</th>
-            <th>Audience</th>
+            <th>Destinatari</th>
             <th>Ore minime</th>
             <th>Frequenza</th>
             <th>Riferimento normativo</th>
@@ -60,7 +61,7 @@ export default function CoursesTab({
               <td>{c.minHours}h</td>
               <td>{c.frequencyYears} anni</td>
               <td>{c.normReference}</td>
-              <td>{c.domain || "—"}</td>
+              <td>{etichettaAmbitoNormativo(c.domain)}</td>
             </tr>
           ))}
           {courses.length === 0 ? (
@@ -123,7 +124,7 @@ function CourseForm({
         <Field label="Nome corso *">
           <input required value={name} onChange={(e) => setName(e.target.value)} />
         </Field>
-        <Field label="Audience *">
+        <Field label="Destinatari *">
           <input
             required
             value={targetAudience}

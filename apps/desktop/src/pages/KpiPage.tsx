@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Company, createKpiSnapshot, fetchCompanyKpi, fetchKpiOverview, KpiOverview } from "../api";
+import { siNo } from "../lib/etichette";
+import { formattaOra } from "../lib/oraItalia";
 
 interface KpiPageProps {
   token: string;
@@ -29,26 +31,30 @@ export default function KpiPage({ token, companies }: KpiPageProps) {
 
   useEffect(() => {
     loadAll().catch((error) => {
-      setMessage(`Errore KPI: ${error instanceof Error ? error.message : "errore"}`);
+      setMessage(`Errore indicatori: ${error instanceof Error ? error.message : "errore"}`);
     });
   }, [token, companyId]);
 
   async function handleSnapshot() {
     try {
       const result = await createKpiSnapshot(token);
-      setMessage(`Snapshot creati: aziende ${result.companySnapshots}, consulenti ${result.consultantSnapshots}`);
+      setMessage(
+        `Rilevazione salvata: ${result.companySnapshots} aziende, ${result.consultantSnapshots} consulenti.`,
+      );
       await loadAll();
     } catch (error) {
-      setMessage(`Errore snapshot KPI: ${error instanceof Error ? error.message : "errore"}`);
+      setMessage(
+        `Errore salvataggio rilevazione: ${error instanceof Error ? error.message : "errore"}`,
+      );
     }
   }
 
   return (
     <section className="panel">
-      <h2>KPI & Performance</h2>
+      <h2>Indicatori e prestazioni</h2>
       <div className="kpi-grid">
         <article className="kpi-card">
-          <h3>Score medio compliance</h3>
+          <h3>Punteggio medio conformità</h3>
           <strong>{overview?.averageComplianceScore ?? 0}</strong>
         </article>
         <article className="kpi-card">
@@ -60,8 +66,8 @@ export default function KpiPage({ token, companies }: KpiPageProps) {
           <strong>{overview?.consultantsCount ?? 0}</strong>
         </article>
         <article className="kpi-card">
-          <h3>Timestamp KPI</h3>
-          <strong>{overview ? new Date(overview.generatedAt).toLocaleTimeString("it-IT") : "--:--"}</strong>
+          <h3>Ultimo aggiornamento</h3>
+          <strong>{formattaOra(overview?.generatedAt)}</strong>
         </article>
       </div>
 
@@ -81,7 +87,9 @@ export default function KpiPage({ token, companies }: KpiPageProps) {
           </select>
         </div>
         <div className="footer-actions" style={{ alignSelf: "end" }}>
-          <button onClick={handleSnapshot}>Salva snapshot KPI</button>
+          <button className="btn-primary" onClick={handleSnapshot}>
+            Salva rilevazione
+          </button>
         </div>
       </div>
 
@@ -89,11 +97,11 @@ export default function KpiPage({ token, companies }: KpiPageProps) {
         <>
           <div className="kpi-grid" style={{ marginTop: 12 }}>
             <article className="kpi-card">
-              <h3>Score azienda</h3>
+              <h3>Punteggio azienda</h3>
               <strong>{companyKpi.complianceScore}</strong>
             </article>
             <article className="kpi-card">
-              <h3>FED Stars</h3>
+              <h3>Stelle FED</h3>
               <strong>{"★".repeat(companyKpi.stars)}{"☆".repeat(5 - companyKpi.stars)}</strong>
             </article>
             <article className="kpi-card">
@@ -111,7 +119,7 @@ export default function KpiPage({ token, companies }: KpiPageProps) {
               <thead>
                 <tr>
                   <th>Area</th>
-                  <th>Score</th>
+                  <th>Punteggio</th>
                 </tr>
               </thead>
               <tbody>
@@ -158,7 +166,7 @@ export default function KpiPage({ token, companies }: KpiPageProps) {
               <th>Sopralluoghi</th>
               <th>NC</th>
               <th>Conversione %</th>
-              <th>Alert</th>
+              <th>Sotto soglia</th>
             </tr>
           </thead>
           <tbody>
@@ -168,7 +176,7 @@ export default function KpiPage({ token, companies }: KpiPageProps) {
                 <td>{item.inspectionsCount}</td>
                 <td>{item.ncTotal}</td>
                 <td>{item.conversionRate}</td>
-                <td>{item.lowNcAlert ? "SI" : "NO"}</td>
+                <td>{siNo(item.lowNcAlert)}</td>
               </tr>
             ))}
           </tbody>

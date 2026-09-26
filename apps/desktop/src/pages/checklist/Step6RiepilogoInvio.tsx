@@ -35,11 +35,11 @@ export default function Step6RiepilogoInvio({
       {summary ? (
         <div className="kpi-grid">
           <article className="kpi-card">
-            <h3>Score compliance</h3>
+            <h3>Punteggio conformità</h3>
             <strong>{summary.score}/100</strong>
           </article>
           <article className="kpi-card">
-            <h3>FED Stars</h3>
+            <h3>Stelle FED</h3>
             <strong>
               {"★".repeat(summary.stars)}
               {"☆".repeat(5 - summary.stars)}
@@ -59,26 +59,42 @@ export default function Step6RiepilogoInvio({
       )}
 
       <div className={`status-banner ${summary?.attestato.eligible ? "status-banner-ok" : "status-banner-warning"}`}>
-        <strong>Attestato:</strong> {summary?.attestato.reason ?? "Salva la checklist per valutare idoneita attestato."}
+        <strong>Attestato:</strong> {summary?.attestato.reason ?? "Salva il sopralluogo per valutare l'idoneità all'attestato."}
       </div>
 
       <div className="footer-actions" style={{ flexWrap: "wrap" }}>
-        <button onClick={handleSaveChecklist} disabled={loading || !selectedInspectionId || isInspectionValidated}>
+        {/* Una sola azione principale in arancio: le altre restano neutre
+            per non mettere sullo stesso piano salvataggio e stampe. */}
+        <button
+          className="btn-primary"
+          onClick={handleSaveChecklist}
+          disabled={loading || !selectedInspectionId || isInspectionValidated}
+        >
           Salva checklist completa
         </button>
         <button
+          className="secondary-btn"
           onClick={handleValidateInspection}
           disabled={loading || !selectedInspectionId || user.role === "junior" || isInspectionValidated}
         >
           Valida sopralluogo
         </button>
-        <button onClick={handleSendToAdmin} disabled={loading || !selectedInspectionId}>
+        <button
+          className="secondary-btn"
+          onClick={handleSendToAdmin}
+          disabled={loading || !selectedInspectionId}
+        >
           Invia ad amministrazione
         </button>
-        <button onClick={handleGenerateVerbale} disabled={loading || !selectedInspectionId}>
+        <button
+          className="secondary-btn"
+          onClick={handleGenerateVerbale}
+          disabled={loading || !selectedInspectionId}
+        >
           Genera verbale cliente
         </button>
         <button
+          className="secondary-btn"
           onClick={handleGenerateAttestato}
           disabled={loading || !selectedInspectionId || !summary?.attestato.eligible}
         >

@@ -1,3 +1,4 @@
+import { formattaData } from "../../lib/oraItalia";
 // Shared helpers/components extracted from AssetsPage.tsx during S12-C2 refactor.
 // Pure extraction: nessun cambio di logica rispetto al monolite originale.
 
@@ -70,7 +71,7 @@ export function FormActions({
 
 export function formatDate(iso?: string | null): string {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("it-IT");
+  return formattaData(iso);
 }
 
 export function soonest(...dates: Array<string | null | undefined>): string | null {

@@ -91,7 +91,7 @@ export default function Step4AssetAttrezzature({
         firstAidKits: { total: kits.total, truncated: kits.truncated },
       });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Errore caricamento asset");
+      setError(e instanceof Error ? e.message : "Errore nel caricamento dei beni");
     } finally {
       setLoading(false);
     }
@@ -102,7 +102,7 @@ export default function Step4AssetAttrezzature({
       <div role="status" className="status-banner status-banner-warning" style={{ marginBottom: 12 }}>
         Visualizzati i primi <strong>{shown}</strong>
         {total != null ? <> di <strong>{total}</strong></> : null} {label}.
-        Affina i criteri lato backend per vederne di piu.
+        Affina i criteri di ricerca per visualizzarne altri.
       </div>
     );
   }
@@ -110,7 +110,7 @@ export default function Step4AssetAttrezzature({
   if (!companyId) {
     return (
       <div className="panel section-panel">
-        <h3>Asset & Attrezzature</h3>
+        <h3>Beni e Attrezzature</h3>
         <p>
           Seleziona/crea prima un'azienda al passo &quot;Dati Azienda&quot; per registrare asset
           collegati al sopralluogo.
@@ -122,7 +122,7 @@ export default function Step4AssetAttrezzature({
   return (
     <div className="panel section-panel">
       <header style={{ marginBottom: 12 }}>
-        <h3>Asset & Attrezzature dell'azienda</h3>
+        <h3>Beni e attrezzature dell'azienda</h3>
         <p>
           Registra macchine, attrezzature, estintori e cassette di primo soccorso collegate
           al sopralluogo. L'azienda e' fissata dal passo &quot;Dati Azienda&quot;.
@@ -144,7 +144,7 @@ export default function Step4AssetAttrezzature({
         </SubTabButton>
       </div>
 
-      {loading ? <p>Caricamento asset...</p> : null}
+      {loading ? <p>Caricamento dei beni...</p> : null}
       {error ? <p style={{ color: "var(--color-error)" }}>{error}</p> : null}
 
       {tab === "equipment" ? (

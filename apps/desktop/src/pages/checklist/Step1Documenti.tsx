@@ -5,6 +5,7 @@ import { Dispatch, SetStateAction } from "react";
 import { InspectionDocumentRequirement } from "../../api";
 import { DOCUMENT_STATUS_OPTIONS } from "./_shared";
 
+import { siNo } from "../../lib/etichette";
 interface Step1DocumentiProps {
   documents: InspectionDocumentRequirement[];
   setDocuments: Dispatch<SetStateAction<InspectionDocumentRequirement[]>>;
@@ -33,7 +34,7 @@ export default function Step1Documenti({
             {documents.map((doc, idx) => (
               <tr key={`${doc.name}-${idx}`}>
                 <td>{doc.name}</td>
-                <td>{doc.isRequired ? "SI" : "NO"}</td>
+                <td>{siNo(doc.isRequired)}</td>
                 <td>
                   <select
                     value={doc.status}

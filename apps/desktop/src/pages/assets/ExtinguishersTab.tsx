@@ -17,6 +17,7 @@ import {
   toDateInput,
 } from "./_shared";
 
+import { etichettaStatoBene } from "../../lib/etichette";
 export interface ExtinguishersTabProps {
   token: string;
   companyId: string;
@@ -109,7 +110,7 @@ export default function ExtinguishersTab({
               <td>{ex.location}</td>
               <td>{formatDate(ex.nextCheckAt)}</td>
               <td>{formatDate(ex.lastRechargeAt)}</td>
-              <td>{ex.status}</td>
+              <td>{etichettaStatoBene(ex.status)}</td>
               <td>
                 <RowActions
                   onQr={ex.status !== "decommissioned" ? () => onOpenQr(ex.id, "extinguisher") : undefined}

@@ -1,5 +1,6 @@
 import { Employee } from "../../api";
 
+import { formattaData } from "../../lib/oraItalia";
 interface ScadenzeTabProps {
   employees: Employee[];
 }
@@ -84,7 +85,7 @@ export default function ScadenzeTab({ employees }: ScadenzeTabProps) {
                 <td>{rec.course.frequencyYears} anni</td>
                 <td>
                   {rec.expiresAt
-                    ? new Date(rec.expiresAt).toLocaleDateString("it-IT")
+                    ? formattaData(rec.expiresAt)
                     : "—"}
                 </td>
                 <td style={{ color: getStatusColor(rec.expiresAt) }}>

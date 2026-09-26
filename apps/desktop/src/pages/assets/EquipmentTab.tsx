@@ -17,6 +17,7 @@ import {
   toDateInput,
 } from "./_shared";
 
+import { etichettaStatoBene } from "../../lib/etichette";
 export interface EquipmentTabProps {
   token: string;
   companyId: string;
@@ -109,7 +110,7 @@ export default function EquipmentTab({
               <td>{eq.serialNumber || "—"}</td>
               <td>{eq.location || "—"}</td>
               <td>{formatDate(eq.nextCheckAt)}</td>
-              <td>{eq.status}</td>
+              <td>{etichettaStatoBene(eq.status)}</td>
               <td>
                 <RowActions
                   onQr={eq.status !== "decommissioned" ? () => onOpenQr(eq.id, "equipment") : undefined}

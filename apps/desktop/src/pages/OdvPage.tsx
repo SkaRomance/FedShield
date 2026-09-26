@@ -8,6 +8,8 @@ import {
 } from "../api";
 import { queueSyncEvent } from "../services/syncManager";
 
+import { etichettaEsitoConfronto } from "../lib/etichette";
+import { formattaData } from "../lib/oraItalia";
 interface OdvPageProps {
   token: string;
   companies: Company[];
@@ -142,11 +144,11 @@ export default function OdvPage({ token, companies }: OdvPageProps) {
             <strong>{defensiveReport.sanctions}</strong>
           </article>
           <article className="kpi-card">
-            <h3>Match con NC segnalate</h3>
+            <h3>Corrispondenze con NC segnalate</h3>
             <strong>{defensiveReport.matched}</strong>
           </article>
           <article className="kpi-card">
-            <h3>Coverage %</h3>
+            <h3>Copertura %</h3>
             <strong>{defensiveReport.coverageRate}</strong>
           </article>
         </div>
@@ -157,7 +159,7 @@ export default function OdvPage({ token, companies }: OdvPageProps) {
           <thead>
             <tr>
               <th>Data</th>
-              <th>Autorita</th>
+              <th>Autorità</th>
               <th>Sanzioni</th>
               <th>Esito confronto</th>
             </tr>
@@ -165,12 +167,12 @@ export default function OdvPage({ token, companies }: OdvPageProps) {
           <tbody>
             {inspections.map((inspection) => (
               <tr key={inspection.id}>
-                <td>{new Date(inspection.inspectedAt).toLocaleDateString("it-IT")}</td>
+                <td>{formattaData(inspection.inspectedAt)}</td>
                 <td>{inspection.authorityName}</td>
                 <td>{inspection.sanctions.length}</td>
                 <td>
                   {inspection.sanctions
-                    .map((sanction) => `${sanction.violationTitle} [${sanction.matchStatus}]`)
+                    .map((sanction) => `${sanction.violationTitle} — ${etichettaEsitoConfronto(sanction.matchStatus)}`)
                     .join("; ")}
                 </td>
               </tr>

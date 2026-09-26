@@ -13,6 +13,9 @@ import {
   Sun,
   Moon,
   Bell,
+  CalendarClock,
+  CloudUpload,
+  TriangleAlert,
 } from "lucide-react";
 import {
   Company,
@@ -24,6 +27,14 @@ import {
 import { queueSyncEvent } from "../services/syncManager";
 import { useNotificationBadge } from "../hooks/useNotificationBadge";
 import { useTheme } from "../hooks/useTheme";
+import { useOrologioItaliano } from "../hooks/useOrologioItaliano";
+import { formattaData } from "../lib/oraItalia";
+import {
+  etichettaRuolo,
+  etichettaStatoLicenza,
+  etichettaStatoSopralluogo,
+  pastigliaStatoSopralluogo,
+} from "../lib/etichette";
 import ChecklistPage from "./ChecklistPage";
 import CustomerRegistryPage from "./CustomerRegistryPage";
 import KpiPage from "./KpiPage";
@@ -52,7 +63,7 @@ interface DashboardProps {
   onLogout: () => void;
 }
 
-const SIDEBAR_LOGO_CANDIDATES = [
+const LOGHI_BARRA_LATERALE = [
   "/fedshield-logo-clean.png",
   "/fedshield-logo.png",
   "/fedshield-logo.jpg",
@@ -63,17 +74,11 @@ const SIDEBAR_LOGO_CANDIDATES = [
   "/logo.jpg",
 ];
 
-function roleLabel(role: string): string {
-  if (role === "admin") return "Admin";
-  if (role === "senior") return "Consulente Senior";
-  return "Consulente Junior";
-}
-
-function userInitials(fullName: string): string {
-  const parts = fullName.trim().split(/\s+/);
-  if (parts.length === 0) return "?";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+function inizialiUtente(nomeCompleto: string): string {
+  const parti = nomeCompleto.trim().split(/\s+/);
+  if (parti.length === 0) return "?";
+  if (parti.length === 1) return parti[0].slice(0, 2).toUpperCase();
+  return (parti[0][0] + parti[parti.length - 1][0]).toUpperCase();
 }
 
 type NavView =
@@ -110,14 +115,26 @@ export default function DashboardPage({
 
   const { count: alertCount } = useNotificationBadge(token);
   const { theme, toggle: toggleTheme } = useTheme();
+  const orologio = useOrologioItaliano();
 
-  const sanctionableNc = useMemo(
+  const ncSanzionabili = useMemo(
     () =>
       inspections
         .flatMap((item) => item.nonConformities)
         .filter((nc) => nc.isSanctionable).length,
     [inspections],
   );
+
+  const daValidare = useMemo(
+    () => inspections.filter((item) => item.status === "pending_validation").length,
+    [inspections],
+  );
+
+  // La sincronizzazione si mostra solo quando c'è davvero qualcosa da sapere.
+  const licenzaDaControllare = Boolean(
+    syncStatus.deviceStatus && syncStatus.deviceStatus !== "active",
+  );
+  const modificheInAttesa = syncStatus.queueSize > 0;
 
   async function handleGenerateReportPdf(inspectionId: string) {
     try {
@@ -171,8 +188,9 @@ export default function DashboardPage({
       <button
         className={`nav-item ${active ? "nav-item-active" : ""}`}
         onClick={() => setActiveView(view)}
+        aria-current={active ? "page" : undefined}
       >
-        <Icon />
+        <Icon aria-hidden="true" />
         <span>{label}</span>
       </button>
     );
@@ -184,16 +202,16 @@ export default function DashboardPage({
         <div className="brand">
           <img
             className="brand-logo"
-            src={SIDEBAR_LOGO_CANDIDATES[logoIndex]}
+            src={LOGHI_BARRA_LATERALE[logoIndex]}
             alt="FedShield"
             onError={(event) => {
-              if (logoIndex < SIDEBAR_LOGO_CANDIDATES.length - 1) {
+              if (logoIndex < LOGHI_BARRA_LATERALE.length - 1) {
                 setLogoIndex((current) => current + 1);
               } else {
                 event.currentTarget.style.display = "none";
-                const fallback = event.currentTarget.nextElementSibling as HTMLElement | null;
-                if (fallback) {
-                  fallback.style.display = "block";
+                const ripiego = event.currentTarget.nextElementSibling as HTMLElement | null;
+                if (ripiego) {
+                  ripiego.style.display = "block";
                 }
               }
             }}
@@ -201,33 +219,33 @@ export default function DashboardPage({
           <span className="brand-fallback">FedShield</span>
         </div>
 
-        <div className="nav-section-label">Workspace</div>
+        <div className="nav-section-label">Area di lavoro</div>
         <nav>
-          {navItem("dashboard", "Dashboard", LayoutDashboard)}
+          {navItem("dashboard", "Riepilogo", LayoutDashboard)}
           {navItem("registry", "Anagrafica Clienti", Users)}
-          {navItem("checklist", "Checklist", ClipboardCheck)}
+          {navItem("checklist", "Sopralluoghi", ClipboardCheck)}
           {navItem("quotes", "Preventivi", FileText)}
         </nav>
 
         <div className="nav-section-label">Analisi</div>
         <nav>
-          {navItem("kpi", "KPI", BarChart3)}
-          {navItem("odv", "ODV", ShieldCheck)}
+          {navItem("kpi", "Indicatori", BarChart3)}
+          {navItem("odv", "Organo di Vigilanza", ShieldCheck)}
         </nav>
 
-        <div className="nav-section-label">Intelligenza</div>
+        <div className="nav-section-label">Assistenza</div>
         <nav>
-          {navItem("chatbot", "AuditBot", Bot)}
-          {user.role === "admin" && navItem("normsync", "NormSync", ScrollText)}
+          {navItem("chatbot", "Assistente Normativo", Bot)}
+          {user.role === "admin" && navItem("normsync", "Aggiornamenti Normativi", ScrollText)}
         </nav>
 
         <div className="sidebar-spacer" />
 
         <div className="sidebar-user">
-          <div className="sidebar-user-avatar">{userInitials(user.fullName)}</div>
+          <div className="sidebar-user-avatar">{inizialiUtente(user.fullName)}</div>
           <div className="sidebar-user-meta">
             <div className="sidebar-user-name">{user.fullName}</div>
-            <div className="sidebar-user-role">{roleLabel(user.role)}</div>
+            <div className="sidebar-user-role">{etichettaRuolo(user.role)}</div>
           </div>
         </div>
       </aside>
@@ -236,19 +254,32 @@ export default function DashboardPage({
         <header className="content-header">
           <div>
             <h1>Benvenuto {user.fullName.split(/\s+/)[0]}</h1>
-            <p>Piattaforma antisanzione · {roleLabel(user.role)}</p>
+            <p>Piattaforma antisanzione · {etichettaRuolo(user.role)}</p>
           </div>
           <div className="header-actions">
+            {/* Data e ora italiane, rilevate da sole e sempre allineate
+                all'ora legale o solare in vigore. */}
+            <div
+              className="orologio-header"
+              title={`Ora italiana (${orologio.regime.sigla}, ${orologio.regime.scarto}) — in vigore l'${orologio.regime.etichetta}`}
+            >
+              <CalendarClock aria-hidden="true" />
+              <time dateTime={orologio.adesso.toISOString()}>
+                {orologio.data} · {orologio.ora}
+              </time>
+              <span className="orologio-regime">{orologio.regime.etichetta}</span>
+            </div>
+
             <button
               className="icon-btn"
               aria-label={alertCount > 0 ? `${alertCount} notifiche` : "Nessuna notifica"}
               title={alertCount > 0 ? `${alertCount} notifiche` : "Nessuna notifica"}
             >
-              <Bell />
+              <Bell aria-hidden="true" />
               {alertCount > 0 ? (
                 <span
                   className="notification-badge"
-                  style={{ position: "absolute", top: -6, right: -6 }}
+                  style={{ position: "absolute", top: -7, right: -7 }}
                 >
                   {alertCount}
                 </span>
@@ -257,87 +288,109 @@ export default function DashboardPage({
             <button
               onClick={toggleTheme}
               className="icon-btn"
-              aria-label={theme === "dark" ? "Tema chiaro" : "Tema scuro"}
+              aria-label={theme === "dark" ? "Passa al tema chiaro" : "Passa al tema scuro"}
               title={theme === "dark" ? "Tema chiaro" : "Tema scuro"}
             >
-              {theme === "dark" ? <Sun /> : <Moon />}
+              {theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
             </button>
-            <button onClick={onSyncNow} className="logout-btn">
-              <RefreshCw />
-              Sync
+            <button
+              onClick={onSyncNow}
+              className="logout-btn"
+              title={syncStatus.message}
+            >
+              <RefreshCw aria-hidden="true" />
+              Sincronizza
             </button>
             <button onClick={onLogout} className="logout-btn">
-              <LogOut />
+              <LogOut aria-hidden="true" />
               Esci
             </button>
           </div>
         </header>
 
-        <section className="panel">
-          <h2>Stato Sync &amp; Licenza</h2>
-          <div className="kpi-grid">
-            <article className="kpi-card">
-              <h3>Stato device</h3>
-              <strong>{syncStatus.deviceStatus ?? "n/d"}</strong>
-            </article>
-            <article className="kpi-card">
-              <h3>Eventi in coda</h3>
-              <strong>{syncStatus.queueSize}</strong>
-            </article>
-            <article className="kpi-card" style={{ gridColumn: "span 2" }}>
-              <h3>Ultimo sync</h3>
-              <strong style={{ fontSize: 15, fontWeight: 500 }}>
-                {syncStatus.message}
-              </strong>
-            </article>
+        {/* Avvisi tecnici: compaiono solo quando richiedono un intervento,
+            così la schermata resta occupata dal lavoro vero. */}
+        {licenzaDaControllare ? (
+          <div className="status-banner status-banner-error">
+            <TriangleAlert
+              aria-hidden="true"
+              size={15}
+              style={{ verticalAlign: "-2px", marginRight: 6 }}
+            />
+            Licenza del dispositivo: {etichettaStatoLicenza(syncStatus.deviceStatus)}. Contatta
+            l&apos;amministratore per ripristinare la sincronizzazione.
           </div>
-        </section>
+        ) : null}
+
+        {modificheInAttesa ? (
+          <div className="status-banner status-banner-warning">
+            <CloudUpload
+              aria-hidden="true"
+              size={15}
+              style={{ verticalAlign: "-2px", marginRight: 6 }}
+            />
+            {syncStatus.queueSize}{" "}
+            {syncStatus.queueSize === 1 ? "modifica ancora da inviare" : "modifiche ancora da inviare"}.
+            Premi Sincronizza quando torni in linea.
+          </div>
+        ) : null}
 
         {activeView === "dashboard" ? (
           <>
             <section className="kpi-grid">
               <article className="kpi-card">
-                <h3>Aziende gestite</h3>
+                <h3>Aziende seguite</h3>
                 <strong>{companies.length}</strong>
               </article>
               <article className="kpi-card">
-                <h3>Sopralluoghi</h3>
+                <h3>Sopralluoghi svolti</h3>
                 <strong>{inspections.length}</strong>
               </article>
               <article className="kpi-card">
-                <h3>NC sanzionabili</h3>
-                <strong>{sanctionableNc}</strong>
+                <h3>Da validare</h3>
+                <strong>{daValidare}</strong>
+                <span className="kpi-card-nota">
+                  {daValidare === 0 ? "Nessuno in attesa" : "In attesa di controllo"}
+                </span>
               </article>
-              <article className="kpi-card">
-                <h3>Stato sistema</h3>
-                <strong style={{ fontSize: 22 }}>Online</strong>
+              <article className={`kpi-card ${ncSanzionabili > 0 ? "kpi-card-critico" : ""}`}>
+                <h3>Non conformità sanzionabili</h3>
+                <strong>{ncSanzionabili}</strong>
+                <span className="kpi-card-nota">
+                  {ncSanzionabili === 0 ? "Nessun rischio aperto" : "Da risolvere con il cliente"}
+                </span>
               </article>
             </section>
 
             <section className="panel">
-              <h2>Ultimi sopralluoghi</h2>
+              <div className="panel-header">
+                <h2>Ultimi sopralluoghi</h2>
+                <span className="template-hint" style={{ margin: 0 }}>
+                  Aggiornato alle {orologio.ora}
+                </span>
+              </div>
               <div className="table-wrap">
                 <table>
                   <thead>
                     <tr>
-                      <th>Titolo</th>
                       <th>Azienda</th>
+                      <th>Sopralluogo</th>
                       <th>Data</th>
                       <th>Stato</th>
                       <th>NC</th>
-                      <th>Output</th>
+                      <th>Documenti</th>
                     </tr>
                   </thead>
                   <tbody>
                     {inspections.slice(0, 8).map((inspection) => (
                       <tr key={inspection.id}>
-                        <td>{inspection.title}</td>
                         <td>{inspection.company.name}</td>
+                        <td>{inspection.title}</td>
+                        <td>{formattaData(inspection.happenedAt)}</td>
                         <td>
-                          {new Date(inspection.happenedAt).toLocaleDateString("it-IT")}
-                        </td>
-                        <td>
-                          <span className="status-pill-info">{inspection.status}</span>
+                          <span className={pastigliaStatoSopralluogo(inspection.status)}>
+                            {etichettaStatoSopralluogo(inspection.status)}
+                          </span>
                         </td>
                         <td>{inspection.nonConformities.length}</td>
                         <td>
@@ -360,8 +413,8 @@ export default function DashboardPage({
                     ))}
                     {inspections.length === 0 && (
                       <tr>
-                        <td colSpan={6} style={{ textAlign: "center", padding: 32, color: "var(--color-text-muted)" }}>
-                          Nessun sopralluogo presente.
+                        <td colSpan={6} className="tabella-vuota">
+                          Nessun sopralluogo registrato. Apri Sopralluoghi per avviarne uno.
                         </td>
                       </tr>
                     )}

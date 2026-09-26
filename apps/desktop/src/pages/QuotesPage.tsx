@@ -11,6 +11,8 @@ import {
 } from "../api";
 import { queueSyncEvent } from "../services/syncManager";
 
+import { etichettaMotivoMalleva, etichettaStatoPreventivo } from "../lib/etichette";
+import { formattaData } from "../lib/oraItalia";
 interface QuotesPageProps {
   token: string;
   companies: Company[];
@@ -120,7 +122,7 @@ export default function QuotesPage({ token, companies }: QuotesPageProps) {
         payload: { action },
       });
       await loadData();
-      setStatusMessage(`Preventivo aggiornato: ${action}.`);
+      setStatusMessage(`Preventivo aggiornato: ${etichettaStatoPreventivo(action).toLowerCase()}.`);
     } catch (error) {
       setStatusMessage(`Errore risposta preventivo: ${error instanceof Error ? error.message : "errore"}`);
     } finally {
@@ -139,9 +141,11 @@ export default function QuotesPage({ token, companies }: QuotesPageProps) {
         payload: { processed: result.processed },
       });
       await loadData();
-      setStatusMessage(`Countdown processati: ${result.processed}.`);
+      setStatusMessage(`Scadenze elaborate: ${result.processed}.`);
     } catch (error) {
-      setStatusMessage(`Errore countdown: ${error instanceof Error ? error.message : "errore"}`);
+      setStatusMessage(
+        `Errore controllo scadenze: ${error instanceof Error ? error.message : "errore"}`,
+      );
     } finally {
       setLoading(false);
     }
@@ -149,7 +153,7 @@ export default function QuotesPage({ token, companies }: QuotesPageProps) {
 
   return (
     <section className="panel">
-      <h2>Preventivi & Countdown</h2>
+      <h2>Preventivi e scadenze</h2>
 
       <div className="grid-two">
         <div>
@@ -171,7 +175,7 @@ export default function QuotesPage({ token, companies }: QuotesPageProps) {
           <select
             value={selectedNcId}
             onChange={(event) => setSelectedNcId(event.target.value)}
-            aria-label="Non conformita candidata"
+            aria-label="Non conformità candidata"
           >
             <option value="">Seleziona NC...</option>
             {candidates.map((candidate) => (
@@ -224,7 +228,7 @@ export default function QuotesPage({ token, companies }: QuotesPageProps) {
 
       <div className="footer-actions">
         <button disabled={loading} onClick={handleProcessExpired}>
-          Esegui controllo countdown
+          Controlla le scadenze
         </button>
         {statusMessage ? <span className="status-message">{statusMessage}</span> : null}
       </div>
@@ -247,10 +251,10 @@ export default function QuotesPage({ token, companies }: QuotesPageProps) {
               <tr key={quote.id}>
                 <td>{quote.company.name}</td>
                 <td>{quote.serviceName}</td>
-                <td>{quote.status}</td>
-                <td>{new Date(quote.responseDueAt).toLocaleDateString("it-IT")}</td>
+                <td>{etichettaStatoPreventivo(quote.status)}</td>
+                <td>{formattaData(quote.responseDueAt)}</td>
                 <td>{quote.nonConformity.normReference ?? "-"}</td>
-                <td>{quote.malleva ? quote.malleva.reason : "-"}</td>
+                <td>{quote.malleva ? etichettaMotivoMalleva(quote.malleva.reason) : "-"}</td>
                 <td>
                   <div className="row-actions">
                     <button

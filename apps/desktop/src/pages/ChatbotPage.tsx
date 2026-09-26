@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { chatbotQuery } from "../api";
 import { renderAssistantMarkdown } from "../lib/markdown";
 
+import { formattaOraConSecondi } from "../lib/oraItalia";
 interface Message {
   role: "user" | "assistant";
   content: string;
@@ -74,7 +75,7 @@ export default function ChatbotPage({ token }: ChatbotPageProps) {
   return (
     <div className="chatbot-page" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-        <h2>🤖 AI AuditBot </h2>
+        <h2>Assistente normativo</h2>
       </div>
       <p>Consulente AI a disposizione del consulente HSE: normative, sanzioni, ispezioni, DPI e formazione.</p>
       {error && <div className="status-message" style={{ color: "var(--color-error)" }}>{error}</div>}
@@ -163,7 +164,7 @@ function ChatMessage({ message }: { message: Message }) {
           wordBreak: "break-word",
         }}
       >
-        <strong>{isUser ? "Tu" : "AI"}</strong>
+        <strong>{isUser ? "Tu" : "Assistente"}</strong>
         {isUser ? (
           <div style={{ marginTop: 4, whiteSpace: "pre-wrap" }}>{message.content}</div>
         ) : (
@@ -174,7 +175,7 @@ function ChatMessage({ message }: { message: Message }) {
           />
         )}
         <small style={{ opacity: 0.6, display: "block", marginTop: 4 }}>
-          {new Date(message.timestamp).toLocaleTimeString("it-IT")}
+          {formattaOraConSecondi(message.timestamp)}
         </small>
       </div>
     </div>

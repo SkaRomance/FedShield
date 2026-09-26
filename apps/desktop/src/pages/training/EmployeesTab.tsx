@@ -39,7 +39,7 @@ export default function EmployeesTab({
   );
 
   async function handleDelete(id: string) {
-    if (!window.confirm("Disattivare il dipendente? (soft delete, recuperabile dal backend)")) return;
+    if (!window.confirm("Disattivare il dipendente? L'operazione e reversibile: i dati restano recuperabili.")) return;
     setBusy(true);
     onError(null);
     try {
@@ -365,7 +365,7 @@ function TrainingRecordForm({
             min={1}
             value={hoursDone}
             onChange={(e) => setHoursDone(e.target.value)}
-            placeholder="Default: minHours del corso"
+            placeholder="Predefinito: ore minime del corso"
           />
         </Field>
         <Field label="Numero attestato">

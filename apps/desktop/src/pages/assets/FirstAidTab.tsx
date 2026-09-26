@@ -17,6 +17,7 @@ import {
   toDateInput,
 } from "./_shared";
 
+import { etichettaStatoBene } from "../../lib/etichette";
 export interface FirstAidTabProps {
   token: string;
   companyId: string;
@@ -105,7 +106,7 @@ export default function FirstAidTab({
               <td>{k.contents || "—"}</td>
               <td>{formatDate(k.nextCheckAt)}</td>
               <td>{formatDate(k.replenishedAt)}</td>
-              <td>{k.status}</td>
+              <td>{etichettaStatoBene(k.status)}</td>
               <td>
                 <RowActions
                   onQr={k.status !== "decommissioned" ? () => onOpenQr(k.id, "firstAid") : undefined}

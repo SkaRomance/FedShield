@@ -30,7 +30,7 @@ export const STEPS = [
   "2. Documenti",
   "3. Locali e Attrezzature",
   "4. Procedure e Igiene",
-  "5. Asset & Attrezzature",
+  "5. Beni e Attrezzature",
   "6. Formazione",
   "7. Riepilogo e Invio",
 ] as const;
@@ -49,7 +49,7 @@ export const ACTIVITY_TYPE_OPTIONS = [
   { value: "pizzeria", label: "Pizzeria / Asporto", atecoCode: "56.10.20" },
   { value: "canteen", label: "Mense / Catering", atecoCode: "56.29.10" },
   { value: "event_catering", label: "Catering Eventi", atecoCode: "56.21.00" },
-  { value: "food_truck", label: "Food Truck / Street Food", atecoCode: "56.10.42" },
+  { value: "food_truck", label: "Food truck / Cibo di strada", atecoCode: "56.10.42" },
   { value: "ambulant_pastry", label: "Gelateria/Pasticceria Ambulante", atecoCode: "56.10.41" },
   { value: "bar", label: "Bar / Caffetteria", atecoCode: "56.30" },
   { value: "hotel", label: "Hotel / Albergo", atecoCode: "55.10.00" },

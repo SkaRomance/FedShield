@@ -76,7 +76,7 @@ export default function Step3ProcedureIgiene({
             style={{ fontSize: "0.88rem" }}
             onClick={() => setIsOpen((prev) => !prev)}
           >
-            {isOpen ? "✕ Chiudi form" : "+ Aggiungi Procedura / Requisito Specifico"}
+            {isOpen ? "✕ Chiudi modulo" : "+ Aggiungi Procedura / Requisito Specifico"}
           </button>
         ) : null}
       </div>

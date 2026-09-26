@@ -18,6 +18,7 @@ import {
   toDateInput,
 } from "./_shared";
 
+import { etichettaStatoBene } from "../../lib/etichette";
 export interface MachinesTabProps {
   token: string;
   companyId: string;
@@ -114,7 +115,7 @@ export default function MachinesTab({
                 <td>{m.location || "—"}</td>
                 <td>{formatDate(m.nextMaintenanceAt)}</td>
                 <td>{formatDate(m.nextSafetyCheckAt)}</td>
-                <td>{m.status}</td>
+                <td>{etichettaStatoBene(m.status)}</td>
                 <td>
                   <RowActions
                     onQr={m.status !== "decommissioned" ? () => onOpenQr(m.id, "machine") : undefined}

@@ -10,6 +10,7 @@ import {
   NormSyncResult,
 } from "../api";
 
+import { formattaData } from "../lib/oraItalia";
 interface NormSyncAdminPageProps {
   token: string;
 }
@@ -300,7 +301,7 @@ export default function NormSyncAdminPage({ token }: NormSyncAdminPageProps) {
                       )}
                     </td>
                     <td style={{ verticalAlign: "top", padding: "12px 8px", fontSize: 13, color: "var(--color-text-muted)" }}>
-                      {new Date(p.createdAt).toLocaleDateString("it-IT")}
+                      {formattaData(p.createdAt)}
                     </td>
                     <td style={{ verticalAlign: "top", padding: "12px 8px" }}>
                       {p.status === "pending" && (

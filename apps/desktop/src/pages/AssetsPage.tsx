@@ -73,7 +73,7 @@ export default function AssetsPage({ token, companies, onOpenQr }: AssetsPagePro
         firstAidKits: { total: kits.total, truncated: kits.truncated },
       });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Errore caricamento asset");
+      setError(e instanceof Error ? e.message : "Errore nel caricamento dei beni");
     } finally {
       setLoading(false);
     }
@@ -92,7 +92,7 @@ export default function AssetsPage({ token, companies, onOpenQr }: AssetsPagePro
   if (companies.length === 0) {
     return (
       <div className="panel">
-        <h2>Asset & Attrezzature</h2>
+        <h2>Beni e Attrezzature</h2>
         <p>Nessuna azienda registrata. Crea un'azienda dall'Anagrafica Clienti per iniziare a registrare asset.</p>
       </div>
     );
@@ -102,7 +102,7 @@ export default function AssetsPage({ token, companies, onOpenQr }: AssetsPagePro
     <div className="assets-page">
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
         <div>
-          <h2>Asset & Attrezzature</h2>
+          <h2>Beni e Attrezzature</h2>
           <p>Registra macchine, estintori e cassette PS con scadenze controllo.</p>
         </div>
         <select
@@ -134,7 +134,7 @@ export default function AssetsPage({ token, companies, onOpenQr }: AssetsPagePro
         </TabButton>
       </div>
 
-      {loading ? <p>Caricamento asset...</p> : null}
+      {loading ? <p>Caricamento dei beni...</p> : null}
       {error ? <p style={{ color: "var(--color-error)" }}>{error}</p> : null}
 
       {tab === "equipment" ? (

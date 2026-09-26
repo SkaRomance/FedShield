@@ -8,6 +8,8 @@ import {
   isUnauthorizedError,
   LoginResponse,
 } from "./api";
+import { etichettaStatoLicenza } from "./lib/etichette";
+import { formattaOra } from "./lib/oraItalia";
 import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
 import {
@@ -31,7 +33,7 @@ export default function App() {
   const [licenseError, setLicenseError] = useState<string | null>(null);
   const [deviceContext, setDeviceContext] = useState<DeviceContext | null>(null);
 
-  const [syncMessage, setSyncMessage] = useState("Sync non avviata.");
+  const [syncMessage, setSyncMessage] = useState("Sincronizzazione non ancora avviata.");
   const [syncQueueSize, setSyncQueueSize] = useState(0);
 
   useEffect(() => {
@@ -50,7 +52,7 @@ export default function App() {
         setSyncQueueSize(getSyncQueueSize());
       })
       .catch((error) => {
-        setLicenseError(error instanceof Error ? error.message : "Errore licenza device");
+        setLicenseError(error instanceof Error ? error.message : "Errore di licenza del dispositivo");
       })
       .finally(() => {
         setLicenseLoading(false);
@@ -70,7 +72,7 @@ export default function App() {
     }
     clearSessionState();
     setSyncQueueSize(getSyncQueueSize());
-    setSyncMessage("Sessione scaduta o token non valido. Effettua di nuovo il login.");
+    setSyncMessage("Sessione scaduta. Esegui di nuovo l'accesso.");
     return true;
   }
 
@@ -93,13 +95,15 @@ export default function App() {
       setDeviceContext(context);
 
       if (!context.isActive && !context.isWithinGrace) {
-        setSyncMessage("Licenza device non attiva. Sync bloccata.");
+        setSyncMessage("Licenza del dispositivo non attiva: sincronizzazione sospesa.");
         return;
       }
 
       const [push, pull] = await Promise.all([flushSyncQueue(token), pullAndAcknowledge(token)]);
       setSyncQueueSize(getSyncQueueSize());
-      setSyncMessage(`Sync OK: push ${push.pushed}/${push.duplicates}, pull ${pull.received}`);
+      setSyncMessage(
+        `Sincronizzazione riuscita alle ${formattaOra(new Date())}: inviate ${push.pushed}, già presenti ${push.duplicates}, ricevute ${pull.received}.`,
+      );
 
       // Refresh rapido per allineare la UI con i delta appena ricevuti.
       await loadDashboard(token);
@@ -108,7 +112,9 @@ export default function App() {
         return;
       }
       setSyncQueueSize(getSyncQueueSize());
-      setSyncMessage(`Sync in errore: ${error instanceof Error ? error.message : "errore"}`);
+      setSyncMessage(
+        `Sincronizzazione non riuscita: ${error instanceof Error ? error.message : "errore"}`,
+      );
     }
   }
 
@@ -145,19 +151,21 @@ export default function App() {
 
   function handleLogout() {
     clearSessionState();
-    setSyncMessage("Sync non avviata.");
+    setSyncMessage("Sincronizzazione non ancora avviata.");
   }
 
   if (licenseLoading) {
-    return <div className="app-screen-msg">Verifica licenza device in corso...</div>;
+    return <div className="app-screen-msg">Verifica della licenza del dispositivo in corso…</div>;
   }
 
   if (licenseError) {
-    return <div className="app-screen-error">Errore licenza: {licenseError}</div>;
+    return <div className="app-screen-error">Errore di licenza: {licenseError}</div>;
   }
 
   if (deviceContext && !deviceContext.isActive && !deviceContext.isWithinGrace) {
-    return <div className="app-screen-error">Licenza dispositivo non attiva. Stato: {deviceContext.status ?? "sconosciuto"}.</div>;
+    return <div className="app-screen-error">
+        Licenza del dispositivo non attiva. Stato: {etichettaStatoLicenza(deviceContext.status)}.
+      </div>;
   }
 
   if (!session) {

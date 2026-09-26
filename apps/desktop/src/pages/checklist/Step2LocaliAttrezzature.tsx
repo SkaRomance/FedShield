@@ -75,7 +75,7 @@ export default function Step2LocaliAttrezzature({
             style={{ fontSize: "0.88rem" }}
             onClick={() => setIsOpen((prev) => !prev)}
           >
-            {isOpen ? "✕ Chiudi form" : "+ Aggiungi Requisito Specifico"}
+            {isOpen ? "✕ Chiudi modulo" : "+ Aggiungi Requisito Specifico"}
           </button>
         ) : null}
       </div>

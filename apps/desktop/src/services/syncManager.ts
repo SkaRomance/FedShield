@@ -175,7 +175,7 @@ export function getSyncQueueSize(): number {
 export async function flushSyncQueue(token: string): Promise<{ pushed: number; duplicates: number }> {
   const context = await ensureLicenseActivation();
   if (!context.heartbeatToken) {
-    throw new Error("Heartbeat token assente.");
+    throw new Error("Token di verifica della licenza assente.");
   }
 
   const queue = readJson<QueuedSyncEvent[]>(SYNC_QUEUE_KEY, []);
@@ -202,7 +202,7 @@ export async function flushSyncQueue(token: string): Promise<{ pushed: number; d
 export async function pullAndAcknowledge(token: string): Promise<{ received: number }> {
   const context = await ensureLicenseActivation();
   if (!context.heartbeatToken) {
-    throw new Error("Heartbeat token assente.");
+    throw new Error("Token di verifica della licenza assente.");
   }
 
   const cursor = localStorage.getItem(SYNC_CURSOR_KEY) ?? undefined;

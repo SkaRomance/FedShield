@@ -13,6 +13,8 @@ import {
 } from "../api";
 import { queueSyncEvent } from "../services/syncManager";
 
+import { etichettaStatoSopralluogo, pastigliaStatoSopralluogo } from "../lib/etichette";
+import { formattaData } from "../lib/oraItalia";
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
 }
@@ -261,7 +263,9 @@ export default function CustomerRegistryPage({
       triggerBlobDownload(blob, `danea-clienti-${todayCompactDateClient()}.csv`);
       setStatusMessage("CSV Danea Easyfatt esportato con successo.");
     } catch (error) {
-      setStatusMessage(`Errore export CSV Danea: ${error instanceof Error ? error.message : "errore"}`);
+      setStatusMessage(
+        `Errore esportazione CSV Danea: ${error instanceof Error ? error.message : "errore"}`,
+      );
     } finally {
       setExportingCsv(false);
     }
@@ -275,7 +279,9 @@ export default function CustomerRegistryPage({
       triggerBlobDownload(blob, `danea-clienti-${todayCompactDateClient()}.xml`);
       setStatusMessage("XML Danea Easyfatt esportato con successo.");
     } catch (error) {
-      setStatusMessage(`Errore export XML Danea: ${error instanceof Error ? error.message : "errore"}`);
+      setStatusMessage(
+        `Errore esportazione XML Danea: ${error instanceof Error ? error.message : "errore"}`,
+      );
     } finally {
       setExportingXml(false);
     }
@@ -342,7 +348,7 @@ export default function CustomerRegistryPage({
           <h3 style={{ margin: 0 }}>{editingCompanyId ? "Modifica cliente" : "Registra nuovo cliente"}</h3>
           {editingCompanyId ? (
             <button className="secondary-btn" onClick={startNewCompany} disabled={savingCompany}>
-              Pulisci form
+              Pulisci modulo
             </button>
           ) : null}
         </div>
@@ -396,7 +402,7 @@ export default function CustomerRegistryPage({
             />
           </div>
           <div>
-            <label htmlFor="registry-company-risk">Livello di rischi dell'attivita</label>
+            <label htmlFor="registry-company-risk">Livello di rischio dell'attività</label>
             <input
               id="registry-company-risk"
               value={companyForm.riskLevel}
@@ -404,7 +410,7 @@ export default function CustomerRegistryPage({
             />
           </div>
           <div>
-            <label htmlFor="registry-company-city">Citta</label>
+            <label htmlFor="registry-company-city">Città</label>
             <input
               id="registry-company-city"
               value={companyForm.city}
@@ -454,7 +460,7 @@ export default function CustomerRegistryPage({
             />
           </div>
           <div style={{ gridColumn: "span 2" }}>
-            <label htmlFor="registry-company-localaddr">Unita locale - Indirizzo</label>
+            <label htmlFor="registry-company-localaddr">Unità locale - Indirizzo</label>
             <textarea
               id="registry-company-localaddr"
               rows={2}
@@ -640,15 +646,19 @@ export default function CustomerRegistryPage({
                 <th>Ambito</th>
                 <th>NC</th>
                 <th>Checklist</th>
-                <th>Output</th>
+                <th>Documenti</th>
               </tr>
             </thead>
             <tbody>
               {inspectionsForCompany.map((inspection) => (
                 <tr key={inspection.id}>
                   <td>{inspection.title}</td>
-                  <td>{new Date(inspection.happenedAt).toLocaleDateString("it-IT")}</td>
-                  <td>{inspection.status}</td>
+                  <td>{formattaData(inspection.happenedAt)}</td>
+                  <td>
+                    <span className={pastigliaStatoSopralluogo(inspection.status)}>
+                      {etichettaStatoSopralluogo(inspection.status)}
+                    </span>
+                  </td>
                   <td>{inspectionModeLabel(inspection.checklistMode)}</td>
                   <td>{inspection.nonConformities.length}</td>
                   <td>
