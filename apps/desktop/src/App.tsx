@@ -37,13 +37,24 @@ export default function App() {
   const [syncQueueSize, setSyncQueueSize] = useState(0);
 
   useEffect(() => {
-    const persisted = localStorage.getItem("fedshield_session");
-    if (persisted) {
-      try {
-        setSession(JSON.parse(persisted) as LoginResponse);
-      } catch {
-        localStorage.removeItem("fedshield_session");
+    try {
+      const persisted = localStorage.getItem("fedshield_session");
+      if (persisted) {
+        const parsed = JSON.parse(persisted) as LoginResponse;
+        if (parsed && typeof parsed.token === "string" && parsed.user) {
+          setSession(parsed);
+        } else {
+          localStorage.removeItem("fedshield_session");
+          setSession(null);
+        }
       }
+    } catch {
+      try {
+        localStorage.removeItem("fedshield_session");
+      } catch {
+        // ignore
+      }
+      setSession(null);
     }
 
     ensureLicenseActivation()

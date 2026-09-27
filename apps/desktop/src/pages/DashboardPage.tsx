@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -47,8 +47,10 @@ import AssetQrPage from "./AssetQrPage";
 interface DashboardProps {
   token: string;
   user: {
-    fullName: string;
-    role: "junior" | "senior" | "admin";
+    id?: string;
+    email?: string;
+    fullName?: string;
+    role?: "junior" | "senior" | "admin";
   };
   companies: Company[];
   inspections: Inspection[];
@@ -73,9 +75,10 @@ const LOGHI_BARRA_LATERALE = [
   "/logo.jpg",
 ];
 
-function inizialiUtente(nomeCompleto: string): string {
+function inizialiUtente(nomeCompleto?: string): string {
+  if (!nomeCompleto) return "FS";
   const parti = nomeCompleto.trim().split(/\s+/);
-  if (parti.length === 0) return "?";
+  if (parti.length === 0 || !parti[0]) return "FS";
   if (parti.length === 1) return parti[0].slice(0, 2).toUpperCase();
   return (parti[0][0] + parti[parti.length - 1][0]).toUpperCase();
 }
@@ -114,24 +117,28 @@ const VIEW_ALIASES: Record<string, NavView> = {
   qr: "assetQr",
 };
 
-function parseInitialView(userRole: string): NavView {
-  if (typeof window !== "undefined") {
-    const rawHash = window.location.hash.replace(/^#\/?/, "").toLowerCase().trim();
-    if (rawHash && VIEW_ALIASES[rawHash]) {
-      const target = VIEW_ALIASES[rawHash];
-      if (target === "normsync" && userRole !== "admin") {
-        return "dashboard";
+function parseInitialView(userRole?: string): NavView {
+  try {
+    if (typeof window !== "undefined") {
+      const rawHash = (window.location.hash || "").replace(/^#\/?/, "").toLowerCase().trim();
+      if (rawHash && VIEW_ALIASES[rawHash]) {
+        const target = VIEW_ALIASES[rawHash];
+        if (target === "normsync" && userRole !== "admin") {
+          return "dashboard";
+        }
+        return target;
       }
-      return target;
-    }
-    const saved = localStorage.getItem("fedshield_active_view")?.toLowerCase().trim();
-    if (saved && VIEW_ALIASES[saved]) {
-      const target = VIEW_ALIASES[saved];
-      if (target === "normsync" && userRole !== "admin") {
-        return "dashboard";
+      const saved = (localStorage.getItem("fedshield_active_view") || "").toLowerCase().trim();
+      if (saved && VIEW_ALIASES[saved]) {
+        const target = VIEW_ALIASES[saved];
+        if (target === "normsync" && userRole !== "admin") {
+          return "dashboard";
+        }
+        return target;
       }
-      return target;
     }
+  } catch {
+    // fallback sicuro
   }
   return "dashboard";
 }
@@ -146,7 +153,9 @@ export default function DashboardPage({
   onSyncNow,
   onLogout,
 }: DashboardProps) {
-  const [activeView, setActiveView] = useState<NavView>(() => parseInitialView(user.role));
+  const userRole = user?.role ?? "junior";
+  const userFullName = user?.fullName || user?.email || "Utente";
+  const [activeView, setActiveView] = useState<NavView>(() => parseInitialView(userRole));
   const [qrAssetId, setQrAssetId] = useState<string | null>(null);
   const [qrAssetKind, setQrAssetKind] = useState<AssetKind | null>(null);
   const [statusMessage, setStatusMessage] = useState<string>("");
@@ -164,29 +173,41 @@ export default function DashboardPage({
       } catch {
         // ignora se localStorage è bloccato
       }
-      const currentRaw = window.location.hash.replace(/^#\/?/, "").toLowerCase().trim();
-      if (VIEW_ALIASES[currentRaw] !== activeView) {
-        window.location.hash = activeView;
+      try {
+        const targetHash = `#${activeView}`;
+        if (window.location.hash !== targetHash) {
+          window.history.replaceState(null, "", targetHash);
+        }
+      } catch {
+        // fallback
       }
     }
   }, [activeView]);
 
   useEffect(() => {
-    const handleHashChange = () => {
-      const rawHash = window.location.hash.replace(/^#\/?/, "").toLowerCase().trim();
-      const mapped = VIEW_ALIASES[rawHash];
-      if (mapped && mapped !== activeView) {
-        if (mapped === "normsync" && user.role !== "admin") {
-          setActiveView("dashboard");
-        } else {
-          setActiveView(mapped);
+    const handleNavigation = () => {
+      try {
+        const rawHash = (window.location.hash || "").replace(/^#\/?/, "").toLowerCase().trim();
+        const mapped = VIEW_ALIASES[rawHash];
+        if (mapped && mapped !== activeView) {
+          if (mapped === "normsync" && userRole !== "admin") {
+            setActiveView("dashboard");
+          } else {
+            setActiveView(mapped);
+          }
         }
+      } catch {
+        // ignore
       }
     };
 
-    window.addEventListener("hashchange", handleHashChange);
-    return () => window.removeEventListener("hashchange", handleHashChange);
-  }, [activeView, user.role]);
+    window.addEventListener("popstate", handleNavigation);
+    window.addEventListener("hashchange", handleNavigation);
+    return () => {
+      window.removeEventListener("popstate", handleNavigation);
+      window.removeEventListener("hashchange", handleNavigation);
+    };
+  }, [activeView, userRole]);
 
   const { count: alertCount } = useNotificationBadge(token);
   const { theme, toggle: toggleTheme } = useTheme();
@@ -260,8 +281,16 @@ export default function DashboardPage({
     const active = activeView === view;
     return (
       <button
+        type="button"
         className={`nav-item ${active ? "nav-item-active" : ""}`}
-        onClick={() => setActiveView(view)}
+        onClick={() => {
+          setActiveView(view);
+          try {
+            window.history.pushState(null, "", `#${view}`);
+          } catch {
+            window.location.hash = view;
+          }
+        }}
         aria-current={active ? "page" : undefined}
       >
         <Icon aria-hidden="true" />
@@ -310,16 +339,16 @@ export default function DashboardPage({
         <div className="nav-section-label">Assistenza</div>
         <nav>
           {navItem("chatbot", "Assistente Normativo", Bot)}
-          {user.role === "admin" && navItem("normsync", "Aggiornamenti Normativi", ScrollText)}
+          {userRole === "admin" && navItem("normsync", "Aggiornamenti Normativi", ScrollText)}
         </nav>
 
         <div className="sidebar-spacer" />
 
         <div className="sidebar-user">
-          <div className="sidebar-user-avatar">{inizialiUtente(user.fullName)}</div>
+          <div className="sidebar-user-avatar">{inizialiUtente(userFullName)}</div>
           <div className="sidebar-user-meta">
-            <div className="sidebar-user-name">{user.fullName}</div>
-            <div className="sidebar-user-role">{etichettaRuolo(user.role)}</div>
+            <div className="sidebar-user-name">{userFullName}</div>
+            <div className="sidebar-user-role">{etichettaRuolo(userRole)}</div>
           </div>
         </div>
       </aside>
@@ -327,8 +356,8 @@ export default function DashboardPage({
       <main className="content">
         <header className="content-header">
           <div>
-            <h1>Benvenuto {user.fullName.split(/\s+/)[0]}</h1>
-            <p>Piattaforma antisanzione · {etichettaRuolo(user.role)}</p>
+            <h1>Benvenuto {userFullName.split(/\s+/)[0]}</h1>
+            <p>Piattaforma antisanzione · {etichettaRuolo(userRole)}</p>
           </div>
           <div className="header-actions">
             {/* Data e ora italiane, rilevate da sole e sempre allineate
