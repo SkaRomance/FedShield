@@ -64,6 +64,10 @@ export default function App() {
     setCompanies([]);
     setInspections([]);
     localStorage.removeItem("fedshield_session");
+    localStorage.removeItem("fedshield_active_view");
+    if (typeof window !== "undefined" && window.location.hash) {
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
   }
 
   function handleUnauthorizedSession(error: unknown): boolean {

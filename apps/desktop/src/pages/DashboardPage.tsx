@@ -91,6 +91,51 @@ type NavView =
   | "normsync"
   | "assetQr";
 
+const VIEW_ALIASES: Record<string, NavView> = {
+  dashboard: "dashboard",
+  riepilogo: "dashboard",
+  registry: "registry",
+  clienti: "registry",
+  anagrafica: "registry",
+  checklist: "checklist",
+  sopralluoghi: "checklist",
+  quotes: "quotes",
+  preventivi: "quotes",
+  kpi: "kpi",
+  indicatori: "kpi",
+  odv: "odv",
+  vigilanza: "odv",
+  chatbot: "chatbot",
+  assistente: "chatbot",
+  normsync: "normsync",
+  normative: "normsync",
+  aggiornamenti: "normsync",
+  assetqr: "assetQr",
+  qr: "assetQr",
+};
+
+function parseInitialView(userRole: string): NavView {
+  if (typeof window !== "undefined") {
+    const rawHash = window.location.hash.replace(/^#\/?/, "").toLowerCase().trim();
+    if (rawHash && VIEW_ALIASES[rawHash]) {
+      const target = VIEW_ALIASES[rawHash];
+      if (target === "normsync" && userRole !== "admin") {
+        return "dashboard";
+      }
+      return target;
+    }
+    const saved = localStorage.getItem("fedshield_active_view")?.toLowerCase().trim();
+    if (saved && VIEW_ALIASES[saved]) {
+      const target = VIEW_ALIASES[saved];
+      if (target === "normsync" && userRole !== "admin") {
+        return "dashboard";
+      }
+      return target;
+    }
+  }
+  return "dashboard";
+}
+
 export default function DashboardPage({
   token,
   user,
@@ -101,7 +146,7 @@ export default function DashboardPage({
   onSyncNow,
   onLogout,
 }: DashboardProps) {
-  const [activeView, setActiveView] = useState<NavView>("dashboard");
+  const [activeView, setActiveView] = useState<NavView>(() => parseInitialView(user.role));
   const [qrAssetId, setQrAssetId] = useState<string | null>(null);
   const [qrAssetKind, setQrAssetKind] = useState<AssetKind | null>(null);
   const [statusMessage, setStatusMessage] = useState<string>("");
@@ -111,6 +156,37 @@ export default function DashboardPage({
     inspectionId?: string;
     token: number;
   }>({ token: 0 });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("fedshield_active_view", activeView);
+      } catch {
+        // ignora se localStorage è bloccato
+      }
+      const currentRaw = window.location.hash.replace(/^#\/?/, "").toLowerCase().trim();
+      if (VIEW_ALIASES[currentRaw] !== activeView) {
+        window.location.hash = activeView;
+      }
+    }
+  }, [activeView]);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const rawHash = window.location.hash.replace(/^#\/?/, "").toLowerCase().trim();
+      const mapped = VIEW_ALIASES[rawHash];
+      if (mapped && mapped !== activeView) {
+        if (mapped === "normsync" && user.role !== "admin") {
+          setActiveView("dashboard");
+        } else {
+          setActiveView(mapped);
+        }
+      }
+    };
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, [activeView, user.role]);
 
   const { count: alertCount } = useNotificationBadge(token);
   const { theme, toggle: toggleTheme } = useTheme();
