@@ -21,12 +21,21 @@ const LOGHI_ACCESSO = [
   "/logo.jpg",
 ];
 
+const SIMBOLO_FEDINVEST = [
+  "/fedinvest-symbol.png",
+  "/fedinvest-symbol.jpg",
+  "/fedinvest-symbol.jfif",
+  "/fedshield-logo-clean.png",
+];
+
 export default function LoginPage({ loading, onSubmit }: LoginPageProps) {
   const [email, setEmail] = useState(DEV_DEFAULTS.email);
   const [password, setPassword] = useState(DEV_DEFAULTS.password);
   const [error, setError] = useState<string | null>(null);
   const [logoIndex, setLogoIndex] = useState(0);
   const [logoFailed, setLogoFailed] = useState(false);
+  const [symbolIndex, setSymbolIndex] = useState(0);
+  const [symbolFailed, setSymbolFailed] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -79,7 +88,22 @@ export default function LoginPage({ loading, onSubmit }: LoginPageProps) {
       <div className="login-form-pane">
         <form className="login-card" onSubmit={handleSubmit}>
           <div className="login-brand-mark">
-            <ShieldCheck size={26} aria-hidden="true" />
+            {!symbolFailed ? (
+              <img
+                src={SIMBOLO_FEDINVEST[symbolIndex]}
+                alt="Simbolo FedInvest"
+                className="login-brand-mark-img"
+                onError={() => {
+                  if (symbolIndex < SIMBOLO_FEDINVEST.length - 1) {
+                    setSymbolIndex((current) => current + 1);
+                  } else {
+                    setSymbolFailed(true);
+                  }
+                }}
+              />
+            ) : (
+              <ShieldCheck size={26} aria-hidden="true" />
+            )}
           </div>
           <h1>FedShield</h1>
           <p>Accedi alla piattaforma antisanzione</p>
