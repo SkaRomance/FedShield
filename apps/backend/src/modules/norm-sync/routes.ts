@@ -143,6 +143,7 @@ async function applyProposalChanges(fastify: any, proposal: any) {
               orderIndex: nextOrder,
               defaultSeverity: change.severity || 1,
               defaultSanctionable: change.sanctionable ?? false,
+              normReference: change.normReference || proposal.normReference || null,
             },
           });
         }
