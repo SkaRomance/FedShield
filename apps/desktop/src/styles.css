@@ -75,6 +75,7 @@
   --color-bg: #f4f6fa;
   --color-surface: #ffffff;
   --color-surface-elevated: #ffffff;
+  --color-card-bg: #ffffff;
   --color-surface-muted: var(--navy-50);
   --color-text: var(--navy-900);
   --color-text-muted: #5d6b85;
@@ -170,6 +171,7 @@
   --color-bg: #0b1122;
   --color-surface: #131b30;
   --color-surface-elevated: #1a2340;
+  --color-card-bg: #131b30;
   --color-surface-muted: #1a2340;
   --color-text: #e8ecf5;
   --color-text-muted: #98a4c0;
@@ -1426,6 +1428,86 @@ input[readonly] {
 
 .btn-danger:hover:not(:disabled) {
   background: color-mix(in srgb, var(--color-error) 18%, transparent);
+}
+
+.btn-success {
+  background: var(--color-success);
+  color: #ffffff;
+  border: 1px solid transparent;
+  padding: 8px 16px;
+  border-radius: var(--r-md);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: -0.005em;
+  transition: all var(--t-fast) var(--ease);
+  box-shadow: var(--shadow-xs);
+}
+
+.btn-success:hover:not(:disabled) {
+  filter: brightness(1.1);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.btn-success:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.btn-danger-outline {
+  background: transparent;
+  color: var(--color-error);
+  border: 1px solid var(--color-error);
+  padding: 8px 14px;
+  border-radius: var(--r-md);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--t-fast) var(--ease);
+}
+
+.btn-danger-outline:hover:not(:disabled) {
+  background: var(--color-error-soft);
+}
+
+.btn-danger-outline:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.norm-proposal-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-lg);
+  padding: var(--sp-4) var(--sp-5);
+  margin-bottom: var(--sp-3);
+  transition: border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+}
+
+.norm-proposal-card:hover {
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-sm);
+}
+
+.table-responsive-fixed {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.table-responsive-fixed th,
+.table-responsive-fixed td {
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* ============================================================

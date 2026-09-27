@@ -157,7 +157,54 @@ async function run() {
   const status2 = statusRes2.json();
   assert.ok(status2.counts.approved >= 1);
 
-  console.log("✓ Test NormSync completato con successo!");
+  // Test bulk-approve su nuove proposte
+  const bulkProp1 = await app.prisma.normativePatchProposal.create({
+    data: {
+      normTitle: "Test Norma Bulk 1",
+      normReference: "D.Lgs. Test 1",
+      changeSummary: "Modifica di test 1",
+      status: "pending",
+    },
+  });
+  const bulkProp2 = await app.prisma.normativePatchProposal.create({
+    data: {
+      normTitle: "Test Norma Bulk 2",
+      normReference: "D.Lgs. Test 2",
+      changeSummary: "Modifica di test 2",
+      status: "pending",
+    },
+  });
+
+  const bulkApproveRes = await app.inject({
+    method: "POST",
+    url: "/api/norm-sync/proposals/bulk-approve",
+    headers: { authorization: `Bearer ${adminToken}` },
+    payload: { ids: [bulkProp1.id] },
+  });
+  assert.equal(bulkApproveRes.statusCode, 200);
+  const bulkApproveData = bulkApproveRes.json();
+  assert.equal(bulkApproveData.success, true);
+  assert.equal(bulkApproveData.count, 1);
+
+  const checkedProp1 = await app.prisma.normativePatchProposal.findUnique({ where: { id: bulkProp1.id } });
+  assert.equal(checkedProp1?.status, "approved");
+
+  // Test bulk-reject
+  const bulkRejectRes = await app.inject({
+    method: "POST",
+    url: "/api/norm-sync/proposals/bulk-reject",
+    headers: { authorization: `Bearer ${adminToken}` },
+    payload: { ids: [bulkProp2.id] },
+  });
+  assert.equal(bulkRejectRes.statusCode, 200);
+  const bulkRejectData = bulkRejectRes.json();
+  assert.equal(bulkRejectData.success, true);
+  assert.equal(bulkRejectData.count, 1);
+
+  const checkedProp2 = await app.prisma.normativePatchProposal.findUnique({ where: { id: bulkProp2.id } });
+  assert.equal(checkedProp2?.status, "rejected");
+
+  console.log("✓ Test NormSync completato con successo (inclusi bulk-approve e bulk-reject)!");
   await app.close();
 }
 

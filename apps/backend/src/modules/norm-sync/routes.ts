@@ -56,6 +56,75 @@ const reviewSchema = z.object({
   note: z.string().optional(),
 });
 
+const bulkReviewSchema = z.object({
+  ids: z.array(z.string()).optional(),
+  note: z.string().optional(),
+});
+
+async function applyProposalChanges(fastify: any, proposal: any) {
+  // M5 (review): proposedChanges è già un valore JSON deserializzato
+  // da Prisma, no deep-clone necessario. Se non è un array salta:
+  // un oggetto/null porterebbe a iterare le chiavi e creare record garbage.
+  const rawChanges = proposal.proposedChanges;
+  const changes: Array<Record<string, any>> = Array.isArray(rawChanges)
+    ? (rawChanges as Array<Record<string, any>>)
+    : [];
+  for (const change of changes) {
+    if (change.checklistType === "training") {
+      const maxTrainingItem = await fastify.prisma.trainingChecklistItem.findFirst({
+        where: { templateId: change.templateId },
+        orderBy: { orderIndex: "desc" },
+        select: { orderIndex: true },
+      });
+      const nextTrainingOrder = (maxTrainingItem?.orderIndex ?? 0) + 1;
+
+      await fastify.prisma.trainingChecklistItem.create({
+        data: {
+          templateId: change.templateId,
+          section: change.section || "safety_training",
+          domain: change.domain || "safety",
+          area: change.area,
+          question: change.question,
+          orderIndex: nextTrainingOrder,
+          defaultSeverity: change.severity || 1,
+          defaultSanctionable: change.sanctionable || false,
+          normReference: proposal.normReference,
+        },
+      });
+    } else {
+      // Trova template esistente per ATECO
+      const templates = await fastify.prisma.checklistTemplate.findMany({
+        where: {
+          isActive: true,
+          macroGroup: change.macroGroup ?? null,
+        },
+        take: 1,
+      });
+      if (templates[0]) {
+        const maxItem = await fastify.prisma.checklistItem.findFirst({
+          where: { templateId: templates[0].id },
+          orderBy: { orderIndex: "desc" },
+          select: { orderIndex: true },
+        });
+        const nextOrder = (maxItem?.orderIndex ?? 0) + 1;
+
+        await fastify.prisma.checklistItem.create({
+          data: {
+            templateId: templates[0].id,
+            section: change.section || "procedures_hygiene",
+            domain: change.domain || "both",
+            area: change.area,
+            question: change.question,
+            orderIndex: nextOrder,
+            defaultSeverity: change.severity || 1,
+            defaultSanctionable: change.sanctionable || false,
+          },
+        });
+      }
+    }
+  }
+}
+
 // Schema risposta n8n AuditBot: validiamo prima di inoltrare al client
 // per non propagare payload inattesi (XSS riflessi, prompt injection, etc.)
 const n8nChatbotResponseSchema = z.object({
@@ -306,67 +375,7 @@ const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
       if (parsed.data.status === "approved") {
         // Applica patch: aggiungi item alle checklist
         try {
-          // M5 (review): proposedChanges è già un valore JSON deserializzato
-          // da Prisma, no deep-clone necessario. Se non è un array salta:
-          // un oggetto/null porterebbe a iterare le chiavi e creare record garbage.
-          const rawChanges = proposal.proposedChanges;
-          const changes: Array<Record<string, any>> = Array.isArray(rawChanges)
-            ? (rawChanges as Array<Record<string, any>>)
-            : [];
-          for (const change of changes) {
-            if (change.checklistType === "training") {
-              const maxTrainingItem = await fastify.prisma.trainingChecklistItem.findFirst({
-                where: { templateId: change.templateId },
-                orderBy: { orderIndex: "desc" },
-                select: { orderIndex: true },
-              });
-              const nextTrainingOrder = (maxTrainingItem?.orderIndex ?? 0) + 1;
-
-              await fastify.prisma.trainingChecklistItem.create({
-                data: {
-                  templateId: change.templateId,
-                  section: change.section || "safety_training",
-                  domain: change.domain || "safety",
-                  area: change.area,
-                  question: change.question,
-                  orderIndex: nextTrainingOrder,
-                  defaultSeverity: change.severity || 1,
-                  defaultSanctionable: change.sanctionable || false,
-                  normReference: proposal.normReference,
-                },
-              });
-            } else {
-              // Trova template esistente per ATECO
-              const templates = await fastify.prisma.checklistTemplate.findMany({
-                where: {
-                  isActive: true,
-                  macroGroup: change.macroGroup ?? null,
-                },
-                take: 1,
-              });
-              if (templates[0]) {
-                const maxItem = await fastify.prisma.checklistItem.findFirst({
-                  where: { templateId: templates[0].id },
-                  orderBy: { orderIndex: "desc" },
-                  select: { orderIndex: true },
-                });
-                const nextOrder = (maxItem?.orderIndex ?? 0) + 1;
-
-                await fastify.prisma.checklistItem.create({
-                  data: {
-                    templateId: templates[0].id,
-                    section: change.section || "procedures_hygiene",
-                    domain: change.domain || "both",
-                    area: change.area,
-                    question: change.question,
-                    orderIndex: nextOrder,
-                    defaultSeverity: change.severity || 1,
-                    defaultSanctionable: change.sanctionable || false,
-                  },
-                });
-              }
-            }
-          }
+          await applyProposalChanges(fastify, proposal);
         } catch (err) {
           fastify.log.error({ err, proposalId: proposal.id }, "Errore applicazione patch normativa");
           return reply.internalServerError("Errore nell'applicare la patch.");
@@ -395,6 +404,55 @@ const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
     },
   );
 
+  // Approvazione massiva di tutte o selezionate proposte in attesa
+  fastify.post(
+    "/norm-sync/proposals/bulk-approve",
+    { preHandler: [fastify.authenticate, requireAdmin] },
+    async (request, reply) => {
+      const parsed = bulkReviewSchema.safeParse(request.body || {});
+      if (!parsed.success) {
+        return reply.badRequest("Dati revisione massiva non validi.");
+      }
+
+      const whereClause: any = { status: "pending" };
+      if (parsed.data.ids && parsed.data.ids.length > 0) {
+        whereClause.id = { in: parsed.data.ids };
+      }
+
+      const proposals = await fastify.prisma.normativePatchProposal.findMany({
+        where: whereClause,
+      });
+
+      const auth = request.user;
+      const approvedIds: string[] = [];
+      for (const proposal of proposals) {
+        try {
+          await applyProposalChanges(fastify, proposal);
+          await fastify.prisma.normativePatchProposal.update({
+            where: { id: proposal.id },
+            data: {
+              status: "approved",
+              reviewedAt: new Date(),
+              reviewedById: auth?.sub ?? null,
+            },
+          });
+          approvedIds.push(proposal.id);
+        } catch (err) {
+          fastify.log.error({ err, proposalId: proposal.id }, "Errore durante l'approvazione della proposta");
+        }
+      }
+
+      await writeAudit(fastify, {
+        userId: auth?.sub,
+        action: "normProposal.bulkApprove",
+        entityType: "normativePatchProposal",
+        data: { count: approvedIds.length, ids: approvedIds, note: parsed.data.note },
+      });
+
+      return { success: true, count: approvedIds.length, ids: approvedIds };
+    },
+  );
+
   fastify.patch(
     "/norm-sync/proposals/:id/reject",
     { preHandler: [fastify.authenticate, requireAdmin] },
@@ -418,6 +476,50 @@ const normSyncRoutes: FastifyPluginAsync = async (fastify) => {
         data: { note },
       });
       return updated;
+    },
+  );
+
+  // Rifiuto massivo di tutte o selezionate proposte in attesa
+  fastify.post(
+    "/norm-sync/proposals/bulk-reject",
+    { preHandler: [fastify.authenticate, requireAdmin] },
+    async (request, reply) => {
+      const parsed = bulkReviewSchema.safeParse(request.body || {});
+      if (!parsed.success) {
+        return reply.badRequest("Dati rifiuto massivo non validi.");
+      }
+
+      const whereClause: any = { status: "pending" };
+      if (parsed.data.ids && parsed.data.ids.length > 0) {
+        whereClause.id = { in: parsed.data.ids };
+      }
+
+      const proposals = await fastify.prisma.normativePatchProposal.findMany({
+        where: whereClause,
+        select: { id: true },
+      });
+
+      const idsToReject = proposals.map((p) => p.id);
+      const auth = request.user;
+      if (idsToReject.length > 0) {
+        await fastify.prisma.normativePatchProposal.updateMany({
+          where: { id: { in: idsToReject } },
+          data: {
+            status: "rejected",
+            reviewedAt: new Date(),
+            reviewedById: auth?.sub ?? null,
+          },
+        });
+      }
+
+      await writeAudit(fastify, {
+        userId: auth?.sub,
+        action: "normProposal.bulkReject",
+        entityType: "normativePatchProposal",
+        data: { count: idsToReject.length, ids: idsToReject, note: parsed.data.note },
+      });
+
+      return { success: true, count: idsToReject.length, ids: idsToReject };
     },
   );
 

@@ -122,6 +122,8 @@ pnpm db:seed:test
 | `/equipment/overview` | GET | Dashboard asset |
 | `/chatbot/query` | POST | AuditBot AI — libero per il consulente |
 | `/norm-sync/proposals` | CRUD | Proposte normative (admin) |
+| `/norm-sync/proposals/bulk-approve` | POST | Approvazione massiva proposte normative (admin) |
+| `/norm-sync/proposals/bulk-reject` | POST | Rifiuto massivo proposte normative (admin) |
 | `/norm-sync/stats` | GET | Dashboard NormSync |
 | `/notifications/alerts` | GET | Alert scadenze (formazione + asset) |
 

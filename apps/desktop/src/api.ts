@@ -1041,6 +1041,20 @@ export function rejectNormSyncProposal(token: string, proposalId: string, note?:
   });
 }
 
+export function bulkApproveNormSyncProposals(token: string, ids?: string[], note?: string) {
+  return authedFetch<{ success: boolean; count: number; ids: string[] }>(`/norm-sync/proposals/bulk-approve`, token, {
+    method: "POST",
+    body: JSON.stringify({ ids, note }),
+  });
+}
+
+export function bulkRejectNormSyncProposals(token: string, ids?: string[], note?: string) {
+  return authedFetch<{ success: boolean; count: number; ids: string[] }>(`/norm-sync/proposals/bulk-reject`, token, {
+    method: "POST",
+    body: JSON.stringify({ ids, note }),
+  });
+}
+
 export interface NormativeSource {
   id: string;
   name: string;
