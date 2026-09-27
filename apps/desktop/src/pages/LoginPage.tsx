@@ -10,7 +10,7 @@ const DEV_DEFAULTS = import.meta.env.DEV
   ? { email: "admin@fedshield.local", password: "fedshield123" }
   : { email: "", password: "" };
 
-const LOGHI_ACCESSO = [
+const LOGHI_FEDSHIELD = [
   "/fedshield-logo-clean.png",
   "/fedshield-logo.png",
   "/fedshield-logo.jpg",
@@ -53,21 +53,21 @@ export default function LoginPage({ loading, onSubmit }: LoginPageProps) {
     <div className="login-shell">
       <div className="login-hero">
         <div className="login-hero-brand">
-          {!logoFailed ? (
+          {!symbolFailed ? (
             <img
-              className="login-hero-logo"
-              src={LOGHI_ACCESSO[logoIndex]}
-              alt="FedInvest - FedShield"
+              className="login-hero-symbol"
+              src={SIMBOLO_FEDINVEST[symbolIndex]}
+              alt="Simbolo FedInvest"
               onError={() => {
-                if (logoIndex < LOGHI_ACCESSO.length - 1) {
-                  setLogoIndex((current) => current + 1);
+                if (symbolIndex < SIMBOLO_FEDINVEST.length - 1) {
+                  setSymbolIndex((current) => current + 1);
                 } else {
-                  setLogoFailed(true);
+                  setSymbolFailed(true);
                 }
               }}
             />
           ) : (
-            <span style={{ fontSize: 18, fontWeight: 700, color: "var(--navy-900)" }}>
+            <span style={{ fontSize: 24, fontWeight: 700, color: "var(--navy-900)" }}>
               FedInvest
             </span>
           )}
@@ -87,26 +87,25 @@ export default function LoginPage({ loading, onSubmit }: LoginPageProps) {
 
       <div className="login-form-pane">
         <form className="login-card" onSubmit={handleSubmit}>
-          <div className="login-brand-mark">
-            {!symbolFailed ? (
+          <div className="login-card-logo-wrap">
+            {!logoFailed ? (
               <img
-                src={SIMBOLO_FEDINVEST[symbolIndex]}
-                alt="Simbolo FedInvest"
-                className="login-brand-mark-img"
+                className="login-card-logo"
+                src={LOGHI_FEDSHIELD[logoIndex]}
+                alt="FedShield"
                 onError={() => {
-                  if (symbolIndex < SIMBOLO_FEDINVEST.length - 1) {
-                    setSymbolIndex((current) => current + 1);
+                  if (logoIndex < LOGHI_FEDSHIELD.length - 1) {
+                    setLogoIndex((current) => current + 1);
                   } else {
-                    setSymbolFailed(true);
+                    setLogoFailed(true);
                   }
                 }}
               />
             ) : (
-              <ShieldCheck size={26} aria-hidden="true" />
+              <h1 className="login-card-fallback-title">FedShield</h1>
             )}
           </div>
-          <h1>FedShield</h1>
-          <p>Accedi alla piattaforma antisanzione</p>
+          <p className="login-card-subtitle">Accedi alla piattaforma antisanzione</p>
 
           <label htmlFor="login-email">Email</label>
           <input
