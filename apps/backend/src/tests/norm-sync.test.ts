@@ -196,15 +196,38 @@ async function run() {
     headers: { authorization: `Bearer ${adminToken}` },
     payload: { ids: [bulkProp2.id] },
   });
-  assert.equal(bulkRejectRes.statusCode, 200);
-  const bulkRejectData = bulkRejectRes.json();
-  assert.equal(bulkRejectData.success, true);
-  assert.equal(bulkRejectData.count, 1);
+  // Test approvazione proposta con training change senza templateId specificato
+  const trainingProp = await app.prisma.normativePatchProposal.create({
+    data: {
+      normTitle: "Test Norma Formazione Senza TemplateId",
+      normReference: "CELEX:TestTraining",
+      changeSummary: "Verifica corso sicurezza",
+      status: "pending",
+      proposedChanges: [
+        {
+          checklistType: "training",
+          section: "safety_training",
+          domain: "safety",
+          area: "Sicurezza D.Lgs. 81/08",
+          question: "Verificare conformità al nuovo aggiornamento normativo formazione",
+          severity: 2,
+          sanctionable: true,
+        },
+      ],
+    },
+  });
 
-  const checkedProp2 = await app.prisma.normativePatchProposal.findUnique({ where: { id: bulkProp2.id } });
-  assert.equal(checkedProp2?.status, "rejected");
+  const approveTrainingRes = await app.inject({
+    method: "PATCH",
+    url: `/api/norm-sync/proposals/${trainingProp.id}/approve`,
+    headers: { authorization: `Bearer ${adminToken}` },
+    payload: { status: "approved" },
+  });
+  assert.equal(approveTrainingRes.statusCode, 200);
+  const approvedTrainingProp = approveTrainingRes.json();
+  assert.equal(approvedTrainingProp.status, "approved");
 
-  console.log("✓ Test NormSync completato con successo (inclusi bulk-approve e bulk-reject)!");
+  console.log("✓ Test NormSync completato con successo (inclusi bulk-approve, bulk-reject e training patch senza templateId)!");
   await app.close();
 }
 

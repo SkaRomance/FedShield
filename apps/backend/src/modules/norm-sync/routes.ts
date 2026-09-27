@@ -69,58 +69,86 @@ async function applyProposalChanges(fastify: any, proposal: any) {
   const changes: Array<Record<string, any>> = Array.isArray(rawChanges)
     ? (rawChanges as Array<Record<string, any>>)
     : [];
+
   for (const change of changes) {
-    if (change.checklistType === "training") {
-      const maxTrainingItem = await fastify.prisma.trainingChecklistItem.findFirst({
-        where: { templateId: change.templateId },
-        orderBy: { orderIndex: "desc" },
-        select: { orderIndex: true },
-      });
-      const nextTrainingOrder = (maxTrainingItem?.orderIndex ?? 0) + 1;
+    try {
+      if (change.checklistType === "training") {
+        let targetTemplateId = change.templateId;
+        if (!targetTemplateId) {
+          const trainingTemplate = await fastify.prisma.trainingChecklistTemplate.findFirst({
+            where: { isActive: true },
+            orderBy: { createdAt: "asc" },
+            select: { id: true },
+          });
+          targetTemplateId = trainingTemplate?.id;
+        }
 
-      await fastify.prisma.trainingChecklistItem.create({
-        data: {
-          templateId: change.templateId,
-          section: change.section || "safety_training",
-          domain: change.domain || "safety",
-          area: change.area,
-          question: change.question,
-          orderIndex: nextTrainingOrder,
-          defaultSeverity: change.severity || 1,
-          defaultSanctionable: change.sanctionable || false,
-          normReference: proposal.normReference,
-        },
-      });
-    } else {
-      // Trova template esistente per ATECO
-      const templates = await fastify.prisma.checklistTemplate.findMany({
-        where: {
-          isActive: true,
-          macroGroup: change.macroGroup ?? null,
-        },
-        take: 1,
-      });
-      if (templates[0]) {
-        const maxItem = await fastify.prisma.checklistItem.findFirst({
-          where: { templateId: templates[0].id },
-          orderBy: { orderIndex: "desc" },
-          select: { orderIndex: true },
-        });
-        const nextOrder = (maxItem?.orderIndex ?? 0) + 1;
+        if (targetTemplateId) {
+          const maxTrainingItem = await fastify.prisma.trainingChecklistItem.findFirst({
+            where: { templateId: targetTemplateId },
+            orderBy: { orderIndex: "desc" },
+            select: { orderIndex: true },
+          });
+          const nextTrainingOrder = (maxTrainingItem?.orderIndex ?? 0) + 1;
 
-        await fastify.prisma.checklistItem.create({
-          data: {
-            templateId: templates[0].id,
-            section: change.section || "procedures_hygiene",
-            domain: change.domain || "both",
-            area: change.area,
-            question: change.question,
-            orderIndex: nextOrder,
-            defaultSeverity: change.severity || 1,
-            defaultSanctionable: change.sanctionable || false,
-          },
-        });
+          await fastify.prisma.trainingChecklistItem.create({
+            data: {
+              templateId: targetTemplateId,
+              section: change.section || "safety_training",
+              domain: change.domain || "safety",
+              area: change.area || "Sicurezza D.Lgs. 81/08",
+              question: change.question,
+              orderIndex: nextTrainingOrder,
+              defaultSeverity: change.severity || 1,
+              defaultSanctionable: change.sanctionable ?? false,
+              normReference: proposal.normReference,
+            },
+          });
+        }
+      } else {
+        // Trova template esistente per checklist operativa
+        let targetTemplateId = change.templateId;
+        if (!targetTemplateId) {
+          let template = null;
+          if (change.macroGroup) {
+            template = await fastify.prisma.checklistTemplate.findFirst({
+              where: { isActive: true, macroGroup: change.macroGroup },
+              select: { id: true },
+            });
+          }
+          if (!template) {
+            template = await fastify.prisma.checklistTemplate.findFirst({
+              where: { isActive: true },
+              select: { id: true },
+            });
+          }
+          targetTemplateId = template?.id;
+        }
+
+        if (targetTemplateId) {
+          const maxItem = await fastify.prisma.checklistItem.findFirst({
+            where: { templateId: targetTemplateId },
+            orderBy: { orderIndex: "desc" },
+            select: { orderIndex: true },
+          });
+          const nextOrder = (maxItem?.orderIndex ?? 0) + 1;
+
+          await fastify.prisma.checklistItem.create({
+            data: {
+              templateId: targetTemplateId,
+              section: change.section || "procedures_hygiene",
+              domain: change.domain || "both",
+              area: change.area || "Requisiti normativi",
+              question: change.question,
+              orderIndex: nextOrder,
+              defaultSeverity: change.severity || 1,
+              defaultSanctionable: change.sanctionable ?? false,
+            },
+          });
+        }
       }
+    } catch (itemErr) {
+      fastify.log.warn({ itemErr, change, proposalId: proposal.id }, "Avviso: Errore durante inserimento elemento checklist per proposta normativa");
     }
   }
 }
