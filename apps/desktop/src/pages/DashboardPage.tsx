@@ -10,8 +10,6 @@ import {
   ScrollText,
   RefreshCw,
   LogOut,
-  Sun,
-  Moon,
   Bell,
   CloudUpload,
   TriangleAlert,
@@ -25,7 +23,6 @@ import {
 } from "../api";
 import { queueSyncEvent } from "../services/syncManager";
 import { useNotificationBadge } from "../hooks/useNotificationBadge";
-import { useTheme } from "../hooks/useTheme";
 import { formattaData } from "../lib/oraItalia";
 import {
   etichettaRuolo,
@@ -210,7 +207,6 @@ export default function DashboardPage({
   }, [activeView, userRole]);
 
   const { count: alertCount } = useNotificationBadge(token);
-  const { theme, toggle: toggleTheme } = useTheme();
 
   const ncSanzionabili = useMemo(
     () =>
@@ -378,14 +374,6 @@ export default function DashboardPage({
                   {alertCount}
                 </span>
               ) : null}
-            </button>
-            <button
-              onClick={toggleTheme}
-              className="icon-btn"
-              aria-label={theme === "dark" ? "Passa al tema chiaro" : "Passa al tema scuro"}
-              title={theme === "dark" ? "Tema chiaro" : "Tema scuro"}
-            >
-              {theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
             </button>
             <button
               onClick={onSyncNow}

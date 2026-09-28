@@ -166,68 +166,9 @@
   color-scheme: light;
 }
 
-/* ---------------- Tema scuro: stesso marchio, ruoli invertiti ---- */
-[data-theme="dark"] {
-  --color-bg: #0b1122;
-  --color-surface: #131b30;
-  --color-surface-elevated: #1a2340;
-  --color-card-bg: #131b30;
-  --color-surface-muted: #1a2340;
-  --color-text: #e8ecf5;
-  --color-text-muted: #98a4c0;
-  --color-border: #263050;
-  --color-border-strong: #33406a;
-  --color-row-divider: rgba(255, 255, 255, 0.07);
-
-  --color-primary: #ffffff;
-  --color-primary-600: var(--navy-100);
-  --color-primary-500: var(--navy-200);
-
-  /* Su fondo scuro serve un arancio piu chiaro per restare leggibile */
-  --color-accent: var(--orange-400);
-  --color-accent-hover: var(--orange-300);
-  --color-accent-bright: var(--orange-400);
-  --color-accent-soft: rgba(230, 87, 18, 0.14);
-  --color-accent-soft-border: rgba(230, 87, 18, 0.3);
-  --color-focus-ring: var(--orange-400);
-
-  --color-secondary: var(--navy-300);
-  --color-secondary-hover: var(--navy-200);
-
-  --color-content-text: #e8ecf5;
-  --color-on-primary: var(--navy-950);
-  --color-on-accent: #1b0c03;
-
-  --color-success: #4ade80;
-  --color-success-soft: rgba(74, 222, 128, 0.14);
-  --color-warning: #fbbf24;
-  --color-warning-soft: rgba(251, 191, 36, 0.14);
-  --color-error: #fb7185;
-  --color-error-soft: rgba(251, 113, 133, 0.14);
-  --color-pending: #93b4f5;
-  --color-pending-soft: rgba(147, 180, 245, 0.14);
-
-  --color-sidebar-bg: #070c1a;
-  --color-sidebar-text: #97a3bf;
-  --color-sidebar-text-strong: #ffffff;
-  --color-sidebar-hover: rgba(255, 255, 255, 0.06);
-  --color-sidebar-active: rgba(230, 87, 18, 0.2);
-  --color-sidebar-active-text: #ffffff;
-  --color-sidebar-active-border: var(--orange-400);
-  --color-sidebar-divider: rgba(255, 255, 255, 0.09);
-
-  --color-shadow: rgba(0, 0, 0, 0.45);
-  --color-shadow-strong: rgba(0, 0, 0, 0.65);
-  --color-status-soft-bg: rgba(230, 87, 18, 0.12);
-  --color-status-soft-border: rgba(230, 87, 18, 0.35);
-
-  color-scheme: dark;
-}
-
 /* Stampa: sempre su bianco, marchio in blu */
 @media print {
-  :root,
-  [data-theme="dark"] {
+  :root {
     color-scheme: light;
     --color-bg: #ffffff;
     --color-surface: #ffffff;
