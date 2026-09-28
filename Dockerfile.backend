@@ -21,6 +21,9 @@ RUN pnpm install --frozen-lockfile=false
 # Copy backend source code and prisma schema
 COPY apps/backend/ ./apps/backend/
 
+# Keep a pristine copy of prisma files so volume mounts don't shadow schema updates
+RUN cp -r apps/backend/prisma /app/prisma-template
+
 # Generate Prisma client
 RUN pnpm -C apps/backend exec prisma generate
 
@@ -35,6 +38,9 @@ EXPOSE 4000
 # Entrypoint script: esegue sync schema DB + seed se nuovo, poi avvia backend
 RUN echo '#!/bin/sh' > /app/docker-entrypoint.sh && \
     echo 'set -e' >> /app/docker-entrypoint.sh && \
+    echo 'if [ -d /app/prisma-template ]; then' >> /app/docker-entrypoint.sh && \
+    echo '  cp -f /app/prisma-template/schema.prisma /app/apps/backend/prisma/schema.prisma || true' >> /app/docker-entrypoint.sh && \
+    echo 'fi' >> /app/docker-entrypoint.sh && \
     echo 'pnpm -C apps/backend exec prisma db push --accept-data-loss' >> /app/docker-entrypoint.sh && \
     echo 'if [ ! -f /app/apps/backend/prisma/.seeded ]; then' >> /app/docker-entrypoint.sh && \
     echo '  echo "Inizializzazione database utenti e checklist baseline..."' >> /app/docker-entrypoint.sh && \
