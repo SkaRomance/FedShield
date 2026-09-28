@@ -30,6 +30,13 @@ const createCompanySchema = z.object({
   haccpConsulenteEsterno: z.string().optional(),
   haccpAdditionalResponsabili: z.string().optional(),
   city: z.string().optional(),
+  code: z.string().optional(),
+  fiscalCode: z.string().optional(),
+  province: z.string().optional(),
+  cap: z.string().optional(),
+  sdiCode: z.string().optional(),
+  mobilePhone: z.string().optional(),
+  bankCoordinates: z.string().optional(),
 });
 const updateCompanySchema = createCompanySchema.partial();
 const companyParamsSchema = z.object({
@@ -56,6 +63,13 @@ const companyOutputSchema = z.object({
   legalAddress: z.string().nullable(),
   localUnitAddress: z.string().nullable(),
   city: z.string().nullable(),
+  code: z.string().nullable().optional(),
+  fiscalCode: z.string().nullable().optional(),
+  province: z.string().nullable().optional(),
+  cap: z.string().nullable().optional(),
+  sdiCode: z.string().nullable().optional(),
+  mobilePhone: z.string().nullable().optional(),
+  bankCoordinates: z.string().nullable().optional(),
   preventionSystemSubjects: z.string().nullable(),
   employerRsppPreposto: z.string().nullable(),
   occupationalDoctor: z.string().nullable(),
@@ -165,6 +179,13 @@ function buildDaneaRow(company: {
   id: string;
   name: string;
   vatNumber: string;
+  code?: string | null;
+  fiscalCode?: string | null;
+  province?: string | null;
+  cap?: string | null;
+  sdiCode?: string | null;
+  mobilePhone?: string | null;
+  bankCoordinates?: string | null;
   reaNumber: string | null;
   legalAddress: string | null;
   city: string | null;
@@ -172,21 +193,21 @@ function buildDaneaRow(company: {
   email: string | null;
   pec: string | null;
 }): DaneaRow {
-  const codice = (company.id || company.vatNumber || "").slice(0, 8);
+  const codice = company.code || (company.id || company.vatNumber || "").slice(0, 8);
   return {
     Codice: codice,
     NomeContoCliente: company.name ?? "",
     PartitaIVA: company.vatNumber ?? "",
-    CodiceFiscale: company.reaNumber ?? "",
+    CodiceFiscale: company.fiscalCode || company.reaNumber || company.vatNumber || "",
     Indirizzo: company.legalAddress ?? "",
-    Cap: "",
+    Cap: company.cap ?? "",
     Citta: company.city ?? "",
-    Provincia: "",
+    Provincia: company.province ?? "",
     Nazione: "IT",
-    Telefono: company.phone ?? "",
+    Telefono: company.phone || company.mobilePhone || "",
     Email: company.email ?? "",
     PEC: company.pec ?? "",
-    Note: "",
+    Note: company.sdiCode ? `SDI: ${company.sdiCode}` : "",
   };
 }
 

@@ -1290,6 +1290,8 @@ export default function ChecklistPage({
 
       {step === 0 && (
         <Step0DatiAzienda
+          token={token}
+          onReload={onReload}
           companies={companies}
           selectedCompany={selectedCompany}
           companyId={companyId}

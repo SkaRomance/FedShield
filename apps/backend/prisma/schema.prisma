@@ -145,6 +145,13 @@ model Company {
   haccpConsulenteEsterno String?
   haccpAdditionalResponsabili String?
   contractStart DateTime?
+  code          String?
+  fiscalCode    String?
+  province      String?
+  cap           String?
+  sdiCode       String?
+  mobilePhone   String?
+  bankCoordinates String?
   city          String?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt

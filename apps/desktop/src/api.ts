@@ -94,6 +94,13 @@ export interface Company {
   haccpConsulenteEsterno?: string;
   haccpAdditionalResponsabili?: string;
   city?: string;
+  code?: string;
+  fiscalCode?: string;
+  province?: string;
+  cap?: string;
+  sdiCode?: string;
+  mobilePhone?: string;
+  bankCoordinates?: string;
 }
 
 export interface Inspection {

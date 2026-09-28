@@ -19,9 +19,10 @@ import { buildApp } from "../app.js";
 async function setup() {
   const app = buildApp();
   await app.ready();
+  const adminUser = await app.prisma.user.findUnique({ where: { email: "admin@fedshield.local" } });
   const adminToken = app.jwt.sign({
-    sub: "smoke-admin",
-    email: "smoke@fedshield.test",
+    sub: adminUser?.id ?? "smoke-admin",
+    email: adminUser?.email ?? "smoke@fedshield.test",
     role: "admin",
   });
   return { app, adminToken };
@@ -154,6 +155,55 @@ test("Smoke: /api/chatbot/query rifiuta question vuota", async () => {
       payload: { question: "   " },
     });
     assert.strictEqual(res.statusCode, 400);
+  } finally {
+    await app.close();
+  }
+});
+
+test("Smoke: POST /api/companies supporta tutti i campi da Clienti.xlsx", async () => {
+  const { app, adminToken } = await setup();
+  try {
+    const vat = `IT${Date.now()}`;
+    const payload = {
+      code: "TEST01",
+      name: "Azienda Test Clienti Excel Srl",
+      vatNumber: vat,
+      fiscalCode: "AZNDTST01A01H501Z",
+      sdiCode: "M5UXCR1",
+      city: "Vibo Valentia",
+      province: "VV",
+      cap: "89900",
+      legalAddress: "Via Roma 1",
+      localUnitAddress: "Corso Umberto 2",
+      phone: "096312345",
+      mobilePhone: "3331234567",
+      email: "test@azienda.it",
+      pec: "test@pec.azienda.it",
+      bankCoordinates: "IT60X0542811101000000123456",
+      atecoCode: "56.10.11",
+      riskLevel: "Basso",
+      legalForm: "S.r.l.",
+      reaNumber: "VV-99999",
+      employeesInfo: "10 dipendenti",
+      description: "Test anagrafica completa",
+    };
+
+    const res = await app.inject({
+      method: "POST",
+      url: "/api/companies",
+      headers: { authorization: `Bearer ${adminToken}` },
+      payload,
+    });
+
+    assert.strictEqual(res.statusCode, 201);
+    const body = JSON.parse(res.body);
+    assert.strictEqual(body.code, "TEST01");
+    assert.strictEqual(body.fiscalCode, "AZNDTST01A01H501Z");
+    assert.strictEqual(body.sdiCode, "M5UXCR1");
+    assert.strictEqual(body.province, "VV");
+    assert.strictEqual(body.cap, "89900");
+    assert.strictEqual(body.mobilePhone, "3331234567");
+    assert.strictEqual(body.bankCoordinates, "IT60X0542811101000000123456");
   } finally {
     await app.close();
   }

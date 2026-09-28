@@ -34,6 +34,8 @@ function slugifyClient(value: string): string {
     .slice(0, 60) || "azienda";
 }
 
+import CompanyDataForm, { CompanyFormData, emptyCompanyFormData } from "../components/CompanyDataForm";
+
 interface CustomerRegistryPageProps {
   token: string;
   companies: Company[];
@@ -42,55 +44,26 @@ interface CustomerRegistryPageProps {
   onUseForInspection: (companyId: string, inspectionId?: string) => void;
 }
 
-type CompanyFormState = {
-  name: string;
-  vatNumber: string;
-  legalForm: string;
-  reaNumber: string;
-  employeesInfo: string;
-  email: string;
-  pec: string;
-  phone: string;
-  atecoCode: string;
-  riskLevel: string;
-  city: string;
-  description: string;
-  legalAddress: string;
-  localUnitAddress: string;
-};
-
-function emptyCompanyForm(): CompanyFormState {
+function companyToForm(company: Company): CompanyFormData {
   return {
-    name: "",
-    vatNumber: "",
-    legalForm: "",
-    reaNumber: "",
-    employeesInfo: "",
-    email: "",
-    pec: "",
-    phone: "",
-    atecoCode: "56.10.11",
-    riskLevel: "",
-    city: "",
-    description: "",
-    legalAddress: "",
-    localUnitAddress: "",
-  };
-}
-
-function companyToForm(company: Company): CompanyFormState {
-  return {
+    code: company.code ?? "",
     name: company.name ?? "",
     vatNumber: company.vatNumber ?? "",
+    fiscalCode: company.fiscalCode ?? "",
     legalForm: company.legalForm ?? "",
     reaNumber: company.reaNumber ?? "",
     employeesInfo: company.employeesInfo ?? "",
     email: company.email ?? "",
     pec: company.pec ?? "",
     phone: company.phone ?? "",
+    mobilePhone: company.mobilePhone ?? "",
     atecoCode: company.atecoCode ?? "",
     riskLevel: company.riskLevel ?? "",
+    province: company.province ?? "",
     city: company.city ?? "",
+    cap: company.cap ?? "",
+    sdiCode: company.sdiCode ?? "",
+    bankCoordinates: company.bankCoordinates ?? "",
     description: company.description ?? "",
     legalAddress: company.legalAddress ?? "",
     localUnitAddress: company.localUnitAddress ?? "",
@@ -122,8 +95,7 @@ export default function CustomerRegistryPage({
   const [exportingCsv, setExportingCsv] = useState<boolean>(false);
   const [exportingXml, setExportingXml] = useState<boolean>(false);
   const [ndaCompanyId, setNdaCompanyId] = useState<string>("");
-  const [editingCompanyId, setEditingCompanyId] = useState<string>("");
-  const [companyForm, setCompanyForm] = useState<CompanyFormState>(() => emptyCompanyForm());
+  const [companyForm, setCompanyForm] = useState<CompanyFormData>(() => emptyCompanyFormData());
   const [savingCompany, setSavingCompany] = useState<boolean>(false);
 
   const normalizedQuery = useMemo(() => companyQuery.trim().toLowerCase(), [companyQuery]);
@@ -186,7 +158,7 @@ export default function CustomerRegistryPage({
     }
   }
 
-  function updateCompanyForm(field: keyof CompanyFormState, value: string) {
+  function updateCompanyForm<K extends keyof CompanyFormData>(field: K, value: CompanyFormData[K]) {
     setCompanyForm((current) => ({
       ...current,
       [field]: value,
@@ -195,7 +167,7 @@ export default function CustomerRegistryPage({
 
   function startNewCompany() {
     setEditingCompanyId("");
-    setCompanyForm(emptyCompanyForm());
+    setCompanyForm(emptyCompanyFormData());
     setStatusMessage("");
   }
 
@@ -214,17 +186,24 @@ export default function CustomerRegistryPage({
     }
 
     const payload = {
+      code: optionalText(companyForm.code),
       name: companyForm.name.trim(),
       vatNumber: companyForm.vatNumber.trim(),
+      fiscalCode: optionalText(companyForm.fiscalCode),
       legalForm: optionalText(companyForm.legalForm),
       reaNumber: optionalText(companyForm.reaNumber),
       employeesInfo: optionalText(companyForm.employeesInfo),
       email: optionalText(companyForm.email),
       pec: optionalText(companyForm.pec),
       phone: optionalText(companyForm.phone),
+      mobilePhone: optionalText(companyForm.mobilePhone),
       atecoCode: optionalText(companyForm.atecoCode),
       riskLevel: optionalText(companyForm.riskLevel),
+      province: optionalText(companyForm.province),
       city: optionalText(companyForm.city),
+      cap: optionalText(companyForm.cap),
+      sdiCode: optionalText(companyForm.sdiCode),
+      bankCoordinates: optionalText(companyForm.bankCoordinates),
       description: optionalText(companyForm.description),
       legalAddress: optionalText(companyForm.legalAddress),
       localUnitAddress: optionalText(companyForm.localUnitAddress),
@@ -352,124 +331,15 @@ export default function CustomerRegistryPage({
             </button>
           ) : null}
         </div>
-        <div className="grid-two" style={{ marginTop: 12 }}>
-          <div>
-            <label htmlFor="registry-company-name">Ragione sociale</label>
-            <input
-              id="registry-company-name"
-              value={companyForm.name}
-              onChange={(event) => updateCompanyForm("name", event.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="registry-company-vat">Codice fiscale, Partita IVA e n. Iscr. Al Registro delle Imprese</label>
-            <input
-              id="registry-company-vat"
-              value={companyForm.vatNumber}
-              onChange={(event) => updateCompanyForm("vatNumber", event.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="registry-company-legalform">Forma Giuridica</label>
-            <input
-              id="registry-company-legalform"
-              value={companyForm.legalForm}
-              onChange={(event) => updateCompanyForm("legalForm", event.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="registry-company-rea">Numero REA</label>
-            <input
-              id="registry-company-rea"
-              value={companyForm.reaNumber}
-              onChange={(event) => updateCompanyForm("reaNumber", event.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="registry-company-employees">Totale dipendenti</label>
-            <input
-              id="registry-company-employees"
-              value={companyForm.employeesInfo}
-              onChange={(event) => updateCompanyForm("employeesInfo", event.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="registry-company-ateco">Codice ATECO</label>
-            <input
-              id="registry-company-ateco"
-              value={companyForm.atecoCode}
-              onChange={(event) => updateCompanyForm("atecoCode", event.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="registry-company-risk">Livello di rischio dell'attività</label>
-            <input
-              id="registry-company-risk"
-              value={companyForm.riskLevel}
-              onChange={(event) => updateCompanyForm("riskLevel", event.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="registry-company-city">Città</label>
-            <input
-              id="registry-company-city"
-              value={companyForm.city}
-              onChange={(event) => updateCompanyForm("city", event.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="registry-company-email">Indirizzo e-mail</label>
-            <input
-              id="registry-company-email"
-              value={companyForm.email}
-              onChange={(event) => updateCompanyForm("email", event.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="registry-company-pec">Indirizzo PEC</label>
-            <input
-              id="registry-company-pec"
-              value={companyForm.pec}
-              onChange={(event) => updateCompanyForm("pec", event.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="registry-company-phone">Telefono</label>
-            <input
-              id="registry-company-phone"
-              value={companyForm.phone}
-              onChange={(event) => updateCompanyForm("phone", event.target.value)}
-            />
-          </div>
-          <div style={{ gridColumn: "span 2" }}>
-            <label htmlFor="registry-company-description">Descrizione</label>
-            <textarea
-              id="registry-company-description"
-              rows={3}
-              value={companyForm.description}
-              onChange={(event) => updateCompanyForm("description", event.target.value)}
-            />
-          </div>
-          <div style={{ gridColumn: "span 2" }}>
-            <label htmlFor="registry-company-legaladdr">Sede legale - Indirizzo</label>
-            <textarea
-              id="registry-company-legaladdr"
-              rows={2}
-              value={companyForm.legalAddress}
-              onChange={(event) => updateCompanyForm("legalAddress", event.target.value)}
-            />
-          </div>
-          <div style={{ gridColumn: "span 2" }}>
-            <label htmlFor="registry-company-localaddr">Unità locale - Indirizzo</label>
-            <textarea
-              id="registry-company-localaddr"
-              rows={2}
-              value={companyForm.localUnitAddress}
-              onChange={(event) => updateCompanyForm("localUnitAddress", event.target.value)}
-            />
-          </div>
+        <div style={{ marginTop: 14 }}>
+          <CompanyDataForm
+            form={companyForm}
+            onChange={updateCompanyForm}
+            idPrefix="registry"
+            disabled={savingCompany}
+          />
         </div>
-        <div className="footer-actions" style={{ justifyContent: "flex-end", flexWrap: "wrap" }}>
+        <div className="footer-actions" style={{ justifyContent: "flex-end", flexWrap: "wrap", marginTop: 14 }}>
           <button onClick={handleSaveCompany} disabled={savingCompany}>
             {savingCompany ? "Salvataggio..." : editingCompanyId ? "Salva modifiche" : "Registra cliente"}
           </button>
@@ -585,21 +455,43 @@ export default function CustomerRegistryPage({
           </div>
           <table>
             <tbody>
+              {selectedCompany.code ? (
+                <tr>
+                  <th>Cod. (Codice cliente)</th>
+                  <td>{selectedCompany.code}</td>
+                </tr>
+              ) : null}
               <tr>
                 <th>Ragione sociale</th>
                 <td>{selectedCompany.name || "-"}</td>
               </tr>
               <tr>
+                <th>Partita IVA</th>
+                <td>{selectedCompany.vatNumber || "-"}</td>
+              </tr>
+              {selectedCompany.fiscalCode ? (
+                <tr>
+                  <th>Codice Fiscale</th>
+                  <td>{selectedCompany.fiscalCode}</td>
+                </tr>
+              ) : null}
+              {selectedCompany.sdiCode ? (
+                <tr>
+                  <th>Cod. destinatario (SDI)</th>
+                  <td>{selectedCompany.sdiCode}</td>
+                </tr>
+              ) : null}
+              <tr>
                 <th>Forma giuridica</th>
                 <td>{selectedCompany.legalForm || "-"}</td>
               </tr>
               <tr>
-                <th>CF/P.IVA/Registro Imprese</th>
-                <td>{selectedCompany.vatNumber || "-"}</td>
-              </tr>
-              <tr>
                 <th>Numero REA</th>
                 <td>{selectedCompany.reaNumber || "-"}</td>
+              </tr>
+              <tr>
+                <th>Totale dipendenti</th>
+                <td>{selectedCompany.employeesInfo || "-"}</td>
               </tr>
               <tr>
                 <th>Codice ATECO</th>
@@ -610,28 +502,50 @@ export default function CustomerRegistryPage({
                 <td>{selectedCompany.riskLevel || "-"}</td>
               </tr>
               <tr>
-                <th>Descrizione</th>
-                <td>{selectedCompany.description || "-"}</td>
-              </tr>
-              <tr>
                 <th>Sede legale</th>
                 <td>{selectedCompany.legalAddress || "-"}</td>
+              </tr>
+              <tr>
+                <th>Città / Comune</th>
+                <td>{selectedCompany.city || "-"}</td>
+              </tr>
+              <tr>
+                <th>Provincia</th>
+                <td>{selectedCompany.province || "-"}</td>
+              </tr>
+              <tr>
+                <th>CAP</th>
+                <td>{selectedCompany.cap || "-"}</td>
               </tr>
               <tr>
                 <th>Unità locale</th>
                 <td>{selectedCompany.localUnitAddress || "-"}</td>
               </tr>
               <tr>
-                <th>Indirizzo PEC</th>
-                <td>{selectedCompany.pec || "-"}</td>
+                <th>Telefono</th>
+                <td>{selectedCompany.phone || "-"}</td>
+              </tr>
+              <tr>
+                <th>Cellulare</th>
+                <td>{selectedCompany.mobilePhone || "-"}</td>
               </tr>
               <tr>
                 <th>E-mail</th>
                 <td>{selectedCompany.email || "-"}</td>
               </tr>
               <tr>
-                <th>Telefono</th>
-                <td>{selectedCompany.phone || "-"}</td>
+                <th>Indirizzo PEC</th>
+                <td>{selectedCompany.pec || "-"}</td>
+              </tr>
+              {selectedCompany.bankCoordinates ? (
+                <tr>
+                  <th>Coord. bancarie (IBAN)</th>
+                  <td>{selectedCompany.bankCoordinates}</td>
+                </tr>
+              ) : null}
+              <tr>
+                <th>Descrizione / Note</th>
+                <td>{selectedCompany.description || "-"}</td>
               </tr>
             </tbody>
           </table>

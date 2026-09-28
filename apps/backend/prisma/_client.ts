@@ -12,6 +12,7 @@
 // `plugins/prisma.ts` con lifecycle decorato (1 connessione gestita
 // dal framework). Questo file è scope seed-only.
 
+import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 
 let _instance: PrismaClient | null = null;
