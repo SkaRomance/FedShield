@@ -1355,6 +1355,8 @@ export default function ChecklistPage({
           onOpenQr={onOpenQr ?? (() => undefined)}
           onAddCustomItems={handleAddBulkCustomItems}
           existingChecklistItems={allItems}
+          atecoCode={effectiveChecklistAteco}
+          isInspectionValidated={!!isInspectionValidated}
         />
       )}
 
@@ -1363,6 +1365,7 @@ export default function ChecklistPage({
           token={token}
           companyId={selectedCompany?.id ?? companyId}
           companies={companies}
+          atecoCode={effectiveChecklistAteco}
         />
       )}
 
