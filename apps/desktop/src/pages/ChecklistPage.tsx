@@ -1329,9 +1329,13 @@ export default function ChecklistPage({
       {step === 2 && (
         <Step2LocaliAttrezzature
           premisesItems={premisesItems}
+          answers={answers}
+          updateAnswer={updateAnswer}
           renderAnswersTable={renderAnswersTable}
           onAddCustomItem={handleAddCustomItem}
           isInspectionValidated={!!isInspectionValidated}
+          atecoCode={effectiveChecklistAteco}
+          checklistMode={effectiveChecklistMode}
         />
       )}
 
