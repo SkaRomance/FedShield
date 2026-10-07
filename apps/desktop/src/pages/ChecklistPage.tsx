@@ -1321,6 +1321,8 @@ export default function ChecklistPage({
           documents={documents}
           setDocuments={setDocuments}
           isInspectionValidated={!!isInspectionValidated}
+          atecoCode={effectiveChecklistAteco}
+          checklistMode={effectiveChecklistMode}
         />
       )}
 

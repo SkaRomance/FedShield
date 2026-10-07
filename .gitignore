@@ -31,3 +31,6 @@ apps/desktop/playwright/.cache/
 
 # Prisma CLI accidental nested dir
 apps/backend/prisma/prisma/
+
+# Temporary video promo assets
+video_promo/
