@@ -273,4 +273,50 @@ assert(Boolean(badge.color && badge.background), "Badge color ok");
 const label = getUrgencyLabel("critical", 15);
 assert(label.includes("15 gg"), "Label contiene 15 gg");
 
+// 9. Test Scadenza Allegato 3B INAIL (31 Marzo)
+console.log("Test 9: computeAllegato3BDeadline e regole Sorveglianza Sanitaria");
+import { computeAllegato3BDeadline } from "./deadlinesEngine";
+assert(computeAllegato3BDeadline("2026-10-08") === "2027-03-31", "Data autunno 2026 -> 31/03/2027");
+assert(computeAllegato3BDeadline("2026-02-15") === "2026-03-31", "Data inizio 2026 prima del 31 marzo -> 31/03/2026");
+
+// 10. Test matching regole sanitarie
+assert(DEADLINE_RULES.NOMINA_MEDICO_COMPETENTE.category === "formazione_sanitaria", "Nomina MC categoria ok");
+assert(DEADLINE_RULES.RELAZIONE_ANNUALE_ALLEGATO_3B.defaultValidityMonths === 12, "Allegato 3B 12 mesi");
+assert(DEADLINE_RULES.SOPRALLUOGO_ANNUALE_MEDICO_COMPETENTE.defaultValidityMonths === 12, "Sopralluogo MC 12 mesi");
+
+// 11. Test aggregazione automatica Allegato 3B
+const testHealthInspection = aggregateAllDeadlines({
+  referenceDate: "2026-10-08",
+  company: { id: "comp-hlt-1", name: "Ristorante Salute Srl", atecoCode: "56.10.11" },
+  inspections: [
+    {
+      id: "insp-hlt-1",
+      companyId: "comp-hlt-1",
+      happenedAt: "2026-10-08",
+      documents: [
+        {
+          name: "Relazione Sanitaria Annuale & Allegato 3B INAIL",
+          documentTemplateId: "doc-hlt-03",
+          status: "viewed_on_site",
+          note: JSON.stringify({ issueDate: "2026-10-08" }),
+        },
+        {
+          name: "Verbale di Sopralluogo Annuale dei Luoghi di Lavoro del MC",
+          documentTemplateId: "doc-hlt-04",
+          status: "viewed_on_site",
+          note: JSON.stringify({ issueDate: "2026-10-08" }),
+        },
+      ],
+    },
+  ],
+});
+const item3b = testHealthInspection.find((d) => d.id.includes("doc-hlt-03"));
+assert(Boolean(item3b), "Allegato 3B aggregato con successo");
+assert(item3b?.deadlineDate === "2027-03-31", `Scadenza Allegato 3B calcolata a 2027-03-31, trovata: ${item3b?.deadlineDate}`);
+
+const itemSopralluogo = testHealthInspection.find((d) => d.id.includes("doc-hlt-04"));
+assert(Boolean(itemSopralluogo), "Sopralluogo MC aggregato con successo");
+assert(itemSopralluogo?.deadlineDate === "2027-10-08", `Scadenza sopralluogo attesa 2027-10-08, trovata: ${itemSopralluogo?.deadlineDate}`);
+
 console.log("=== TUTTI I TEST SUPERATI CON SUCCESSO! ===");
+

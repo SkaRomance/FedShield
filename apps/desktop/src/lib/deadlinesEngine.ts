@@ -252,6 +252,24 @@ export function diffCalendarDays(targetYmd: string, referenceYmd: string): numbe
   return Math.round((tTime - refTime) / (1000 * 60 * 60 * 24));
 }
 
+/**
+ * Calcola la data della scadenza perentoria dell'Allegato 3B INAIL (entro il 31 marzo).
+ * In base all'art. 40 c. 1 D.Lgs. 81/08, i dati aggregati dell'anno di riferimento vanno inviati
+ * entro il 31 marzo dell'anno successivo.
+ */
+export function computeAllegato3BDeadline(baseDateYmd: string): string {
+  const norm = normalizeDateToYmd(baseDateYmd);
+  if (!norm) return "";
+  const year = parseInt(norm.substring(0, 4), 10);
+  const month = parseInt(norm.substring(5, 7), 10);
+  const day = parseInt(norm.substring(8, 10), 10);
+
+  if (month < 3 || (month === 3 && day <= 31)) {
+    return `${year}-03-31`;
+  }
+  return `${year + 1}-03-31`;
+}
+
 // ============================================================================
 // 3. REGOLE NORMATIVE DI DECADENZA DI LEGGE (DEADLINE_RULES)
 // ============================================================================
@@ -745,16 +763,58 @@ export const DEADLINE_RULES: Record<string, DeadlineRule> = {
     },
   },
 
+  NOMINA_MEDICO_COMPETENTE: {
+    key: "NOMINA_MEDICO_COMPETENTE",
+    category: "formazione_sanitaria",
+    categoryLabel: DEADLINE_CATEGORIES_INFO.formazione_sanitaria.title,
+    title: "Nomina Medico Competente con Accettazione Firmata",
+    normReference: "D.Lgs. 81/2008, art. 18 c. 1 lett. a, artt. 38-39",
+    defaultValidityMonths: 24, // Convenzione biennale tipica
+    description: "Nomina e convenzione formale del Medico Competente per la sorveglianza sanitaria.",
+    matchers: {
+      catalogIds: ["doc-hlt-01", "doc-hlt-nomina-mc"],
+      nameKeywords: ["nomina medico", "medico competente", "incarico mc", "convenzione medico"],
+    },
+  },
+
+  RELAZIONE_ANNUALE_ALLEGATO_3B: {
+    key: "RELAZIONE_ANNUALE_ALLEGATO_3B",
+    category: "formazione_sanitaria",
+    categoryLabel: DEADLINE_CATEGORIES_INFO.formazione_sanitaria.title,
+    title: "Relazione Sanitaria Annuale & Allegato 3B INAIL (entro 31 marzo)",
+    normReference: "D.Lgs. 81/2008, art. 40 c. 1 e D.M. 05/09/2012",
+    defaultValidityMonths: 12,
+    description: "Invio telematico all'INAIL delle informazioni aggregate sanitarie e di rischio entro il 31 marzo.",
+    matchers: {
+      catalogIds: ["doc-hlt-03", "doc-hlt-allegato-3b-inail"],
+      nameKeywords: ["allegato 3b", "relazione sanitaria annuale", "inail 3b", "trasmissione 3b"],
+    },
+  },
+
+  SOPRALLUOGO_ANNUALE_MEDICO_COMPETENTE: {
+    key: "SOPRALLUOGO_ANNUALE_MEDICO_COMPETENTE",
+    category: "formazione_sanitaria",
+    categoryLabel: DEADLINE_CATEGORIES_INFO.formazione_sanitaria.title,
+    title: "Verbale di Sopralluogo Annuale dei Luoghi di Lavoro del MC",
+    normReference: "D.Lgs. 81/2008, art. 25 c. 1 lett. l",
+    defaultValidityMonths: 12, // Annuale
+    description: "Sopralluogo congiunto annuale degli ambienti di lavoro con RSPP e RLS.",
+    matchers: {
+      catalogIds: ["doc-hlt-04", "doc-hlt-sopralluogo-mc"],
+      nameKeywords: ["sopralluogo medico", "verbale sopralluogo mc", "visita ambienti mc"],
+    },
+  },
+
   SORVEGLIANZA_SANITARIA_VISITA: {
     key: "SORVEGLIANZA_SANITARIA_VISITA",
     category: "formazione_sanitaria",
     categoryLabel: DEADLINE_CATEGORIES_INFO.formazione_sanitaria.title,
-    title: "Visita Medica Periodica del Medico Competente",
+    title: "Visita Medica Periodica del Medico Competente / Idoneità",
     normReference: "D.Lgs. 81/2008, art. 41 c. 2 lett. b",
     defaultValidityMonths: 12, // 1 anno di norma
     description: "Visita medica periodica per sorveglianza sanitaria preventiva e periodica dei lavoratori esposti a rischio.",
     matchers: {
-      catalogIds: ["sec-giudizi-idoneita"],
+      catalogIds: ["sec-giudizi-idoneita", "doc-hlt-05", "doc-hlt-registro-idoneita"],
       nameKeywords: ["visita medica", "idoneità", "giudizio di idoneità", "sorveglianza sanitaria"],
     },
   },
@@ -1165,8 +1225,19 @@ export function aggregateAllDeadlines(input: AggregateDeadlinesInput): Aggregate
           else validityMonths = 36;
         }
 
+        let effectiveExplicitExpiry = extraMeta.expiryDate;
+        if (!effectiveExplicitExpiry && rule?.key === "RELAZIONE_ANNUALE_ALLEGATO_3B") {
+          const baseDate =
+            extraMeta.issueDate ||
+            fallbackInspectionDate ||
+            (typeof referenceDate === "string" ? referenceDate : undefined);
+          if (baseDate) {
+            effectiveExplicitExpiry = computeAllegato3BDeadline(baseDate);
+          }
+        }
+
         const compResult = computeDeadlineResult({
-          explicitExpiryDate: extraMeta.expiryDate,
+          explicitExpiryDate: effectiveExplicitExpiry,
           issueDate: extraMeta.issueDate,
           validityMonths,
           fallbackInspectionDate,

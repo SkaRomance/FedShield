@@ -31,6 +31,7 @@ import Step2AmbientiDiLavoro from "./checklist/Step2AmbientiDiLavoro";
 import Step3ProcedureIgiene from "./checklist/Step3ProcedureIgiene";
 import Step4AssetAttrezzature from "./checklist/Step4AssetAttrezzature";
 import Step5Formazione from "./checklist/Step5Formazione";
+import Step6SorveglianzaSanitaria from "./checklist/Step6SorveglianzaSanitaria";
 import Step6RiepilogoInvio from "./checklist/Step6RiepilogoInvio";
 import {
   ACTIVITY_TYPE_OPTIONS,
@@ -187,6 +188,9 @@ export default function ChecklistPage({
     [selectedInspection?.checklistMode, newInspectionChecklistMode],
   );
   const isInspectionValidated = selectedInspection?.status === "validated";
+  const isHealthSurveillanceDisabled =
+    effectiveChecklistMode === "haccp_only" ||
+    (effectiveChecklistMode as string) === "environmental_only";
   const showSafetyRoleBlock = effectiveChecklistMode !== "haccp_only";
   const showHaccpRoleBlock = effectiveChecklistMode !== "safety_only";
   const isHypermarketAteco = /^47\.11\.1(\.|$)/.test(newCompanyAteco.trim());
@@ -1243,15 +1247,30 @@ export default function ChecklistPage({
       </div>
 
       <div className="stepper">
-        {STEPS.map((label, index) => (
-          <button
-            key={label}
-            className={`stepper-item ${index === step ? "stepper-item-active" : ""}`}
-            onClick={() => setStep(index)}
-          >
-            {label}
-          </button>
-        ))}
+        {STEPS.map((label, index) => {
+          const isDisabled = index === 6 && isHealthSurveillanceDisabled;
+          return (
+            <button
+              key={label}
+              className={`stepper-item ${index === step ? "stepper-item-active" : ""}`}
+              disabled={isDisabled}
+              title={
+                isDisabled
+                  ? "Non applicabile per la modalità selezionata (Solo HACCP / Ambientale)"
+                  : undefined
+              }
+              onClick={() => {
+                if (isDisabled) return;
+                setStep(index);
+              }}
+            >
+              {label}
+              {isDisabled && (
+                <span style={{ marginLeft: 6, fontSize: "0.7rem", opacity: 0.65 }}>[N/A]</span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {isInspectionValidated && (
@@ -1372,6 +1391,20 @@ export default function ChecklistPage({
       )}
 
       {step === 6 && (
+        <Step6SorveglianzaSanitaria
+          token={token}
+          companyId={selectedCompany?.id ?? companyId}
+          company={selectedCompany}
+          documents={documents}
+          setDocuments={setDocuments}
+          atecoCode={effectiveChecklistAteco}
+          checklistMode={effectiveChecklistMode}
+          isInspectionValidated={!!isInspectionValidated}
+          inspectionId={selectedInspectionId}
+        />
+      )}
+
+      {step === 7 && (
         <Step6RiepilogoInvio
           summary={summary}
           loading={loading}
@@ -1388,14 +1421,33 @@ export default function ChecklistPage({
 
       <div className="footer-actions" style={{ justifyContent: "flex-end", flexWrap: "wrap" }}>
         {message ? <span className="status-message" style={{ marginRight: "auto" }}>{message}</span> : null}
-        <button onClick={() => setStep((current) => Math.max(0, current - 1))} disabled={step === 0}>
+        <button
+          onClick={() =>
+            setStep((current) => {
+              let prev = Math.max(0, current - 1);
+              if (prev === 6 && isHealthSurveillanceDisabled) {
+                prev = 5;
+              }
+              return prev;
+            })
+          }
+          disabled={step === 0}
+        >
           Indietro
         </button>
         {/* Nel primo passo l'azione principale e "Crea sopralluogo":
             qui Avanti resta neutro per non avere due pulsanti in arancio. */}
         <button
           className={step === 0 ? "secondary-btn" : "btn-primary"}
-          onClick={() => setStep((current) => Math.min(STEPS.length - 1, current + 1))}
+          onClick={() =>
+            setStep((current) => {
+              let next = Math.min(STEPS.length - 1, current + 1);
+              if (next === 6 && isHealthSurveillanceDisabled) {
+                next = 7;
+              }
+              return next;
+            })
+          }
           disabled={step === STEPS.length - 1}
         >
           Avanti
