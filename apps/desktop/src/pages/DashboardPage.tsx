@@ -4,6 +4,7 @@ import {
   Users,
   ClipboardCheck,
   FileText,
+  CalendarClock,
   BarChart3,
   ShieldCheck,
   Bot,
@@ -38,6 +39,7 @@ import OdvPage from "./OdvPage";
 import QuotesPage from "./QuotesPage";
 import ChatbotPage from "./ChatbotPage";
 import NormSyncAdminPage from "./NormSyncAdminPage";
+import DeadlinesPage from "./DeadlinesPage";
 import { AssetKind } from "./AssetsPage";
 import AssetQrPage from "./AssetQrPage";
 
@@ -84,6 +86,7 @@ type NavView =
   | "dashboard"
   | "registry"
   | "checklist"
+  | "deadlines"
   | "quotes"
   | "kpi"
   | "odv"
@@ -99,6 +102,9 @@ const VIEW_ALIASES: Record<string, NavView> = {
   anagrafica: "registry",
   checklist: "checklist",
   sopralluoghi: "checklist",
+  deadlines: "deadlines",
+  scadenzario: "deadlines",
+  scadenze: "deadlines",
   quotes: "quotes",
   preventivi: "quotes",
   kpi: "kpi",
@@ -323,6 +329,7 @@ export default function DashboardPage({
           {navItem("dashboard", "Riepilogo", LayoutDashboard)}
           {navItem("registry", "Anagrafica Clienti", Users)}
           {navItem("checklist", "Sopralluoghi", ClipboardCheck)}
+          {navItem("deadlines", "Scadenzario", CalendarClock)}
           {navItem("quotes", "Preventivi", FileText)}
         </nav>
 
@@ -442,6 +449,130 @@ export default function DashboardPage({
                   {ncSanzionabili === 0 ? "Nessun rischio aperto" : "Da risolvere con il cliente"}
                 </span>
               </article>
+              <article
+                className="kpi-card"
+                style={{ cursor: "pointer" }}
+                onClick={() => {
+                  setActiveView("deadlines");
+                  try {
+                    window.history.pushState(null, "", "#deadlines");
+                  } catch {
+                    window.location.hash = "deadlines";
+                  }
+                }}
+                title="Apri lo Scadenzario per monitorare tutti i termini di legge"
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <h3>Scadenzario Globale</h3>
+                  <CalendarClock size={16} style={{ color: "var(--color-primary, #0f4c81)" }} />
+                </div>
+                <strong>Scadenze</strong>
+                <span className="kpi-card-nota" style={{ color: "var(--color-primary, #0f4c81)", fontWeight: 500 }}>
+                  Apri monitoraggio adempimenti →
+                </span>
+              </article>
+            </section>
+
+            <section className="panel" style={{ marginTop: "var(--sp-4)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <CalendarClock size={20} style={{ color: "var(--color-primary, #0f4c81)" }} />
+                  <h2 style={{ margin: 0, fontSize: "1.1rem" }}>Scadenzario & Monitoraggio Adempimenti</h2>
+                </div>
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => {
+                    setActiveView("deadlines");
+                    try {
+                      window.history.pushState(null, "", "#deadlines");
+                    } catch {
+                      window.location.hash = "deadlines";
+                    }
+                  }}
+                  style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, padding: "6px 14px" }}
+                >
+                  <CalendarClock size={15} />
+                  <span>Vai allo Scadenzario</span>
+                </button>
+              </div>
+              <p style={{ margin: "0 0 12px 0", fontSize: 13, color: "var(--color-text-muted)" }}>
+                Monitoraggio continuo e calcolo automatico dei termini legali: autorizzazioni ambientali ed edilizie, sicurezza sul lavoro D.Lgs. 81/08, autocontrollo HACCP, controlli periodici attrezzature/presidi antincendio e formazione obbligatoria.
+              </p>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                <div
+                  style={{
+                    flex: "1 1 200px",
+                    background: "var(--color-bg-subtle, #f8f9fb)",
+                    padding: "10px 14px",
+                    borderRadius: 6,
+                    border: "1px solid var(--color-border, #e2e8f0)",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    setActiveView("deadlines");
+                    try {
+                      window.history.pushState(null, "", "#deadlines");
+                    } catch {
+                      window.location.hash = "deadlines";
+                    }
+                  }}
+                >
+                  <span style={{ fontSize: 13, fontWeight: 500 }}>Regole di calcolo automatiche</span>
+                  <span style={{ fontSize: 12, color: "var(--color-primary, #0f4c81)", fontWeight: 600 }}>D.Lgs. 81 & DPR Attivi</span>
+                </div>
+                <div
+                  style={{
+                    flex: "1 1 200px",
+                    background: "var(--color-bg-subtle, #f8f9fb)",
+                    padding: "10px 14px",
+                    borderRadius: 6,
+                    border: "1px solid var(--color-border, #e2e8f0)",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    setActiveView("deadlines");
+                    try {
+                      window.history.pushState(null, "", "#deadlines");
+                    } catch {
+                      window.location.hash = "deadlines";
+                    }
+                  }}
+                >
+                  <span style={{ fontSize: 13, fontWeight: 500 }}>Doppio rilevamento</span>
+                  <span style={{ fontSize: 12, color: "#16a34a", fontWeight: 600 }}>Manuale + Legge</span>
+                </div>
+                <div
+                  style={{
+                    flex: "1 1 200px",
+                    background: "var(--color-bg-subtle, #f8f9fb)",
+                    padding: "10px 14px",
+                    borderRadius: 6,
+                    border: "1px solid var(--color-border, #e2e8f0)",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    setActiveView("deadlines");
+                    try {
+                      window.history.pushState(null, "", "#deadlines");
+                    } catch {
+                      window.location.hash = "deadlines";
+                    }
+                  }}
+                >
+                  <span style={{ fontSize: 13, fontWeight: 500 }}>Aziende monitorate</span>
+                  <span style={{ fontSize: 12, fontWeight: 700 }}>{companies.length} clienti</span>
+                </div>
+              </div>
             </section>
 
             <section className="panel">
@@ -501,10 +632,17 @@ export default function DashboardPage({
               {statusMessage ? <p className="status-message">{statusMessage}</p> : null}
             </section>
           </>
+        ) : activeView === "deadlines" ? (
+          <DeadlinesPage
+            token={token}
+            companies={companies}
+            inspections={inspections}
+            userRole={userRole}
+          />
         ) : activeView === "checklist" ? (
           <ChecklistPage
             token={token}
-            user={user}
+            user={{ ...user, role: userRole }}
             companies={companies}
             inspections={inspections}
             initialCompanyId={checklistSelection.companyId}
