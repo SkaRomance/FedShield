@@ -16,6 +16,7 @@ import {
   getDeadlinesSummary,
   getUrgencyBadgeColor,
   getUrgencyLabel,
+  isNonExpiringDocument,
 } from "./deadlinesEngine";
 
 function assert(condition: boolean, message: string) {
@@ -118,9 +119,10 @@ assert(DEADLINE_RULES.CPI_ANTINCENDIO.defaultValidityMonths === 60, "CPI 5 anni 
 assert(DEADLINE_RULES.VDR_RUMORE.defaultValidityMonths === 48, "Rumore 4 anni = 48 mesi");
 assert(DEADLINE_RULES.VDR_VIBRAZIONI.defaultValidityMonths === 48, "Vibrazioni 4 anni = 48 mesi");
 assert(DEADLINE_RULES.VDR_CHIMICO.defaultValidityMonths === 36, "Chimico 3 anni = 36 mesi");
-assert(DEADLINE_RULES.DVR_GENERALE.defaultValidityMonths === 36, "DVR 3 anni = 36 mesi");
+assert(DEADLINE_RULES.DVR_GENERALE.defaultValidityMonths === 12, "DVR riesame annuale = 12 mesi");
+assert(DEADLINE_RULES.VDR_RIESAME_ANNUALE.defaultValidityMonths === 12, "VDR riesame annuale = 12 mesi");
 assert(DEADLINE_RULES.HACCP_MANUALE_RIESAME.defaultValidityMonths === 12, "HACCP 1 anno = 12 mesi");
-assert(DEADLINE_RULES.ACQUE_LEGIONELLA.defaultValidityMonths === 24, "Legionella 2 anni = 24 mesi");
+assert(DEADLINE_RULES.ACQUE_LEGIONELLA.defaultValidityMonths === 12, "Legionella/PSA riesame annuale = 12 mesi");
 assert(DEADLINE_RULES.ESTINTORI_CONTROLLO_SEMESTRALE.defaultValidityMonths === 6, "Estintori 6 mesi");
 assert(DEADLINE_RULES.CASSETTA_PRONTO_SOCCORSO.defaultValidityMonths === 6, "Cassetta PS 6 mesi");
 assert(DEADLINE_RULES.FORMAZIONE_PREPOSTI.defaultValidityMonths === 24, "Preposti 2 anni = 24 mesi");
@@ -317,6 +319,70 @@ assert(item3b?.deadlineDate === "2027-03-31", `Scadenza Allegato 3B calcolata a 
 const itemSopralluogo = testHealthInspection.find((d) => d.id.includes("doc-hlt-04"));
 assert(Boolean(itemSopralluogo), "Sopralluogo MC aggregato con successo");
 assert(itemSopralluogo?.deadlineDate === "2027-10-08", `Scadenza sopralluogo attesa 2027-10-08, trovata: ${itemSopralluogo?.deadlineDate}`);
+
+// 12. Test documenti senza scadenza (SCIA, planimetria, agibilità, DICO, libretti macchine, rapporti di prova)
+console.log("Test 12: isNonExpiringDocument ed esclusione dal computo");
+assert(isNonExpiringDocument("SCIA di Inizio Attività", "base-scia") === true, "SCIA non scade");
+assert(isNonExpiringDocument("Planimetria aggiornata locali", "base-planimetria") === true, "Planimetria non scade");
+assert(isNonExpiringDocument("Certificato di Agibilità", "base-agibilita") === true, "Agibilità non scade");
+assert(isNonExpiringDocument("Dichiarazione di Conformità Impianto Elettrico (DICO)", "base-dico-elettrico") === true, "DICO elettrico non scade");
+assert(isNonExpiringDocument("DICO Impianto Gas", "base-dico-gas") === true, "DICO gas non scade");
+assert(isNonExpiringDocument("Libretto d'Uso e Manutenzione") === true, "Libretto macchine non scade");
+assert(isNonExpiringDocument("Certificazione CE del costruttore") === true, "Certificazione CE non scade");
+assert(isNonExpiringDocument("Rapporti di Prova Ufficiali di Analisi delle Acque", "acque-rapporti-prova", true) === true, "Rapporti di prova non scadono");
+assert(isNonExpiringDocument("C.P.I. Prevenzione Incendi", "base-cpi-antincendio") === false, "CPI scade (5 anni)");
+assert(isNonExpiringDocument("Verifica Periodica Messa a Terra", "base-messa-a-terra") === false, "Messa a terra scade (2 o 5 anni)");
+
+// Verifica che documenti senza scadenza vengano omessi da aggregateAllDeadlines
+const testNonExpiringAggregate = aggregateAllDeadlines({
+  referenceDate: "2026-10-08",
+  company: { id: "comp-no-exp", name: "Azienda Test Srl" },
+  inspections: [
+    {
+      id: "insp-no-exp",
+      companyId: "comp-no-exp",
+      documents: [
+        { name: "SCIA di Inizio Attività", documentTemplateId: "base-scia", status: "viewed_on_site", note: JSON.stringify({ issueDate: "2020-01-01" }) },
+        { name: "Planimetria aggiornata locali", documentTemplateId: "base-planimetria", status: "viewed_on_site", note: JSON.stringify({ issueDate: "2020-01-01" }) },
+        { name: "Certificato di Agibilità", documentTemplateId: "base-agibilita", status: "viewed_on_site", note: JSON.stringify({ issueDate: "2020-01-01" }) },
+        { name: "DICO D.M. 37/08 Elettrico", documentTemplateId: "base-dico-elettrico", status: "viewed_on_site", note: JSON.stringify({ issueDate: "2020-01-01" }) },
+        { name: "Libretto d'Uso e Manutenzione", status: "viewed_on_site", note: JSON.stringify({ issueDate: "2020-01-01" }) },
+        { name: "Rapporto di Prova Analisi", status: "viewed_on_site", note: JSON.stringify({ issueDate: "2020-01-01" }) },
+        // Questo invece HA riesame annuale
+        { name: "DVR - Documento di Valutazione dei Rischi", documentTemplateId: "sec-dvr", status: "viewed_on_site", note: JSON.stringify({ issueDate: "2025-01-01" }) },
+      ],
+    },
+  ],
+});
+assert(testNonExpiringAggregate.length === 1, `Atteso solo 1 documento con scadenza (DVR), trovati: ${testNonExpiringAggregate.length}`);
+assert(testNonExpiringAggregate[0].title.includes("DVR"), "L'unico documento con scadenza presente è il DVR");
+
+// 13. Test riesame annuale (12 mesi) per DVR, Manuale HACCP, Piano Legionella/PSA, VDR e stato 'expired' con NC
+console.log("Test 13: Riesame annuale 12 mesi per DVR, HACCP, Legionella/PSA, VDR e alert NC");
+const testAnnualReviewAggregate = aggregateAllDeadlines({
+  referenceDate: "2026-10-08",
+  company: { id: "comp-annual", name: "Azienda Annual Srl" },
+  inspections: [
+    {
+      id: "insp-annual",
+      companyId: "comp-annual",
+      documents: [
+        // Rilasciato il 01/01/2025 -> Scadenza 01/01/2026 -> Rispetto a 08/10/2026 è scaduto (> 12 mesi fa)
+        { name: "DVR Generale", documentTemplateId: "sec-dvr", status: "viewed_on_site", note: JSON.stringify({ issueDate: "2025-01-01" }) },
+        { name: "Manuale HACCP Autocontrollo", documentTemplateId: "haccp-manuale", status: "viewed_on_site", note: JSON.stringify({ issueDate: "2025-01-01" }) },
+        { name: "Piano Sicurezza Acque PSA Legionella", documentTemplateId: "acque-psa", status: "viewed_on_site", note: JSON.stringify({ issueDate: "2025-01-01" }) },
+        { name: "VDR Rischi Specifici", documentTemplateId: "sec-vdr", status: "viewed_on_site", note: JSON.stringify({ issueDate: "2025-01-01" }) },
+      ],
+    },
+  ],
+});
+assert(testAnnualReviewAggregate.length === 4, "Tutti e 4 i documenti con riesame annuale generano scadenze");
+for (const item of testAnnualReviewAggregate) {
+  assert(item.deadlineDate === "2026-01-01", `${item.title} deve scadere a 12 mesi (2026-01-01), trovata: ${item.deadlineDate}`);
+  assert(item.urgency === "expired", `${item.title} deve risultare expired`);
+  assert(item.isSanctionableNc === true, `${item.title} deve essere contrassegnato con NC sanzionabile`);
+  assert(Boolean(item.sanctionInfo), `${item.title} deve contenere sanctionInfo`);
+}
 
 console.log("=== TUTTI I TEST SUPERATI CON SUCCESSO! ===");
 

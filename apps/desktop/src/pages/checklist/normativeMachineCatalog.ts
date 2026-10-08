@@ -1013,10 +1013,17 @@ export interface MachineFullDetailsMetadata {
   riskAssessmentInDvr?: "yes" | "no" | "na";
   manualPresent?: "yes" | "no" | "na";
   maintenanceLogPresent?: "yes" | "no" | "expired";
+  lastMaintenanceDate?: string; // Data ultima manutenzione effettuata (YYYY-MM-DD)
+  maintenancePeriodicityMonths?: number; // Periodicità manutenzione ordinaria (12 o 24 mesi)
+  nextMaintenanceDate?: string; // Data prossima manutenzione programmata (YYYY-MM-DD)
   inailCheckRequired?: boolean;
   inailSerial?: string;
+  inailPeriodicityMonths?: number; // Periodicità verifica periodica INAIL/ARPA ex art. 71 c. 11 (12 o 24 mesi)
   inailLastCheckDate?: string;
   inailNextCheckDate?: string;
+  ceReleaseDate?: string; // Data di rilascio dichiarazione CE (documento permanente)
+  installationCertifiedDate?: string; // Data certificazione installazione a regola d'arte (documento permanente)
+  manualReleaseDate?: string; // Data edizione/rilascio libretto uso (documento permanente)
   requiredCourseCode?: string;
   requiredCourseTitle?: string;
   environmentId?: string; // ID locale di ubicazione (da Step 2)

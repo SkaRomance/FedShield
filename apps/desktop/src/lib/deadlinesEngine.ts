@@ -98,6 +98,8 @@ export interface AggregatedDeadline {
   sourceEntity: DeadlineSourceEntity;
   sourceId: string;
   note?: string;
+  isSanctionableNc?: boolean;      // Non Conformità sanzionabile se la scadenza è superata
+  sanctionInfo?: string;          // Dettaglio sanzione applicabile ex lege
 }
 
 export interface DeadlineCategoryMeta {
@@ -435,13 +437,27 @@ export const DEADLINE_RULES: Record<string, DeadlineRule> = {
     key: "DVR_GENERALE",
     category: "sicurezza",
     categoryLabel: DEADLINE_CATEGORIES_INFO.sicurezza.title,
-    title: "DVR - Riesame Periodico Documento Valutazione Rischi",
+    title: "DVR - Riesame Annuale Documento Valutazione Rischi",
     normReference: "D.Lgs. 81/2008, artt. 17, 28 e 29 c. 3",
-    defaultValidityMonths: 36, // 3 anni di audit periodico
-    description: "Riesame generale della valutazione dei rischi e rielaborazione programmata (art. 29 c. 3).",
+    defaultValidityMonths: 12, // Riesame annuale programmato D.Lgs. 81/2008
+    description: "Riesame e verifica annuale della valutazione di tutti i rischi aziendali e del programma delle misure di miglioramento (art. 29 c. 3).",
     matchers: {
       catalogIds: ["sec-dvr"],
       nameKeywords: ["dvr", "documento di valutazione dei rischi", "valutazione dei rischi generale"],
+    },
+  },
+
+  VDR_RIESAME_ANNUALE: {
+    key: "VDR_RIESAME_ANNUALE",
+    category: "sicurezza",
+    categoryLabel: DEADLINE_CATEGORIES_INFO.sicurezza.title,
+    title: "VDR - Riesame Annuale Valutazione Rischi Specifici",
+    normReference: "D.Lgs. 81/2008, artt. 28 e 181 c. 2",
+    defaultValidityMonths: 12, // Riesame annuale
+    description: "Riesame annuale della valutazione dei rischi specifici aziendali e aggiornamento del piano delle misure di tutela.",
+    matchers: {
+      catalogIds: ["sec-vdr", "sec-vdr-generale"],
+      nameKeywords: ["vdr", "valutazione dei rischi specifici", "riesame vdr", "valutazione rischi"],
     },
   },
 
@@ -604,21 +620,13 @@ export const DEADLINE_RULES: Record<string, DeadlineRule> = {
     key: "ACQUE_LEGIONELLA",
     category: "haccp_acque",
     categoryLabel: DEADLINE_CATEGORIES_INFO.haccp_acque.title,
-    title: "Valutazione Rischio Legionella & Campionamento Impianto",
+    title: "Piano Sicurezza Acque (PSA) & Rischio Legionella (Riesame Annuale)",
     normReference: "Linee Guida Nazionali Legionellosi 2015 e D.Lgs. 18/2023",
-    defaultValidityMonths: 24, // 2 anni (1 anno per strutture sanitarie/ricettive)
-    resolveValidityMonths: (ctx) => {
-      if (!ctx.atecoCode) return 24;
-      const clean = ctx.atecoCode.replace(/[^0-9]/g, "");
-      if (clean.startsWith("55") || clean.startsWith("86") || clean.startsWith("87")) {
-        return 12; // Hotel, cliniche, RSA -> annuale
-      }
-      return 24;
-    },
-    description: "Campionamento e valutazione del rischio Legionella pneumophila su accumuli e terminali idrici.",
+    defaultValidityMonths: 12, // Riesame annuale (D.Lgs. 18/2023)
+    description: "Riesame annuale del Piano di Sicurezza delle Acque (PSA) e monitoraggio del rischio Legionella pneumophila.",
     matchers: {
       catalogIds: ["acque-analisi-legionella", "acque-psa"],
-      nameKeywords: ["legionella", "legionellosi", "water safety plan", "piano sicurezza acque"],
+      nameKeywords: ["legionella", "legionellosi", "water safety plan", "piano sicurezza acque", "psa"],
     },
   },
 
@@ -1119,6 +1127,123 @@ export interface AggregateDeadlinesInput {
 }
 
 /**
+ * Identifica se un documento fa parte delle categorie che NON HANNO SCADENZA secondo la normativa italiana:
+ * - SCIA di inizio attività / Notifica Sanitaria (titoli abilitativi apertura)
+ * - Planimetrie e layout dei locali
+ * - Certificato di agibilità e destinazione d'uso urbanistica
+ * - Dichiarazioni di conformità impianti alla regola d'arte (DICO D.M. 37/08 elettrico, gas)
+ * - Visura camerale
+ * - Libretti d'uso e manutenzione del costruttore, certificazioni/dichiarazioni CE, installazione a regola d'arte
+ * - Rapporti di prova analitici di laboratorio (istantanei / fotografie puntuali)
+ */
+export function isNonExpiringDocument(
+  identifierOrName: string,
+  catalogId?: string | null,
+  isLaboratoryTestReport?: boolean,
+): boolean {
+  if (isLaboratoryTestReport) return true;
+  const lower = (identifierOrName || "").toLowerCase().trim();
+  const catId = (catalogId || "").toLowerCase().trim();
+
+  // Documenti periodici che NON vanno confusi (hanno scadenza periodica):
+  // - C.P.I. / SCIA Antincendio (D.P.R. 151/2011) ha rinnovo quinquennale (5 anni)!
+  if (
+    catId === "base-cpi-antincendio" ||
+    lower.includes("cpi") ||
+    lower.includes("prevenzione incendi") ||
+    lower.includes("scia antincendio")
+  ) {
+    return false;
+  }
+  // - Messa a terra (D.P.R. 462/01) ha verifica biennale o quinquennale!
+  if (
+    catId === "base-messa-a-terra" ||
+    lower.includes("messa a terra") ||
+    lower.includes("462/01") ||
+    lower.includes("scariche atmosferiche")
+  ) {
+    return false;
+  }
+
+  // 1. SCIA di inizio attività / Notifica Sanitaria
+  if (
+    catId === "base-scia" ||
+    lower.includes("scia di inizio") ||
+    lower.includes("scia inizio") ||
+    lower.includes("notifica sanitaria") ||
+    lower.includes("segnalazione certificata di inizio attività")
+  ) {
+    return true;
+  }
+
+  // 2. Planimetria aggiornata locali
+  if (catId === "base-planimetria" || lower.includes("planimetria") || lower.includes("layout")) {
+    return true;
+  }
+
+  // 3. Certificato di Agibilità / Destinazione d'uso
+  if (
+    catId === "base-agibilita" ||
+    lower.includes("agibilità") ||
+    lower.includes("agibilita") ||
+    lower.includes("destinazione d'uso")
+  ) {
+    return true;
+  }
+
+  // 4. DICO Impianti D.M. 37/08
+  if (
+    catId === "base-dico-elettrico" ||
+    catId === "base-dico-gas" ||
+    lower.includes("dico ") ||
+    lower.includes("dico)") ||
+    lower.includes("dico d.m. 37/08") ||
+    lower.includes("dichiarazione di conformità impianto") ||
+    lower.includes("dichiarazione di conformita impianto") ||
+    lower.includes("dichiarazione di conformità d.m. 37/08")
+  ) {
+    return true;
+  }
+
+  // 5. Visura camerale
+  if (catId === "base-visura" || lower.includes("visura camerale")) {
+    return true;
+  }
+
+  // 6. Libretti macchine, manuali d'uso, schede tecniche, marcatura/certificazione CE, installazione a regola d'arte
+  if (
+    lower.includes("libretto d'uso") ||
+    lower.includes("libretto uso") ||
+    lower.includes("manuale d'uso") ||
+    lower.includes("manuale uso") ||
+    lower.includes("scheda tecnica") ||
+    lower.includes("certificazione ce") ||
+    lower.includes("dichiarazione ce") ||
+    lower.includes("marcatura ce") ||
+    lower.includes("installazione a regola d'arte") ||
+    lower.includes("conformità moca") ||
+    lower.includes("conformita moca")
+  ) {
+    return true;
+  }
+
+  // 7. Rapporti di prova analitici / tamponi
+  if (
+    catId.includes("rapporto") ||
+    catId.includes("rapporti") ||
+    lower.includes("rapporto di prova") ||
+    lower.includes("rapporti di prova") ||
+    lower.includes("tamponi superficiali") ||
+    lower.includes("tamponi di superficie") ||
+    lower.includes("analisi microbiologiche alimenti")
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * Funzione ausiliaria interna per mappare la categoria di catalogo alla categoria di scadenza.
  */
 function mapCatalogCategoryToDeadlineCategory(catKey?: string): DeadlineCategory {
@@ -1195,6 +1320,17 @@ export function aggregateAllDeadlines(input: AggregateDeadlinesInput): Aggregate
         const extraMeta: DocumentExtraMeta = parseDocumentExtraMeta(doc.note);
         const catalogDef = findCatalogDefinition(doc.name);
 
+        // I documenti senza scadenza (SCIA, planimetria, agibilità, DICO, libretti macchine, rapporti di prova)
+        // sono ESCLUSI dal computo delle scadenze (perché non scadono)
+        const isNonExpiring = isNonExpiringDocument(
+          doc.name,
+          doc.documentTemplateId,
+          catalogDef?.isLaboratoryTestReport,
+        );
+        if (isNonExpiring && !extraMeta.expiryDate) {
+          continue;
+        }
+
         const ruleContext: RuleResolutionContext = {
           atecoCode: comp.atecoCode,
           notes: extraMeta.noteText,
@@ -1218,11 +1354,12 @@ export function aggregateAllDeadlines(input: AggregateDeadlinesInput): Aggregate
             : rule.defaultValidityMonths;
         } else if (catalogDef) {
           category = mapCatalogCategoryToDeadlineCategory(catalogDef.category);
-          // Default prudenziali se non mappato da una regola specifica
+          // Default normativi (riesame annuale a 12 mesi per DVR, Manuale HACCP, Piano Legionella/PSA, VDR)
           if (catalogDef.category === "haccp_alimentare") validityMonths = 12;
-          else if (catalogDef.category === "acque_legionella") validityMonths = 24;
+          else if (catalogDef.category === "acque_legionella") validityMonths = 12;
+          else if (catalogDef.category === "sicurezza_81_08") validityMonths = 12;
           else if (catalogDef.category === "base_autorizzativa") validityMonths = 60;
-          else validityMonths = 36;
+          else validityMonths = 12;
         }
 
         let effectiveExplicitExpiry = extraMeta.expiryDate;
@@ -1248,6 +1385,25 @@ export function aggregateAllDeadlines(input: AggregateDeadlinesInput): Aggregate
         const docIdClean = (doc.documentTemplateId || doc.name).replace(/[^a-zA-Z0-9_-]/g, "_");
         const deadlineId = `doc-${insp.id}-${docIdClean}`;
 
+        const isExpired = compResult.urgency === "expired";
+        let isSanctionableNc = false;
+        let sanctionInfo: string | undefined = undefined;
+
+        if (isExpired) {
+          isSanctionableNc = true;
+          if (category === "sicurezza") {
+            sanctionInfo =
+              "Violazione D.Lgs. 81/2008 art. 29 c. 3 (sanzione art. 55 c. 1): arresto da 3 a 6 mesi o ammenda da 3.071,27 € a 7.862,44 € per omesso riesame periodico.";
+          } else if (category === "haccp_acque") {
+            sanctionInfo =
+              "Violazione Reg. CE 852/2004 e D.Lgs. 193/2007 art. 6 c. 6: sanzione amministrativa da 1.000 € a 6.000 € per mancato riesame del piano di autocontrollo.";
+          } else if (category === "autorizzazioni") {
+            sanctionInfo = "Titolo autorizzativo scaduto: possibile sospensione dell'attività.";
+          } else {
+            sanctionInfo = "Requisito normativo scaduto: costituisce Non Conformità sanzionabile.";
+          }
+        }
+
         result.push({
           id: deadlineId,
           companyId: comp.id,
@@ -1267,6 +1423,8 @@ export function aggregateAllDeadlines(input: AggregateDeadlinesInput): Aggregate
           sourceEntity: "inspection_document",
           sourceId: `${insp.id}:${doc.name}`,
           note: extraMeta.noteText || doc.note || undefined,
+          isSanctionableNc,
+          sanctionInfo,
         });
       }
     }
@@ -1316,6 +1474,11 @@ export function aggregateAllDeadlines(input: AggregateDeadlinesInput): Aggregate
         sourceEntity: "machine",
         sourceId: machine.id,
         note: machine.note || undefined,
+        isSanctionableNc: maintResult.urgency === "expired",
+        sanctionInfo:
+          maintResult.urgency === "expired"
+            ? "Violazione D.Lgs. 81/2008 art. 71 c. 8 (sanzione art. 55 c. 5 lett. c): arresto da 3 a 6 mesi o ammenda da 3.071,27 € a 7.862,44 €."
+            : undefined,
       });
 
       // 2. Verifica di sicurezza / INAIL (art. 71 c. 11 e All. VII)
@@ -1353,6 +1516,11 @@ export function aggregateAllDeadlines(input: AggregateDeadlinesInput): Aggregate
           sourceEntity: "machine",
           sourceId: machine.id,
           note: machine.note || undefined,
+          isSanctionableNc: safetyResult.urgency === "expired",
+          sanctionInfo:
+            safetyResult.urgency === "expired"
+              ? "Violazione D.Lgs. 81/2008 art. 71 c. 11 (sanzione art. 55 c. 5 lett. d): ammenda da 1.842,78 € a 7.862,44 €. Attrezzatura non utilizzabile fino a collaudo."
+              : undefined,
         });
       }
     }
@@ -1401,6 +1569,11 @@ export function aggregateAllDeadlines(input: AggregateDeadlinesInput): Aggregate
         sourceEntity: "equipment",
         sourceId: eq.id,
         note: eq.note || undefined,
+        isSanctionableNc: checkResult.urgency === "expired",
+        sanctionInfo:
+          checkResult.urgency === "expired"
+            ? "Violazione D.Lgs. 81/2008 art. 71 c. 8 (sanzione art. 55 c. 5 lett. c): arresto da 3 a 6 mesi o ammenda da 3.071,27 € a 7.862,44 €."
+            : undefined,
       });
     }
   }
@@ -1597,6 +1770,11 @@ export function aggregateAllDeadlines(input: AggregateDeadlinesInput): Aggregate
           sourceEntity: "training_record",
           sourceId: rec.id,
           note: rec.note || undefined,
+          isSanctionableNc: trainingResult.urgency === "expired",
+          sanctionInfo:
+            trainingResult.urgency === "expired"
+              ? "Violazione D.Lgs. 81/2008 art. 37 (sanzione art. 55 c. 5 lett. c): arresto da 2 a 4 mesi o ammenda da 1.842,78 € a 7.371,13 € per omessa formazione/aggiornamento."
+              : undefined,
         });
       }
     }

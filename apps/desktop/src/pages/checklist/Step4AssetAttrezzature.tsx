@@ -40,6 +40,7 @@ import {
   MachineDocumentAttachment,
   getMandatoryDocumentaryChecksForMachine,
 } from "./normativeMachineCatalog";
+import { addMonthsToYmd } from "../../lib/deadlinesEngine";
 
 export type AssetSubTab = "machines" | "equipment" | "extinguishers" | "firstAid";
 
@@ -104,10 +105,17 @@ export default function Step4AssetAttrezzature({
   const [formRiskAssessmentInDvr, setFormRiskAssessmentInDvr] = useState<"yes" | "no" | "na">("yes");
   const [formManualPresent, setFormManualPresent] = useState<"yes" | "no" | "na">("yes");
   const [formMaintenanceLogPresent, setFormMaintenanceLogPresent] = useState<"yes" | "no" | "expired">("yes");
+  const [formLastMaintenanceDate, setFormLastMaintenanceDate] = useState("");
+  const [formMaintenancePeriodicityMonths, setFormMaintenancePeriodicityMonths] = useState<number>(12);
+  const [formNextMaintenanceDate, setFormNextMaintenanceDate] = useState("");
   const [formInailCheckRequired, setFormInailCheckRequired] = useState(false);
   const [formInailSerial, setFormInailSerial] = useState("");
+  const [formInailPeriodicityMonths, setFormInailPeriodicityMonths] = useState<number>(12);
   const [formInailLastCheckDate, setFormInailLastCheckDate] = useState("");
   const [formInailNextCheckDate, setFormInailNextCheckDate] = useState("");
+  const [formCeReleaseDate, setFormCeReleaseDate] = useState("");
+  const [formInstallationCertifiedDate, setFormInstallationCertifiedDate] = useState("");
+  const [formManualReleaseDate, setFormManualReleaseDate] = useState("");
   const [formLocation, setFormLocation] = useState("");
   const [formEnvironmentName, setFormEnvironmentName] = useState("");
   const [formAuthorizedWorkerIds, setFormAuthorizedWorkerIds] = useState<string[]>([]);
@@ -147,6 +155,8 @@ export default function Step4AssetAttrezzature({
     () => getSuggestedMachinesForEnvironmentsAndAteco(environments, atecoCode),
     [environments, atecoCode],
   );
+
+  const todayYmd = useMemo(() => new Date().toISOString().split("T")[0], []);
 
   useEffect(() => {
     if (companyId) void reload();
@@ -250,11 +260,19 @@ export default function Step4AssetAttrezzature({
       setFormInstallationCompliant("yes");
       setFormRiskAssessmentInDvr("yes");
       setFormManualPresent("yes");
-      setFormMaintenanceLogPresent("yes");
+      const defaultLastMaint = new Date(Date.now() - 90 * 86400000).toISOString().split("T")[0];
+      setFormLastMaintenanceDate(defaultLastMaint);
+      setFormMaintenancePeriodicityMonths(12);
+      setFormNextMaintenanceDate(addMonthsToYmd(defaultLastMaint, 12));
       setFormInailCheckRequired(template.isSubjectToInailCheck);
       setFormInailSerial(template.isSubjectToInailCheck ? `INAIL-${Math.floor(10000 + Math.random() * 90000)}` : "");
-      setFormInailLastCheckDate(template.isSubjectToInailCheck ? new Date(Date.now() - 180 * 86400000).toISOString().split("T")[0] : "");
-      setFormInailNextCheckDate(template.isSubjectToInailCheck ? new Date(Date.now() + 185 * 86400000).toISOString().split("T")[0] : "");
+      setFormInailPeriodicityMonths(12);
+      const defaultLastInail = template.isSubjectToInailCheck ? new Date(Date.now() - 180 * 86400000).toISOString().split("T")[0] : "";
+      setFormInailLastCheckDate(defaultLastInail);
+      setFormInailNextCheckDate(defaultLastInail ? addMonthsToYmd(defaultLastInail, 12) : "");
+      setFormCeReleaseDate("");
+      setFormInstallationCertifiedDate("");
+      setFormManualReleaseDate("");
       setFormLocation(initialLocation);
       setFormEnvironmentName(initialLocation);
       setFormAuthorizedWorkerIds([]);
@@ -276,10 +294,18 @@ export default function Step4AssetAttrezzature({
       setFormRiskAssessmentInDvr("yes");
       setFormManualPresent("yes");
       setFormMaintenanceLogPresent("yes");
+      const defaultLastMaint = new Date(Date.now() - 90 * 86400000).toISOString().split("T")[0];
+      setFormLastMaintenanceDate(defaultLastMaint);
+      setFormMaintenancePeriodicityMonths(12);
+      setFormNextMaintenanceDate(addMonthsToYmd(defaultLastMaint, 12));
       setFormInailCheckRequired(false);
       setFormInailSerial("");
+      setFormInailPeriodicityMonths(12);
       setFormInailLastCheckDate("");
       setFormInailNextCheckDate("");
+      setFormCeReleaseDate("");
+      setFormInstallationCertifiedDate("");
+      setFormManualReleaseDate("");
       setFormLocation("");
       setFormEnvironmentName("");
       setFormAuthorizedWorkerIds([]);
@@ -310,10 +336,26 @@ export default function Step4AssetAttrezzature({
     setFormRiskAssessmentInDvr(meta.riskAssessmentInDvr ?? "yes");
     setFormManualPresent(meta.manualPresent ?? (meta.manualDocument ? "yes" : "yes"));
     setFormMaintenanceLogPresent(meta.maintenanceLogPresent ?? "yes");
+
+    const maintPeriod = meta.maintenancePeriodicityMonths || 12;
+    const lastMaint = meta.lastMaintenanceDate || (m.lastMaintenanceAt ? m.lastMaintenanceAt.slice(0, 10) : "");
+    const nextMaint = meta.nextMaintenanceDate || (m.nextMaintenanceAt ? m.nextMaintenanceAt.slice(0, 10) : "") || (lastMaint ? addMonthsToYmd(lastMaint, maintPeriod) : "");
+    setFormLastMaintenanceDate(lastMaint);
+    setFormMaintenancePeriodicityMonths(maintPeriod);
+    setFormNextMaintenanceDate(nextMaint);
+
+    const inailPeriod = meta.inailPeriodicityMonths || 12;
+    const lastInail = meta.inailLastCheckDate || (m.lastSafetyCheckAt ? m.lastSafetyCheckAt.slice(0, 10) : "");
+    const nextInail = meta.inailNextCheckDate || (m.nextSafetyCheckAt ? m.nextSafetyCheckAt.slice(0, 10) : "") || (lastInail ? addMonthsToYmd(lastInail, inailPeriod) : "");
     setFormInailCheckRequired(meta.inailCheckRequired ?? false);
     setFormInailSerial(meta.inailSerial || "");
-    setFormInailLastCheckDate(meta.inailLastCheckDate || "");
-    setFormInailNextCheckDate(meta.inailNextCheckDate || "");
+    setFormInailPeriodicityMonths(inailPeriod);
+    setFormInailLastCheckDate(lastInail);
+    setFormInailNextCheckDate(nextInail);
+
+    setFormCeReleaseDate(meta.ceReleaseDate || "");
+    setFormInstallationCertifiedDate(meta.installationCertifiedDate || "");
+    setFormManualReleaseDate(meta.manualReleaseDate || "");
     setFormAuthorizedWorkerIds(meta.authorizedWorkerIds || []);
     setFormAuthorizedCustomWorkers((meta.authorizedWorkerNames || []).join(", "));
     setFormManualDoc(meta.manualDocument);
@@ -394,12 +436,19 @@ export default function Step4AssetAttrezzature({
         installationDate: formInstallationDate || undefined,
         ceStatus: formCeStatus,
         ceCertificationPresent: formCeCertificationPresent,
+        ceReleaseDate: formCeReleaseDate || undefined,
         installationCompliant: formInstallationCompliant,
+        installationCertifiedDate: formInstallationCertifiedDate || undefined,
         riskAssessmentInDvr: formRiskAssessmentInDvr,
         manualPresent: formManualDoc ? "yes" : formManualPresent,
+        manualReleaseDate: formManualReleaseDate || undefined,
         maintenanceLogPresent: formMaintenanceLogPresent,
+        lastMaintenanceDate: formLastMaintenanceDate || undefined,
+        maintenancePeriodicityMonths: formMaintenancePeriodicityMonths,
+        nextMaintenanceDate: formNextMaintenanceDate || undefined,
         inailCheckRequired: formInailCheckRequired,
         inailSerial: formInailSerial.trim() || undefined,
+        inailPeriodicityMonths: formInailPeriodicityMonths,
         inailLastCheckDate: formInailLastCheckDate || undefined,
         inailNextCheckDate: formInailNextCheckDate || undefined,
         requiredCourseCode: training.courseCode,
@@ -423,6 +472,9 @@ export default function Step4AssetAttrezzature({
         serialNumber: formSerialNumber.trim() || undefined,
         location: formEnvironmentName.trim() || formLocation.trim() || undefined,
         note: serializedNote,
+        lastMaintenanceAt: formLastMaintenanceDate ? new Date(formLastMaintenanceDate).toISOString() : undefined,
+        nextMaintenanceAt: formNextMaintenanceDate ? new Date(formNextMaintenanceDate).toISOString() : undefined,
+        lastSafetyCheckAt: formInailLastCheckDate ? new Date(formInailLastCheckDate).toISOString() : undefined,
         nextSafetyCheckAt: formInailNextCheckDate ? new Date(formInailNextCheckDate).toISOString() : undefined,
       };
 
@@ -462,14 +514,20 @@ export default function Step4AssetAttrezzature({
         const already = machines.some((m) => m.name.toLowerCase() === t.name.toLowerCase());
         if (already) continue;
 
+        const defaultLastMaint = new Date(Date.now() - 120 * 86400000).toISOString().split("T")[0];
+        const defaultNextMaint = addMonthsToYmd(defaultLastMaint, 12);
         const meta: MachineFullDetailsMetadata = {
           buildYear: new Date().getFullYear() - 2,
           installationDate: new Date(Date.now() - 365 * 86400000).toISOString().split("T")[0],
           ceStatus: "ce_compliant",
           manualPresent: "yes",
           maintenanceLogPresent: "yes",
+          lastMaintenanceDate: defaultLastMaint,
+          maintenancePeriodicityMonths: 12,
+          nextMaintenanceDate: defaultNextMaint,
           inailCheckRequired: t.isSubjectToInailCheck,
           inailSerial: t.isSubjectToInailCheck ? `INAIL-${Math.floor(10000 + Math.random() * 90000)}` : undefined,
+          inailPeriodicityMonths: 12,
           inailLastCheckDate: t.isSubjectToInailCheck ? new Date(Date.now() - 120 * 86400000).toISOString().split("T")[0] : undefined,
           inailNextCheckDate: t.isSubjectToInailCheck ? new Date(Date.now() + 245 * 86400000).toISOString().split("T")[0] : undefined,
           requiredCourseCode: t.training.courseCode,
@@ -486,6 +544,9 @@ export default function Step4AssetAttrezzature({
           serialNumber: `SN-${Math.floor(100000 + Math.random() * 900000)}`,
           location: t.targetEnvironmentName,
           note: serializeMachineMetadata(meta),
+          lastMaintenanceAt: new Date(defaultLastMaint).toISOString(),
+          nextMaintenanceAt: new Date(defaultNextMaint).toISOString(),
+          lastSafetyCheckAt: meta.inailLastCheckDate ? new Date(meta.inailLastCheckDate).toISOString() : undefined,
           nextSafetyCheckAt: meta.inailNextCheckDate ? new Date(meta.inailNextCheckDate).toISOString() : undefined,
         });
       }
@@ -1100,8 +1161,13 @@ export default function Step4AssetAttrezzature({
                         }}
                       >
                         <div>
-                          <div style={{ fontSize: "12px", fontWeight: 700, color: "#1e293b" }}>
-                            1. Certificazione / Marcatura CE
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                            <div style={{ fontSize: "12px", fontWeight: 700, color: "#1e293b" }}>
+                              1. Certificazione / Marcatura CE
+                            </div>
+                            <span style={{ fontSize: "10px", padding: "1px 5px", borderRadius: 4, backgroundColor: "#f1f5f9", color: "#475569", fontWeight: 600 }}>
+                              🛡️ Permanente (senza scadenza)
+                            </span>
                           </div>
                           <div style={{ fontSize: "11px", color: "#64748b" }}>
                             {meta.ceStatus === "ce_compliant" ? "Marcata CE (Direttiva Macchine)" : meta.ceStatus === "ante_ce_annex_v" ? "Ante-CE (All. V D.Lgs. 81/08)" : "Marcatura non conforme"}
@@ -1187,8 +1253,13 @@ export default function Step4AssetAttrezzature({
                         }}
                       >
                         <div>
-                          <div style={{ fontSize: "12px", fontWeight: 700, color: "#1e293b" }}>
-                            2. Installazione a Regola d&apos;Arte
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                            <div style={{ fontSize: "12px", fontWeight: 700, color: "#1e293b" }}>
+                              2. Installazione a Regola d&apos;Arte
+                            </div>
+                            <span style={{ fontSize: "10px", padding: "1px 5px", borderRadius: 4, backgroundColor: "#f1f5f9", color: "#475569", fontWeight: 600 }}>
+                              🛡️ Permanente (senza scadenza)
+                            </span>
                           </div>
                           <div style={{ fontSize: "11px", color: "#64748b" }}>
                             art. 71 c. 3 — Fissaggi, allacciamenti e spazi idonei a norma
@@ -1343,8 +1414,13 @@ export default function Step4AssetAttrezzature({
                         }}
                       >
                         <div>
-                          <div style={{ fontSize: "12px", fontWeight: 700, color: "#1e293b" }}>
-                            4. Libretto d&apos;Uso e Manutenzione
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                            <div style={{ fontSize: "12px", fontWeight: 700, color: "#1e293b" }}>
+                              4. Libretto d&apos;Uso e Manutenzione
+                            </div>
+                            <span style={{ fontSize: "10px", padding: "1px 5px", borderRadius: 4, backgroundColor: "#f1f5f9", color: "#475569", fontWeight: 600 }}>
+                              🛡️ Permanente (senza scadenza)
+                            </span>
                           </div>
                           <div style={{ fontSize: "11px", color: "#64748b" }}>
                             art. 70 c. 2 — Manuale in italiano disponibile e consultabile
@@ -1423,6 +1499,12 @@ export default function Step4AssetAttrezzature({
                         <span style={{ fontWeight: 600, color: meta.maintenanceLogPresent === "yes" ? "#16a34a" : meta.maintenanceLogPresent === "expired" ? "#d97706" : "#dc2626" }}>
                           {meta.maintenanceLogPresent === "yes" ? "Compilato e Aggiornato" : meta.maintenanceLogPresent === "expired" ? "Non Aggiornato" : "Assente"}
                         </span>
+                        {meta.lastMaintenanceDate && <span style={{ marginLeft: 6, fontSize: "11px", color: "#64748b" }}>(Ultima: {meta.lastMaintenanceDate})</span>}
+                        {meta.nextMaintenanceDate && (
+                          <span style={{ marginLeft: 6, fontSize: "11px", color: meta.nextMaintenanceDate < todayYmd ? "#dc2626" : "#166534", fontWeight: 600 }}>
+                            (Scadenza: {meta.nextMaintenanceDate})
+                          </span>
+                        )}
                       </div>
 
                       {meta.technicalSheetDocument && (
@@ -1441,10 +1523,29 @@ export default function Step4AssetAttrezzature({
                       {meta.inailCheckRequired && (
                         <div style={{ color: "#0369a1", fontWeight: 600 }}>
                           🔍 <strong>Verifica Periodica INAIL (art. 71 c. 11):</strong> {meta.inailSerial ? `Matr. ${meta.inailSerial}` : "Attiva"}{" "}
-                          {meta.inailNextCheckDate ? `(Scad. ${meta.inailNextCheckDate})` : ""}
+                          {meta.inailLastCheckDate && <span style={{ fontSize: "11px", color: "#64748b" }}>(Ultima: {meta.inailLastCheckDate}) </span>}
+                          {meta.inailNextCheckDate ? (
+                            <span style={{ fontSize: "11px", color: meta.inailNextCheckDate < todayYmd ? "#dc2626" : "#0369a1", fontWeight: 700 }}>
+                              (Scad. {meta.inailNextCheckDate})
+                            </span>
+                          ) : ""}
                         </div>
                       )}
                     </div>
+
+                    {/* Banner Sanzionabile Manutenzione Scaduta */}
+                    {((meta.nextMaintenanceDate && meta.nextMaintenanceDate < todayYmd) || meta.maintenanceLogPresent === "expired") && (
+                      <div style={{ marginTop: 8, padding: "6px 10px", borderRadius: 6, backgroundColor: "#fef2f2", border: "1px solid #f87171", color: "#991b1b", fontSize: "11px", fontWeight: 700 }}>
+                        🚨 NON CONFORMITÀ SANZIONABILE: Manutenzione periodica scaduta (art. 71 c. 4 lett. a / art. 71 c. 8 D.Lgs. 81/08 - arresto da 3 a 6 mesi o ammenda da 3.071,27 a 7.862,44 € ex art. 87 c. 2 lett. c)
+                      </div>
+                    )}
+
+                    {/* Banner Sanzionabile Verifica INAIL Scaduta */}
+                    {meta.inailCheckRequired && meta.inailNextCheckDate && meta.inailNextCheckDate < todayYmd && (
+                      <div style={{ marginTop: 8, padding: "6px 10px", borderRadius: 6, backgroundColor: "#fef2f2", border: "1px solid #f87171", color: "#991b1b", fontSize: "11px", fontWeight: 700 }}>
+                        🚨 NON CONFORMITÀ SANZIONABILE: Verifica periodica INAIL/ARPA scaduta (art. 71 c. 11 D.Lgs. 81/08 / All. VII - sanzione amm.va pecuniaria da 614,25 a 2.150,00 € ex art. 87 c. 3 lett. d)
+                      </div>
+                    )}
                   </div>
 
                   {/* BOX LAVORATORI ABILITATI ALL'USO DEL MACCHINARIO */}
@@ -1963,9 +2064,14 @@ export default function Step4AssetAttrezzature({
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                   {/* 1. Certificazione CE */}
                   <div>
-                    <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#374151", marginBottom: 4 }}>
-                      1. Certificazione / Dichiarazione CE
-                    </label>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                      <label style={{ fontSize: "12px", fontWeight: 600, color: "#374151" }}>
+                        1. Certificazione / Dichiarazione CE
+                      </label>
+                      <span style={{ fontSize: "10px", color: "#166534", backgroundColor: "#dcfce7", padding: "1px 5px", borderRadius: 4, fontWeight: 600 }}>
+                        🛡️ Permanente
+                      </span>
+                    </div>
                     <select
                       value={formCeCertificationPresent}
                       onChange={(e) => {
@@ -1980,6 +2086,15 @@ export default function Step4AssetAttrezzature({
                       <option value="no">❌ No (Assente / Carente)</option>
                       <option value="na">⚪ Non Applicabile</option>
                     </select>
+                    <div style={{ marginTop: 4, fontSize: "11px", color: "#64748b" }}>
+                      Data emissione/rilascio (senza scadenza):
+                      <input
+                        type="date"
+                        value={formCeReleaseDate}
+                        onChange={(e) => setFormCeReleaseDate(e.target.value)}
+                        style={{ marginTop: 2, width: "100%", padding: "4px 8px", borderRadius: 4, border: "1px solid #cbd5e1", fontSize: "12px" }}
+                      />
+                    </div>
                   </div>
 
                   {/* Stato Tecnico Marcatura */}
@@ -2000,9 +2115,14 @@ export default function Step4AssetAttrezzature({
 
                   {/* 2. Installazione a Regola d'Arte */}
                   <div>
-                    <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#374151", marginBottom: 4 }}>
-                      2. Installazione a Regola d&apos;Arte (art. 71 c. 3)
-                    </label>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                      <label style={{ fontSize: "12px", fontWeight: 600, color: "#374151" }}>
+                        2. Installazione a Regola d&apos;Arte (art. 71 c. 3)
+                      </label>
+                      <span style={{ fontSize: "10px", color: "#166534", backgroundColor: "#dcfce7", padding: "1px 5px", borderRadius: 4, fontWeight: 600 }}>
+                        🛡️ Permanente
+                      </span>
+                    </div>
                     <select
                       value={formInstallationCompliant}
                       onChange={(e) => setFormInstallationCompliant(e.target.value as "yes" | "no" | "na")}
@@ -2012,6 +2132,15 @@ export default function Step4AssetAttrezzature({
                       <option value="no">❌ No (Non a regola d&apos;arte / Difetti)</option>
                       <option value="na">⚪ Non Applicabile</option>
                     </select>
+                    <div style={{ marginTop: 4, fontSize: "11px", color: "#64748b" }}>
+                      Data dichiarazione/certificazione (senza scadenza):
+                      <input
+                        type="date"
+                        value={formInstallationCertifiedDate}
+                        onChange={(e) => setFormInstallationCertifiedDate(e.target.value)}
+                        style={{ marginTop: 2, width: "100%", padding: "4px 8px", borderRadius: 4, border: "1px solid #cbd5e1", fontSize: "12px" }}
+                      />
+                    </div>
                   </div>
 
                   {/* 3. Valutazione Rischi Inserita nel DVR */}
@@ -2032,9 +2161,14 @@ export default function Step4AssetAttrezzature({
 
                   {/* 4. Libretto Uso e Manutenzione */}
                   <div>
-                    <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#374151", marginBottom: 4 }}>
-                      4. Libretto d&apos;Uso e Manutenzione (in Italiano)
-                    </label>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                      <label style={{ fontSize: "12px", fontWeight: 600, color: "#374151" }}>
+                        4. Libretto d&apos;Uso e Manutenzione (in Italiano)
+                      </label>
+                      <span style={{ fontSize: "10px", color: "#166534", backgroundColor: "#dcfce7", padding: "1px 5px", borderRadius: 4, fontWeight: 600 }}>
+                        🛡️ Permanente
+                      </span>
+                    </div>
                     <select
                       value={formManualPresent}
                       onChange={(e) => setFormManualPresent(e.target.value as "yes" | "no" | "na")}
@@ -2044,6 +2178,15 @@ export default function Step4AssetAttrezzature({
                       <option value="no">❌ No (Assente / Non reperibile)</option>
                       <option value="na">⚪ Non Applicabile</option>
                     </select>
+                    <div style={{ marginTop: 4, fontSize: "11px", color: "#64748b" }}>
+                      Data edizione manuale (senza scadenza):
+                      <input
+                        type="date"
+                        value={formManualReleaseDate}
+                        onChange={(e) => setFormManualReleaseDate(e.target.value)}
+                        style={{ marginTop: 2, width: "100%", padding: "4px 8px", borderRadius: 4, border: "1px solid #cbd5e1", fontSize: "12px" }}
+                      />
+                    </div>
                   </div>
 
                   {/* Registro Manutenzioni */}
@@ -2061,6 +2204,67 @@ export default function Step4AssetAttrezzature({
                       <option value="no">❌ Assente</option>
                     </select>
                   </div>
+                </div>
+
+                {/* Dettagli Manutenzione Programmata (Periodicità 12/24 mesi) */}
+                <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px dashed #cbd5e1" }}>
+                  <div style={{ fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: 6 }}>
+                    🛠️ Manutenzione Programmata e Periodica (D.Lgs. 81/08 art. 71 c. 4 e c. 8)
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+                    <div>
+                      <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "#475569", marginBottom: 4 }}>
+                        Data Ultima Manutenzione
+                      </label>
+                      <input
+                        type="date"
+                        value={formLastMaintenanceDate}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setFormLastMaintenanceDate(val);
+                          if (val) {
+                            setFormNextMaintenanceDate(addMonthsToYmd(val, formMaintenancePeriodicityMonths));
+                          }
+                        }}
+                        style={{ width: "100%", padding: "6px 8px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: "12px" }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "#475569", marginBottom: 4 }}>
+                        Periodicità Manutenzione
+                      </label>
+                      <select
+                        value={formMaintenancePeriodicityMonths}
+                        onChange={(e) => {
+                          const months = Number(e.target.value);
+                          setFormMaintenancePeriodicityMonths(months);
+                          if (formLastMaintenanceDate) {
+                            setFormNextMaintenanceDate(addMonthsToYmd(formLastMaintenanceDate, months));
+                          }
+                        }}
+                        style={{ width: "100%", padding: "6px 8px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: "12px" }}
+                      >
+                        <option value={12}>12 Mesi (Annuale - Standard)</option>
+                        <option value={24}>24 Mesi (Biennale)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "#475569", marginBottom: 4 }}>
+                        Prossima Manutenzione (Scadenza)
+                      </label>
+                      <input
+                        type="date"
+                        value={formNextMaintenanceDate}
+                        onChange={(e) => setFormNextMaintenanceDate(e.target.value)}
+                        style={{ width: "100%", padding: "6px 8px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: "12px" }}
+                      />
+                    </div>
+                  </div>
+                  {formNextMaintenanceDate && formNextMaintenanceDate < todayYmd && (
+                    <div style={{ marginTop: 8, padding: "8px 10px", borderRadius: 6, backgroundColor: "#fee2e2", border: "1px solid #ef4444", color: "#991b1b", fontSize: "12px", fontWeight: 600 }}>
+                      🚨 NON CONFORMITÀ SANZIONABILE: Manutenzione periodica scaduta (art. 71 c. 4 lett. a / art. 71 c. 8 D.Lgs. 81/08 - arresto da 3 a 6 mesi o ammenda da 3.071,27 a 7.862,44 € ex art. 87 c. 2 lett. c)
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -2083,41 +2287,73 @@ export default function Step4AssetAttrezzature({
                 </label>
 
                 {formInailCheckRequired && (
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginTop: 10 }}>
-                    <div>
-                      <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "#0c4a6e", marginBottom: 4 }}>
-                        Matricola INAIL / Codice Impianto
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Es. INAIL-49821"
-                        value={formInailSerial}
-                        onChange={(e) => setFormInailSerial(e.target.value)}
-                        style={{ width: "100%", padding: "6px 8px", borderRadius: 6, border: "1px solid #93c5fd", fontSize: "12px" }}
-                      />
+                  <div style={{ marginTop: 10 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10 }}>
+                      <div>
+                        <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "#0c4a6e", marginBottom: 4 }}>
+                          Matricola INAIL / Codice Impianto
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Es. INAIL-49821"
+                          value={formInailSerial}
+                          onChange={(e) => setFormInailSerial(e.target.value)}
+                          style={{ width: "100%", padding: "6px 8px", borderRadius: 6, border: "1px solid #93c5fd", fontSize: "12px" }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "#0c4a6e", marginBottom: 4 }}>
+                          Periodicità Verifica
+                        </label>
+                        <select
+                          value={formInailPeriodicityMonths}
+                          onChange={(e) => {
+                            const months = Number(e.target.value);
+                            setFormInailPeriodicityMonths(months);
+                            if (formInailLastCheckDate) {
+                              setFormInailNextCheckDate(addMonthsToYmd(formInailLastCheckDate, months));
+                            }
+                          }}
+                          style={{ width: "100%", padding: "6px 8px", borderRadius: 6, border: "1px solid #93c5fd", fontSize: "12px" }}
+                        >
+                          <option value={12}>12 Mesi (All. VII - Sollevamento vetusti / pressione)</option>
+                          <option value={24}>24 Mesi (All. VII - Sollevamento ordinario)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "#0c4a6e", marginBottom: 4 }}>
+                          Data Ultima Verifica
+                        </label>
+                        <input
+                          type="date"
+                          value={formInailLastCheckDate}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setFormInailLastCheckDate(val);
+                            if (val) {
+                              setFormInailNextCheckDate(addMonthsToYmd(val, formInailPeriodicityMonths));
+                            }
+                          }}
+                          style={{ width: "100%", padding: "6px 8px", borderRadius: 6, border: "1px solid #93c5fd", fontSize: "12px" }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "#0c4a6e", marginBottom: 4 }}>
+                          Prossima Verifica / Scadenza *
+                        </label>
+                        <input
+                          type="date"
+                          value={formInailNextCheckDate}
+                          onChange={(e) => setFormInailNextCheckDate(e.target.value)}
+                          style={{ width: "100%", padding: "6px 8px", borderRadius: 6, border: "1px solid #93c5fd", fontSize: "12px" }}
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "#0c4a6e", marginBottom: 4 }}>
-                        Data Ultima Verifica
-                      </label>
-                      <input
-                        type="date"
-                        value={formInailLastCheckDate}
-                        onChange={(e) => setFormInailLastCheckDate(e.target.value)}
-                        style={{ width: "100%", padding: "6px 8px", borderRadius: 6, border: "1px solid #93c5fd", fontSize: "12px" }}
-                      />
-                    </div>
-                    <div>
-                      <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "#0c4a6e", marginBottom: 4 }}>
-                        Data Prossima Verifica / Scadenza *
-                      </label>
-                      <input
-                        type="date"
-                        value={formInailNextCheckDate}
-                        onChange={(e) => setFormInailNextCheckDate(e.target.value)}
-                        style={{ width: "100%", padding: "6px 8px", borderRadius: 6, border: "1px solid #93c5fd", fontSize: "12px" }}
-                      />
-                    </div>
+                    {formInailNextCheckDate && formInailNextCheckDate < todayYmd && (
+                      <div style={{ marginTop: 8, padding: "8px 10px", borderRadius: 6, backgroundColor: "#fee2e2", border: "1px solid #ef4444", color: "#991b1b", fontSize: "12px", fontWeight: 600 }}>
+                        🚨 NON CONFORMITÀ SANZIONABILE: Verifica periodica INAIL/ARPA scaduta (art. 71 c. 11 D.Lgs. 81/08 / All. VII - sanzione amm.va pecuniaria da 614,25 a 2.150,00 € ex art. 87 c. 3 lett. d)
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

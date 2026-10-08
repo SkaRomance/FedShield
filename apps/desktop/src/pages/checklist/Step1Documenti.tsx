@@ -24,7 +24,11 @@ import {
   NormativeDocumentDefinition,
   parseDocumentExtraMeta,
   serializeDocumentExtraMeta,
+  formatDocumentValidity,
+  getDocumentExpiryType,
 } from "./normativeDocumentCatalog";
+import { addMonthsToYmd } from "../../lib/deadlinesEngine";
+import { formattaData, perCampoData } from "../../lib/oraItalia";
 
 interface Step1DocumentiProps {
   documents: InspectionDocumentRequirement[];
@@ -32,9 +36,11 @@ interface Step1DocumentiProps {
   isInspectionValidated: boolean;
   atecoCode?: string;
   checklistMode?: string;
+  isAutoSaving?: boolean;
+  lastAutoSavedAt?: string | null;
 }
 
-type FilterStatus = "all" | "pending" | "missing" | "present" | "na";
+type FilterStatus = "all" | "pending" | "missing" | "present" | "na" | "expired";
 
 export default function Step1Documenti({
   documents,
@@ -42,6 +48,8 @@ export default function Step1Documenti({
   isInspectionValidated,
   atecoCode,
   checklistMode,
+  isAutoSaving,
+  lastAutoSavedAt,
 }: Step1DocumentiProps) {
   // Stato espansione sezioni accordion: CHIUSE DI DEFAULT come richiesto per evitare disordine visivo
   const [openSections, setOpenSections] = useState<Record<DocumentCategory, boolean>>({
@@ -232,7 +240,41 @@ export default function Step1Documenti({
     updateDocumentItem(name, { status: subStatus });
   }
 
-  // Gestione note e metadati (date e contenuti minimi spuntati)
+  // Gestione specifica per cambio Data di Rilascio / Ultimo Riesame:
+  // Calcola AUTOMATICAMENTE la Data di Scadenza di legge o prossimo riesame (+validityMonths)
+  function handleIssueDateChange(
+    name: string,
+    currentNote: string,
+    newIssueDate: string,
+    docDef?: NormativeDocumentDefinition,
+  ) {
+    const meta = parseDocumentExtraMeta(currentNote);
+    meta.issueDate = newIssueDate;
+
+    const def = docDef ?? findCatalogDefinition(name);
+    const validityMonths = def?.validityMonths ?? (def?.isPeriodicReviewDocument ? 12 : undefined);
+
+    if (validityMonths && newIssueDate && newIssueDate.trim().length > 0) {
+      // Calcolo automatico della data di scadenza o prossimo riesame
+      meta.expiryDate = addMonthsToYmd(newIssueDate, validityMonths);
+    } else if (!def?.hasStatutoryExpiry && !def?.isPeriodicReviewDocument && def) {
+      // Documento permanente o rapporto di prova: non ha scadenza
+      meta.expiryDate = "";
+    }
+
+    const serialized = serializeDocumentExtraMeta(meta);
+    updateDocumentItem(name, { note: serialized });
+  }
+
+  // Modifica manuale della data di scadenza / riesame
+  function handleExpiryDateChange(name: string, currentNote: string, newExpiryDate: string) {
+    const meta = parseDocumentExtraMeta(currentNote);
+    meta.expiryDate = newExpiryDate;
+    const serialized = serializeDocumentExtraMeta(meta);
+    updateDocumentItem(name, { note: serialized });
+  }
+
+  // Gestione note e metadati generici
   function handleMetadataChange(
     name: string,
     currentNote: string,
@@ -320,17 +362,37 @@ export default function Step1Documenti({
       result = result.filter((d) => d.status === "not_available" || d.status === "requested_later");
     } else if (filterStatus === "na") {
       result = result.filter((d) => d.status === "not_applicable");
+    } else if (filterStatus === "expired") {
+      const today = perCampoData(new Date());
+      result = result.filter((d) => {
+        if (d.status === "not_applicable") return false;
+        const meta = parseDocumentExtraMeta(d.note);
+        const def = d.definition ?? findCatalogDefinition(d.name);
+        const validity = def?.validityMonths ?? (def?.isPeriodicReviewDocument ? 12 : undefined);
+        const effExpiry = meta.expiryDate || (validity && meta.issueDate ? addMonthsToYmd(meta.issueDate, validity) : undefined);
+        return Boolean(effExpiry && effExpiry < today);
+      });
     }
 
     return result;
   }, [unifiedDocumentList, searchQuery, filterStatus]);
 
-  // Statistiche globali
+  const todayYmd = useMemo(() => perCampoData(new Date()), []);
+
+  // Statistiche globali con conteggio documenti scaduti (Non Conformità)
   const stats = useMemo(() => {
     let present = 0;
     let missing = 0;
     let na = 0;
+    let expired = 0;
     for (const d of unifiedDocumentList) {
+      const meta = parseDocumentExtraMeta(d.note);
+      const def = d.definition ?? findCatalogDefinition(d.name);
+      const validity = def?.validityMonths ?? (def?.isPeriodicReviewDocument ? 12 : undefined);
+      const effExpiry = meta.expiryDate || (validity && meta.issueDate ? addMonthsToYmd(meta.issueDate, validity) : undefined);
+      const isExp = Boolean(effExpiry && effExpiry < todayYmd && d.status !== "not_applicable");
+      if (isExp) expired++;
+
       if (d.status === "viewed_on_site") present++;
       else if (d.status === "not_applicable") na++;
       else missing++;
@@ -340,8 +402,9 @@ export default function Step1Documenti({
       present,
       missing,
       na,
+      expired,
     };
-  }, [unifiedDocumentList]);
+  }, [unifiedDocumentList, todayYmd]);
 
   // Raggruppamento documenti per categoria
   const groupedDocuments = useMemo(() => {
@@ -373,9 +436,44 @@ export default function Step1Documenti({
       {/* Header principale */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16, marginBottom: 16 }}>
         <div>
-          <h3 style={{ margin: "0 0 6px 0", fontSize: "22px", color: "var(--color-primary, #0f172a)" }}>
-            Checklist Documentale Completa
-          </h3>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginBottom: 6 }}>
+            <h3 style={{ margin: 0, fontSize: "22px", color: "var(--color-primary, #0f172a)" }}>
+              Checklist Documentale Completa
+            </h3>
+            {isAutoSaving ? (
+              <span
+                style={{
+                  fontSize: "12px",
+                  color: "#b45309",
+                  backgroundColor: "#fef3c7",
+                  border: "1px solid #fde68a",
+                  padding: "2px 8px",
+                  borderRadius: "6px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                  fontWeight: 500,
+                }}
+              >
+                <span className="autosave-spinner" />
+                Salvataggio...
+              </span>
+            ) : lastAutoSavedAt ? (
+              <span
+                style={{
+                  fontSize: "12px",
+                  color: "#15803d",
+                  backgroundColor: "#f0fdf4",
+                  border: "1px solid #bbf7d0",
+                  padding: "2px 8px",
+                  borderRadius: "6px",
+                  fontWeight: 500,
+                }}
+              >
+                Salvato alle {lastAutoSavedAt} ✓
+              </span>
+            ) : null}
+          </div>
           <p style={{ margin: 0, color: "#64748b", fontSize: "14px" }}>
             Verifica puntuale dei titoli autorizzativi, igiene alimentare HACCP, sicurezza sul lavoro (D.Lgs. 81/08), piano acque e matrici ambientali.
           </p>
@@ -448,7 +546,7 @@ export default function Step1Documenti({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
           gap: 12,
           marginBottom: 20,
         }}
@@ -464,6 +562,21 @@ export default function Step1Documenti({
         <div style={{ backgroundColor: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: "12px 16px" }}>
           <div style={{ fontSize: "12px", color: "#dc2626", fontWeight: 600 }}>❌ ASSENTI / DA ACQUISIRE (NO)</div>
           <div style={{ fontSize: "24px", fontWeight: 700, color: "#dc2626" }}>{stats.missing}</div>
+        </div>
+        <div
+          style={{
+            backgroundColor: stats.expired > 0 ? "#fff1f2" : "#f8fafc",
+            border: `1px solid ${stats.expired > 0 ? "#fca5a5" : "#e2e8f0"}`,
+            borderRadius: 8,
+            padding: "12px 16px",
+          }}
+        >
+          <div style={{ fontSize: "12px", color: stats.expired > 0 ? "#e11d48" : "#64748b", fontWeight: 700 }}>
+            {stats.expired > 0 ? "⚠️ SCADUTI / NON CONFORMI" : "SCADUTI / NC"}
+          </div>
+          <div style={{ fontSize: "24px", fontWeight: 800, color: stats.expired > 0 ? "#e11d48" : "#0f172a" }}>
+            {stats.expired}
+          </div>
         </div>
         <div style={{ backgroundColor: "#f1f5f9", border: "1px solid #cbd5e1", borderRadius: 8, padding: "12px 16px" }}>
           <div style={{ fontSize: "12px", color: "#475569", fontWeight: 600 }}>⚪ NON APPLICABILI (N/A)</div>
@@ -519,6 +632,7 @@ export default function Step1Documenti({
               { id: "all", label: "Tutti" },
               { id: "missing", label: "❌ Solo No" },
               { id: "present", label: "✅ Solo Sì" },
+              { id: "expired", label: "⚠️ Solo Scaduti (NC)" },
               { id: "na", label: "⚪ Solo N/A" },
             ] as const
           ).map((btn) => (
@@ -568,7 +682,15 @@ export default function Step1Documenti({
           const isOpen = openSections[catKey];
           const applicability = isCategoryApplicableForAteco(catKey, atecoCode, checklistMode);
 
-          // Calcolo statistiche della sezione
+          // Calcolo statistiche della sezione (inclusi scaduti / non conformi)
+          const catExpired = items.filter((i) => {
+            if (i.status === "not_applicable") return false;
+            const meta = parseDocumentExtraMeta(i.note);
+            const def = i.definition ?? findCatalogDefinition(i.name);
+            const validity = def?.validityMonths ?? (def?.isPeriodicReviewDocument ? 12 : undefined);
+            const effExpiry = meta.expiryDate || (validity && meta.issueDate ? addMonthsToYmd(meta.issueDate, validity) : undefined);
+            return Boolean(effExpiry && effExpiry < todayYmd);
+          }).length;
           const catPresent = items.filter((i) => i.status === "viewed_on_site").length;
           const catMissing = items.filter((i) => i.status === "not_available" || i.status === "requested_later").length;
           const catNa = items.filter((i) => i.status === "not_applicable").length;
@@ -630,6 +752,20 @@ export default function Step1Documenti({
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   {/* Badge contatori sezione */}
                   <div style={{ display: "flex", gap: 6, fontSize: "12px", fontWeight: 600 }}>
+                    {catExpired > 0 && (
+                      <span
+                        style={{
+                          padding: "3px 8px",
+                          borderRadius: 4,
+                          backgroundColor: "#fee2e2",
+                          color: "#b91c1c",
+                          border: "1px solid #f87171",
+                          fontWeight: 700,
+                        }}
+                      >
+                        ⚠️ {catExpired} Scaduti (NC)
+                      </span>
+                    )}
                     <span style={{ padding: "3px 8px", borderRadius: 4, backgroundColor: "#dcfce7", color: "#166534" }}>
                       ✅ {catPresent} Sì
                     </span>
@@ -680,25 +816,37 @@ export default function Step1Documenti({
                     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                       {items.map((docItem, idx) => {
                         const meta = parseDocumentExtraMeta(docItem.note);
-                        const hasMinContents = docItem.definition?.minimumContents && docItem.definition.minimumContents.length > 0;
-                        const isMinContentsOpen = !!expandedMinContents[docItem.name];
-                        const checkedCount = (meta.checkedContents ?? []).length;
-                        const totalMinCount = docItem.definition?.minimumContents?.length ?? 0;
+                        const def = docItem.definition ?? findCatalogDefinition(docItem.name);
+                        const isLabReport = Boolean(def?.isLaboratoryTestReport);
+                        const hasStatutory = Boolean(def?.hasStatutoryExpiry);
+                        const isPeriodic = Boolean(def?.isPeriodicReviewDocument);
+                        const hasExpiryField = Boolean(hasStatutory || isPeriodic || !def);
+                        const validityMonths = def?.validityMonths ?? (isPeriodic ? 12 : undefined);
 
                         // Determina lo stato primario
                         const isYes = docItem.status === "viewed_on_site";
                         const isNo = docItem.status === "not_available" || docItem.status === "requested_later";
                         const isNa = docItem.status === "not_applicable";
 
+                        // Calcolo scadenza effettiva e controllo se SCADUTO (Non Conformità)
+                        const effectiveExpiry = meta.expiryDate || (validityMonths && meta.issueDate ? addMonthsToYmd(meta.issueDate, validityMonths) : undefined);
+                        const isExpired = Boolean(effectiveExpiry && effectiveExpiry < todayYmd && !isNa);
+
+                        const hasMinContents = def?.minimumContents && def.minimumContents.length > 0;
+                        const isMinContentsOpen = !!expandedMinContents[docItem.name];
+                        const checkedCount = (meta.checkedContents ?? []).length;
+                        const totalMinCount = def?.minimumContents?.length ?? 0;
+
                         return (
                           <div
                             key={`${docItem.name}-${idx}`}
                             style={{
-                              border: "1px solid",
-                              borderColor: isYes ? "#bbf7d0" : isNo ? "#fecaca" : "#e2e8f0",
-                              backgroundColor: isYes ? "#fafffa" : isNo ? "#fffbfb" : "#fff",
+                              border: isExpired ? "2px solid #ef4444" : "1px solid",
+                              borderColor: isExpired ? "#ef4444" : isYes ? "#bbf7d0" : isNo ? "#fecaca" : "#e2e8f0",
+                              backgroundColor: isExpired ? "#fff8f8" : isYes ? "#fafffa" : isNo ? "#fffbfb" : "#fff",
                               borderRadius: 8,
                               padding: "14px 16px",
+                              boxShadow: isExpired ? "0 0 0 1px #ef4444, 0 2px 4px rgba(239, 68, 68, 0.12)" : "none",
                               transition: "all 0.15s ease",
                             }}
                           >
@@ -718,6 +866,22 @@ export default function Step1Documenti({
                                   <span style={{ fontSize: "15px", fontWeight: 700, color: "#0f172a" }}>
                                     {docItem.name}
                                   </span>
+                                  {isExpired && (
+                                    <span
+                                      style={{
+                                        fontSize: "10px",
+                                        fontWeight: 800,
+                                        padding: "2px 8px",
+                                        borderRadius: 4,
+                                        backgroundColor: "#fee2e2",
+                                        color: "#b91c1c",
+                                        border: "1px solid #ef4444",
+                                        letterSpacing: "0.5px",
+                                      }}
+                                    >
+                                      ⚠️ {isPeriodic ? "NC - RIESAME PERIODICO SCADUTO" : "NC - DOCUMENTO SCADUTO"}
+                                    </span>
+                                  )}
                                   {docItem.isRequired && (
                                     <span
                                       style={{
@@ -733,7 +897,7 @@ export default function Step1Documenti({
                                       OBBLIGATORIO
                                     </span>
                                   )}
-                                  {docItem.definition?.isLaboratoryTestReport && (
+                                  {isLabReport && (
                                     <span
                                       style={{
                                         fontSize: "10px",
@@ -746,6 +910,36 @@ export default function Step1Documenti({
                                       }}
                                     >
                                       🧪 RAPPORTO DI PROVA
+                                    </span>
+                                  )}
+                                  {hasStatutory && (
+                                    <span
+                                      style={{
+                                        fontSize: "10px",
+                                        fontWeight: 700,
+                                        padding: "2px 6px",
+                                        borderRadius: 4,
+                                        backgroundColor: "#fef3c7",
+                                        color: "#b45309",
+                                        border: "1px solid #fde68a",
+                                      }}
+                                    >
+                                      ⏳ VALIDITÀ {formatDocumentValidity(def)}
+                                    </span>
+                                  )}
+                                  {isPeriodic && (
+                                    <span
+                                      style={{
+                                        fontSize: "10px",
+                                        fontWeight: 700,
+                                        padding: "2px 6px",
+                                        borderRadius: 4,
+                                        backgroundColor: "#f3e8ff",
+                                        color: "#7e22ce",
+                                        border: "1px solid #e9d5ff",
+                                      }}
+                                    >
+                                      🔄 RIESAME ANNUALE
                                     </span>
                                   )}
                                   <span
@@ -872,81 +1066,399 @@ export default function Step1Documenti({
                               </div>
                             </div>
 
-                            {/* Riga Opzioni Aggiuntive: Date e Note */}
-                            <div
-                              style={{
-                                display: "grid",
-                                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                                gap: 12,
-                                marginTop: 12,
-                                paddingTop: 10,
-                                borderTop: "1px dashed #e2e8f0",
-                              }}
-                            >
-                              {/* Data Emissione */}
-                              <div>
-                                <label style={{ fontSize: "12px", fontWeight: 600, color: "#475569", display: "block", marginBottom: 3 }}>
-                                  Data Redazione / Emissione:
-                                </label>
-                                <input
-                                  type="date"
-                                  disabled={isInspectionValidated}
-                                  value={meta.issueDate ?? ""}
-                                  onChange={(e) => handleMetadataChange(docItem.name, docItem.note, "issueDate", e.target.value)}
+                            {/* Banner di Allerta Scaduto / Non Conformità Rilevata */}
+                            {isExpired && (
+                              <div
+                                style={{
+                                  marginTop: 10,
+                                  padding: "9px 12px",
+                                  backgroundColor: "#fee2e2",
+                                  border: "1px solid #f87171",
+                                  borderRadius: 6,
+                                  color: "#991b1b",
+                                  fontSize: "12px",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "space-between",
+                                  gap: 8,
+                                }}
+                              >
+                                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                  <span style={{ fontSize: "16px" }}>🚨</span>
+                                  <span>
+                                    {isPeriodic ? (
+                                      <>
+                                        <strong>NON CONFORMITÀ RILEVATA:</strong> Il termine per il riesame periodico obbligatorio è scaduto il{" "}
+                                        <u>{formattaData(effectiveExpiry)}</u> (intervallo normativo di 12 mesi superato).
+                                        È necessario effettuare una revisione formale del documento ai sensi di legge.
+                                      </>
+                                    ) : (
+                                      <>
+                                        <strong>NON CONFORMITÀ RILEVATA:</strong> Il documento è scaduto di validità legale il{" "}
+                                        <u>{formattaData(effectiveExpiry)}</u>. È richiesto il rinnovo o nuova istanza/collaudo ai sensi della normativa vigente.
+                                      </>
+                                    )}
+                                  </span>
+                                </div>
+                                <span
                                   style={{
-                                    width: "100%",
-                                    padding: "6px 10px",
+                                    fontSize: "10px",
+                                    fontWeight: 700,
+                                    backgroundColor: "#dc2626",
+                                    color: "#fff",
+                                    padding: "2px 8px",
                                     borderRadius: 4,
-                                    border: "1px solid #cbd5e1",
-                                    fontSize: "13px",
-                                    backgroundColor: "#fff",
+                                    whiteSpace: "nowrap",
                                   }}
-                                />
+                                >
+                                  NC ATTIVA
+                                </span>
                               </div>
+                            )}
 
-                              {/* Data Scadenza / Rinnovo */}
-                              <div>
-                                <label style={{ fontSize: "12px", fontWeight: 600, color: "#475569", display: "block", marginBottom: 3 }}>
-                                  Data Scadenza / Rinnovo:
-                                </label>
-                                <input
-                                  type="date"
-                                  disabled={isInspectionValidated}
-                                  value={meta.expiryDate ?? ""}
-                                  onChange={(e) => handleMetadataChange(docItem.name, docItem.note, "expiryDate", e.target.value)}
-                                  style={{
-                                    width: "100%",
-                                    padding: "6px 10px",
-                                    borderRadius: 4,
-                                    border: "1px solid #cbd5e1",
-                                    fontSize: "13px",
-                                    backgroundColor: "#fff",
-                                  }}
-                                />
-                              </div>
+                            {/* Riga Opzioni Aggiuntive: Date e Note in base al regime normativo */}
+                            {!hasExpiryField ? (
+                              /* REGIME 1: Documenti Permanenti & Rapporti di Prova (SENZA Data Scadenza) */
+                              <div
+                                style={{
+                                  display: "grid",
+                                  gridTemplateColumns: "minmax(240px, 320px) 1fr",
+                                  gap: 12,
+                                  marginTop: 12,
+                                  paddingTop: 10,
+                                  borderTop: "1px dashed #e2e8f0",
+                                }}
+                              >
+                                {/* Data Emissione / Prelievo */}
+                                <div>
+                                  <label style={{ fontSize: "12px", fontWeight: 600, color: "#475569", display: "block", marginBottom: 3 }}>
+                                    {isLabReport ? "📅 Data Prelievo / Esecuzione Analisi:" : "📅 Data Rilascio / Emissione:"}
+                                  </label>
+                                  <input
+                                    type="date"
+                                    disabled={isInspectionValidated}
+                                    value={meta.issueDate ?? ""}
+                                    onChange={(e) => handleIssueDateChange(docItem.name, docItem.note, e.target.value, def)}
+                                    style={{
+                                      width: "100%",
+                                      padding: "6px 10px",
+                                      borderRadius: 4,
+                                      border: "1px solid #cbd5e1",
+                                      fontSize: "13px",
+                                      backgroundColor: "#fff",
+                                    }}
+                                  />
+                                  <div style={{ fontSize: "11px", color: isLabReport ? "#0369a1" : "#64748b", marginTop: 4, display: "flex", alignItems: "center", gap: 4 }}>
+                                    <span>{isLabReport ? "🧪" : "♾️"}</span>
+                                    <span>
+                                      {isLabReport
+                                        ? "Rapporto analitico puntuale (fa fede la data del prelievo). Nessuna scadenza di legge."
+                                        : "Atto permanente a validità continuativa (nessuna scadenza periodica)."}
+                                    </span>
+                                  </div>
+                                </div>
 
-                              {/* Note / Prescrizioni */}
-                              <div style={{ gridColumn: "span 2" }}>
-                                <label style={{ fontSize: "12px", fontWeight: 600, color: "#475569", display: "block", marginBottom: 3 }}>
-                                  Note del consulente / Rilievi:
-                                </label>
-                                <input
-                                  type="text"
-                                  placeholder="Es. Da aggiornare a seguito inserimento nuovo impianto, firmato in data..."
-                                  disabled={isInspectionValidated}
-                                  value={meta.noteText ?? ""}
-                                  onChange={(e) => handleMetadataChange(docItem.name, docItem.note, "noteText", e.target.value)}
-                                  style={{
-                                    width: "100%",
-                                    padding: "6px 10px",
-                                    borderRadius: 4,
-                                    border: "1px solid #cbd5e1",
-                                    fontSize: "13px",
-                                    backgroundColor: "#fff",
-                                  }}
-                                />
+                                {/* Note del consulente / Rilievi */}
+                                <div>
+                                  <label style={{ fontSize: "12px", fontWeight: 600, color: "#475569", display: "block", marginBottom: 3 }}>
+                                    Note del consulente / Rilievi:
+                                  </label>
+                                  <input
+                                    type="text"
+                                    placeholder={
+                                      isLabReport
+                                        ? "Es. Esito conforme ai limiti di legge, laboratorio accreditato..."
+                                        : "Es. Numero protocollo SUAP, conformità edilizia, DICO completa di allegati obbligatori..."
+                                    }
+                                    disabled={isInspectionValidated}
+                                    value={meta.noteText ?? ""}
+                                    onChange={(e) => handleMetadataChange(docItem.name, docItem.note, "noteText", e.target.value)}
+                                    style={{
+                                      width: "100%",
+                                      padding: "6px 10px",
+                                      borderRadius: 4,
+                                      border: "1px solid #cbd5e1",
+                                      fontSize: "13px",
+                                      backgroundColor: "#fff",
+                                    }}
+                                  />
+                                </div>
                               </div>
-                            </div>
+                            ) : hasStatutory ? (
+                              /* REGIME 2: Documenti con Scadenza di Legge (AUA, CPI, DPR 462, Scarichi, ecc.) */
+                              <div
+                                style={{
+                                  display: "grid",
+                                  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                                  gap: 12,
+                                  marginTop: 12,
+                                  paddingTop: 10,
+                                  borderTop: "1px dashed #e2e8f0",
+                                }}
+                              >
+                                {/* Data Rilascio / Emissione */}
+                                <div>
+                                  <label style={{ fontSize: "12px", fontWeight: 600, color: "#475569", display: "block", marginBottom: 3 }}>
+                                    📅 Data di Rilascio / Emissione:
+                                  </label>
+                                  <input
+                                    type="date"
+                                    disabled={isInspectionValidated}
+                                    value={meta.issueDate ?? ""}
+                                    onChange={(e) => handleIssueDateChange(docItem.name, docItem.note, e.target.value, def)}
+                                    style={{
+                                      width: "100%",
+                                      padding: "6px 10px",
+                                      borderRadius: 4,
+                                      border: "1px solid #cbd5e1",
+                                      fontSize: "13px",
+                                      backgroundColor: "#fff",
+                                    }}
+                                  />
+                                  <div style={{ fontSize: "11px", color: "#64748b", marginTop: 4 }}>
+                                    Validità di legge: {formatDocumentValidity(def)}
+                                  </div>
+                                </div>
+
+                                {/* Data Scadenza di Legge */}
+                                <div>
+                                  <label style={{ fontSize: "12px", fontWeight: 600, color: isExpired ? "#b91c1c" : "#475569", display: "block", marginBottom: 3 }}>
+                                    ⏳ Data Scadenza di Legge:
+                                  </label>
+                                  <input
+                                    type="date"
+                                    disabled={isInspectionValidated}
+                                    value={effectiveExpiry ?? ""}
+                                    onChange={(e) => handleExpiryDateChange(docItem.name, docItem.note, e.target.value)}
+                                    style={{
+                                      width: "100%",
+                                      padding: "6px 10px",
+                                      borderRadius: 4,
+                                      border: isExpired ? "1px solid #ef4444" : "1px solid #cbd5e1",
+                                      fontSize: "13px",
+                                      backgroundColor: isExpired ? "#fee2e2" : "#fff",
+                                      color: isExpired ? "#991b1b" : "#0f172a",
+                                      fontWeight: isExpired ? 600 : 400,
+                                    }}
+                                  />
+                                  <div style={{ fontSize: "11px", marginTop: 4 }}>
+                                    {isExpired ? (
+                                      <span style={{ color: "#b91c1c", fontWeight: 700 }}>
+                                        ⚠️ Scaduto il {formattaData(effectiveExpiry)} (NC)
+                                      </span>
+                                    ) : effectiveExpiry ? (
+                                      <span style={{ color: "#166534", fontWeight: 500 }}>
+                                        ✅ Valido fino al {formattaData(effectiveExpiry)}
+                                      </span>
+                                    ) : (
+                                      <span style={{ color: "#94a3b8" }}>
+                                        Calcolata in automatico (+{validityMonths} mesi)
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Note / Prescrizioni */}
+                                <div style={{ gridColumn: "span 2" }}>
+                                  <label style={{ fontSize: "12px", fontWeight: 600, color: "#475569", display: "block", marginBottom: 3 }}>
+                                    Note del consulente / Rilievi:
+                                  </label>
+                                  <input
+                                    type="text"
+                                    placeholder="Es. Pratica di rinnovo avviata, CPI in deroga, prescrizioni VVF..."
+                                    disabled={isInspectionValidated}
+                                    value={meta.noteText ?? ""}
+                                    onChange={(e) => handleMetadataChange(docItem.name, docItem.note, "noteText", e.target.value)}
+                                    style={{
+                                      width: "100%",
+                                      padding: "6px 10px",
+                                      borderRadius: 4,
+                                      border: "1px solid #cbd5e1",
+                                      fontSize: "13px",
+                                      backgroundColor: "#fff",
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            ) : isPeriodic ? (
+                              /* REGIME 3: Documenti con Riesame Periodico (DVR, HACCP, Legionella, VDR) */
+                              <div
+                                style={{
+                                  display: "grid",
+                                  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                                  gap: 12,
+                                  marginTop: 12,
+                                  paddingTop: 10,
+                                  borderTop: "1px dashed #e2e8f0",
+                                }}
+                              >
+                                {/* Data Emissione / Ultimo Riesame */}
+                                <div>
+                                  <label style={{ fontSize: "12px", fontWeight: 600, color: "#475569", display: "block", marginBottom: 3 }}>
+                                    📅 Data Emissione / Ultimo Riesame:
+                                  </label>
+                                  <input
+                                    type="date"
+                                    disabled={isInspectionValidated}
+                                    value={meta.issueDate ?? ""}
+                                    onChange={(e) => handleIssueDateChange(docItem.name, docItem.note, e.target.value, def)}
+                                    style={{
+                                      width: "100%",
+                                      padding: "6px 10px",
+                                      borderRadius: 4,
+                                      border: "1px solid #cbd5e1",
+                                      fontSize: "13px",
+                                      backgroundColor: "#fff",
+                                    }}
+                                  />
+                                  <div style={{ fontSize: "11px", color: "#64748b", marginTop: 4 }}>
+                                    Cadenza riesame: annuale (12 mesi)
+                                  </div>
+                                </div>
+
+                                {/* Prossimo Riesame Entro */}
+                                <div>
+                                  <label style={{ fontSize: "12px", fontWeight: 600, color: isExpired ? "#b91c1c" : "#475569", display: "block", marginBottom: 3 }}>
+                                    🔄 Prossimo Riesame Entro:
+                                  </label>
+                                  <input
+                                    type="date"
+                                    disabled={isInspectionValidated}
+                                    value={effectiveExpiry ?? ""}
+                                    onChange={(e) => handleExpiryDateChange(docItem.name, docItem.note, e.target.value)}
+                                    style={{
+                                      width: "100%",
+                                      padding: "6px 10px",
+                                      borderRadius: 4,
+                                      border: isExpired ? "1px solid #ef4444" : "1px solid #cbd5e1",
+                                      fontSize: "13px",
+                                      backgroundColor: isExpired ? "#fee2e2" : "#fff",
+                                      color: isExpired ? "#991b1b" : "#0f172a",
+                                      fontWeight: isExpired ? 600 : 400,
+                                    }}
+                                  />
+                                  <div style={{ fontSize: "11px", marginTop: 4 }}>
+                                    {isExpired ? (
+                                      <span style={{ color: "#b91c1c", fontWeight: 700 }}>
+                                        ⚠️ Riesame scaduto il {formattaData(effectiveExpiry)} (NC)
+                                      </span>
+                                    ) : effectiveExpiry ? (
+                                      <span style={{ color: "#166534", fontWeight: 500 }}>
+                                        ✅ Riesame valido fino al {formattaData(effectiveExpiry)}
+                                      </span>
+                                    ) : (
+                                      <span style={{ color: "#94a3b8" }}>
+                                        Calcolato in automatico (+12 mesi)
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Note / Prescrizioni */}
+                                <div style={{ gridColumn: "span 2" }}>
+                                  <label style={{ fontSize: "12px", fontWeight: 600, color: "#475569", display: "block", marginBottom: 3 }}>
+                                    Note del consulente / Rilievi:
+                                  </label>
+                                  <input
+                                    type="text"
+                                    placeholder="Es. Da aggiornare per nuove attrezzature o modifiche al ciclo produttivo..."
+                                    disabled={isInspectionValidated}
+                                    value={meta.noteText ?? ""}
+                                    onChange={(e) => handleMetadataChange(docItem.name, docItem.note, "noteText", e.target.value)}
+                                    style={{
+                                      width: "100%",
+                                      padding: "6px 10px",
+                                      borderRadius: 4,
+                                      border: "1px solid #cbd5e1",
+                                      fontSize: "13px",
+                                      backgroundColor: "#fff",
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            ) : (
+                              /* REGIME 4: Documenti Personalizzati Fuori Catalogo */
+                              <div
+                                style={{
+                                  display: "grid",
+                                  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                                  gap: 12,
+                                  marginTop: 12,
+                                  paddingTop: 10,
+                                  borderTop: "1px dashed #e2e8f0",
+                                }}
+                              >
+                                {/* Data Emissione */}
+                                <div>
+                                  <label style={{ fontSize: "12px", fontWeight: 600, color: "#475569", display: "block", marginBottom: 3 }}>
+                                    📅 Data Emissione / Redazione:
+                                  </label>
+                                  <input
+                                    type="date"
+                                    disabled={isInspectionValidated}
+                                    value={meta.issueDate ?? ""}
+                                    onChange={(e) => handleIssueDateChange(docItem.name, docItem.note, e.target.value)}
+                                    style={{
+                                      width: "100%",
+                                      padding: "6px 10px",
+                                      borderRadius: 4,
+                                      border: "1px solid #cbd5e1",
+                                      fontSize: "13px",
+                                      backgroundColor: "#fff",
+                                    }}
+                                  />
+                                </div>
+
+                                {/* Data Scadenza (opzionale) */}
+                                <div>
+                                  <label style={{ fontSize: "12px", fontWeight: 600, color: isExpired ? "#b91c1c" : "#475569", display: "block", marginBottom: 3 }}>
+                                    ⏳ Data Scadenza (se applicabile):
+                                  </label>
+                                  <input
+                                    type="date"
+                                    disabled={isInspectionValidated}
+                                    value={meta.expiryDate ?? ""}
+                                    onChange={(e) => handleExpiryDateChange(docItem.name, docItem.note, e.target.value)}
+                                    style={{
+                                      width: "100%",
+                                      padding: "6px 10px",
+                                      borderRadius: 4,
+                                      border: isExpired ? "1px solid #ef4444" : "1px solid #cbd5e1",
+                                      fontSize: "13px",
+                                      backgroundColor: isExpired ? "#fee2e2" : "#fff",
+                                      color: isExpired ? "#991b1b" : "#0f172a",
+                                    }}
+                                  />
+                                  {isExpired && (
+                                    <div style={{ fontSize: "11px", color: "#b91c1c", fontWeight: 700, marginTop: 4 }}>
+                                      ⚠️ Scaduto il {formattaData(meta.expiryDate)} (NC)
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Note / Prescrizioni */}
+                                <div style={{ gridColumn: "span 2" }}>
+                                  <label style={{ fontSize: "12px", fontWeight: 600, color: "#475569", display: "block", marginBottom: 3 }}>
+                                    Note del consulente / Rilievi:
+                                  </label>
+                                  <input
+                                    type="text"
+                                    placeholder="Annotazioni del consulente..."
+                                    disabled={isInspectionValidated}
+                                    value={meta.noteText ?? ""}
+                                    onChange={(e) => handleMetadataChange(docItem.name, docItem.note, "noteText", e.target.value)}
+                                    style={{
+                                      width: "100%",
+                                      padding: "6px 10px",
+                                      borderRadius: 4,
+                                      border: "1px solid #cbd5e1",
+                                      fontSize: "13px",
+                                      backgroundColor: "#fff",
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            )}
 
                             {/* Sezione Contenuti Minimi Obbligatori (se previsti dalla norma per questo documento) */}
                             {hasMinContents && docItem.definition?.minimumContents && (

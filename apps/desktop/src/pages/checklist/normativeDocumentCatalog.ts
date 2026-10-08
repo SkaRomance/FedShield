@@ -44,6 +44,12 @@ export interface NormativeDocumentDefinition {
   isPublicFacilitySpecific?: boolean;
   /** Contenuti minimi che devono essere presenti nel documento secondo la legge */
   minimumContents?: MinimumContentItem[];
+  /** Se true, il documento ha una scadenza legale perentoria (es. CPI 5 anni, AUA 15 anni, DPR 462 2 o 5 anni, Scarichi 4 anni) */
+  hasStatutoryExpiry?: boolean;
+  /** Se true, il documento non ha scadenza formale ma è soggetto a riesame/aggiornamento periodico (di norma annuale +12 mesi) */
+  isPeriodicReviewDocument?: boolean;
+  /** Mesi di validità previsti dalla norma (es. 12 per riesame annuale, 60 per CPI 5 anni, 180 per AUA 15 anni, 48 per scarichi) */
+  validityMonths?: number;
 }
 
 export const DOCUMENT_CATEGORIES_INFO: Record<
@@ -110,6 +116,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "L. 580/1993 e R.D. 2011/1934",
     description: "Verifica oggetto sociale, sede legale/operative, compagine societaria e poteri del legale rappresentante.",
     isRequiredDefault: true,
+    hasStatutoryExpiry: true,
+    validityMonths: 6,
   },
   {
     id: "base-scia",
@@ -118,6 +126,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.Lgs. 222/2016, art. 19 L. 241/90 e Reg. CE 852/04 art. 6",
     description: "Titolo autorizzativo per l'esercizio dell'attività d'impresa e registrazione sanitaria SUAP/ASL.",
     isRequiredDefault: true,
+    hasStatutoryExpiry: false,
+    isPeriodicReviewDocument: false,
   },
   {
     id: "base-planimetria",
@@ -126,6 +136,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.Lgs. 81/2008 Allegato IV punto 1.2 e Reg. CE 852/04 All. II",
     description: "Planimetria in scala con quote, destinazione funzionale degli ambienti, percorsi e uscite.",
     isRequiredDefault: true,
+    hasStatutoryExpiry: false,
+    isPeriodicReviewDocument: false,
   },
   {
     id: "base-agibilita",
@@ -134,6 +146,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.P.R. 380/2001 (Testo Unico Edilizia), art. 24",
     description: "Attestazione delle condizioni di sicurezza, igiene, salubrità e conformità edilizio-urbanistica.",
     isRequiredDefault: true,
+    hasStatutoryExpiry: false,
+    isPeriodicReviewDocument: false,
   },
   {
     id: "base-dico-elettrico",
@@ -142,6 +156,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.M. 37/2008, art. 7 e D.Lgs. 81/2008 art. 80",
     description: "Dichiarazione a regola d'arte dell'impianto elettrico con allegati obbligatori rilasciata dall'installatore.",
     isRequiredDefault: true,
+    hasStatutoryExpiry: false,
+    isPeriodicReviewDocument: false,
   },
   {
     id: "base-messa-a-terra",
@@ -150,6 +166,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.P.R. 462/2001, art. 4 e D.Lgs. 81/2008 art. 86",
     description: "Omologazione e verbale di verifica periodica biennale/quinquennale rilasciato da Organismo Abilitato o ASL/ARPA.",
     isRequiredDefault: true,
+    hasStatutoryExpiry: true,
+    validityMonths: 24,
   },
   {
     id: "base-cpi-antincendio",
@@ -158,6 +176,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.P.R. 151/2011",
     description: "Titolo autorizzativo antincendio VVF per attività soggette (Attività riportate in Allegato I DPR 151/11).",
     isRequiredDefault: false,
+    hasStatutoryExpiry: true,
+    validityMonths: 60,
   },
   {
     id: "base-dico-gas",
@@ -167,6 +187,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     description: "DICO per apparecchiature di cottura industriali a gas, caldaie e impianti termici di aerazione.",
     isRequiredDefault: false,
     applicableAtecoPrefixes: ["56.", "10.", "11.", "45.2", "25.", "28.", "16.", "31."],
+    hasStatutoryExpiry: false,
+    isPeriodicReviewDocument: false,
   },
   {
     id: "base-aua-ambientale",
@@ -179,6 +201,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
       "45.2", "10.", "11.", "13.", "16.", "20.", "22.", "23.", "24.", "25.",
       "28.", "29.", "30.", "31.", "38.", "39.", "41.", "42.", "43.", "47.30", "96.01"
     ],
+    hasStatutoryExpiry: true,
+    validityMonths: 180,
   },
 
   // =========================================================================
@@ -192,6 +216,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     description: "Piano aziendale di autocontrollo basato sui 7 principi del sistema HACCP con analisi pericoli e CCP.",
     isRequiredDefault: true,
     isFoodSpecific: true,
+    isPeriodicReviewDocument: true,
+    validityMonths: 12,
     minimumContents: [
       {
         id: "h-mc-1",
@@ -263,6 +289,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     description: "Schede di registrazione quotidiana delle temperature degli impianti di conservazione positiva e negativa.",
     isRequiredDefault: true,
     isFoodSpecific: true,
+    isPeriodicReviewDocument: true,
+    validityMonths: 12,
   },
   {
     id: "haccp-registro-sanificazione",
@@ -272,6 +300,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     description: "Tracciamento della pulizia e disinfezione ordinaria e straordinaria di superfici, cappe, filtri e locali.",
     isRequiredDefault: true,
     isFoodSpecific: true,
+    isPeriodicReviewDocument: true,
+    validityMonths: 12,
   },
   {
     id: "haccp-pest-control",
@@ -281,6 +311,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     description: "Verbali periodici della ditta specializzata di derattizzazione e disinfestazione con schede tossicologiche.",
     isRequiredDefault: true,
     isFoodSpecific: true,
+    isPeriodicReviewDocument: true,
+    validityMonths: 12,
   },
   {
     id: "haccp-analisi-alimenti",
@@ -291,6 +323,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     isRequiredDefault: true,
     isFoodSpecific: true,
     isLaboratoryTestReport: true,
+    hasStatutoryExpiry: false,
+    isPeriodicReviewDocument: false,
     applicableAtecoPrefixes: ["56.", "10.", "11.", "47.11", "47.2", "55.1", "93.29.2", "93.29.1"],
     minimumContents: [
       {
@@ -333,6 +367,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     description: "Certificazioni di idoneità alimentare per carta forno, imballaggi, pellicole, contenitori take-away e stoviglie.",
     isRequiredDefault: true,
     isFoodSpecific: true,
+    hasStatutoryExpiry: false,
+    isPeriodicReviewDocument: false,
   },
   {
     id: "haccp-schede-tecniche-chimici",
@@ -342,6 +378,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     description: "Schede a 16 punti dei detergenti, disincrostanti e disinfettanti impiegati con dosaggi e tempi di contatto.",
     isRequiredDefault: true,
     isFoodSpecific: true,
+    hasStatutoryExpiry: false,
+    isPeriodicReviewDocument: false,
   },
   {
     id: "haccp-attestati-formazione",
@@ -351,6 +389,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     description: "Attestati di formazione obbligatoria in corso di validità per tutti gli addetti che manipolano alimenti.",
     isRequiredDefault: true,
     isFoodSpecific: true,
+    hasStatutoryExpiry: true,
+    validityMonths: 36,
   },
 
   // =========================================================================
@@ -363,6 +403,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.Lgs. 81/2008, artt. 17 e 28",
     description: "Documento fondamentale per la valutazione di tutti i rischi presenti in azienda e piano delle misure di tutela.",
     isRequiredDefault: true,
+    isPeriodicReviewDocument: true,
+    validityMonths: 12,
     minimumContents: [
       {
         id: "dvr-mc-1",
@@ -413,6 +455,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.Lgs. 81/2008, artt. 17, 31, 32 e 34",
     description: "Nomina formale del Responsabile del Servizio di Prevenzione e Protezione con attestati di formazione/aggiornamento.",
     isRequiredDefault: true,
+    isPeriodicReviewDocument: true,
+    validityMonths: 12,
   },
   {
     id: "sec-verbale-rls",
@@ -421,6 +465,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.Lgs. 81/2008, artt. 47 e 50",
     description: "Documentazione di nomina del Rappresentante dei Lavoratori per la Sicurezza aziendale o territoriale (comunicazione INAIL).",
     isRequiredDefault: true,
+    isPeriodicReviewDocument: true,
+    validityMonths: 12,
   },
   {
     id: "sec-nomina-medico",
@@ -429,6 +475,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.Lgs. 81/2008, artt. 18, 25 e 41",
     description: "Incarico del Medico Competente iscritto all'Elenco Nazionale con piano di sorveglianza sanitaria correlato ai rischi.",
     isRequiredDefault: true,
+    isPeriodicReviewDocument: true,
+    validityMonths: 12,
   },
   {
     id: "sec-piano-emergenza",
@@ -437,6 +485,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.Lgs. 81/2008, art. 43 e D.M. 02/09/2021",
     description: "Procedure organizzative e operative per fronteggiare emergenze, incendi ed evacuazione rapida dei locali.",
     isRequiredDefault: true,
+    isPeriodicReviewDocument: true,
+    validityMonths: 12,
     minimumContents: [
       {
         id: "pee-mc-1",
@@ -472,6 +522,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.M. 01/09/2021 (Decreto Controlli) e D.P.R. 151/2011",
     description: "Tracciamento della sorveglianza e dei controlli semestrali su estintori, idranti, porte REI e luci di emergenza.",
     isRequiredDefault: true,
+    hasStatutoryExpiry: true,
+    validityMonths: 6,
   },
   {
     id: "sec-vdr-chimico",
@@ -480,6 +532,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.Lgs. 81/2008, Titolo IX, Capo I, artt. 221-232",
     description: "Valutazione dei pericoli chimici legati a prodotti di pulizia, disinfezione o lavorazione con schede SDS a 16 punti.",
     isRequiredDefault: true,
+    isPeriodicReviewDocument: true,
+    validityMonths: 12,
     minimumContents: [
       {
         id: "vdr-c-1",
@@ -510,6 +564,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.Lgs. 81/2008, Titolo VIII, Capo II, artt. 187-198",
     description: "Relazione tecnica con misurazioni del livello di esposizione quotidiana personale (Lex,8h) e picco.",
     isRequiredDefault: false,
+    isPeriodicReviewDocument: true,
+    validityMonths: 12,
   },
   {
     id: "sec-vdr-vibrazioni",
@@ -518,6 +574,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.Lgs. 81/2008, Titolo VIII, Capo III, artt. 199-205",
     description: "Valutazione delle vibrazioni trasmesse al sistema mano-braccio (HAV) o corpo intero (WBV).",
     isRequiredDefault: false,
+    isPeriodicReviewDocument: true,
+    validityMonths: 12,
   },
   {
     id: "sec-vdr-mmc",
@@ -526,6 +584,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.Lgs. 81/2008, Titolo VI, artt. 167-171 e ISO 11228",
     description: "Valutazione delle attività di sollevamento pesi, traino/spinta carrelli o movimenti ripetitivi arti superiori.",
     isRequiredDefault: true,
+    isPeriodicReviewDocument: true,
+    validityMonths: 12,
   },
   {
     id: "sec-verbali-dpi",
@@ -534,6 +594,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.Lgs. 81/2008, artt. 76, 77 e 79",
     description: "Moduli firmati dai dipendenti per ricevuta dei Dispositivi di Protezione Individuale e relativo addestramento.",
     isRequiredDefault: true,
+    isPeriodicReviewDocument: true,
+    validityMonths: 12,
   },
   {
     id: "sec-giudizi-idoneita",
@@ -542,6 +604,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.Lgs. 81/2008, art. 41",
     description: "Certificati di idoneità lavorativa con eventuali prescrizioni/limitazioni per ciascun lavoratore soggetto a sorveglianza.",
     isRequiredDefault: true,
+    hasStatutoryExpiry: true,
+    validityMonths: 12,
   },
   {
     id: "sec-riunione-periodica",
@@ -550,6 +614,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.Lgs. 81/2008, art. 35",
     description: "Verbale dell'incontro annuale tra Datore di Lavoro, RSPP, Medico Competente e RLS (obbligatorio > 15 dipendenti).",
     isRequiredDefault: false,
+    hasStatutoryExpiry: true,
+    validityMonths: 12,
   },
   {
     id: "sec-duvri",
@@ -558,6 +624,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.Lgs. 81/2008, art. 26",
     description: "Documento unico per eliminare i rischi di interferenza con imprese appaltatrici o lavoratori autonomi in sede.",
     isRequiredDefault: false,
+    isPeriodicReviewDocument: true,
+    validityMonths: 12,
   },
   {
     id: "sec-pos-cantieri",
@@ -568,6 +636,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     isRequiredDefault: false,
     isConstructionSpecific: true,
     applicableAtecoPrefixes: ["41.", "42.", "43."],
+    isPeriodicReviewDocument: true,
+    validityMonths: 12,
   },
   {
     id: "sec-monitoraggio-aerodispersi",
@@ -577,6 +647,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     description: "Campionamenti analitici dell'aria nei luoghi di lavoro per verifica del rispetto dei VLEP (Valori Limite di Esposizione Professionale).",
     isRequiredDefault: false,
     isLaboratoryTestReport: true,
+    hasStatutoryExpiry: false,
+    isPeriodicReviewDocument: false,
     applicableAtecoPrefixes: ["16.", "31.", "25.", "28.", "41.", "42.", "43.", "45.2", "23.", "20.", "22."],
     minimumContents: [
       {
@@ -628,6 +700,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     description: "Valutazione e gestione del rischio del sistema idrico di distribuzione interna per garantire salubrità e prevenire Legionella.",
     isRequiredDefault: true,
     isPublicFacilitySpecific: true,
+    isPeriodicReviewDocument: true,
+    validityMonths: 12,
     minimumContents: [
       {
         id: "wsp-mc-1",
@@ -679,6 +753,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     description: "Certificati analitici periodici di laboratorio accreditato su parametri microbiologici e chimici dell'acqua destinata al consumo umano.",
     isRequiredDefault: true,
     isLaboratoryTestReport: true,
+    hasStatutoryExpiry: false,
+    isPeriodicReviewDocument: false,
     minimumContents: [
       {
         id: "acq-mc-1",
@@ -710,6 +786,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     description: "Campionamenti periodici nei punti terminali a maggior rischio con conteggio UFC/L effettuati da laboratorio qualificato.",
     isRequiredDefault: true,
     isLaboratoryTestReport: true,
+    hasStatutoryExpiry: false,
+    isPeriodicReviewDocument: false,
     minimumContents: [
       {
         id: "leg-mc-1",
@@ -740,6 +818,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.Lgs. 18/2023 e Linee Guida Legionellosi 2015",
     description: "Tracciamento di lavaggi periodici, sostituzione filtri, decalcificazione rompigetto ed eventuali shock termici/chimici.",
     isRequiredDefault: true,
+    isPeriodicReviewDocument: true,
+    validityMonths: 12,
   },
 
   // =========================================================================
@@ -753,6 +833,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     description: "Certificati analitici periodici dei fumi convogliati emessi da cabine di verniciatura, forni, caldaie, saldature e lavorazioni meccaniche.",
     isRequiredDefault: true,
     isLaboratoryTestReport: true,
+    hasStatutoryExpiry: false,
+    isPeriodicReviewDocument: false,
     applicableAtecoPrefixes: [
       "45.2", "25.", "28.", "16.", "31.", "10.", "11.", "13.", "20.", "22.", "23.", "24.", "29.", "30.", "33.", "38."
     ],
@@ -797,6 +879,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     description: "Analisi periodiche delle acque reflue scaricate in pubblica fognatura o corpo idrico superficiale (compreso scarico da disoleatore).",
     isRequiredDefault: true,
     isLaboratoryTestReport: true,
+    hasStatutoryExpiry: false,
+    isPeriodicReviewDocument: false,
     applicableAtecoPrefixes: [
       "45.2", "25.", "28.", "10.", "11.", "13.", "20.", "22.", "23.", "24.", "38.", "41.", "42.", "43.", "47.30", "96.01"
     ],
@@ -834,6 +918,19 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     ],
   },
   {
+    id: "env-autorizzazione-scarichi",
+    name: "Autorizzazione allo Scarico delle Acque Reflue (art. 124 D.Lgs. 152/2006)",
+    category: "matrici_ambientali",
+    normReference: "D.Lgs. 152/2006, art. 124 e s.m.i.",
+    description: "Titolo autorizzativo quadriennale per lo scarico di acque reflue industriali o assimilate in pubblica fognatura/corpo idrico (validità 4 anni / 48 mesi).",
+    isRequiredDefault: false,
+    hasStatutoryExpiry: true,
+    validityMonths: 48,
+    applicableAtecoPrefixes: [
+      "45.2", "25.", "28.", "10.", "11.", "13.", "20.", "22.", "23.", "24.", "38.", "41.", "42.", "43.", "47.30", "96.01"
+    ],
+  },
+  {
     id: "env-rapporto-terre-scavo",
     name: "Rapporto di Prova Caratterizzazione Terre e Rocce da Scavo (D.P.R. 120/2017 & D.Lgs. 152/06)",
     category: "matrici_ambientali",
@@ -841,6 +938,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     description: "Certificati analitici di campionamento del suolo e terre da scavo per qualifica come sottoprodotto o recupero ambientale.",
     isRequiredDefault: true,
     isLaboratoryTestReport: true,
+    hasStatutoryExpiry: false,
+    isPeriodicReviewDocument: false,
     isConstructionSpecific: true,
     applicableAtecoPrefixes: ["41.", "42.", "43.", "08.", "09.", "38.", "39."],
     minimumContents: [
@@ -884,6 +983,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     description: "Mappatura dei materiali contenenti amianto (coperture in eternit, canne fumarie, coibentazioni) con indice di degrado.",
     isRequiredDefault: false,
     isLaboratoryTestReport: true,
+    isPeriodicReviewDocument: true,
+    validityMonths: 24,
     applicableAtecoPrefixes: ["41.", "42.", "43.", "68.", "38.", "39.", "45.2", "25.", "16.", "10."],
     minimumContents: [
       {
@@ -920,6 +1021,8 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.Lgs. 152/2006, art. 190 e D.M. 59/2023 (RENTRI)",
     description: "Tracciamento della produzione e smaltimento rifiuti speciali pericolosi e non pericolosi (oli esausti, batterie, filtri, imballaggi).",
     isRequiredDefault: true,
+    isPeriodicReviewDocument: true,
+    validityMonths: 12,
     applicableAtecoPrefixes: [
       "45.2", "25.", "28.", "16.", "31.", "10.", "11.", "13.", "20.", "22.", "23.", "24.", "38.", "39.", "41.", "42.", "43.", "47.30", "86.", "96.01", "96.02"
     ],
@@ -1034,10 +1137,37 @@ export function findCatalogDefinition(docName: string): NormativeDocumentDefinit
       (def.id === "haccp-manuale" && lower.includes("haccp")) ||
       (def.id === "acque-psa" && (lower.includes("acque") || lower.includes("legionell"))) ||
       (def.id === "env-rapporto-emissioni-fumi" && (lower.includes("emission") || lower.includes("camini"))) ||
-      (def.id === "env-rapporto-scarichi-idrici" && lower.includes("scarich")) ||
+      (def.id === "env-rapporto-scarichi-idrici" && lower.includes("scarich") && lower.includes("rapporto")) ||
+      (def.id === "env-autorizzazione-scarichi" && lower.includes("scaric") && (lower.includes("autorizz") || lower.includes("titolo"))) ||
       (def.id === "env-rapporto-terre-scavo" && lower.includes("terre da scavo"))
     );
   });
+}
+
+/**
+ * Determina se un documento ha una scadenza legale perentoria, un riesame periodico obbligatorio,
+ * o se è un atto permanente / rapporto di prova senza scadenza.
+ */
+export function getDocumentExpiryType(
+  def?: NormativeDocumentDefinition,
+): "statutory" | "periodic_review" | "permanent" {
+  if (!def) return "permanent";
+  if (def.hasStatutoryExpiry) return "statutory";
+  if (def.isPeriodicReviewDocument) return "periodic_review";
+  return "permanent";
+}
+
+/**
+ * Formatta in italiano la durata di validità di un documento (es. "5 anni (60 mesi)", "12 mesi")
+ */
+export function formatDocumentValidity(target?: NormativeDocumentDefinition | number): string {
+  const months = typeof target === "number" ? target : target?.validityMonths;
+  if (!months) return "Nessuna scadenza";
+  if (months % 12 === 0) {
+    const years = months / 12;
+    return years === 1 ? "1 anno (12 mesi)" : `${years} anni (${months} mesi)`;
+  }
+  return `${months} mesi`;
 }
 
 /**

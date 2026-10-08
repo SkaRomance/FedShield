@@ -98,6 +98,15 @@ export default function ChecklistPage({
   const [answers, setAnswers] = useState<Record<string, LocalAnswer>>({});
   const [documents, setDocuments] = useState<InspectionDocumentRequirement[]>([]);
   const [summary, setSummary] = useState<InspectionSummary | null>(null);
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
+  const [lastAutoSavedAt, setLastAutoSavedAt] = useState<string | null>(null);
+  const lastLoadedInspectionIdRef = useRef<string | null>(null);
+  const lastSavedDocumentsJsonRef = useRef<string>("");
+  const documentsRef = useRef<InspectionDocumentRequirement[]>(documents);
+  documentsRef.current = documents;
+  const answersRef = useRef<Record<string, LocalAnswer>>(answers);
+  answersRef.current = answers;
+  const isChangingStepRef = useRef(false);
 
   const [newCompanyName, setNewCompanyName] = useState("");
   const [newCompanyVat, setNewCompanyVat] = useState("");
@@ -206,6 +215,10 @@ export default function ChecklistPage({
   const effectiveRetailScopes = useMemo(
     () => (user.role === "admin" ? [] : newCompanyRetailScopes),
     [user.role, newCompanyRetailScopes],
+  );
+  const effectiveRetailScopesKey = useMemo(
+    () => effectiveRetailScopes.slice().sort().join(","),
+    [effectiveRetailScopes],
   );
 
   const generalProgress = useMemo(() => {
@@ -515,28 +528,78 @@ export default function ChecklistPage({
     loadChecklistTemplates().catch((error) => {
       setMessage(`Errore caricamento checklist: ${error instanceof Error ? error.message : "errore"}`);
     });
-  }, [token, companyId, effectiveChecklistAteco, effectiveChecklistMode, effectiveRetailScopes, selectedInspection?.answers]);
+  }, [token, companyId, effectiveChecklistAteco, effectiveChecklistMode, effectiveRetailScopesKey, selectedInspection?.answers]);
 
   useEffect(() => {
     async function loadDocumentsAndSummary() {
       if (!selectedInspectionId) {
+        lastLoadedInspectionIdRef.current = null;
         setDocuments([]);
         setSummary(null);
         return;
       }
 
+      // Se l'ispezione è già stata caricata e abbiamo documenti nello stato, non sovrascrivere!
+      if (lastLoadedInspectionIdRef.current === selectedInspectionId && documentsRef.current.length > 0) {
+        return;
+      }
+
+      lastLoadedInspectionIdRef.current = selectedInspectionId;
       const [requirements, nextSummary] = await Promise.all([
         fetchInspectionDocumentRequirements(token, selectedInspectionId, effectiveRetailScopes),
         fetchInspectionSummary(token, selectedInspectionId),
       ]);
       setDocuments(requirements);
+      lastSavedDocumentsJsonRef.current = JSON.stringify(requirements);
       setSummary(nextSummary);
     }
 
     loadDocumentsAndSummary().catch((error) => {
+      lastLoadedInspectionIdRef.current = null;
       setMessage(`Errore caricamento dettaglio sopralluogo: ${error instanceof Error ? error.message : "errore"}`);
     });
-  }, [token, selectedInspectionId, effectiveRetailScopes]);
+  }, [token, selectedInspectionId, effectiveRetailScopesKey]);
+
+  // Auto-salvataggio continuo con debounce (600ms) dei documenti su SQLite
+  useEffect(() => {
+    if (!selectedInspectionId || documents.length === 0 || isInspectionValidated) {
+      return;
+    }
+
+    const serializedDocs = JSON.stringify(documents);
+    if (serializedDocs === lastSavedDocumentsJsonRef.current) {
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        setIsAutoSaving(true);
+        await upsertInspectionDocuments(token, selectedInspectionId, documents);
+        lastSavedDocumentsJsonRef.current = serializedDocs;
+        const now = new Date();
+        const itTime = now.toLocaleTimeString("it-IT", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+        setLastAutoSavedAt(itTime);
+        queueSyncEvent({
+          eventType: "inspection.documents.saved",
+          entityType: "inspection",
+          entityId: selectedInspectionId,
+          payload: { documentsCount: documents.length },
+        });
+      } catch (err) {
+        console.error("Errore salvataggio automatico documenti:", err);
+      } finally {
+        setIsAutoSaving(false);
+      }
+    }, 600);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [documents, selectedInspectionId, token, isInspectionValidated]);
 
   function updateAnswer(itemId: string, partial: Partial<LocalAnswer>) {
     setAnswers((current) => ({
@@ -924,12 +987,53 @@ export default function ChecklistPage({
   async function saveDocuments() {
     if (!selectedInspectionId || documents.length === 0) return;
     await upsertInspectionDocuments(token, selectedInspectionId, documents);
+    lastSavedDocumentsJsonRef.current = JSON.stringify(documents);
+    const now = new Date();
+    const itTime = now.toLocaleTimeString("it-IT", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+    setLastAutoSavedAt(itTime);
     queueSyncEvent({
       eventType: "inspection.documents.saved",
       entityType: "inspection",
       entityId: selectedInspectionId,
       payload: { documentsCount: documents.length },
     });
+  }
+
+  async function handleStepChange(nextStep: number) {
+    if (nextStep === step || isChangingStepRef.current) return;
+    isChangingStepRef.current = true;
+    try {
+      if (selectedInspectionId && !isInspectionValidated) {
+        try {
+          setIsAutoSaving(true);
+          const saves: Promise<unknown>[] = [];
+          if (documents.length > 0) {
+            saves.push(saveDocuments());
+          }
+          if (Object.keys(answers).length > 0) {
+            saves.push(saveAnswers());
+          }
+          if (saves.length > 0) {
+            await Promise.all(saves);
+          }
+          if (nextStep === 7) {
+            const refreshedSummary = await fetchInspectionSummary(token, selectedInspectionId);
+            setSummary(refreshedSummary);
+          }
+        } catch (error) {
+          console.error("Errore salvataggio al cambio step:", error);
+        } finally {
+          setIsAutoSaving(false);
+        }
+      }
+      setStep(nextStep);
+    } finally {
+      isChangingStepRef.current = false;
+    }
   }
 
   async function saveAnswers() {
@@ -1236,13 +1340,41 @@ export default function ChecklistPage({
 
   return (
     <section className="panel checklist-panel">
-      <div className="panel-header">
-        <h2>Sopralluogo guidato</h2>
-        {selectedInspection ? (
-          <span className="template-hint" style={{ margin: 0 }}>
-            {selectedInspection.company?.name ?? "Azienda"} · svolto il{" "}
-            {formattaDataOra(selectedInspection.happenedAt)}
-          </span>
+      <div className="panel-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+        <div>
+          <h2>Sopralluogo guidato</h2>
+          {selectedInspection ? (
+            <span className="template-hint" style={{ margin: 0 }}>
+              {selectedInspection.company?.name ?? "Azienda"} · svolto il{" "}
+              {formattaDataOra(selectedInspection.happenedAt)}
+            </span>
+          ) : null}
+        </div>
+        {selectedInspectionId ? (
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              fontSize: "0.85rem",
+              padding: "4px 10px",
+              borderRadius: "6px",
+              backgroundColor: isAutoSaving ? "#fef3c7" : lastAutoSavedAt ? "#f0fdf4" : "transparent",
+              border: isAutoSaving ? "1px solid #fde68a" : lastAutoSavedAt ? "1px solid #bbf7d0" : "1px solid transparent",
+              transition: "all 0.2s ease",
+            }}
+          >
+            {isAutoSaving ? (
+              <span style={{ color: "#b45309", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <span className="autosave-spinner" />
+                Salvataggio in corso...
+              </span>
+            ) : lastAutoSavedAt ? (
+              <span style={{ color: "#15803d", fontWeight: 500 }}>
+                Salvato alle {lastAutoSavedAt} ✓
+              </span>
+            ) : null}
+          </div>
         ) : null}
       </div>
 
@@ -1261,7 +1393,7 @@ export default function ChecklistPage({
               }
               onClick={() => {
                 if (isDisabled) return;
-                setStep(index);
+                void handleStepChange(index);
               }}
             >
               {label}
@@ -1342,6 +1474,8 @@ export default function ChecklistPage({
           isInspectionValidated={!!isInspectionValidated}
           atecoCode={effectiveChecklistAteco}
           checklistMode={effectiveChecklistMode}
+          isAutoSaving={isAutoSaving}
+          lastAutoSavedAt={lastAutoSavedAt}
         />
       )}
 
@@ -1422,15 +1556,13 @@ export default function ChecklistPage({
       <div className="footer-actions" style={{ justifyContent: "flex-end", flexWrap: "wrap" }}>
         {message ? <span className="status-message" style={{ marginRight: "auto" }}>{message}</span> : null}
         <button
-          onClick={() =>
-            setStep((current) => {
-              let prev = Math.max(0, current - 1);
-              if (prev === 6 && isHealthSurveillanceDisabled) {
-                prev = 5;
-              }
-              return prev;
-            })
-          }
+          onClick={() => {
+            let prev = Math.max(0, step - 1);
+            if (prev === 6 && isHealthSurveillanceDisabled) {
+              prev = 5;
+            }
+            void handleStepChange(prev);
+          }}
           disabled={step === 0}
         >
           Indietro
@@ -1439,15 +1571,13 @@ export default function ChecklistPage({
             qui Avanti resta neutro per non avere due pulsanti in arancio. */}
         <button
           className={step === 0 ? "secondary-btn" : "btn-primary"}
-          onClick={() =>
-            setStep((current) => {
-              let next = Math.min(STEPS.length - 1, current + 1);
-              if (next === 6 && isHealthSurveillanceDisabled) {
-                next = 7;
-              }
-              return next;
-            })
-          }
+          onClick={() => {
+            let next = Math.min(STEPS.length - 1, step + 1);
+            if (next === 6 && isHealthSurveillanceDisabled) {
+              next = 7;
+            }
+            void handleStepChange(next);
+          }}
           disabled={step === STEPS.length - 1}
         >
           Avanti

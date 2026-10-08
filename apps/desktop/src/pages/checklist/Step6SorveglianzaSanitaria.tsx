@@ -27,6 +27,7 @@ import {
   SPECIAL_PROTECTIONS_CATALOG,
 } from "./normativeHealthCatalog";
 import { parseDocumentExtraMeta, serializeDocumentExtraMeta } from "./normativeDocumentCatalog";
+import { addMonthsToYmd } from "../../lib/deadlinesEngine";
 
 interface Step6SorveglianzaSanitariaProps {
   token?: string;
@@ -130,18 +131,47 @@ export default function Step6SorveglianzaSanitaria({
   const [appealStatus, setAppealStatus] = useState<FitnessAppealRecord["appealStatus"]>("submitted");
   const [appealNotes, setAppealNotes] = useState("");
 
+  const todayYmd = useMemo(() => new Date().toISOString().split("T")[0], []);
+  const fitnessStorageKey = `fedshield_fitness_records_${companyId || company?.id || "current"}`;
+
   // Stato idoneità per singolo dipendente
   const [employeeFitnessState, setEmployeeFitnessState] = useState<
     Record<
       string,
       {
         examDate?: string;
+        periodicityMonths?: number;
         expiryDate?: string;
         status?: "idoneo" | "idoneo_parziale" | "inidoneo_temporaneo" | "inidoneo_permanente" | "da_visitare";
         notes?: string;
       }
     >
-  >({});
+  >(() => {
+    try {
+      const saved = localStorage.getItem(fitnessStorageKey);
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // ignore
+    }
+    return {};
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(fitnessStorageKey, JSON.stringify(employeeFitnessState));
+    } catch {
+      // ignore
+    }
+  }, [employeeFitnessState, fitnessStorageKey]);
+
+  // Conteggio lavoratori con idoneità scaduta
+  const expiredWorkersCount = useMemo(() => {
+    return internalEmployees.filter((emp) => {
+      const state = employeeFitnessState[emp.id];
+      if (!state || !state.expiryDate) return false;
+      return state.expiryDate < todayYmd && state.status !== "da_visitare";
+    }).length;
+  }, [internalEmployees, employeeFitnessState, todayYmd]);
 
   // Toggle singola sezione accordion
   function toggleSection(key: keyof typeof openSections) {
@@ -176,10 +206,22 @@ export default function Step6SorveglianzaSanitaria({
       const oldDoc = existingIndex >= 0 ? prev[existingIndex] : undefined;
       const currentMeta = parseDocumentExtraMeta(oldDoc?.note);
 
+      const effectiveIssue = issueDate !== undefined ? issueDate : currentMeta.issueDate;
+      let effectiveExpiry = expiryDate !== undefined ? expiryDate : currentMeta.expiryDate;
+
+      // Logica normativa scadenze:
+      // doc-hlt-01 (Nomina MC) e doc-hlt-06 (Custodia cartelle) sono adempimenti formali permanenti senza scadenza
+      if (def.id === "doc-hlt-01" || def.id === "doc-hlt-06") {
+        effectiveExpiry = undefined;
+      } else if ((def.id === "doc-hlt-02" || def.id === "doc-hlt-04") && effectiveIssue && expiryDate === undefined) {
+        // Riesame annuale automatico (+12 mesi)
+        effectiveExpiry = addMonthsToYmd(effectiveIssue, 12);
+      }
+
       const nextMeta = {
         ...currentMeta,
-        issueDate: issueDate !== undefined ? issueDate : currentMeta.issueDate,
-        expiryDate: expiryDate !== undefined ? expiryDate : currentMeta.expiryDate,
+        issueDate: effectiveIssue,
+        expiryDate: effectiveExpiry,
         subStatus: status,
       };
 
@@ -339,6 +381,37 @@ export default function Step6SorveglianzaSanitaria({
               ⚠️ Minori &lt; 18 anni ({protectedDetection.minorWorkerNames.length})
             </div>
           )}
+
+          {/* Badge Idoneità Sanitarie Lavoratori */}
+          {expiredWorkersCount > 0 ? (
+            <div
+              style={{
+                padding: "6px 12px",
+                borderRadius: 6,
+                background: "#fee2e2",
+                border: "1px solid #ef4444",
+                color: "#991b1b",
+                fontWeight: 700,
+                fontSize: "0.85rem",
+              }}
+            >
+              🚨 {expiredWorkersCount} Idoneità Scadute
+            </div>
+          ) : (
+            <div
+              style={{
+                padding: "6px 12px",
+                borderRadius: 6,
+                background: "#dcfce7",
+                border: "1px solid #86efac",
+                color: "#166534",
+                fontWeight: 600,
+                fontSize: "0.85rem",
+              }}
+            >
+              ✅ Idoneità Regolari
+            </div>
+          )}
         </div>
       </div>
 
@@ -468,31 +541,83 @@ export default function Step6SorveglianzaSanitaria({
                           <option value="not_applicable">⚪ Non applicabile</option>
                         </select>
 
-                        {/* Date Rilascio / Scadenza */}
-                        <div style={{ display: "flex", gap: 6, fontSize: "0.75rem" }}>
-                          <input
-                            type="date"
-                            title="Data Rilascio / Stipula"
-                            value={meta.issueDate || ""}
-                            disabled={isInspectionValidated}
-                            onChange={(e) =>
-                              handleUpdateHealthDocStatus(def, currentStatus, e.target.value, meta.expiryDate)
-                            }
-                            style={{ padding: "3px 4px", fontSize: "0.75rem", border: "1px solid #cbd5e1", borderRadius: 4, width: "50%" }}
-                          />
-                          <input
-                            type="date"
-                            title="Data Scadenza / Prossimo Rinnovo"
-                            value={meta.expiryDate || ""}
-                            disabled={isInspectionValidated}
-                            onChange={(e) =>
-                              handleUpdateHealthDocStatus(def, currentStatus, meta.issueDate, e.target.value)
-                            }
-                            style={{ padding: "3px 4px", fontSize: "0.75rem", border: "1px solid #cbd5e1", borderRadius: 4, width: "50%" }}
-                          />
-                        </div>
+                        {/* Date Rilascio / Scadenza / Conformità Formale */}
+                        {def.id === "doc-hlt-01" || def.id === "doc-hlt-06" ? (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                            <input
+                              type="date"
+                              title="Data Nomina / Verbale"
+                              value={meta.issueDate || ""}
+                              disabled={isInspectionValidated}
+                              onChange={(e) =>
+                                handleUpdateHealthDocStatus(def, currentStatus, e.target.value, undefined)
+                              }
+                              style={{ padding: "3px 4px", fontSize: "0.75rem", border: "1px solid #cbd5e1", borderRadius: 4, width: "100%" }}
+                            />
+                            <span style={{ fontSize: "10px", color: "#166534", backgroundColor: "#dcfce7", padding: "1px 5px", borderRadius: 3, fontWeight: 600 }}>
+                              🛡️ Conformità formale permanente (senza scadenza)
+                            </span>
+                          </div>
+                        ) : (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                            <div style={{ display: "flex", gap: 6, fontSize: "0.75rem" }}>
+                              <input
+                                type="date"
+                                title="Data Rilascio / Stipula / Riesame"
+                                value={meta.issueDate || ""}
+                                disabled={isInspectionValidated}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  const exp = (def.id === "doc-hlt-02" || def.id === "doc-hlt-04")
+                                    ? (val ? addMonthsToYmd(val, 12) : meta.expiryDate)
+                                    : meta.expiryDate;
+                                  handleUpdateHealthDocStatus(def, currentStatus, val, exp);
+                                }}
+                                style={{ padding: "3px 4px", fontSize: "0.75rem", border: "1px solid #cbd5e1", borderRadius: 4, width: "50%" }}
+                              />
+                              <input
+                                type="date"
+                                title={def.id === "doc-hlt-02" ? "Data Scadenza (Riesame Annuale +12m)" : "Data Scadenza / Prossimo Rinnovo"}
+                                value={meta.expiryDate || ""}
+                                disabled={isInspectionValidated}
+                                onChange={(e) =>
+                                  handleUpdateHealthDocStatus(def, currentStatus, meta.issueDate, e.target.value)
+                                }
+                                style={{
+                                  padding: "3px 4px",
+                                  fontSize: "0.75rem",
+                                  border: meta.expiryDate && meta.expiryDate < todayYmd ? "1px solid #ef4444" : "1px solid #cbd5e1",
+                                  backgroundColor: meta.expiryDate && meta.expiryDate < todayYmd ? "#fef2f2" : "#fff",
+                                  color: meta.expiryDate && meta.expiryDate < todayYmd ? "#dc2626" : undefined,
+                                  fontWeight: meta.expiryDate && meta.expiryDate < todayYmd ? 600 : undefined,
+                                  borderRadius: 4,
+                                  width: "50%",
+                                }}
+                              />
+                            </div>
+                            {def.id === "doc-hlt-02" && (
+                              <span style={{ fontSize: "10px", color: "#475569" }}>
+                                Riesame annuale automatico (+12 mesi)
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
+
+                    {/* Banner Sanzionabile Protocollo Sanitario Scaduto */}
+                    {def.id === "doc-hlt-02" && meta.expiryDate && meta.expiryDate < todayYmd && (
+                      <div style={{ marginTop: 8, padding: "6px 10px", borderRadius: 6, backgroundColor: "#fee2e2", border: "1px solid #f87171", color: "#991b1b", fontSize: "11px", fontWeight: 700 }}>
+                        🚨 NON CONFORMITÀ SANZIONABILE: Protocollo Sanitario scaduto per mancato riesame annuale (art. 25 c. 1 lett. b / art. 58 c. 1 lett. c D.Lgs. 81/08: arresto fino a 2 mesi o ammenda da 460,70 € a 1.842,78 €)
+                      </div>
+                    )}
+
+                    {/* Banner Sanzionabile Sopralluogo MC Scaduto */}
+                    {def.id === "doc-hlt-04" && meta.expiryDate && meta.expiryDate < todayYmd && (
+                      <div style={{ marginTop: 8, padding: "6px 10px", borderRadius: 6, backgroundColor: "#fee2e2", border: "1px solid #f87171", color: "#991b1b", fontSize: "11px", fontWeight: 700 }}>
+                        🚨 NON CONFORMITÀ SANZIONABILE: Sopralluogo annuale dei luoghi di lavoro scaduto (art. 25 c. 1 lett. l / art. 58 c. 1 lett. a D.Lgs. 81/08: arresto fino a 3 mesi o ammenda da 491,41 € a 1.965,63 €)
+                      </div>
+                    )}
 
                     {/* Espansione Contenuti Minimi */}
                     <div style={{ marginTop: 8 }}>
@@ -844,6 +969,13 @@ export default function Step6SorveglianzaSanitaria({
 
             {/* Tabella Monitoraggio Idoneità Lavoratori */}
             <h4 style={{ margin: "0 0 8px 0", fontSize: "0.95rem" }}>Registro Idoneità Lavoratori</h4>
+
+            {expiredWorkersCount > 0 && (
+              <div style={{ marginBottom: 12, padding: "10px 14px", borderRadius: 8, backgroundColor: "#fee2e2", border: "1px solid #ef4444", color: "#991b1b", fontSize: "0.85rem", fontWeight: 700 }}>
+                🚨 ATTENZIONE: Rilevate {expiredWorkersCount} idoneità sanitarie scadute! L&apos;adibizione di lavoratori a mansioni senza idoneità in corso di validità costituisce reato contravvenzionale sanzionato con ammenda da 1.228,52 € a 5.528,35 € (art. 18 c. 1 lett. c e art. 55 c. 5 lett. e D.Lgs. 81/08).
+              </div>
+            )}
+
             {internalEmployees.length === 0 ? (
               <p style={{ fontSize: "0.85rem", color: "#64748b" }}>
                 Nessun dipendente registrato in anagrafica aziendale. Censire i lavoratori nello Step Formazione o Anagrafica.
@@ -856,19 +988,33 @@ export default function Step6SorveglianzaSanitaria({
                       <th style={{ padding: "8px 10px", borderBottom: "1px solid #cbd5e1" }}>Lavoratore</th>
                       <th style={{ padding: "8px 10px", borderBottom: "1px solid #cbd5e1" }}>Mansione</th>
                       <th style={{ padding: "8px 10px", borderBottom: "1px solid #cbd5e1" }}>Data Ultima Visita</th>
+                      <th style={{ padding: "8px 10px", borderBottom: "1px solid #cbd5e1" }}>Periodicità Visita</th>
                       <th style={{ padding: "8px 10px", borderBottom: "1px solid #cbd5e1" }}>Scadenza Idoneità</th>
                       <th style={{ padding: "8px 10px", borderBottom: "1px solid #cbd5e1" }}>Giudizio Rilasciato</th>
                     </tr>
                   </thead>
                   <tbody>
                     {internalEmployees.map((emp) => {
-                      const empState = employeeFitnessState[emp.id] || { status: "idoneo" };
+                      const empState = employeeFitnessState[emp.id] || { status: "idoneo", periodicityMonths: 12 };
+                      const periodicity = empState.periodicityMonths || 12;
+                      const isExpired = Boolean(empState.expiryDate && empState.expiryDate < todayYmd && empState.status !== "da_visitare");
 
                       return (
-                        <tr key={emp.id} style={{ borderBottom: "1px solid #e2e8f0" }}>
+                        <tr
+                          key={emp.id}
+                          style={{
+                            borderBottom: "1px solid #e2e8f0",
+                            backgroundColor: isExpired ? "#fef2f2" : undefined,
+                          }}
+                        >
                           <td style={{ padding: "8px 10px", fontWeight: 500 }}>
-                            {emp.firstName} {emp.lastName}
+                            <div>{emp.firstName} {emp.lastName}</div>
                             {emp.fiscalCode && <div style={{ fontSize: "0.75rem", color: "#64748b" }}>{emp.fiscalCode}</div>}
+                            {isExpired && (
+                              <div style={{ marginTop: 4, fontSize: "0.75rem", color: "#dc2626", fontWeight: 700 }}>
+                                🚨 NC SANZIONABILE: Idoneità scaduta ex art. 18 c. 1 lett. c D.Lgs. 81/08 (ammenda art. 55 c. 5 lett. e: da 1.228 € a 5.528 €)
+                              </div>
+                            )}
                           </td>
                           <td style={{ padding: "8px 10px" }}>{emp.role || emp.department || "Dipendente"}</td>
                           <td style={{ padding: "8px 10px" }}>
@@ -876,14 +1022,50 @@ export default function Step6SorveglianzaSanitaria({
                               type="date"
                               value={empState.examDate || ""}
                               disabled={isInspectionValidated}
-                              onChange={(e) =>
-                                setEmployeeFitnessState((prev) => ({
-                                  ...prev,
-                                  [emp.id]: { ...prev[emp.id], examDate: e.target.value },
-                                }))
-                              }
+                              onChange={(e) => {
+                                const examVal = e.target.value;
+                                setEmployeeFitnessState((prev) => {
+                                  const cur = prev[emp.id] || { status: "idoneo", periodicityMonths: 12 };
+                                  const p = cur.periodicityMonths || 12;
+                                  const computedExp = examVal ? addMonthsToYmd(examVal, p) : cur.expiryDate;
+                                  return {
+                                    ...prev,
+                                    [emp.id]: {
+                                      ...cur,
+                                      examDate: examVal,
+                                      expiryDate: computedExp,
+                                    },
+                                  };
+                                });
+                              }}
                               style={{ padding: "4px", fontSize: "0.8rem", border: "1px solid #cbd5e1", borderRadius: 4 }}
                             />
+                          </td>
+                          <td style={{ padding: "8px 10px" }}>
+                            <select
+                              value={periodicity}
+                              disabled={isInspectionValidated}
+                              onChange={(e) => {
+                                const p = Number(e.target.value);
+                                setEmployeeFitnessState((prev) => {
+                                  const cur = prev[emp.id] || { status: "idoneo" };
+                                  const computedExp = cur.examDate ? addMonthsToYmd(cur.examDate, p) : cur.expiryDate;
+                                  return {
+                                    ...prev,
+                                    [emp.id]: {
+                                      ...cur,
+                                      periodicityMonths: p,
+                                      expiryDate: computedExp,
+                                    },
+                                  };
+                                });
+                              }}
+                              style={{ padding: "4px 6px", fontSize: "0.8rem", borderRadius: 4, border: "1px solid #cbd5e1" }}
+                            >
+                              <option value={12}>12 Mesi (Standard - Rischi generici/chimico/MMC)</option>
+                              <option value={24}>24 Mesi (Biennale - VDT &gt; 50 anni / con prescrizioni)</option>
+                              <option value={60}>60 Mesi (Quinquennale - VDT &lt; 50 anni)</option>
+                            </select>
                           </td>
                           <td style={{ padding: "8px 10px" }}>
                             <input
@@ -896,7 +1078,15 @@ export default function Step6SorveglianzaSanitaria({
                                   [emp.id]: { ...prev[emp.id], expiryDate: e.target.value },
                                 }))
                               }
-                              style={{ padding: "4px", fontSize: "0.8rem", border: "1px solid #cbd5e1", borderRadius: 4 }}
+                              style={{
+                                padding: "4px",
+                                fontSize: "0.8rem",
+                                border: isExpired ? "1px solid #ef4444" : "1px solid #cbd5e1",
+                                backgroundColor: isExpired ? "#fee2e2" : "#fff",
+                                color: isExpired ? "#991b1b" : undefined,
+                                fontWeight: isExpired ? 700 : undefined,
+                                borderRadius: 4,
+                              }}
                             />
                           </td>
                           <td style={{ padding: "8px 10px" }}>
