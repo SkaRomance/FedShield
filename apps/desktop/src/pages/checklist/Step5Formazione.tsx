@@ -83,7 +83,15 @@ export default function Step5Formazione({ token, companyId, companies, atecoCode
 
   // Identifica l'elenco dei requisiti formativi specifici richiesti dalle macchine censite
   const equipmentTrainingRequirements = useMemo(() => {
-    const map = new Map<string, { requirement: MachineTrainingRequirementDef; machineNames: string[] }>();
+    const map = new Map<
+      string,
+      {
+        requirement: MachineTrainingRequirementDef;
+        machineNames: string[];
+        authorizedWorkerIds: Set<string>;
+        authorizedCustomNames: Set<string>;
+      }
+    >();
 
     for (const m of machines) {
       const meta = parseMachineMetadata(m.note);
@@ -118,13 +126,26 @@ export default function Step5Formazione({ token, companyId, companies, atecoCode
         };
 
       if (!map.has(def.courseCode)) {
-        map.set(def.courseCode, { requirement: def, machineNames: [m.name] });
+        map.set(def.courseCode, {
+          requirement: def,
+          machineNames: [m.name],
+          authorizedWorkerIds: new Set(meta.authorizedWorkerIds || []),
+          authorizedCustomNames: new Set(meta.authorizedWorkerNames || []),
+        });
       } else {
-        map.get(def.courseCode)!.machineNames.push(m.name);
+        const existing = map.get(def.courseCode)!;
+        existing.machineNames.push(m.name);
+        (meta.authorizedWorkerIds || []).forEach((id) => existing.authorizedWorkerIds.add(id));
+        (meta.authorizedCustomNames || []).forEach((name) => existing.authorizedCustomNames.add(name));
       }
     }
 
-    return Array.from(map.values());
+    return Array.from(map.values()).map((item) => ({
+      requirement: item.requirement,
+      machineNames: item.machineNames,
+      authorizedWorkerIds: Array.from(item.authorizedWorkerIds),
+      authorizedCustomNames: Array.from(item.authorizedCustomNames),
+    }));
   }, [machines]);
 
   // Seleziona la tab expiry di default solo se non ci sono macchine con corsi specifici
@@ -314,7 +335,7 @@ export default function Step5Formazione({ token, companyId, companies, atecoCode
           </div>
 
           <div style={{ display: "grid", gap: 16 }}>
-            {equipmentTrainingRequirements.map(({ requirement: req, machineNames }) => {
+            {equipmentTrainingRequirements.map(({ requirement: req, machineNames, authorizedWorkerIds, authorizedCustomNames }) => {
               // Verifica se il corso esiste già nel catalogo generale
               const matchedCourseInCatalog = courses.find(
                 (c) =>
@@ -330,6 +351,10 @@ export default function Step5Formazione({ token, companyId, companies, atecoCode
                 : [];
 
               const missingCount = Math.max(0, employees.length - certifiedEmployees.length);
+
+              // Lavoratori specificamente designati per le macchine associate a questo corso
+              const designatedEmployees = employees.filter((emp) => authorizedWorkerIds.includes(emp.id));
+              const designatedCustomList = authorizedCustomNames || [];
 
               return (
                 <div
@@ -436,7 +461,7 @@ export default function Step5Formazione({ token, companyId, companies, atecoCode
                     </div>
                   </div>
 
-                  {/* Riepilogo Abilitazione Dipendenti */}
+                  {/* Riepilogo Abilitazione Generale Dipendenti */}
                   <div
                     style={{
                       display: "flex",
@@ -453,7 +478,7 @@ export default function Step5Formazione({ token, companyId, companies, atecoCode
                   >
                     <div style={{ display: "flex", gap: 16, alignItems: "center", fontSize: "13px" }}>
                       <div>
-                        Operatori abilitati in regola:{" "}
+                        Operatori aziendali abilitati:{" "}
                         <strong style={{ color: "#16a34a" }}>{certifiedEmployees.length}</strong>
                       </div>
                       <div>
@@ -468,6 +493,7 @@ export default function Step5Formazione({ token, companyId, companies, atecoCode
                       type="button"
                       onClick={() => {
                         setAssignModalReq(req);
+                        setAssignEmployeeId("");
                         setAssignHours(req.minHours);
                       }}
                       style={{
@@ -484,6 +510,180 @@ export default function Step5Formazione({ token, companyId, companies, atecoCode
                       ➕ Assegna Patentino a Dipendente
                     </button>
                   </div>
+
+                  {/* SEZIONE: Lavoratori Specificamente Abilitati sulle Macchine nello Step 4 */}
+                  {designatedEmployees.length > 0 || designatedCustomList.length > 0 ? (
+                    <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px dashed #cbd5e1" }}>
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          fontWeight: 700,
+                          color: "#1e293b",
+                          marginBottom: 8,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 6,
+                        }}
+                      >
+                        <span>👥</span>
+                        <span>
+                          Lavoratori Addetti alle Macchine Selezionati nello Step 4 (
+                          {designatedEmployees.length + designatedCustomList.length}):
+                        </span>
+                      </div>
+
+                      <div style={{ display: "grid", gap: 8 }}>
+                        {designatedEmployees.map((emp) => {
+                          const rec = matchedCourseInCatalog
+                            ? emp.trainingRecords?.find((r) => r.courseId === matchedCourseInCatalog.id)
+                            : undefined;
+                          const isCompliant = rec && (!rec.expiresAt || new Date(rec.expiresAt) > new Date());
+                          const isExpired = rec && rec.expiresAt && new Date(rec.expiresAt) <= new Date();
+                          const isMissing = !rec;
+
+                          return (
+                            <div
+                              key={emp.id}
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                flexWrap: "wrap",
+                                gap: 8,
+                                padding: "8px 12px",
+                                borderRadius: 6,
+                                backgroundColor: isCompliant ? "#f0fdf4" : isExpired ? "#fef2f2" : "#fffbeb",
+                                border: `1px solid ${isCompliant ? "#bbf7d0" : isExpired ? "#fecaca" : "#fde68a"}`,
+                              }}
+                            >
+                              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                                <strong style={{ fontSize: "13px", color: "#0f172a" }}>
+                                  {emp.firstName} {emp.lastName}
+                                </strong>
+                                {emp.jobTitle && (
+                                  <span style={{ fontSize: "11px", color: "#64748b" }}>({emp.jobTitle})</span>
+                                )}
+                                {isCompliant && (
+                                  <span
+                                    style={{
+                                      fontSize: "11px",
+                                      fontWeight: 700,
+                                      color: "#16a34a",
+                                      backgroundColor: "#dcfce7",
+                                      padding: "2px 6px",
+                                      borderRadius: 4,
+                                    }}
+                                  >
+                                    ✅ In Regola{" "}
+                                    {rec?.expiresAt
+                                      ? `(Scad. ${new Date(rec.expiresAt).toLocaleDateString("it-IT")})`
+                                      : ""}
+                                    {rec?.certificateNumber ? ` - N. ${rec.certificateNumber}` : ""}
+                                  </span>
+                                )}
+                                {isExpired && (
+                                  <span
+                                    style={{
+                                      fontSize: "11px",
+                                      fontWeight: 700,
+                                      color: "#dc2626",
+                                      backgroundColor: "#fee2e2",
+                                      padding: "2px 6px",
+                                      borderRadius: 4,
+                                    }}
+                                  >
+                                    🔴 Scaduto il {new Date(rec!.expiresAt!).toLocaleDateString("it-IT")}
+                                  </span>
+                                )}
+                                {isMissing && (
+                                  <span
+                                    style={{
+                                      fontSize: "11px",
+                                      fontWeight: 700,
+                                      color: "#d97706",
+                                      backgroundColor: "#fef3c7",
+                                      padding: "2px 6px",
+                                      borderRadius: 4,
+                                    }}
+                                  >
+                                    ⚠️ Patentino / Attestato Mancante
+                                  </span>
+                                )}
+                              </div>
+
+                              <div>
+                                {!isCompliant && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setAssignModalReq(req);
+                                      setAssignEmployeeId(emp.id);
+                                      setAssignHours(req.minHours);
+                                    }}
+                                    style={{
+                                      padding: "4px 10px",
+                                      borderRadius: 5,
+                                      border: "1px solid #d97706",
+                                      backgroundColor: "#fff",
+                                      color: "#b45309",
+                                      fontSize: "11px",
+                                      fontWeight: 700,
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    {isExpired ? "🔄 Registra Rinnovo" : "➕ Assegna Attestato"}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+
+                        {designatedCustomList.map((customName, idx) => (
+                          <div
+                            key={idx}
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              padding: "6px 12px",
+                              borderRadius: 6,
+                              backgroundColor: "#f8fafc",
+                              border: "1px solid #e2e8f0",
+                            }}
+                          >
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "12px", color: "#334155" }}>
+                              <span>👤</span>
+                              <strong>{customName}</strong>
+                              <span style={{ fontSize: "11px", color: "#64748b" }}>
+                                (Operatore esterno/autonomo designato sulla macchina nello Step 4)
+                              </span>
+                            </div>
+                            <span style={{ fontSize: "11px", color: "#0284c7", fontWeight: 600 }}>
+                              Verifica conformità documentale esterna
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        marginTop: 10,
+                        padding: "8px 12px",
+                        backgroundColor: "#f8fafc",
+                        borderRadius: 6,
+                        border: "1px dashed #cbd5e1",
+                        fontSize: "12px",
+                        color: "#64748b",
+                      }}
+                    >
+                      ℹ️ Nessun operatore designato nello Step 4 per:{" "}
+                      <strong style={{ color: "#334155" }}>{machineNames.join(", ")}</strong>. Puoi selezionare i
+                      lavoratori autorizzati direttamente nella scheda di ciascun macchinario nello Step 4 oppure
+                      registrare l'abilitazione con il pulsante "➕ Assegna Patentino".
+                    </div>
+                  )}
                 </div>
               );
             })}

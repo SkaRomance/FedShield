@@ -1358,6 +1358,7 @@ export default function ChecklistPage({
           existingChecklistItems={allItems}
           atecoCode={effectiveChecklistAteco}
           isInspectionValidated={!!isInspectionValidated}
+          inspectionId={selectedInspectionId}
         />
       )}
 

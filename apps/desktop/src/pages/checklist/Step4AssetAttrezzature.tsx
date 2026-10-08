@@ -1,6 +1,6 @@
-// Step 4 "Attrezzature e Macchinari" — Redesign Avanzato con Catalogo ATECO,
-// Dati minimi obbligatori di legge (Costruttore, Modello, Matricola, Marcatura CE, Verifiche INAIL art. 71 c. 11),
-// Libreria requisiti di sicurezza per ciascuna macchina e collegamento con la Formazione Operatori (Accordo Stato-Regioni).
+// Step 4 "Attrezzature e Macchinari" — Redesign Avanzato con Catalogo ATECO & Locali Censiti,
+// Dati minimi obbligatori di legge (Costruttore, Modello, Matricola, Data di Installazione, Marcatura CE, Verifiche INAIL art. 71 c. 11),
+// Scansioni Libretto d'Uso e Scheda Tecnica, Lavoratori Abilitati e collegamento con la Formazione Operatori (Accordo Stato-Regioni).
 
 import { useEffect, useState, useMemo } from "react";
 import {
@@ -16,10 +16,17 @@ import {
   FireExtinguisher,
   FirstAidKit,
   Machine,
+  Employee,
+  fetchEmployees,
 } from "../../api";
 import EquipmentTab from "../assets/EquipmentTab";
 import ExtinguishersTab from "../assets/ExtinguishersTab";
 import FirstAidTab from "../assets/FirstAidTab";
+import {
+  workEnvironmentsStorageKey,
+  getStandardEnvironmentsForAteco,
+  WorkEnvironmentInstance,
+} from "./normativePremisesCatalog";
 import {
   getSectorMachineCatalogForAteco,
   parseMachineMetadata,
@@ -28,6 +35,9 @@ import {
   MachineSafetyCheckDef,
   TRAINING_REQUIREMENTS_LIBRARY,
   MachineFullDetailsMetadata,
+  getSuggestedMachinesForEnvironmentsAndAteco,
+  SuggestedMachineWithEnvironment,
+  MachineDocumentAttachment,
 } from "./normativeMachineCatalog";
 
 export type AssetSubTab = "machines" | "equipment" | "extinguishers" | "firstAid";
@@ -50,6 +60,7 @@ interface Step4AssetAttrezzatureProps {
   existingChecklistItems?: ChecklistItem[];
   atecoCode?: string;
   isInspectionValidated?: boolean;
+  inspectionId?: string;
 }
 
 export default function Step4AssetAttrezzature({
@@ -60,12 +71,14 @@ export default function Step4AssetAttrezzature({
   existingChecklistItems = [],
   atecoCode,
   isInspectionValidated = false,
+  inspectionId = "current",
 }: Step4AssetAttrezzatureProps) {
   const [tab, setTab] = useState<AssetSubTab>("machines");
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [machines, setMachines] = useState<Machine[]>([]);
   const [extinguishers, setExtinguishers] = useState<FireExtinguisher[]>([]);
   const [firstAidKits, setFirstAidKits] = useState<FirstAidKit[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
@@ -82,6 +95,7 @@ export default function Step4AssetAttrezzature({
   const [formModel, setFormModel] = useState("");
   const [formSerialNumber, setFormSerialNumber] = useState("");
   const [formBuildYear, setFormBuildYear] = useState<number | undefined>(new Date().getFullYear() - 2);
+  const [formInstallationDate, setFormInstallationDate] = useState("");
   const [formCeStatus, setFormCeStatus] = useState<"ce_compliant" | "ante_ce_annex_v" | "non_compliant">("ce_compliant");
   const [formManualPresent, setFormManualPresent] = useState<"yes" | "no">("yes");
   const [formMaintenanceLogPresent, setFormMaintenanceLogPresent] = useState<"yes" | "no" | "expired">("yes");
@@ -90,6 +104,12 @@ export default function Step4AssetAttrezzature({
   const [formInailLastCheckDate, setFormInailLastCheckDate] = useState("");
   const [formInailNextCheckDate, setFormInailNextCheckDate] = useState("");
   const [formLocation, setFormLocation] = useState("");
+  const [formEnvironmentName, setFormEnvironmentName] = useState("");
+  const [formAuthorizedWorkerIds, setFormAuthorizedWorkerIds] = useState<string[]>([]);
+  const [formAuthorizedCustomWorkers, setFormAuthorizedCustomWorkers] = useState("");
+  const [formManualDoc, setFormManualDoc] = useState<MachineDocumentAttachment | undefined>(undefined);
+  const [formTechSheetDoc, setFormTechSheetDoc] = useState<MachineDocumentAttachment | undefined>(undefined);
+  const [formCeDeclDoc, setFormCeDeclDoc] = useState<MachineDocumentAttachment | undefined>(undefined);
   const [formSubmitting, setFormSubmitting] = useState(false);
 
   // Modale per aggiungere requisito personalizzato su una specifica macchina
@@ -102,6 +122,27 @@ export default function Step4AssetAttrezzature({
   // Catalogo macchine suggerite per l'ATECO aziendale
   const sectorCatalog = useMemo(() => getSectorMachineCatalogForAteco(atecoCode), [atecoCode]);
 
+  // Ambienti di lavoro registrati nello Step 2 (o standard di fallback)
+  const environments = useMemo(() => {
+    try {
+      const key = workEnvironmentsStorageKey(inspectionId);
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed as WorkEnvironmentInstance[];
+      }
+    } catch {
+      // ignore
+    }
+    return getStandardEnvironmentsForAteco(atecoCode);
+  }, [inspectionId, atecoCode]);
+
+  // Macchine suggerite incrociando sia i locali censiti che il settore ATECO
+  const suggestedMachines = useMemo(
+    () => getSuggestedMachinesForEnvironmentsAndAteco(environments, atecoCode),
+    [environments, atecoCode],
+  );
+
   useEffect(() => {
     if (companyId) void reload();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -112,16 +153,18 @@ export default function Step4AssetAttrezzature({
     setLoading(true);
     setError(null);
     try {
-      const [eq, ma, ex, kits] = await Promise.all([
+      const [eq, ma, ex, kits, emps] = await Promise.all([
         fetchEquipmentPaged(token, { companyId }),
         fetchMachinesPaged(token, { companyId }),
         fetchFireExtinguishersPaged(token, { companyId }),
         fetchFirstAidKitsPaged(token, { companyId }),
+        fetchEmployees(token, { companyId, isActive: true }).catch(() => []),
       ]);
       setEquipment(eq.items);
       setMachines(ma.items);
       setExtinguishers(ex.items);
       setFirstAidKits(kits.items);
+      setEmployees(emps);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Errore nel caricamento dei beni e attrezzature");
     } finally {
@@ -129,9 +172,66 @@ export default function Step4AssetAttrezzature({
     }
   }
 
-  // Apertura form creazione macchina
-  function handleOpenCreate(template?: SectorMachineTemplate) {
+  // Gestione apertura/anteprima documento allegato
+  function handleOpenDocument(doc?: MachineDocumentAttachment) {
+    if (!doc?.dataUrl) return;
+    const isPdf = doc.fileType.includes("pdf");
+    const win = window.open();
+    if (win) {
+      if (isPdf) {
+        win.document.write(
+          `<iframe src="${doc.dataUrl}" frameborder="0" style="border:0; position:fixed; top:0; left:0; width:100%; height:100%;" allowfullscreen></iframe>`
+        );
+      } else {
+        win.document.write(
+          `<html><head><title>${doc.fileName}</title></head><body style="margin:0; background:#0f172a; display:flex; justify-content:center; align-items:center; min-height:100vh;"><img src="${doc.dataUrl}" style="max-width:100%; max-height:100vh; object-fit:contain;" /></body></html>`
+        );
+      }
+    } else {
+      const a = document.createElement("a");
+      a.href = doc.dataUrl;
+      a.download = doc.fileName;
+      a.click();
+    }
+  }
+
+  // Gestione caricamento file scansionato (con limite 5MB)
+  function handleFileUpload(
+    e: React.ChangeEvent<HTMLInputElement>,
+    target: "manual" | "techSheet" | "ceDecl",
+  ) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Il file selezionato supera il limite massimo di 5MB. Seleziona una scansione o un PDF più compresso.");
+      e.target.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const attachment: MachineDocumentAttachment = {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type || (file.name.endsWith(".pdf") ? "application/pdf" : "image/jpeg"),
+        dataUrl: reader.result as string,
+        uploadedAt: new Date().toISOString(),
+      };
+      if (target === "manual") setFormManualDoc(attachment);
+      else if (target === "techSheet") setFormTechSheetDoc(attachment);
+      else if (target === "ceDecl") setFormCeDeclDoc(attachment);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  }
+
+  // Apertura form creazione macchina (opzionalmente con template)
+  function handleOpenCreate(template?: SuggestedMachineWithEnvironment | SectorMachineTemplate) {
     setEditingMachine(null);
+    const tmplWithEnv = template as SuggestedMachineWithEnvironment | undefined;
+    const initialLocation = tmplWithEnv?.targetEnvironmentName || "";
+
     if (template) {
       setFormName(template.name);
       setFormType(template.type);
@@ -139,6 +239,7 @@ export default function Step4AssetAttrezzature({
       setFormModel(template.suggestedModel);
       setFormSerialNumber(`SN-${Math.floor(100000 + Math.random() * 900000)}`);
       setFormBuildYear(new Date().getFullYear() - 3);
+      setFormInstallationDate(new Date(Date.now() - 365 * 86400000).toISOString().split("T")[0]);
       setFormCeStatus("ce_compliant");
       setFormManualPresent("yes");
       setFormMaintenanceLogPresent("yes");
@@ -146,7 +247,13 @@ export default function Step4AssetAttrezzature({
       setFormInailSerial(template.isSubjectToInailCheck ? `INAIL-${Math.floor(10000 + Math.random() * 90000)}` : "");
       setFormInailLastCheckDate(template.isSubjectToInailCheck ? new Date(Date.now() - 180 * 86400000).toISOString().split("T")[0] : "");
       setFormInailNextCheckDate(template.isSubjectToInailCheck ? new Date(Date.now() + 185 * 86400000).toISOString().split("T")[0] : "");
-      setFormLocation("");
+      setFormLocation(initialLocation);
+      setFormEnvironmentName(initialLocation);
+      setFormAuthorizedWorkerIds([]);
+      setFormAuthorizedCustomWorkers("");
+      setFormManualDoc(undefined);
+      setFormTechSheetDoc(undefined);
+      setFormCeDeclDoc(undefined);
     } else {
       setFormName("");
       setFormType("Macchina / Impianto");
@@ -154,6 +261,7 @@ export default function Step4AssetAttrezzature({
       setFormModel("");
       setFormSerialNumber("");
       setFormBuildYear(new Date().getFullYear() - 1);
+      setFormInstallationDate(new Date().toISOString().split("T")[0]);
       setFormCeStatus("ce_compliant");
       setFormManualPresent("yes");
       setFormMaintenanceLogPresent("yes");
@@ -162,6 +270,12 @@ export default function Step4AssetAttrezzature({
       setFormInailLastCheckDate("");
       setFormInailNextCheckDate("");
       setFormLocation("");
+      setFormEnvironmentName("");
+      setFormAuthorizedWorkerIds([]);
+      setFormAuthorizedCustomWorkers("");
+      setFormManualDoc(undefined);
+      setFormTechSheetDoc(undefined);
+      setFormCeDeclDoc(undefined);
     }
     setShowMachineModal(true);
   }
@@ -175,15 +289,22 @@ export default function Step4AssetAttrezzature({
     setFormManufacturer(m.manufacturer || "");
     setFormModel(m.model || "");
     setFormSerialNumber(m.serialNumber || "");
-    setFormLocation(m.location || "");
+    setFormLocation(m.location || meta.environmentName || "");
+    setFormEnvironmentName(meta.environmentName || m.location || "");
     setFormBuildYear(meta.buildYear ?? new Date().getFullYear() - 2);
+    setFormInstallationDate(meta.installationDate || "");
     setFormCeStatus(meta.ceStatus ?? "ce_compliant");
-    setFormManualPresent(meta.manualPresent ?? "yes");
+    setFormManualPresent(meta.manualPresent ?? (meta.manualDocument ? "yes" : "no"));
     setFormMaintenanceLogPresent(meta.maintenanceLogPresent ?? "yes");
     setFormInailCheckRequired(meta.inailCheckRequired ?? false);
     setFormInailSerial(meta.inailSerial || "");
     setFormInailLastCheckDate(meta.inailLastCheckDate || "");
     setFormInailNextCheckDate(meta.inailNextCheckDate || "");
+    setFormAuthorizedWorkerIds(meta.authorizedWorkerIds || []);
+    setFormAuthorizedCustomWorkers((meta.authorizedWorkerNames || []).join(", "));
+    setFormManualDoc(meta.manualDocument);
+    setFormTechSheetDoc(meta.technicalSheetDocument);
+    setFormCeDeclDoc(meta.ceDeclarationDocument);
     setShowMachineModal(true);
   }
 
@@ -219,10 +340,16 @@ export default function Step4AssetAttrezzature({
       // Preserva eventuali requisiti personalizzati già presenti
       const existingMeta = editingMachine ? parseMachineMetadata(editingMachine.note) : {};
 
+      const customNames = formAuthorizedCustomWorkers
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+
       const metadata: MachineFullDetailsMetadata = {
         buildYear: formBuildYear,
+        installationDate: formInstallationDate || undefined,
         ceStatus: formCeStatus,
-        manualPresent: formManualPresent,
+        manualPresent: formManualDoc ? "yes" : formManualPresent,
         maintenanceLogPresent: formMaintenanceLogPresent,
         inailCheckRequired: formInailCheckRequired,
         inailSerial: formInailSerial.trim() || undefined,
@@ -230,6 +357,12 @@ export default function Step4AssetAttrezzature({
         inailNextCheckDate: formInailNextCheckDate || undefined,
         requiredCourseCode: training.courseCode,
         requiredCourseTitle: training.courseTitle,
+        environmentName: formEnvironmentName.trim() || formLocation.trim() || undefined,
+        authorizedWorkerIds: formAuthorizedWorkerIds,
+        authorizedWorkerNames: customNames,
+        manualDocument: formManualDoc,
+        technicalSheetDocument: formTechSheetDoc,
+        ceDeclarationDocument: formCeDeclDoc,
         customRequirements: existingMeta.customRequirements,
       };
 
@@ -241,7 +374,7 @@ export default function Step4AssetAttrezzature({
         manufacturer: formManufacturer.trim() || undefined,
         model: formModel.trim() || undefined,
         serialNumber: formSerialNumber.trim() || undefined,
-        location: formLocation.trim() || undefined,
+        location: formEnvironmentName.trim() || formLocation.trim() || undefined,
         note: serializedNote,
         nextSafetyCheckAt: formInailNextCheckDate ? new Date(formInailNextCheckDate).toISOString() : undefined,
       };
@@ -264,22 +397,27 @@ export default function Step4AssetAttrezzature({
     }
   }
 
-  // Precarica in blocco le macchine tipiche del settore ATECO
+  // Precarica in blocco le macchine tipiche incrociate per locali e settore ATECO
   async function handlePreloadSectorMachines() {
-    if (!window.confirm(`Vuoi precaricare le ${sectorCatalog.machines.length} macchine tipiche del settore "${sectorCatalog.sectorLabel}"?`)) {
+    if (
+      !window.confirm(
+        `Vuoi precaricare le ${suggestedMachines.length} attrezzature consigliate per i tuoi locali censiti e il settore "${sectorCatalog.sectorLabel}"?`
+      )
+    ) {
       return;
     }
 
     setLoading(true);
     setError(null);
     try {
-      for (const t of sectorCatalog.machines) {
+      for (const t of suggestedMachines) {
         // Verifica se esiste già per nome
         const already = machines.some((m) => m.name.toLowerCase() === t.name.toLowerCase());
         if (already) continue;
 
         const meta: MachineFullDetailsMetadata = {
           buildYear: new Date().getFullYear() - 2,
+          installationDate: new Date(Date.now() - 365 * 86400000).toISOString().split("T")[0],
           ceStatus: "ce_compliant",
           manualPresent: "yes",
           maintenanceLogPresent: "yes",
@@ -289,6 +427,7 @@ export default function Step4AssetAttrezzature({
           inailNextCheckDate: t.isSubjectToInailCheck ? new Date(Date.now() + 245 * 86400000).toISOString().split("T")[0] : undefined,
           requiredCourseCode: t.training.courseCode,
           requiredCourseTitle: t.training.courseTitle,
+          environmentName: t.targetEnvironmentName,
         };
 
         await createMachine(token, {
@@ -298,12 +437,13 @@ export default function Step4AssetAttrezzature({
           manufacturer: t.suggestedManufacturer,
           model: t.suggestedModel,
           serialNumber: `SN-${Math.floor(100000 + Math.random() * 900000)}`,
+          location: t.targetEnvironmentName,
           note: serializeMachineMetadata(meta),
           nextSafetyCheckAt: meta.inailNextCheckDate ? new Date(meta.inailNextCheckDate).toISOString() : undefined,
         });
       }
 
-      setActionMessage(`✓ Macchine tipiche del settore ${sectorCatalog.sectorLabel} precaricate con successo!`);
+      setActionMessage(`✓ Attrezzature consigliate per i tuoi locali (${suggestedMachines.length}) precaricate con successo!`);
       await reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Errore durante il precaricamento.");
@@ -612,53 +752,106 @@ export default function Step4AssetAttrezzature({
       {/* ============================================================== */}
       {tab === "machines" && (
         <div>
-          {/* Banner Settore ATECO Rilevato */}
+          {/* Banner Settore ATECO & Ambienti Censiti Rilevati */}
           <div
             style={{
               backgroundColor: "#f0fdf4",
               border: "1px solid #bbf7d0",
               borderRadius: "8px",
-              padding: "12px 16px",
+              padding: "14px 18px",
               marginBottom: 20,
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
               flexWrap: "wrap",
-              gap: 12,
+              gap: 14,
             }}
           >
             <div>
-              <div style={{ fontSize: "12px", color: "#166534", fontWeight: 700, textTransform: "uppercase" }}>
-                SETTORE ATTIVITÀ ATECO RILEVATO
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: "12px", color: "#166534", fontWeight: 700, textTransform: "uppercase" }}>
+                  SETTORE ATECO & AMBIENTI CENSITI
+                </span>
+                <span
+                  style={{
+                    backgroundColor: "#dcfce7",
+                    color: "#15803d",
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    padding: "2px 8px",
+                    borderRadius: 12,
+                  }}
+                >
+                  {suggestedMachines.length} macchine consigliate
+                </span>
               </div>
-              <div style={{ fontSize: "15px", fontWeight: 700, color: "#14532d" }}>
-                {sectorCatalog.sectorLabel} {atecoCode ? `(Codice ATECO ${atecoCode})` : ""}
+              <div style={{ fontSize: "16px", fontWeight: 700, color: "#14532d", marginTop: 2 }}>
+                {sectorCatalog.sectorLabel} {atecoCode ? `(ATECO ${atecoCode})` : ""}
               </div>
+
+              {/* Badges Ambienti di lavoro presenti */}
+              {environments.length > 0 && (
+                <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginTop: 6 }}>
+                  <span style={{ fontSize: "12px", color: "#166534", fontWeight: 600 }}>Locali attivi:</span>
+                  {environments.map((env) => (
+                    <span
+                      key={env.id || env.name}
+                      style={{
+                        backgroundColor: "#fff",
+                        border: "1px solid #86efac",
+                        color: "#166534",
+                        fontSize: "11px",
+                        padding: "2px 8px",
+                        borderRadius: 4,
+                        fontWeight: 600,
+                      }}
+                    >
+                      🏢 {env.name}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Menu Rapido: Scegli dalla libreria macchine tipiche */}
-            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <span style={{ fontSize: "13px", color: "#15803d", fontWeight: 600 }}>
-                Aggiungi tipica dal catalogo:
-              </span>
+            {/* Menu Rapido: Scegli dalla libreria macchine consigliate per i locali */}
+            <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
               <select
                 disabled={isInspectionValidated}
                 onChange={(e) => {
                   const val = e.target.value;
                   if (!val) return;
-                  const tmpl = sectorCatalog.machines.find((m) => m.machineKey === val);
+                  const tmpl = suggestedMachines.find((m) => m.machineKey === val);
                   if (tmpl) handleOpenCreate(tmpl);
                   e.target.value = "";
                 }}
-                style={{ padding: "6px 12px", borderRadius: "6px", border: "1px solid #86efac", fontSize: "13px" }}
+                style={{ padding: "8px 12px", borderRadius: "6px", border: "1px solid #86efac", fontSize: "13px", fontWeight: 600, backgroundColor: "#fff" }}
               >
-                <option value="">— Seleziona macchina tipica —</option>
-                {sectorCatalog.machines.map((tm) => (
-                  <option key={tm.machineKey} value={tm.machineKey}>
-                    {tm.name} ({tm.suggestedManufacturer})
+                <option value="">➕ Scegli macchina consigliata dal catalogo...</option>
+                {suggestedMachines.map((tm, sIdx) => (
+                  <option key={`${tm.machineKey}_${sIdx}`} value={tm.machineKey}>
+                    {tm.targetEnvironmentName ? `[${tm.targetEnvironmentName}] ` : ""}{tm.name} ({tm.suggestedManufacturer})
                   </option>
                 ))}
               </select>
+
+              {!isInspectionValidated && machines.length === 0 && (
+                <button
+                  type="button"
+                  onClick={handlePreloadSectorMachines}
+                  style={{
+                    backgroundColor: "#16a34a",
+                    color: "#fff",
+                    border: "none",
+                    padding: "8px 14px",
+                    borderRadius: 6,
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  ⚡ Precarica Tutte ({suggestedMachines.length})
+                </button>
+              )}
             </div>
           </div>
 
@@ -710,14 +903,24 @@ export default function Step4AssetAttrezzature({
                         >
                           {m.type}
                         </span>
-                        {m.location && (
-                          <span style={{ fontSize: "12px", color: "#64748b" }}>
-                            📍 {m.location}
+                        {(meta.environmentName || m.location) && (
+                          <span
+                            style={{
+                              backgroundColor: "#e0f2fe",
+                              color: "#0369a1",
+                              border: "1px solid #bae6fd",
+                              padding: "2px 8px",
+                              borderRadius: 4,
+                              fontSize: "12px",
+                              fontWeight: 600,
+                            }}
+                          >
+                            📍 {meta.environmentName || m.location}
                           </span>
                         )}
                       </div>
 
-                      {/* Riga Dati Minimi: Costruttore, Modello, Matricola, Anno */}
+                      {/* Riga Dati Minimi: Costruttore, Modello, Matricola, Anno, Data Installazione */}
                       <div
                         style={{
                           display: "flex",
@@ -744,6 +947,11 @@ export default function Step4AssetAttrezzature({
                         <div>
                           <strong>Anno:</strong> {meta.buildYear || "—"}
                         </div>
+                        {meta.installationDate && (
+                          <div>
+                            <strong>Data Installazione:</strong> {meta.installationDate}
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -804,7 +1012,7 @@ export default function Step4AssetAttrezzature({
                     </div>
                   </div>
 
-                  {/* Badge di Stato di Conformità (CE, Manuale, Registro, INAIL) */}
+                  {/* Badge di Stato di Conformità (CE, Manuale, Registro, INAIL, Documenti Scansionati) */}
                   <div
                     style={{
                       display: "flex",
@@ -846,10 +1054,116 @@ export default function Step4AssetAttrezzature({
                         : "❌ Non a Norma (Manca Marcatura CE)"}
                     </span>
 
-                    {/* Libretto Uso e Manutenzione */}
-                    <span style={{ fontSize: "12px", color: meta.manualPresent === "yes" ? "#166534" : "#991b1b" }}>
-                      📖 Libretto d'Uso: <strong>{meta.manualPresent === "yes" ? "Presente" : "Assente"}</strong>
-                    </span>
+                    {/* Libretto Uso e Manutenzione (con supporto scansione allegata) */}
+                    {meta.manualDocument ? (
+                      <span
+                        style={{
+                          backgroundColor: "#f0fdf4",
+                          border: "1px solid #86efac",
+                          color: "#166534",
+                          padding: "3px 8px",
+                          borderRadius: 4,
+                          fontSize: "12px",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 6,
+                        }}
+                      >
+                        📖 Libretto d&apos;Uso: <strong>{meta.manualDocument.fileName}</strong>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenDocument(meta.manualDocument)}
+                          style={{
+                            border: "none",
+                            backgroundColor: "#16a34a",
+                            color: "#fff",
+                            padding: "2px 6px",
+                            borderRadius: 4,
+                            fontSize: "11px",
+                            cursor: "pointer",
+                            fontWeight: 700,
+                          }}
+                          title="Visualizza scansione libretto"
+                        >
+                          👁️ Apri Scansione
+                        </button>
+                      </span>
+                    ) : (
+                      <span style={{ fontSize: "12px", color: meta.manualPresent === "yes" ? "#166534" : "#991b1b" }}>
+                        📖 Libretto d&apos;Uso: <strong>{meta.manualPresent === "yes" ? "Cartaceo presente" : "Assente"}</strong>
+                      </span>
+                    )}
+
+                    {/* Scheda Tecnica del Costruttore Scansionata */}
+                    {meta.technicalSheetDocument && (
+                      <span
+                        style={{
+                          backgroundColor: "#eff6ff",
+                          border: "1px solid #93c5fd",
+                          color: "#1e40af",
+                          padding: "3px 8px",
+                          borderRadius: 4,
+                          fontSize: "12px",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 6,
+                        }}
+                      >
+                        📄 Scheda Tecnica: <strong>{meta.technicalSheetDocument.fileName}</strong>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenDocument(meta.technicalSheetDocument)}
+                          style={{
+                            border: "none",
+                            backgroundColor: "#2563eb",
+                            color: "#fff",
+                            padding: "2px 6px",
+                            borderRadius: 4,
+                            fontSize: "11px",
+                            cursor: "pointer",
+                            fontWeight: 700,
+                          }}
+                          title="Visualizza scansione scheda tecnica"
+                        >
+                          👁️ Apri Scheda
+                        </button>
+                      </span>
+                    )}
+
+                    {/* Dichiarazione CE Scansionata */}
+                    {meta.ceDeclarationDocument && (
+                      <span
+                        style={{
+                          backgroundColor: "#faf5ff",
+                          border: "1px solid #d8b4fe",
+                          color: "#6b21a8",
+                          padding: "3px 8px",
+                          borderRadius: 4,
+                          fontSize: "12px",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 6,
+                        }}
+                      >
+                        🛡️ Dichiarazione CE: <strong>{meta.ceDeclarationDocument.fileName}</strong>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenDocument(meta.ceDeclarationDocument)}
+                          style={{
+                            border: "none",
+                            backgroundColor: "#9333ea",
+                            color: "#fff",
+                            padding: "2px 6px",
+                            borderRadius: 4,
+                            fontSize: "11px",
+                            cursor: "pointer",
+                            fontWeight: 700,
+                          }}
+                        >
+                          👁️ Apri
+                        </button>
+                      </span>
+                    )}
 
                     {/* Registro Manutenzioni */}
                     <span style={{ fontSize: "12px", color: meta.maintenanceLogPresent === "yes" ? "#166534" : "#991b1b" }}>
@@ -874,6 +1188,78 @@ export default function Step4AssetAttrezzature({
                         {meta.inailNextCheckDate ? `(Scad: ${meta.inailNextCheckDate})` : ""}
                       </span>
                     )}
+                  </div>
+
+                  {/* BOX LAVORATORI ABILITATI ALL'USO DEL MACCHINARIO */}
+                  <div
+                    style={{
+                      backgroundColor: "#f8fafc",
+                      border: "1px solid #e2e8f0",
+                      borderRadius: 8,
+                      padding: "10px 14px",
+                      marginBottom: 14,
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <span style={{ fontSize: "16px" }}>👥</span>
+                        <strong style={{ fontSize: "13px", color: "#1e293b" }}>
+                          Lavoratori Abilitati all&apos;Uso della Macchina:
+                        </strong>
+                      </div>
+                      <span style={{ fontSize: "12px", color: "#64748b" }}>
+                        {(meta.authorizedWorkerIds?.length || 0) + (meta.authorizedWorkerNames?.length || 0)} operatori autorizzati
+                      </span>
+                    </div>
+
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8 }}>
+                      {((meta.authorizedWorkerIds && meta.authorizedWorkerIds.length > 0) || (meta.authorizedWorkerNames && meta.authorizedWorkerNames.length > 0)) ? (
+                        <>
+                          {meta.authorizedWorkerIds?.map((wId) => {
+                            const emp = employees.find((e) => e.id === wId);
+                            return (
+                              <span
+                                key={wId}
+                                style={{
+                                  backgroundColor: "#e0f2fe",
+                                  border: "1px solid #bae6fd",
+                                  color: "#0369a1",
+                                  padding: "3px 10px",
+                                  borderRadius: 16,
+                                  fontSize: "12px",
+                                  fontWeight: 600,
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 4,
+                                }}
+                              >
+                                👤 {emp ? `${emp.firstName} ${emp.lastName}${emp.role ? ` (${emp.role})` : ""}` : `ID: ${wId}`}
+                              </span>
+                            );
+                          })}
+                          {meta.authorizedWorkerNames?.map((name, nIdx) => (
+                            <span
+                              key={nIdx}
+                              style={{
+                                backgroundColor: "#f1f5f9",
+                                border: "1px solid #cbd5e1",
+                                color: "#334155",
+                                padding: "3px 10px",
+                                borderRadius: 16,
+                                fontSize: "12px",
+                                fontWeight: 600,
+                              }}
+                            >
+                              👤 {name}
+                            </span>
+                          ))}
+                        </>
+                      ) : (
+                        <span style={{ fontSize: "12px", color: "#94a3b8", fontStyle: "italic" }}>
+                          Nessun lavoratore designato all&apos;uso. Clicca &quot;Modifica&quot; per associare gli operatori abilitati.
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* BOX FORMAZIONE SPECIFICA OPERATORI (COLLEGAMENTO TAB 5) */}
@@ -1189,8 +1575,8 @@ export default function Step4AssetAttrezzature({
                 </div>
               </div>
 
-              {/* Dati Minimi: Costruttore, Modello, Matricola, Anno */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10 }}>
+              {/* Dati Minimi: Costruttore, Modello, Matricola */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
                 <div>
                   <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#374151", marginBottom: 4 }}>
                     Costruttore / Marca
@@ -1227,9 +1613,13 @@ export default function Step4AssetAttrezzature({
                     style={{ width: "100%", padding: "7px 10px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: "13px" }}
                   />
                 </div>
+              </div>
+
+              {/* Anno Fabbricazione e Data Installazione */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                 <div>
                   <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#374151", marginBottom: 4 }}>
-                    Anno Fabbricazione
+                    Anno di Fabbricazione
                   </label>
                   <input
                     type="number"
@@ -1237,6 +1627,17 @@ export default function Step4AssetAttrezzature({
                     max={new Date().getFullYear() + 1}
                     value={formBuildYear ?? ""}
                     onChange={(e) => setFormBuildYear(e.target.value ? Number(e.target.value) : undefined)}
+                    style={{ width: "100%", padding: "7px 10px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: "13px" }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#374151", marginBottom: 4 }}>
+                    Data di Installazione in Azienda
+                  </label>
+                  <input
+                    type="date"
+                    value={formInstallationDate}
+                    onChange={(e) => setFormInstallationDate(e.target.value)}
                     style={{ width: "100%", padding: "7px 10px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: "13px" }}
                   />
                 </div>
@@ -1345,18 +1746,272 @@ export default function Step4AssetAttrezzature({
                 )}
               </div>
 
-              {/* Ubicazione */}
-              <div>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#374151", marginBottom: 4 }}>
-                  Ubicazione / Reparto di Installazione
-                </label>
-                <input
-                  type="text"
-                  placeholder="Es. Cucina piano terra, Magazzino corsia B, Officina"
-                  value={formLocation}
-                  onChange={(e) => setFormLocation(e.target.value)}
-                  style={{ width: "100%", padding: "7px 10px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: "13px" }}
-                />
+              {/* Locale Censito (Step 2) e Ubicazione specifica */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#374151", marginBottom: 4 }}>
+                    Locale di Riferimento (dagli Ambienti Step 2)
+                  </label>
+                  <select
+                    value={formEnvironmentName}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFormEnvironmentName(val);
+                      if (val && !formLocation) setFormLocation(val);
+                    }}
+                    style={{ width: "100%", padding: "7px 10px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: "13px" }}
+                  >
+                    <option value="">-- Seleziona locale dagli ambienti registrati --</option>
+                    {environments.map((env) => (
+                      <option key={env.id} value={env.name}>
+                        📍 {env.name} {env.surfaceMq ? `(${env.surfaceMq} mq)` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#374151", marginBottom: 4 }}>
+                    Reparto / Ubicazione Specifica
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Es. Corsia 3, Banco carni, Linea taglio"
+                    value={formLocation}
+                    onChange={(e) => setFormLocation(e.target.value)}
+                    style={{ width: "100%", padding: "7px 10px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: "13px" }}
+                  />
+                </div>
+              </div>
+
+              {/* Documenti Scansionati (PDF o Immagini fino a 5MB) */}
+              <div
+                style={{
+                  backgroundColor: "#f8fafc",
+                  border: "1px solid #cbd5e1",
+                  borderRadius: 8,
+                  padding: "14px",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+                  <span style={{ fontSize: "15px" }}>📁</span>
+                  <span style={{ fontSize: "13px", fontWeight: 700, color: "#0f172a" }}>
+                    Documentazione Tecnica Digitale (Libretti, Schede, Conformità CE)
+                  </span>
+                  <span style={{ fontSize: "11px", color: "#64748b" }}>(Max 5MB per file - PDF, PNG, JPG)</span>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+                  {/* Libretto d'Uso */}
+                  <div style={{ border: "1px solid #e2e8f0", backgroundColor: "#fff", borderRadius: 6, padding: "10px" }}>
+                    <div style={{ fontSize: "12px", fontWeight: 600, color: "#334155", marginBottom: 6 }}>
+                      📖 Libretto Uso e Manutenzione
+                    </div>
+                    {formManualDoc ? (
+                      <div>
+                        <div style={{ fontSize: "11px", color: "#0f172a", fontWeight: 600, wordBreak: "break-all", marginBottom: 4 }}>
+                          ✓ {formManualDoc.fileName}
+                        </div>
+                        <div style={{ fontSize: "10px", color: "#64748b", marginBottom: 6 }}>
+                          {(formManualDoc.fileSize / 1024).toFixed(1)} KB
+                        </div>
+                        <div style={{ display: "flex", gap: 6 }}>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDocument(formManualDoc)}
+                            style={{ padding: "3px 8px", fontSize: "11px", borderRadius: 4, border: "1px solid #94a3b8", backgroundColor: "#f1f5f9", cursor: "pointer" }}
+                          >
+                            👁️ Apri
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setFormManualDoc(undefined)}
+                            style={{ padding: "3px 8px", fontSize: "11px", borderRadius: 4, border: "1px solid #fca5a5", backgroundColor: "#fef2f2", color: "#dc2626", cursor: "pointer" }}
+                          >
+                            🗑️ Rimuovi
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <input
+                          type="file"
+                          accept=".pdf,image/*"
+                          onChange={(e) => handleFileUpload(e, "manual")}
+                          style={{ fontSize: "11px", width: "100%" }}
+                        />
+                        <div style={{ fontSize: "10px", color: "#94a3b8", marginTop: 4 }}>Nessun libretto allegato</div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Scheda Tecnica */}
+                  <div style={{ border: "1px solid #e2e8f0", backgroundColor: "#fff", borderRadius: 6, padding: "10px" }}>
+                    <div style={{ fontSize: "12px", fontWeight: 600, color: "#334155", marginBottom: 6 }}>
+                      📋 Scheda Tecnica Costruttore
+                    </div>
+                    {formTechSheetDoc ? (
+                      <div>
+                        <div style={{ fontSize: "11px", color: "#0f172a", fontWeight: 600, wordBreak: "break-all", marginBottom: 4 }}>
+                          ✓ {formTechSheetDoc.fileName}
+                        </div>
+                        <div style={{ fontSize: "10px", color: "#64748b", marginBottom: 6 }}>
+                          {(formTechSheetDoc.fileSize / 1024).toFixed(1)} KB
+                        </div>
+                        <div style={{ display: "flex", gap: 6 }}>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDocument(formTechSheetDoc)}
+                            style={{ padding: "3px 8px", fontSize: "11px", borderRadius: 4, border: "1px solid #94a3b8", backgroundColor: "#f1f5f9", cursor: "pointer" }}
+                          >
+                            👁️ Apri
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setFormTechSheetDoc(undefined)}
+                            style={{ padding: "3px 8px", fontSize: "11px", borderRadius: 4, border: "1px solid #fca5a5", backgroundColor: "#fef2f2", color: "#dc2626", cursor: "pointer" }}
+                          >
+                            🗑️ Rimuovi
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <input
+                          type="file"
+                          accept=".pdf,image/*"
+                          onChange={(e) => handleFileUpload(e, "techSheet")}
+                          style={{ fontSize: "11px", width: "100%" }}
+                        />
+                        <div style={{ fontSize: "10px", color: "#94a3b8", marginTop: 4 }}>Nessuna scheda tecnica</div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Dichiarazione CE */}
+                  <div style={{ border: "1px solid #e2e8f0", backgroundColor: "#fff", borderRadius: 6, padding: "10px" }}>
+                    <div style={{ fontSize: "12px", fontWeight: 600, color: "#334155", marginBottom: 6 }}>
+                      🏷️ Dichiarazione CE / All. V
+                    </div>
+                    {formCeDeclDoc ? (
+                      <div>
+                        <div style={{ fontSize: "11px", color: "#0f172a", fontWeight: 600, wordBreak: "break-all", marginBottom: 4 }}>
+                          ✓ {formCeDeclDoc.fileName}
+                        </div>
+                        <div style={{ fontSize: "10px", color: "#64748b", marginBottom: 6 }}>
+                          {(formCeDeclDoc.fileSize / 1024).toFixed(1)} KB
+                        </div>
+                        <div style={{ display: "flex", gap: 6 }}>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDocument(formCeDeclDoc)}
+                            style={{ padding: "3px 8px", fontSize: "11px", borderRadius: 4, border: "1px solid #94a3b8", backgroundColor: "#f1f5f9", cursor: "pointer" }}
+                          >
+                            👁️ Apri
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setFormCeDeclDoc(undefined)}
+                            style={{ padding: "3px 8px", fontSize: "11px", borderRadius: 4, border: "1px solid #fca5a5", backgroundColor: "#fef2f2", color: "#dc2626", cursor: "pointer" }}
+                          >
+                            🗑️ Rimuovi
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <input
+                          type="file"
+                          accept=".pdf,image/*"
+                          onChange={(e) => handleFileUpload(e, "ceDecl")}
+                          style={{ fontSize: "11px", width: "100%" }}
+                        />
+                        <div style={{ fontSize: "10px", color: "#94a3b8", marginTop: 4 }}>Nessuna conformità CE</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Lavoratori Abilitati all'Uso della Macchina */}
+              <div
+                style={{
+                  backgroundColor: "#fdf8f6",
+                  border: "1px solid #fed7aa",
+                  borderRadius: 8,
+                  padding: "14px",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, flexWrap: "wrap", gap: 6 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ fontSize: "16px" }}>👥</span>
+                    <span style={{ fontSize: "13px", fontWeight: 700, color: "#9a3412" }}>
+                      Lavoratori Abilitati e Addetti all'Uso
+                    </span>
+                  </div>
+                  <span style={{ fontSize: "11px", color: "#c2410c" }}>
+                    Sincronizzato con lo Step 5 Formazione per il controllo di abilitazioni e patentini
+                  </span>
+                </div>
+
+                <div style={{ fontSize: "12px", color: "#431407", marginBottom: 10 }}>
+                  Seleziona i dipendenti aziendali autorizzati all'uso di questa specifica attrezzatura:
+                </div>
+
+                {employees.length === 0 ? (
+                  <div style={{ fontSize: "12px", color: "#78716c", fontStyle: "italic", padding: "8px", backgroundColor: "#fff", borderRadius: 6, border: "1px dashed #cbd5e1" }}>
+                    Nessun dipendente attivo registrato per questa azienda. Inserisci eventuali nominativi esterni nel campo sottostante.
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, maxHeight: "150px", overflowY: "auto", padding: "4px" }}>
+                    {employees.map((emp) => {
+                      const isSelected = formAuthorizedWorkerIds.includes(emp.id);
+                      return (
+                        <button
+                          key={emp.id}
+                          type="button"
+                          onClick={() => {
+                            if (isSelected) {
+                              setFormAuthorizedWorkerIds((prev) => prev.filter((id) => id !== emp.id));
+                            } else {
+                              setFormAuthorizedWorkerIds((prev) => [...prev, emp.id]);
+                            }
+                          }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 6,
+                            padding: "5px 10px",
+                            borderRadius: 16,
+                            border: isSelected ? "1px solid #ea580c" : "1px solid #cbd5e1",
+                            backgroundColor: isSelected ? "#ffedd5" : "#fff",
+                            color: isSelected ? "#9a3412" : "#334155",
+                            fontSize: "12px",
+                            fontWeight: isSelected ? 700 : 500,
+                            cursor: "pointer",
+                            transition: "all 0.15s ease",
+                          }}
+                        >
+                          <span>{isSelected ? "✓" : "+"}</span>
+                          <span>{emp.firstName} {emp.lastName}</span>
+                          {emp.jobTitle && <span style={{ fontSize: "10px", opacity: 0.8 }}>({emp.jobTitle})</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                <div style={{ marginTop: 10 }}>
+                  <label style={{ display: "block", fontSize: "11px", fontWeight: 600, color: "#9a3412", marginBottom: 4 }}>
+                    Altri Operatori Abilitati / Lavoratori Esterni o Autonomi (separati da virgola)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Es. Mario Rossi (esterno), Luca Bianchi (socio)"
+                    value={formAuthorizedCustomWorkers}
+                    onChange={(e) => setFormAuthorizedCustomWorkers(e.target.value)}
+                    style={{ width: "100%", padding: "6px 8px", borderRadius: 6, border: "1px solid #fdba74", fontSize: "12px", backgroundColor: "#fff" }}
+                  />
+                </div>
               </div>
 
               <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 10 }}>

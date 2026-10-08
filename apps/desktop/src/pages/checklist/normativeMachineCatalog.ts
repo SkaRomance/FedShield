@@ -699,6 +699,234 @@ export const SECTOR_MACHINERY_CATALOGS: SectorMachineCatalog[] = [
       },
     ],
   },
+
+  // 6. FALEGNAMERIA & LAVORAZIONE LEGNO
+  {
+    sectorKey: "falegnameria_legno",
+    sectorLabel: "Falegnameria, Arredamento e Fabbricazione Prodotti in Legno",
+    atecoPrefixes: ["16.", "31."],
+    machines: [
+      {
+        machineKey: "squadratrice_banco",
+        name: "Sega Circolare Squadratrice a Lama Inclinabile",
+        type: "Macchina per Taglio Legno",
+        suggestedManufacturer: "SCM / Casadei / Felder",
+        suggestedModel: "Si 400 / Kappa 450",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_legno,
+        safetyChecks: [
+          {
+            code: "RIVING_KNIFE_GUARD",
+            title: "Cuffia Sospesa con Cappa di Aspirazione e Coltello Divisore",
+            question: "La lama è sormontata da cuffia di protezione sospesa registrabile collegata ad aspirazione trucioli e coltello divisore conforme alla norma UNI EN 1870-1?",
+            normReference: "UNI EN 1870-1; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BLADE_BRAKE_10SEC",
+            title: "Freno Meccanico/Elettronico della Lama (< 10 secondi)",
+            question: "All'arresto del motore la lama si ferma completamente entro un tempo massimo di 10 secondi tramite freno automatico?",
+            normReference: "UNI EN 1870-1 punto 5.3; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PUSH_STICK_PRESENT",
+            title: "Presenza Spingipezzo Ergonomico a Bordo Macchina",
+            question: "È presente sul banco e viene regolarmente utilizzato lo spingitoio in legno/plastica per il taglio di pezzi corti (< 30 cm) onde evitare il contatto dita-lama?",
+            normReference: "D.Lgs. 81/2008 All. VI punto 2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "pialla_filo_spessore",
+        name: "Pialla a Filo e a Spessore Combinata",
+        type: "Macchina Lavorazione Legno",
+        suggestedManufacturer: "SCM / minimax / Griggio",
+        suggestedModel: "FS 41 Elite / Formula f2",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_legno,
+        safetyChecks: [
+          {
+            code: "PLANER_BRIDGE_GUARD",
+            title: "Protezione a Ponte Registrabile dell'Albero Pialla",
+            question: "L'albero portalame della pialla a filo è protetto da schermo a ponte regolabile in altezza e larghezza per coprire la parte non impegnata nella piallatura?",
+            normReference: "UNI EN 859:2012; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ANTI_KICKBACK_FINGERS",
+            title: "Denti Antiritorno sulla Pialla a Spessore",
+            question: "All'ingresso della pialla a spessore sono installati settori antiritorno snodati (pettine anti-kickback) funzionanti liberamente per gravità?",
+            normReference: "UNI EN 860:2012; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "aspiratore_polveri_legno",
+        name: "Impianto di Aspirazione Polveri e Trucioli (ATEX)",
+        type: "Impianto di Captazione e Depolverazione",
+        suggestedManufacturer: "Coral / Spänex / Alfarimini",
+        suggestedModel: "Clean Dust 3000 / Eurofilter",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "ATEX_VENT_EXPLOSION",
+            title: "Pannelli di Sfogo Antideflagrazione e Conformità ATEX",
+            question: "Il filtro depolveratore e le canalizzazioni per polveri di legno combustibili presentano pannelli di sfogo ATEX con sfogo all'esterno e barriere tagliafuoco?",
+            normReference: "D.Lgs. 81/2008 Titolo XI; UNI EN 12779; Direttiva 2014/34/UE",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ANTISTATIC_HOSES",
+            title: "Tubazioni Flessibili Antistatiche con Messa a Terra",
+            question: "I raccordi flessibili tra le macchine e i tubi rigidi d'aspirazione sono di tipo antistatico con spirale di rame collegata all'impianto di terra?",
+            normReference: "CEI EN 60079-32-1; D.Lgs. 81/2008 Titolo XI",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  // 7. COMMERCIO AL DETTAGLIO & SUPERMERCATI
+  {
+    sectorKey: "commercio_dettaglio",
+    sectorLabel: "Commercio al Dettaglio, Supermercati e Negozi Specializzati",
+    atecoPrefixes: ["47."],
+    machines: [
+      {
+        machineKey: "affettatrice_banco",
+        name: "Affettatrice Professionale Banco Salumeria",
+        type: "Macchina Lavorazione Carni/Salumi",
+        suggestedManufacturer: "Berkel / Sirman",
+        suggestedModel: "Red Line 300 / Palladio",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "BLADE_GUARD_RING",
+            title: "Anello Fisso di Protezione Lama (Paralama)",
+            question: "La lama dell'affettatrice è protetta su tutto l'arco non lavorativo da un anello di protezione fisso e dal coprilama amovibile fissato con tirante conforme a norma UNI EN 1974?",
+            normReference: "D.Lgs. 81/2008 All. V p. 6; UNI EN 1974:2010",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ZERO_VOLTAGE_RESTART",
+            title: "Riarmo Spontaneo (Relè di Minima Tensione)",
+            question: "L'affettatrice è dotata di pulsantiera di comando con relè di minima tensione che impedisce il riavvio spontaneo dopo una momentanea interruzione di corrente?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2.1; CEI EN 60204-1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "transpallet_magazzino",
+        name: "Transpallet Elettrico per Ricevimento Merci",
+        type: "Carrello per Movimentazione Bassa",
+        suggestedManufacturer: "Jungheinrich / BT Toyota",
+        suggestedModel: "EJE M15 / Levio",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.transpallet_elettrico,
+        safetyChecks: [
+          {
+            code: "BELLY_BUTTON_SAFETY",
+            title: "Pulsante Antinfortunistico Antipizzicamento sul Timone ('Pulsante Pancia')",
+            question: "Sulla testata del timone è presente e funzionante il pulsante di sicurezza rosso che inverte immediatamente la marcia se premuto contro il corpo dell'operatore?",
+            normReference: "UNI EN ISO 3691-1 punto 4.4.2; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "pressa_cartoni",
+        name: "Pressa Compattatrice per Scatole e Cartoni",
+        type: "Macchina per Imballaggi e Rifiuti",
+        suggestedManufacturer: "Strautmann / Orwak",
+        suggestedModel: "Bale Press 3110",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "PRESS_DOOR_INTERLOCK",
+            title: "Interblocco di Sicurezza Portellone di Carico",
+            question: "Il piatto pressante scende solo a portellone anteriore completamente chiuso con microinterruttore di sicurezza codificato a prova di manomissione?",
+            normReference: "UNI EN 16500:2014; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  // 8. SANITÀ, AMBULATORI & LABORATORI
+  {
+    sectorKey: "sanita_ambulatori",
+    sectorLabel: "Sanità, Strutture Residenziali, Ambulatori e Centri Medici",
+    atecoPrefixes: ["86.", "87."],
+    machines: [
+      {
+        machineKey: "autoclave_sterilizzazione",
+        name: "Autoclave a Vapore di Sterilizzazione (Classe B)",
+        type: "Attrezzatura a Pressione / Sterilizzazione",
+        suggestedManufacturer: "Euronda / Melag / Mocom",
+        suggestedModel: "Vacuklav 40 B+ / Classic 18",
+        isSubjectToInailCheck: true, // Recipiente in pressione PED
+        inailFrequencyYears: 2,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "PRESSURE_DOOR_LOCK",
+            title: "Blocco Elettromeccanico Portello in Presenza di Pressione",
+            question: "L'autoclave presenta un dispositivo di sicurezza a doppio consenso che impedisce tassativamente l'apertura dello sportello se la camera è in pressione (> 0.1 bar) o con ciclo attivo?",
+            normReference: "UNI EN 13060:2015; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CALIBRATED_SAFETY_VALVE",
+            title: "Valvola di Sovrapressione Tarata e Certificata PED",
+            question: "La camera è provvista di valvola di sicurezza tarata a marchio PED per scaricare istantaneamente eventuali sovrapressioni accidentali?",
+            normReference: "D.M. 329/04; Direttiva 2014/68/UE (PED)",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "poltrona_ambulatoriale",
+        name: "Riunito / Poltrona per Visite con Azionamento Elettromeccanico",
+        type: "Dispositivo Elettromedicale",
+        suggestedManufacturer: "Castellini / Anthos / Stern Weber",
+        suggestedModel: "Skema 6 / S200",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "CHAIR_SAFETY_BASE_SWITCH",
+            title: "Dispositivo Antischiacciamento alla Base della Poltrona",
+            question: "Il basamento e la base dello schienale sono dotati di microinterruttori sensibili che arrestano all'istante la discesa in caso di contatto con ostacoli o piedi dell'operatore?",
+            normReference: "CEI EN 60601-1; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 // Helper per identificare il catalogo settoriale idoneo in base al codice ATECO
@@ -718,9 +946,19 @@ export function getSectorMachineCatalogForAteco(atecoCode?: string | null): Sect
   return SECTOR_MACHINERY_CATALOGS[1];
 }
 
+// Interfaccia per gli allegati di scansione documenti (Libretto d'uso, Scheda tecnica, Certificato CE)
+export interface MachineDocumentAttachment {
+  fileName: string;
+  fileSize: number; // in byte
+  fileType: string; // es. "application/pdf" | "image/jpeg"
+  dataUrl?: string; // base64 / data URL
+  uploadedAt: string; // ISO
+}
+
 // Interfaccia estesa per i metadati di una macchina salvati nel campo `note` (JSON)
 export interface MachineFullDetailsMetadata {
   buildYear?: number;
+  installationDate?: string; // Data installazione macchina (YYYY-MM-DD)
   ceStatus?: "ce_compliant" | "ante_ce_annex_v" | "non_compliant";
   manualPresent?: "yes" | "no";
   maintenanceLogPresent?: "yes" | "no" | "expired";
@@ -730,6 +968,13 @@ export interface MachineFullDetailsMetadata {
   inailNextCheckDate?: string;
   requiredCourseCode?: string;
   requiredCourseTitle?: string;
+  environmentId?: string; // ID locale di ubicazione (da Step 2)
+  environmentName?: string; // Denominazione locale di ubicazione
+  authorizedWorkerIds?: string[]; // IDs dei lavoratori dipendenti abilitati all'uso
+  authorizedWorkerNames?: string[]; // Nominativi extra lavoratori abilitati all'uso
+  manualDocument?: MachineDocumentAttachment; // Scansione Libretto Uso e Manutenzione
+  technicalSheetDocument?: MachineDocumentAttachment; // Scansione Scheda Tecnica del Costruttore
+  ceDeclarationDocument?: MachineDocumentAttachment; // Scansione Dichiarazione CE
   customRequirements?: MachineSafetyCheckDef[];
 }
 
@@ -748,4 +993,92 @@ export function parseMachineMetadata(rawNote?: string | null): MachineFullDetail
 export function serializeMachineMetadata(meta: MachineFullDetailsMetadata, originalNote?: string): string {
   // Salva come JSON compatto
   return JSON.stringify(meta);
+}
+
+// ---------------------------------------------------------------------------------
+// MOTORE DINAMICO DI RACCOMANDAZIONE MACCHINE INCROCIATO SU LOCALI E CODICE ATECO
+// ---------------------------------------------------------------------------------
+export interface EnvironmentInputRef {
+  id?: string;
+  name: string;
+  category?: string;
+}
+
+export interface SuggestedMachineWithEnvironment extends SectorMachineTemplate {
+  targetEnvironmentName?: string;
+  targetEnvironmentCategory?: string;
+  sourceReason: "environment" | "ateco";
+}
+
+export function getSuggestedMachinesForEnvironmentsAndAteco(
+  environments: EnvironmentInputRef[] = [],
+  atecoCode?: string | null,
+): SuggestedMachineWithEnvironment[] {
+  const suggested: SuggestedMachineWithEnvironment[] = [];
+  const addedKeys = new Set<string>();
+
+  // 1. MACCHINE SUGGERITE IN BASE AI LOCALI CENSITI NELLO STEP 2
+  for (const env of environments) {
+    const cat = (env.category || "").toLowerCase();
+    const nameLower = (env.name || "").toLowerCase();
+
+    // Mappa la categoria del locale alle macchine pertinenti
+    let matchingMachines: SectorMachineTemplate[] = [];
+
+    if (cat === "cucina" || nameLower.includes("cucina") || nameLower.includes("laboratorio")) {
+      const restSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "ristorazione_alimentare");
+      if (restSector) matchingMachines = restSector.machines;
+    } else if (cat === "magazzino_merci" || nameLower.includes("magazzino") || nameLower.includes("deposito")) {
+      const logSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "logistica_magazzino");
+      if (logSector) matchingMachines = logSector.machines;
+    } else if (cat === "officina_meccanica" || nameLower.includes("officina") || nameLower.includes("meccanica")) {
+      const autoSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "autoriparazione_meccanica");
+      const metalSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "metalmeccanica_officina");
+      matchingMachines = [...(autoSector?.machines || []), ...(metalSector?.machines || [])];
+    } else if (cat === "saldatura" || nameLower.includes("saldatura")) {
+      const metalSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "metalmeccanica_officina");
+      matchingMachines = (metalSector?.machines || []).filter((m) => m.machineKey.includes("saldat") || m.machineKey.includes("mola"));
+    } else if (cat === "reparto_legno" || nameLower.includes("legno") || nameLower.includes("falegnam")) {
+      const woodSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "falegnameria_legno");
+      if (woodSector) matchingMachines = woodSector.machines;
+    } else if (cat === "esterno_cantiere" || nameLower.includes("cantiere")) {
+      const buildSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "edilizia_cantieri");
+      if (buildSector) matchingMachines = buildSector.machines;
+    } else if (cat === "ambulatorio" || nameLower.includes("ambulatorio") || nameLower.includes("visite")) {
+      const healthSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "sanita_ambulatori");
+      if (healthSector) matchingMachines = healthSector.machines;
+    } else if (cat === "centrale_termica" || cat === "deposito_infiammabili" || nameLower.includes("compressor")) {
+      const autoSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "autoriparazione_meccanica");
+      matchingMachines = (autoSector?.machines || []).filter((m) => m.machineKey.includes("compressor"));
+    }
+
+    for (const m of matchingMachines) {
+      const uniqueKey = `${m.machineKey}_${env.name}`;
+      if (!addedKeys.has(uniqueKey)) {
+        addedKeys.add(uniqueKey);
+        suggested.push({
+          ...m,
+          targetEnvironmentName: env.name,
+          targetEnvironmentCategory: env.category,
+          sourceReason: "environment",
+        });
+      }
+    }
+  }
+
+  // 2. INTEGRA LE MACCHINE DEL SETTORE ATECO SE NON GIÀ AGGIUNTE
+  const sectorCatalog = getSectorMachineCatalogForAteco(atecoCode);
+  for (const m of sectorCatalog.machines) {
+    const alreadyAny = suggested.some((s) => s.machineKey === m.machineKey);
+    if (!alreadyAny) {
+      suggested.push({
+        ...m,
+        targetEnvironmentName: undefined,
+        targetEnvironmentCategory: undefined,
+        sourceReason: "ateco",
+      });
+    }
+  }
+
+  return suggested;
 }
