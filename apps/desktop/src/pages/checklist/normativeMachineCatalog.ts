@@ -955,12 +955,63 @@ export interface MachineDocumentAttachment {
   uploadedAt: string; // ISO
 }
 
+// Requisiti documentali obbligatori di legge comuni a tutte le macchine e attrezzature (D.Lgs. 81/08 Titolo III)
+export const MANDATORY_DOCUMENTARY_CHECKS: MachineSafetyCheckDef[] = [
+  {
+    code: "DOC_CE_CERTIFICATION",
+    title: "Presenza Certificazione e Conformità CE",
+    question: "È presente in azienda la marcatura CE visibile con relativa attestazione/dichiarazione di conformità CE/UE rilasciata dal costruttore (oppure attestazione di rispondenza ai requisiti dell'All. V D.Lgs. 81/08 per macchinari ante-CE)?",
+    normReference: "D.Lgs. 81/2008 art. 70 c. 1; D.Lgs. 17/2010 (Direttiva Macchine)",
+    defaultSeverity: 3,
+    defaultSanctionable: true,
+  },
+  {
+    code: "DOC_WORKMANLIKE_INSTALLATION",
+    title: "Installazione a Regola d'Arte e Conformità Impianti",
+    question: "L'attrezzatura/macchinario è installata a regola d'arte secondo le istruzioni del costruttore, con ancoraggio stabile, spazi di lavoro e manutenzione idonei e allacciamenti impiantistici conformi alle norme CEI/UNI?",
+    normReference: "D.Lgs. 81/2008 art. 71 c. 3 e D.M. 37/2008",
+    defaultSeverity: 3,
+    defaultSanctionable: true,
+  },
+  {
+    code: "DOC_RISK_ASSESSMENT_DVR",
+    title: "Valutazione dei Rischi Inserita nel DVR",
+    question: "I rischi specifici connessi all'uso ordinario, straordinario, pulizia e manutenzione della macchina sono formalmente censiti e valutati nel Documento di Valutazione dei Rischi (DVR) aziendale?",
+    normReference: "D.Lgs. 81/2008 art. 17 c. 1 lett. a, art. 28 e art. 71 c. 1",
+    defaultSeverity: 4,
+    defaultSanctionable: true,
+  },
+  {
+    code: "DOC_USER_MANUAL",
+    title: "Presenza Libretto d'Uso e Manutenzione",
+    question: "Il libretto/manuale d'uso e manutenzione fornito dal fabbricante è disponibile in azienda in lingua italiana e prontamente consultabile dai lavoratori incaricati?",
+    normReference: "D.Lgs. 81/2008 art. 70 c. 2 e art. 73 c. 1",
+    defaultSeverity: 2,
+    defaultSanctionable: true,
+  },
+];
+
+export function getMandatoryDocumentaryChecksForMachine(machineName: string): MachineSafetyCheckDef[] {
+  return MANDATORY_DOCUMENTARY_CHECKS.map((c) => ({
+    ...c,
+    question: c.question.includes("macchinario")
+      ? c.question.replace("L'attrezzatura/macchinario", `L'attrezzatura "${machineName}"`)
+      : c.question.includes("macchina")
+      ? c.question.replace("della macchina", `di "${machineName}"`)
+      : c.question,
+  }));
+}
+
 // Interfaccia estesa per i metadati di una macchina salvati nel campo `note` (JSON)
 export interface MachineFullDetailsMetadata {
   buildYear?: number;
   installationDate?: string; // Data installazione macchina (YYYY-MM-DD)
   ceStatus?: "ce_compliant" | "ante_ce_annex_v" | "non_compliant";
-  manualPresent?: "yes" | "no";
+  // Requisiti documentali espliciti (Sì / No / Non Applicabile)
+  ceCertificationPresent?: "yes" | "no" | "na";
+  installationCompliant?: "yes" | "no" | "na";
+  riskAssessmentInDvr?: "yes" | "no" | "na";
+  manualPresent?: "yes" | "no" | "na";
   maintenanceLogPresent?: "yes" | "no" | "expired";
   inailCheckRequired?: boolean;
   inailSerial?: string;

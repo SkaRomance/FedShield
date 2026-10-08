@@ -38,6 +38,7 @@ import {
   getSuggestedMachinesForEnvironmentsAndAteco,
   SuggestedMachineWithEnvironment,
   MachineDocumentAttachment,
+  getMandatoryDocumentaryChecksForMachine,
 } from "./normativeMachineCatalog";
 
 export type AssetSubTab = "machines" | "equipment" | "extinguishers" | "firstAid";
@@ -97,7 +98,11 @@ export default function Step4AssetAttrezzature({
   const [formBuildYear, setFormBuildYear] = useState<number | undefined>(new Date().getFullYear() - 2);
   const [formInstallationDate, setFormInstallationDate] = useState("");
   const [formCeStatus, setFormCeStatus] = useState<"ce_compliant" | "ante_ce_annex_v" | "non_compliant">("ce_compliant");
-  const [formManualPresent, setFormManualPresent] = useState<"yes" | "no">("yes");
+  // 4 Requisiti Documentali Obbligatori (Sì / No / Non Applicabile)
+  const [formCeCertificationPresent, setFormCeCertificationPresent] = useState<"yes" | "no" | "na">("yes");
+  const [formInstallationCompliant, setFormInstallationCompliant] = useState<"yes" | "no" | "na">("yes");
+  const [formRiskAssessmentInDvr, setFormRiskAssessmentInDvr] = useState<"yes" | "no" | "na">("yes");
+  const [formManualPresent, setFormManualPresent] = useState<"yes" | "no" | "na">("yes");
   const [formMaintenanceLogPresent, setFormMaintenanceLogPresent] = useState<"yes" | "no" | "expired">("yes");
   const [formInailCheckRequired, setFormInailCheckRequired] = useState(false);
   const [formInailSerial, setFormInailSerial] = useState("");
@@ -241,6 +246,9 @@ export default function Step4AssetAttrezzature({
       setFormBuildYear(new Date().getFullYear() - 3);
       setFormInstallationDate(new Date(Date.now() - 365 * 86400000).toISOString().split("T")[0]);
       setFormCeStatus("ce_compliant");
+      setFormCeCertificationPresent("yes");
+      setFormInstallationCompliant("yes");
+      setFormRiskAssessmentInDvr("yes");
       setFormManualPresent("yes");
       setFormMaintenanceLogPresent("yes");
       setFormInailCheckRequired(template.isSubjectToInailCheck);
@@ -263,6 +271,9 @@ export default function Step4AssetAttrezzature({
       setFormBuildYear(new Date().getFullYear() - 1);
       setFormInstallationDate(new Date().toISOString().split("T")[0]);
       setFormCeStatus("ce_compliant");
+      setFormCeCertificationPresent("yes");
+      setFormInstallationCompliant("yes");
+      setFormRiskAssessmentInDvr("yes");
       setFormManualPresent("yes");
       setFormMaintenanceLogPresent("yes");
       setFormInailCheckRequired(false);
@@ -294,7 +305,10 @@ export default function Step4AssetAttrezzature({
     setFormBuildYear(meta.buildYear ?? new Date().getFullYear() - 2);
     setFormInstallationDate(meta.installationDate || "");
     setFormCeStatus(meta.ceStatus ?? "ce_compliant");
-    setFormManualPresent(meta.manualPresent ?? (meta.manualDocument ? "yes" : "no"));
+    setFormCeCertificationPresent(meta.ceCertificationPresent ?? (meta.ceStatus === "non_compliant" ? "no" : "yes"));
+    setFormInstallationCompliant(meta.installationCompliant ?? "yes");
+    setFormRiskAssessmentInDvr(meta.riskAssessmentInDvr ?? "yes");
+    setFormManualPresent(meta.manualPresent ?? (meta.manualDocument ? "yes" : "yes"));
     setFormMaintenanceLogPresent(meta.maintenanceLogPresent ?? "yes");
     setFormInailCheckRequired(meta.inailCheckRequired ?? false);
     setFormInailSerial(meta.inailSerial || "");
@@ -306,6 +320,36 @@ export default function Step4AssetAttrezzature({
     setFormTechSheetDoc(meta.technicalSheetDocument);
     setFormCeDeclDoc(meta.ceDeclarationDocument);
     setShowMachineModal(true);
+  }
+
+  // Aggiornamento rapido con un clic dello stato documentale direttamente dalla scheda della macchina
+  async function handleQuickUpdateDocumentaryStatus(
+    m: Machine,
+    field: "ceCertificationPresent" | "installationCompliant" | "riskAssessmentInDvr" | "manualPresent",
+    value: "yes" | "no" | "na",
+  ) {
+    const meta = parseMachineMetadata(m.note);
+    const updatedMeta: MachineFullDetailsMetadata = {
+      ...meta,
+      [field]: value,
+    };
+    // Se la certificazione CE passa a "no", aggiorniamo coerentemente anche ceStatus
+    if (field === "ceCertificationPresent") {
+      if (value === "no") updatedMeta.ceStatus = "non_compliant";
+      else if (value === "yes" && meta.ceStatus === "non_compliant") updatedMeta.ceStatus = "ce_compliant";
+    }
+    const serialized = serializeMachineMetadata(updatedMeta);
+    try {
+      await updateMachine(token, m.id, {
+        note: serialized,
+      });
+      setMachines((prev) =>
+        prev.map((item) => (item.id === m.id ? { ...item, note: serialized } : item)),
+      );
+      setActionMessage(`✓ Requisito documentale aggiornato per "${m.name}".`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Errore aggiornamento requisito documentale");
+    }
   }
 
   // Eliminazione macchina
@@ -349,6 +393,9 @@ export default function Step4AssetAttrezzature({
         buildYear: formBuildYear,
         installationDate: formInstallationDate || undefined,
         ceStatus: formCeStatus,
+        ceCertificationPresent: formCeCertificationPresent,
+        installationCompliant: formInstallationCompliant,
+        riskAssessmentInDvr: formRiskAssessmentInDvr,
         manualPresent: formManualDoc ? "yes" : formManualPresent,
         maintenanceLogPresent: formMaintenanceLogPresent,
         inailCheckRequired: formInailCheckRequired,
@@ -501,8 +548,13 @@ export default function Step4AssetAttrezzature({
     }
   }
 
-  // Trova i controlli di sicurezza definiti nel catalogo per una macchina
-  function getChecksForMachine(m: Machine): MachineSafetyCheckDef[] {
+  // 1. Requisiti documentali obbligatori di legge (CE, Regola d'arte, DVR, Libretto uso e manutenzione)
+  function getDocumentaryChecksForMachine(m: Machine): MachineSafetyCheckDef[] {
+    return getMandatoryDocumentaryChecksForMachine(m.name);
+  }
+
+  // 2. Controlli tecnici operativi specifici della macchina (organi in movimento, carter, emergenza, ecc.)
+  function getSpecificSafetyChecksForMachine(m: Machine): MachineSafetyCheckDef[] {
     const meta = parseMachineMetadata(m.note);
     const custom = meta.customRequirements || [];
 
@@ -510,27 +562,11 @@ export default function Step4AssetAttrezzature({
       (t) => t.name.toLowerCase() === m.name.toLowerCase() || m.name.toLowerCase().includes(t.machineKey),
     );
 
-    const standard = matchedTemplate ? matchedTemplate.safetyChecks : [
-      {
-        code: "CE_CONFORMITY",
-        title: "Marcatura CE e Dichiarazione di Conformità",
-        question: `La macchina ${m.name} presenta marcatura CE visibile e leggibile, con targhetta identificativa del costruttore e dichiarazione di conformità CE/UE disponibile in azienda?`,
-        normReference: "D.Lgs. 81/2008, art. 70 c. 1; D.Lgs. 17/2010",
-        defaultSeverity: 3,
-        defaultSanctionable: true,
-      },
-      {
-        code: "USER_MANUAL",
-        title: "Libretto d'Uso e Manutenzione in Lingua Italiana",
-        question: `È presente in azienda e prontamente consultabile dagli operatori il manuale d'uso e manutenzione di ${m.name} redatto in lingua italiana?`,
-        normReference: "D.Lgs. 81/2008, art. 70 c. 2 e art. 73 c. 1",
-        defaultSeverity: 2,
-        defaultSanctionable: true,
-      },
+    const defaultSpecific: MachineSafetyCheckDef[] = [
       {
         code: "GUARDS_AND_INTERLOCKS",
         title: "Ripari e Dispositivi di Sicurezza Organi in Movimento",
-        question: `Tutti gli organi mobili e le zone di pericolo di ${m.name} sono dotati di ripari fissi o mobili, carter e microinterruttori di sicurezza efficienti contro il rischio di contatto o trascinamento?`,
+        question: `Tutti gli organi mobili e le zone di pericolo di ${m.name} sono dotati di ripari fissi o mobili, carter e microinterruttori di sicurezza efficienti contro il contatto o trascinamento?`,
         normReference: "D.Lgs. 81/2008, All. V, parte I, p. 6 e All. VI",
         defaultSeverity: 4,
         defaultSanctionable: true,
@@ -553,7 +589,13 @@ export default function Step4AssetAttrezzature({
       },
     ];
 
-    return [...standard, ...custom];
+    const specific = matchedTemplate ? matchedTemplate.safetyChecks : defaultSpecific;
+    return [...specific, ...custom];
+  }
+
+  // Tutti i controlli per la checklist (Requisiti Documentali + Controlli Tecnici Specifici)
+  function getChecksForMachine(m: Machine): MachineSafetyCheckDef[] {
+    return [...getDocumentaryChecksForMachine(m), ...getSpecificSafetyChecksForMachine(m)];
   }
 
   // Trova il requisito formativo obbligatorio collegato alla macchina
@@ -859,8 +901,16 @@ export default function Step4AssetAttrezzature({
           <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
             {machines.map((m) => {
               const meta = parseMachineMetadata(m.note);
-              const checks = getChecksForMachine(m);
+              const docChecks = getDocumentaryChecksForMachine(m);
+              const specChecks = getSpecificSafetyChecksForMachine(m);
+              const checks = [...docChecks, ...specChecks];
               const training = getTrainingForMachine(m);
+
+              // Valori correnti dei 4 requisiti documentali per la macchina
+              const ceStatusVal = meta.ceCertificationPresent ?? (meta.ceStatus === "non_compliant" ? "no" : "yes");
+              const instStatusVal = meta.installationCompliant ?? "yes";
+              const dvrStatusVal = meta.riskAssessmentInDvr ?? "yes";
+              const manualStatusVal = meta.manualPresent ?? (meta.manualDocument ? "yes" : "yes");
 
               const isIncludedInChecklist = existingChecklistItems.some(
                 (it) => it.area.toLowerCase() === `Sicurezza Macchine - ${m.name}`.toLowerCase(),
@@ -1012,182 +1062,389 @@ export default function Step4AssetAttrezzature({
                     </div>
                   </div>
 
-                  {/* Badge di Stato di Conformità (CE, Manuale, Registro, INAIL, Documenti Scansionati) */}
+                  {/* BOX REQUISITI DOCUMENTALI OBBLIGATORI (D.Lgs. 81/08 Titolo III) */}
                   <div
                     style={{
-                      display: "flex",
-                      gap: 10,
-                      alignItems: "center",
-                      flexWrap: "wrap",
-                      padding: "10px 14px",
                       backgroundColor: "#f8fafc",
+                      border: "1px solid #cbd5e1",
                       borderRadius: 8,
-                      border: "1px solid #e2e8f0",
+                      padding: "12px 14px",
                       marginBottom: 14,
                     }}
                   >
-                    {/* Marcatura CE */}
-                    <span
-                      style={{
-                        padding: "4px 8px",
-                        borderRadius: 4,
-                        fontSize: "12px",
-                        fontWeight: 700,
-                        backgroundColor:
-                          meta.ceStatus === "ce_compliant"
-                            ? "#dcfce7"
-                            : meta.ceStatus === "ante_ce_annex_v"
-                            ? "#fef3c7"
-                            : "#fee2e2",
-                        color:
-                          meta.ceStatus === "ce_compliant"
-                            ? "#15803d"
-                            : meta.ceStatus === "ante_ce_annex_v"
-                            ? "#92400e"
-                            : "#b91c1c",
-                      }}
-                    >
-                      {meta.ceStatus === "ce_compliant"
-                        ? "✅ Marcata CE (Direttiva Macchine)"
-                        : meta.ceStatus === "ante_ce_annex_v"
-                        ? "⚠️ Ante-CE (All. V D.Lgs. 81/08)"
-                        : "❌ Non a Norma (Manca Marcatura CE)"}
-                    </span>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, flexWrap: "wrap", gap: 6 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <span style={{ fontSize: "16px" }}>📄</span>
+                        <strong style={{ fontSize: "13px", color: "#0f172a" }}>
+                          Requisiti Documentali Obbligatori (D.Lgs. 81/08 Titolo III):
+                        </strong>
+                      </div>
+                      <span style={{ fontSize: "11px", color: "#64748b" }}>
+                        Clicca per impostare con un tocco lo stato di conformità (Sì / No / Non Applicabile)
+                      </span>
+                    </div>
 
-                    {/* Libretto Uso e Manutenzione (con supporto scansione allegata) */}
-                    {meta.manualDocument ? (
-                      <span
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                      {/* 1. Presenza Certificazione CE */}
+                      <div
                         style={{
-                          backgroundColor: "#f0fdf4",
-                          border: "1px solid #86efac",
-                          color: "#166534",
-                          padding: "3px 8px",
-                          borderRadius: 4,
-                          fontSize: "12px",
-                          display: "inline-flex",
+                          backgroundColor: "#fff",
+                          border: `1px solid ${ceStatusVal === "yes" ? "#86efac" : ceStatusVal === "no" ? "#fca5a5" : "#cbd5e1"}`,
+                          borderRadius: 6,
+                          padding: "8px 10px",
+                          display: "flex",
+                          justifyContent: "space-between",
                           alignItems: "center",
+                          flexWrap: "wrap",
                           gap: 6,
                         }}
                       >
-                        📖 Libretto d&apos;Uso: <strong>{meta.manualDocument.fileName}</strong>
-                        <button
-                          type="button"
-                          onClick={() => handleOpenDocument(meta.manualDocument)}
-                          style={{
-                            border: "none",
-                            backgroundColor: "#16a34a",
-                            color: "#fff",
-                            padding: "2px 6px",
-                            borderRadius: 4,
-                            fontSize: "11px",
-                            cursor: "pointer",
-                            fontWeight: 700,
-                          }}
-                          title="Visualizza scansione libretto"
-                        >
-                          👁️ Apri Scansione
-                        </button>
-                      </span>
-                    ) : (
-                      <span style={{ fontSize: "12px", color: meta.manualPresent === "yes" ? "#166534" : "#991b1b" }}>
-                        📖 Libretto d&apos;Uso: <strong>{meta.manualPresent === "yes" ? "Cartaceo presente" : "Assente"}</strong>
-                      </span>
-                    )}
+                        <div>
+                          <div style={{ fontSize: "12px", fontWeight: 700, color: "#1e293b" }}>
+                            1. Certificazione / Marcatura CE
+                          </div>
+                          <div style={{ fontSize: "11px", color: "#64748b" }}>
+                            {meta.ceStatus === "ce_compliant" ? "Marcata CE (Direttiva Macchine)" : meta.ceStatus === "ante_ce_annex_v" ? "Ante-CE (All. V D.Lgs. 81/08)" : "Marcatura non conforme"}
+                          </div>
+                          {meta.ceDeclarationDocument && (
+                            <button
+                              type="button"
+                              onClick={() => handleOpenDocument(meta.ceDeclarationDocument)}
+                              style={{ marginTop: 4, padding: "2px 6px", fontSize: "10px", borderRadius: 4, border: "none", backgroundColor: "#7c3aed", color: "#fff", cursor: "pointer", fontWeight: 600 }}
+                            >
+                              🛡️ Apri Dichiarazione CE ({meta.ceDeclarationDocument.fileName})
+                            </button>
+                          )}
+                        </div>
 
-                    {/* Scheda Tecnica del Costruttore Scansionata */}
-                    {meta.technicalSheetDocument && (
-                      <span
+                        <div style={{ display: "flex", gap: 4 }}>
+                          <button
+                            type="button"
+                            disabled={isInspectionValidated}
+                            onClick={() => handleQuickUpdateDocumentaryStatus(m, "ceCertificationPresent", "yes")}
+                            style={{
+                              padding: "4px 8px",
+                              borderRadius: 4,
+                              fontSize: "11px",
+                              fontWeight: 700,
+                              cursor: "pointer",
+                              border: ceStatusVal === "yes" ? "1px solid #16a34a" : "1px solid #cbd5e1",
+                              backgroundColor: ceStatusVal === "yes" ? "#dcfce7" : "#fff",
+                              color: ceStatusVal === "yes" ? "#15803d" : "#64748b",
+                            }}
+                          >
+                            ✓ Sì
+                          </button>
+                          <button
+                            type="button"
+                            disabled={isInspectionValidated}
+                            onClick={() => handleQuickUpdateDocumentaryStatus(m, "ceCertificationPresent", "no")}
+                            style={{
+                              padding: "4px 8px",
+                              borderRadius: 4,
+                              fontSize: "11px",
+                              fontWeight: 700,
+                              cursor: "pointer",
+                              border: ceStatusVal === "no" ? "1px solid #dc2626" : "1px solid #cbd5e1",
+                              backgroundColor: ceStatusVal === "no" ? "#fee2e2" : "#fff",
+                              color: ceStatusVal === "no" ? "#b91c1c" : "#64748b",
+                            }}
+                          >
+                            ✗ No
+                          </button>
+                          <button
+                            type="button"
+                            disabled={isInspectionValidated}
+                            onClick={() => handleQuickUpdateDocumentaryStatus(m, "ceCertificationPresent", "na")}
+                            style={{
+                              padding: "4px 8px",
+                              borderRadius: 4,
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              cursor: "pointer",
+                              border: ceStatusVal === "na" ? "1px solid #64748b" : "1px solid #cbd5e1",
+                              backgroundColor: ceStatusVal === "na" ? "#f1f5f9" : "#fff",
+                              color: ceStatusVal === "na" ? "#334155" : "#64748b",
+                            }}
+                          >
+                            — N/A
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* 2. Installazione a Regola d'Arte */}
+                      <div
                         style={{
-                          backgroundColor: "#eff6ff",
-                          border: "1px solid #93c5fd",
-                          color: "#1e40af",
-                          padding: "3px 8px",
-                          borderRadius: 4,
-                          fontSize: "12px",
-                          display: "inline-flex",
+                          backgroundColor: "#fff",
+                          border: `1px solid ${instStatusVal === "yes" ? "#86efac" : instStatusVal === "no" ? "#fca5a5" : "#cbd5e1"}`,
+                          borderRadius: 6,
+                          padding: "8px 10px",
+                          display: "flex",
+                          justifyContent: "space-between",
                           alignItems: "center",
+                          flexWrap: "wrap",
                           gap: 6,
                         }}
                       >
-                        📄 Scheda Tecnica: <strong>{meta.technicalSheetDocument.fileName}</strong>
-                        <button
-                          type="button"
-                          onClick={() => handleOpenDocument(meta.technicalSheetDocument)}
-                          style={{
-                            border: "none",
-                            backgroundColor: "#2563eb",
-                            color: "#fff",
-                            padding: "2px 6px",
-                            borderRadius: 4,
-                            fontSize: "11px",
-                            cursor: "pointer",
-                            fontWeight: 700,
-                          }}
-                          title="Visualizza scansione scheda tecnica"
-                        >
-                          👁️ Apri Scheda
-                        </button>
-                      </span>
-                    )}
+                        <div>
+                          <div style={{ fontSize: "12px", fontWeight: 700, color: "#1e293b" }}>
+                            2. Installazione a Regola d&apos;Arte
+                          </div>
+                          <div style={{ fontSize: "11px", color: "#64748b" }}>
+                            art. 71 c. 3 — Fissaggi, allacciamenti e spazi idonei a norma
+                          </div>
+                        </div>
 
-                    {/* Dichiarazione CE Scansionata */}
-                    {meta.ceDeclarationDocument && (
-                      <span
+                        <div style={{ display: "flex", gap: 4 }}>
+                          <button
+                            type="button"
+                            disabled={isInspectionValidated}
+                            onClick={() => handleQuickUpdateDocumentaryStatus(m, "installationCompliant", "yes")}
+                            style={{
+                              padding: "4px 8px",
+                              borderRadius: 4,
+                              fontSize: "11px",
+                              fontWeight: 700,
+                              cursor: "pointer",
+                              border: instStatusVal === "yes" ? "1px solid #16a34a" : "1px solid #cbd5e1",
+                              backgroundColor: instStatusVal === "yes" ? "#dcfce7" : "#fff",
+                              color: instStatusVal === "yes" ? "#15803d" : "#64748b",
+                            }}
+                          >
+                            ✓ Sì
+                          </button>
+                          <button
+                            type="button"
+                            disabled={isInspectionValidated}
+                            onClick={() => handleQuickUpdateDocumentaryStatus(m, "installationCompliant", "no")}
+                            style={{
+                              padding: "4px 8px",
+                              borderRadius: 4,
+                              fontSize: "11px",
+                              fontWeight: 700,
+                              cursor: "pointer",
+                              border: instStatusVal === "no" ? "1px solid #dc2626" : "1px solid #cbd5e1",
+                              backgroundColor: instStatusVal === "no" ? "#fee2e2" : "#fff",
+                              color: instStatusVal === "no" ? "#b91c1c" : "#64748b",
+                            }}
+                          >
+                            ✗ No
+                          </button>
+                          <button
+                            type="button"
+                            disabled={isInspectionValidated}
+                            onClick={() => handleQuickUpdateDocumentaryStatus(m, "installationCompliant", "na")}
+                            style={{
+                              padding: "4px 8px",
+                              borderRadius: 4,
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              cursor: "pointer",
+                              border: instStatusVal === "na" ? "1px solid #64748b" : "1px solid #cbd5e1",
+                              backgroundColor: instStatusVal === "na" ? "#f1f5f9" : "#fff",
+                              color: instStatusVal === "na" ? "#334155" : "#64748b",
+                            }}
+                          >
+                            — N/A
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* 3. Valutazione Rischi Inserita nel DVR */}
+                      <div
                         style={{
-                          backgroundColor: "#faf5ff",
-                          border: "1px solid #d8b4fe",
-                          color: "#6b21a8",
-                          padding: "3px 8px",
-                          borderRadius: 4,
-                          fontSize: "12px",
-                          display: "inline-flex",
+                          backgroundColor: "#fff",
+                          border: `1px solid ${dvrStatusVal === "yes" ? "#86efac" : dvrStatusVal === "no" ? "#fca5a5" : "#cbd5e1"}`,
+                          borderRadius: 6,
+                          padding: "8px 10px",
+                          display: "flex",
+                          justifyContent: "space-between",
                           alignItems: "center",
+                          flexWrap: "wrap",
                           gap: 6,
                         }}
                       >
-                        🛡️ Dichiarazione CE: <strong>{meta.ceDeclarationDocument.fileName}</strong>
-                        <button
-                          type="button"
-                          onClick={() => handleOpenDocument(meta.ceDeclarationDocument)}
-                          style={{
-                            border: "none",
-                            backgroundColor: "#9333ea",
-                            color: "#fff",
-                            padding: "2px 6px",
-                            borderRadius: 4,
-                            fontSize: "11px",
-                            cursor: "pointer",
-                            fontWeight: 700,
-                          }}
-                        >
-                          👁️ Apri
-                        </button>
-                      </span>
-                    )}
+                        <div>
+                          <div style={{ fontSize: "12px", fontWeight: 700, color: "#1e293b" }}>
+                            3. Valutazione Rischi Inserita nel DVR
+                          </div>
+                          <div style={{ fontSize: "11px", color: "#64748b" }}>
+                            art. 17 e 28 — Rischi d&apos;uso, manutenzione e pulizia valutati nel DVR
+                          </div>
+                        </div>
 
-                    {/* Registro Manutenzioni */}
-                    <span style={{ fontSize: "12px", color: meta.maintenanceLogPresent === "yes" ? "#166534" : "#991b1b" }}>
-                      🛠️ Registro Controlli: <strong>{meta.maintenanceLogPresent === "yes" ? "Aggiornato" : "Assente / Non tenuto"}</strong>
-                    </span>
+                        <div style={{ display: "flex", gap: 4 }}>
+                          <button
+                            type="button"
+                            disabled={isInspectionValidated}
+                            onClick={() => handleQuickUpdateDocumentaryStatus(m, "riskAssessmentInDvr", "yes")}
+                            style={{
+                              padding: "4px 8px",
+                              borderRadius: 4,
+                              fontSize: "11px",
+                              fontWeight: 700,
+                              cursor: "pointer",
+                              border: dvrStatusVal === "yes" ? "1px solid #16a34a" : "1px solid #cbd5e1",
+                              backgroundColor: dvrStatusVal === "yes" ? "#dcfce7" : "#fff",
+                              color: dvrStatusVal === "yes" ? "#15803d" : "#64748b",
+                            }}
+                          >
+                            ✓ Sì
+                          </button>
+                          <button
+                            type="button"
+                            disabled={isInspectionValidated}
+                            onClick={() => handleQuickUpdateDocumentaryStatus(m, "riskAssessmentInDvr", "no")}
+                            style={{
+                              padding: "4px 8px",
+                              borderRadius: 4,
+                              fontSize: "11px",
+                              fontWeight: 700,
+                              cursor: "pointer",
+                              border: dvrStatusVal === "no" ? "1px solid #dc2626" : "1px solid #cbd5e1",
+                              backgroundColor: dvrStatusVal === "no" ? "#fee2e2" : "#fff",
+                              color: dvrStatusVal === "no" ? "#b91c1c" : "#64748b",
+                            }}
+                          >
+                            ✗ No
+                          </button>
+                          <button
+                            type="button"
+                            disabled={isInspectionValidated}
+                            onClick={() => handleQuickUpdateDocumentaryStatus(m, "riskAssessmentInDvr", "na")}
+                            style={{
+                              padding: "4px 8px",
+                              borderRadius: 4,
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              cursor: "pointer",
+                              border: dvrStatusVal === "na" ? "1px solid #64748b" : "1px solid #cbd5e1",
+                              backgroundColor: dvrStatusVal === "na" ? "#f1f5f9" : "#fff",
+                              color: dvrStatusVal === "na" ? "#334155" : "#64748b",
+                            }}
+                          >
+                            — N/A
+                          </button>
+                        </div>
+                      </div>
 
-                    {/* Verifica Periodica INAIL */}
-                    {meta.inailCheckRequired && (
-                      <span
+                      {/* 4. Presenza Libretto Uso e Manutenzione */}
+                      <div
                         style={{
-                          backgroundColor: "#eff6ff",
-                          border: "1px solid #bfdbfe",
-                          color: "#1e40af",
-                          padding: "2px 8px",
-                          borderRadius: 4,
-                          fontSize: "12px",
-                          fontWeight: 600,
+                          backgroundColor: "#fff",
+                          border: `1px solid ${manualStatusVal === "yes" ? "#86efac" : manualStatusVal === "no" ? "#fca5a5" : "#cbd5e1"}`,
+                          borderRadius: 6,
+                          padding: "8px 10px",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          flexWrap: "wrap",
+                          gap: 6,
                         }}
                       >
-                        🔍 Verifica Periodica INAIL (art. 71 c. 11):{" "}
-                        {meta.inailSerial ? `Matr. ${meta.inailSerial}` : "Attiva"}{" "}
-                        {meta.inailNextCheckDate ? `(Scad: ${meta.inailNextCheckDate})` : ""}
-                      </span>
-                    )}
+                        <div>
+                          <div style={{ fontSize: "12px", fontWeight: 700, color: "#1e293b" }}>
+                            4. Libretto d&apos;Uso e Manutenzione
+                          </div>
+                          <div style={{ fontSize: "11px", color: "#64748b" }}>
+                            art. 70 c. 2 — Manuale in italiano disponibile e consultabile
+                          </div>
+                          {meta.manualDocument && (
+                            <button
+                              type="button"
+                              onClick={() => handleOpenDocument(meta.manualDocument)}
+                              style={{ marginTop: 4, padding: "2px 6px", fontSize: "10px", borderRadius: 4, border: "none", backgroundColor: "#16a34a", color: "#fff", cursor: "pointer", fontWeight: 600 }}
+                            >
+                              📖 Apri Libretto Scansionato ({meta.manualDocument.fileName})
+                            </button>
+                          )}
+                        </div>
+
+                        <div style={{ display: "flex", gap: 4 }}>
+                          <button
+                            type="button"
+                            disabled={isInspectionValidated}
+                            onClick={() => handleQuickUpdateDocumentaryStatus(m, "manualPresent", "yes")}
+                            style={{
+                              padding: "4px 8px",
+                              borderRadius: 4,
+                              fontSize: "11px",
+                              fontWeight: 700,
+                              cursor: "pointer",
+                              border: manualStatusVal === "yes" ? "1px solid #16a34a" : "1px solid #cbd5e1",
+                              backgroundColor: manualStatusVal === "yes" ? "#dcfce7" : "#fff",
+                              color: manualStatusVal === "yes" ? "#15803d" : "#64748b",
+                            }}
+                          >
+                            ✓ Sì
+                          </button>
+                          <button
+                            type="button"
+                            disabled={isInspectionValidated}
+                            onClick={() => handleQuickUpdateDocumentaryStatus(m, "manualPresent", "no")}
+                            style={{
+                              padding: "4px 8px",
+                              borderRadius: 4,
+                              fontSize: "11px",
+                              fontWeight: 700,
+                              cursor: "pointer",
+                              border: manualStatusVal === "no" ? "1px solid #dc2626" : "1px solid #cbd5e1",
+                              backgroundColor: manualStatusVal === "no" ? "#fee2e2" : "#fff",
+                              color: manualStatusVal === "no" ? "#b91c1c" : "#64748b",
+                            }}
+                          >
+                            ✗ No
+                          </button>
+                          <button
+                            type="button"
+                            disabled={isInspectionValidated}
+                            onClick={() => handleQuickUpdateDocumentaryStatus(m, "manualPresent", "na")}
+                            style={{
+                              padding: "4px 8px",
+                              borderRadius: 4,
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              cursor: "pointer",
+                              border: manualStatusVal === "na" ? "1px solid #64748b" : "1px solid #cbd5e1",
+                              backgroundColor: manualStatusVal === "na" ? "#f1f5f9" : "#fff",
+                              color: manualStatusVal === "na" ? "#334155" : "#64748b",
+                            }}
+                          >
+                            — N/A
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Dettagli Aggiuntivi: Registro Manutenzioni, Scheda Tecnica, INAIL */}
+                    <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", marginTop: 10, paddingTop: 8, borderTop: "1px dashed #cbd5e1", fontSize: "12px", color: "#475569" }}>
+                      <div>
+                        🛠️ <strong>Registro Controlli e Manutenzioni:</strong>{" "}
+                        <span style={{ fontWeight: 600, color: meta.maintenanceLogPresent === "yes" ? "#16a34a" : meta.maintenanceLogPresent === "expired" ? "#d97706" : "#dc2626" }}>
+                          {meta.maintenanceLogPresent === "yes" ? "Compilato e Aggiornato" : meta.maintenanceLogPresent === "expired" ? "Non Aggiornato" : "Assente"}
+                        </span>
+                      </div>
+
+                      {meta.technicalSheetDocument && (
+                        <div>
+                          📄 <strong>Scheda Tecnica:</strong> {meta.technicalSheetDocument.fileName}{" "}
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDocument(meta.technicalSheetDocument)}
+                            style={{ border: "none", backgroundColor: "#2563eb", color: "#fff", padding: "1px 6px", borderRadius: 4, fontSize: "10px", cursor: "pointer", fontWeight: 600 }}
+                          >
+                            👁️ Apri
+                          </button>
+                        </div>
+                      )}
+
+                      {meta.inailCheckRequired && (
+                        <div style={{ color: "#0369a1", fontWeight: 600 }}>
+                          🔍 <strong>Verifica Periodica INAIL (art. 71 c. 11):</strong> {meta.inailSerial ? `Matr. ${meta.inailSerial}` : "Attiva"}{" "}
+                          {meta.inailNextCheckDate ? `(Scad. ${meta.inailNextCheckDate})` : ""}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* BOX LAVORATORI ABILITATI ALL'USO DEL MACCHINARIO */}
@@ -1386,30 +1643,74 @@ export default function Step4AssetAttrezzature({
                       </div>
                     </div>
 
-                    <div style={{ display: "grid", gap: 6 }}>
-                      {checks.map((chk, cidx) => (
-                        <div
-                          key={chk.code || cidx}
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            gap: 12,
-                            padding: "6px 10px",
-                            backgroundColor: "#f8fafc",
-                            borderRadius: 6,
-                            border: "1px solid #f1f5f9",
-                            fontSize: "12px",
-                          }}
-                        >
-                          <div style={{ flex: 1 }}>
-                            <strong>{chk.title}:</strong> {chk.question}
-                          </div>
-                          <span style={{ color: "#64748b", fontStyle: "italic", whiteSpace: "nowrap", fontSize: "11px" }}>
-                            {chk.normReference}
-                          </span>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                      {/* Gruppo 1: Requisiti Documentali Obbligatori */}
+                      <div>
+                        <div style={{ fontSize: "12px", fontWeight: 700, color: "#1e293b", marginBottom: 6, display: "flex", alignItems: "center", gap: 6 }}>
+                          <span>📄</span>
+                          <span>Requisiti Documentali di Legge ({docChecks.length} controlli):</span>
                         </div>
-                      ))}
+                        <div style={{ display: "grid", gap: 6 }}>
+                          {docChecks.map((chk, cidx) => (
+                            <div
+                              key={`doc_${chk.code || cidx}`}
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                gap: 12,
+                                padding: "6px 10px",
+                                backgroundColor: "#f0f9ff",
+                                borderRadius: 6,
+                                border: "1px solid #bae6fd",
+                                fontSize: "12px",
+                              }}
+                            >
+                              <div style={{ flex: 1 }}>
+                                <strong style={{ color: "#0369a1" }}>{chk.title}:</strong> {chk.question}
+                              </div>
+                              <span style={{ color: "#0284c7", fontStyle: "italic", whiteSpace: "nowrap", fontSize: "11px", fontWeight: 600 }}>
+                                {chk.normReference}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Gruppo 2: Requisiti Operativi Specifici di Sicurezza */}
+                      {specChecks.length > 0 && (
+                        <div>
+                          <div style={{ fontSize: "12px", fontWeight: 700, color: "#1e293b", marginBottom: 6, display: "flex", alignItems: "center", gap: 6 }}>
+                            <span>🛡️</span>
+                            <span>Requisiti Operativi Specifici di Sicurezza ({specChecks.length} controlli):</span>
+                          </div>
+                          <div style={{ display: "grid", gap: 6 }}>
+                            {specChecks.map((chk, cidx) => (
+                              <div
+                                key={`spec_${chk.code || cidx}`}
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  alignItems: "center",
+                                  gap: 12,
+                                  padding: "6px 10px",
+                                  backgroundColor: "#f8fafc",
+                                  borderRadius: 6,
+                                  border: "1px solid #e2e8f0",
+                                  fontSize: "12px",
+                                }}
+                              >
+                                <div style={{ flex: 1 }}>
+                                  <strong>{chk.title}:</strong> {chk.question}
+                                </div>
+                                <span style={{ color: "#64748b", fontStyle: "italic", whiteSpace: "nowrap", fontSize: "11px" }}>
+                                  {chk.normReference}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1643,48 +1944,123 @@ export default function Step4AssetAttrezzature({
                 </div>
               </div>
 
-              {/* Marcatura CE e Documenti di Bordo */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#374151", marginBottom: 4 }}>
-                    Marcatura CE (Direttiva Macchine)
-                  </label>
-                  <select
-                    value={formCeStatus}
-                    onChange={(e) => setFormCeStatus(e.target.value as any)}
-                    style={{ width: "100%", padding: "7px 10px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: "13px" }}
-                  >
-                    <option value="ce_compliant">✅ Marcata CE (con Dichiarazione CE)</option>
-                    <option value="ante_ce_annex_v">⚠️ Ante-CE (All. V D.Lgs. 81/08)</option>
-                    <option value="non_compliant">❌ Non Conforme (Senza Marcatura)</option>
-                  </select>
+              {/* REQUISITI DOCUMENTALI OBBLIGATORI (D.Lgs. 81/08 Titolo III) */}
+              <div
+                style={{
+                  backgroundColor: "#f8fafc",
+                  border: "1px solid #cbd5e1",
+                  borderRadius: 8,
+                  padding: "12px 14px",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+                  <span style={{ fontSize: "15px" }}>📄</span>
+                  <span style={{ fontSize: "13px", fontWeight: 700, color: "#0f172a" }}>
+                    Requisiti Documentali Obbligatori (D.Lgs. 81/08 Titolo III)
+                  </span>
                 </div>
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#374151", marginBottom: 4 }}>
-                    Manuale d'Uso e Manutenzione
-                  </label>
-                  <select
-                    value={formManualPresent}
-                    onChange={(e) => setFormManualPresent(e.target.value as any)}
-                    style={{ width: "100%", padding: "7px 10px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: "13px" }}
-                  >
-                    <option value="yes">✅ Presente in lingua italiana</option>
-                    <option value="no">❌ Assente / Non reperibile</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#374151", marginBottom: 4 }}>
-                    Registro Controlli e Manutenzioni
-                  </label>
-                  <select
-                    value={formMaintenanceLogPresent}
-                    onChange={(e) => setFormMaintenanceLogPresent(e.target.value as any)}
-                    style={{ width: "100%", padding: "7px 10px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: "13px" }}
-                  >
-                    <option value="yes">✅ Compilato e aggiornato</option>
-                    <option value="expired">⚠️ Non aggiornato</option>
-                    <option value="no">❌ Assente</option>
-                  </select>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  {/* 1. Certificazione CE */}
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#374151", marginBottom: 4 }}>
+                      1. Certificazione / Dichiarazione CE
+                    </label>
+                    <select
+                      value={formCeCertificationPresent}
+                      onChange={(e) => {
+                        const val = e.target.value as "yes" | "no" | "na";
+                        setFormCeCertificationPresent(val);
+                        if (val === "no") setFormCeStatus("non_compliant");
+                        else if (val === "yes" && formCeStatus === "non_compliant") setFormCeStatus("ce_compliant");
+                      }}
+                      style={{ width: "100%", padding: "7px 10px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: "13px" }}
+                    >
+                      <option value="yes">✅ Sì (Conforme / Presente)</option>
+                      <option value="no">❌ No (Assente / Carente)</option>
+                      <option value="na">⚪ Non Applicabile</option>
+                    </select>
+                  </div>
+
+                  {/* Stato Tecnico Marcatura */}
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#374151", marginBottom: 4 }}>
+                      Stato Marcatura (Direttiva Macchine)
+                    </label>
+                    <select
+                      value={formCeStatus}
+                      onChange={(e) => setFormCeStatus(e.target.value as any)}
+                      style={{ width: "100%", padding: "7px 10px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: "13px" }}
+                    >
+                      <option value="ce_compliant">Marcata CE (Direttiva Macchine)</option>
+                      <option value="ante_ce_annex_v">Ante-CE (Adeguata ad All. V D.Lgs. 81/08)</option>
+                      <option value="non_compliant">Non Conforme / Manca Marcatura</option>
+                    </select>
+                  </div>
+
+                  {/* 2. Installazione a Regola d'Arte */}
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#374151", marginBottom: 4 }}>
+                      2. Installazione a Regola d&apos;Arte (art. 71 c. 3)
+                    </label>
+                    <select
+                      value={formInstallationCompliant}
+                      onChange={(e) => setFormInstallationCompliant(e.target.value as "yes" | "no" | "na")}
+                      style={{ width: "100%", padding: "7px 10px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: "13px" }}
+                    >
+                      <option value="yes">✅ Sì (Installata a regola d&apos;arte)</option>
+                      <option value="no">❌ No (Non a regola d&apos;arte / Difetti)</option>
+                      <option value="na">⚪ Non Applicabile</option>
+                    </select>
+                  </div>
+
+                  {/* 3. Valutazione Rischi Inserita nel DVR */}
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#374151", marginBottom: 4 }}>
+                      3. Valutazione Rischi Inserita nel DVR (art. 28)
+                    </label>
+                    <select
+                      value={formRiskAssessmentInDvr}
+                      onChange={(e) => setFormRiskAssessmentInDvr(e.target.value as "yes" | "no" | "na")}
+                      style={{ width: "100%", padding: "7px 10px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: "13px" }}
+                    >
+                      <option value="yes">✅ Sì (Valutata e presente nel DVR)</option>
+                      <option value="no">❌ No (Non inserita / Non valutata)</option>
+                      <option value="na">⚪ Non Applicabile</option>
+                    </select>
+                  </div>
+
+                  {/* 4. Libretto Uso e Manutenzione */}
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#374151", marginBottom: 4 }}>
+                      4. Libretto d&apos;Uso e Manutenzione (in Italiano)
+                    </label>
+                    <select
+                      value={formManualPresent}
+                      onChange={(e) => setFormManualPresent(e.target.value as "yes" | "no" | "na")}
+                      style={{ width: "100%", padding: "7px 10px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: "13px" }}
+                    >
+                      <option value="yes">✅ Sì (Disponibile in lingua italiana)</option>
+                      <option value="no">❌ No (Assente / Non reperibile)</option>
+                      <option value="na">⚪ Non Applicabile</option>
+                    </select>
+                  </div>
+
+                  {/* Registro Manutenzioni */}
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#374151", marginBottom: 4 }}>
+                      Registro Controlli e Manutenzioni
+                    </label>
+                    <select
+                      value={formMaintenanceLogPresent}
+                      onChange={(e) => setFormMaintenanceLogPresent(e.target.value as any)}
+                      style={{ width: "100%", padding: "7px 10px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: "13px" }}
+                    >
+                      <option value="yes">✅ Compilato e aggiornato</option>
+                      <option value="expired">⚠️ Non aggiornato</option>
+                      <option value="no">❌ Assente</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
