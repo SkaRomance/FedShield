@@ -16,6 +16,7 @@ import {
   classifyDocumentCategory,
   DocumentCategory,
   DOCUMENT_CATEGORIES_INFO,
+  filterDocumentsForAteco,
   findCatalogDefinition,
   isCategoryApplicableForAteco,
   MinimumContentItem,
@@ -42,13 +43,17 @@ export default function Step1Documenti({
   atecoCode,
   checklistMode,
 }: Step1DocumentiProps) {
-  // Stato espansione sezioni accordion
+  // Stato espansione sezioni accordion: CHIUSE DI DEFAULT come richiesto per evitare disordine visivo
   const [openSections, setOpenSections] = useState<Record<DocumentCategory, boolean>>({
-    base_autorizzativa: true,
-    haccp_alimentare: true,
-    sicurezza_81_08: true,
-    acque_legionella: true,
+    base_autorizzativa: false,
+    haccp_alimentare: false,
+    sicurezza_81_08: false,
+    acque_legionella: false,
+    matrici_ambientali: false,
   });
+
+  // Filtro ATECO: di default attivo (mostra solo documenti pertinenti), con interruttore per visualizzare tutto il catalogo
+  const [showAllDocuments, setShowAllDocuments] = useState(false);
 
   // Ricerca e filtro rapido
   const [searchQuery, setSearchQuery] = useState("");
@@ -75,6 +80,7 @@ export default function Step1Documenti({
       haccp_alimentare: true,
       sicurezza_81_08: true,
       acque_legionella: true,
+      matrici_ambientali: true,
     });
   }
 
@@ -84,6 +90,7 @@ export default function Step1Documenti({
       haccp_alimentare: false,
       sicurezza_81_08: false,
       acque_legionella: false,
+      matrici_ambientali: false,
     });
   }
 
@@ -96,7 +103,7 @@ export default function Step1Documenti({
     return map;
   }, [documents]);
 
-  // Lista unificata completa (catalogo normativo + eventuali custom dell'ispezione)
+  // Lista unificata completa (catalogo normativo filtrato per ATECO + eventuali custom dell'ispezione)
   const unifiedDocumentList = useMemo(() => {
     const list: Array<{
       definition?: NormativeDocumentDefinition;
@@ -112,8 +119,12 @@ export default function Step1Documenti({
 
     const seenNames = new Set<string>();
 
-    // 1. Prima tutti i documenti del catalogo normativo
-    for (const def of NORMATIVE_DOCUMENTS_CATALOG) {
+    // 1. Catalogo normativo (filtrato dinamicamente per Codice ATECO o catalogo completo se toggled)
+    const catalogSource = showAllDocuments
+      ? NORMATIVE_DOCUMENTS_CATALOG
+      : filterDocumentsForAteco(NORMATIVE_DOCUMENTS_CATALOG, atecoCode, checklistMode);
+
+    for (const def of catalogSource) {
       const lower = def.name.toLowerCase().trim();
       seenNames.add(lower);
       const existing = existingDocsMap.get(lower);
@@ -131,29 +142,37 @@ export default function Step1Documenti({
       });
     }
 
-    // 2. Poi i documenti aggiunti o presenti nell'ispezione non presenti nel catalogo
+    // 2. Documenti presenti nell'ispezione:
+    // Se un documento fa parte del catalogo generale ma è escluso dal filtro ATECO,
+    // viene mostrato SOLO se il consulente lo ha già compilato (status !== not_available && status !== not_applicable)
+    // Se è un documento personalizzato inserito manualmente (!catalogDef), viene sempre mostrato.
     for (const doc of documents) {
       const lower = doc.name.toLowerCase().trim();
       if (!seenNames.has(lower)) {
-        seenNames.add(lower);
-        const def = findCatalogDefinition(doc.name);
-        const cat = def ? def.category : classifyDocumentCategory(doc.name);
-        list.push({
-          definition: def,
-          name: doc.name,
-          category: cat,
-          normReference: def?.normReference ?? "Specifica aziendale",
-          description: def?.description ?? "Documento rilevato in sede di sopralluogo",
-          isRequired: doc.isRequired,
-          status: doc.status,
-          note: doc.note ?? "",
-          rawDoc: doc,
-        });
+        const catalogDef = findCatalogDefinition(doc.name);
+        const hasBeenAnswered = doc.status !== "not_available" && doc.status !== "not_applicable";
+        const isCustomDoc = !catalogDef;
+
+        if (isCustomDoc || hasBeenAnswered || showAllDocuments) {
+          seenNames.add(lower);
+          const cat = catalogDef ? catalogDef.category : classifyDocumentCategory(doc.name);
+          list.push({
+            definition: catalogDef,
+            name: doc.name,
+            category: cat,
+            normReference: catalogDef?.normReference ?? "Specifica aziendale",
+            description: catalogDef?.description ?? "Documento rilevato in sede di sopralluogo",
+            isRequired: doc.isRequired,
+            status: doc.status,
+            note: doc.note ?? "",
+            rawDoc: doc,
+          });
+        }
       }
     }
 
     return list;
-  }, [existingDocsMap, documents]);
+  }, [existingDocsMap, documents, atecoCode, checklistMode, showAllDocuments]);
 
   // Aggiorna o inserisce un documento nello stato documents
   function updateDocumentItem(
@@ -331,6 +350,7 @@ export default function Step1Documenti({
       haccp_alimentare: [],
       sicurezza_81_08: [],
       acque_legionella: [],
+      matrici_ambientali: [],
     };
 
     for (const doc of filteredDocuments) {
@@ -345,19 +365,63 @@ export default function Step1Documenti({
     "haccp_alimentare",
     "sicurezza_81_08",
     "acque_legionella",
+    "matrici_ambientali",
   ];
 
   return (
     <div className="panel section-panel" style={{ padding: "20px" }}>
       {/* Header principale */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16, marginBottom: 20 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16, marginBottom: 16 }}>
         <div>
           <h3 style={{ margin: "0 0 6px 0", fontSize: "22px", color: "var(--color-primary, #0f172a)" }}>
             Checklist Documentale Completa
           </h3>
           <p style={{ margin: 0, color: "#64748b", fontSize: "14px" }}>
-            Verifica puntuale dei titoli autorizzativi, igiene alimentare HACCP, sicurezza sul lavoro (D.Lgs. 81/08) e piano acque (D.Lgs. 18/23).
+            Verifica puntuale dei titoli autorizzativi, igiene alimentare HACCP, sicurezza sul lavoro (D.Lgs. 81/08), piano acque e matrici ambientali.
           </p>
+
+          {/* Barra info dinamica ATECO e toggle catalogo */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginTop: 10 }}>
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: "12px",
+                padding: "3px 10px",
+                borderRadius: "16px",
+                backgroundColor: atecoCode ? "#eff6ff" : "#f1f5f9",
+                color: atecoCode ? "#1e40af" : "#475569",
+                border: "1px solid",
+                borderColor: atecoCode ? "#bfdbfe" : "#cbd5e1",
+                fontWeight: 600,
+              }}
+            >
+              🏷️ {atecoCode ? `ATECO Azienda: ${atecoCode}` : "ATECO: Non specificato"}
+            </span>
+
+            <button
+              type="button"
+              onClick={() => setShowAllDocuments((prev) => !prev)}
+              style={{
+                fontSize: "12px",
+                padding: "3px 10px",
+                borderRadius: "16px",
+                border: "1px solid",
+                borderColor: showAllDocuments ? "#f59e0b" : "#cbd5e1",
+                backgroundColor: showAllDocuments ? "#fffbeb" : "#fff",
+                color: showAllDocuments ? "#b45309" : "#334155",
+                cursor: "pointer",
+                fontWeight: 500,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 4,
+              }}
+              title="Alterna tra i soli documenti pertinenti per questo codice ATECO e l'intero catalogo normativo"
+            >
+              {showAllDocuments ? "📂 Mostra solo applicabili per ATECO" : "🌐 Mostra catalogo completo (tutti i settori)"}
+            </button>
+          </div>
         </div>
 
         {/* Pulsante aggiunta documento custom */}
@@ -496,7 +560,7 @@ export default function Step1Documenti({
         </div>
       </div>
 
-      {/* Le 4 Sezioni Accordion */}
+      {/* Le 5 Sezioni Accordion */}
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         {categoriesOrder.map((catKey) => {
           const catInfo = DOCUMENT_CATEGORIES_INFO[catKey];
@@ -667,6 +731,21 @@ export default function Step1Documenti({
                                       }}
                                     >
                                       OBBLIGATORIO
+                                    </span>
+                                  )}
+                                  {docItem.definition?.isLaboratoryTestReport && (
+                                    <span
+                                      style={{
+                                        fontSize: "10px",
+                                        fontWeight: 700,
+                                        padding: "2px 6px",
+                                        borderRadius: 4,
+                                        backgroundColor: "#e0f2fe",
+                                        color: "#0369a1",
+                                        border: "1px solid #bae6fd",
+                                      }}
+                                    >
+                                      🧪 RAPPORTO DI PROVA
                                     </span>
                                   )}
                                   <span
@@ -1054,6 +1133,7 @@ export default function Step1Documenti({
                   <option value="haccp_alimentare">🍽️ 2. Igiene Alimentare & HACCP</option>
                   <option value="sicurezza_81_08">🦺 3. Sicurezza sul Lavoro D.Lgs. 81/08</option>
                   <option value="acque_legionella">💧 4. Piano Sicurezza Acque & Legionella</option>
+                  <option value="matrici_ambientali">🌿 5. Matrici Ambientali: Fumi, Scarichi e Suolo</option>
                 </select>
               </div>
 

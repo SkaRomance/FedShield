@@ -13,7 +13,8 @@ export type DocumentCategory =
   | "base_autorizzativa"
   | "haccp_alimentare"
   | "sicurezza_81_08"
-  | "acque_legionella";
+  | "acque_legionella"
+  | "matrici_ambientali";
 
 export interface MinimumContentItem {
   id: string;
@@ -29,6 +30,12 @@ export interface NormativeDocumentDefinition {
   normReference: string;
   description: string;
   isRequiredDefault: boolean;
+  /** Prefissi di Codice ATECO a cui si applica (es. ["56.", "10."]). Se omesso o vuoto, segue le regole di categoria */
+  applicableAtecoPrefixes?: string[];
+  /** Prefissi di Codice ATECO espressamente esclusi */
+  excludedAtecoPrefixes?: string[];
+  /** Flag che indica se il documento è un Rapporto di Prova / Analisi di Laboratorio */
+  isLaboratoryTestReport?: boolean;
   /** Se true, si applica prevalentemente al settore alimentare */
   isFoodSpecific?: boolean;
   /** Se true, si applica prevalentemente all'edilizia / cantieri */
@@ -61,26 +68,34 @@ export const DOCUMENT_CATEGORIES_INFO: Record<
   haccp_alimentare: {
     key: "haccp_alimentare",
     title: "Igiene Alimentare & Autocontrollo HACCP",
-    subtitle: "Manuale HACCP con contenuti minimi, registri, allergeni e tracciabilità",
+    subtitle: "Manuale HACCP con contenuti minimi, registri, allergeni e rapporti di prova alimentari",
     icon: "🍽️",
     badgeColor: "#16a34a",
-    normScope: "Reg. CE 852/2004 • Reg. CE 178/2002 • Reg. UE 1169/2011 • Reg. CE 1935/04",
+    normScope: "Reg. CE 852/2004 • Reg. CE 178/2002 • Reg. CE 2073/2005 • Reg. UE 1169/2011",
   },
   sicurezza_81_08: {
     key: "sicurezza_81_08",
     title: "Sicurezza sul Lavoro D.Lgs. 81/2008",
-    subtitle: "DVR con contenuti minimi art. 28, nomine, VDR rischi specifici, emergenze e DPI",
+    subtitle: "DVR con contenuti minimi art. 28, nomine, VDR rischi specifici, aerodispersi indoor e DPI",
     icon: "🦺",
     badgeColor: "#ea580c",
-    normScope: "D.Lgs. 81/2008 e s.m.i. • D.M. 02/09/2021 • D.M. 01/09/2021",
+    normScope: "D.Lgs. 81/2008 e s.m.i. • D.M. 02/09/2021 • D.M. 01/09/2021 • UNI EN 689",
   },
   acque_legionella: {
     key: "acque_legionella",
     title: "Piano Sicurezza Acque & Rischio Legionella",
-    subtitle: "Water Safety Plan, valutazione impianto idrico, campionamenti e manutenzione",
+    subtitle: "Water Safety Plan, valutazione impianto idrico, campionamenti ufficiali e manutenzione",
     icon: "💧",
     badgeColor: "#2563eb",
     normScope: "D.Lgs. 18/2023 (Acque Potabili) • Linee Guida Legionellosi 2015",
+  },
+  matrici_ambientali: {
+    key: "matrici_ambientali",
+    title: "Matrici Ambientali: Emissioni Fumi, Scarichi Idrici e Suolo",
+    subtitle: "Rapporti di prova analitici, AUA, emissioni in atmosfera, scarichi e terre da scavo",
+    icon: "🌿",
+    badgeColor: "#047857",
+    normScope: "D.Lgs. 152/2006 (Testo Unico Ambientale) • D.P.R. 59/2013 (A.U.A.) • D.P.R. 120/2017",
   },
 };
 
@@ -151,6 +166,7 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.M. 37/2008 e norme UNI CIG 8723 / UNI 7129",
     description: "DICO per apparecchiature di cottura industriali a gas, caldaie e impianti termici di aerazione.",
     isRequiredDefault: false,
+    applicableAtecoPrefixes: ["56.", "10.", "11.", "45.2", "25.", "28.", "16.", "31."],
   },
   {
     id: "base-aua-ambientale",
@@ -159,6 +175,10 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     normReference: "D.P.R. 59/2013 e D.Lgs. 152/2006 (Testo Unico Ambientale)",
     description: "Autorizzazione per scarichi reflui industriali/assimilati in fognatura, emissioni in atmosfera e impatto acustico.",
     isRequiredDefault: false,
+    applicableAtecoPrefixes: [
+      "45.2", "10.", "11.", "13.", "16.", "20.", "22.", "23.", "24.", "25.",
+      "28.", "29.", "30.", "31.", "38.", "39.", "41.", "42.", "43.", "47.30", "96.01"
+    ],
   },
 
   // =========================================================================
@@ -264,12 +284,46 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
   },
   {
     id: "haccp-analisi-alimenti",
-    name: "Rapporti di Prova Analisi Microbiologiche Alimenti & Tamponi Superficiali",
+    name: "Rapporti di Prova Analisi Microbiologiche Alimenti & Tamponi Superficiali (Reg. CE 2073/05)",
     category: "haccp_alimentare",
-    normReference: "Reg. CE 2073/2005 sui criteri microbiologici",
-    description: "Referti periodici di laboratorio accreditato su matrici alimentari lavorate e tamponi ambientali.",
+    normReference: "Reg. CE 2073/2005 sui criteri microbiologici e norma UNI EN ISO 18593",
+    description: "Referti periodici di laboratorio accreditato su matrici alimentari lavorate (Listeria, Salmonella, E. Coli, Stafilococchi) e tamponi di superficie/attrezzature.",
     isRequiredDefault: true,
     isFoodSpecific: true,
+    isLaboratoryTestReport: true,
+    applicableAtecoPrefixes: ["56.", "10.", "11.", "47.11", "47.2", "55.1", "93.29.2", "93.29.1"],
+    minimumContents: [
+      {
+        id: "ana-al-1",
+        label: "Ricerca di Listeria monocytogenes su alimenti pronti al consumo (RTE) e valutazione limiti di tolleranza",
+        normArticle: "Reg. CE 2073/2005, Allegato I, Cap. 1 Criteri di sicurezza alimentare",
+      },
+      {
+        id: "ana-al-2",
+        label: "Ricerca di Salmonella spp. su preparati a base di carne, uova, dolci e matrici deperibili (assenza in 25g)",
+        normArticle: "Reg. CE 2073/2005, Allegato I, Cap. 1",
+      },
+      {
+        id: "ana-al-3",
+        label: "Conta di Escherichia coli e Stafilococchi coagulasi-positivi come indicatori di igiene di processo",
+        normArticle: "Reg. CE 2073/2005, Allegato I, Cap. 2 Criteri di igiene del processo",
+      },
+      {
+        id: "ana-al-4",
+        label: "Tamponi ambientali e di superficie su piani di lavoro, taglieri, affettatrici e coltelleria (metodo ISO 18593)",
+        normArticle: "Reg. CE 2073/2005, art. 5 e norma UNI EN ISO 18593",
+      },
+      {
+        id: "ana-al-5",
+        label: "Verifica e validazione assenza di contaminazione crociata da allergeni (glutine, latte, soia) su linee dedicate",
+        normArticle: "Reg. UE 1169/2011 e D.Lgs. 231/2017",
+      },
+      {
+        id: "ana-al-6",
+        label: "Rapporto di prova analitica rilasciato da laboratorio accreditato ACCREDIA (ISO/IEC 17025) con giudizio di conformità",
+        normArticle: "Reg. CE 2073/2005, art. 5",
+      },
+    ],
   },
   {
     id: "haccp-conformita-moca",
@@ -513,6 +567,54 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     description: "Documento di dettaglio della sicurezza per le lavorazioni di cantiere redatto dall'impresa esecutrice.",
     isRequiredDefault: false,
     isConstructionSpecific: true,
+    applicableAtecoPrefixes: ["41.", "42.", "43."],
+  },
+  {
+    id: "sec-monitoraggio-aerodispersi",
+    name: "Rapporto di Prova Monitoraggio Agenti Chimici e Aerodispersi Indoor (Polveri legno, Silice, Fumi saldatura)",
+    category: "sicurezza_81_08",
+    normReference: "D.Lgs. 81/2008 Titolo IX, Allegati XXXVIII, XXXIX, XLI, XLII e norma UNI EN 689",
+    description: "Campionamenti analitici dell'aria nei luoghi di lavoro per verifica del rispetto dei VLEP (Valori Limite di Esposizione Professionale).",
+    isRequiredDefault: false,
+    isLaboratoryTestReport: true,
+    applicableAtecoPrefixes: ["16.", "31.", "25.", "28.", "41.", "42.", "43.", "45.2", "23.", "20.", "22."],
+    minimumContents: [
+      {
+        id: "aero-mc-1",
+        label: "Strategia di campionamento secondo norma UNI EN 689 con definizione dei Gruppi di Esposizione Omogenea (SEG)",
+        normArticle: "Norma UNI EN 689:2019 e D.Lgs. 81/2008 art. 225",
+      },
+      {
+        id: "aero-mc-2",
+        label: "Determinazione quantitativa delle polveri totali, frazione inalabile e frazione respirabile",
+        normArticle: "D.Lgs. 81/2008, Allegato XXXVIII",
+      },
+      {
+        id: "aero-mc-3",
+        label: "Monitoraggio polveri di legno duro con confronto limite vincolante (VLEP 2 mg/m³ ex All. XLII)",
+        normArticle: "D.Lgs. 81/2008, Allegato XLII (Agenti Cancerogeni)",
+      },
+      {
+        id: "aero-mc-4",
+        label: "Monitoraggio Silice Libera Cristallina frazione respirabile per edilizia, cave e inerti (VLEP 0.1 mg/m³)",
+        normArticle: "D.Lgs. 81/2008, All. XLII e Direttiva UE 2017/2398",
+      },
+      {
+        id: "aero-mc-5",
+        label: "Campionamento e determinazione fumi di saldatura e metalli pesanti aerodispersi (Manganese, Nichel, Cromo VI)",
+        normArticle: "D.Lgs. 81/2008, Allegato XXXVIII",
+      },
+      {
+        id: "aero-mc-6",
+        label: "Campionamento e gascromatografia solventi organici volatili (COV / BTEX) in cabine di verniciatura",
+        normArticle: "D.Lgs. 81/2008, Allegato XXXVIII",
+      },
+      {
+        id: "aero-mc-7",
+        label: "Rapporto di prova firmato da Chimico / Igienista Industriale abilitato con esito del test di conformità UNI EN 689",
+        normArticle: "Norma UNI EN 689:2019",
+      },
+    ],
   },
 
   // =========================================================================
@@ -571,19 +673,65 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
   },
   {
     id: "acque-rapporti-prova",
-    name: "Rapporti di Prova Ufficiali di Analisi delle Acque Potabili",
+    name: "Rapporti di Prova Ufficiali di Analisi delle Acque Potabili (D.Lgs. 18/2023)",
     category: "acque_legionella",
-    normReference: "D.Lgs. 18/2023, Allegato I",
-    description: "Certificati analitici di laboratorio accreditato su parametri microbiologici e chimici (Piombo, Rame, Cloro, Nitrati).",
+    normReference: "D.Lgs. 18/2023, Allegato I e Allegato II",
+    description: "Certificati analitici periodici di laboratorio accreditato su parametri microbiologici e chimici dell'acqua destinata al consumo umano.",
     isRequiredDefault: true,
+    isLaboratoryTestReport: true,
+    minimumContents: [
+      {
+        id: "acq-mc-1",
+        label: "Parametri microbiologici di legge: Escherichia coli (0 UFC/100ml) ed Enterococchi (0 UFC/100ml)",
+        normArticle: "D.Lgs. 18/2023, Allegato I, Parte A",
+      },
+      {
+        id: "acq-mc-2",
+        label: "Parametri chimici obbligatori: Piombo (max 5 µg/l), Rame (max 2 mg/l), Nichel (max 20 µg/l), Nitrati (max 50 mg/l) e PFAS",
+        normArticle: "D.Lgs. 18/2023, Allegato I, Parte B",
+      },
+      {
+        id: "acq-mc-3",
+        label: "Parametri indicatori: Cloro residuo libero/totale, pH, Conducibilità elettrica, Torbidità e Conta colonie a 22°C/37°C",
+        normArticle: "D.Lgs. 18/2023, Allegato I, Parte C",
+      },
+      {
+        id: "acq-mc-4",
+        label: "Verbale di campionamento al punto di consegna e ai rubinetti terminali d'uso più sfavorevoli con catena di custodia",
+        normArticle: "D.Lgs. 18/2023, Allegato II",
+      },
+    ],
   },
   {
     id: "acque-analisi-legionella",
-    name: "Registro Campionamenti e Rapporti di Prova Ricerca Legionella",
+    name: "Registro Campionamenti e Rapporti di Prova Ricerca Legionella pneumophila",
     category: "acque_legionella",
-    normReference: "Linee Guida Nazionali per la Prevenzione e il Controllo della Legionellosi (07/05/2015)",
-    description: "Campionamenti periodici nei punti terminali più a rischio con conteggio UFC/L effettuati da laboratorio qualificato.",
+    normReference: "Linee Guida Nazionali per la Prevenzione e il Controllo della Legionellosi (07/05/2015) e D.Lgs. 18/2023",
+    description: "Campionamenti periodici nei punti terminali a maggior rischio con conteggio UFC/L effettuati da laboratorio qualificato.",
     isRequiredDefault: true,
+    isLaboratoryTestReport: true,
+    minimumContents: [
+      {
+        id: "leg-mc-1",
+        label: "Campionamento secondo norma ISO 11731 ai punti critici (soffioni docce, rompigetto, ricircolo ACS, serbatoi di accumulo)",
+        normArticle: "Linee Guida Nazionali 2015, par. 3.2 e norma ISO 11731",
+      },
+      {
+        id: "leg-mc-2",
+        label: "Determinazione quantitativa Legionella pneumophila (sierogruppo 1 e altri sierogruppi 2-14) espressa in UFC/Litro",
+        normArticle: "Linee Guida Nazionali 2015, par. 3.3",
+      },
+      {
+        id: "leg-mc-3",
+        label: "Confronto con le soglie di rischio Linee Guida (<100 UFC/L: idoneo; 101-1000 UFC/L: revisione WSP; >1000 UFC/L: bonifica immediata)",
+        normArticle: "Linee Guida Nazionali 2015, Tabella 4",
+      },
+      {
+        id: "leg-mc-4",
+        label: "Rapporto di prova accreditato rilasciato da laboratorio iscritto al registro regionale / ACCREDIA",
+        normArticle: "Linee Guida Nazionali 2015 e D.Lgs. 18/2023",
+      },
+    ],
   },
   {
     id: "acque-registro-manutenzione",
@@ -593,16 +741,222 @@ export const NORMATIVE_DOCUMENTS_CATALOG: NormativeDocumentDefinition[] = [
     description: "Tracciamento di lavaggi periodici, sostituzione filtri, decalcificazione rompigetto ed eventuali shock termici/chimici.",
     isRequiredDefault: true,
   },
+
+  // =========================================================================
+  // 5. MATRICI AMBIENTALI: EMISSIONI FUMI, SCARICHI IDRICI E SUOLO (D.LGS. 152/2006 / AUA)
+  // =========================================================================
+  {
+    id: "env-rapporto-emissioni-fumi",
+    name: "Rapporto di Prova Analisi Emissioni in Atmosfera ai Camini (D.Lgs. 152/2006 Parte V - AUA)",
+    category: "matrici_ambientali",
+    normReference: "D.Lgs. 152/2006, Parte V, D.P.R. 59/2013 (AUA) e norme UNI EN ISO di campionamento",
+    description: "Certificati analitici periodici dei fumi convogliati emessi da cabine di verniciatura, forni, caldaie, saldature e lavorazioni meccaniche.",
+    isRequiredDefault: true,
+    isLaboratoryTestReport: true,
+    applicableAtecoPrefixes: [
+      "45.2", "25.", "28.", "16.", "31.", "10.", "11.", "13.", "20.", "22.", "23.", "24.", "29.", "30.", "33.", "38."
+    ],
+    minimumContents: [
+      {
+        id: "env-fumi-1",
+        label: "Verbale di prelievo con misurazione portata volumetrica, temperatura fumi, velocità ed umidità (UNI EN 15259)",
+        normArticle: "Norma UNI EN 15259 e D.Lgs. 152/2006 Allegato VI Parte V",
+      },
+      {
+        id: "env-fumi-2",
+        label: "Determinazione analitica delle polveri totali ed inorganiche convogliate ai punti di emissione (E1, E2, ecc.)",
+        normArticle: "D.Lgs. 152/2006 Parte V, All. I",
+      },
+      {
+        id: "env-fumi-3",
+        label: "Determinazione quantitativa dei Composti Organici Volatili (COV / COT) e confronto con soglie autorizzate AUA",
+        normArticle: "D.Lgs. 152/2006 art. 275 e All. III",
+      },
+      {
+        id: "env-fumi-4",
+        label: "Analisi fumi di combustione (Monossido di Carbonio CO, Ossidi di Azoto NOx, Biossido di Zolfo SO2)",
+        normArticle: "D.Lgs. 152/2006 Parte V, All. I",
+      },
+      {
+        id: "env-fumi-5",
+        label: "Confronto analitico con i Valori Limite di Emissione (VLE) prescritti nell'atto autorizzativo AUA o D.G.R.",
+        normArticle: "D.P.R. 59/2013 e D.Lgs. 152/2006 art. 271",
+      },
+      {
+        id: "env-fumi-6",
+        label: "Certificato di taratura delle sonde e rapporto firmato da laboratorio accreditato / chimico abilitato",
+        normArticle: "Norma UNI CEI EN ISO/IEC 17025",
+      },
+    ],
+  },
+  {
+    id: "env-rapporto-scarichi-idrici",
+    name: "Rapporto di Prova Analisi Scarichi Acque Reflue Industriali e Prima Pioggia (D.Lgs. 152/06 Parte III)",
+    category: "matrici_ambientali",
+    normReference: "D.Lgs. 152/2006, Parte III, Allegato 5 Tabella 3 e 4, e D.P.R. 59/2013 (AUA)",
+    description: "Analisi periodiche delle acque reflue scaricate in pubblica fognatura o corpo idrico superficiale (compreso scarico da disoleatore).",
+    isRequiredDefault: true,
+    isLaboratoryTestReport: true,
+    applicableAtecoPrefixes: [
+      "45.2", "25.", "28.", "10.", "11.", "13.", "20.", "22.", "23.", "24.", "38.", "41.", "42.", "43.", "47.30", "96.01"
+    ],
+    minimumContents: [
+      {
+        id: "env-idro-1",
+        label: "Campionamento medio ponderato al pozzetto fiscale di ispezione a monte dell'immissione (UNI EN ISO 5667)",
+        normArticle: "Norma UNI EN ISO 5667 e D.Lgs. 152/2006 art. 101",
+      },
+      {
+        id: "env-idro-2",
+        label: "Parametri chimico-fisici di base: pH, Conducibilità elettrica, Solidi Sospesi Totali (SST) e Temperatura",
+        normArticle: "D.Lgs. 152/2006, All. 5 Tabella 3",
+      },
+      {
+        id: "env-idro-3",
+        label: "Carico inquinante organico: COD (Domanda Chimica di Ossigeno) e BOD5 (Domanda Biochimica di Ossigeno)",
+        normArticle: "D.Lgs. 152/2006, All. 5 Tabella 3",
+      },
+      {
+        id: "env-idro-4",
+        label: "Determinazione Idrocarburi Totali (C>10) per verifica efficienza disoleatore / vasca di decantazione",
+        normArticle: "D.Lgs. 152/2006, All. 5 Tabella 3 e 4",
+      },
+      {
+        id: "env-idro-5",
+        label: "Analisi Solventi organici clorurati, Tensioattivi totali e Metalli pesanti (Zinco, Ferro, Nichel, Rame, Cromo)",
+        normArticle: "D.Lgs. 152/2006, All. 5 Tabella 3",
+      },
+      {
+        id: "env-idro-6",
+        label: "Attestazione di conformità ai limiti della Tabella 3 (fognatura) o Tabella 4 (acque superficiali) All. 5 Parte III",
+        normArticle: "D.Lgs. 152/2006, art. 101 e art. 107",
+      },
+    ],
+  },
+  {
+    id: "env-rapporto-terre-scavo",
+    name: "Rapporto di Prova Caratterizzazione Terre e Rocce da Scavo (D.P.R. 120/2017 & D.Lgs. 152/06)",
+    category: "matrici_ambientali",
+    normReference: "D.P.R. 120/2017 e D.Lgs. 152/2006, Parte IV, Titolo V, Allegato 5 Tabella 1",
+    description: "Certificati analitici di campionamento del suolo e terre da scavo per qualifica come sottoprodotto o recupero ambientale.",
+    isRequiredDefault: true,
+    isLaboratoryTestReport: true,
+    isConstructionSpecific: true,
+    applicableAtecoPrefixes: ["41.", "42.", "43.", "08.", "09.", "38.", "39."],
+    minimumContents: [
+      {
+        id: "env-scav-1",
+        label: "Piano di campionamento georiferito e relazione geologica/ambientale sul sito di scavo (D.P.R. 120/17)",
+        normArticle: "D.P.R. 120/2017, Allegato 2",
+      },
+      {
+        id: "env-scav-2",
+        label: "Determinazione Metalli pesanti (Arsenico, Cadmio, Cobalto, Nichel, Piombo, Rame, Zinco, Cromo totale e VI)",
+        normArticle: "D.Lgs. 152/2006, All. 5 Tabella 1 Colonna A/B",
+      },
+      {
+        id: "env-scav-3",
+        label: "Idrocarburi leggeri C<12, pesanti C>12, BTEX (Benzene, Toluene, Xileni) e IPA (Idrocarburi Policiclici)",
+        normArticle: "D.Lgs. 152/2006, All. 5 Tabella 1",
+      },
+      {
+        id: "env-scav-4",
+        label: "Test di cessione su eluato (D.M. 05/02/1998 Allegato 3) per verifica compatibilità ambientale",
+        normArticle: "D.M. 05/02/1998 e D.P.R. 120/2017",
+      },
+      {
+        id: "env-scav-5",
+        label: "Attestazione analitica di rispetto dei limiti di Concentrazione Soglia di Contaminazione (CSC) Colonna A o B",
+        normArticle: "D.P.R. 120/2017, art. 4",
+      },
+      {
+        id: "env-scav-6",
+        label: "Dichiarazione di Utilizzo (D.U. / D.A.U.) con indicazione del sito di destinazione finale e tempi di riutilizzo",
+        normArticle: "D.P.R. 120/2017, art. 21",
+      },
+    ],
+  },
+  {
+    id: "env-mappatura-amianto",
+    name: "Relazione Tecnica Censimento e Valutazione Stato Amianto (MCA) nei Fabbricati",
+    category: "matrici_ambientali",
+    normReference: "L. 257/1992, D.M. 06/09/1994 e D.Lgs. 81/2008 Titolo IX Capo III",
+    description: "Mappatura dei materiali contenenti amianto (coperture in eternit, canne fumarie, coibentazioni) con indice di degrado.",
+    isRequiredDefault: false,
+    isLaboratoryTestReport: true,
+    applicableAtecoPrefixes: ["41.", "42.", "43.", "68.", "38.", "39.", "45.2", "25.", "16.", "10."],
+    minimumContents: [
+      {
+        id: "env-ami-1",
+        label: "Censimento visivo dei manufatti sospetti (coperture, canne fumarie, controsoffitti, vinilamianto)",
+        normArticle: "D.M. 06/09/1994, All. 1",
+      },
+      {
+        id: "env-ami-2",
+        label: "Rapporto di prova analitico su campioni massivi con microscopia ottica (MOCF) o elettronica (SEM/EDX)",
+        normArticle: "D.M. 06/09/1994 e L. 257/1992",
+      },
+      {
+        id: "env-ami-3",
+        label: "Calcolo dell'Indice di Degrado (I.D.) della copertura secondo D.M. 06/09/1994 o algoritmi regionali",
+        normArticle: "D.M. 06/09/1994, punto 2",
+      },
+      {
+        id: "env-ami-4",
+        label: "Nomina formale del Responsabile del Rischio Amianto con compiti di controllo e programma di custodia",
+        normArticle: "D.M. 06/09/1994, punto 4",
+      },
+      {
+        id: "env-ami-5",
+        label: "Programma di monitoraggio periodico e valutazione delle azioni (bonifica, incapsulamento, rimozione)",
+        normArticle: "D.Lgs. 81/2008, artt. 248-256",
+      },
+    ],
+  },
+  {
+    id: "env-registro-rifiuti",
+    name: "Registro di Carico e Scarico Rifiuti & Formulari FIR / RENTRI",
+    category: "matrici_ambientali",
+    normReference: "D.Lgs. 152/2006, art. 190 e D.M. 59/2023 (RENTRI)",
+    description: "Tracciamento della produzione e smaltimento rifiuti speciali pericolosi e non pericolosi (oli esausti, batterie, filtri, imballaggi).",
+    isRequiredDefault: true,
+    applicableAtecoPrefixes: [
+      "45.2", "25.", "28.", "16.", "31.", "10.", "11.", "13.", "20.", "22.", "23.", "24.", "38.", "39.", "41.", "42.", "43.", "47.30", "86.", "96.01", "96.02"
+    ],
+  },
 ];
 
 /**
- * Funzione di classificazione automatica di un documento in una delle 4 macro-aree
+ * Funzione di classificazione automatica di un documento in una delle 5 macro-aree
  * in base al nome e alla norma.
  */
 export function classifyDocumentCategory(docName: string): DocumentCategory {
   const lower = docName.toLowerCase();
 
-  // 1. Acque e Legionella
+  // 1. Matrici ambientali
+  if (
+    lower.includes("emission") ||
+    lower.includes("camini") ||
+    lower.includes("camin") ||
+    lower.includes("fumi") ||
+    lower.includes("scaric") ||
+    lower.includes("reflu") ||
+    lower.includes("fogna") ||
+    lower.includes("disoleat") ||
+    lower.includes("terre da scavo") ||
+    lower.includes("rocce da scavo") ||
+    lower.includes("suolo") ||
+    lower.includes("sottosuolo") ||
+    lower.includes("amianto") ||
+    lower.includes("mca") ||
+    lower.includes("rifiut") ||
+    lower.includes("rentri") ||
+    lower.includes("fir")
+  ) {
+    return "matrici_ambientali";
+  }
+
+  // 2. Acque e Legionella
   if (
     lower.includes("acqua") ||
     lower.includes("acque") ||
@@ -616,7 +970,7 @@ export function classifyDocumentCategory(docName: string): DocumentCategory {
     return "acque_legionella";
   }
 
-  // 2. HACCP / Igiene alimentare
+  // 3. HACCP / Igiene alimentare
   if (
     lower.includes("haccp") ||
     lower.includes("aliment") ||
@@ -638,7 +992,7 @@ export function classifyDocumentCategory(docName: string): DocumentCategory {
     return "haccp_alimentare";
   }
 
-  // 3. Base autorizzativa / propedeutica
+  // 4. Base autorizzativa / propedeutica
   if (
     lower.includes("visura") ||
     lower.includes("scia") ||
@@ -656,14 +1010,12 @@ export function classifyDocumentCategory(docName: string): DocumentCategory {
     lower.includes("aua") ||
     lower.includes("via") ||
     lower.includes("vas") ||
-    lower.includes("scarich") ||
-    lower.includes("ambientale") ||
     lower.includes("canne fumarie")
   ) {
     return "base_autorizzativa";
   }
 
-  // 4. Default: Sicurezza sul Lavoro D.Lgs. 81/2008
+  // 5. Default: Sicurezza sul Lavoro D.Lgs. 81/2008
   return "sicurezza_81_08";
 }
 
@@ -680,7 +1032,10 @@ export function findCatalogDefinition(docName: string): NormativeDocumentDefinit
       defLower.includes(lower) ||
       (def.id === "sec-dvr" && lower.startsWith("dvr")) ||
       (def.id === "haccp-manuale" && lower.includes("haccp")) ||
-      (def.id === "acque-psa" && (lower.includes("acque") || lower.includes("legionell")))
+      (def.id === "acque-psa" && (lower.includes("acque") || lower.includes("legionell"))) ||
+      (def.id === "env-rapporto-emissioni-fumi" && (lower.includes("emission") || lower.includes("camini"))) ||
+      (def.id === "env-rapporto-scarichi-idrici" && lower.includes("scarich")) ||
+      (def.id === "env-rapporto-terre-scavo" && lower.includes("terre da scavo"))
     );
   });
 }
@@ -761,7 +1116,146 @@ export function isCategoryApplicableForAteco(
     };
   }
 
+  // Sezione Matrici Ambientali:
+  if (category === "matrici_ambientali") {
+    if (checklistMode === "haccp_only") {
+      return { applicable: false, reason: "Sopralluogo impostato in modalità Solo HACCP." };
+    }
+    const isEnvSector =
+      /^45\.2/.test(ateco) || // Officine, carrozzerie, gommisti, riparazioni auto
+      /^[1-3][0-9]\./.test(ateco) || // Industria manifatturiera (10-33: legno, metallo, alimentare industriale, plastica, chimica)
+      /^41\./.test(ateco) || // Costruzione di edifici (terre da scavo, amianto)
+      /^42\./.test(ateco) || // Ingegneria civile
+      /^43\./.test(ateco) || // Lavori di costruzione specializzati
+      /^38\./.test(ateco) || // Raccolta e trattamento rifiuti
+      /^39\./.test(ateco) || // Bonifica e servizi di gestione rifiuti
+      /^0[89]\./.test(ateco) || // Cave ed estrazione
+      /^47\.30/.test(ateco) || // Commercio carburanti / stazioni di servizio
+      /^96\.01/.test(ateco); // Lavanderie e tintorie (scarichi chimici)
+
+    if (!ateco) {
+      return {
+        applicable: false,
+        reason: "Settore ATECO non specificato: sezione attivabile per attività con emissioni in atmosfera, scarichi o terre da scavo.",
+      };
+    }
+    if (isEnvSector) {
+      return {
+        applicable: true,
+        reason: `Settore a impatto ambientale (ATECO ${ateco}): obblighi analitici e di controllo AUA / D.Lgs. 152/2006.`,
+      };
+    }
+    return {
+      applicable: false,
+      reason: `Attività (ATECO ${ateco}) a basso impatto ambientale senza scarichi industriali, camini o movimentazione terre.`,
+    };
+  }
+
   return { applicable: true, reason: "Applicabile" };
+}
+
+/**
+ * Normalizza il codice ATECO rimuovendo caratteri non numerici
+ */
+export function normalizeAteco(ateco?: string): string {
+  if (!ateco) return "";
+  return ateco.replace(/[^0-9]/g, "");
+}
+
+/**
+ * Verifica se un codice ATECO corrisponde al prefisso specificato
+ */
+export function matchAtecoPrefix(atecoCode: string | undefined, prefixPattern: string): boolean {
+  if (!atecoCode) return false;
+  const cleanAteco = normalizeAteco(atecoCode);
+  const cleanPrefix = normalizeAteco(prefixPattern);
+  if (!cleanPrefix) return false;
+  return cleanAteco.startsWith(cleanPrefix);
+}
+
+/**
+ * Verifica se un documento del catalogo è applicabile al codice ATECO specificato
+ */
+export function isDocumentApplicableToAteco(
+  docDef: NormativeDocumentDefinition,
+  atecoCode?: string,
+  checklistMode?: string,
+): boolean {
+  const ateco = (atecoCode ?? "").trim();
+
+  // 1. ChecklistMode filter
+  if (checklistMode === "haccp_only" && docDef.category !== "haccp_alimentare" && docDef.category !== "base_autorizzativa") {
+    return false;
+  }
+  if (checklistMode === "safety_only" && docDef.category === "haccp_alimentare") {
+    return false;
+  }
+
+  // 2. Prefissi esclusi
+  if (docDef.excludedAtecoPrefixes && docDef.excludedAtecoPrefixes.length > 0 && ateco) {
+    const isExcluded = docDef.excludedAtecoPrefixes.some((p) => matchAtecoPrefix(ateco, p));
+    if (isExcluded) return false;
+  }
+
+  // 3. Regole per categoria HACCP
+  if (docDef.category === "haccp_alimentare") {
+    const catCheck = isCategoryApplicableForAteco("haccp_alimentare", ateco, checklistMode);
+    if (!catCheck.applicable && ateco) {
+      return false;
+    }
+  }
+
+  // 4. Regole per categoria Matrici Ambientali
+  if (docDef.category === "matrici_ambientali") {
+    const catCheck = isCategoryApplicableForAteco("matrici_ambientali", ateco, checklistMode);
+    if (!catCheck.applicable && ateco) {
+      return false;
+    }
+  }
+
+  // 5. Prefissi applicabili espliciti sul documento
+  if (docDef.applicableAtecoPrefixes && docDef.applicableAtecoPrefixes.length > 0) {
+    if (!ateco) {
+      // Se nessun ATECO è specificato, includi solo se è richiesto di base e non specialistico
+      return docDef.isRequiredDefault && !docDef.isConstructionSpecific && !docDef.isFoodSpecific;
+    }
+    return docDef.applicableAtecoPrefixes.some((p) => matchAtecoPrefix(ateco, p));
+  }
+
+  // 6. Specifico per l'edilizia / cantieri
+  if (docDef.isConstructionSpecific) {
+    if (!ateco) return false;
+    const isConstruction = matchAtecoPrefix(ateco, "41") || matchAtecoPrefix(ateco, "42") || matchAtecoPrefix(ateco, "43");
+    return isConstruction;
+  }
+
+  // 7. Specifico per il settore alimentare
+  if (docDef.isFoodSpecific) {
+    if (!ateco) return true;
+    const isFood =
+      matchAtecoPrefix(ateco, "56") ||
+      matchAtecoPrefix(ateco, "4711") ||
+      matchAtecoPrefix(ateco, "472") ||
+      matchAtecoPrefix(ateco, "10") ||
+      matchAtecoPrefix(ateco, "11") ||
+      matchAtecoPrefix(ateco, "551") ||
+      matchAtecoPrefix(ateco, "93292") ||
+      matchAtecoPrefix(ateco, "93291");
+    return isFood;
+  }
+
+  return true;
+}
+
+/**
+ * Filtra il catalogo normativo restituendo solo i documenti applicabili per l'ATECO e modalità
+ */
+export function filterDocumentsForAteco(
+  catalog: NormativeDocumentDefinition[],
+  atecoCode?: string,
+  checklistMode?: string,
+): NormativeDocumentDefinition[] {
+  return catalog.filter((docDef) => isDocumentApplicableToAteco(docDef, atecoCode, checklistMode));
 }
 
 /**
