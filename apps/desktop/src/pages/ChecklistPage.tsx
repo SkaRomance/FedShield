@@ -27,7 +27,7 @@ import { queueSyncEvent } from "../services/syncManager";
 import { daOraItaliana, formattaDataOra, perCampoData, perCampoOra } from "../lib/oraItalia";
 import Step0DatiAzienda from "./checklist/Step0DatiAzienda";
 import Step1Documenti from "./checklist/Step1Documenti";
-import Step2LocaliAttrezzature from "./checklist/Step2LocaliAttrezzature";
+import Step2AmbientiDiLavoro from "./checklist/Step2AmbientiDiLavoro";
 import Step3ProcedureIgiene from "./checklist/Step3ProcedureIgiene";
 import Step4AssetAttrezzature from "./checklist/Step4AssetAttrezzature";
 import Step5Formazione from "./checklist/Step5Formazione";
@@ -1327,7 +1327,7 @@ export default function ChecklistPage({
       )}
 
       {step === 2 && (
-        <Step2LocaliAttrezzature
+        <Step2AmbientiDiLavoro
           premisesItems={premisesItems}
           answers={answers}
           updateAnswer={updateAnswer}
@@ -1336,6 +1336,7 @@ export default function ChecklistPage({
           isInspectionValidated={!!isInspectionValidated}
           atecoCode={effectiveChecklistAteco}
           checklistMode={effectiveChecklistMode}
+          inspectionId={selectedInspectionId}
         />
       )}
 

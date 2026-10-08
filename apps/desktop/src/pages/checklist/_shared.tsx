@@ -28,7 +28,7 @@ export interface RolePersonCardData extends PersonCardData {
 export const STEPS = [
   "1. Dati Azienda",
   "2. Documenti",
-  "3. Locali e Attrezzature",
+  "3. Ambienti di Lavoro",
   "4. Procedure e Igiene",
   "5. Beni e Attrezzature",
   "6. Formazione",
