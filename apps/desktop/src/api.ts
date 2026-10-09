@@ -1149,6 +1149,13 @@ export interface Employee {
   isActive: boolean;
   hireDate?: string | null;
   leftDate?: string | null;
+  birthDate?: string | null;
+  birthPlace?: string | null;
+  contractType?: string | null;
+  weeklyHours?: number | null;
+  safetyRoles?: string | null;
+  assignedEquipment?: string | null;
+  notes?: string | null;
   trainingRecords?: TrainingRecord[];
 }
 
@@ -1160,6 +1167,13 @@ export interface EmployeePayload {
   role?: string;
   department?: string;
   hireDate?: string;
+  birthDate?: string;
+  birthPlace?: string;
+  contractType?: string;
+  weeklyHours?: number;
+  safetyRoles?: string;
+  assignedEquipment?: string;
+  notes?: string;
 }
 
 export function fetchEmployees(

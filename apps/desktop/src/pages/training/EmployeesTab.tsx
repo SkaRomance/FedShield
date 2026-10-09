@@ -1,20 +1,27 @@
 import { useMemo, useState } from "react";
 import {
   Company,
-  createEmployee,
-  createTrainingRecord,
   deleteEmployee,
   Employee,
+  Machine,
   TrainingCourse,
-  updateEmployee,
 } from "../../api";
-import { Field, formStyle, gridStyle } from "./_shared";
+import {
+  computeIndividualTrainingPlan,
+  getCleanDepartmentDisplay,
+  PlannedCourseItem,
+} from "../../lib/individualTrainingPlan";
+import IndividualPlanCard from "./IndividualPlanCard";
+import EmployeeFullModal from "./EmployeeFullModal";
+import TrainingRecordModal from "./TrainingRecordModal";
+import { GraduationCap, LayoutGrid, List, Plus, Search, UserPlus } from "lucide-react";
 
 interface EmployeesTabProps {
   token: string;
   companies: Company[];
   employees: Employee[];
   courses: TrainingCourse[];
+  machines?: Machine[];
   onChanged: () => Promise<void>;
   onError: (msg: string | null) => void;
 }
@@ -24,366 +31,404 @@ export default function EmployeesTab({
   companies,
   employees,
   courses,
+  machines = [],
   onChanged,
   onError,
 }: EmployeesTabProps) {
   const [companyFilter, setCompanyFilter] = useState<string>("");
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
+  const [showModal, setShowModal] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const [recordTarget, setRecordTarget] = useState<{
+    employee: Employee;
+    course?: PlannedCourseItem;
+  } | null>(null);
   const [busy, setBusy] = useState(false);
-  const [showRecordFor, setShowRecordFor] = useState<string | null>(null);
 
-  const filtered = useMemo(
-    () => (companyFilter ? employees.filter((e) => e.companyId === companyFilter) : employees),
-    [employees, companyFilter],
-  );
+  // Filtra per azienda e testo di ricerca
+  const filtered = useMemo(() => {
+    return employees.filter((e) => {
+      if (companyFilter && e.companyId !== companyFilter) return false;
+      if (searchTerm) {
+        const query = searchTerm.toLowerCase();
+        const fullName = `${e.lastName} ${e.firstName}`.toLowerCase();
+        const role = (e.role || "").toLowerCase();
+        const cf = (e.fiscalCode || "").toLowerCase();
+        if (!fullName.includes(query) && !role.includes(query) && !cf.includes(query)) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [employees, companyFilter, searchTerm]);
+
+  // Calcola piani formativi individuali per i dipendenti filtrati
+  const plansWithEmployees = useMemo(() => {
+    return filtered.map((emp) => {
+      const company = companies.find((c) => c.id === emp.companyId);
+      const companyMachines = machines.filter((m) => m.companyId === emp.companyId);
+      const plan = computeIndividualTrainingPlan(emp, {
+        company,
+        atecoCode: company?.atecoCode || undefined,
+        companyMachines,
+        availableCourses: courses,
+      });
+      return { emp, plan };
+    });
+  }, [filtered, companies, machines, courses]);
 
   async function handleDelete(id: string) {
-    if (!window.confirm("Disattivare il dipendente? L'operazione e reversibile: i dati restano recuperabili.")) return;
+    if (
+      !window.confirm(
+        "Disattivare il lavoratore? L'operazione è reversibile e i dati di formazione rimangono conservati a norma di legge.",
+      )
+    ) {
+      return;
+    }
     setBusy(true);
     onError(null);
     try {
       await deleteEmployee(token, id);
       await onChanged();
     } catch (e) {
-      onError(e instanceof Error ? e.message : "Errore eliminazione");
+      onError(e instanceof Error ? e.message : "Errore eliminazione lavoratore");
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <section className="panel">
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h3>Dipendenti</h3>
-        <div style={{ display: "flex", gap: 8 }}>
-          <select
-            value={companyFilter}
-            onChange={(e) => setCompanyFilter(e.target.value)}
-            aria-label="Filtra per azienda"
+    <section className="panel" style={{ padding: "20px" }}>
+      {/* Testata della Scheda Dipendenti */}
+      <header
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "12px",
+          marginBottom: "16px",
+        }}
+      >
+        <div>
+          <h3 style={{ margin: "0 0 4px 0", fontSize: "18px", color: "var(--navy-900, #17203c)" }}>
+            Anagrafica Lavoratori & Progettazione Formativa
+          </h3>
+          <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
+            Gestione anagrafiche complete, mansioni specifiche, ruoli di sicurezza, attrezzature e piani formativi individuali.
+          </p>
+        </div>
+
+        <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+          {/* Switch modalità vista: schede vs tabella */}
+          <div
+            style={{
+              display: "flex",
+              backgroundColor: "#f1f5f9",
+              padding: "2px",
+              borderRadius: "6px",
+              border: "1px solid #cbd5e1",
+            }}
           >
-            <option value="">— Tutte le aziende —</option>
-            {companies.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+            <button
+              type="button"
+              onClick={() => setViewMode("cards")}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                padding: "6px 10px",
+                border: "none",
+                borderRadius: "4px",
+                backgroundColor: viewMode === "cards" ? "#ffffff" : "transparent",
+                color: viewMode === "cards" ? "#0284c7" : "#64748b",
+                fontWeight: viewMode === "cards" ? 700 : 500,
+                fontSize: "12px",
+                cursor: "pointer",
+                boxShadow: viewMode === "cards" ? "0 1px 2px rgba(0,0,0,0.08)" : "none",
+              }}
+            >
+              <LayoutGrid size={14} />
+              Schede Piani
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("table")}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                padding: "6px 10px",
+                border: "none",
+                borderRadius: "4px",
+                backgroundColor: viewMode === "table" ? "#ffffff" : "transparent",
+                color: viewMode === "table" ? "#0284c7" : "#64748b",
+                fontWeight: viewMode === "table" ? 700 : 500,
+                fontSize: "12px",
+                cursor: "pointer",
+                boxShadow: viewMode === "table" ? "0 1px 2px rgba(0,0,0,0.08)" : "none",
+              }}
+            >
+              <List size={14} />
+              Tabella
+            </button>
+          </div>
+
           <button
             className="btn-primary"
             onClick={() => {
-              setEditingId(null);
-              setShowForm(true);
+              setEditingEmployee(null);
+              setShowModal(true);
             }}
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
           >
-            + Nuovo dipendente
+            <UserPlus size={15} />
+            + Nuovo Dipendente
           </button>
         </div>
       </header>
 
-      {showForm ? (
-        <EmployeeForm
+      {/* Barra Filtri: Azienda e Ricerca */}
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          marginBottom: "18px",
+          flexWrap: "wrap",
+          alignItems: "center",
+          backgroundColor: "#f8fafc",
+          padding: "10px 14px",
+          borderRadius: "8px",
+          border: "1px solid #e2e8f0",
+        }}
+      >
+        <div style={{ flex: "1 1 240px", minWidth: "200px" }}>
+          <select
+            value={companyFilter}
+            onChange={(e) => setCompanyFilter(e.target.value)}
+            style={{ width: "100%", padding: "7px 10px", borderRadius: "6px", border: "1px solid #cbd5e1" }}
+            aria-label="Filtra per azienda"
+          >
+            <option value="">— Tutte le aziende ({employees.length} lavoratori) —</option>
+            {companies.map((c) => {
+              const count = employees.filter((e) => e.companyId === c.id).length;
+              return (
+                <option key={c.id} value={c.id}>
+                  {c.name} ({count})
+                </option>
+              );
+            })}
+          </select>
+        </div>
+
+        <div style={{ flex: "2 1 280px", position: "relative" }}>
+          <Search
+            size={14}
+            style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }}
+          />
+          <input
+            type="text"
+            placeholder="Cerca lavoratore per cognome, nome, mansione o codice fiscale..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "7px 10px 7px 32px",
+              borderRadius: "6px",
+              border: "1px solid #cbd5e1",
+              fontSize: "13px",
+            }}
+          />
+        </div>
+
+        <div style={{ fontSize: "12.5px", color: "#64748b", fontWeight: 600 }}>
+          Visualizzati: <strong>{filtered.length}</strong> su {employees.length}
+        </div>
+      </div>
+
+      {/* Modale Inserimento / Modifica Dipendente */}
+      {showModal && (
+        <EmployeeFullModal
           token={token}
           companies={companies}
-          editing={editingId ? employees.find((e) => e.id === editingId) ?? null : null}
+          companyId={companyFilter || undefined}
+          editing={editingEmployee}
+          machines={machines}
           onClose={() => {
-            setShowForm(false);
-            setEditingId(null);
+            setShowModal(false);
+            setEditingEmployee(null);
           }}
           onSaved={async () => {
-            setShowForm(false);
-            setEditingId(null);
+            setShowModal(false);
+            setEditingEmployee(null);
             await onChanged();
           }}
           onError={onError}
         />
-      ) : null}
+      )}
 
-      {showRecordFor ? (
-        <TrainingRecordForm
+      {/* Modale Registrazione Attestato */}
+      {recordTarget && (
+        <TrainingRecordModal
           token={token}
-          employee={employees.find((e) => e.id === showRecordFor)!}
+          employee={recordTarget.employee}
           courses={courses}
-          onClose={() => setShowRecordFor(null)}
+          preselectedCourse={recordTarget.course}
+          onClose={() => setRecordTarget(null)}
           onSaved={async () => {
-            setShowRecordFor(null);
+            setRecordTarget(null);
             await onChanged();
           }}
           onError={onError}
         />
-      ) : null}
+      )}
 
-      <table>
-        <thead>
-          <tr>
-            <th>Cognome Nome</th>
-            <th>CF</th>
-            <th>Ruolo</th>
-            <th>Reparto</th>
-            <th>Azienda</th>
-            <th>Corsi</th>
-            <th>Azioni</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.map((emp) => {
-            const company = companies.find((c) => c.id === emp.companyId);
-            const recordsCount = emp.trainingRecords?.length ?? 0;
-            return (
-              <tr key={emp.id}>
-                <td>
-                  <strong>{emp.lastName}</strong> {emp.firstName}
-                </td>
-                <td>{emp.fiscalCode || "—"}</td>
-                <td>{emp.role || "—"}</td>
-                <td>{emp.department || "—"}</td>
-                <td>{company?.name || emp.companyId}</td>
-                <td>{recordsCount}</td>
-                <td>
-                  <div className="row-actions">
-                    <button
-                      className="ghost-btn"
-                      onClick={() => {
-                        setEditingId(emp.id);
-                        setShowForm(true);
-                      }}
-                      disabled={busy}
-                    >
-                      Modifica
-                    </button>
-                    <button
-                      className="ghost-btn"
-                      onClick={() => setShowRecordFor(emp.id)}
-                      disabled={busy || courses.length === 0}
-                      title={courses.length === 0 ? "Crea prima un corso" : "Aggiungi formazione"}
-                    >
-                      + Formazione
-                    </button>
-                    <button
-                      className="ghost-btn"
-                      onClick={() => handleDelete(emp.id)}
-                      disabled={busy}
-                      style={{ color: "var(--color-error)" }}
-                    >
-                      Disattiva
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-          {filtered.length === 0 ? (
-            <tr>
-              <td colSpan={7}>Nessun dipendente.</td>
-            </tr>
-          ) : null}
-        </tbody>
-      </table>
-    </section>
-  );
-}
+      {/* VISTA A SCHEDE INDIVIDUALI (Default) */}
+      {viewMode === "cards" ? (
+        <div>
+          {plansWithEmployees.map(({ emp, plan }) => (
+            <IndividualPlanCard
+              key={emp.id}
+              employee={emp}
+              plan={plan}
+              courses={courses}
+              onEdit={(target) => {
+                setEditingEmployee(target);
+                setShowModal(true);
+              }}
+              onDelete={handleDelete}
+              onAddTrainingRecord={(target, course) => {
+                setRecordTarget({ employee: target, course });
+              }}
+            />
+          ))}
 
-function EmployeeForm({
-  token,
-  companies,
-  editing,
-  onClose,
-  onSaved,
-  onError,
-}: {
-  token: string;
-  companies: Company[];
-  editing: Employee | null;
-  onClose: () => void;
-  onSaved: () => Promise<void>;
-  onError: (msg: string | null) => void;
-}) {
-  const [companyId, setCompanyId] = useState(editing?.companyId ?? companies[0]?.id ?? "");
-  const [firstName, setFirstName] = useState(editing?.firstName ?? "");
-  const [lastName, setLastName] = useState(editing?.lastName ?? "");
-  const [fiscalCode, setFiscalCode] = useState(editing?.fiscalCode ?? "");
-  const [role, setRole] = useState(editing?.role ?? "");
-  const [department, setDepartment] = useState(editing?.department ?? "");
-  const [hireDate, setHireDate] = useState(
-    editing?.hireDate ? editing.hireDate.slice(0, 10) : "",
-  );
-  const [busy, setBusy] = useState(false);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    onError(null);
-    try {
-      const payload = {
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        fiscalCode: fiscalCode.trim() || undefined,
-        role: role.trim() || undefined,
-        department: department.trim() || undefined,
-        hireDate: hireDate ? new Date(hireDate).toISOString() : undefined,
-      };
-      if (editing) {
-        await updateEmployee(token, editing.id, payload);
-      } else {
-        if (!companyId) {
-          onError("Seleziona un'azienda.");
-          return;
-        }
-        await createEmployee(token, { companyId, ...payload });
-      }
-      await onSaved();
-    } catch (err) {
-      onError(err instanceof Error ? err.message : "Errore salvataggio");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="inline-form" style={formStyle}>
-      <h4>{editing ? "Modifica dipendente" : "Nuovo dipendente"}</h4>
-      <div style={gridStyle}>
-        {!editing ? (
-          <Field label="Azienda *">
-            <select
-              required
-              value={companyId}
-              onChange={(e) => setCompanyId(e.target.value)}
-              aria-label="Azienda"
+          {plansWithEmployees.length === 0 && (
+            <div
+              style={{
+                padding: "36px 20px",
+                textAlign: "center",
+                backgroundColor: "#f8fafc",
+                borderRadius: "8px",
+                border: "1px dashed #cbd5e1",
+              }}
             >
-              {companies.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </Field>
-        ) : null}
-        <Field label="Cognome *">
-          <input required value={lastName} onChange={(e) => setLastName(e.target.value)} />
-        </Field>
-        <Field label="Nome *">
-          <input required value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-        </Field>
-        <Field label="Codice Fiscale">
-          <input value={fiscalCode} onChange={(e) => setFiscalCode(e.target.value.toUpperCase())} maxLength={16} />
-        </Field>
-        <Field label="Ruolo">
-          <input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Cuoco, Operaio, ..." />
-        </Field>
-        <Field label="Reparto">
-          <input value={department} onChange={(e) => setDepartment(e.target.value)} />
-        </Field>
-        <Field label="Data assunzione">
-          <input type="date" value={hireDate} onChange={(e) => setHireDate(e.target.value)} />
-        </Field>
-      </div>
-      <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
-        <button type="submit" className="btn-primary" disabled={busy}>
-          {busy ? "Salvataggio..." : editing ? "Salva modifiche" : "Crea dipendente"}
-        </button>
-        <button type="button" className="ghost-btn" onClick={onClose} disabled={busy}>
-          Annulla
-        </button>
-      </div>
-    </form>
-  );
-}
-
-function TrainingRecordForm({
-  token,
-  employee,
-  courses,
-  onClose,
-  onSaved,
-  onError,
-}: {
-  token: string;
-  employee: Employee;
-  courses: TrainingCourse[];
-  onClose: () => void;
-  onSaved: () => Promise<void>;
-  onError: (msg: string | null) => void;
-}) {
-  const [courseId, setCourseId] = useState(courses[0]?.id ?? "");
-  const [completedAt, setCompletedAt] = useState(new Date().toISOString().slice(0, 10));
-  const [hoursDone, setHoursDone] = useState<string>("");
-  const [certificateNumber, setCertificateNumber] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  function computeExpiry(): string | undefined {
-    if (!courseId || !completedAt) return undefined;
-    const course = courses.find((c) => c.id === courseId);
-    if (!course) return undefined;
-    const d = new Date(completedAt);
-    d.setFullYear(d.getFullYear() + course.frequencyYears);
-    return d.toISOString();
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    onError(null);
-    try {
-      await createTrainingRecord(token, {
-        employeeId: employee.id,
-        courseId,
-        completedAt: new Date(completedAt).toISOString(),
-        expiresAt: computeExpiry(),
-        hoursDone: hoursDone ? Number(hoursDone) : undefined,
-        certificateNumber: certificateNumber.trim() || undefined,
-      });
-      await onSaved();
-    } catch (err) {
-      onError(err instanceof Error ? err.message : "Errore salvataggio");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="inline-form" style={formStyle}>
-      <h4>
-        Registra formazione: {employee.lastName} {employee.firstName}
-      </h4>
-      <div style={gridStyle}>
-        <Field label="Corso *">
-          <select required value={courseId} onChange={(e) => setCourseId(e.target.value)}>
-            {courses.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name} ({c.minHours}h, ogni {c.frequencyYears}a)
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label="Data completamento *">
-          <input type="date" required value={completedAt} onChange={(e) => setCompletedAt(e.target.value)} />
-        </Field>
-        <Field label="Ore svolte">
-          <input
-            type="number"
-            min={1}
-            value={hoursDone}
-            onChange={(e) => setHoursDone(e.target.value)}
-            placeholder="Predefinito: ore minime del corso"
-          />
-        </Field>
-        <Field label="Numero attestato">
-          <input
-            value={certificateNumber}
-            onChange={(e) => setCertificateNumber(e.target.value)}
-            placeholder="es. CERT-2026-001"
-          />
-        </Field>
-      </div>
-      <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
-        <button type="submit" className="btn-primary" disabled={busy}>
-          {busy ? "Registrazione..." : "Registra formazione"}
-        </button>
-        <button type="button" className="ghost-btn" onClick={onClose} disabled={busy}>
-          Annulla
-        </button>
-      </div>
-    </form>
+              <GraduationCap size={40} color="#94a3b8" style={{ marginBottom: "10px" }} />
+              <h4 style={{ margin: "0 0 6px 0", color: "#334155" }}>Nessun lavoratore trovato</h4>
+              <p style={{ margin: "0 0 16px 0", color: "#64748b", fontSize: "13px" }}>
+                {searchTerm || companyFilter
+                  ? "Nessun lavoratore corrisponde ai filtri di ricerca selezionati."
+                  : "Nessun lavoratore registrato. Crea la prima anagrafica per attivare la progettazione formativa."}
+              </p>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => {
+                  setEditingEmployee(null);
+                  setShowModal(true);
+                }}
+              >
+                + Aggiungi Primo Lavoratore
+              </button>
+            </div>
+          )}
+        </div>
+      ) : (
+        /* VISTA TABELLARE TRADIZIONALE ARRICCHITA */
+        <div style={{ overflowX: "auto" }}>
+          <table>
+            <thead>
+              <tr>
+                <th>Cognome Nome</th>
+                <th>CF</th>
+                <th>Mansione</th>
+                <th>Reparto</th>
+                <th>Azienda</th>
+                <th>Stato Formazione</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody>
+              {plansWithEmployees.map(({ emp, plan }) => {
+                const company = companies.find((c) => c.id === emp.companyId);
+                return (
+                  <tr key={emp.id}>
+                    <td>
+                      <strong>{emp.lastName}</strong> {emp.firstName}
+                    </td>
+                    <td style={{ fontFamily: "monospace" }}>{emp.fiscalCode || "—"}</td>
+                    <td>{emp.role || "—"}</td>
+                    <td>{getCleanDepartmentDisplay(emp)}</td>
+                    <td>{company?.name || emp.companyId}</td>
+                    <td>
+                      <span
+                        style={{
+                          backgroundColor:
+                            plan.overallStatus === "conforme"
+                              ? "#dcfce7"
+                              : plan.overallStatus === "attenzione"
+                              ? "#fef3c7"
+                              : "#fee2e2",
+                          color:
+                            plan.overallStatus === "conforme"
+                              ? "#15803d"
+                              : plan.overallStatus === "attenzione"
+                              ? "#b45309"
+                              : "#b91c1c",
+                          fontSize: "11.5px",
+                          fontWeight: 700,
+                          padding: "3px 8px",
+                          borderRadius: "6px",
+                          display: "inline-block",
+                        }}
+                      >
+                        {plan.compliancePercentage}% ({plan.completedCoursesCount}/{plan.totalRequiredCourses} corsi)
+                      </span>
+                    </td>
+                    <td>
+                      <div className="row-actions">
+                        <button
+                          className="ghost-btn"
+                          onClick={() => {
+                            setEditingEmployee(emp);
+                            setShowModal(true);
+                          }}
+                          disabled={busy}
+                        >
+                          Modifica
+                        </button>
+                        <button
+                          className="ghost-btn"
+                          onClick={() => setRecordTarget({ employee: emp })}
+                          disabled={busy}
+                        >
+                          + Formazione
+                        </button>
+                        <button
+                          className="ghost-btn"
+                          onClick={() => handleDelete(emp.id)}
+                          disabled={busy}
+                          style={{ color: "var(--color-error)" }}
+                        >
+                          Disattiva
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+              {plansWithEmployees.length === 0 && (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: "center", padding: "20px" }}>
+                    Nessun lavoratore trovato.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
   );
 }

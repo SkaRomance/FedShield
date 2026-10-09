@@ -54,7 +54,7 @@ test("Golden path: login senior → company → employee → corso → record", 
     assert.ok(company.id, "company.id deve esistere");
     cleanup.companyId = company.id;
 
-    // 3. Create employee
+    // 3. Create employee with extended profile fields
     const employeeRes = await app.inject({
       method: "POST",
       url: "/api/employees",
@@ -67,11 +67,50 @@ test("Golden path: login senior → company → employee → corso → record", 
         role: "Cuoco",
         department: "Cucina",
         hireDate: "2024-01-15T00:00:00.000Z",
+        birthDate: "1988-06-20T00:00:00.000Z",
+        birthPlace: "Roma",
+        contractType: "indeterminato",
+        weeklyHours: 40,
+        safetyRoles: ["preposto", "antincendio"],
+        assignedEquipment: ["affettatrice", "forno"],
+        notes: "Idoneo alla mansione con prescrizioni DPI",
       },
     });
     assert.strictEqual(employeeRes.statusCode, 201, `create employee: ${employeeRes.body}`);
-    const employee = employeeRes.json() as { id: string; firstName: string };
+    const employee = employeeRes.json() as {
+      id: string;
+      firstName: string;
+      birthPlace: string;
+      contractType: string;
+      weeklyHours: number;
+      safetyRoles: string;
+      assignedEquipment: string;
+      notes: string;
+    };
     assert.strictEqual(employee.firstName, "Mario");
+    assert.strictEqual(employee.birthPlace, "Roma");
+    assert.strictEqual(employee.contractType, "indeterminato");
+    assert.strictEqual(employee.weeklyHours, 40);
+    assert.strictEqual(employee.safetyRoles, JSON.stringify(["preposto", "antincendio"]));
+    assert.strictEqual(employee.assignedEquipment, JSON.stringify(["affettatrice", "forno"]));
+    assert.strictEqual(employee.notes, "Idoneo alla mansione con prescrizioni DPI");
+
+    // 3b. Test patch employee fields (e.g. updating hours and resetting birthDate with null)
+    const patchRes = await app.inject({
+      method: "PATCH",
+      url: `/api/employees/${employee.id}`,
+      headers,
+      payload: {
+        weeklyHours: 36,
+        birthDate: null,
+        notes: "Orario ridotto",
+      },
+    });
+    assert.strictEqual(patchRes.statusCode, 200, `patch employee: ${patchRes.body}`);
+    const patchedEmp = patchRes.json() as any;
+    assert.strictEqual(patchedEmp.weeklyHours, 36);
+    assert.strictEqual(patchedEmp.birthDate, null);
+    assert.strictEqual(patchedEmp.notes, "Orario ridotto");
 
     // 4. Create training course
     const courseRes = await app.inject({

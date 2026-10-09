@@ -4,17 +4,60 @@ import { requireSeniorOrAdmin } from "../../plugins/auth.js";
 import { writeAudit } from "../../plugins/audit.js";
 import { replyOnUniqueViolation } from "../../plugins/prisma-errors.js";
 
+const birthDateSchema = z
+  .union([
+    z.string().datetime({ offset: true }),
+    z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    z.literal(""),
+    z.null(),
+  ])
+  .optional();
+
+const weeklyHoursSchema = z
+  .union([
+    z.number(),
+    z.string().regex(/^\d+(\.\d+)?$/).transform((v) => Number(v)),
+    z.null(),
+  ])
+  .optional();
+
 const createEmployeeSchema = z.object({
   companyId: z.string().min(1),
   firstName: z.string().min(1),
   lastName: z.string().min(1),
-  fiscalCode: z.string().optional(),
-  role: z.string().optional(),
-  department: z.string().optional(),
-  hireDate: z.string().datetime().optional(),
+  fiscalCode: z.string().optional().nullable(),
+  role: z.string().optional().nullable(),
+  department: z.string().optional().nullable(),
+  hireDate: z
+    .union([
+      z.string().datetime({ offset: true }),
+      z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      z.literal(""),
+      z.null(),
+    ])
+    .optional(),
+  birthDate: birthDateSchema,
+  birthPlace: z.string().optional().nullable(),
+  contractType: z.string().optional().nullable(),
+  weeklyHours: weeklyHoursSchema,
+  safetyRoles: z.union([z.string(), z.array(z.string()), z.null()]).optional(),
+  assignedEquipment: z.union([z.string(), z.array(z.string()), z.null()]).optional(),
+  notes: z.string().optional().nullable(),
 });
 
-const updateEmployeeSchema = createEmployeeSchema.partial().omit({ companyId: true });
+const updateEmployeeSchema = createEmployeeSchema
+  .partial()
+  .omit({ companyId: true })
+  .extend({
+    leftDate: z
+      .union([
+        z.string().datetime({ offset: true }),
+        z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        z.literal(""),
+        z.null(),
+      ])
+      .optional(),
+  });
 
 const employeeRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get(
@@ -67,7 +110,18 @@ const employeeRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.badRequest("Dati dipendente non validi.");
       }
       const data: any = { ...parsed.data };
-      if (data.hireDate) data.hireDate = new Date(data.hireDate);
+      if (data.hireDate !== undefined) {
+        data.hireDate = data.hireDate ? new Date(data.hireDate) : null;
+      }
+      if (data.birthDate !== undefined) {
+        data.birthDate = data.birthDate ? new Date(data.birthDate) : null;
+      }
+      if (Array.isArray(data.safetyRoles)) {
+        data.safetyRoles = JSON.stringify(data.safetyRoles);
+      }
+      if (Array.isArray(data.assignedEquipment)) {
+        data.assignedEquipment = JSON.stringify(data.assignedEquipment);
+      }
       let created;
       try {
         created = await fastify.prisma.employee.create({ data });
@@ -98,8 +152,21 @@ const employeeRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.badRequest("Dati aggiornamento non validi.");
       }
       const data: any = { ...parsed.data };
-      if (data.hireDate) data.hireDate = new Date(data.hireDate);
-      if (data.leftDate) data.leftDate = new Date(data.leftDate);
+      if (data.hireDate !== undefined) {
+        data.hireDate = data.hireDate ? new Date(data.hireDate) : null;
+      }
+      if (data.leftDate !== undefined) {
+        data.leftDate = data.leftDate ? new Date(data.leftDate) : null;
+      }
+      if (data.birthDate !== undefined) {
+        data.birthDate = data.birthDate ? new Date(data.birthDate) : null;
+      }
+      if (Array.isArray(data.safetyRoles)) {
+        data.safetyRoles = JSON.stringify(data.safetyRoles);
+      }
+      if (Array.isArray(data.assignedEquipment)) {
+        data.assignedEquipment = JSON.stringify(data.assignedEquipment);
+      }
       let updated;
       try {
         updated = await fastify.prisma.employee.update({

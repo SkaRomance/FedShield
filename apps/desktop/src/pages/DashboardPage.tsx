@@ -14,6 +14,7 @@ import {
   Bell,
   CloudUpload,
   TriangleAlert,
+  GraduationCap,
 } from "lucide-react";
 import {
   Company,
@@ -42,6 +43,7 @@ import NormSyncAdminPage from "./NormSyncAdminPage";
 import DeadlinesPage from "./DeadlinesPage";
 import { AssetKind } from "./AssetsPage";
 import AssetQrPage from "./AssetQrPage";
+import TrainingPage from "./TrainingPage";
 
 interface DashboardProps {
   token: string;
@@ -92,7 +94,8 @@ type NavView =
   | "odv"
   | "chatbot"
   | "normsync"
-  | "assetQr";
+  | "assetQr"
+  | "training";
 
 const VIEW_ALIASES: Record<string, NavView> = {
   dashboard: "dashboard",
@@ -118,6 +121,9 @@ const VIEW_ALIASES: Record<string, NavView> = {
   aggiornamenti: "normsync",
   assetqr: "assetQr",
   qr: "assetQr",
+  training: "training",
+  formazione: "training",
+  personale: "training",
 };
 
 function parseInitialView(userRole?: string): NavView {
@@ -328,6 +334,7 @@ export default function DashboardPage({
         <nav>
           {navItem("dashboard", "Riepilogo", LayoutDashboard)}
           {navItem("registry", "Anagrafica Clienti", Users)}
+          {navItem("training", "Personale & Formazione", GraduationCap)}
           {navItem("checklist", "Sopralluoghi", ClipboardCheck)}
           {navItem("deadlines", "Scadenzario", CalendarClock)}
           {navItem("quotes", "Preventivi", FileText)}
@@ -683,6 +690,8 @@ export default function DashboardPage({
               setQrAssetKind(null);
             }}
           />
+        ) : activeView === "training" ? (
+          <TrainingPage token={token} companies={companies} userRole={userRole} />
         ) : (
           <OdvPage token={token} companies={companies} />
         )}

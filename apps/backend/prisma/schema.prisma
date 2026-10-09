@@ -486,13 +486,20 @@ model Employee {
   fiscalCode    String?
   role          String?
   department    String?
-  hireDate      DateTime?
-  leftDate      DateTime?
-  isActive      Boolean      @default(true)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  company       Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  trainingRecords EmployeeTrainingRecord[]
+  hireDate          DateTime?
+  leftDate          DateTime?
+  birthDate         DateTime?
+  birthPlace        String?
+  contractType      String?
+  weeklyHours       Float?
+  safetyRoles       String?
+  assignedEquipment String?
+  notes             String?
+  isActive          Boolean      @default(true)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  company           Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  trainingRecords   EmployeeTrainingRecord[]
 
   @@unique([companyId, fiscalCode])
   @@index([companyId, isActive])
