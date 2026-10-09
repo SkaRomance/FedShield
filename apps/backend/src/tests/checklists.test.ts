@@ -103,6 +103,36 @@ async function run() {
   const requirements = docsRequirements.json();
   assert.ok(Array.isArray(requirements) && requirements.length > 0);
 
+  // Verifica filtraggio checklistMode su GET /inspections/:id/documents/requirements
+  const createHaccpInspection = await app.inject({
+    method: "POST",
+    url: "/api/inspections",
+    headers: { authorization: `Bearer ${token}` },
+    payload: {
+      companyId,
+      title: "Test inspection HACCP only",
+      checklistMode: "haccp_only",
+    },
+  });
+  assert.equal(createHaccpInspection.statusCode, 201);
+  const haccpInspectionId = createHaccpInspection.json().id as string;
+
+  const haccpDocsRes = await app.inject({
+    method: "GET",
+    url: `/api/inspections/${haccpInspectionId}/documents/requirements`,
+    headers: { authorization: `Bearer ${token}` },
+  });
+  assert.equal(haccpDocsRes.statusCode, 200);
+  const haccpRequirements = haccpDocsRes.json();
+  const haccpTemplateIds = haccpRequirements.map((r: { documentTemplateId: string }) => r.documentTemplateId);
+  const haccpTemplates = await app.prisma.documentTemplate.findMany({
+    where: { id: { in: haccpTemplateIds } },
+  });
+  for (const t of haccpTemplates) {
+    assert.notEqual(t.domain, "safety", `Template ${t.name} non deve avere domain 'safety' in haccp_only`);
+    assert.ok(t.domain === "haccp" || t.domain === "both");
+  }
+
   const saveDocs = await app.inject({
     method: "PUT",
     url: `/api/inspections/${inspectionId}/documents`,

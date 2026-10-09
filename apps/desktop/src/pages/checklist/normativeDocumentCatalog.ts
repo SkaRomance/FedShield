@@ -1181,8 +1181,17 @@ export function isCategoryApplicableForAteco(
   const ateco = (atecoCode ?? "").trim();
 
   // Modalità checklist forzate
-  if (checklistMode === "haccp_only" && category === "sicurezza_81_08") {
-    return { applicable: false, reason: "Sopralluogo impostato in modalità Solo HACCP." };
+  if (checklistMode === "haccp_only") {
+    if (category === "sicurezza_81_08" || category === "matrici_ambientali") {
+      return { applicable: false, reason: "Sopralluogo impostato in modalità Solo HACCP." };
+    }
+    if (category === "acque_legionella") {
+      return {
+        applicable: true,
+        reason:
+          "Piano Sicurezza Acque (PSA D.Lgs. 18/2023) e parametri potabilità integrati con autocontrollo HACCP (Reg. CE 852/2004).",
+      };
+    }
   }
   if (checklistMode === "safety_only" && category === "haccp_alimentare") {
     return { applicable: false, reason: "Sopralluogo impostato in modalità Solo Sicurezza." };
@@ -1226,6 +1235,13 @@ export function isCategoryApplicableForAteco(
 
   // Sezione Acque & Legionella: particolarmente rilevante per strutture con impianti complessi / aperte al pubblico
   if (category === "acque_legionella") {
+    if (checklistMode === "haccp_only") {
+      return {
+        applicable: true,
+        reason:
+          "Piano Sicurezza Acque (PSA D.Lgs. 18/2023) e parametri potabilità integrati con autocontrollo HACCP (Reg. CE 852/2004).",
+      };
+    }
     const isHighPriority =
       /^55\./.test(ateco) || // Hotel, B&B, strutture ricettive
       /^56\./.test(ateco) || // Ristorazione
@@ -1314,7 +1330,12 @@ export function isDocumentApplicableToAteco(
   const ateco = (atecoCode ?? "").trim();
 
   // 1. ChecklistMode filter
-  if (checklistMode === "haccp_only" && docDef.category !== "haccp_alimentare" && docDef.category !== "base_autorizzativa") {
+  if (
+    checklistMode === "haccp_only" &&
+    docDef.category !== "haccp_alimentare" &&
+    docDef.category !== "base_autorizzativa" &&
+    docDef.category !== "acque_legionella"
+  ) {
     return false;
   }
   if (checklistMode === "safety_only" && docDef.category === "haccp_alimentare") {
@@ -1397,6 +1418,7 @@ export interface DocumentExtraMeta {
   expiryDate?: string;
   checkedContents?: string[];
   subStatus?: "viewed_on_site" | "requested_later" | "not_available" | "not_applicable";
+  customCategory?: DocumentCategory;
 }
 
 /**
@@ -1439,7 +1461,8 @@ export function serializeDocumentExtraMeta(meta: DocumentExtraMeta): string {
     (meta.issueDate && meta.issueDate.trim().length > 0) ||
     (meta.expiryDate && meta.expiryDate.trim().length > 0) ||
     (meta.checkedContents && meta.checkedContents.length > 0) ||
-    meta.subStatus;
+    meta.subStatus ||
+    meta.customCategory;
 
   if (hasExtra) {
     return JSON.stringify({
@@ -1448,6 +1471,7 @@ export function serializeDocumentExtraMeta(meta: DocumentExtraMeta): string {
       expiryDate: meta.expiryDate ?? "",
       checkedContents: meta.checkedContents ?? [],
       subStatus: meta.subStatus,
+      customCategory: meta.customCategory,
     });
   }
 

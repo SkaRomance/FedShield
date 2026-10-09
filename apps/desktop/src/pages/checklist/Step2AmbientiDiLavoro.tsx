@@ -32,6 +32,19 @@ interface Step2AmbientiDiLavoroProps {
   inspectionId?: string;
 }
 
+export function filterEnvironmentItemsByChecklistMode<T extends { domain?: "safety" | "haccp" | "both" | string }>(
+  items: T[],
+  checklistMode?: string,
+): T[] {
+  if (checklistMode === "haccp_only") {
+    return items.filter((item) => item.domain === "haccp" || item.domain === "both");
+  }
+  if (checklistMode === "safety_only") {
+    return items.filter((item) => item.domain === "safety" || item.domain === "both");
+  }
+  return items;
+}
+
 export default function Step2AmbientiDiLavoro({
   premisesItems,
   answers = {},
@@ -39,6 +52,7 @@ export default function Step2AmbientiDiLavoro({
   onAddCustomItem,
   isInspectionValidated = false,
   atecoCode,
+  checklistMode = "unified",
   inspectionId = "current",
 }: Step2AmbientiDiLavoroProps) {
   // Lista ambienti di lavoro (inizializzata dinamicamente in base al codice ATECO)
@@ -100,7 +114,9 @@ export default function Step2AmbientiDiLavoro({
   const [customNormRef, setCustomNormRef] = useState("");
   const [customSeverity, setCustomSeverity] = useState(2);
   const [customSanctionable, setCustomSanctionable] = useState(true);
-  const [customDomain, setCustomDomain] = useState<"safety" | "haccp" | "both">("safety");
+  const [customDomain, setCustomDomain] = useState<"safety" | "haccp" | "both">(() =>
+    checklistMode === "haccp_only" ? "haccp" : "safety",
+  );
   const [submittingCustom, setSubmittingCustom] = useState(false);
 
   // Drawer Non Conformità aperto per un dato itemId
@@ -262,8 +278,8 @@ export default function Step2AmbientiDiLavoro({
       }
     }
 
-    return list;
-  }, [currentEnv, generatedItems, premisesItems]);
+    return filterEnvironmentItemsByChecklistMode(list, checklistMode);
+  }, [currentEnv, generatedItems, premisesItems, checklistMode]);
 
   // Requisiti filtrati per ricerca ed esito
   const filteredItems = useMemo(() => {
@@ -459,7 +475,7 @@ export default function Step2AmbientiDiLavoro({
               <span>{env.name}</span>
 
               {/* Badge indicatore di stato */}
-              {envEval.cpiActivityAlert && (
+              {envEval.cpiActivityAlert && checklistMode !== "haccp_only" && (
                 <span title="Locale soggetto a CPI D.P.R. 151/11" style={{ fontSize: "13px" }}>
                   🔥
                 </span>
@@ -868,7 +884,9 @@ export default function Step2AmbientiDiLavoro({
 
             {/* Badge Riepilogo Normativo & Alert Dimensionali */}
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-              {complianceResult.summaryBadges.map((b, i) => (
+              {complianceResult.summaryBadges
+                .filter((b) => (checklistMode === "haccp_only" ? !b.text.includes("CPI") : true))
+                .map((b, i) => (
                 <span
                   key={i}
                   style={{
@@ -909,7 +927,7 @@ export default function Step2AmbientiDiLavoro({
             </div>
 
             {/* Alert Specifico Assoggettabilità CPI */}
-            {complianceResult.cpiActivityAlert && (
+            {complianceResult.cpiActivityAlert && checklistMode !== "haccp_only" && (
               <div
                 style={{
                   marginTop: 12,

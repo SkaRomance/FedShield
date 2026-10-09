@@ -245,11 +245,11 @@ const sectors: SectorDefinition[] = [
     documents: [
       { name: "DVR centro sportivo e fitness aggiornato", domain: ComplianceDomain.safety },
       { name: "Registro verifiche DAE e attestati BLSD addetti", domain: ComplianceDomain.safety },
-      { name: "Piano prevenzione e registro campionamenti Legionella", domain: ComplianceDomain.safety },
+      { name: "Piano prevenzione e registro campionamenti Legionella", domain: ComplianceDomain.both },
       { name: "Registro verifiche e manutenzione attrezzature fitness", domain: ComplianceDomain.safety },
       { name: "Piano emergenza, evacuazione e registro antincendio", domain: ComplianceDomain.safety },
       { name: "Dichiarazione conformita impianti elettrici e verifiche DPR 462/01", domain: ComplianceDomain.safety },
-      { name: "Piano autocontrollo vasca e registro parametri piscina (se presente)", domain: ComplianceDomain.safety, isRequired: false },
+      { name: "Piano autocontrollo vasca e registro parametri piscina (se presente)", domain: ComplianceDomain.both, isRequired: false },
     ],
   },
   {
@@ -345,7 +345,7 @@ const additionalSectorDocuments: Array<{
       { name: "DVR rischio biologico, agenti chimici e radioprotezione", domain: ComplianceDomain.safety },
       { name: "Registro sterilizzazione e verifiche autoclavi (test Bowie-Dick/spore)", domain: ComplianceDomain.both },
       { name: "Protocollo e registro rifiuti speciali a rischio infettivo (CER 180103) e FIR", domain: ComplianceDomain.safety },
-      { name: "Piano prevenzione e campionamento Legionellosi rete idrica", domain: ComplianceDomain.safety },
+      { name: "Piano prevenzione e campionamento Legionellosi rete idrica", domain: ComplianceDomain.both },
       { name: "Registro dosimetria e relazione Esperto di Radioprotezione", domain: ComplianceDomain.safety, isRequired: false },
       { name: "Protocolli igienico-sanitari e procedure disinfezione ambulatoriale", domain: ComplianceDomain.both },
     ],

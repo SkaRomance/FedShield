@@ -241,8 +241,8 @@ function buildAtecoVariants(atecoCode?: string | null) {
   return [...variants];
 }
 
-function buildDomainFilterByChecklistMode(checklistMode: InspectionChecklistMode) {
-  if (checklistMode === InspectionChecklistMode.unified) {
+function buildDomainFilterByChecklistMode(checklistMode?: InspectionChecklistMode | null) {
+  if (!checklistMode || checklistMode === InspectionChecklistMode.unified) {
     return undefined;
   }
 

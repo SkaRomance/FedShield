@@ -158,12 +158,31 @@ export default function Step1Documenti({
       const lower = doc.name.toLowerCase().trim();
       if (!seenNames.has(lower)) {
         const catalogDef = findCatalogDefinition(doc.name);
+        const meta = parseDocumentExtraMeta(doc.note);
+        const cat = meta.customCategory ?? (catalogDef ? catalogDef.category : classifyDocumentCategory(doc.name));
+
+        // Se non stiamo forzando la visualizzazione di tutto il catalogo,
+        // non includiamo documenti di categorie non ammesse per la modalità corrente
+        // (es. vecchi documenti di sicurezza in sopralluoghi solo HACCP)
+        if (!showAllDocuments) {
+          if (
+            checklistMode === "haccp_only" &&
+            cat !== "base_autorizzativa" &&
+            cat !== "haccp_alimentare" &&
+            cat !== "acque_legionella"
+          ) {
+            continue;
+          }
+          if (checklistMode === "safety_only" && cat === "haccp_alimentare") {
+            continue;
+          }
+        }
+
         const hasBeenAnswered = doc.status !== "not_available" && doc.status !== "not_applicable";
         const isCustomDoc = !catalogDef;
 
         if (isCustomDoc || hasBeenAnswered || showAllDocuments) {
           seenNames.add(lower);
-          const cat = catalogDef ? catalogDef.category : classifyDocumentCategory(doc.name);
           list.push({
             definition: catalogDef,
             name: doc.name,
@@ -326,7 +345,10 @@ export default function Step1Documenti({
     if (!customDocName.trim()) return;
 
     const trimmed = customDocName.trim();
-    const metaNote = customDocNorm.trim() ? `Rif. normativo: ${customDocNorm.trim()}` : "";
+    const meta = parseDocumentExtraMeta("");
+    meta.noteText = customDocNorm.trim() ? `Rif. normativo: ${customDocNorm.trim()}` : "";
+    meta.customCategory = customDocCategory;
+    const metaNote = serializeDocumentExtraMeta(meta);
 
     updateDocumentItem(trimmed, {
       status: "not_available",
@@ -423,13 +445,21 @@ export default function Step1Documenti({
     return groups;
   }, [filteredDocuments]);
 
-  const categoriesOrder: DocumentCategory[] = [
-    "base_autorizzativa",
-    "haccp_alimentare",
-    "sicurezza_81_08",
-    "acque_legionella",
-    "matrici_ambientali",
-  ];
+  const categoriesOrder: DocumentCategory[] = useMemo(() => {
+    if (checklistMode === "haccp_only") {
+      return ["base_autorizzativa", "haccp_alimentare", "acque_legionella"];
+    }
+    if (checklistMode === "safety_only") {
+      return ["base_autorizzativa", "sicurezza_81_08", "acque_legionella", "matrici_ambientali"];
+    }
+    return [
+      "base_autorizzativa",
+      "haccp_alimentare",
+      "sicurezza_81_08",
+      "acque_legionella",
+      "matrici_ambientali",
+    ];
+  }, [checklistMode]);
 
   return (
     <div className="panel section-panel" style={{ padding: "20px" }}>
@@ -535,7 +565,12 @@ export default function Step1Documenti({
               fontSize: "14px",
               fontWeight: 500,
             }}
-            onClick={() => setShowAddCustomModal(true)}
+            onClick={() => {
+              if (!categoriesOrder.includes(customDocCategory)) {
+                setCustomDocCategory(categoriesOrder[0] ?? "base_autorizzativa");
+              }
+              setShowAddCustomModal(true);
+            }}
           >
             ➕ Aggiungi Documento Personalizzato
           </button>
@@ -1641,11 +1676,14 @@ export default function Step1Documenti({
                   onChange={(e) => setCustomDocCategory(e.target.value as DocumentCategory)}
                   style={{ width: "100%", padding: "8px 12px", borderRadius: 6, border: "1px solid #cbd5e1" }}
                 >
-                  <option value="base_autorizzativa">🏛️ 1. Base & Autorizzativa</option>
-                  <option value="haccp_alimentare">🍽️ 2. Igiene Alimentare & HACCP</option>
-                  <option value="sicurezza_81_08">🦺 3. Sicurezza sul Lavoro D.Lgs. 81/08</option>
-                  <option value="acque_legionella">💧 4. Piano Sicurezza Acque & Legionella</option>
-                  <option value="matrici_ambientali">🌿 5. Matrici Ambientali: Fumi, Scarichi e Suolo</option>
+                  {categoriesOrder.map((catKey) => {
+                    const info = DOCUMENT_CATEGORIES_INFO[catKey];
+                    return (
+                      <option key={catKey} value={catKey}>
+                        {info.icon} {info.title}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
