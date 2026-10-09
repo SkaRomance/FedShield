@@ -5,6 +5,8 @@ import {
 import {
   generateEnvironmentChecklistItems,
   defaultEnvironmentFeatures,
+  evaluateEnvironmentCompliance,
+  getStandardEnvironmentsForAteco,
   WorkEnvironmentInstance,
 } from "./normativePremisesCatalog.js";
 
@@ -116,5 +118,133 @@ for (const item of cucinaSafety) {
 }
 const hasCubaturaInSafety = cucinaSafety.some((it) => it.id.includes("dim-cubatura"));
 assert.equal(hasCubaturaInSafety, true, "Cubatura D.Lgs. 81 deve essere presente in safety_only");
+
+// 3. Test Ipermercato ATECO 47.11.1 (o 47.11.10)
+console.log("Test 5: getStandardEnvironmentsForAteco per Ipermercato (47.11.1)");
+const iperEnvs = getStandardEnvironmentsForAteco("47.11.1");
+assert.equal(iperEnvs.length, 12, "L'ipermercato deve avere esattamente 12 ambienti tipici");
+
+// Verifica ID e nomi dei 12 reparti/ambienti
+const expectedIds = [
+  "env-iper-corsie",
+  "env-iper-macelleria",
+  "env-iper-pescheria",
+  "env-iper-gastronomia",
+  "env-iper-panetteria",
+  "env-iper-ortofrutta",
+  "env-iper-magazzino",
+  "env-iper-celle-frigo",
+  "env-iper-centrale-frigo",
+  "env-iper-compattatore",
+  "env-iper-casse-uffici",
+  "env-iper-spogliatoi",
+];
+
+for (const id of expectedIds) {
+  const envFound = iperEnvs.find((e) => e.id === id);
+  assert.ok(envFound, `Ambiente con id ${id} deve essere presente nell'elenco Ipermercato`);
+}
+
+// Verifica proprietà specifiche dei locali chiave
+const corsie = iperEnvs.find((e) => e.id === "env-iper-corsie")!;
+assert.equal(corsie.surfaceSqM, 3500);
+assert.equal(corsie.heightM, 5.0);
+assert.equal(corsie.volumeCuM, 17500);
+assert.equal(corsie.occupantsCount, 30);
+assert.equal(corsie.features.forcedExhaustPresent, true);
+assert.equal(corsie.features.emergencyExitsCount, 6);
+
+const celleFrigo = iperEnvs.find((e) => e.id === "env-iper-celle-frigo")!;
+assert.equal(celleFrigo.category, "storage");
+assert.equal(celleFrigo.surfaceSqM, 150);
+assert.equal(celleFrigo.features.hasTrappedPersonAlarm, true);
+
+const magazzino = iperEnvs.find((e) => e.id === "env-iper-magazzino")!;
+assert.equal(magazzino.surfaceSqM, 1200);
+assert.equal(magazzino.heightM, 6.5);
+assert.equal(magazzino.volumeCuM, 7800);
+
+// Test 6: evaluateEnvironmentCompliance per Ipermercato
+console.log("Test 6: evaluateEnvironmentCompliance per ambienti Ipermercato");
+const evalCorsie = evaluateEnvironmentCompliance(corsie, "47.11.1");
+assert.ok(evalCorsie.cpiActivityAlert, "L'area vendita corsie (3500mq) deve essere soggetta a CPI");
+assert.ok(
+  evalCorsie.summaryBadges.some((b) => b.text.includes("Corsie di esodo")),
+  "Deve esserci badge per corsie di esodo ≥ 2,40m",
+);
+assert.ok(
+  evalCorsie.summaryBadges.some((b) => b.text.includes("Uscite di emergenza")),
+  "Deve esserci badge per uscite di emergenza con maniglioni antipanico",
+);
+
+const evalCelle = evaluateEnvironmentCompliance(celleFrigo, "47.11.1");
+assert.ok(
+  evalCelle.summaryBadges.some((b) => b.text.includes("Allarme uomo intrappolato")),
+  "Deve esserci badge allarme uomo intrappolato a norma UNI EN 378 per celle",
+);
+
+const centraleFrigo = iperEnvs.find((e) => e.id === "env-iper-centrale-frigo")!;
+const evalCentrale = evaluateEnvironmentCompliance(centraleFrigo, "47.11.1");
+assert.ok(
+  evalCentrale.summaryBadges.some((b) => b.text.includes("Sensori gas refrigerante")),
+  "Deve esserci badge per sensori fughe gas refrigerante e ventilazione emergenza",
+);
+
+// Test 7: generateEnvironmentChecklistItems per reparti Ipermercato
+console.log("Test 7: generateEnvironmentChecklistItems per reparti specifici Ipermercato");
+const macelleria = iperEnvs.find((e) => e.id === "env-iper-macelleria")!;
+const macelleriaItems = generateEnvironmentChecklistItems(macelleria, "47.11.1");
+assert.ok(
+  macelleriaItems.some((it) => it.id.includes("ganciere-guidovie")),
+  "Macelleria deve avere verifica guidovie aeree e ganciere",
+);
+assert.ok(
+  macelleriaItems.some((it) => it.id.includes("lavamani-sterilizzatore")),
+  "Macelleria deve avere verifica lavamani comando non manuale e sterilizzatore coltelli",
+);
+
+const pescheria = iperEnvs.find((e) => e.id === "env-iper-pescheria")!;
+const pescheriaItems = generateEnvironmentChecklistItems(pescheria, "47.11.1");
+assert.ok(
+  pescheriaItems.some((it) => it.id.includes("banco-pesce-scolo")),
+  "Pescheria deve avere verifica banco ghiaccio con scolo acque continuo",
+);
+assert.ok(
+  pescheriaItems.some((it) => it.id.includes("sicurezza-pescheria-dpi")),
+  "Pescheria deve avere verifica pavimento R13 e guanti antitaglio in maglia d'acciaio",
+);
+
+const celleFrigoItems = generateEnvironmentChecklistItems(celleFrigo, "47.11.1");
+assert.ok(
+  celleFrigoItems.some((it) => it.id.includes("allarme-uomo-intrappolato")),
+  "Celle frigorifere devono avere verifica allarme uomo intrappolato UNI EN 378",
+);
+assert.ok(
+  celleFrigoItems.some((it) => it.id.includes("teletermometro-registrazione")),
+  "Celle frigorifere devono avere verifica teletermometro continuo Reg. CE 37/2005",
+);
+
+const corsieItems = generateEnvironmentChecklistItems(corsie, "47.11.1");
+assert.ok(
+  corsieItems.some((it) => it.id.includes("corsie-esodo-vie-fuga")),
+  "Corsie ipermercato devono avere verifica corsie esodo ≥ 2.40m",
+);
+assert.ok(
+  corsieItems.some((it) => it.id.includes("scaffali-vendita-corsie")),
+  "Corsie ipermercato devono avere verifica reti anticaduta e fermo-pacchi",
+);
+
+const centraleFrigoItems = generateEnvironmentChecklistItems(centraleFrigo, "47.11.1");
+assert.ok(
+  centraleFrigoItems.some((it) => it.id.includes("centrale-frigo-gas-refrigerante")),
+  "Centrale frigorifera deve avere verifica rilevazione perdite gas refrigerante",
+);
+
+const compattatore = iperEnvs.find((e) => e.id === "env-iper-compattatore")!;
+const compattatoreItems = generateEnvironmentChecklistItems(compattatore, "47.11.1");
+assert.ok(
+  compattatoreItems.some((it) => it.id.includes("compattatori-sicurezza-macchine")),
+  "Compattatori devono avere verifica arresti d'emergenza e interblocchi",
+);
 
 console.log("=== TUTTI I TEST Step2AmbientiDiLavoro SUPERATI CON SUCCESSO! ===");

@@ -291,7 +291,827 @@ export const SECTOR_MACHINERY_CATALOGS: SectorMachineCatalog[] = [
     ],
   },
 
-  // 2. LOGISTICA, MAGAZZINO & TRASPORTI
+  // 2. IPERMERCATO, SUPERMERCATO & GDO ALIMENTARE (Superficie > 2.500 mq)
+  {
+    sectorKey: "ipermercato_gdo",
+    sectorLabel: "Ipermercato, Supermercato e Grande Distribuzione Alimentare (GDO)",
+    atecoPrefixes: ["47.11.1", "47.11.10", "47.11"],
+    machines: [
+      // --- REPARTO 1: LOGISTICA E RICEVIMENTO MERCI ---
+      {
+        machineKey: "muletto_frontale_elettrico",
+        name: "Carrello Elevatore Elettrico Frontale (Muletto)",
+        type: "Apparecchio di Sollevamento e Movimentazione Merci",
+        suggestedManufacturer: "Still / Toyota / Linde",
+        suggestedModel: "RX 20 / Traigo 48",
+        isSubjectToInailCheck: true,
+        inailFrequencyYears: 1,
+        training: TRAINING_REQUIREMENTS_LIBRARY.carrello_elevatore,
+        safetyChecks: [
+          {
+            code: "MULETTO_ROPS_FOPS",
+            title: "Tettuccio di Protezione Conducente (ROPS/FOPS)",
+            question: "Il carrello è dotato di tettuccio di protezione integro contro la caduta di carichi dall'alto (FOPS) e contro lo schiacciamento da ribaltamento (ROPS)?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2.4; UNI EN ISO 3691-1",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "MULETTO_SAFETY_SEATBELT",
+            title: "Cintura di Sicurezza o Sistema di Ritenuta Conducente",
+            question: "Il sedile di guida è provvisto di cintura di sicurezza con avvolgitore (o barriere laterali) obbligatoria per trattenere l'operatore in cabina in caso di ribaltamento?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2.4 e art. 71; Linee Guida ISPESL",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "MULETTO_FORKS_CHAINS_INSPECTION",
+            title: "Verifica Trimestrale Catene di Sollevamento e Usura Forche (< 10%)",
+            question: "Le forche di sollevamento e le catene fleyer sono sottoposte a verifica periodica trimestrale con registrazione su libretto, usura del tallone inferiore al 10% e assenza di cricche?",
+            normReference: "ISO 5057; D.Lgs. 81/2008 art. 71 c. 8",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "MULETTO_REVERSE_ALARM_BLUESPOT",
+            title: "Cicalino Retromarcia, Lampeggiante e Segnalatore Blue Spot",
+            question: "Il carrello è provvisto di avvisatore acustico bitonale in retromarcia, lampeggiante e sistema ottico di avvertimento pedoni Blue Spot / Red Zone funzionanti?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2.2; UNI EN ISO 3691-1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "MULETTO_LOAD_CHART",
+            title: "Targhetta del Diagramma Portate Residue Visibile",
+            question: "È chiaramente visibile e leggibile dal posto guida la targa indelebile con il diagramma delle portate residue in quota in funzione del baricentro del carico?",
+            normReference: "D.Lgs. 81/2008 All. V p. 1.2; UNI EN ISO 3691-1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "transpallet_elettrico_pedana",
+        name: "Transpallet Elettrico con Pedana Operatore a Bordo",
+        type: "Carrello Semovente con Conducente a Bordo su Pedana",
+        suggestedManufacturer: "Jungheinrich / Still / BT Toyota",
+        suggestedModel: "ERE 120 / EXH-S",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.carrello_elevatore,
+        safetyChecks: [
+          {
+            code: "PEDANA_BELLY_BUTTON_SAFETY",
+            title: "Pulsante Antischiacciamento sul Timone ('Pulsante Pancia')",
+            question: "Sulla testata del timone è presente e funzionante il pulsante di sicurezza antipizzicamento che inverte immediatamente la marcia a contatto con il corpo dell'operatore?",
+            normReference: "UNI EN ISO 3691-1 punto 4.4.2; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PEDANA_ELECTROMAGNETIC_BRAKE",
+            title: "Freno Elettromagnetico ad Azione Automatica",
+            question: "Rilasciando il timone o abbandonando la pedana operatore si attiva immediatamente il freno elettromagnetico di servizio e stazionamento a uomo morto?",
+            normReference: "UNI EN ISO 3691-1 punto 4.3; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PEDANA_SIDE_GUARDS_SENSOR",
+            title: "Sponde Laterali di Protezione e Sensore Presenza Operatore",
+            question: "La pedana ribaltabile/fissa è provvista di protezioni laterali di contenimento operatore integre e sensore presence-control sotto il pianale?",
+            normReference: "UNI EN ISO 3691-1; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PEDANA_EMERGENCY_DISCONNECT",
+            title: "Fungo di Sgancio Rapido Alimentazione Batteria",
+            question: "È presente sul cruscotto o sul telaio il pulsante rosso a fungo di arresto di emergenza per la disconnessione generale immediata del circuito batteria?",
+            normReference: "CEI EN 60204-1; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "transpallet_elettrico_terra",
+        name: "Transpallet Elettrico con Timone - Uomo a Terra",
+        type: "Carrello per Movimentazione Bassa con Timone",
+        suggestedManufacturer: "Still / Toyota / Linde",
+        suggestedModel: "ECV 10 / LWE140",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.transpallet_elettrico,
+        safetyChecks: [
+          {
+            code: "TERRA_VERTICAL_TILLER_MICRO",
+            title: "Microinterruttore di Sicurezza Timone Verticale e Marcia Lenta",
+            question: "In posizione verticale del timone il transpallet arresta la trazione (freno inserito), salvo attivazione intenzionale del pulsante tartaruga di manovra lenta a timone eretto?",
+            normReference: "UNI EN ISO 3691-1; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "TERRA_BELLY_ANTISQUASH",
+            title: "Pulsante Antipancia Antischiacciamento al Timone",
+            question: "Il pulsante di sicurezza sulla testa timone inverte istantaneamente la traslazione in allontanamento dal conducente se premuto contro il corpo?",
+            normReference: "UNI EN ISO 3691-1; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "TERRA_EMERGENCY_STOP_BUTTON",
+            title: "Fungo Rosso di Emergenza Staccabatteria",
+            question: "È presente e funzionante il pulsante a fungo di arresto emergenza che toglie alimentazione istantanea all'impianto elettrico e mototamburo?",
+            normReference: "CEI EN 60204-1; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "transpallet_manuale",
+        name: "Transpallet Manuale Idraulico",
+        type: "Attrezzatura Manuale di Movimentazione Merci",
+        suggestedManufacturer: "Lifter Pramac / Jungheinrich / Yale",
+        suggestedModel: "GS Basic 25S4 / AM 22",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "TRANSPALLET_OVERLOAD_VALVE",
+            title: "Valvola Limitatrice di Massima Pressione (Sovraccarico)",
+            question: "Il gruppo pompa idraulica è provvisto di valvola di massima pressione tarata per impedire il sollevamento oltre la portata nominale (2.500 kg ben visibile sul telaio)?",
+            normReference: "UNI EN ISO 3691-5; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "TRANSPALLET_STEERING_ROLLERS",
+            title: "Rulli di Carico, Ruote Direzionali e Ritorno Verticale Timone",
+            question: "I doppi rulli sotto le forche e le ruote sterzanti sono privi di crepe o sgranature e la molla del timone assicura il ritorno spontaneo in posizione verticale a riposo?",
+            normReference: "UNI EN ISO 3691-5; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "TRANSPALLET_CONTROL_LEVER",
+            title: "Leva di Comando a 3 Posizioni con Discesa Proporzionale",
+            question: "La leva di comando sul timone commuta stabilmente tra sollevamento, folle (traino a ruote libere) e discesa con valvola di scarico progressiva senza scatti?",
+            normReference: "UNI EN ISO 3691-5",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "pressa_compattatrice",
+        name: "Pressa Compattatrice per Cartone e Plastica (Compattatore Verticale)",
+        type: "Macchina per Trattamento e Compattazione Rifiuti / Imballaggi",
+        suggestedManufacturer: "Bramidan / Strautmann / HSM / Orwak",
+        suggestedModel: "B4 / BalePress 10 / Power 4240",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "PRESSA_GATE_INTERLOCK",
+            title: "Interblocco di Sicurezza Portellone di Carico (UNI EN 16500)",
+            question: "Il piatto pressante scende esclusivamente a portellone anteriore di carico completamente chiuso, con microinterruttore di sicurezza codificato a prova di manomissione?",
+            normReference: "UNI EN 16500:2014; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PRESSA_EMERGENCY_STOP",
+            title: "Pulsante di Arresto di Emergenza a Fungo",
+            question: "La pressa è dotata di arresto di emergenza a ritenuta meccanica (fungo rosso su sfondo giallo) ad azione immediata facilmente raggiungibile sul fronte?",
+            normReference: "UNI EN ISO 13850; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PRESSA_TWO_HAND_EJECTION",
+            title: "Comando Protetto di Espulsione Balla a Due Mani",
+            question: "Il sistema semiautomatico di espulsione e ribaltamento della balla legata richiede comando simultaneo protetto per evitare rischi di schiacciamento arti?",
+            normReference: "UNI EN 16500:2014; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "pedana_di_carico",
+        name: "Banchina Idraulica di Carico / Dock Leveller",
+        type: "Pedana Elettroidraulica di Raccordo Automezzi",
+        suggestedManufacturer: "Campisa / Armo / Hörmann / Kopron",
+        suggestedModel: "Fidani Telescopic / Dock Leveller RH",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "PEDANA_PARACHUTE_VALVE",
+            title: "Valvola Idraulica Paracadute di Blocco Caduta (EN 1398)",
+            question: "Il cilindro idraulico principale di sollevamento è dotato di valvola di sicurezza paracadute che blocca all'istante la discesa della rampa in caso di allontanamento intempestivo dell'autocarro?",
+            normReference: "UNI EN 1398:2009; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PEDANA_LATERAL_FOOT_GUARDS",
+            title: "Bandelle Laterali Salvapiedi Giallo-Nere e Paracolpi in Gomma",
+            question: "La banchina presenta bandelle laterali telescopiche salvapiedi con segnaletica zebrata giallo-nera e robusti respingenti in gomma antiurto integri a protezione della struttura?",
+            normReference: "UNI EN 1398:2009; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PEDANA_DOOR_INTERLOCK",
+            title: "Interblocco Funzionale con Portone Sezionale di Baia",
+            question: "Il quadro elettrico della rampa è asservito al portone sezionale, impedendo la movimentazione del ponte a portone chiuso o non totalmente sollevato?",
+            normReference: "UNI EN 1398; CEI EN 60204-1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "stazione_ricarica_batterie",
+        name: "Stazione di Ricarica Batterie Trazione Muletti",
+        type: "Impianto e Apparecchiature Elettriche di Carica Accumulatori",
+        suggestedManufacturer: "Fiamm / EnerSys / Zivan / Fronius",
+        suggestedModel: "Selectiva 4.0 / Lifeplus Mod",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "BATTERIE_ATEX_VENTILATION",
+            title: "Aspirazione Idrogeno Antiscintilla ATEX (CEI EN 62485-3)",
+            question: "L'area di ricarica accumulatori è provvista di cappa o impianto di aspirazione forzata antiscintilla ATEX o idonea aerazione naturale permanente calcolata per impedire atmosfere esplosive da idrogeno?",
+            normReference: "CEI EN 62485-3 / CEI 21-39; D.Lgs. 81/2008 Titolo XI ATEX",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BATTERIE_EMERGENCY_EYEWASH",
+            title: "Doccetta Lavaocchi di Emergenza a Prossimità Immediata",
+            question: "Nelle immediate vicinanze dei punti di rabbocco/carica è presente una doccetta lavaocchi di emergenza (o doccia di emergenza) alimentata ad acqua potabile e regolarmente collaudata?",
+            normReference: "UNI EN 15154-1/2; D.Lgs. 81/2008 art. 45",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BATTERIE_SPILL_KIT_NEUTRALIZER",
+            title: "Kit Neutralizzante Acido Solforico e DPI III Categoria",
+            question: "È disponibile sul posto polvere assorbente e neutralizzante specifica per acido solforico conforme al D.M. 24/01/2011, unitamente a guanti antiacido in nitrile/neoprene, visiera paraschizzi e grembiule?",
+            normReference: "D.M. 24/01/2011; D.Lgs. 81/2008 art. 77 e 225",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BATTERIE_ELECTRICAL_DISCONNECT",
+            title: "Fissaggio Raddrizzatori, Connettori REMA e Sgancio Rapido",
+            question: "I caricabatterie industriali sono ancorati stabilmente a parete/supporto, i cavi con prese REMA sono integri privi di surriscaldamenti ed è presente un interruttore di sgancio rapido esterno?",
+            normReference: "CEI EN 62485-3; CEI 64-8",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "scaffalature_portapallet",
+        name: "Scaffalature Industriali Porta-Pallet ad Alta Portata",
+        type: "Strutture di Stoccaggio Statiche Portapallet",
+        suggestedManufacturer: "Metalsistem / Rosss / Marcegaglia",
+        suggestedModel: "Unirack / Super 4-5-6 / Iron Man",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "SCAFFALATURE_LOAD_SIGNS",
+            title: "Cartelli di Portata Visibili per Corrente e Campata",
+            question: "Su tutte le testate di corsia sono affissi e chiaramente leggibili i cartelli segnaletici di carico massimo per coppia di correnti e carico massimo complessivo di campata?",
+            normReference: "UNI EN 15635:2009; D.Lgs. 81/2008 art. 63 e All. IV p. 1.4.4",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SCAFFALATURE_LOCKING_PINS",
+            title: "Perni di Sicurezza Metallici su Tutti i Correnti",
+            question: "Tutti i nodi di aggancio tra correnti e montanti sono provvisti di spine/perni metallici di sicurezza inseriti per impedire lo sgancio accidentale da sollevamento involontario con le forche del muletto?",
+            normReference: "UNI EN 15635 p. 8.1.1; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SCAFFALATURE_COLUMN_PROTECTORS",
+            title: "Paracolpi in Acciaio alla Base dei Montanti d'Angolo",
+            question: "Tutti i montanti d'angolo e i passaggi carrelli sono provvisti di protezioni d'urto (paracolpi sagomati in acciaio) ancorati stabilmente a pavimento con tasselli strutturali?",
+            normReference: "UNI EN 15512; UNI EN 15635",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SCAFFALATURE_ANNUAL_INSPECTION",
+            title: "Ispezione Periodica Annuale Scaffalature (UNI EN 15635)",
+            question: "L'azienda dispone del registro di controllo periodico e del verbale di ispezione tecnica annuale condotta da tecnico competente qualificato (metodo verde/giallo/rosso)?",
+            normReference: "UNI EN 15635 p. 9.4; D.Lgs. 81/2008 art. 71 c. 8",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // --- REPARTO 2: REPARTO MACELLERIA ---
+      {
+        machineKey: "segaossa_nastro",
+        name: "Segaossa Elettrico a Nastro per Carni e Ossa",
+        type: "Macchina per Taglio Carni e Ossa Congelate",
+        suggestedManufacturer: "Fimar / Sirman / Kolbe",
+        suggestedModel: "SE 1830 / K 330",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "SEGAOSSA_ADJUSTABLE_GUARD",
+            title: "Guidalama Regolabile in Altezza con Riparo Fisso (UNI EN 12268)",
+            question: "Il guidalama regolabile in altezza copre integralmente la lama nastro, lasciando scoperta unicamente la luce strettamente necessaria al passaggio del pezzo da tagliare?",
+            normReference: "UNI EN 12268:2014; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SEGAOSSA_PUSHER_SHIELD",
+            title: "Spingicarne Guidato con Schermo di Protezione Mani",
+            question: "Il segaossa è provvisto di spingicarne scorrevole o basculante con schermo trasparente per evitare l'avvicinamento delle mani dell'operatore alla lama in moto?",
+            normReference: "UNI EN 12268:2014; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SEGAOSSA_RAPID_MOTOR_BRAKE",
+            title: "Freno Motore con Arresto Rapido Lama entro 4 Secondi",
+            question: "La macchina è dotata di freno motore elettro-meccanico che arresta completamente il movimento della lama entro un massimo di 4 secondi dall'arresto o emergenza?",
+            normReference: "UNI EN 12268 punto 5.2.2; CEI EN 60204-1",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SEGAOSSA_PULLEY_DOOR_SWITCH",
+            title: "Microinterruttori Interbloccati sui Portelli delle Pulegge",
+            question: "I portelli di chiusura pulegge superiore e inferiore sono dotati di microinterruttori di sicurezza con grado di protezione IP che impediscono l'avviamento a vani aperti?",
+            normReference: "UNI EN 12268; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "tritacarne_refrigerato",
+        name: "Tritacarne Refrigerato Professionale Industriale",
+        type: "Macchina per Macinazione Carni con Gruppo Frigo",
+        suggestedManufacturer: "Sirman / Minerva Omega / Kolbe",
+        suggestedModel: "TC 32 Colorado / C/E 22 Refrigerato",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "TRITACARNE_NECK_SAFETY",
+            title: "Bocca di Introduzione Salvadita (Altezza >= 120 mm, Foro max 52 mm)",
+            question: "Il collo della tramoggia di carico presenta un'altezza minima di 120 mm e diametro massimo di 52 mm conforme a UNI EN 12331 per impedire il contatto con l'elica conica?",
+            normReference: "UNI EN 12331:2010; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "TRITACARNE_PESTLE_PRESENCE",
+            title: "Pestello Spingicarne MOCA e Divieto Spinta Manuale",
+            question: "È obbligatoriamente presente e utilizzato il pestello in materiale plastico alimentare MOCA ed è espressamente vietato l'uso di dita o utensili impropri per la spinta della carne?",
+            normReference: "UNI EN 12331; Reg. CE 1935/2004",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "TRITACARNE_DEAD_MAN_REVERSE",
+            title: "Comando Inversione Marcia ad Azione Mantenuta e Fungo di Emergenza",
+            question: "Il comando di inversione rotazione coclea funziona solo ad azione mantenuta (uomo presente) ed è provvisto di pulsante di arresto di emergenza a fungo?",
+            normReference: "UNI EN 12331; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "insaccatrice_idraulica",
+        name: "Insaccatrice Idraulica a Pistone per Carni",
+        type: "Macchina Idraulica per Dosaggio e Insacco Impasti di Carne",
+        suggestedManufacturer: "Talsa / Mainca / Sirman",
+        suggestedModel: "H 26 / FC 25 / IS 30",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "INSACCATRICE_KNEE_LEVER",
+            title: "Comando a Ginocchiera con Rilascio Istantaneo",
+            question: "La leva di comando di salita pistone a ginocchiera arresta immediatamente il moto del pistone non appena l'operatore rilascia la pressione del ginocchio?",
+            normReference: "UNI EN 12463:2014; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "INSACCATRICE_LID_LOCK",
+            title: "Coperchio con Blocco Meccanico di Sicurezza",
+            question: "Il coperchio del cilindro presenta robusto blocco meccanico a volantino e microinterruttore che impediscono la pressurizzazione idraulica a coperchio non serrato?",
+            normReference: "UNI EN 12463:2014; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "INSACCATRICE_PRESSURE_VALVE",
+            title: "Circuito Idraulico con Manometro e Valvola Limitatrice Tarata",
+            question: "La centralina oleodinamica a bagno d'olio sigillato è provvista di manometro di controllo e valvola di sicurezza tarata per scaricare sovrapressioni?",
+            normReference: "D.Lgs. 81/2008 All. V p. 7; Direttiva Macchine",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // --- REPARTO 3: REPARTO GASTRONOMIA E SALUMERIA ---
+      {
+        machineKey: "affettatrice_gravita_gdo",
+        name: "Affettatrice Professionale a Gravità / Verticale Lama 370 mm",
+        type: "Macchina da Taglio per Gastronomia e Salumeria",
+        suggestedManufacturer: "Berkel / Sirman / Kolbe",
+        suggestedModel: "Autocut 370 / Palladio 350",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "AFFETTATRICE_GDO_BLADE_RING",
+            title: "Anello Fisso di Protezione Lama (Paralama UNI EN 1974)",
+            question: "La lama è protetta su tutto l'arco non lavorativo da un anello fisso continuo e il coprilama è fissato stabilmente con tirante a norme UNI EN 1974?",
+            normReference: "UNI EN 1974:2010; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "AFFETTATRICE_GDO_ZERO_LOCK",
+            title: "Dispositivo di Blocco Carro a Spessore Zero",
+            question: "Il piatto portamerce può essere sfilato per pulizia e sanificazione solo posizionando la manopola di regolazione spessore fetta sullo zero (lama totalmente schermata dalla vela)?",
+            normReference: "UNI EN 1974:2010 punto 5.2.4; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "AFFETTATRICE_GDO_MIN_VOLTAGE",
+            title: "Relè di Minima Tensione Anti-Riarmo Spontaneo",
+            question: "La pulsantiera di comando a bassa tensione è provvista di relè di minima tensione che impedisce la ripartenza spontanea dopo un blackout accidentale?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2.1; CEI EN 60204-1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "AFFETTATRICE_GDO_HAND_SHIELD",
+            title: "Pressamerce Ergonomico con Schermo Trasparente Salvadita",
+            question: "Il piatto scorrevole è dotato di pressamerce integro con schermo trasparente di protezione in policarbonato per escludere contatti delle dita con la lama?",
+            normReference: "UNI EN 1974; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "forno_gastronomia_gdo",
+        name: "Forno Misto Convezione/Vapore per Gastronomia e Polli",
+        type: "Attrezzatura Termica di Cottura Professionale",
+        suggestedManufacturer: "Rational / Lainox / Unox",
+        suggestedModel: "iCombi Pro 10-1/1 / Naboo 101",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "FORNO_GDO_VENTILATED_GLASS",
+            title: "Porta con Vetro Termoisolante Ventilato Basso-Emissivo",
+            question: "La porta della camera di cottura è dotata di doppio/triplo vetro ventilato che garantisce una temperatura esterna al tocco inferiore alle soglie di scottatura?",
+            normReference: "UNI EN 203-1; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+          {
+            code: "FORNO_GDO_FAN_STEAM_STOP",
+            title: "Arresto Immediato Ventole ed Evacuazione Vapore all'Apertura",
+            question: "Al primo scatto di apertura della maniglia della porta il moto dei ventilatori e l'immissione di vapore si arrestano automaticamente prima dello sgancio totale dell'anta?",
+            normReference: "D.Lgs. 81/2008 All. V; Direttiva Macchine 2006/42/CE",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FORNO_GDO_HOOD_EXTRACTION",
+            title: "Cappa di Aspirazione Fumi e Scarico Condense Canalizzato",
+            question: "Il forno è asservito a cappa di aspirazione fumi o condensatore vapori integrato con scarico canalizzato a norma e scarico condensa a sifone?",
+            normReference: "D.Lgs. 81/2008 All. IV p. 2; UNI EN 203-1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "confezionatrice_sottovuoto_campana",
+        name: "Confezionatrice Sottovuoto a Campana Professionale",
+        type: "Macchina per Confezionamento Sottovuoto e Atmosfera Modificata",
+        suggestedManufacturer: "Besser Vacuum / Orved / Valko",
+        suggestedModel: "Evox 30 / VM 18 / Favola 42",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "SOTTOVUOTO_PLEXI_LID_SAFETY",
+            title: "Campana in Plexiglass con Pistoni a Gas e Blocco Anticaduta",
+            question: "La campana trasparente in plexiglass ad alta resistenza è integra, priva di crepe o scheggiature e sostenuta da pistoni a gas idraulici con blocco anticaduta?",
+            normReference: "D.Lgs. 81/2008 All. V; Direttiva Macchine",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SOTTOVUOTO_SEALING_BAR_COVER",
+            title: "Barre Saldanti Protette e Disattivazione a Coperchio Aperto",
+            question: "Le barre saldanti sono rivestite con nastro in teflon termoisolante integro e l'alimentazione ad alta intensità è disattivata a coperchio sollevato?",
+            normReference: "CEI EN 60204-1; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SOTTOVUOTO_PUMP_EXHAUST",
+            title: "Pompa Vuoto con Filtro Disoleatore e Spia Livello Olio",
+            question: "La pompa per vuoto è provvista di cartuccia disoleatrice fumi integra per evitare emissione di vapori d'olio nel locale e livello lubrificante controllato?",
+            normReference: "D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // --- REPARTO 4: REPARTO PANETTERIA E FORNO ---
+      {
+        machineKey: "impastatrice_spirale_gdo",
+        name: "Impastatrice a Spirale Industriale per Panificazione",
+        type: "Macchina per Impasti Pesanti ad Alta Capacità",
+        suggestedManufacturer: "Esmach / Pietro Berto / Sunmix",
+        suggestedModel: "SPI 60 / Compact 60 / Sun 60",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "IMPASTATRICE_GDO_INTERLOCKED_GRID",
+            title: "Riparo Mobile Interbloccato a Griglia Inox sulla Vasca",
+            question: "La vasca è coperta da una griglia di protezione in acciaio inox con microinterruttore di sicurezza che arresta istantaneamente la spirale e la vasca al sollevamento?",
+            normReference: "UNI EN 453:2010; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "IMPASTATRICE_GDO_EMERGENCY_STOP",
+            title: "Pulsante di Arresto di Emergenza a Fungo con Ritenuta Meccanica",
+            question: "Sul pannello comandi è presente e funzionante il pulsante di arresto emergenza a fungo rosso con sblocco a rotazione conforme a UNI EN ISO 13850?",
+            normReference: "UNI EN ISO 13850; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "IMPASTATRICE_GDO_BOWL_CLEARANCE",
+            title: "Distanza di Sicurezza tra Organo Lavoratore e Bordo Vasca",
+            question: "Le distanze di sicurezza tra la spirale/frangipasta e le pareti/fondo della vasca rispettano i franchi dimensionali della norma UNI EN 453 per prevenire schiacciamenti?",
+            normReference: "UNI EN 453:2010 punto 5.2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "spezzatrice_arrotondatrice",
+        name: "Spezzatrice / Arrotondatrice Esagonale per Impasti",
+        type: "Macchina per Porzionatura e Formatrice Impasti",
+        suggestedManufacturer: "Vitella / Sottoriva / Pietro Berto",
+        suggestedModel: "SPA M 30 / Rosa Hexagonal / Robocut",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "SPEZZATRICE_TWO_HAND_CONTROL",
+            title: "Comando Bimanuale di Taglio o Coperchio Interbloccato (EN 12042)",
+            question: "La fase di pressata e taglio con coltelli a stella/esagonali richiede azionamento bimanuale simultaneo o discesa di coperchio con microinterruttore di sicurezza codificato?",
+            normReference: "UNI EN 12042:2014; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SPEZZATRICE_KNIFE_RING_COVER",
+            title: "Anello Perimetrale di Schermatura Coltelli Divisori",
+            question: "I coltelli divisori in acciaio inox sono completamente racchiusi dall'anello sagomato per impedire qualsiasi introduzione accidentale delle dita dell'operatore?",
+            normReference: "UNI EN 12042:2014; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SPEZZATRICE_CLEANING_DISCONNECT",
+            title: "Dispositivo di Blocco Elettromeccanico per Posizione Pulizia",
+            question: "La macchina dispone di posizione di sblocco coltelli per pulizia e lavaggio giornaliero che esclude totalmente l'avviamento del motore di pressata?",
+            normReference: "D.Lgs. 81/2008 art. 71; CEI EN 60204-1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "forno_rotativo_pane",
+        name: "Forno Rotativo a Carrello Estraibile per Pane",
+        type: "Impianto Termico di Cottura a Carrello Girevole",
+        suggestedManufacturer: "Tagliavini / Polin / Mondial Forni",
+        suggestedModel: "Rotor 60x80 / Pocket 4060 / Basic",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "FORNO_PANE_PANIC_RELEASE",
+            title: "Maniglione Interno di Sicurezza Antipanico Apertura Porta",
+            question: "La porta della camera di cottura è dotata di maniglione/dispositivo di sblocco interno che consente l'apertura immediata dall'interno in caso di intrappolamento accidentale dell'operatore?",
+            normReference: "UNI EN 1673:2009; D.Lgs. 81/2008 art. 64 e All. IV p. 1.6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FORNO_PANE_RACK_STOP_INTERLOCK",
+            title: "Microinterruttore Apertura Porta con Blocco Rotazione Carrello",
+            question: "All'apertura della porta il moto rotatorio del carrello si arresta immediatamente e si attiva automaticamente la cappa aspirante fumi e vapori caldi?",
+            normReference: "UNI EN 1673:2009; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FORNO_PANE_THERMAL_SEALS",
+            title: "Guarnizioni Termiche Integre e Valvola Sfogo Vapori",
+            question: "Le guarnizioni perimetrali della porta sono integre per evitare fuoriuscite di calore/fumi e il condotto fumi è dotato di valvola di sovrapressione/scarico vapore efficiente?",
+            normReference: "UNI EN 1673; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "tagliapane_professionale",
+        name: "Macchina Tagliapane Industriale a Lame",
+        type: "Macchina da Taglio Pagnotte a Lame Verticali",
+        suggestedManufacturer: "Jac / Rollmatic / Vimar",
+        suggestedModel: "Duro 450 / Samurai 45",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "TAGLIAPANE_INTERLOCKED_COVER",
+            title: "Coperchio Superiore Interbloccato a Discesa (EN 13954)",
+            question: "Il telaio porta lame si avvia esclusivamente a coperchio di protezione superiore abbassato e si arresta istantaneamente se il coperchio viene sollevato durante il taglio?",
+            normReference: "UNI EN 13954:2010; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "TAGLIAPANE_PUSHER_PROTECTION",
+            title: "Spintore Automatico con Protezione Frontale Bocca di Uscita",
+            question: "Lo spintore del pane avanza automaticamente fino a fine corsa con arresto del ciclo ed è presente una griglia o scivolo protettivo che impedisce di raggiungere le lame dall'uscita?",
+            normReference: "UNI EN 13954:2010; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "TAGLIAPANE_CRUMB_DRAWER_SAFETY",
+            title: "Cassetto Raccoglibriciole con Blocco Sicurezza",
+            question: "Il cassetto raccoglibriciole inferiore è provvisto di microinterruttore o carter fisso che impedisce l'accesso alla zona inferiore del pacco lame in moto?",
+            normReference: "UNI EN 13954; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // --- REPARTO 5: REPARTO PESCHERIA ---
+      {
+        machineKey: "fabbricatore_ghiaccio_scaglie",
+        name: "Fabbricatore di Ghiaccio a Scaglie Piatte per Banco Pesce",
+        type: "Apparecchiatura Frigorifera per Conservazione Ittica",
+        suggestedManufacturer: "Brema / Icematic / Scotsman",
+        suggestedModel: "Muster 350 / Flake F 200 / Scale Ice 400",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "GHIACCIO_REFRIGERANT_SAFETY",
+            title: "Circuito Frigorifero Sigillato Conforme UNI EN 378",
+            question: "Il circuito frigorifero è privo di perdite di fluido refrigerante, provvisto di pressostati di sicurezza di alta e bassa pressione e registro manutenzione F-Gas se pertinente?",
+            normReference: "UNI EN 378-1/2; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "GHIACCIO_MOCA_CYLINDER",
+            title: "Cilindro Evaporatore e Coclea Conformi MOCA con Sanificazione",
+            question: "Il cilindro evaporatore e la coclea raschiaghiaccio sono realizzati in acciaio inox alimentare certificato MOCA con procedura di sanificazione e disincrostazione documentata?",
+            normReference: "Reg. CE 1935/2004 MOCA; Reg. CE 852/2004 HACCP",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "GHIACCIO_DRAIN_AIR_GAP",
+            title: "Scarico con Sifone ad Interruzione d'Aria (Anti-Contaminazione)",
+            question: "Lo scarico dell'acqua di condensa e sfioro è dotato di disconnessione idraulica con interruzione d'aria (air gap) per impedire ritorni biologici o reflussi fognari?",
+            normReference: "Reg. CE 852/2004 All. II Cap. I",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "squamatore_elettrico",
+        name: "Squamatore Elettrico Professionale per Pesce",
+        type: "Attrezzatura Elettrica Portatile di Eviscerazione e Pulizia Ittica",
+        suggestedManufacturer: "Sirman / KT (KoneTeollisuus)",
+        suggestedModel: "KT-S Fish Scaler / Sirman Squamatore",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "SQUAMATORE_SELV_TRANSFORMER",
+            title: "Alimentazione SELV con Trasformatore di Sicurezza d'Isolamento",
+            question: "L'apparecchio portatile opera a bassissima tensione di sicurezza (SELV max 24V) alimentato da trasformatore d'isolamento a doppio isolamento Classe II contro folgorazione in ambiente umido?",
+            normReference: "CEI 64-8 sez. 7; CEI EN 60745-1; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SQUAMATORE_SPLASH_GUARD",
+            title: "Schermo Paraschizzi e Protezione Dita su Testina Rotante",
+            question: "Il mandrino rotante con rullo squamatore è provvisto di schermo trasparente paraschizzi sagomato per proteggere le mani dell'operatore e convogliare le squame?",
+            normReference: "D.Lgs. 81/2008 All. V p. 6; art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SQUAMATORE_IP67_SEAL",
+            title: "Grado di Protezione IP55/IP67 e Guaina Cavo Stagna Antitaglio",
+            question: "L'impugnatura antiscivolo e il cavo di trasmissione flessibile garantiscono tenuta stagna certificata (minimo IP55/IP67) e assenza di lesioni all'isolamento?",
+            normReference: "CEI EN 60529; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // --- REPARTO 6: PULIZIA E IGIENE CORSIE ---
+      {
+        machineKey: "lavasciuga_uomo_bordo",
+        name: "Lavasciuga Pavimenti Industriale con Uomo a Bordo",
+        type: "Macchina Semovente per Pulizia Industriale Pavimentazioni",
+        suggestedManufacturer: "Comac / Tennant / Nilfisk",
+        suggestedModel: "Innova 85 / T7 Ride-on / Viper AS710R",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "LAVASCIUGA_BEACON_BEEPER",
+            title: "Lampeggiante di Segnalazione Visiva e Cicalino Retromarcia",
+            question: "La macchina è provvista di lampeggiante arancione a 360° visibile a distanza e avvisatore acustico automatico di retromarcia attivi durante il lavaggio in corsia?",
+            normReference: "UNI EN ISO 3691-1; D.Lgs. 81/2008 All. V p. 2.2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVASCIUGA_DEAD_MAN_SEAT",
+            title: "Sensore Uomo a Bordo sul Sedile e Freno di Emergenza",
+            question: "Il sedile di guida è dotato di microinterruttore di presenza operatore che blocca trazione e spazzole se il conducente si alza, oltre a freno di stazionamento ed emergenza a pedale?",
+            normReference: "UNI EN ISO 3691-1; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVASCIUGA_LED_SQUEEGEE",
+            title: "Fari LED Anteriori e Tergitore Posteriore con Sgancio Rapido",
+            question: "Sono presenti fari LED anteriori di lavoro funzionanti e il tergitore parabolico è provvisto di sistema di sgancio di sicurezza antirottura in caso di urto contro montanti o testate scaffali?",
+            normReference: "D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVASCIUGA_TANK_OVERFLOW",
+            title: "Sensore Elettronico di Troppopieno Serbatoio Recupero",
+            question: "Il serbatoio dell'acqua sporca è provvisto di galleggiante/sensore elettronico che arresta tempestivamente il motore di aspirazione al raggiungimento del livello massimo?",
+            normReference: "CEI EN 60335-2-72; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  // 3. LOGISTICA, MAGAZZINO & TRASPORTI
   {
     sectorKey: "logistica_magazzino",
     sectorLabel: "Logistica, Magazzino, Spedizioni e Trasporti",
@@ -943,7 +1763,8 @@ export function getSectorMachineCatalogForAteco(atecoCode?: string | null): Sect
   }
 
   // Fallback logistica/magazzino per settori industriali/commerciali generici
-  return SECTOR_MACHINERY_CATALOGS[1];
+  const logisticaFallback = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "logistica_magazzino");
+  return logisticaFallback || SECTOR_MACHINERY_CATALOGS[0];
 }
 
 // Interfaccia per gli allegati di scansione documenti (Libretto d'uso, Scheda tecnica, Certificato CE)
@@ -1063,6 +1884,7 @@ export interface EnvironmentInputRef {
 }
 
 export interface SuggestedMachineWithEnvironment extends SectorMachineTemplate {
+  targetEnvironmentId?: string;
   targetEnvironmentName?: string;
   targetEnvironmentCategory?: string;
   sourceReason: "environment" | "ateco";
@@ -1075,15 +1897,109 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
   const suggested: SuggestedMachineWithEnvironment[] = [];
   const addedKeys = new Set<string>();
 
+  const isIperAteco = !!atecoCode && (
+    atecoCode.startsWith("47.11.1") ||
+    atecoCode.startsWith("47.11.10") ||
+    atecoCode.startsWith("47.11") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("4711")
+  );
+  const iperSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "ipermercato_gdo");
+  const iperMachines = iperSector ? iperSector.machines : [];
+
   // 1. MACCHINE SUGGERITE IN BASE AI LOCALI CENSITI NELLO STEP 2
   for (const env of environments) {
+    const envId = (env.id || "").toLowerCase();
     const cat = (env.category || "").toLowerCase();
     const nameLower = (env.name || "").toLowerCase();
 
     // Mappa la categoria del locale alle macchine pertinenti
     let matchingMachines: SectorMachineTemplate[] = [];
 
-    if (cat === "cucina" || nameLower.includes("cucina") || nameLower.includes("laboratorio")) {
+    // Reparti Ipermercato GDO (intercettati per ID ambiente, categoria o denominazione)
+    if (
+      envId === "env-iper-magazzino" ||
+      envId.includes("iper-magazzino") ||
+      (isIperAteco && (cat === "warehouse" || cat === "magazzino_merci" || nameLower.includes("ricevimento") || (nameLower.includes("magazzino") && !nameLower.includes("legnami") && !nameLower.includes("oli")))) ||
+      nameLower.includes("ricevimento merci")
+    ) {
+      matchingMachines = iperMachines.filter((m) =>
+        [
+          "muletto_frontale_elettrico",
+          "transpallet_elettrico_pedana",
+          "transpallet_elettrico_terra",
+          "transpallet_manuale",
+          "pressa_compattatrice",
+          "pedana_di_carico",
+          "stazione_ricarica_batterie",
+          "scaffalature_portapallet",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-iper-macelleria" ||
+      envId.includes("iper-macelleria") ||
+      nameLower.includes("macelleria") ||
+      cat === "macelleria"
+    ) {
+      matchingMachines = iperMachines.filter((m) =>
+        [
+          "segaossa_nastro",
+          "tritacarne_refrigerato",
+          "insaccatrice_idraulica",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-iper-pescheria" ||
+      envId.includes("iper-pescheria") ||
+      nameLower.includes("pescheria") ||
+      cat === "pescheria"
+    ) {
+      matchingMachines = iperMachines.filter((m) =>
+        [
+          "fabbricatore_ghiaccio_scaglie",
+          "squamatore_elettrico",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-iper-gastronomia" ||
+      envId.includes("iper-gastronomia") ||
+      nameLower.includes("gastronomia") ||
+      nameLower.includes("salumeria") ||
+      cat === "gastronomia"
+    ) {
+      matchingMachines = iperMachines.filter((m) =>
+        [
+          "affettatrice_gravita_gdo",
+          "forno_gastronomia_gdo",
+          "confezionatrice_sottovuoto_campana",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-iper-panetteria" ||
+      envId.includes("iper-panetteria") ||
+      nameLower.includes("panetteria") ||
+      nameLower.includes("panificio") ||
+      cat === "panetteria"
+    ) {
+      matchingMachines = iperMachines.filter((m) =>
+        [
+          "impastatrice_spirale_gdo",
+          "spezzatrice_arrotondatrice",
+          "forno_rotativo_pane",
+          "tagliapane_professionale",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-iper-corsie" ||
+      envId.includes("iper-corsie") ||
+      nameLower.includes("corsie") ||
+      (isIperAteco && (nameLower.includes("vendita") || cat === "sales_floor" || cat === "public" || cat === "area_vendita"))
+    ) {
+      matchingMachines = iperMachines.filter((m) =>
+        [
+          "lavasciuga_uomo_bordo",
+        ].includes(m.machineKey)
+      );
+    } else if (cat === "cucina" || nameLower.includes("cucina") || nameLower.includes("laboratorio")) {
       const restSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "ristorazione_alimentare");
       if (restSector) matchingMachines = restSector.machines;
     } else if (cat === "magazzino_merci" || nameLower.includes("magazzino") || nameLower.includes("deposito")) {
@@ -1111,11 +2027,12 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
     }
 
     for (const m of matchingMachines) {
-      const uniqueKey = `${m.machineKey}_${env.name}`;
+      const uniqueKey = `${m.machineKey}_${env.name || env.id}`;
       if (!addedKeys.has(uniqueKey)) {
         addedKeys.add(uniqueKey);
         suggested.push({
           ...m,
+          targetEnvironmentId: env.id,
           targetEnvironmentName: env.name,
           targetEnvironmentCategory: env.category,
           sourceReason: "environment",

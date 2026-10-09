@@ -1381,6 +1381,9 @@ export default function Step2AmbientiDiLavoro({
                   <option value="public">🛍️ Area Aperta al Pubblico / Vendita</option>
                   <option value="technical">⚡ Locale Tecnico / Impianti</option>
                   <option value="outdoor">🚗 Area Esterna / Piazzale</option>
+                  <option value="sales_office">🛒 Area Vendita / Casse / Box</option>
+                  <option value="storage">❄️ Cella Frigo / Stoccaggio Speciale</option>
+                  <option value="changing_rooms">🚻 Spogliatoi Personale</option>
                 </select>
               </div>
 
