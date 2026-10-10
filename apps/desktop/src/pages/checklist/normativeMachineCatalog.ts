@@ -150,6 +150,712 @@ export const TRAINING_REQUIREMENTS_LIBRARY: Record<string, MachineTrainingRequir
 // CATALOGO MACCHINE PREFORMATO PER SETTORI ATECO
 // -------------------------------------------------------------
 export const SECTOR_MACHINERY_CATALOGS: SectorMachineCatalog[] = [
+  // 0. RISTORAZIONE CON SOMMINISTRAZIONE (Ristoranti classici, Trattorie, Osterie - ATECO 56.10.11, 56.10.10, 56.10.1)
+  {
+    sectorKey: "ristorazione_somministrazione",
+    sectorLabel: "Ristorazione con Somministrazione (Ristoranti, Trattorie, Osterie)",
+    atecoPrefixes: ["56.10.11", "56.10.10", "56.10.1"],
+    machines: [
+      // --- REPARTO 1: COTTURA & BLOCCO FUOCHI (env-rist-cucina) ---
+      {
+        machineKey: "cucina_fuochi_gas",
+        name: "Blocco Cottura Fuochi Aperti a Gas / Induzione",
+        type: "Apparecchiatura di Cottura Professionale a Gas / Induzione",
+        suggestedManufacturer: "Angelo Po / Zanussi / Modular",
+        suggestedModel: "Monoblocco Gamma 700/900 Fuochi Aperti",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "FUOCHI_TERMOCOPPIA_SICUREZZA",
+            title: "Termocoppie di Sicurezza Fiamma su Tutti i Bruciatori",
+            question: "Tutti i bruciatori aperti sono dotati di termocoppia di sicurezza e valvola elettromagnetica che interrompe istantaneamente l'erogazione del gas in caso di spegnimento accidentale della fiamma?",
+            normReference: "UNI EN 203-1:2021 punto 5.3; D.Lgs. 81/2008 All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FUOCHI_MANOPOLE_FERMO_SICUREZZA",
+            title: "Manopole di Comando con Fermo di Sicurezza Meccanico",
+            question: "Le manopole di regolazione del gas sono provviste di scatto/fermo meccanico sulla posizione di chiuso e richiedono pressione assiale per l'apertura contro azionamenti accidentali?",
+            normReference: "UNI EN 203-1 punto 5.2.2; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FUOCHI_GRIGLIE_GHISA_STABILITA",
+            title: "Griglie d'Appoggio Pentole in Ghisa Complanari e Stabili",
+            question: "Le griglie superiori d'appoggio pentole in ghisa pesante sono integre, complanari e dotate di incastri di fermo stabili per evitare il rovesciamento di recipienti contenenti liquidi bollenti?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3; UNI EN 203-1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FUOCHI_VALVOLA_INTERCETTAZIONE_GAS",
+            title: "Valvola Manuale di Intercettazione Rapida Gas a Monte",
+            question: "È presente una valvola a sfera di intercettazione rapida del gas a monte del blocco fuochi, segnalata, accessibile e libera da intralci per l'immediata chiusura di emergenza?",
+            normReference: "D.M. 12/04/1996 punto 5.4; D.M. 03/09/2021; UNI 8723",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "forno_misto_ristorante",
+        name: "Forno Combinato Convezione/Vapore Professionale",
+        type: "Forno Professionale Convezione Vapore Gastronomia",
+        suggestedManufacturer: "Rational / Unox / Lainox",
+        suggestedModel: "iCombi Pro 6-10 teglie / Cheftop Mind.Maps",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "FORNO_VETRO_VENTILATO_ANTIUSTIONE",
+            title: "Porta con Doppio/Triplo Vetro Ventilato Anti-Ustione (UNI EN 203-1)",
+            question: "La porta del forno è dotata di doppio o triplo vetro con intercapedine d'aria ventilata anti-ustione conforme a norma UNI EN 203-1 per mantenere la superficie esterna a temperatura non ustionante?",
+            normReference: "UNI EN 203-1 punto 5.4; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FORNO_ARRESTO_VENTOLE_VAPORE",
+            title: "Arresto Automatico Ventole e Vapore all'Apertura Porta",
+            question: "All'apertura della porta del forno il moto delle ventole di convezione e l'erogazione di vapore vivo si arrestano istantaneamente prima dell'apertura completa dell'anta?",
+            normReference: "D.Lgs. 81/2008 All. V p. 6; Direttiva Macchine 2006/42/CE All. I p. 1.3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FORNO_CAPPA_CONDENSAZIONE_GRASSI",
+            title: "Cappa a Condensazione Canalizzata con Scarico Grassi",
+            question: "Il forno è dotato di cappa a condensazione vapori canalizzata con vaschetta di scarico grassi integrata o allacciata al sistema di aspirazione generale priva di sgocciolamenti a pavimento?",
+            normReference: "Reg. CE 852/2004 All. II cap. I; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+          {
+            code: "FORNO_SCARICO_AIR_GAP",
+            title: "Scarico Condense con Interruzione d'Aria Anti-Reflusso (Air Gap)",
+            question: "La condotta di scarico condense della camera di cottura presenta uno stacco con interruzione d'aria aperta (air gap) per prevenire il reflusso fognario o batterico nella camera a norma UNI EN 1717?",
+            normReference: "UNI EN 1717; Reg. CE 852/2004 All. II cap. I",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "friggitrice_ristorante",
+        name: "Friggitrice Professionale a Vasca Singola o Doppia",
+        type: "Apparecchiatura Professionale di Cottura ad Olio",
+        suggestedManufacturer: "Lotus / Angelo Po / Giorik",
+        suggestedModel: "F18-94G / SuperFry 20L",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "FRIGGITRICE_TERMOSTATO_MAX_230",
+            title: "Termostato di Massima Temperatura a Riarmo Manuale (< 230°C)",
+            question: "La friggitrice è equipaggiata con termostato di massima temperatura indipendente a riarmo manuale tarato sotto i 230°C contro l'autocombustione dell'olio in caso di avaria del termostato di lavoro?",
+            normReference: "UNI EN 203-1:2021; D.Lgs. 81/2008 art. 71 e All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FRIGGITRICE_VALVOLA_SCARICO_SICURA",
+            title: "Valvola di Scarico Olio con Sicura Meccanica e Prolunga",
+            question: "Il rubinetto di scarico dell'olio caldo è provvisto di sicura meccanica contro l'apertura involontaria e di prolunga metallica per il travaso in sicurezza nel contenitore di raccolta?",
+            normReference: "D.Lgs. 81/2008 All. V p. 7; UNI EN 203-1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FRIGGITRICE_ZONA_FREDDA_DECANTATORE",
+            title: "Zona Fredda Fondo Vasca e Controllo Composti Polari",
+            question: "La vasca dispone di zona fredda sul fondo per la decantazione dei residui e viene eseguito il monitoraggio periodico della qualità dell'olio con composti polari rigorosamente < 25%?",
+            normReference: "Reg. CE 852/2004; Circ. Min. Sanità 11/01/1991 n. 1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FRIGGITRICE_LIVELLO_OLIO_MIN_MAX",
+            title: "Tacche di Livello Minimo e Massimo Olio Incise in Vasca",
+            question: "Sulla parete interna della vasca sono chiaramente incisi i livelli minimo e massimo dell'olio per prevenire incendi per scarso volume o traboccamenti durante l'immersione dei cestelli?",
+            normReference: "UNI EN 203-1 punto 5.5; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "abbattitore_temperatura",
+        name: "Abbattitore Rapido di Temperatura e Surgelatore (+90°C a +3°C / -18°C)",
+        type: "Apparecchiatura Frigorifera Rapida per Sicurezza Alimentare",
+        suggestedManufacturer: "Irinox / Coldline / Lainox",
+        suggestedModel: "MultiFresh Next / Vision Pro",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "ABBATTITORE_BONIFICA_ANISAKIS",
+            title: "Bonifica Preventiva Obbligatoria Anisakis Pesce Crudo (Reg. CE 853/04)",
+            question: "L'apparecchio dispone del programma certificato di bonifica preventiva Anisakis (temperatura a cuore <= -20°C per almeno 24h o -35°C per 15h) con registrazione ciclo per preparazioni di pesce crudo?",
+            normReference: "Reg. CE 853/2004 All. III sez. VIII cap. 3; D.M. 17/07/2013; D.Lgs. 81/2008",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ABBATTITORE_SONDA_CUORE_SPILLONE",
+            title: "Sonda al Cuore Multipoint a Spillone Igienizzabile",
+            question: "La sonda termometrica a spillone è integra, tarata e viene igienizzata e disinfettata prima e dopo ogni inserimento al cuore degli alimenti per prevenire contaminazioni crociate?",
+            normReference: "Reg. CE 852/2004 All. II cap. V; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ABBATTITORE_ALLARME_PORTA_VENTOLE",
+            title: "Allarme Visivo/Acustico Porta Aperta e Arresto Ventole",
+            question: "L'abbattitore è provvisto di allarme visivo e acustico per porta aperta prolungata e di arresto automatico dei ventilatori di evaporazione al sollevamento/apertura dell'anta?",
+            normReference: "D.Lgs. 81/2008 All. V p. 6; CEI EN 60335-2-89",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+          {
+            code: "ABBATTITORE_CIRCUITO_UNI_EN_378",
+            title: "Circuito Frigorifero Sigillato Conforme UNI EN 378 (Gas Ecologico)",
+            question: "Il circuito frigorifero risponde alla norma UNI EN 378, con gas refrigerante ecologico a basso GWP (R290 o R452A) ed è privo di perdite o formazioni anomale di ghiaccio sull'evaporatore?",
+            normReference: "UNI EN 378:2020; Reg. UE 517/2014; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "frytop_piastra",
+        name: "Piastra Fry-Top Elettrica o a Gas Liscia/Rigata",
+        type: "Apparecchiatura di Cottura a Contatto Diretto",
+        suggestedManufacturer: "Angelo Po / Zanussi / Giorik",
+        suggestedModel: "FT70G / FryTop 900 Cromo Duro",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "FRYTOP_PARASPRUZZI_INOX",
+            title: "Paraspruzzi Perimetrale Inox Amovibile Anti-Schizzi d'Olio Caldo",
+            question: "La piastra è dotata di paraspruzzi perimetrale continuo amovibile in acciaio inox a protezione delle braccia e del viso dell'operatore contro schizzi di grasso rovente?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3; UNI EN 203-1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FRYTOP_CASSETTO_RACCOGLIGRASSO",
+            title: "Cassetto Raccogligrasso Estraibile con Fermo Corsa Meccanico",
+            question: "Il cassetto di raccolta grassi è estraibile, munito di fermo corsa meccanico anticaduta per evitare ribaltamenti accidentali di liquidi caldi durante l'estrazione e di capacità adeguata?",
+            normReference: "D.Lgs. 81/2008 All. V p. 6; UNI EN 203-1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FRYTOP_TERMOSTATO_SICUREZZA",
+            title: "Termostato di Sicurezza a Riarmo Manuale Sovratemperatura",
+            question: "La piastra è dotata di termostato di limite massimo di sicurezza indipendente a riarmo manuale che disattiva l'alimentazione in caso di anomalia del termostato di regolazione?",
+            normReference: "UNI EN 203-1; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FRYTOP_TERMOCOPPIA_FIAMMA",
+            title: "Termocoppia di Sicurezza Fiamma e Accensione Elettrica (Gas)",
+            question: "Nelle versioni a gas, ciascun bruciatore della piastra è provvisto di termocoppia rapida per l'intercettazione del gas e dispositivo di accensione piezoelettrico o pilota?",
+            normReference: "UNI EN 203-1 punto 5.3; D.Lgs. 81/2008 All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "bollitore_cuocipasta",
+        name: "Cuocipasta Automatico / Bollitore a Cestelli",
+        type: "Apparecchiatura Termica di Cottura Idrica",
+        suggestedManufacturer: "Lotus / Angelo Po / Modular",
+        suggestedModel: "CP-74G / PastaPro 40L",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "CUOCIPASTA_SFIORATORE_TROPPOPIENO",
+            title: "Scarico Sfioratore Troppopieno per Evacuazione Amidi e Schiume",
+            question: "La vasca è provvista di zona di sfioramento frontale con foro di troppopieno collegato a scarico canalizzato per l'evacuazione continua di amidi e schiume ed evitare traboccamenti d'acqua bollente?",
+            normReference: "UNI EN 203-1; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CUOCIPASTA_RUBINETTO_CARICO_ACQUA",
+            title: "Rubinetto Carico Acqua Incorporato con Valvola di Non Ritorno",
+            question: "Il rubinetto di carico e rabbocco acqua è incorporato stabilmente sul piano vasca ed è dotato di dispositivo di non ritorno a tutela della rete idrica potabile conforme UNI EN 1717?",
+            normReference: "UNI EN 1717; D.Lgs. 31/2001; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CUOCIPASTA_TERMOSTATO_SICUREZZA_SECCO",
+            title: "Termostato di Sicurezza contro il Surriscaldamento a Secco",
+            question: "La vasca è equipaggiata con termostato/pressostato di sicurezza a riarmo manuale che arresta il riscaldamento a gas o elettrico in caso di livello d'acqua insufficiente o funzionamento a secco?",
+            normReference: "D.Lgs. 81/2008 All. V p. 7; CEI EN 60335-2-47",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CUOCIPASTA_CESTELLI_MANICI_ISOLATI",
+            title: "Cestelli Forati Inox con Manici Termoisolanti Ergonomici",
+            question: "I cestelli forati di cottura e scolo sono in acciaio inox idoneo MOCA, con manici rivestiti in materiale termoisolante antiscivolo integri e ganci di sgocciolamento stabili sul bordo vasca?",
+            normReference: "Reg. CE 1935/2004; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+      {
+        machineKey: "cappa_aspirazione_cucina",
+        name: "Cappa di Aspirazione Compensata con Impianto Estinzione Automatica",
+        type: "Impianto di Aspirazione e Trattamento Aria Cucina con Antincendio",
+        suggestedManufacturer: "Alvial / Misa / Giga",
+        suggestedModel: "Compensata Induzione 3000 con Ansul R-102",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "CAPPA_FILTRI_LABIRINTO_INOX",
+            title: "Filtri a Labirinto Antigrasso in Acciaio Inox Lavabili",
+            question: "La cappa è equipaggiata con filtri a labirinto inerziali in acciaio inox lavabili, inclinati a 45°, provvisti di canalina di raccolta e bacinella raccogli-olio a svuotamento programmato?",
+            normReference: "UNI EN 16282-6; Reg. CE 852/2004 All. II cap. I; D.Lgs. 81/2008 art. 64",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CAPPA_IMPIANTO_SPEGNIMENTO_ANSUL",
+            title: "Impianto Automatico di Spegnimento a Pioggia Tipo Ansul R-102",
+            question: "Sopra il blocco fuochi e le friggitrici è installato un impianto fisso di spegnimento a pioggia tipo Ansul R-102 a norma NFPA 96 / UNI ISO 15371 con bombola ad agente estinguente F e comando manuale di emergenza?",
+            normReference: "NFPA 96; UNI ISO 15371; D.M. 03/09/2021",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CAPPA_CANALIZZAZIONE_TETTO_INDIPENDENTE",
+            title: "Canalizzazione di Estrazione Fumi a Tetto Indipendente",
+            question: "La condotta di estrazione fumi è indipendente a tenuta d'aria, sfociante a tetto sopra il colmo, priva di contropendenze e munita di portelle per l'ispezione e bonifica periodica?",
+            normReference: "UNI EN 16282-7; D.Lgs. 81/2008 art. 64 e All. IV p. 1.9",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CAPPA_INTERBLOCCO_ELETTROVALVOLA_GAS",
+            title: "Asservimento Elettrovalvola Gas al Funzionamento Aspiratore",
+            question: "L'erogazione del gas ai fuochi è asservita al funzionamento del ventilatore di estrazione cappa tramite pressostato o relè differenziale che ne blocca l'adduzione ad aspiratore fermo?",
+            normReference: "D.M. 12/04/1996 punto 5.4; D.M. 03/09/2021; UNI 8723",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // --- REPARTO 2: PREPARAZIONE FREDDA & LAVORAZIONE (env-rist-prep-fredda) ---
+      {
+        machineKey: "affettatrice_gravita_ristorante",
+        name: "Affettatrice Professionale a Gravità per Salumi Lama 350 mm",
+        type: "Macchina per il Taglio e Affettamento Carni e Salumi",
+        suggestedManufacturer: "Berkel / Sirman / RGV",
+        suggestedModel: "Domina 350 / Palladio 350 Autocheck",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "AFFETTATRICE_ANELLO_FISSO_PARALAMA",
+            title: "Anello Fisso Paralama Continuo a Norma UNI EN 1974",
+            question: "L'affettatrice è munita di anello fisso di protezione continuo che copre l'intero profilo circolare della lama non impegnato dal taglio conforme a norma UNI EN 1974?",
+            normReference: "UNI EN 1974:2010 punto 5.2.2; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "AFFETTATRICE_BLOCCO_CARRO_SPESSORE_ZERO",
+            title: "Blocco Carro Portamerce a Spessore Zero della Vela per Pulizia Sicura",
+            question: "Il carro scorrevole portamerce può essere sfilato per la pulizia e sanificazione solo con la manopola graduata dello spessore posizionata rigorosamente su '0' (filo lama coperto dalla vela)?",
+            normReference: "UNI EN 1974:2010 punto 5.2.4; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "AFFETTATRICE_RELE_MINIMA_TENSIONE",
+            title: "Relè di Minima Tensione Anti-Riavvio Spontaneo",
+            question: "La pulsantiera di comando marcia/arresto (IP65) è dotata di relè di minima tensione che impedisce categoricamente il riavvio spontaneo dopo una momentanea interruzione di corrente?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2.1; CEI EN 60204-1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "AFFETTATRICE_PRESSAMERCE_SCHERMO_DITA",
+            title: "Pressamerce Ergonomico con Schermo Trasparente Salvadita",
+            question: "Il pressamerce è dotato di maniglia ergonomica protetta e schermo trasparente in policarbonato integro a salvaguardia delle dita dell'operatore durante l'avanzamento verso la lama?",
+            normReference: "UNI EN 1974:2010 punto 5.2.3; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "cutter_robot_tagliaverdure",
+        name: "Cutter Robot / Tagliaverdure Professionale Combinato",
+        type: "Robot Tagliaverdure e Cutter da Banco per Ristorazione",
+        suggestedManufacturer: "Robot Coupe / Dito Sama / Sammic",
+        suggestedModel: "R 301 Ultra / Bermixer Dito",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "CUTTER_COPERCHIO_INTERBLOCCO_2SEC",
+            title: "Coperchio Trasparente Interbloccato con Arresto Lama entro 2 Secondi (UNI EN 12852)",
+            question: "Il coperchio trasparente della vasca cutter è interbloccato con microinterruttore di sicurezza che arresta la rotazione della lama entro 2 secondi dal sollevamento a norma UNI EN 12852?",
+            normReference: "UNI EN 12852:2010; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CUTTER_PESTELLO_SALVADITA",
+            title: "Pestello Salvadita Sagomato per Tramoggia Tagliaverdure",
+            question: "La testata tagliaverdure dispone del pestello sagomato obbligatorio per l'avanzamento degli ortaggi nella tramoggia con divieto assoluto di spinta manuale delle verdure?",
+            normReference: "UNI EN 1678:2010; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CUTTER_BLOCCO_VASCA_MECCANICO",
+            title: "Blocco Vasca Meccanico con Microinterruttore di Consenso",
+            question: "Il basamento motore impedisce la rotazione dell'albero motore qualora la vasca di lavorazione in acciaio inox non sia perfettamente inserita e bloccata in posizione di lavoro?",
+            normReference: "UNI EN 12852; Direttiva Macchine 2006/42/CE All. I",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CUTTER_PULSANTIERA_IP65_PULSE",
+            title: "Pulsantiera Bassa Tensione IP65 con Funzione Impulso (Pulse)",
+            question: "I pulsanti di comando marcia/arresto sono a tenuta stagna IP65 in bassissima tensione di sicurezza con tasto impulso (Pulse) per lavorazioni intermittenti di precisione?",
+            normReference: "CEI EN 60204-1; D.Lgs. 81/2008 All. V p. 2.1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "confezionatrice_sottovuoto_ristorante",
+        name: "Confezionatrice Sottovuoto a Campana da Banco per Sous-Vide e Conservazione",
+        type: "Macchina per Confezionamento Sottovuoto Professionale",
+        suggestedManufacturer: "Orved / Besser Vacuum / Valko",
+        suggestedModel: "Evox 30 / Mistral 40",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "SOTTOVUOTO_COPERCHIO_PISTONI_ANTICADUTA",
+            title: "Coperchio in Plexiglass con Pistoni Anticaduta",
+            question: "La campana trasparente in plexiglass ad alto spessore è sostenuta da pistoni oleodinamici anticaduta perfettamente efficienti che evitano la caduta improvvisa del coperchio sulle mani dell'operatore?",
+            normReference: "Direttiva Macchine 2006/42/CE; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SOTTOVUOTO_BARRE_SALDANTI_SCHERMATE",
+            title: "Barre Saldanti Teflonate Schermate con Spegnimento a Campana Sollevata",
+            question: "Le barre saldanti teflonate sono schermate e la linea elettrica di saldatura viene diseccitata istantaneamente quando la campana non è chiusa in camera di vuoto?",
+            normReference: "CEI EN 60204-1; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SOTTOVUOTO_POMPA_DISOLEATORE_FUMI",
+            title: "Pompa a Bagno d'Olio con Disoleatore Fumi e Deumidificazione",
+            question: "La pompa a vuoto rotativa a bagno d'olio è munita di filtro disoleatore allo scarico fumi integro per prevenire emissioni nell'aria del laboratorio e ciclo di deumidificazione olio programmato?",
+            normReference: "Reg. CE 852/2004; D.Lgs. 81/2008 art. 64 e art. 71",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+          {
+            code: "SOTTOVUOTO_SENSORE_VUOTO_SOUSVIDE",
+            title: "Sensore di Vuoto Assoluto per Sicurezza Cottura Sous-Vide",
+            question: "La macchina è provvista di sensore di vuoto assoluto per garantire una percentuale residua di ossigeno idonea alla conservazione e alla cottura a bassa temperatura in sicurezza microbiologica (HACCP)?",
+            normReference: "Reg. CE 852/2004; Linee Guida Ministeriali HACCP Cottura Sottovuoto",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "tritacarne_grattugia_ristorante",
+        name: "Gruppo Combinato Tritacarne / Grattugia Elettrica Professionale",
+        type: "Macchina Combinata per Macinazione Carne e Grattugia Formaggio",
+        suggestedManufacturer: "Fimar / Sirman / Omega",
+        suggestedModel: "TCG 12 / Combinato C/E 22",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "TRITACARNE_BOCCA_SALVADITA_12331",
+            title: "Bocca Salvadita Collo h >= 120 mm Foro Max 52 mm (UNI EN 12331)",
+            question: "La bocca di carico del tritacarne presenta un collo di altezza pari ad almeno 120 mm con foro massimo di 52 mm a norma UNI EN 12331 per impedire il contatto accidentale delle dita con la coclea?",
+            normReference: "UNI EN 12331:2021; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "TRITACARNE_LEVA_GRATTUGIA_INTERBLOCCO",
+            title: "Leva Pressore Grattugia Interbloccata a Microinterruttore (UNI EN 454)",
+            question: "La leva pressamerce della bocca grattugia è dotata di microinterruttore di sicurezza che arresta istantaneamente la rotazione del rullo dentato quando sollevata sopra l'angolo di sicurezza?",
+            normReference: "UNI EN 454; UNI EN 12331; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "TRITACARNE_PESTELLO_PLASTICO_MOCA",
+            title: "Pestello Plastico MOCA con Divieto Assoluto Spinta Manuale",
+            question: "È fornito di serie il pestello sagomato in plastica alimentare MOCA conforme Reg. CE 1935/2004, integro e utilizzato obbligatoriamente con divieto tassativo di spinta manuale del prodotto?",
+            normReference: "Reg. CE 1935/2004; D.Lgs. 81/2008 art. 71 e All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "TRITACARNE_GRIGLIA_SCARICO_GRATTUGIA",
+            title: "Griglia Fissa di Protezione Inferiore Scarico Grattugia",
+            question: "La bocca inferiore di scarico del formaggio grattugiato è provvista di griglia metallica fissa anti-intrusione dita verso il rullo in rotazione?",
+            normReference: "D.Lgs. 81/2008 All. V p. 6; UNI EN ISO 13857",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "frullatore_immersione_mixer",
+        name: "Mixer / Frullatore ad Immersione Professionale",
+        type: "Attrezzatura Portatile di Miscelazione ed Emulsione ad Immersione",
+        suggestedManufacturer: "Robot Coupe / Dito Sama / Dynamic",
+        suggestedModel: "Micromix / Bermixer Pro / Master MX 91",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "MIXER_DOPPIO_COMANDO_SICUREZZA",
+            title: "Interruttore ad Azione Mantenuta con Pulsante di Sicurezza a Doppio Comando",
+            question: "L'impugnatura è provvista di interruttore ad azione mantenuta con pulsante di sicurezza a doppio comando per evitare azionamenti accidentali durante il lavaggio e lo spostamento?",
+            normReference: "CEI EN 60335-2-64; D.Lgs. 81/2008 All. V p. 2.1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "MIXER_CAMPANA_AVVOLGENTE_MOCA",
+            title: "Campana Lama Avvolgente Antischizzo e Coltelli Idonei MOCA",
+            question: "Il coltello rotante è protetto da campana metallica sagomata continua in acciaio inox idoneo MOCA che scherma la lama e previene proiezioni di liquidi roventi?",
+            normReference: "Reg. CE 1935/2004; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "MIXER_DOPPIO_ISOLAMENTO_CLASSE_II",
+            title: "Doppio Isolamento Elettrico (Classe II) e Cavo Antistrappo",
+            question: "Il corpo motore presenta doppio isolamento elettrico di Classe II con cavo di alimentazione vulcanizzato antistrappo integro e grado di protezione ad immersione IPX4?",
+            normReference: "CEI EN 60335-1; CEI 64-8; D.Lgs. 81/2008 Titolo III",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "MIXER_TUBO_SMONTABILE_SANIFICAZIONE",
+            title: "Tubo ed Elica Smontabili per Sanificazione Sicura",
+            question: "Il tubo a immersione con l'elica tagliente si sgancia completamente dal corpo motore per consentire il lavaggio e la disinfezione separata senza bagnare i componenti elettrici?",
+            normReference: "Reg. CE 852/2004 All. II cap. V; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // --- REPARTO 3: LAVAGGIO STOVIGLIE & PLONGE (env-rist-plonge) ---
+      {
+        machineKey: "lavastoviglie_capotta_plonge",
+        name: "Lavastoviglie Industriale a Capotta Passante con Tavoli Inox",
+        type: "Macchina Lavastoviglie a Capotta per Ristorazione",
+        suggestedManufacturer: "Winterhalter / Meiko / Comenda",
+        suggestedModel: "PT-M / UPster H 500 / LC 700",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "LAVASTOVIGLIE_CAPOTTA_CONTROBILANCIATA",
+            title: "Capotta Controbilanciata con Arresto Pompa e Bracci al Sollevamento",
+            question: "La capotta è dotata di maniglione controbilanciato a molle con microinterruttore di sicurezza che arresta istantaneamente la pompa di lavaggio e i bracci rotanti al sollevamento?",
+            normReference: "UNI EN 50416; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVASTOVIGLIE_DISPOSITIVO_ANTIREFLUSSO",
+            title: "Dispositivo Anti-Reflusso Idrico Fognario a Norma UNI EN 1717",
+            question: "Il circuito idraulico è provvisto di dispositivo anti-reflusso a interruzione d'aria conforme UNI EN 1717 per impedire qualsiasi ritorno di acque saponate o reflue nella rete acquedotto?",
+            normReference: "UNI EN 1717; D.Lgs. 31/2001; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVASTOVIGLIE_DOSATORI_PERISTALTICI",
+            title: "Dosatori Automatici Peristaltici per Evitare Contatto con Prodotti Caustici",
+            question: "I prodotti di lavaggio e risciacquo (detergente alcalino caustico e brillantante acido) sono dosati mediante pompe peristaltiche automatiche per evitare manipolazioni dirette dell'operatore?",
+            normReference: "D.Lgs. 81/2008 Titolo IX art. 223 e 225; Reg. CE 852/2004",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVASTOVIGLIE_TERMOSTOP_SANIFICAZIONE",
+            title: "Dispositivo Thermostop Risciacquo Sanificante HACCP (>= 82°C)",
+            question: "La macchina integra il sistema Thermostop che garantisce l'avvio del ciclo di risciacquo unicamente se l'acqua del boiler ha raggiunto la temperatura di sanificazione termica >= 82°C?",
+            normReference: "DIN 10510; DIN 10512; Reg. CE 852/2004 All. II",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // --- REPARTO 4: FREDDO & MAGAZZINO (env-rist-celle e env-rist-dispensa) ---
+      {
+        machineKey: "armadio_frigo_conservazione",
+        name: "Armadi Frigoriferi Statici/Ventilati Positivi e Negativi 700/1400 Litri",
+        type: "Attrezzatura Professionale di Refrigerazione e Conservazione Alimenti",
+        suggestedManufacturer: "Friulinox / Polaris / Ilsa",
+        suggestedModel: "AR70 / Master 1400 TN/BT",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "FRIGO_CONTROLLO_DIGITALE_ALLARME_HACCP",
+            title: "Controllo Digitale Temperatura con Allarme Visivo/Acustico HACCP",
+            question: "Il termoregolatore digitale è visibile dall'esterno con allarme visivo e acustico per sovratemperatura, anomalia sonda o porta aperta prolungata per conformità HACCP?",
+            normReference: "Reg. CE 852/2004 All. II cap. IX; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FRIGO_GUARNIZIONI_MAGNETICHE_PULIBILI",
+            title: "Guarnizioni Magnetiche Pulibili e Sostituibili",
+            question: "Le guarnizioni magnetiche perimetrali degli sportelli assicurano perfetta tenuta termica, sono integre, prive di muffe o fessurazioni e facilmente sfilabili per pulizia e sanificazione?",
+            normReference: "Reg. CE 852/2004 All. II cap. V; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+          {
+            code: "FRIGO_ISOLAMENTO_CICLOPENTANO_GAS_378",
+            title: "Isolamento Ciclopentano Ecologico e Circuito Conforme UNI EN 378",
+            question: "La struttura presenta isolamento ecologico in ciclopentano espanso con gas refrigerante ecologico a basso GWP (R290) e circuito frigorifero a tenuta conforme a norma UNI EN 378?",
+            normReference: "UNI EN 378:2020; Reg. UE 517/2014; CEI EN 60335-2-89",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FRIGO_APERTURA_EMERGENZA_INTERNA",
+            title: "Dispositivo di Apertura di Emergenza dall'Interno",
+            question: "Per celle o grandi armadi con accesso a corpo intero, è presente e perfettamente funzionante la maniglia meccanica di sblocco di emergenza dall'interno anche a porta bloccata a chiave dall'esterno?",
+            normReference: "UNI EN 378-1; D.Lgs. 81/2008 All. IV punto 1.11",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "fabbricatore_ghiaccio_ristorante",
+        name: "Fabbricatore di Ghiaccio a Cubetti Cavi/Pieni per Bar e Cucina",
+        type: "Apparecchiatura di Produzione Ghiaccio Alimentare",
+        suggestedManufacturer: "Brema / Icematic / Scotsman",
+        suggestedModel: "CB 249 / CS 28 / BarLine B",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "GHIACCIO_CIRCUITO_ERMETICO_378",
+            title: "Circuito Sigillato Conforme UNI EN 378",
+            question: "Il gruppo frigorifero a circuito sigillato ermetico è conforme alla norma UNI EN 378 ed è installato in posizione aerata priva di ostacoli per il raffreddamento del condensatore?",
+            normReference: "UNI EN 378; CEI EN 60335-2-24; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+          {
+            code: "GHIACCIO_MATERIALI_MOCA_REG_1935",
+            title: "Materiali Alimentari Idonei MOCA (Reg. CE 1935/2004)",
+            question: "Il serbatoio di stoccaggio e i componenti a contatto con acqua e ghiaccio sono in materiali idonei MOCA Reg. CE 1935/2004 con procedura documentata di pulizia periodica anti-legionella?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004; Linee Guida per il Controllo della Legionellosi",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "GHIACCIO_SCARICO_INTERRUZIONE_ARIA",
+            title: "Scarico con Interruzione d'Aria Anti-Reflusso Fognario",
+            question: "La tubazione di scarico acqua della vasca presenta uno stacco a caduta libera con interruzione d'aria aperta (air break) per impedire ritorni di cattivi odori o batteri dalla colonna fognaria?",
+            normReference: "UNI EN 1717; Reg. CE 852/2004 All. II cap. I",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "GHIACCIO_FILTRO_ACQUA_ANTIBATTERICO",
+            title: "Filtrazione e Decalcificazione Acqua con Cartuccia Registrata",
+            question: "La linea di alimentazione idrica è provvista di cartuccia filtrante/decalcificante a monte con registrazione periodica della sostituzione conforme ai requisiti dell'acqua potabile?",
+            normReference: "D.Lgs. 31/2001; D.Lgs. 18/2023; Reg. CE 852/2004",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // --- REPARTO 5: BAR & SOMMINISTRAZIONE (env-rist-bar-cassa) ---
+      {
+        machineKey: "macchina_caffe_espresso",
+        name: "Macchina per Caffè Espresso Professionale a 2 o 3 Gruppi",
+        type: "Apparecchiatura Idrotermica a Pressione per Somministrazione Bevande",
+        suggestedManufacturer: "La Marzocco / Faema / Rancilio",
+        suggestedModel: "Linea PB / E71 / Classe 9",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "CAFFE_VALVOLA_PED_SOVRAPRESSIONE",
+            title: "Valvola di Sicurezza Sovrapressione Certificata PED (D.Lgs. 26/2016)",
+            question: "La caldaia a vapore è equipaggiata con valvola di sicurezza contro le sovrapressioni certificata CE secondo la Direttiva PED (D.Lgs. 26/2016) con scarico convogliato?",
+            normReference: "Direttiva PED 2014/68/UE; D.Lgs. 26/2016; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CAFFE_LANCIA_VAPORE_COOL_TOUCH",
+            title: "Lancia Vapore Isolata Cool-Touch Antiscottatura",
+            question: "Le lance vapore per il montaggio latte sono dotate di isolamento termico interno Cool-Touch antiscottatura e impugnatura in gomma siliconica per prevenire ustioni alle mani?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3; CEI EN 60335-2-75",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CAFFE_MANOMETRI_DOPPIA_SCALA",
+            title: "Manometri Pressione Certificati e Chiaramente Leggibili",
+            question: "I manometri di controllo della pressione caldaia vapore e pressione pompa erogazione sono integri, certificati e chiaramente leggibili dal posto di manovra dell'operatore?",
+            normReference: "D.Lgs. 81/2008 All. V p. 1.2; CEI EN 60335-2-75",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+          {
+            code: "CAFFE_ADDOLCITORE_DISCONNETTORE",
+            title: "Addolcitore Acqua a Monte con Disconnettore Idrico UNI EN 1717",
+            question: "L'allacciamento idrico della macchina include addolcitore a resine e dispositivo di non ritorno a monte conforme a norma UNI EN 1717 per impedire reflussi verso l'acquedotto potabile?",
+            normReference: "UNI EN 1717; D.Lgs. 31/2001; Reg. CE 852/2004",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+    ],
+  },
+
   // 1. RISTORAZIONE & ALIMENTARE
   {
     sectorKey: "ristorazione_alimentare",
@@ -2423,12 +3129,18 @@ export const SECTOR_MACHINERY_CATALOGS: SectorMachineCatalog[] = [
 // Helper per identificare il catalogo settoriale idoneo in base al codice ATECO
 export function getSectorMachineCatalogForAteco(atecoCode?: string | null): SectorMachineCatalog {
   if (!atecoCode) {
-    return SECTOR_MACHINERY_CATALOGS[0]; // Ristorazione/Alimentare come default
+    return SECTOR_MACHINERY_CATALOGS[0]; // Ristorazione/Somministrazione come default
   }
 
   const clean = atecoCode.trim();
+  const digitsOnly = clean.replace(/[^0-9]/g, "");
   for (const cat of SECTOR_MACHINERY_CATALOGS) {
-    if (cat.atecoPrefixes.some((p) => clean.startsWith(p))) {
+    if (
+      cat.atecoPrefixes.some((p) => {
+        const pDigits = p.replace(/[^0-9]/g, "");
+        return clean.startsWith(p) || (pDigits.length >= 2 && digitsOnly.startsWith(pDigits));
+      })
+    ) {
       return cat;
     }
   }
@@ -2568,6 +3280,16 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
   const suggested: SuggestedMachineWithEnvironment[] = [];
   const addedKeys = new Set<string>();
 
+  const isRistoranteAteco = !!atecoCode && (
+    atecoCode.startsWith("56.10.11") ||
+    atecoCode.startsWith("56.10.10") ||
+    atecoCode.startsWith("56.10.1") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("561011") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("56101")
+  );
+  const ristSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "ristorazione_somministrazione");
+  const ristMachines = ristSector ? ristSector.machines : [];
+
   const isIperAteco = !!atecoCode && (
     atecoCode.startsWith("47.11.1") ||
     atecoCode.startsWith("47.11.10") ||
@@ -2593,8 +3315,72 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
     // Mappa la categoria del locale alle macchine pertinenti
     let matchingMachines: SectorMachineTemplate[] = [];
 
-    // Reparti Supermercato Alimentare (47.11.2 - superficie 400 - 2.500 mq)
+    // Reparti Ristorazione con Somministrazione (56.10.11 / 56.10.10 / 56.10.1 - Ristoranti, Trattorie, Osterie)
     if (
+      envId === "env-rist-cucina" ||
+      envId.includes("rist-cucina") ||
+      (isRistoranteAteco && (envId === "env-cucina" || nameLower.includes("cucina") || nameLower.includes("cottura") || cat === "cucina"))
+    ) {
+      matchingMachines = ristMachines.filter((m) =>
+        [
+          "cucina_fuochi_gas",
+          "forno_misto_ristorante",
+          "friggitrice_ristorante",
+          "abbattitore_temperatura",
+          "frytop_piastra",
+          "bollitore_cuocipasta",
+          "cappa_aspirazione_cucina",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-rist-prep-fredda" ||
+      envId.includes("rist-prep-fredda") ||
+      (isRistoranteAteco && (nameLower.includes("preparazione") || nameLower.includes("fredda") || nameLower.includes("lavorazione")))
+    ) {
+      matchingMachines = ristMachines.filter((m) =>
+        [
+          "affettatrice_gravita_ristorante",
+          "cutter_robot_tagliaverdure",
+          "confezionatrice_sottovuoto_ristorante",
+          "tritacarne_grattugia_ristorante",
+          "frullatore_immersione_mixer",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-rist-plonge" ||
+      envId.includes("rist-plonge") ||
+      (isRistoranteAteco && (envId === "env-plonge" || nameLower.includes("plonge") || nameLower.includes("lavaggio") || nameLower.includes("stoviglie")))
+    ) {
+      matchingMachines = ristMachines.filter((m) =>
+        [
+          "lavastoviglie_capotta_plonge",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-rist-celle" ||
+      envId === "env-rist-dispensa" ||
+      envId.includes("rist-celle") ||
+      envId.includes("rist-dispensa") ||
+      (isRistoranteAteco && (envId === "env-cella" || envId === "env-dispensa" || nameLower.includes("cella") || nameLower.includes("celle") || nameLower.includes("dispensa") || (nameLower.includes("frigo") && !nameLower.includes("bar"))))
+    ) {
+      matchingMachines = ristMachines.filter((m) =>
+        [
+          "armadio_frigo_conservazione",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-rist-bar-cassa" ||
+      envId.includes("rist-bar-cassa") ||
+      envId.includes("rist-bar") ||
+      (isRistoranteAteco && (envId === "env-sala" || nameLower.includes("bar") || nameLower.includes("cassa") || nameLower.includes("somministrazione") || nameLower.includes("banco") || cat === "sales_office" || cat === "public"))
+    ) {
+      matchingMachines = ristMachines.filter((m) =>
+        [
+          "fabbricatore_ghiaccio_ristorante",
+          "macchina_caffe_espresso",
+        ].includes(m.machineKey)
+      );
+    } else if (
       envId === "env-super-magazzino" ||
       envId.includes("super-magazzino") ||
       (isSuperAteco && (cat === "warehouse" || cat === "magazzino_merci" || nameLower.includes("deposito") || (nameLower.includes("magazzino") && !nameLower.includes("legnami") && !nameLower.includes("oli"))))

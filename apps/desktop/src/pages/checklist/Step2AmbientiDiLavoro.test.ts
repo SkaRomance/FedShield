@@ -528,4 +528,396 @@ assert.ok(
   "Locale tecnico deve avere verifica sgancio di emergenza e accesso autorizzato",
 );
 
+// ============================================================================
+// 5. Test Ristorante con Somministrazione ATECO 56.10.11 (o 56.10.1 / 561011)
+// ============================================================================
+console.log("Test 11: getStandardEnvironmentsForAteco & conformità per Ristorante (56.10.11 / 56.10.1)");
+const ristEnvs = getStandardEnvironmentsForAteco("56.10.11");
+assert.equal(ristEnvs.length, 11, "Il ristorante con somministrazione deve avere esattamente 11 ambienti tipici");
+
+// Verifica prefissi e varianti (56.10.1, 56.10.10, 561011, 56101)
+const ristEnvsVar1 = getStandardEnvironmentsForAteco("56.10.1");
+assert.equal(ristEnvsVar1.length, 11, "Anche prefisso 56.10.1 deve restituire gli 11 ambienti ristorante");
+const ristEnvsVar2 = getStandardEnvironmentsForAteco("56.10.10");
+assert.equal(ristEnvsVar2.length, 11, "Anche prefisso 56.10.10 deve restituire gli 11 ambienti ristorante");
+const ristEnvsVar3 = getStandardEnvironmentsForAteco("561011");
+assert.equal(ristEnvsVar3.length, 11, "Anche codice non formattato 561011 deve restituire 11 ambienti ristorante");
+const ristEnvsVar4 = getStandardEnvironmentsForAteco("56101");
+assert.equal(ristEnvsVar4.length, 11, "Anche codice non formattato 56101 deve restituire 11 ambienti ristorante");
+
+// Verifica ID degli 11 ambienti standard del Ristorante
+const expectedRistIds = [
+  "env-rist-cucina",
+  "env-rist-plonge",
+  "env-rist-prep-fredda",
+  "env-rist-celle",
+  "env-rist-dispensa",
+  "env-rist-sala",
+  "env-rist-bar-cassa",
+  "env-rist-spogliatoi",
+  "env-rist-wc-clienti",
+  "env-rist-rifiuti",
+  "env-rist-tecnico",
+];
+
+for (const id of expectedRistIds) {
+  const envFound = ristEnvs.find((e) => e.id === id);
+  assert.ok(envFound, `Ambiente con id ${id} deve essere presente nell'elenco Ristorante`);
+}
+
+// 1. Cucina Ristorante
+const ristCucina = ristEnvs.find((e) => e.id === "env-rist-cucina")!;
+assert.equal(ristCucina.category, "production");
+assert.equal(ristCucina.surfaceSqM, 45);
+assert.equal(ristCucina.heightM, 3.0);
+assert.equal(ristCucina.volumeCuM, 135);
+assert.equal(ristCucina.occupantsCount, 4);
+assert.equal(ristCucina.windowSurfaceSqM, 4.5);
+assert.equal(ristCucina.features.forcedExhaustPresent, true);
+assert.equal(ristCucina.features.forcedExhaustType, "kitchen_hood");
+assert.equal(ristCucina.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(ristCucina.features.flooringCondition, "compliant_anti_slip");
+assert.equal(ristCucina.features.insectScreens, true);
+assert.equal(ristCucina.features.microclimateCompliant, true);
+
+// 2. Plonge
+const ristPlonge = ristEnvs.find((e) => e.id === "env-rist-plonge")!;
+assert.equal(ristPlonge.category, "production");
+assert.equal(ristPlonge.surfaceSqM, 15);
+assert.equal(ristPlonge.heightM, 3.0);
+assert.equal(ristPlonge.volumeCuM, 45);
+assert.equal(ristPlonge.occupantsCount, 2);
+assert.equal(ristPlonge.windowSurfaceSqM, 1.5);
+assert.equal(ristPlonge.features.forcedExhaustPresent, true);
+assert.equal(ristPlonge.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(ristPlonge.features.flooringCondition, "compliant_anti_slip");
+
+// 3. Prep Fredda
+const ristPrepFredda = ristEnvs.find((e) => e.id === "env-rist-prep-fredda")!;
+assert.equal(ristPrepFredda.category, "production");
+assert.equal(ristPrepFredda.surfaceSqM, 18);
+assert.equal(ristPrepFredda.heightM, 3.0);
+assert.equal(ristPrepFredda.volumeCuM, 54);
+assert.equal(ristPrepFredda.occupantsCount, 2);
+assert.equal(ristPrepFredda.windowSurfaceSqM, 2.0);
+assert.equal(ristPrepFredda.features.forcedExhaustPresent, true);
+assert.equal(ristPrepFredda.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(ristPrepFredda.features.flooringCondition, "compliant_anti_slip");
+assert.equal(ristPrepFredda.features.insectScreens, true);
+assert.equal(ristPrepFredda.features.microclimateCompliant, true);
+
+// 4. Celle Deperibili
+const ristCelle = ristEnvs.find((e) => e.id === "env-rist-celle")!;
+assert.equal(ristCelle.category, "storage");
+assert.equal(ristCelle.surfaceSqM, 20);
+assert.equal(ristCelle.heightM, 2.6);
+assert.equal(ristCelle.volumeCuM, 52);
+assert.equal(ristCelle.occupantsCount, 1);
+assert.equal(ristCelle.windowSurfaceSqM, 0);
+assert.equal(ristCelle.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(ristCelle.features.flooringCondition, "compliant_anti_slip");
+assert.equal(ristCelle.features.emergencyLighting, true);
+assert.equal(ristCelle.features.hasTrappedPersonAlarm, true);
+
+// 5. Dispensa Secco
+const ristDispensa = ristEnvs.find((e) => e.id === "env-rist-dispensa")!;
+assert.equal(ristDispensa.category, "warehouse");
+assert.equal(ristDispensa.surfaceSqM, 25);
+assert.equal(ristDispensa.heightM, 2.7);
+assert.equal(ristDispensa.volumeCuM, 67.5);
+assert.equal(ristDispensa.occupantsCount, 1);
+assert.equal(ristDispensa.windowSurfaceSqM, 2.0);
+assert.equal(ristDispensa.features.shelvingCertified, true);
+
+// 6. Sala Ristorazione
+const ristSala = ristEnvs.find((e) => e.id === "env-rist-sala")!;
+assert.equal(ristSala.category, "public");
+assert.equal(ristSala.surfaceSqM, 120);
+assert.equal(ristSala.heightM, 2.8);
+assert.equal(ristSala.volumeCuM, 336);
+assert.equal(ristSala.occupantsCount, 60);
+assert.equal(ristSala.windowSurfaceSqM, 15.0);
+assert.equal(ristSala.emergencyExitsCount, 2);
+assert.equal(ristSala.features.emergencyLighting, true);
+assert.equal(ristSala.features.antiShatterGlass, true);
+
+// 7. Bar / Cassa
+const ristBarCassa = ristEnvs.find((e) => e.id === "env-rist-bar-cassa")!;
+assert.equal(ristBarCassa.category, "sales_office");
+assert.equal(ristBarCassa.surfaceSqM, 20);
+assert.equal(ristBarCassa.heightM, 2.8);
+assert.equal(ristBarCassa.volumeCuM, 56);
+assert.equal(ristBarCassa.occupantsCount, 2);
+assert.equal(ristBarCassa.windowSurfaceSqM, 2.0);
+assert.equal(ristBarCassa.features.emergencyLighting, true);
+
+// 8. Spogliatoi
+const ristSpogliatoi = ristEnvs.find((e) => e.id === "env-rist-spogliatoi")!;
+assert.equal(ristSpogliatoi.category, "changing_rooms");
+assert.equal(ristSpogliatoi.surfaceSqM, 16);
+assert.equal(ristSpogliatoi.heightM, 2.4);
+assert.equal(ristSpogliatoi.volumeCuM, 38.4);
+assert.equal(ristSpogliatoi.occupantsCount, 6);
+assert.equal(ristSpogliatoi.windowSurfaceSqM, 1.5);
+assert.equal(ristSpogliatoi.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(ristSpogliatoi.features.flooringCondition, "compliant_anti_slip");
+assert.equal(ristSpogliatoi.features.forcedExhaustPresent, true);
+assert.equal(ristSpogliatoi.features.forcedExhaustType, "blind_toilet_fan");
+
+// 9. WC Clienti
+const ristWcClienti = ristEnvs.find((e) => e.id === "env-rist-wc-clienti")!;
+assert.equal(ristWcClienti.category, "services");
+assert.equal(ristWcClienti.surfaceSqM, 15);
+assert.equal(ristWcClienti.heightM, 2.4);
+assert.equal(ristWcClienti.volumeCuM, 36);
+assert.equal(ristWcClienti.occupantsCount, 2);
+assert.equal(ristWcClienti.windowSurfaceSqM, 1.5);
+assert.equal(ristWcClienti.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(ristWcClienti.features.flooringCondition, "compliant_anti_slip");
+assert.equal(ristWcClienti.features.forcedExhaustPresent, true);
+assert.equal(ristWcClienti.features.forcedExhaustType, "blind_toilet_fan");
+
+// 10. Deposito Rifiuti
+const ristRifiuti = ristEnvs.find((e) => e.id === "env-rist-rifiuti")!;
+assert.equal(ristRifiuti.category, "technical");
+assert.equal(ristRifiuti.surfaceSqM, 12);
+assert.equal(ristRifiuti.heightM, 2.7);
+assert.equal(ristRifiuti.volumeCuM, 32.4);
+assert.equal(ristRifiuti.occupantsCount, 1);
+assert.equal(ristRifiuti.windowSurfaceSqM, 0);
+assert.equal(ristRifiuti.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(ristRifiuti.features.flooringCondition, "compliant_anti_slip");
+
+// 11. Locale Tecnico Gas
+const ristTecnico = ristEnvs.find((e) => e.id === "env-rist-tecnico")!;
+assert.equal(ristTecnico.category, "technical");
+assert.equal(ristTecnico.surfaceSqM, 10);
+assert.equal(ristTecnico.heightM, 2.5);
+assert.equal(ristTecnico.volumeCuM, 25);
+assert.equal(ristTecnico.occupantsCount, 1);
+assert.equal(ristTecnico.windowSurfaceSqM, 0);
+assert.equal(ristTecnico.features.emergencyLighting, true);
+assert.equal(ristTecnico.features.gasLeakDetectorPresent, true);
+
+// Verifica evaluateEnvironmentCompliance per locali Ristorante
+const evalRistCucina = evaluateEnvironmentCompliance(ristCucina, "56.10.11");
+assert.equal(evalRistCucina.isHeightCompliant, true, "Cucina ristorante h=3.00m è conforme");
+assert.ok(
+  evalRistCucina.summaryBadges.some((b) => b.text.includes("Cucina a norma: altezza ≥ 3,00m")),
+  "Cucina deve avere badge altezza ≥ 3,00m e Ansul",
+);
+assert.ok(
+  evalRistCucina.summaryBadges.some((b) => b.text.includes("Lavamani comando non manuale")),
+  "Cucina deve avere badge lavamani comando non manuale",
+);
+
+const evalRistSala = evaluateEnvironmentCompliance(ristSala, "56.10.11");
+assert.ok(
+  evalRistSala.summaryBadges.some((b) => b.text.includes("Vie di esodo libere ≥ 1,20m")),
+  "Sala deve avere badge vie di esodo libere ≥ 1,20m",
+);
+assert.ok(
+  evalRistSala.summaryBadges.some((b) => b.text.includes("Illuminazione di emergenza ≥ 5 lux")),
+  "Sala deve avere badge illuminazione emergenza ed estintori 34A 233B",
+);
+
+const evalRistPlonge = evaluateEnvironmentCompliance(ristPlonge, "56.10.11");
+assert.ok(
+  evalRistPlonge.summaryBadges.some((b) => b.text.includes("Plonge separata: percorso sporco/pulito")),
+  "Plonge deve avere badge separazione marcia in avanti",
+);
+
+const evalRistCelle = evaluateEnvironmentCompliance(ristCelle, "56.10.11");
+assert.ok(
+  evalRistCelle.summaryBadges.some((b) => b.text.includes("Allarme uomo intrappolato")),
+  "Celle devono avere badge allarme uomo intrappolato UNI EN 378",
+);
+assert.ok(
+  evalRistCelle.summaryBadges.some((b) => b.text.includes("Teletermometri continui HACCP")),
+  "Celle devono avere badge teletermometri continui HACCP",
+);
+
+const evalRistSpogliatoi = evaluateEnvironmentCompliance(ristSpogliatoi, "56.10.11");
+assert.ok(
+  evalRistSpogliatoi.summaryBadges.some((b) => b.text.includes("Armadietti doppio scomparto sporco/pulito")),
+  "Spogliatoi staff devono avere badge armadietti doppio scomparto",
+);
+
+const evalRistTecnico = evaluateEnvironmentCompliance(ristTecnico, "56.10.11");
+assert.ok(
+  evalRistTecnico.summaryBadges.some((b) => b.text.includes("Elettrovalvola gas metano esterna")),
+  "Locale tecnico deve avere badge elettrovalvola gas metano con sgancio",
+);
+
+// ============================================================================
+// Test 12: generateEnvironmentChecklistItems per locali specifici Ristorante
+// ============================================================================
+console.log("Test 12: generateEnvironmentChecklistItems per locali Ristorante (ATECO 56.10.11)");
+
+// Cucina
+const cucinaItems = generateEnvironmentChecklistItems(ristCucina, "56.10.11");
+assert.ok(
+  cucinaItems.some((it) => it.id.includes("termocoppie-cappa-ansul") && it.domain === "both"),
+  "Cucina deve avere verifica termocoppie fuochi e impianto Ansul (domain: both)",
+);
+assert.ok(
+  cucinaItems.some((it) => it.id.includes("filtri-antigrasso-labirinto") && it.domain === "both"),
+  "Cucina deve avere verifica filtri antigrasso a labirinto e canna fumaria (domain: both)",
+);
+assert.ok(
+  cucinaItems.some((it) => it.id.includes("lavamani-non-manuale") && it.domain === "haccp"),
+  "Cucina deve avere verifica lavamani ginocchio con sapone e carta monouso (domain: haccp)",
+);
+assert.ok(
+  cucinaItems.some((it) => it.id.includes("canaline-scolo-sifonate") && it.domain === "both"),
+  "Cucina deve avere verifica canaline scolo sifonate con griglie inox (domain: both)",
+);
+
+// Plonge
+const plongeItems = generateEnvironmentChecklistItems(ristPlonge, "56.10.11");
+assert.ok(
+  plongeItems.some((it) => it.id.includes("cappa-vapori-lavastoviglie") && it.domain === "safety"),
+  "Plonge deve avere verifica cappa aspirazione vapori lavastoviglie (domain: safety)",
+);
+assert.ok(
+  plongeItems.some((it) => it.id.includes("marcia-avanti-stoviglie") && it.domain === "haccp"),
+  "Plonge deve avere verifica marcia in avanti percorso sporco/pulito (domain: haccp)",
+);
+assert.ok(
+  plongeItems.some((it) => it.id.includes("dosatori-automatici-chimici") && it.domain === "safety"),
+  "Plonge deve avere verifica dosatori automatici detergenti (domain: safety)",
+);
+
+// Prep Fredda
+const prepFreddaItems = generateEnvironmentChecklistItems(ristPrepFredda, "56.10.11");
+assert.ok(
+  prepFreddaItems.some((it) => it.id.includes("tavoli-refrigerati-termometro") && it.domain === "haccp"),
+  "Prep fredda deve avere verifica tavoli refrigerati con display (domain: haccp)",
+);
+assert.ok(
+  prepFreddaItems.some((it) => it.id.includes("lavello-dedicato-verdure") && it.domain === "haccp"),
+  "Prep fredda deve avere verifica lavello dedicato lavaggio verdure (domain: haccp)",
+);
+assert.ok(
+  prepFreddaItems.some((it) => it.id.includes("coltelleria-taglieri-codice-colore") && it.domain === "haccp"),
+  "Prep fredda deve avere verifica taglieri con codice colore HACCP (domain: haccp)",
+);
+
+// Celle Deperibili
+const celleItems = generateEnvironmentChecklistItems(ristCelle, "56.10.11");
+assert.ok(
+  celleItems.some((it) => it.id.includes("allarme-uomo-intrappolato") && it.domain === "safety"),
+  "Celle deperibili devono avere verifica allarme uomo intrappolato UNI EN 378 (domain: safety)",
+);
+assert.ok(
+  celleItems.some((it) => it.id.includes("teletermometro-registrazione") && it.domain === "haccp"),
+  "Celle deperibili devono avere verifica registrazione continua temperature HACCP (domain: haccp)",
+);
+
+// Dispensa Secco
+const dispensaItems = generateEnvironmentChecklistItems(ristDispensa, "56.10.11");
+assert.ok(
+  dispensaItems.some((it) => it.id.includes("scaffalature-sollevate-pest-control") && it.domain === "haccp"),
+  "Dispensa deve avere verifica scaffali sollevati ≥15cm per pest control (domain: haccp)",
+);
+assert.ok(
+  dispensaItems.some((it) => it.id.includes("assenza-umidita-muffe") && it.domain === "both"),
+  "Dispensa deve avere verifica assenza umidità e muffe (domain: both)",
+);
+
+// Sala Ristorazione
+const salaItems = generateEnvironmentChecklistItems(ristSala, "56.10.11");
+assert.ok(
+  salaItems.some((it) => it.id.includes("vie-esodo-sala") && it.domain === "safety"),
+  "Sala deve avere verifica vie di esodo libere ≥ 1.20m (domain: safety)",
+);
+assert.ok(
+  salaItems.some((it) => it.id.includes("uscite-emergenza-antipanico") && it.domain === "safety"),
+  "Sala deve avere verifica porte sicurezza antipanico UNI EN 1125 (domain: safety)",
+);
+assert.ok(
+  salaItems.some((it) => it.id.includes("illuminazione-sicurezza-estintori") && it.domain === "safety"),
+  "Sala deve avere verifica illuminazione sicurezza ed estintori (domain: safety)",
+);
+
+// Bar / Cassa
+const barItems = generateEnvironmentChecklistItems(ristBarCassa, "56.10.11");
+assert.ok(
+  barItems.some((it) => it.id.includes("lancia-vapore-cooltouch") && it.domain === "safety"),
+  "Bar/Cassa deve avere verifica lancia vapore cool-touch (domain: safety)",
+);
+assert.ok(
+  barItems.some((it) => it.id.includes("lavabicchieri-temperatura-risciacquo") && it.domain === "haccp"),
+  "Bar/Cassa deve avere verifica lavabicchieri con risciacquo a 85°C (domain: haccp)",
+);
+assert.ok(
+  barItems.some((it) => it.id.includes("fabbricatore-ghiaccio-moca") && it.domain === "haccp"),
+  "Bar/Cassa deve avere verifica fabbricatore ghiaccio conforme MOCA (domain: haccp)",
+);
+assert.ok(
+  !barItems.some((it) => it.id.includes("nastri-motorizzati-casse")),
+  "Bar/Cassa ristorante non deve avere nastri motorizzati casse da supermercato",
+);
+
+// Spogliatoio Personale
+const spogliatoiItems = generateEnvironmentChecklistItems(ristSpogliatoi, "56.10.11");
+assert.ok(
+  spogliatoiItems.some((it) => it.id.includes("armadietti-spogliatoio") && (it.domain === "both" || it.domain === "safety")),
+  "Spogliatoi devono avere armadietti doppio scomparto sporco/pulito",
+);
+assert.ok(
+  spogliatoiItems.some((it) => it.id.includes("lavamani-antibagno-spogliatoio") && it.domain === "both"),
+  "Spogliatoi devono avere lavamani acqua calda/fredda nell'antibagno (domain: both)",
+);
+
+// WC Clienti
+const wcClientiItems = generateEnvironmentChecklistItems(ristWcClienti, "56.10.11");
+assert.ok(
+  wcClientiItems.some((it) => it.id.includes("wc-disabili-tirante-campanello") && it.domain === "safety"),
+  "WC Clienti deve avere verifica accessibilità disabili con tirante allarme (domain: safety)",
+);
+assert.ok(
+  !wcClientiItems.some((it) => it.id.includes("armadietti-spogliatoio")),
+  "WC Clienti non deve contenere armadietti da spogliatoio personale",
+);
+
+// Deposito Rifiuti
+const rifiutiItems = generateEnvironmentChecklistItems(ristRifiuti, "56.10.11");
+assert.ok(
+  rifiutiItems.some((it) => it.id.includes("mastelli-olio-esausto-cer") && it.domain === "both"),
+  "Deposito rifiuti deve avere verifica mastelli ermetici e olio esausto CER 20 01 25 (domain: both)",
+);
+
+// Locale Tecnico Gas
+const tecnicoItems = generateEnvironmentChecklistItems(ristTecnico, "56.10.11");
+assert.ok(
+  tecnicoItems.some((it) => it.id.includes("elettrovalvola-gas-sgancio-emergenza") && it.domain === "safety"),
+  "Locale tecnico deve avere verifica elettrovalvola esterna gas metano con pulsante emergenza (domain: safety)",
+);
+assert.ok(
+  !tecnicoItems.some((it) => it.id.includes("centrale-frigo-gas-refrigerante")),
+  "Locale tecnico ristorante gas metano non deve avere sensori gas refrigerante centrale frigorifera",
+);
+
+// Verifica conformità del filtro checklistMode per cucina ristorante
+const cucinaHaccpMode = filterEnvironmentItemsByChecklistMode(cucinaItems, "haccp_only");
+assert.ok(
+  cucinaHaccpMode.every((it) => it.domain === "haccp" || it.domain === "both"),
+  "In modalità haccp_only tutti gli item cucina devono essere haccp o both",
+);
+assert.ok(
+  !cucinaHaccpMode.some((it) => it.domain === "safety"),
+  "In modalità haccp_only nessun item cucina deve avere domain safety",
+);
+
+const cucinaSafetyMode = filterEnvironmentItemsByChecklistMode(cucinaItems, "safety_only");
+assert.ok(
+  cucinaSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item cucina devono essere safety o both",
+);
+assert.ok(
+  !cucinaSafetyMode.some((it) => it.domain === "haccp"),
+  "In modalità safety_only nessun item cucina deve avere domain haccp",
+);
+
 console.log("=== TUTTI I TEST Step2AmbientiDiLavoro SUPERATI CON SUCCESSO! ===");
