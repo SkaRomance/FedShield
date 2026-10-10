@@ -247,4 +247,285 @@ assert.ok(
   "Compattatori devono avere verifica arresti d'emergenza e interblocchi",
 );
 
+// ============================================================================
+// 4. Test Supermercato ATECO 47.11.2 (o 47.11.20 / 47112)
+// ============================================================================
+console.log("Test 8: getStandardEnvironmentsForAteco per Supermercato (47.11.2 / 47.11.20)");
+const superEnvs = getStandardEnvironmentsForAteco("47.11.2");
+assert.equal(superEnvs.length, 12, "Il supermercato deve avere esattamente 12 ambienti tipici");
+
+// Verifica ID dei 12 ambienti standard del Supermercato
+const expectedSuperIds = [
+  "env-super-corsie",
+  "env-super-gastronomia",
+  "env-super-macelleria",
+  "env-super-panetteria",
+  "env-super-ortofrutta",
+  "env-super-pescheria",
+  "env-super-magazzino",
+  "env-super-celle-frigo",
+  "env-super-compattatore",
+  "env-super-casse-uffici",
+  "env-super-spogliatoi",
+  "env-super-tecnico",
+];
+
+for (const id of expectedSuperIds) {
+  const envFound = superEnvs.find((e) => e.id === id);
+  assert.ok(envFound, `Ambiente con id ${id} deve essere presente nell'elenco Supermercato`);
+}
+
+// Verifica varianti di prefisso (47.11.20 e 47112)
+const superEnvsVariant1 = getStandardEnvironmentsForAteco("47.11.20");
+assert.equal(superEnvsVariant1.length, 12, "Anche 47.11.20 deve restituire 12 ambienti Supermercato");
+const superEnvsVariant2 = getStandardEnvironmentsForAteco("47112");
+assert.equal(superEnvsVariant2.length, 12, "Anche 47112 deve restituire 12 ambienti Supermercato");
+
+// Verifica parametri dimensionali e caratteristiche dei reparti Supermercato
+const superCorsie = superEnvs.find((e) => e.id === "env-super-corsie")!;
+assert.equal(superCorsie.category, "sales_office");
+assert.equal(superCorsie.surfaceSqM, 900);
+assert.equal(superCorsie.heightM, 3.8);
+assert.equal(superCorsie.volumeCuM, 3420);
+assert.equal(superCorsie.occupantsCount, 12);
+assert.equal(superCorsie.emergencyExitsCount, 3);
+assert.equal(superCorsie.features.forcedExhaustPresent, true);
+assert.equal(superCorsie.features.emergencyLighting, true);
+assert.equal(superCorsie.features.shelvingCertified, true);
+assert.equal(superCorsie.features.fireLoadHigh, true);
+
+const superGastronomia = superEnvs.find((e) => e.id === "env-super-gastronomia")!;
+assert.equal(superGastronomia.category, "production");
+assert.equal(superGastronomia.surfaceSqM, 35);
+assert.equal(superGastronomia.heightM, 3.0);
+assert.equal(superGastronomia.volumeCuM, 105);
+assert.equal(superGastronomia.occupantsCount, 3);
+assert.equal(superGastronomia.features.wallsCondition, "washable_sanitizable_2m");
+
+const superMacelleria = superEnvs.find((e) => e.id === "env-super-macelleria")!;
+assert.equal(superMacelleria.category, "production");
+assert.equal(superMacelleria.surfaceSqM, 40);
+assert.equal(superMacelleria.heightM, 3.0);
+assert.equal(superMacelleria.volumeCuM, 120);
+assert.equal(superMacelleria.occupantsCount, 2);
+
+const superPanetteria = superEnvs.find((e) => e.id === "env-super-panetteria")!;
+assert.equal(superPanetteria.category, "production");
+assert.equal(superPanetteria.surfaceSqM, 30);
+assert.equal(superPanetteria.heightM, 3.2);
+assert.equal(superPanetteria.volumeCuM, 96);
+assert.equal(superPanetteria.occupantsCount, 2);
+
+const superOrtofrutta = superEnvs.find((e) => e.id === "env-super-ortofrutta")!;
+assert.equal(superOrtofrutta.category, "production");
+assert.equal(superOrtofrutta.surfaceSqM, 45);
+assert.equal(superOrtofrutta.heightM, 3.2);
+assert.equal(superOrtofrutta.volumeCuM, 144);
+assert.equal(superOrtofrutta.occupantsCount, 2);
+
+const superPescheria = superEnvs.find((e) => e.id === "env-super-pescheria")!;
+assert.equal(superPescheria.category, "production");
+assert.equal(superPescheria.surfaceSqM, 30);
+assert.equal(superPescheria.heightM, 3.0);
+assert.equal(superPescheria.volumeCuM, 90);
+assert.equal(superPescheria.occupantsCount, 2);
+
+const superMagazzino = superEnvs.find((e) => e.id === "env-super-magazzino")!;
+assert.equal(superMagazzino.category, "warehouse");
+assert.equal(superMagazzino.surfaceSqM, 350);
+assert.equal(superMagazzino.heightM, 4.5);
+assert.equal(superMagazzino.volumeCuM, 1575);
+assert.equal(superMagazzino.occupantsCount, 4);
+
+const superCelleFrigo = superEnvs.find((e) => e.id === "env-super-celle-frigo")!;
+assert.equal(superCelleFrigo.category, "storage");
+assert.equal(superCelleFrigo.surfaceSqM, 50);
+assert.equal(superCelleFrigo.heightM, 3.0);
+assert.equal(superCelleFrigo.volumeCuM, 150);
+assert.equal(superCelleFrigo.features.hasTrappedPersonAlarm, true);
+
+const superCompattatore = superEnvs.find((e) => e.id === "env-super-compattatore")!;
+assert.equal(superCompattatore.category, "technical");
+assert.equal(superCompattatore.surfaceSqM, 30);
+assert.equal(superCompattatore.heightM, 3.2);
+assert.equal(superCompattatore.volumeCuM, 96);
+
+const superCasseUffici = superEnvs.find((e) => e.id === "env-super-casse-uffici")!;
+assert.equal(superCasseUffici.category, "sales_office");
+assert.equal(superCasseUffici.surfaceSqM, 50);
+assert.equal(superCasseUffici.heightM, 3.0);
+assert.equal(superCasseUffici.volumeCuM, 150);
+assert.equal(superCasseUffici.occupantsCount, 6);
+
+const superSpogliatoi = superEnvs.find((e) => e.id === "env-super-spogliatoi")!;
+assert.equal(superSpogliatoi.category, "changing_rooms");
+assert.equal(superSpogliatoi.surfaceSqM, 45);
+assert.equal(superSpogliatoi.heightM, 2.7);
+assert.equal(superSpogliatoi.volumeCuM, 121.5);
+assert.equal(superSpogliatoi.occupantsCount, 12);
+
+const superTecnico = superEnvs.find((e) => e.id === "env-super-tecnico")!;
+assert.equal(superTecnico.category, "technical");
+assert.equal(superTecnico.surfaceSqM, 25);
+assert.equal(superTecnico.heightM, 3.0);
+assert.equal(superTecnico.volumeCuM, 75);
+assert.equal(superTecnico.features.gasLeakDetectorPresent, true);
+
+// Test 9: evaluateEnvironmentCompliance per Supermercato
+console.log("Test 9: evaluateEnvironmentCompliance per ambienti Supermercato");
+const evalSuperCorsie = evaluateEnvironmentCompliance(superCorsie, "47.11.2");
+assert.ok(evalSuperCorsie.cpiActivityAlert, "L'area vendita del supermercato (900mq) deve essere soggetta a CPI");
+assert.ok(
+  evalSuperCorsie.cpiActivityAlert.code.includes("69.1.A"),
+  "Superficie di 900mq deve rientrare nell'Attività 69.1.A (400-1500 mq)",
+);
+assert.ok(
+  evalSuperCorsie.summaryBadges.some((b) => b.text.includes("Corsie di esodo principali ≥ 1,80m")),
+  "Deve esserci badge per corsie di esodo ≥ 1,80m D.M. 27/07/2010 per supermercato",
+);
+assert.ok(
+  evalSuperCorsie.summaryBadges.some((b) => b.text.includes("Uscite di emergenza: 3 varchi")),
+  "Deve esserci badge per 3 varchi uscite di emergenza con maniglioni antipanico",
+);
+
+const evalSuperCelle = evaluateEnvironmentCompliance(superCelleFrigo, "47.11.2");
+assert.ok(
+  evalSuperCelle.summaryBadges.some((b) => b.text.includes("Allarme uomo intrappolato")),
+  "Celle frigo supermercato devono avere badge allarme uomo intrappolato UNI EN 378",
+);
+
+const evalSuperTecnico = evaluateEnvironmentCompliance(superTecnico, "47.11.2");
+assert.ok(
+  evalSuperTecnico.summaryBadges.some((b) => b.text.includes("Sensori gas refrigerante")),
+  "Locale tecnico compressori deve avere badge sensori gas refrigerante e ventilazione emergenza",
+);
+
+// Test 10: generateEnvironmentChecklistItems per reparti specifici Supermercato
+console.log("Test 10: generateEnvironmentChecklistItems per reparti Supermercato");
+
+// Corsie supermercato
+const superCorsieItems = generateEnvironmentChecklistItems(superCorsie, "47.11.2");
+assert.ok(
+  superCorsieItems.some((it) => it.id.includes("corsie-esodo-vie-fuga") && it.title.includes("1,80 m")),
+  "Corsie supermercato devono avere verifica vie di esodo ≥ 1,80 m",
+);
+assert.ok(
+  superCorsieItems.some((it) => it.id.includes("scaffali-vendita-corsie")),
+  "Corsie supermercato devono avere verifica scaffalature di vendita e reti anticaduta",
+);
+assert.ok(
+  superCorsieItems.some((it) => it.id.includes("banchi-frigo-murali")),
+  "Corsie supermercato devono avere verifica banchi frigo murali con teletermometri",
+);
+
+// Macelleria supermercato
+const superMacelleriaItems = generateEnvironmentChecklistItems(superMacelleria, "47.11.2");
+assert.ok(
+  superMacelleriaItems.some((it) => it.id.includes("ganciere-guidovie")),
+  "Macelleria supermercato deve avere verifica ganciere carni",
+);
+assert.ok(
+  superMacelleriaItems.some((it) => it.id.includes("lavamani-sterilizzatore")),
+  "Macelleria supermercato deve avere verifica lavamani comando non manuale e sterilizzatore",
+);
+assert.ok(
+  superMacelleriaItems.some((it) => it.id.includes("banco-carni-canalina-cella")),
+  "Macelleria supermercato deve avere verifica banco carni, canaline inox e cella",
+);
+
+// Gastronomia supermercato
+const superGastroItems = generateEnvironmentChecklistItems(superGastronomia, "47.11.2");
+assert.ok(
+  superGastroItems.some((it) => it.id.includes("attrezzature-gastronomia")),
+  "Gastronomia supermercato deve avere verifica affettatrici con protezioni e forni",
+);
+assert.ok(
+  superGastroItems.some((it) => it.id.includes("gastronomia-banco-lavamani")),
+  "Gastronomia supermercato deve avere verifica banco +4°C e lavamani non manuale",
+);
+
+// Panetteria / Bake-off supermercato
+const superPaneItems = generateEnvironmentChecklistItems(superPanetteria, "47.11.2");
+assert.ok(
+  superPaneItems.some((it) => it.id.includes("forno-doratura-bakeoff")),
+  "Panetteria supermercato deve avere verifica forno doratura bake-off e cappa a condensazione",
+);
+assert.ok(
+  superPaneItems.some((it) => it.id.includes("tagliapane-banchi-selfservice")),
+  "Panetteria supermercato deve avere verifica macchina tagliapane con ripari e banchi self-service",
+);
+
+// Ortofrutta supermercato
+const superOrtoItems = generateEnvironmentChecklistItems(superOrtofrutta, "47.11.2");
+assert.ok(
+  superOrtoItems.some((it) => it.id.includes("ortofrutta-mondatura-bilance")),
+  "Ortofrutta supermercato deve avere verifica tavoli mondatura inox e bilance self-service omologate",
+);
+
+// Pescheria supermercato
+const superPesceItems = generateEnvironmentChecklistItems(superPescheria, "47.11.2");
+assert.ok(
+  superPesceItems.some((it) => it.id.includes("banco-pesce-scolo")),
+  "Pescheria supermercato deve avere verifica banco pesce e scolo continuo",
+);
+assert.ok(
+  superPesceItems.some((it) => it.id.includes("sicurezza-pescheria-dpi")),
+  "Pescheria supermercato deve avere verifica pavimento R13 e guanti antitaglio in maglia",
+);
+
+// Magazzino merci supermercato
+const superMagazzinoItems = generateEnvironmentChecklistItems(superMagazzino, "47.11.2");
+assert.ok(
+  superMagazzinoItems.some((it) => it.id.includes("scaffalature-transpallet-scarico")),
+  "Magazzino supermercato deve avere verifica scaffalature porta-pallet medie e portone scarico",
+);
+
+// Celle frigo supermercato
+const superCelleItems = generateEnvironmentChecklistItems(superCelleFrigo, "47.11.2");
+assert.ok(
+  superCelleItems.some((it) => it.id.includes("allarme-uomo-intrappolato")),
+  "Celle frigo supermercato devono avere verifica allarme uomo intrappolato UNI EN 378",
+);
+assert.ok(
+  superCelleItems.some((it) => it.id.includes("teletermometro-registrazione")),
+  "Celle frigo supermercato devono avere verifica teletermometro registrazione continua",
+);
+
+// Compattatore imballaggi supermercato
+const superCompattatoreItems = generateEnvironmentChecklistItems(superCompattatore, "47.11.2");
+assert.ok(
+  superCompattatoreItems.some((it) => it.id.includes("pressa-compattatrice-verticale")),
+  "Compattatore supermercato deve avere verifica pressa compattatrice verticale UNI EN 16500",
+);
+assert.ok(
+  superCompattatoreItems.some((it) => it.id.includes("igiene-area-rifiuti")),
+  "Compattatore supermercato deve avere verifica igiene e lavaggio area rifiuti",
+);
+
+// Casse e Uffici supermercato
+const superCasseItems = generateEnvironmentChecklistItems(superCasseUffici, "47.11.2");
+assert.ok(
+  superCasseItems.some((it) => it.id.includes("barriera-casse-esodo")),
+  "Barriera casse deve avere verifica varchi di esodo ed evacuazione",
+);
+assert.ok(
+  superCasseItems.some((it) => it.id.includes("ergonomia-postazione-cassa")),
+  "Postazioni cassa devono avere verifica ergonomia sedute e poggiapiedi",
+);
+assert.ok(
+  superCasseItems.some((it) => it.id.includes("nastri-motorizzati-casse")),
+  "Banchi cassa devono avere verifica nastri motorizzati con fotocellula e pedale uomo presente",
+);
+
+// Locale tecnico compressori supermercato
+const superTecnicoItems = generateEnvironmentChecklistItems(superTecnico, "47.11.2");
+assert.ok(
+  superTecnicoItems.some((it) => it.id.includes("centrale-frigo-gas-refrigerante")),
+  "Locale tecnico deve avere verifica rilevazione fughe gas refrigerante e ventilazione",
+);
+assert.ok(
+  superTecnicoItems.some((it) => it.id.includes("centrale-frigo-accesso-dpi")),
+  "Locale tecnico deve avere verifica sgancio di emergenza e accesso autorizzato",
+);
+
 console.log("=== TUTTI I TEST Step2AmbientiDiLavoro SUPERATI CON SUCCESSO! ===");

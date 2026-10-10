@@ -750,6 +750,275 @@ export function getStandardEnvironmentsForAteco(atecoCode?: string): WorkEnviron
     ];
   }
 
+  // 0-bis. Supermercato (47.11.2, 47.11.20 - superficie di vendita da 400 a 2.500 mq)
+  if (ateco.startsWith("47112")) {
+    return [
+      {
+        id: "env-super-corsie",
+        key: "super_corsie_area_vendita",
+        name: "Area Vendita / Corsie Supermercato a Libero Servizio",
+        icon: "🛒",
+        category: "sales_office",
+        isDefault: true,
+        surfaceSqM: 900,
+        heightM: 3.8,
+        volumeCuM: 3420,
+        occupantsCount: 12,
+        emergencyExitsCount: 3,
+        windowSurfaceSqM: 20,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("sales_office"),
+          forcedExhaustPresent: true,
+          emergencyLighting: true,
+          emergencyExitsCount: 3,
+          shelvingCertified: true,
+          fireLoadHigh: true,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-super-gastronomia",
+        key: "super_gastronomia_banco",
+        name: "Reparto Gastronomia / Salumeria / Formaggi & Banco Assistito",
+        icon: "🧀",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 35,
+        heightM: 3.0,
+        volumeCuM: 105,
+        occupantsCount: 3,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          forcedExhaustType: "kitchen_hood",
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-super-macelleria",
+        key: "super_macelleria_laboratorio",
+        name: "Reparto Macelleria / Laboratorio Porzionamento Carni & Banco",
+        icon: "🥩",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 40,
+        heightM: 3.0,
+        volumeCuM: 120,
+        occupantsCount: 2,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          forcedExhaustType: "kitchen_hood",
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-super-panetteria",
+        key: "super_panetteria_bakeoff",
+        name: "Reparto Panetteria / Punto Caldo Bake-Off & Confezionati",
+        icon: "🥖",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 30,
+        heightM: 3.2,
+        volumeCuM: 96,
+        occupantsCount: 2,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          forcedExhaustType: "kitchen_hood",
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-super-ortofrutta",
+        key: "super_ortofrutta_mondatura",
+        name: "Reparto Ortofrutta / Esposizione e Mondatura",
+        icon: "🥦",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 45,
+        heightM: 3.2,
+        volumeCuM: 144,
+        occupantsCount: 2,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-super-pescheria",
+        key: "super_pescheria_banco",
+        name: "Reparto Pescheria / Banco Pesce Fresco & Cella",
+        icon: "🐟",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 30,
+        heightM: 3.0,
+        volumeCuM: 90,
+        occupantsCount: 2,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          forcedExhaustType: "kitchen_hood",
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-super-magazzino",
+        key: "super_magazzino_merci",
+        name: "Magazzino Merci & Deposito Scorte con Portone Scarico",
+        icon: "📦",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 350,
+        heightM: 4.5,
+        volumeCuM: 1575,
+        occupantsCount: 4,
+        emergencyExitsCount: 2,
+        windowSurfaceSqM: 10,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          emergencyLighting: true,
+          shelvingCertified: true,
+          fireLoadHigh: true,
+          flooringCondition: "compliant_anti_slip",
+          emergencyExitsCount: 2,
+        },
+      },
+      {
+        id: "env-super-celle-frigo",
+        key: "super_celle_frigo_stoccaggio",
+        name: "Celle Frigorifere Principali di Stoccaggio TN e BT",
+        icon: "❄️",
+        category: "storage",
+        isDefault: true,
+        surfaceSqM: 50,
+        heightM: 3.0,
+        volumeCuM: 150,
+        occupantsCount: 2,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("storage"),
+          aerationType: "insufficient",
+          flooringCondition: "compliant_anti_slip",
+          wallsCondition: "washable_sanitizable_2m",
+          shelvingCertified: true,
+          hasTrappedPersonAlarm: true,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-super-compattatore",
+        key: "super_locale_compattatore",
+        name: "Locale Compattatore Cartone & Stoccaggio Imballaggi",
+        icon: "🗑️",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 30,
+        heightM: 3.2,
+        volumeCuM: 96,
+        occupantsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          fireLoadHigh: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-super-casse-uffici",
+        key: "super_barriera_casse_uffici",
+        name: "Barriera Casse & Ufficio Cassa / Direzione",
+        icon: "🖥️",
+        category: "sales_office",
+        isDefault: true,
+        surfaceSqM: 50,
+        heightM: 3.0,
+        volumeCuM: 150,
+        occupantsCount: 6,
+        windowSurfaceSqM: 8,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("sales_office"),
+          emergencyLighting: true,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-super-spogliatoi",
+        key: "super_spogliatoi_personale",
+        name: "Spogliatoi e Servizi Igienici Personale (Uomini e Donne)",
+        icon: "🚻",
+        category: "changing_rooms",
+        isDefault: true,
+        surfaceSqM: 45,
+        heightM: 2.7,
+        volumeCuM: 121.5,
+        occupantsCount: 12,
+        windowSurfaceSqM: 4,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("changing_rooms"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          forcedExhaustPresent: true,
+          forcedExhaustType: "blind_toilet_fan",
+        },
+      },
+      {
+        id: "env-super-tecnico",
+        key: "super_locale_tecnico_quadri",
+        name: "Locale Tecnico / Quadri Elettrici & Compressori Frigo",
+        icon: "⚙️",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 25,
+        heightM: 3.0,
+        volumeCuM: 75,
+        occupantsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          forcedExhaustPresent: true,
+          emergencyLighting: true,
+          gasLeakDetectorPresent: true,
+        },
+      },
+    ];
+  }
+
   // 1. Ristorazione, HoReCa, Somministrazione alimenti (56.x, 10.x, 11.x, 47.11, 47.2, 55.1)
   if (
     ateco.startsWith("56") ||
@@ -1692,7 +1961,7 @@ export function evaluateEnvironmentCompliance(
     summaryBadges.push({ text: "🔥 Soggetto a CPI (Attività 75 - Officina ≥300mq)", status: "danger" });
   }
 
-  // Attività 69: Esercizi commerciali e vendita con superficie > 400 mq (e oltre 3.000 mq cat. C)
+  // Attività 69: Esercizi commerciali e vendita con superficie ≥ 400 mq (69.1.A: 400-1500 mq, 69.2.B: 1500-3000 mq, 69.3.C: ≥3000 mq)
   if (
     (env.category === "public" ||
       env.category === "sales_office" ||
@@ -1709,14 +1978,22 @@ export function evaluateEnvironmentCompliance(
           "Locale di vendita al dettaglio con superficie lorda accessibile al pubblico > 3.000 m²: soggetta a parere preventivo di conformità, SCIA e sopralluogo con CPI da parte del Comando VVF.",
       };
       summaryBadges.push({ text: "🔥 Soggetto a CPI (Attività 69.C - Ipermercato ≥3.000mq)", status: "danger" });
+    } else if (surface > 1500) {
+      cpiActivityAlert = {
+        code: "Attività 69.2.B (D.P.R. 151/2011)",
+        title: "Supermercato / Vendita > 1.500 m² e ≤ 3.000 m² - Categoria B CPI VVF",
+        description:
+          "Locale commerciale con superficie lorda accessibile al pubblico compresa tra 1.501 e 3.000 m²: soggetto a valutazione del progetto da parte dei VVF e SCIA antincendio con controlli a campione (D.P.R. 151/2011).",
+      };
+      summaryBadges.push({ text: "🔥 Soggetto a CPI (Attività 69.2.B - Supermercato >1.500mq)", status: "danger" });
     } else {
       cpiActivityAlert = {
-        code: "Attività 69 (D.P.R. 151/2011)",
-        title: "Locale di Vendita al Dettaglio ≥ 400 m² - Soggetto a CPI / SCIA VVF",
+        code: "Attività 69.1.A (D.P.R. 151/2011)",
+        title: "Supermercato / Vendita 400-1.500 m² - Categoria A CPI VVF",
         description:
-          "Locale commerciale con superficie lorda accessibile al pubblico pari o superiore a 400 m²: soggetto a controllo VVF.",
+          "Locale commerciale con superficie lorda accessibile al pubblico compresa tra 400 e 1.500 m²: soggetto a presentazione di SCIA antincendio senza obbligo di preventivo esame progetto (D.P.R. 151/2011).",
       };
-      summaryBadges.push({ text: "🔥 Soggetto a CPI (Attività 69 - Vendita ≥400mq)", status: "danger" });
+      summaryBadges.push({ text: "🔥 Soggetto a CPI (Attività 69.1.A - Supermercato 400-1.500mq)", status: "danger" });
     }
   }
 
@@ -1734,7 +2011,7 @@ export function evaluateEnvironmentCompliance(
     summaryBadges.push({ text: "🔥 Alta Capienza (Attività 65 / Esodo Rilevante)", status: "warning" });
   }
 
-  // 6. Regole ad hoc per reparti Ipermercato e impianti specifici
+  // 6. Regole ad hoc per reparti Ipermercato/Supermercato e impianti specifici
   // a) Celle frigorifere: Obbligo dispositivo allarme uomo intrappolato a norma UNI EN 378
   const isColdRoom =
     env.id.includes("celle-frigo") ||
@@ -1752,7 +2029,7 @@ export function evaluateEnvironmentCompliance(
   const isLargeRetailArea =
     env.id.includes("iper-corsie") ||
     env.key.includes("iper_corsie") ||
-    ((env.category === "sales_office" || env.category === "public") && surface >= 1000);
+    ((env.category === "sales_office" || env.category === "public") && surface >= 2500);
   if (isLargeRetailArea) {
     summaryBadges.push({
       text: "🚪 Corsie di esodo principali ≥ 2,40m (D.M. 27/07/2010)",
@@ -1767,10 +2044,34 @@ export function evaluateEnvironmentCompliance(
     }
   }
 
-  // c) Centrale frigorifera: Sensori fughe gas refrigerante e ventilazione meccanica di emergenza
+  // b2) Area Vendita / Corsie Supermercato: Vie di esodo larghe ≥ 1,80m e uscite di emergenza
+  const isSupermarketRetailArea =
+    env.id.includes("super-corsie") ||
+    env.key.includes("super_corsie") ||
+    (!isLargeRetailArea &&
+      (env.category === "sales_office" || env.category === "public") &&
+      surface >= 400 &&
+      surface < 2500);
+  if (isSupermarketRetailArea) {
+    summaryBadges.push({
+      text: "🚪 Corsie di esodo principali ≥ 1,80m (D.M. 27/07/2010)",
+      status: "info",
+    });
+    const exits = env.emergencyExitsCount ?? env.features.emergencyExitsCount ?? 0;
+    if (exits >= 3) {
+      summaryBadges.push({
+        text: `Uscite di emergenza: ${exits} varchi con maniglioni antipanico`,
+        status: "success",
+      });
+    }
+  }
+
+  // c) Centrale frigorifera / Locale tecnico compressori: Sensori fughe gas refrigerante e ventilazione meccanica di emergenza
   const isRefrigerationPlant =
     env.id.includes("centrale-frigo") ||
     env.key.includes("centrale_frigo") ||
+    env.id.includes("super-tecnico") ||
+    env.key.includes("super_tecnico") ||
     !!env.features.gasLeakDetectorPresent;
   if (isRefrigerationPlant) {
     summaryBadges.push({
@@ -2075,6 +2376,21 @@ export function generateEnvironmentChecklistItems(
       suggestedNonConformity:
         "Assenza di comando non manuale (ginocchio/pedale) al lavamani del laboratorio macelleria o sterilizzatore coltelli assente/non funzionante.",
     });
+
+    items.push({
+      id: `${env.id}-banco-carni-canalina-cella`,
+      area: env.name,
+      title: "Banco Carni (+0/+4°C), Canaline di Scolo Inox Sifonate e Cella Carni",
+      question:
+        "Il banco carni garantisce temperatura continua tra 0°C e +4°C, il pavimento dispone di canaline di scolo sifonate con griglie asportabili in acciaio inox, le pareti sono rivestite con materiale lavabile fino ad almeno 2 metri di altezza e la cella carni è dedicata ed igienizzata?",
+      normReference: "Reg. CE 852/2004 All. II Cap. II e Reg. CE 853/2004 All. III",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Canaline di scolo del laboratorio carni prive di griglie inox o con ristagno di residui organici, oppure banco carni con temperatura superiore a +4°C.",
+    });
   }
 
   // b) Reparto Pescheria: Banco ghiaccio a scolo continuo e pavimentazione bagnata R13
@@ -2126,9 +2442,24 @@ export function generateEnvironmentChecklistItems(
       suggestedNonConformity:
         "Affettatrice con dispositivo di protezione lama o carrello manomesso/incompleto, o cappa dei forni colma di residui grassi combustibili.",
     });
+
+    items.push({
+      id: `${env.id}-gastronomia-banco-lavamani`,
+      area: env.name,
+      title: "Banco Gastronomia (+4°C), Pareti Lavabili e Lavamani a Comando Non Manuale",
+      question:
+        "Il banco assistito di gastronomia, salumi e formaggi assicura il mantenimento continuo della temperatura a +4°C rilevabile su display, e il reparto dispone di lavamani a comando non manuale (a ginocchio o pedale) con sapone disinfettante, carta a perdere e pareti lisce lavabili h >= 2 metri?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo I e Capitolo II",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Rubinetteria lavamani del reparto gastronomia azionabile manualmente o banco espositivo formaggi/salumi con temperatura non conforme a +4°C.",
+    });
   }
 
-  // d) Reparto Panetteria / Pasticceria: Impastatrici e polveri farina
+  // d) Reparto Panetteria / Pasticceria / Bake-off: Forni, tagliapane e polveri
   if (env.id.includes("panetteria") || env.key.includes("panetteria")) {
     items.push({
       id: `${env.id}-sicurezza-impastatrici-polveri`,
@@ -2143,6 +2474,54 @@ export function generateEnvironmentChecklistItems(
       categoryTag: "aspirazione",
       suggestedNonConformity:
         "Impastatrice con griglia di protezione bypassata o difettosa, o presenza di depositi diffusi di polveri di farina nell'ambiente.",
+    });
+
+    items.push({
+      id: `${env.id}-forno-doratura-bakeoff`,
+      area: env.name,
+      title: "Forno Doratura Bake-Off, Cappa a Condensazione e Dispositivi Scottature",
+      question:
+        "Il forno di doratura/cottura per prodotti bake-off è provvisto di cappa aspirante o a condensazione dei vapori funzionante, maniglie termoisolanti e sportello con doppio vetro intatto, e gli operatori dispongono di guanti termici DPI certificati (EN 407) contro il rischio scottature?",
+      normReference: "D.Lgs. 81/2008 All. V e VI, Reg. CE 852/2004 All. II",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Forno bake-off con cappa fumi non aspirante o guarnizioni usurate con fuoriuscita vapori caldi, o addetti sprovvisti di guanti di protezione termica idonei.",
+    });
+
+    items.push({
+      id: `${env.id}-tagliapane-banchi-selfservice`,
+      area: env.name,
+      title: "Macchina Tagliapane con Ripari Interbloccati e Banchi Self-Service Pane",
+      question:
+        "La macchina tagliapane è provvista di riparo mobile interbloccato che impedisce il contatto con la lama in movimento (UNI EN 13954), e i banchi di vendita self-service del pane sono provvisti di sportelli richiudibili, pinze in acciaio inox o distributori di guanti monouso per prevenire contaminazioni?",
+      normReference: "Norma UNI EN 13954, D.Lgs. 81/2008 All. V e Reg. CE 852/2004 All. II Cap. IX",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Macchina tagliapane con carter di protezione lama manomesso o banco self-service pane privo di pinze/guanti monouso a disposizione dei clienti.",
+    });
+  }
+
+  // d2) Reparto Ortofrutta: Esposizione, mondatura e bilance self-service
+  if (env.id.includes("ortofrutta") || env.key.includes("ortofrutta")) {
+    items.push({
+      id: `${env.id}-ortofrutta-mondatura-bilance`,
+      area: env.name,
+      title: "Tavoli Mondatura Inox, Lavello Dedicato e Bilance Self-Service Omologate",
+      question:
+        "L'area ortofrutta dispone di tavoli e lavello in acciaio inox dedicati alla mondatura degli ortaggi con flusso idrico potabile, e le bilance per il pubblico sono omologate con dispenser di sacchetti e guanti monouso igienici obbligatori?",
+      normReference: "Reg. CE 852/2004 All. II Cap. II e Cap. IX",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Assenza di guanti monouso igienici per i clienti nell'area ortofrutta a libero servizio o lavello mondatura utilizzato promiscuamente senza sapone e asciugamani a perdere.",
     });
   }
 
@@ -2184,26 +2563,48 @@ export function generateEnvironmentChecklistItems(
     });
   }
 
-  // f) Area Vendita Corsie Ipermercato: Vie di esodo ≥ 2.40m e scaffali di vendita
+  // f) Area Vendita Corsie: Vie di esodo (≥ 2.40m Ipermercato o ≥ 1.80m Supermercato) e scaffali di vendita
   if (
     env.id.includes("corsie") ||
     env.key.includes("corsie") ||
-    (env.category === "sales_office" && (env.surfaceSqM ?? 0) >= 1000)
+    (env.category === "sales_office" && (env.surfaceSqM ?? 0) >= 400)
   ) {
-    items.push({
-      id: `${env.id}-corsie-esodo-vie-fuga`,
-      area: env.name,
-      title: "Larghezza Corsie Principali e Vie di Esodo (≥ 2,40 m)",
-      question:
-        "Le corsie principali di scorrimento dell'ipermercato presentano larghezza utile non inferiore a 2,40 metri (almeno 4 moduli di uscita), sono libere da isole promozionali ingombranti, transpallet o bancali provvisori, e conducono direttamente alle uscite di emergenza con maniglioni antipanico?",
-      normReference: "D.M. 27/07/2010 (Attività commerciali) e D.Lgs. 81/2008 All. IV p.to 1.4",
-      defaultSeverity: 4,
-      defaultSanctionable: true,
-      domain: "safety",
-      categoryTag: "cpi",
-      suggestedNonConformity:
-        "Corsie principali di circolazione e percorsi di esodo ristretti a meno di 2,40m o parzialmente ostruiti da espositori promozionali e merci a terra lungo i percorsi verso le uscite di sicurezza.",
-    });
+    const isSupermarket =
+      env.id.includes("super-corsie") ||
+      env.key.includes("super_corsie") ||
+      ((env.surfaceSqM ?? 0) < 2500);
+
+    if (isSupermarket) {
+      items.push({
+        id: `${env.id}-corsie-esodo-vie-fuga`,
+        area: env.name,
+        title: "Larghezza Corsie Principali e Vie di Esodo (≥ 1,80 m)",
+        question:
+          "Le corsie principali di scorrimento del supermercato presentano larghezza utile non inferiore a 1,80 metri (almeno 3 moduli di passaggio a norma D.M. 27/07/2010), sono libere da isole promozionali ingombranti, transpallet o bancali provvisori, e conducono direttamente alle uscite di emergenza con maniglioni antipanico?",
+        normReference: "D.M. 27/07/2010 (Attività commerciali) e D.Lgs. 81/2008 All. IV p.to 1.4",
+        defaultSeverity: 4,
+        defaultSanctionable: true,
+        domain: "safety",
+        categoryTag: "cpi",
+        suggestedNonConformity:
+          "Corsie principali di circolazione del supermercato con larghezza inferiore a 1,80m o parzialmente ostruite da espositori promozionali e merci a terra lungo i percorsi verso le uscite di sicurezza.",
+      });
+    } else {
+      items.push({
+        id: `${env.id}-corsie-esodo-vie-fuga`,
+        area: env.name,
+        title: "Larghezza Corsie Principali e Vie di Esodo (≥ 2,40 m)",
+        question:
+          "Le corsie principali di scorrimento dell'ipermercato presentano larghezza utile non inferiore a 2,40 metri (almeno 4 moduli di uscita), sono libere da isole promozionali ingombranti, transpallet o bancali provvisori, e conducono direttamente alle uscite di emergenza con maniglioni antipanico?",
+        normReference: "D.M. 27/07/2010 (Attività commerciali) e D.Lgs. 81/2008 All. IV p.to 1.4",
+        defaultSeverity: 4,
+        defaultSanctionable: true,
+        domain: "safety",
+        categoryTag: "cpi",
+        suggestedNonConformity:
+          "Corsie principali di circolazione e percorsi di esodo ristretti a meno di 2,40m o parzialmente ostruiti da espositori promozionali e merci a terra lungo i percorsi verso le uscite di sicurezza.",
+      });
+    }
 
     items.push({
       id: `${env.id}-scaffali-vendita-corsie`,
@@ -2219,9 +2620,24 @@ export function generateEnvironmentChecklistItems(
       suggestedNonConformity:
         "Scaffalature di vendita aperte al pubblico con stoccaggio merci ad altezza superiore a 2 metri prive di rete posteriore anticaduta o prive di cartelli di portata massima ammissibile.",
     });
+
+    items.push({
+      id: `${env.id}-banchi-frigo-murali`,
+      area: env.name,
+      title: "Banchi Frigoriferi Murali, Vasche Surgelati e Teletermometri",
+      question:
+        "I banchi frigoriferi murali verticali e le vasche surgelati dell'area vendita a libero servizio sono provvisti di display termometrici tarati visibili, sonde di temperatura con teletermometri continui (+4°C freschi / -18°C surgelati), allarmi di deviazione termica e chiusure notturne o ante a vetro per la catena del freddo?",
+      normReference: "Reg. CE 852/2004 All. II Cap. IX e Reg. CE 37/2005",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Banchi frigoriferi murali a libero servizio con display termometrici non funzionanti o temperature superiori ai limiti HACCP con rischio interruzione catena del freddo.",
+    });
   }
 
-  // g) Barriera Casse & Uffici: Varchi evacuazione ed ergonomia
+  // g) Barriera Casse & Uffici: Varchi evacuazione, ergonomia e nastri motorizzati
   if (env.id.includes("casse") || env.key.includes("casse")) {
     items.push({
       id: `${env.id}-barriera-casse-esodo`,
@@ -2252,38 +2668,59 @@ export function generateEnvironmentChecklistItems(
       suggestedNonConformity:
         "Postazioni di cassa prive di pedane poggiapiedi regolabili o esposte a correnti d'aria fredda continue causate dalla vicinanza delle porte automatiche d'ingresso.",
     });
+
+    items.push({
+      id: `${env.id}-nastri-motorizzati-casse`,
+      area: env.name,
+      title: "Sicurezza Nastri Motorizzati Casse (Fotocellula, Pedale Uomo Presente e Ripari)",
+      question:
+        "I banchi cassa a nastro trasportatore motorizzato sono dotati di fotocellula di arresto automatico a fine corsa, comando di avanzamento a pedale uomo presente a bassa tensione per l'azionamento, carter di protezione anti-trascinamento sui rulli di rinvio e pulsante di arresto rapido conforme alle norme di sicurezza macchine?",
+      normReference: "D.Lgs. 81/2008 All. V e All. VI, Direttiva 2006/42/CE e norma UNI EN 619",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Nastro motorizzato cassa privo di fotocellula di arresto all'estremità o carter di protezione rulli rimosso con pericolo di trascinamento e schiacciamento dita.",
+    });
   }
 
-  // h) Locale Tecnico Centrale Frigorifera: Rilevatori fughe gas e ventilazione d'emergenza
-  if (env.id.includes("centrale-frigo") || env.key.includes("centrale_frigo")) {
+  // h) Locale Tecnico / Centrale Frigorifera: Rilevatori fughe gas, sgancio emergenza e ventilazione
+  if (
+    env.id.includes("centrale-frigo") ||
+    env.key.includes("centrale_frigo") ||
+    env.id.includes("tecnico") ||
+    env.key.includes("tecnico") ||
+    !!env.features.gasLeakDetectorPresent
+  ) {
     items.push({
       id: `${env.id}-centrale-frigo-gas-refrigerante`,
       area: env.name,
       title: "Rilevazione Gas Refrigerante e Ventilazione Meccanica Emergenza (UNI EN 378)",
       question:
-        "Il locale della centrale frigorifera è dotato di impianto fisso per la rilevazione continua di perdite di gas refrigerante (CO2 o freon) con segnalazione ottico-acustica esterna e attivazione automatica della ventilazione di emergenza ad alta portata?",
+        "Il locale della centrale frigorifera o vano compressori è dotato di impianto o sensori per la rilevazione continua di perdite di gas refrigerante con segnalazione ottico-acustica esterna e ventilazione di emergenza ad alta portata?",
       normReference: "Norma UNI EN 378-3, D.Lgs. 81/2008 Titolo IX e Reg. UE 2024/573",
       defaultSeverity: 4,
       defaultSanctionable: true,
       domain: "safety",
       categoryTag: "aspirazione",
       suggestedNonConformity:
-        "Centrale frigorifera sprovvista di impianto fisso di rilevamento fughe gas refrigerante con allarme ottico-acustico esterno o ventilazione d'emergenza non funzionante.",
+        "Centrale frigorifera o vano compressori sprovvisto di impianto di rilevamento fughe gas refrigerante con allarme ottico-acustico esterno o ventilazione d'emergenza non funzionante.",
     });
 
     items.push({
       id: `${env.id}-centrale-frigo-accesso-dpi`,
       area: env.name,
-      title: "Accesso Riservato Personale Autorizzato e Schede di Emergenza Gas",
+      title: "Accesso Riservato Personale Autorizzato, Sgancio Emergenza e Schede Gas",
       question:
-        "La porta di accesso alla centrale frigorifera è tenuta chiusa a chiave con cartelli di divieto d'accesso ai non autorizzati, e all'esterno sono esposte le procedure di emergenza per rilascio gas refrigerante e i DPI specifici?",
-      normReference: "D.Lgs. 81/2008 art. 75-77 e Allegato IV punto 1.1",
+        "La porta di accesso al locale tecnico è tenuta chiusa a chiave con cartelli di divieto d'accesso ai non autorizzati, il quadro elettrico generale dispone di pulsante di sgancio d'emergenza accessibile e all'esterno sono esposte le procedure di emergenza gas e DPI specifici?",
+      normReference: "D.Lgs. 81/2008 art. 75-77 e Allegato IV punto 1.1, CEI 64-8",
       defaultSeverity: 3,
       defaultSanctionable: true,
       domain: "safety",
       categoryTag: "dimensionale",
       suggestedNonConformity:
-        "Centrale frigorifera con porta liberamente accessibile a personale non addestrato o priva delle procedure di emergenza per rilascio accidentale gas refrigerante.",
+        "Locale tecnico con porta liberamente accessibile a personale non addestrato, quadro elettrico con sgancio ostruito o privo delle procedure di emergenza per rilascio accidentale gas refrigerante.",
     });
   }
 
@@ -2292,16 +2729,31 @@ export function generateEnvironmentChecklistItems(
     items.push({
       id: `${env.id}-compattatori-sicurezza-macchine`,
       area: env.name,
-      title: "Sicurezza Macchine Presse Compattatrici (Direttiva 2006/42/CE)",
+      title: "Sicurezza Macchine Presse Compattatrici (Direttiva 2006/42/CE e UNI EN 16500)",
       question:
-        "Le presse compattatrici per imballaggi cartone e plastica dispongono di marcatura CE, pulsanti di arresto d'emergenza a fungo ben visibili e ripristinabili, interblocchi di sicurezza sulle tramogge di carico che impediscono l'avvio con sportello aperto (UNI EN 16252)?",
-      normReference: "D.Lgs. 81/2008 All. V e norma UNI EN 16252",
+        "Le presse compattatrici per imballaggi cartone e plastica dispongono di marcatura CE, conformità UNI EN 16500 (per compattatrici verticali) o UNI EN 16252, pulsanti di arresto d'emergenza a fungo ben visibili e ripristinabili, interblocchi di sicurezza sulle tramogge di carico che impediscono l'avvio con sportello aperto?",
+      normReference: "D.Lgs. 81/2008 All. V, norma UNI EN 16500 e UNI EN 16252",
       defaultSeverity: 4,
       defaultSanctionable: true,
       domain: "safety",
       categoryTag: "dimensionale",
       suggestedNonConformity:
         "Pressa compattatrice con dispositivi di sicurezza bypassati, assenza di arresto d'emergenza a fungo o personale non specificamente addestrato all'uso (art. 73 D.Lgs. 81/08).",
+    });
+
+    items.push({
+      id: `${env.id}-pressa-compattatrice-verticale`,
+      area: env.name,
+      title: "Pressa Compattatrice Verticale Cartone (UNI EN 16500) e Arresto a Fungo",
+      question:
+        "La pressa compattatrice verticale per cartone e imballaggi è provvista di marcatura CE con certificazione UNI EN 16500, sportello di caricamento con interblocco elettromeccanico di blocco ciclo, arresto di emergenza a fungo ben accessibile e istruzioni d'uso esposte?",
+      normReference: "Norma UNI EN 16500 e D.Lgs. 81/2008 art. 70-71 e All. V",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Pressa compattatrice verticale con interblocco sportello disattivato con funzionamento a vano aperto o pulsante di arresto d'emergenza a fungo non funzionante.",
     });
 
     items.push({
@@ -2320,7 +2772,7 @@ export function generateEnvironmentChecklistItems(
     });
   }
 
-  // j) Magazzino Centrale / Baie di Carico
+  // j) Magazzino Merci / Baie di Carico
   if (env.id.includes("magazzino") && (env.surfaceSqM ?? 0) >= 500) {
     items.push({
       id: `${env.id}-baie-carico-banchine`,
@@ -2335,6 +2787,24 @@ export function generateEnvironmentChecklistItems(
       categoryTag: "arredi_scaffali",
       suggestedNonConformity:
         "Baie di carico prive di sistema di blocco ruote per autocarri durante le manovre di carico/scarico con transpallet/carrello elevatore, o pedana con dislivello pericoloso non segnalato.",
+    });
+  }
+
+  // j2) Magazzino Merci: Scaffalature porta-pallet medie e portone scarico merci
+  if (env.id.includes("magazzino") || env.key.includes("magazzino")) {
+    items.push({
+      id: `${env.id}-scaffalature-transpallet-scarico`,
+      area: env.name,
+      title: "Scaffalature Porta-Pallet Medie (UNI EN 15635), Corsie e Portone Scarico",
+      question:
+        "Le scaffalature porta-pallet (fino a 4m di altezza) presentano cartelli di portata massima ammissibile (UNI EN 15635), le corsie per stoccatori e transpallet risultano sgombre con percorsi pedonali definiti, e il portone di scarico merci autocarri è provvisto di dispositivi di sicurezza contro la caduta accidentale (paracadute funi/molle)?",
+      normReference: "D.Lgs. 81/2008 art. 71, All. IV p.to 1.4 e All. V p.to 1.8, norma UNI EN 15635",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Scaffalature porta-pallet del magazzino prive di cartelli di portata per campata o portone carraio di scarico merci privo di paracadute di sicurezza anticaduta in caso di rottura organi di sospensione.",
     });
   }
 
