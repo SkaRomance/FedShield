@@ -144,6 +144,24 @@ export const TRAINING_REQUIREMENTS_LIBRARY: Record<string, MachineTrainingRequir
     requiresPatentinoAccordoSR: false,
     targetRoleDescription: "Lavoratori che utilizzano attrezzature o macchinari aziendali",
   },
+  macchine_bar_vapore: {
+    courseCode: "FORMAZ_MACCHINE_BAR_VAPORE",
+    courseTitle: "Addestramento all'Uso Sicuro di Macchine Espresso a Vapore e Attrezzature Bar",
+    normReference: "D.Lgs. 81/2008 art. 71 c. 7 e art. 73 c. 4; D.Lgs. 26/2016 (PED)",
+    minHours: 4,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Baristi, barman e operatori di banco caffetteria addetti all'uso di macchine per caffè a vapore",
+  },
+  bombole_gas_compressi: {
+    courseCode: "FORMAZ_BOMBOLE_GAS_COMPRESSI",
+    courseTitle: "Formazione e Addestramento per la Movimentazione e Uso in Sicurezza di Bombole di Gas Compressi (CO2/Azoto)",
+    normReference: "D.Lgs. 81/2008 art. 71 c. 7, art. 73 c. 4 e Titolo XI",
+    minHours: 4,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Baristi, spillatori e personale addetto alla sostituzione e gestione bombole CO2/azoto",
+  },
 };
 
 // -------------------------------------------------------------
@@ -4480,6 +4498,727 @@ export const SECTOR_MACHINERY_CATALOGS: SectorMachineCatalog[] = [
     ],
   },
 
+  // 1-quater. BAR, CAFFETTERIA, SNACK BAR, COCKTAIL BAR E BIRRERIA
+  // ATECO 56.30.00, 56.30.0, 56.30, 56.3 (Bar, Caffetteria, Snack Bar, Cocktail Bar, Wine Bar, Birreria e Tavola Fredda)
+  {
+    sectorKey: "bar_caffetteria",
+    sectorLabel: "Bar, Caffetteria, Snack Bar, Cocktail Bar e Birreria",
+    atecoPrefixes: ["56.30.00", "56.30.0", "56.30", "56.3"],
+    machines: [
+      // 1. MACCHINA PER CAFFÈ ESPRESSO (env-bar-banco-caffetteria)
+      {
+        machineKey: "macchina_caffe_bar",
+        name: "Macchina per Caffè Espresso Professionale a 2 o 3 Gruppi",
+        type: "Macchina Termobarica a Vapore / Pressione per Caffè Espresso",
+        suggestedManufacturer: "La Marzocco / Faema / Rancilio",
+        suggestedModel: "Linea PB / Faema E71 / Rancilio Classe 9",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_bar_vapore,
+        safetyChecks: [
+          {
+            code: "MACCHINA_CAFFE_CALDAIA_PED_VALVOLA_SOVRAPRESSIONE",
+            title: "Caldaia Certificata PED (D.Lgs. 26/2016) e Valvola di Sicurezza Sovrapressione",
+            question: "La caldaia a vapore/acqua calda della macchina espresso è costruita e collaudata a norma PED (D.Lgs. 26/2016), provvista di valvola di sicurezza meccanica contro le sovrapressioni con scarico convogliato e priva di trafilamenti?",
+            normReference: "D.Lgs. 26/2016 (Direttiva PED 2014/68/UE); D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "MACCHINA_CAFFE_LANCIA_VAPORE_COOL_TOUCH_ANTIUSTIONE",
+            title: "Lancia Vapore Cool-Touch Termoisolata Anti-Scottatura",
+            question: "Le lance vapore per montare il latte sono dotate di isolamento termico interno tipo Cool-Touch o impugnatura atermica in elastomero siliconico per prevenire ustioni e scottature accidentali dell'operatore durante l'uso continuo?",
+            normReference: "D.Lgs. 81/2008 art. 71 e All. V p. 9; CEI EN 60335-2-75",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "MACCHINA_CAFFE_MANOMETRI_PRESSIONE_CERTIFICATI",
+            title: "Manometri di Controllo Pressione Caldaia ed Erogazione Tarati e Funzionanti",
+            question: "I manometri analogici o digitali di controllo pressione in caldaia (1.0-1.5 bar) e pressione di spinta della pompa rotativa (8-9 bar) sono integri, perfettamente visibili e tarati con segnalazione delle zone di sovrapressione critica?",
+            normReference: "D.Lgs. 81/2008 art. 71; CEI EN 60335-2-75",
+            defaultSeverity: 4,
+            defaultSanctionable: false,
+          },
+          {
+            code: "MACCHINA_CAFFE_VALVOLA_ANTISUZIONE_ROMPIVUOTO",
+            title: "Valvola Rompivuoto Anti-Depressione e Anti-Riflusso Latte",
+            question: "Le lance vapore e la caldaia montano valvole anti-vuoto (anti-suzione) perfettamente pulite ed efficienti per impedire la risalita del latte all'interno del circuito pressurizzato della caldaia al termine dell'erogazione?",
+            normReference: "Reg. CE 852/2004 All. II cap. V; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "MACCHINA_CAFFE_SCARICO_CONVOGLIATO_INTERRUZIONE_ARIA",
+            title: "Vaschetta Raccogligocce e Scarico Idrico con Interruzione d'Aria (UNI EN 1717)",
+            question: "La vaschetta raccogligocce inox d'appoggio tazze è dotata di scarico continuo convogliato a sifone aperto con interruzione d'aria per prevenire ristagni maleodoranti e riflussi dall'impianto fognario?",
+            normReference: "UNI EN 1717; Reg. CE 852/2004",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 2. MACINADOSATORE ELETTRONICO ISTANTANEO (env-bar-banco-caffetteria)
+      {
+        machineKey: "macinadosatore_caffe_ondemand",
+        name: "Macinadosatore Elettronico Istantaneo On-Demand per Caffè",
+        type: "Macinatore Elettrico con Regolazione Micrometrica Macine",
+        suggestedManufacturer: "Mazzer / Eureka / Fiorenzato",
+        suggestedModel: "Mazzer Kony S / Eureka Olympus / Fiorenzato F64",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "MACINADOSATORE_CAMPANA_MOCA_MICROINTERRUTTORE",
+            title: "Campana Grani Certificata MOCA (Reg. CE 1935/2004) e Microinterruttore di Blocco",
+            question: "La campana dei grani di caffè è certificata MOCA (Reg. CE 1935/2004) in materiale atossico antiurto ed è provvista di microinterruttore di sicurezza che arresta il motore impedendo l'avvio a campana rimossa o durante la pulizia delle macine?",
+            normReference: "Reg. CE 1935/2004; UNI EN 12852; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "MACINADOSATORE_BATTIFILTRO_FONOASSORBENTE_RUMORE",
+            title: "Cassetto Battifiltro Fonoassorbente per Abbattimento Rumore Impulsivo",
+            question: "Il cassetto o cilindro battifiltro per i fondi di caffè è provvisto di barra rivestita in gomma siliconica ammortizzata fonoassorbente e guarnizioni acustiche per abbattere l'esposizione al rumore impulsivo (D.Lgs. 81/2008 Titolo VIII Capo II)?",
+            normReference: "D.Lgs. 81/2008 Titolo VIII Capo II (art. 187-198); UNI EN ISO 11202",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "MACINADOSATORE_REGOLAZIONE_MICROMETRICA_BLOCCO",
+            title: "Regolazione Micrometrica con Fermo Meccanico e Protezione Sovraccarico",
+            question: "La ghiera di regolazione micrometrica delle macine piane/coniche è dotata di pulsante/fermo meccanico di blocco e salvamotore termico magneto-termico contro surriscaldamenti anomali o blocco accidentale da corpi estranei?",
+            normReference: "D.Lgs. 81/2008 art. 71; CEI EN 60335-2-64",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 3. LAVABICCHIERI PROFESSIONALE SOTTOBANCO (env-bar-banco-caffetteria)
+      {
+        machineKey: "lavabicchieri_bar_sottobanco",
+        name: "Lavastoviglie / Lavabicchieri Professionale Sottobanco con Risciacquo 85°C",
+        type: "Lavabicchieri Sottobanco con Pompa di Scarico e Dispositivo Break Tank",
+        suggestedManufacturer: "Winterhalter / Meiko / Comenda",
+        suggestedModel: "Winterhalter UC-S / Meiko M-iClean / Comenda",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "LAVABICCHIERI_RISCIACQUO_85C_HACCP_DIN10511",
+            title: "Risciacquo Igienico ad Alta Temperatura 85°C Conforme HACCP",
+            question: "La lavabicchieri garantisce durante la fase di risciacquo finale una temperatura dell'acqua di almeno 85°C per un tempo sufficiente ad assicurare la sanificazione termica e igienizzazione dei bicchieri e tazzine a norma HACCP e DIN 10511?",
+            normReference: "Reg. CE 852/2004 All. II cap. V; DIN 10511; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVABICCHIERI_DISPOSITIVO_BREAK_TANK_UNI1717",
+            title: "Dispositivo Anti-Reflusso Idrico a Interruzione d'Aria Break Tank (UNI EN 1717)",
+            question: "La macchina è provvista di dispositivo di non ritorno idrico Break Tank con interruzione d'aria di tipo AA/AB conforme a UNI EN 1717 per impedire qualsiasi riflusso o contaminazione dell'acqua potabile di rete con acque di lavaggio?",
+            normReference: "UNI EN 1717; D.Lgs. 18/2023; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVABICCHIERI_DOSATORI_PERISTALTICI_CIRCUITO_CHIUSO",
+            title: "Dosatori Automatici Peristaltici Detergente e Brillantante a Circuito Chiuso",
+            question: "I dosatori di detergente caustico e brillantante sono di tipo peristaltico automatico temporizzato con tubicini di pescaggio a circuito chiuso per evitare travasi manuali e rischio chimico di contatto cutaneo (D.Lgs. 81/08 Titolo IX)?",
+            normReference: "D.Lgs. 81/2008 art. 71 e art. 223-225; Reg. CE 1272/2008 (CLP)",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVABICCHIERI_MICRO_ARRESTO_CICLO_APERTURA",
+            title: "Microinterruttore di Sicurezza Arresto Ciclo all'Apertura Porta",
+            question: "L'apertura della porta o cappotta durante la fase di lavaggio provoca l'arresto immediato del ciclo e delle pompe di lavaggio tramite microinterruttore di sicurezza, evitando schizzi di acqua bollente o detergenti sull'operatore?",
+            normReference: "UNI EN 60335-2-58; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 4. FABBRICATORE DI GHIACCIO A CUBETTI (env-bar-banco-caffetteria)
+      {
+        machineKey: "fabbricatore_ghiaccio_bar",
+        name: "Fabbricatore di Ghiaccio a Cubetti Cavi/Pieni per Cocktail e Soft Drink",
+        type: "Produttore Elettrico Automatico di Ghiaccio Alimentare",
+        suggestedManufacturer: "Brema / Icematic / Scotsman",
+        suggestedModel: "Brema CB 425 / Icematic CS40",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "FABBRICATORE_GHIACCIO_CIRCUITO_ERMETICO_R290",
+            title: "Circuito Frigorifero Ermetico con Gas Naturale Ecologico R290 (UNI EN 378)",
+            question: "Il circuito di refrigerazione dell'evaporatore a palette o spruzzatori è ermeticamente sigillato, conforme alla norma UNI EN 378 ed impiega gas refrigerante ecologico a basso GWP (propano R290)?",
+            normReference: "UNI EN 378-1/2; CEI EN 60335-2-24; Reg. UE 517/2014",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FABBRICATORE_GHIACCIO_MATERIALI_INTERNI_MOCA",
+            title: "Vasca di Contenimento e Materiali a Contatto MOCA (Reg. CE 1935/2004)",
+            question: "L'interno della vasca di deposito, la portella basculante isolata e la paletta di prelievo sono realizzati in materiali atossici certificati MOCA conformi al Reg. CE 1935/2004, con paletta riposta in supporto dedicato sanificato?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004 All. II cap. V; D.Lgs. 29/2017",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FABBRICATORE_GHIACCIO_SCARICO_INTERRUZIONE_ARIA",
+            title: "Scarico Acque con Interruzione d'Aria Anti-Reflusso Fognario (UNI EN 1717)",
+            question: "Il condotto di scarico dell'acqua di scarto e fusione del serbatoio è dotato di disconnessione idraulica a battente aperto / interruzione d'aria conforme a UNI EN 1717 per impedire risalite microbiologiche o fognarie nel ghiaccio?",
+            normReference: "UNI EN 1717; Reg. CE 852/2004",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FABBRICATORE_GHIACCIO_SANIFICAZIONE_PERIODICA_ANTICALCARE",
+            title: "Protocollo di Sanificazione Periodica Anticalcare e Disinfezione HACCP",
+            question: "Viene effettuata e registrata regolarmente sul piano di autocontrollo HACCP la sanificazione chimica antibatterica con disincrostazione anticalcare periodica dell'evaporatore, ugelli e vasca di contenimento ghiaccio?",
+            normReference: "Reg. CE 852/2004; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 5. COCKTAIL STATION (env-bar-cocktail-station)
+      {
+        machineKey: "cocktail_station_bar",
+        name: "Cocktail Station Completa in Acciaio Inox con Vasca Ghiaccio Coibentata",
+        type: "Modulo Operativo Ergonomico Barman / Mixology in Acciaio Inox",
+        suggestedManufacturer: "RG Mania / Station Bar / Forcar",
+        suggestedModel: "RG Mania / Station Bar / Forcar",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "COCKTAIL_STATION_VASCA_COIBENTATA_SCARICO_DIRETTO",
+            title: "Vasca Ghiaccio Coibentata in Inox con Scarico Indipendente e Separatore",
+            question: "La vasca centrale per ghiaccio cubetti e tritato è coibentata con isolamento termico privo di CFC, dotata di piletta di scarico continuo dell'acqua di fusione e separatore grigliato asportabile in acciaio inox AISI 304 MOCA?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "COCKTAIL_STATION_SPEED_RAIL_ANTICADUTA",
+            title: "Speed-Rail Frontale Portabottiglie Sagomato con Bordo Anticaduta e Antitaglio",
+            question: "Lo speed-rail portabottiglie per speed pourer presenta bordi antitaglio arrotondati e spondina di contenimento dimensionata per prevenire cadute accidentali e rotture di bottiglie in vetro con rischio lesioni da taglio?",
+            normReference: "D.Lgs. 81/2008 art. 71 e All. V p. 6; UNI EN ISO 14120",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "COCKTAIL_STATION_VASCHETTE_MOCA_COPERCHI",
+            title: "Vaschette Guarnizioni/Frutta in Policarbonato MOCA con Coperchio Ermetico",
+            question: "Le vaschette per frutta e guarnizioni cocktail (condiment holder) sono certificate MOCA Reg. CE 1935/2004, dotate di coperchio trasparente a chiusura antipolvere per proteggere gli alimenti da contaminazioni crociate ed insetti?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004 All. II cap. IX",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "COCKTAIL_STATION_LAVELLO_BAGNAGHIACCIO_UNI1717",
+            title: "Piano Lavello con Bagnaghiaccio Pressurizzato e Valvola di Non Ritorno (UNI EN 1717)",
+            question: "Il dispositivo bagnaghiaccio / lava-shaker (pitcher rinser) a pressione è collegato all'impianto idrico con interruttore di disconnessione idraulica e valvola di non ritorno conforme a UNI EN 1717?",
+            normReference: "UNI EN 1717; D.Lgs. 18/2023; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 6. BLENDER / FRULLATORE PROFESSIONALE INSONORIZZATO (env-bar-cocktail-station)
+      {
+        machineKey: "blender_frullatore_cocktail",
+        name: "Frullatore / Blender Professionale Insonorizzato per Frappè e Cocktail",
+        type: "Blender Elettrico Professionale per Mixology con Calotta Insonorizzata",
+        suggestedManufacturer: "Vitamix / Hamilton Beach / Blendtec",
+        suggestedModel: "Vitamix The Quiet One / Hamilton Beach Eclipse",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "BLENDER_CAMPANA_FONOASSORBENTE_MICRO_UNI12852",
+            title: "Campana Fonoassorbente con Microinterruttore di Sicurezza UNI EN 12852",
+            question: "La calotta insonorizzante di protezione acustica è dotata di microinterruttore di sicurezza a norma UNI EN 12852 che disattiva immediatamente il motore al sollevamento, impedendo l'accesso al bicchiere con le lame in movimento?",
+            normReference: "UNI EN 12852; CEI EN 60335-2-64; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BLENDER_BICCHIERE_MOCA_BPA_FREE_ANTIURTO",
+            title: "Bicchiere Graduato in Copoliestere MOCA BPA-Free Antiurto",
+            question: "La caraffa graduata è realizzata in copoliestere antiurto per alimenti certificata MOCA priva di bisfenolo A (BPA-free) resistente alle sollecitazioni del ghiaccio senza rischio di fessurazioni o scheggiature pericolose?",
+            normReference: "Reg. CE 1935/2004; D.Lgs. 29/2017; Reg. UE 10/2011",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BLENDER_LAME_INOX_PROTEZIONE_SOVRACCARICO",
+            title: "Gruppo Lame Inox ad Alta Resistenza e Protezione Termica Sovraccarico",
+            question: "Il gruppo lame rotanti è in acciaio inossidabile temperato ad alta durezza, con innesto a giunto scanalato protetto e circuito provvisto di salvavita termico a riarmo contro sovraccarichi o blocco meccanico?",
+            normReference: "D.Lgs. 81/2008 art. 71; CEI EN 60335-1",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 7. TRITAGHIACCIO PROFESSIONALE (env-bar-cocktail-station)
+      {
+        machineKey: "tritaghiaccio_professionale_bar",
+        name: "Tritaghiaccio Professionale Elettrico per Granite e Cocktail Pestrati",
+        type: "Tritaghiaccio Elettrico Professionale per Bar con Tramoggia Protetta",
+        suggestedManufacturer: "Sirman / Ceado / Santos",
+        suggestedModel: "Sirman Nordkapp / Ceado V90",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "TRITAGHIACCIO_LEVA_PRESSORE_MICRO_UNI12852",
+            title: "Bocca di Carico con Leva Pressore Interbloccata a Microinterruttore UNI EN 12852",
+            question: "La bocca di carico del ghiaccio è munita di leva pressore interbloccata a microinterruttore di sicurezza conforme a UNI EN 12852 che arresta istantaneamente il motore al sollevamento per prevenire il contatto delle dita con il disco di taglio?",
+            normReference: "UNI EN 12852; D.Lgs. 81/2008 All. V p. 6; CEI EN 60335-2-64",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "TRITAGHIACCIO_DISCO_LAME_INOX_ROMPIGHIACCIO",
+            title: "Disco Rompighiaccio e Lame in Acciaio Inox MOCA Inaccessibili",
+            question: "I dischi frantumatori e le lame rompighiaccio sono in acciaio inossidabile alimentare certificato MOCA, strutturalmente inaccessibili durante il normale funzionamento e protetti da carter ermetico?",
+            normReference: "Reg. CE 1935/2004; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "TRITAGHIACCIO_CASSETTO_RACCOGLITORE_MOCA_SENSORE",
+            title: "Cassetto Raccoglighiaccio Trasparente MOCA con Sensore di Presenza",
+            question: "Il cassetto raccoglitore del ghiaccio tritato è in policarbonato trasparente MOCA e dispone di sensore o microinterruttore che impedisce il funzionamento a cassetto aperto o estratto?",
+            normReference: "UNI EN 12852; Reg. CE 1935/2004",
+            defaultSeverity: 4,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 8. SPILLATORE BIRRA E BEVANDE (env-bar-spillatura-co2)
+      {
+        machineKey: "spillatore_birra_bevande",
+        name: "Impianto di Spillatura Birra e Bevande a Più Vie con Serpentina Sottobanco",
+        type: "Impianto Professionale di Erogazione Bevande con Raffreddatore Sottobanco",
+        suggestedManufacturer: "Celli Group / Vin Service / Cornelius",
+        suggestedModel: "Celli Group / Vin Service",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "SPILLATORE_RUBINETTI_INOX_MOCA_COMPENSATORE",
+            title: "Rubinetti e Colonne in Acciaio Inox MOCA con Compensatore di Flusso",
+            question: "I rubinetti di spillatura, le colonne e le cannucce di mandata sono realizzati in acciaio inox o leghe certificate MOCA (Reg. CE 1935/2004) provvisti di compensatore di flusso regolabile per impedire schizzi e sprechi?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004; D.Lgs. 29/2017",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "SPILLATORE_SERPENTINA_BANCO_GHIACCIO_ISOLATA",
+            title: "Serpentina Inox di Raffreddamento a Banco di Ghiaccio Termoisolata",
+            question: "L'unità sottobanco presenta serpentine in acciaio inox immerse in vasca con banco di ghiaccio coibentata, con termostato di sicurezza e agitazione automatica dell'acqua di refrigerazione?",
+            normReference: "UNI EN 378; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "SPILLATORE_VASCHETTA_LAVABICCHIERI_UNI1717",
+            title: "Vaschetta Raccogligocce Inox con Lavabicchieri a Disconnessione Idrica (UNI EN 1717)",
+            question: "La vaschetta raccogligocce d'appoggio bicchieri è dotata di scarico convogliato e dispositivo lavabicchieri a pressione (rinser) protetto da valvola di non ritorno conforme a UNI EN 1717 per evitare ritorni idraulici?",
+            normReference: "UNI EN 1717; D.Lgs. 18/2023",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SPILLATORE_SANIFICAZIONE_CHIMICA_LINEE_BIRRA",
+            title: "Protocollo di Sanificazione Chimica Periodica Linee Birra (HACCP)",
+            question: "Le linee di spillatura della birra e delle bevande vengono sottoposte regolarmente a flussaggio, pulizia chimica alcalina e disinfezione programmata con acido e alcalino conforme al piano HACCP e annotate su apposito registro?",
+            normReference: "Reg. CE 852/2004; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 9. BOMBOLE CO2 ED AZOTO SPILLATURA (env-bar-spillatura-co2)
+      {
+        machineKey: "bombole_co2_azoto_spillatura",
+        name: "Gruppo Bombole CO2 ed Azoto Alimentare (E290/E941) con Rilevatore Gas",
+        type: "Impianto Bombole Gas Compresso Alimentare con Riduttori di Pressione",
+        suggestedManufacturer: "Messer / Rivoira / SIAD / Nippon Gases",
+        suggestedModel: "Messer E290 / SIAD Carboazoto",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.bombole_gas_compressi,
+        safetyChecks: [
+          {
+            code: "BOMBOLE_CO2_CATENELLE_ANTICADUTA_PARETE",
+            title: "Bombole Vincolate a Parete con Catenelle Anticaduta Verticali (D.Lgs. 81/08 Tit. XI)",
+            question: "Le bombole di anidride carbonica (CO2 E290) e azoto (N2 E941) sia in esercizio che di scorta sono saldamente ancorate a parete o carrello tramite robuste catenelle metalliche o collari a 2/3 dell'altezza per prevenirne la caduta?",
+            normReference: "D.Lgs. 81/2008 art. 71, All. V p. 6 e Titolo XI; D.M. 10/03/1998",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BOMBOLE_CO2_RIDUTTORE_MANOMETRI_VALVOLA_SOVRAPRESSIONE",
+            title: "Riduttore di Pressione Certificato con Manometri di Alta/Bassa e Valvola di Sfogo",
+            question: "I riduttori di pressione a norma UNI EN ISO 2503 sono provvisti di manometro di alta pressione (carica bombola), manometro di bassa pressione (mandata linee) e valvola di sicurezza tarata contro le sovrapressioni?",
+            normReference: "UNI EN ISO 2503; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BOMBOLE_CO2_RILEVATORE_GAS_ALLARME_ANTIASFISSIA",
+            title: "Rilevatore a Parete Fughe CO2 con Allarme Ottico-Acustico Anti-Asfissia",
+            question: "Nel locale/vano di stoccaggio delle bombole è presente un sensore rilevatore di perdite di CO2 posizionato a circa 20-30 cm dal pavimento (gas pesante) provvisto di allarme ottico-acustico anti-asfissia ed eventuale elettrovalvola/ventilazione?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3, All. IV p. 1.8 e Titolo XI; Linee Guida INAIL",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BOMBOLE_CO2_COLLAUDO_TPED_CAPPELLOTTO",
+            title: "Conformità Bombole TPED, Collaudo Periodico Decennale e Cappellotto di Protezione",
+            question: "Le bombole sono conformi alla direttiva TPED (D.Lgs. 35/2010), hanno collaudo decennale valido, etichettatura E290/E941 per uso alimentare e le bombole piene di scorta sono provviste di cappellotto di protezione della valvola?",
+            normReference: "D.Lgs. 35/2010 (TPED); D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 10. PIASTRA PANINI E TOSTIERA (env-bar-retrobanco-snack)
+      {
+        machineKey: "piastra_panini_tostiera",
+        name: "Piastra Elettrica Doppia Rigata in Ghisa / Vetroceramica per Panini e Toast",
+        type: "Piastra Elettrica Doppia da Banco per Cottura e Tostatura Panini",
+        suggestedManufacturer: "Sirman / Milan Toast / Spidocook",
+        suggestedModel: "Sirman Cort / Milan Toast / Spidocook",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "PIASTRA_PANINI_PIANI_GHISA_VETROCERAMICA_MOCA",
+            title: "Piani di Cottura in Ghisa Rigata o Vetroceramica Certificati MOCA",
+            question: "Le piastre di cottura in ghisa sabbiata con trattamento antimicrobico o in vetroceramica sono certificate per il contatto con alimenti (MOCA Reg. CE 1935/2004) e prive di lesioni, sfaldamenti o ruggine superficiale?",
+            normReference: "Reg. CE 1935/2004; D.Lgs. 29/2017; Reg. CE 852/2004",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PIASTRA_PANINI_MANIGLIA_TERMOISOLANTE_ANTIUSTIONE",
+            title: "Maniglia Termoisolante Ergonomica Anti-Ustione con Bilanciamento Piani",
+            question: "L'impugnatura del piano superiore mobile è realizzata in materiale atermico termoisolante anti-ustione ed è supportata da molla di bilanciamento che impedisce la caduta traumatica o lo schiacciamento delle dita dell'operatore?",
+            normReference: "D.Lgs. 81/2008 art. 71 e All. V p. 9; CEI EN 60335-2-48",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PIASTRA_PANINI_CASSETTO_RACCOGLIGRASSO_FERMO",
+            title: "Cassetto Raccogligrasso Estraibile con Fermo Meccanico di Sicurezza",
+            question: "La piastra è dotata di cassetto raccogligrasso e residui in acciaio inox estraibile, provvisto di fermo meccanico per prevenirne lo sfilamento accidentale con sversamento di olio o grasso bollente?",
+            normReference: "D.Lgs. 81/2008 art. 71; CEI EN 60335-2-48",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "PIASTRA_PANINI_TERMOSTATO_LAVORO_E_SICUREZZA",
+            title: "Termostato di Lavoro Fino a 300°C con Termostato di Sicurezza a Riarmo",
+            question: "La temperatura di lavoro è controllata da termostato regolabile fino a 300°C con presenza di termostato di sicurezza a riarmo manuale che interviene staccando l'alimentazione in caso di anomalia termica?",
+            normReference: "CEI EN 60335-2-48; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 11. FORNO MICROONDE SPEED OVEN (env-bar-retrobanco-snack)
+      {
+        machineKey: "forno_microonde_speedoven",
+        name: "Forno Professionale ad Alta Velocità / Microonde Combinato (Speed Oven)",
+        type: "Forno Professionale ad Alta Velocità Combinato Convezione/Microonde",
+        suggestedManufacturer: "Merrychef / Menumaster / Turbochef",
+        suggestedModel: "Merrychef eikon e2s / Menumaster",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "SPEEDOVEN_CAMERA_INOX_SANIFICABILE_MOCA",
+            title: "Camera Interna in Acciaio Inox AISI 304 Sanificabile a Norme MOCA",
+            question: "La camera interna di cottura è costruita in acciaio inox AISI 304 privo di fessure, con spigoli arrotondati facilmente sanificabili e teglie/accessori certificati MOCA per cotture ad alta temperatura?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004 All. II cap. V",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "SPEEDOVEN_TRIPLO_INTERBLOCCO_PORTA_MICROONDE",
+            title: "Porta Schermata con Triplo Interblocco di Sicurezza Emissione Onde",
+            question: "La porta è munita di triplo interblocco elettromeccanico di sicurezza che interrompe immediatamente l'emissione di microonde e disattiva il generatore magnetron non appena l'anta viene sbloccata o aperta?",
+            normReference: "CEI EN 60335-2-90; D.Lgs. 81/2008 art. 71 e All. V p. 6",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SPEEDOVEN_CATALIZZATORE_FUMI_SENZA_CANNA_FUMARIA",
+            title: "Catalizzatore Fumi Interno Integrato Senza Necessità di Canna Fumaria",
+            question: "Il forno speed-oven incorpora un convertitore catalitico interno per il ricircolo e la purificazione dei fumi e vapori di cottura, consentendo l'installazione a vista a banco senza cappa d'aspirazione con fumi all'esterno?",
+            normReference: "D.Lgs. 81/2008 art. 71; CEI EN 60335-2-90",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "SPEEDOVEN_RICETTE_PREIMPOSTATE_PARAMETRI_BLOCCATI",
+            title: "Programmi di Cottura con Ricette Memorizzate e Blocco Parametri Operatore",
+            question: "L'interfaccia digitale dispone di ricette preprogrammate con blocco parametri per prevenire sovra-riscaldamenti, autocombustione degli alimenti o rischi di ustione causati da impostazioni errate del tempo e potenza?",
+            normReference: "D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 12. AFFETTATRICE A GRAVITÀ BAR (env-bar-retrobanco-snack)
+      {
+        machineKey: "affettatrice_gravita_bar",
+        name: "Affettatrice Professionale a Gravità per Salumi Lama 300 mm",
+        type: "Affettatrice a Gravità Professionale per Salumi e Formaggi",
+        suggestedManufacturer: "Berkel / Sirman / RGV",
+        suggestedModel: "Berkel Red Line / Sirman Palladio 300",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "AFFETTATRICE_BAR_ANELLO_FISSO_PARALAMA_360",
+            title: "Anello Fisso Paralama Continuo a 360° Conforme UNI EN 1974",
+            question: "La lama dell'affettatrice è protetta da un anello fisso di protezione continuo a 360° a norma UNI EN 1974 che impedisce il contatto accidentale delle dita con il tagliente anche a coprilama rimosso per la pulizia?",
+            normReference: "UNI EN 1974; D.Lgs. 81/2008 art. 71 e All. V p. 6",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "AFFETTATRICE_BAR_BLOCCO_VELA_SPESSORE_ZERO",
+            title: "Blocco Meccanico Vela a Spessore Zero per Rimozione Piatto Merce",
+            question: "È presente il dispositivo meccanico di interblocco che impedisce lo smontaggio del piatto carrello portamerce se la manopola graduata della vela non è posizionata a 'zero' (lama completamente chiusa)?",
+            normReference: "UNI EN 1974; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "AFFETTATRICE_BAR_RELE_MINIMA_TENSIONE_NVR",
+            title: "Relè di Minima Tensione NVR Anti-Riavvio Spontaneo",
+            question: "Il pulsante di comando marcia/arresto (IP65) è dotato di relè di minima tensione (NVR - No-Volt Release) per prevenire il riavvio spontaneo e pericoloso della lama dopo un'interruzione improvvisa dell'energia elettrica?",
+            normReference: "UNI EN 1974; CEI EN 60204-1; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "AFFETTATRICE_BAR_PRESSAMERCE_SCHERMO_SALVADITA",
+            title: "Pressamerce Ergonomico con Schermo di Protezione Salvadita Trasparente",
+            question: "Il braccio pressamerce è dotato di maniglia ergonomica in tecnopolimero e schermo trasparente salvadita in policarbonato infrangibile che scherma la mano dell'operatore durante l'avanzamento verso la lama?",
+            normReference: "UNI EN 1974; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "AFFETTATRICE_BAR_AFFILATOIO_INCORPORATO_CUFFIA",
+            title: "Gruppo Affilatoio Incorporato con Protezione a Cuffia Integrale",
+            question: "L'affilatoio a due smerigli è incorporato, stabilmente fissato e provvisto di calotta protettiva che impedisce il contatto accidentale con la lama durante le manovre di rotazione per l'affilatura?",
+            normReference: "UNI EN 1974; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 13. VETRINA SNACK REFRIGERATA (env-bar-banco-caffetteria)
+      {
+        machineKey: "vetrina_snack_refrigerata",
+        name: "Vetrina Refrigerata da Banco Porta-Snack, Tramezzini e Brioche (+4°C)",
+        type: "Vetrina Espositiva Refrigerata Positiva da Banco con Cristalli Curvi",
+        suggestedManufacturer: "Afinox / IFI / Enofrigo",
+        suggestedModel: "Afinox / IFI / Enofrigo",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "VETRINA_SNACK_CRISTALLI_CURVI_PARATOIE_HACCP",
+            title: "Cristalli Curvi Panoramici Parafiato Igienici Antiaerosol per Clienti",
+            question: "La vetrina è munita di cristalli curvi temperati parafiato panoramici che proteggono gli snack esposti (tramezzini, panini, brioche farcite) da aerosol, tosse o contaminazioni da parte della clientela (norme HACCP)?",
+            normReference: "Reg. CE 852/2004 All. II cap. III; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "VETRINA_SNACK_CONTROLLO_DIGITALE_TEMP_HACCP",
+            title: "Controllo Digitale Temperatura HACCP (+2°C/+6°C) con Allarme e Sbrinamento",
+            question: "La centralina digitale regola stabilmente la temperatura interna fra +2°C e +6°C per alimenti deperibili, con allarme sonoro/visivo di superamento soglia critica e ciclo di sbrinamento automatico programmato?",
+            normReference: "Reg. CE 852/2004 All. II cap. IX; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "VETRINA_SNACK_ILLUMINAZIONE_LED_BASSA_TENSIONE",
+            title: "Illuminazione Interna a LED a Bassa Tensione 24V Ermetica IP65",
+            question: "L'illuminazione dei ripiani è a barre LED a bassissima tensione di sicurezza (SELV 24V) protette con grado di isolamento stagno IP65 contro umidità e contatti accidentali?",
+            normReference: "CEI EN 60335-2-89; CEI 64-8",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "VETRINA_SNACK_RIPIANI_INOX_MOCA_ANTIRIBALTAMENTO",
+            title: "Ripiani Asportabili in Vetro Temperato o Acciaio Inox MOCA con Fermo",
+            question: "I ripiani espositivi sono certificati MOCA, facilmente rimovibili per la sanificazione quotidiana e dotati di fermi o guide antiribaltamento?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 14. ARMADIO FRIGORIFERO PORTE VETRATE (env-bar-celle-frigo / env-bar-deposito-bevande)
+      {
+        machineKey: "armadio_frigo_bar_bevande",
+        name: "Armadio Frigorifero a Porte Vetrate per Bevande e Latte (+2/+4°C)",
+        type: "Frigorifero Professionale Verticale a Porte Vetrate Positive",
+        suggestedManufacturer: "Friulinox / Liebherr / Polaris",
+        suggestedModel: "Friulinox / Liebherr / Polaris",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "FRIGO_BAR_PORTE_DOPPIO_VETRO_GUARNIZIONI_MAGNETICHE",
+            title: "Porte Doppio Vetro Basso Emissivo con Guarnizioni Magnetiche Sostituibili",
+            question: "Le ante a battente montano doppi vetri termoisolanti temperati basso-emissivi con guarnizioni magnetiche a tenuta ermetica, facilmente pulibili e sostituibili per garantire l'igiene ed efficienza energetica?",
+            normReference: "Reg. CE 852/2004 All. II cap. V; CEI EN 60335-2-89",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "FRIGO_BAR_TERMOSTATO_DIGITALE_HACCP_SONDA_NTC",
+            title: "Termostato Digitale HACCP con Sonda NTC e Sbrinamento Automatico",
+            question: "L'armadio dispone di controllo elettronico della temperatura (+2°C / +4°C per latte fresco, bibite e succhi), sonda NTC con display visibile al personale e sbrinamento automatico a gas caldo o fermo compressore?",
+            normReference: "Reg. CE 852/2004; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FRIGO_BAR_CIRCUITO_ECOLOGICO_R290_UNI378",
+            title: "Circuito Ecologico con Refrigerante Naturale R290 (UNI EN 378)",
+            question: "Il motocompressore integrato impiega refrigerante naturale R290 (propano) conforme alla normativa europea F-Gas ed è inserito in vano motore adeguatamente areato e protetto da griglia di sicurezza?",
+            normReference: "UNI EN 378-1/2; Reg. UE 517/2014; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FRIGO_BAR_GRIGLIE_MOCA_PORTATA_CERTIFICATA",
+            title: "Griglie Interne Plastificate MOCA con Portata Certificata Anticaduta",
+            question: "I ripiani a griglia interni sono realizzati con rivestimento atossico certificato MOCA, con ganci di supporto provvisti di fermo anticaduta e portata minima di 40 kg per ripiano?",
+            normReference: "Reg. CE 1935/2004; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 15. SPREMIAGRUMI E CENTRIFUGA (env-bar-banco-caffetteria)
+      {
+        machineKey: "spremiagrumi_centrifuga_bar",
+        name: "Spremiagrumi Elettrico e Centrifuga Professionale per Frutta Fresca",
+        type: "Apparecchio Elettrico Professionale da Banco per Spremute ed Estratti",
+        suggestedManufacturer: "Ceado / Santos / Zumex",
+        suggestedModel: "Ceado S98 / Santos 50 / Zumex",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "SPREMIAGRUMI_LEVA_PRESSORE_MICRO_UNI12852",
+            title: "Leva Pressore con Microinterruttore di Arresto Motore UNI EN 12852",
+            question: "La leva di pressione dello spremiagrumi o il coperchio della centrifuga sono dotati di microinterruttore di sicurezza a norma UNI EN 12852 che interrompe istantaneamente la rotazione del cono/cestello all'apertura?",
+            normReference: "UNI EN 12852; CEI EN 60335-2-64; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SPREMIAGRUMI_COMPONENTI_MOCA_LAVABILI",
+            title: "Vasca, Pigna e Filtro in Acciaio Inox / Policarbonato MOCA Lavabili",
+            question: "Tutte le parti a contatto con gli agrumi e i succhi (vaschetta, pigna rotante, ogiva e beccuccio salvagoccia) sono certificate MOCA Reg. CE 1935/2004 e smontabili senza attrezzi per il lavaggio in lavastoviglie?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004 All. II cap. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CENTRIFUGA_PROTEZIONE_DITA_IMBOCCO_PESTELLO",
+            title: "Protezione Dita su Imbocco Centrifuga con Pestello Ergonomico",
+            question: "L'imbocco di alimentazione della frutta per la centrifuga presenta altezza e diametro tali da impedire l'introduzione involontaria delle dita, con uso obbligatorio di pestello dedicato?",
+            normReference: "UNI EN 12852; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CENTRIFUGA_FRENO_MOTORE_ELETTROMAGNETICO",
+            title: "Freno Motore Elettromagnetico per Arresto Rapido del Cestello Rotante",
+            question: "La centrifuga è equipaggiata con freno motore a disco o controcorrente che garantisce l'arresto completo del cestello filtrante rotante entro 2 secondi dallo spegnimento o sollevamento della leva?",
+            normReference: "UNI EN 12852; CEI EN 60335-2-64; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 16. IMPIANTO ADDOLCITORE E FILTRAZIONE ACQUE (env-bar-tecnico-trattamento-acque / env-bar-plonge-lavaggio)
+      {
+        machineKey: "impianto_addolcitore_acque",
+        name: "Impianto Addolcitore e Filtrazione Acque ad Osmosi Inversa per Macchine Bar",
+        type: "Sistema Professionale di Trattamento e Addolcimento Acque Potabili per Bar",
+        suggestedManufacturer: "BWT water+more / Brita Purity / Everpure",
+        suggestedModel: "BWT water+more / Brita Purity",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "ADDOLCITORE_FILTRI_RESINE_POTABILITA_DLGS18_2023",
+            title: "Filtri Decloratori e Resine a Scambio Ionico Conformi D.Lgs. 18/2023 e DM 174/2004",
+            question: "Il gruppo di trattamento acque impiega cartucce filtranti a carboni attivi sinterizzati e resine a scambio ionico conformi al D.Lgs. 18/2023 e D.M. 174/2004 per materiali a contatto con acqua destinata al consumo umano?",
+            normReference: "D.Lgs. 18/2023; D.M. 174/2004; Reg. CE 1935/2004",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ADDOLCITORE_VALVOLA_ANTIRIFLUSSO_UNI1717",
+            title: "Valvola di Sicurezza Anti-Riflusso a Disconnessione Idrica (UNI EN 1717)",
+            question: "L'allaccio all'acquedotto a monte del sistema di filtrazione è protetto da valvola di non ritorno e disconnettore idraulico conforme a UNI EN 1717 con manometro di controllo pressione idrica di rete?",
+            normReference: "UNI EN 1717; D.Lgs. 18/2023; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ADDOLCITORE_TEST_DUREZZA_CAMBIO_CARTUCCE_HACCP",
+            title: "Test Periodico Durezza Acqua (°fF) e Registro Manutenzioni Sostituzione Cartucce",
+            question: "Viene effettuato periodicamente il test colorimetrico della durezza dell'acqua in gradi francesi (°fF) e registrata la sostituzione programmata delle cartucce esauste sul registro di manutenzione HACCP aziendale?",
+            normReference: "D.Lgs. 18/2023; Reg. CE 852/2004; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ADDOLCITORE_FLESSIBILI_INOX_ALTA_PRESSIONE",
+            title: "Tubi Flessibili di Collegamento in Treccia d'Acciaio Inox per Alta Pressione",
+            question: "Tutti i tubi flessibili di mandata dell'acqua addolcita verso macchina caffè, lavastoviglie e fabbricatore ghiaccio sono in treccia d'acciaio inox certificati MOCA resistenti alla pressione e alle sollecitazioni idrauliche?",
+            normReference: "D.M. 174/2004; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+    ],
+  },
+
   // 2. RISTORAZIONE & ALIMENTARE
   {
     sectorKey: "ristorazione_alimentare",
@@ -6988,6 +7727,15 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
   const superSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "supermercato_alimentare");
   const superMachines = superSector ? superSector.machines : [];
 
+  const isBarAteco = !!atecoCode && (
+    atecoCode.startsWith("56.30") ||
+    atecoCode.startsWith("56.3") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("5630") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("563")
+  );
+  const barSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "bar_caffetteria");
+  const barMachines = barSector ? barSector.machines : [];
+
   // 1. MACCHINE SUGGERITE IN BASE AI LOCALI CENSITI NELLO STEP 2
   for (const env of environments) {
     const envId = (env.id || "").toLowerCase();
@@ -7548,6 +8296,94 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
       matchingMachines = gelMachines.filter((m) =>
         [
           "armadio_congelatore_carapine_sede",
+        ].includes(m.machineKey)
+      );
+    }
+
+    // Reparti Bar, Caffetteria, Snack Bar, Cocktail Bar e Birreria (56.30.00 / 56.30.0 / 56.30 / 56.3)
+    else if (
+      envId === "env-bar-cocktail-station" ||
+      envId.includes("bar-cocktail-station") ||
+      envId.includes("cocktail") ||
+      (isBarAteco && (nameLower.includes("cocktail") || nameLower.includes("mixology") || nameLower.includes("barman")))
+    ) {
+      matchingMachines = barMachines.filter((m) =>
+        [
+          "cocktail_station_bar",
+          "blender_frullatore_cocktail",
+          "tritaghiaccio_professionale_bar",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-bar-banco-caffetteria" ||
+      envId.includes("bar-banco-caffetteria") ||
+      envId.includes("banco-caffetteria") ||
+      (isBarAteco && (
+        envId === "env-banco" ||
+        nameLower.includes("caffetteria") ||
+        nameLower.includes("banco bar") ||
+        nameLower.includes("banco caffetteria") ||
+        (nameLower.includes("banco") && !nameLower.includes("cocktail") && !nameLower.includes("retrobanco") && !nameLower.includes("bottiglie"))
+      ))
+    ) {
+      matchingMachines = barMachines.filter((m) =>
+        [
+          "macchina_caffe_bar",
+          "macinadosatore_caffe_ondemand",
+          "lavabicchieri_bar_sottobanco",
+          "fabbricatore_ghiaccio_bar",
+          "vetrina_snack_refrigerata",
+          "spremiagrumi_centrifuga_bar",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-bar-retrobanco-snack" ||
+      envId.includes("bar-retrobanco-snack") ||
+      envId.includes("retrobanco") ||
+      (isBarAteco && (nameLower.includes("retrobanco") || nameLower.includes("snack") || nameLower.includes("panini") || nameLower.includes("tavola fredda")))
+    ) {
+      matchingMachines = barMachines.filter((m) =>
+        [
+          "piastra_panini_tostiera",
+          "forno_microonde_speedoven",
+          "affettatrice_gravita_bar",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-bar-spillatura-co2" ||
+      envId.includes("bar-spillatura-co2") ||
+      envId.includes("spillatura") ||
+      (isBarAteco && !envId.includes("deposito") && !nameLower.includes("deposito") && !nameLower.includes("magazzino") && (nameLower.includes("spillatura") || nameLower.includes("spina") || nameLower.includes("bombole") || (nameLower.includes("birra") && !nameLower.includes("deposito") && !nameLower.includes("magazzino"))))
+    ) {
+      matchingMachines = barMachines.filter((m) =>
+        [
+          "spillatore_birra_bevande",
+          "bombole_co2_azoto_spillatura",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-bar-celle-frigo" ||
+      envId === "env-bar-deposito-bevande" ||
+      envId.includes("bar-celle-frigo") ||
+      envId.includes("bar-deposito-bevande") ||
+      (isBarAteco && (nameLower.includes("celle") || nameLower.includes("deposito") || nameLower.includes("magazzino") || nameLower.includes("bevande") || (nameLower.includes("frigo") && !nameLower.includes("banco")) || cat === "warehouse"))
+    ) {
+      matchingMachines = barMachines.filter((m) =>
+        [
+          "armadio_frigo_bar_bevande",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-bar-tecnico-trattamento-acque" ||
+      envId === "env-bar-plonge-lavaggio" ||
+      envId.includes("bar-tecnico-trattamento-acque") ||
+      envId.includes("bar-plonge-lavaggio") ||
+      envId.includes("bar-trattamento-acque") ||
+      (isBarAteco && (nameLower.includes("trattamento acque") || nameLower.includes("addolcitore") || nameLower.includes("depuratore") || nameLower.includes("osmosi") || nameLower.includes("plonge") || (nameLower.includes("lavaggio") && !nameLower.includes("bicchieri"))))
+    ) {
+      matchingMachines = barMachines.filter((m) =>
+        [
+          "impianto_addolcitore_acque",
         ].includes(m.machineKey)
       );
     } else if (

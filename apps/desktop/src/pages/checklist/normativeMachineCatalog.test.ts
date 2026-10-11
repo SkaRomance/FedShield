@@ -447,9 +447,9 @@ assert.ok(ristGenIndex !== -1, "Settore generico ristorazione_alimentare deve es
 assert.equal(ristSommIndex, 0, "ristorazione_somministrazione deve trovarsi al primo posto della lista");
 assert.ok(ristSommIndex < ristGenIndex, "ristorazione_somministrazione deve precedere il settore generico");
 
-// Verifica che codici generici (es. 56.30 bar) continuino a risolvere su ristorazione_alimentare
-const genericBarCatalog = getSectorMachineCatalogForAteco("56.30");
-assert.equal(genericBarCatalog.sectorKey, "ristorazione_alimentare", "ATECO 56.30 deve ricadere sul fallback generico ristorazione_alimentare");
+// Verifica che codici generici non profilati (es. 56.99 altre attività ristorazione) continuino a risolvere su ristorazione_alimentare
+const genericFallbackCatalog = getSectorMachineCatalogForAteco("56.99");
+assert.equal(genericFallbackCatalog.sectorKey, "ristorazione_alimentare", "ATECO 56.99 deve ricadere sul fallback generico ristorazione_alimentare");
 
 // -------------------------------------------------------------
 // Test 12: Verifica completezza delle 16 macchine professionali
@@ -1927,4 +1927,235 @@ const fallbackGelVar = getSuggestedMachinesForEnvironmentsAndAteco([], "561041")
 assert.equal(fallbackGelVar.length, 16, "Variante 561041 deve restituire tutte le 16 macchine");
 assert.ok(fallbackGelVar.every((m) => m.sourceReason === "ateco"));
 
+// -------------------------------------------------------------
+// Test 35: Priorità e risoluzione catalogo ATECO per Bar, Caffetteria, Snack Bar, Cocktail Bar e Birreria (56.30 / 56.3)
+// -------------------------------------------------------------
+console.log("\n=== INIZIO TEST normativeMachineCatalog (ATECO 56.30 Bar / Caffetteria / Cocktail Bar) ===");
+console.log("Test 35: Verifica priorità catalogo ATECO per Bar, Caffetteria, Snack Bar, Cocktail Bar e Birreria (56.30.00 / 56.30.0 / 56.30 / 56.3 / 5630 / 563)");
+const catalogBarExact = getSectorMachineCatalogForAteco("56.30");
+assert.equal(catalogBarExact.sectorKey, "bar_caffetteria", "ATECO 56.30 deve restituire bar_caffetteria");
+assert.ok(catalogBarExact.sectorLabel.includes("Bar"), "L'etichetta del catalogo deve includere Bar");
+assert.ok(catalogBarExact.sectorLabel.includes("Caffetteria"), "L'etichetta del catalogo deve includere Caffetteria");
+assert.ok(catalogBarExact.sectorLabel.includes("Cocktail Bar"), "L'etichetta del catalogo deve includere Cocktail Bar");
+assert.ok(catalogBarExact.sectorLabel.includes("Birreria"), "L'etichetta del catalogo deve includere Birreria");
+
+for (const variant of ["56.30.00", "56.30.0", "56.30", "56.3", "563000", "5630", "563"]) {
+  const barVar = getSectorMachineCatalogForAteco(variant);
+  assert.equal(barVar.sectorKey, "bar_caffetteria", `Variante '${variant}' deve restituire bar_caffetteria`);
+}
+
+// Verifica posizionamento: bar_caffetteria segue gelateria_pasticceria_ambulante e precede ristorazione_alimentare
+const gelIdxBar = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "gelateria_pasticceria_ambulante");
+const barIdx = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "bar_caffetteria");
+const ristGenIdxBar = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ristorazione_alimentare");
+assert.ok(gelIdxBar !== -1, "Settore gelateria_pasticceria_ambulante deve esistere");
+assert.ok(barIdx !== -1, "Settore bar_caffetteria deve esistere");
+assert.ok(ristGenIdxBar !== -1, "Settore generico ristorazione_alimentare deve esistere");
+assert.equal(barIdx, gelIdxBar + 1, "bar_caffetteria deve seguire immediatamente gelateria_pasticceria_ambulante");
+assert.ok(barIdx < ristGenIdxBar, "bar_caffetteria deve precedere ristorazione_alimentare nel catalogo");
+
+// -------------------------------------------------------------
+// Test 36: Verifica completezza delle 16 macchine professionali per Bar con modelli reali, corsi e controlli tecnici
+// -------------------------------------------------------------
+console.log("Test 36: Verifica completezza delle 16 attrezzature professionali con verifiche, corsi e modelli reali");
+assert.equal(catalogBarExact.machines.length, 16, "Il catalogo Bar / Caffetteria deve contenere esattamente 16 macchine");
+
+const expectedBarMachineKeys = [
+  "macchina_caffe_bar",
+  "macinadosatore_caffe_ondemand",
+  "lavabicchieri_bar_sottobanco",
+  "fabbricatore_ghiaccio_bar",
+  "cocktail_station_bar",
+  "blender_frullatore_cocktail",
+  "tritaghiaccio_professionale_bar",
+  "spillatore_birra_bevande",
+  "bombole_co2_azoto_spillatura",
+  "piastra_panini_tostiera",
+  "forno_microonde_speedoven",
+  "affettatrice_gravita_bar",
+  "vetrina_snack_refrigerata",
+  "armadio_frigo_bar_bevande",
+  "spremiagrumi_centrifuga_bar",
+  "impianto_addolcitore_acque",
+];
+
+for (const key of expectedBarMachineKeys) {
+  const found = catalogBarExact.machines.find((m) => m.machineKey === key);
+  assert.ok(found, `Macchina ${key} deve essere presente nel catalogo Bar / Caffetteria`);
+  assert.ok(found.name.length > 5, `Nome macchina ${key} deve essere esaustivo`);
+  assert.ok(found.type.length > 5, `Tipologia macchina ${key} deve essere specificata`);
+  assert.ok(found.suggestedManufacturer.length > 0, `Produttore suggerito per ${key} deve essere presente`);
+  assert.ok(found.suggestedModel.length > 0, `Modello suggerito per ${key} deve essere presente`);
+  assert.ok(found.safetyChecks.length >= 3, `Macchina ${key} deve avere almeno 3 controlli di sicurezza`);
+  assert.ok(found.training, `Macchina ${key} deve avere un corso di formazione/addestramento associato`);
+}
+
+// Verifiche puntuali su modelli reali e controlli normativi specifici:
+const macchinaCaffe = catalogBarExact.machines.find((m) => m.machineKey === "macchina_caffe_bar")!;
+assert.ok(macchinaCaffe.suggestedManufacturer.includes("La Marzocco") || macchinaCaffe.suggestedManufacturer.includes("Faema") || macchinaCaffe.suggestedManufacturer.includes("Rancilio"), "La Marzocco, Faema o Rancilio");
+assert.ok(macchinaCaffe.suggestedModel.includes("Linea PB") || macchinaCaffe.suggestedModel.includes("Faema E71") || macchinaCaffe.suggestedModel.includes("Classe 9"), "Linea PB, Faema E71 o Classe 9");
+assert.ok(macchinaCaffe.safetyChecks.some((c) => c.code === "MACCHINA_CAFFE_CALDAIA_PED_VALVOLA_SOVRAPRESSIONE" && c.normReference.includes("PED")), "Caldaia PED e valvola sovrapressione");
+assert.ok(macchinaCaffe.safetyChecks.some((c) => c.code === "MACCHINA_CAFFE_LANCIA_VAPORE_COOL_TOUCH_ANTIUSTIONE" && c.title.includes("Cool-Touch")), "Lancia Cool-Touch anti-scottatura");
+assert.ok(macchinaCaffe.safetyChecks.some((c) => c.code === "MACCHINA_CAFFE_MANOMETRI_PRESSIONE_CERTIFICATI"), "Manometri pressione certificati");
+assert.equal(macchinaCaffe.training.minHours, 4, "Addestramento 4h uso sicuro macchine a vapore");
+
+const macinadosatore = catalogBarExact.machines.find((m) => m.machineKey === "macinadosatore_caffe_ondemand")!;
+assert.ok(macinadosatore.suggestedManufacturer.includes("Mazzer") || macinadosatore.suggestedManufacturer.includes("Eureka") || macinadosatore.suggestedManufacturer.includes("Fiorenzato"), "Mazzer, Eureka o Fiorenzato");
+assert.ok(macinadosatore.safetyChecks.some((c) => c.code === "MACINADOSATORE_CAMPANA_MOCA_MICROINTERRUTTORE" && c.normReference.includes("1935/2004")), "Campana MOCA e microinterruttore");
+assert.ok(macinadosatore.safetyChecks.some((c) => c.code === "MACINADOSATORE_BATTIFILTRO_FONOASSORBENTE_RUMORE" && c.normReference.includes("Titolo VIII")), "Cassetto battifiltro fonoassorbente rumore impulsivo D.Lgs. 81/08");
+
+const lavabicchieri = catalogBarExact.machines.find((m) => m.machineKey === "lavabicchieri_bar_sottobanco")!;
+assert.ok(lavabicchieri.suggestedManufacturer.includes("Winterhalter") || lavabicchieri.suggestedManufacturer.includes("Meiko") || lavabicchieri.suggestedManufacturer.includes("Comenda"), "Winterhalter, Meiko o Comenda");
+assert.ok(lavabicchieri.safetyChecks.some((c) => c.code === "LAVABICCHIERI_RISCIACQUO_85C_HACCP_DIN10511" && c.question.includes("85°C")), "Risciacquo igienico 85°C HACCP");
+assert.ok(lavabicchieri.safetyChecks.some((c) => c.code === "LAVABICCHIERI_DISPOSITIVO_BREAK_TANK_UNI1717" && c.normReference.includes("UNI EN 1717")), "Dispositivo Break Tank UNI EN 1717");
+assert.ok(lavabicchieri.safetyChecks.some((c) => c.code === "LAVABICCHIERI_MICRO_ARRESTO_CICLO_APERTURA"), "Micro arresto all'apertura");
+
+const fabbricatoreGhiaccio = catalogBarExact.machines.find((m) => m.machineKey === "fabbricatore_ghiaccio_bar")!;
+assert.ok(fabbricatoreGhiaccio.suggestedManufacturer.includes("Brema") || fabbricatoreGhiaccio.suggestedManufacturer.includes("Icematic"), "Brema o Icematic");
+assert.ok(fabbricatoreGhiaccio.safetyChecks.some((c) => c.code === "FABBRICATORE_GHIACCIO_CIRCUITO_ERMETICO_R290" && c.normReference.includes("UNI EN 378")), "Circuito R290 UNI EN 378");
+assert.ok(fabbricatoreGhiaccio.safetyChecks.some((c) => c.code === "FABBRICATORE_GHIACCIO_MATERIALI_INTERNI_MOCA" && c.normReference.includes("1935/2004")), "Materiali interni MOCA");
+assert.ok(fabbricatoreGhiaccio.safetyChecks.some((c) => c.code === "FABBRICATORE_GHIACCIO_SCARICO_INTERRUZIONE_ARIA" && c.normReference.includes("UNI EN 1717")), "Scarico anti-reflusso fognario UNI EN 1717");
+
+const cocktailStation = catalogBarExact.machines.find((m) => m.machineKey === "cocktail_station_bar")!;
+assert.ok(cocktailStation.suggestedManufacturer.includes("RG Mania") || cocktailStation.suggestedManufacturer.includes("Station Bar") || cocktailStation.suggestedManufacturer.includes("Forcar"), "RG Mania, Station Bar o Forcar");
+assert.ok(cocktailStation.safetyChecks.some((c) => c.code === "COCKTAIL_STATION_VASCA_COIBENTATA_SCARICO_DIRETTO"), "Vasca ghiaccio coibentata");
+assert.ok(cocktailStation.safetyChecks.some((c) => c.code === "COCKTAIL_STATION_SPEED_RAIL_ANTICADUTA"), "Speed-rail anticaduta bottiglie");
+assert.ok(cocktailStation.safetyChecks.some((c) => c.code === "COCKTAIL_STATION_LAVELLO_BAGNAGHIACCIO_UNI1717" && c.normReference.includes("UNI EN 1717")), "Bagnaghiaccio a pressione UNI EN 1717");
+
+const blender = catalogBarExact.machines.find((m) => m.machineKey === "blender_frullatore_cocktail")!;
+assert.ok(blender.suggestedManufacturer.includes("Vitamix") || blender.suggestedManufacturer.includes("Hamilton Beach"), "Vitamix o Hamilton Beach");
+assert.ok(blender.safetyChecks.some((c) => c.code === "BLENDER_CAMPANA_FONOASSORBENTE_MICRO_UNI12852" && c.normReference.includes("UNI EN 12852")), "Campana fonoassorbente micro UNI EN 12852");
+assert.ok(blender.safetyChecks.some((c) => c.code === "BLENDER_BICCHIERE_MOCA_BPA_FREE_ANTIURTO" && c.normReference.includes("1935/2004")), "Bicchiere MOCA BPA-free antiurto");
+
+const tritaghiaccio = catalogBarExact.machines.find((m) => m.machineKey === "tritaghiaccio_professionale_bar")!;
+assert.ok(tritaghiaccio.suggestedManufacturer.includes("Sirman") || tritaghiaccio.suggestedManufacturer.includes("Ceado"), "Sirman o Ceado");
+assert.ok(tritaghiaccio.safetyChecks.some((c) => c.code === "TRITAGHIACCIO_LEVA_PRESSORE_MICRO_UNI12852" && c.normReference.includes("UNI EN 12852")), "Leva pressore micro UNI EN 12852");
+
+const spillatore = catalogBarExact.machines.find((m) => m.machineKey === "spillatore_birra_bevande")!;
+assert.ok(spillatore.suggestedManufacturer.includes("Celli Group") || spillatore.suggestedManufacturer.includes("Vin Service"), "Celli Group o Vin Service");
+assert.ok(spillatore.safetyChecks.some((c) => c.code === "SPILLATORE_VASCHETTA_LAVABICCHIERI_UNI1717" && c.normReference.includes("UNI EN 1717")), "Lavabicchieri a disconnessione UNI EN 1717");
+
+const bombole = catalogBarExact.machines.find((m) => m.machineKey === "bombole_co2_azoto_spillatura")!;
+assert.ok(bombole.safetyChecks.some((c) => c.code === "BOMBOLE_CO2_CATENELLE_ANTICADUTA_PARETE" && c.normReference.includes("Titolo XI")), "Catenelle anticaduta verticali D.Lgs. 81/08 Titolo XI");
+assert.ok(bombole.safetyChecks.some((c) => c.code === "BOMBOLE_CO2_RILEVATORE_GAS_ALLARME_ANTIASFISSIA" && c.question.includes("anti-asfissia")), "Rilevatore fughe CO2 anti-asfissia");
+
+const piastraPanini = catalogBarExact.machines.find((m) => m.machineKey === "piastra_panini_tostiera")!;
+assert.ok(piastraPanini.suggestedManufacturer.includes("Sirman") || piastraPanini.suggestedManufacturer.includes("Milan Toast") || piastraPanini.suggestedManufacturer.includes("Spidocook"), "Sirman, Milan Toast o Spidocook");
+assert.ok(piastraPanini.safetyChecks.some((c) => c.code === "PIASTRA_PANINI_PIANI_GHISA_VETROCERAMICA_MOCA"), "Piani ghisa/vetroceramica MOCA");
+assert.ok(piastraPanini.safetyChecks.some((c) => c.code === "PIASTRA_PANINI_MANIGLIA_TERMOISOLANTE_ANTIUSTIONE"), "Maniglia termoisolante anti-ustione");
+
+const speedOven = catalogBarExact.machines.find((m) => m.machineKey === "forno_microonde_speedoven")!;
+assert.ok(speedOven.suggestedManufacturer.includes("Merrychef") || speedOven.suggestedManufacturer.includes("Menumaster"), "Merrychef o Menumaster");
+assert.ok(speedOven.safetyChecks.some((c) => c.code === "SPEEDOVEN_TRIPLO_INTERBLOCCO_PORTA_MICROONDE"), "Triplo interblocco porta");
+assert.ok(speedOven.safetyChecks.some((c) => c.code === "SPEEDOVEN_CATALIZZATORE_FUMI_SENZA_CANNA_FUMARIA"), "Catalizzatore fumi interno");
+
+const affettatriceBar = catalogBarExact.machines.find((m) => m.machineKey === "affettatrice_gravita_bar")!;
+assert.ok(affettatriceBar.suggestedManufacturer.includes("Berkel") || affettatriceBar.suggestedManufacturer.includes("Sirman"), "Berkel o Sirman");
+assert.ok(affettatriceBar.safetyChecks.some((c) => c.code === "AFFETTATRICE_BAR_ANELLO_FISSO_PARALAMA_360" && c.normReference.includes("UNI EN 1974")), "Anello fisso 360° UNI EN 1974");
+assert.ok(affettatriceBar.safetyChecks.some((c) => c.code === "AFFETTATRICE_BAR_BLOCCO_VELA_SPESSORE_ZERO"), "Blocco vela spessore zero");
+assert.ok(affettatriceBar.safetyChecks.some((c) => c.code === "AFFETTATRICE_BAR_RELE_MINIMA_TENSIONE_NVR"), "Relè di minima tensione NVR");
+
+const vetrinaSnack = catalogBarExact.machines.find((m) => m.machineKey === "vetrina_snack_refrigerata")!;
+assert.ok(vetrinaSnack.suggestedManufacturer.includes("Afinox") || vetrinaSnack.suggestedManufacturer.includes("IFI") || vetrinaSnack.suggestedManufacturer.includes("Enofrigo"), "Afinox, IFI o Enofrigo");
+assert.ok(vetrinaSnack.safetyChecks.some((c) => c.code === "VETRINA_SNACK_CRISTALLI_CURVI_PARATOIE_HACCP"), "Cristalli curvi panoramici parafiato");
+
+const frigoBar = catalogBarExact.machines.find((m) => m.machineKey === "armadio_frigo_bar_bevande")!;
+assert.ok(frigoBar.suggestedManufacturer.includes("Friulinox") || frigoBar.suggestedManufacturer.includes("Liebherr") || frigoBar.suggestedManufacturer.includes("Polaris"), "Friulinox, Liebherr o Polaris");
+assert.ok(frigoBar.safetyChecks.some((c) => c.code === "FRIGO_BAR_PORTE_DOPPIO_VETRO_GUARNIZIONI_MAGNETICHE"), "Doppio vetro e guarnizioni magnetiche");
+
+const spremiagrumi = catalogBarExact.machines.find((m) => m.machineKey === "spremiagrumi_centrifuga_bar")!;
+assert.ok(spremiagrumi.suggestedManufacturer.includes("Ceado") || spremiagrumi.suggestedManufacturer.includes("Santos") || spremiagrumi.suggestedManufacturer.includes("Zumex"), "Ceado, Santos o Zumex");
+assert.ok(spremiagrumi.safetyChecks.some((c) => c.code === "SPREMIAGRUMI_LEVA_PRESSORE_MICRO_UNI12852" && c.normReference.includes("UNI EN 12852")), "Leva pressore micro UNI EN 12852");
+
+const addolcitore = catalogBarExact.machines.find((m) => m.machineKey === "impianto_addolcitore_acque")!;
+assert.ok(addolcitore.suggestedManufacturer.includes("BWT") || addolcitore.suggestedManufacturer.includes("Brita"), "BWT water+more o Brita Purity");
+assert.ok(addolcitore.safetyChecks.some((c) => c.code === "ADDOLCITORE_FILTRI_RESINE_POTABILITA_DLGS18_2023" && c.normReference.includes("18/2023")), "Potabilità D.Lgs. 18/2023");
+assert.ok(addolcitore.safetyChecks.some((c) => c.code === "ADDOLCITORE_VALVOLA_ANTIRIFLUSSO_UNI1717" && c.normReference.includes("UNI EN 1717")), "Antiriflusso UNI EN 1717");
+
+// -------------------------------------------------------------
+// Test 37: Associazione 1-a-1 ambienti Step 2 Bar (env-bar-*) -> Step 4 Macchine
+// -------------------------------------------------------------
+console.log("Test 37: Verifica associazione ambienti Step 2 Bar (env-bar-*) -> Step 4 Macchine");
+const barEnvironments = [
+  { id: "env-bar-banco-caffetteria", name: "Banco Somministrazione, Caffetteria e Punto Cassa", category: "sales_office" },
+  { id: "env-bar-cocktail-station", name: "Cocktail Station e Banco Mixology", category: "sales_office" },
+  { id: "env-bar-retrobanco-snack", name: "Retrobanco Preparazione Snack e Tavola Fredda", category: "cucina" },
+  { id: "env-bar-spillatura-co2", name: "Postazione Spillatura Birra e Vano Tecnico Bombole CO2", category: "tecnici_esterno" },
+  { id: "env-bar-celle-frigo", name: "Celle Frigorifere e Deposito Bevande", category: "warehouse" },
+  { id: "env-bar-tecnico-trattamento-acque", name: "Vano Tecnico Addolcitore e Plonge Lavaggio Bicchieri", category: "services" },
+];
+
+const suggestedWithBarEnvs = getSuggestedMachinesForEnvironmentsAndAteco(barEnvironments, "56.30");
+assert.equal(suggestedWithBarEnvs.length, 16, "Tutte le 16 macchine devono essere raccomandate e collegate ai 6 ambienti censiti");
+
+const bancoBarMachines = suggestedWithBarEnvs.filter((m) => m.targetEnvironmentId === "env-bar-banco-caffetteria");
+assert.equal(bancoBarMachines.length, 6, "env-bar-banco-caffetteria deve associare 6 macchine");
+assert.ok(bancoBarMachines.some((m) => m.machineKey === "macchina_caffe_bar"));
+assert.ok(bancoBarMachines.some((m) => m.machineKey === "macinadosatore_caffe_ondemand"));
+assert.ok(bancoBarMachines.some((m) => m.machineKey === "lavabicchieri_bar_sottobanco"));
+assert.ok(bancoBarMachines.some((m) => m.machineKey === "fabbricatore_ghiaccio_bar"));
+assert.ok(bancoBarMachines.some((m) => m.machineKey === "vetrina_snack_refrigerata"));
+assert.ok(bancoBarMachines.some((m) => m.machineKey === "spremiagrumi_centrifuga_bar"));
+
+const cocktailBarMachines = suggestedWithBarEnvs.filter((m) => m.targetEnvironmentId === "env-bar-cocktail-station");
+assert.equal(cocktailBarMachines.length, 3, "env-bar-cocktail-station deve associare 3 macchine");
+assert.ok(cocktailBarMachines.some((m) => m.machineKey === "cocktail_station_bar"));
+assert.ok(cocktailBarMachines.some((m) => m.machineKey === "blender_frullatore_cocktail"));
+assert.ok(cocktailBarMachines.some((m) => m.machineKey === "tritaghiaccio_professionale_bar"));
+
+const snackBarMachines = suggestedWithBarEnvs.filter((m) => m.targetEnvironmentId === "env-bar-retrobanco-snack");
+assert.equal(snackBarMachines.length, 3, "env-bar-retrobanco-snack deve associare 3 macchine");
+assert.ok(snackBarMachines.some((m) => m.machineKey === "piastra_panini_tostiera"));
+assert.ok(snackBarMachines.some((m) => m.machineKey === "forno_microonde_speedoven"));
+assert.ok(snackBarMachines.some((m) => m.machineKey === "affettatrice_gravita_bar"));
+
+const spillaturaBarMachines = suggestedWithBarEnvs.filter((m) => m.targetEnvironmentId === "env-bar-spillatura-co2");
+assert.equal(spillaturaBarMachines.length, 2, "env-bar-spillatura-co2 deve associare 2 macchine");
+assert.ok(spillaturaBarMachines.some((m) => m.machineKey === "spillatore_birra_bevande"));
+assert.ok(spillaturaBarMachines.some((m) => m.machineKey === "bombole_co2_azoto_spillatura"));
+
+const celleBarMachines = suggestedWithBarEnvs.filter((m) => m.targetEnvironmentId === "env-bar-celle-frigo");
+assert.equal(celleBarMachines.length, 1, "env-bar-celle-frigo deve associare 1 macchina frigo bevande");
+assert.ok(celleBarMachines.some((m) => m.machineKey === "armadio_frigo_bar_bevande"));
+
+const tecnicoBarMachines = suggestedWithBarEnvs.filter((m) => m.targetEnvironmentId === "env-bar-tecnico-trattamento-acque");
+assert.equal(tecnicoBarMachines.length, 1, "env-bar-tecnico-trattamento-acque deve associare addolcitore acque");
+assert.ok(tecnicoBarMachines.some((m) => m.machineKey === "impianto_addolcitore_acque"));
+
+// Verifica anche ambienti con alias deposito-bevande e plonge-lavaggio
+const depositoBevandeTest = getSuggestedMachinesForEnvironmentsAndAteco(
+  [{ id: "env-bar-deposito-bevande", name: "Magazzino e Deposito Fusti e Bottiglie", category: "warehouse" }],
+  "56.30",
+);
+const depBarLinked = depositoBevandeTest.filter((m) => m.targetEnvironmentId === "env-bar-deposito-bevande");
+assert.equal(depBarLinked.length, 1, "env-bar-deposito-bevande deve associare armadio_frigo_bar_bevande");
+assert.ok(depBarLinked.some((m) => m.machineKey === "armadio_frigo_bar_bevande"));
+
+const plongeLavaggioTest = getSuggestedMachinesForEnvironmentsAndAteco(
+  [{ id: "env-bar-plonge-lavaggio", name: "Zona Plonge e Lavaggio Calici", category: "services" }],
+  "56.30",
+);
+const plongeBarLinked = plongeLavaggioTest.filter((m) => m.targetEnvironmentId === "env-bar-plonge-lavaggio");
+assert.equal(plongeBarLinked.length, 1, "env-bar-plonge-lavaggio deve associare impianto_addolcitore_acque");
+assert.ok(plongeBarLinked.some((m) => m.machineKey === "impianto_addolcitore_acque"));
+
+// -------------------------------------------------------------
+// Test 38: Risoluzione solo su codice ATECO senza locali censiti (Bar / Caffetteria 56.30)
+// -------------------------------------------------------------
+console.log("Test 38: Integrazione automatica macchine per ATECO 56.30 senza ambienti preventivi");
+const suggestedBarOnlyAteco = getSuggestedMachinesForEnvironmentsAndAteco([], "56.30");
+assert.equal(suggestedBarOnlyAteco.length, 16, "Devono essere suggerite tutte le 16 macchine del bar / caffetteria");
+assert.ok(
+  suggestedBarOnlyAteco.every((m) => m.sourceReason === "ateco"),
+  "Tutte le macchine devono avere sourceReason === 'ateco' se nessun locale è stato specificato",
+);
+
+// Verifica fallback automatico identico per varianti di codice ATECO ("56.30.00", "56.3", "5630", "563")
+for (const code of ["56.30.00", "56.3", "5630", "563"]) {
+  const fallbackBarRes = getSuggestedMachinesForEnvironmentsAndAteco([], code);
+  assert.equal(fallbackBarRes.length, 16, `ATECO variant '${code}' deve restituire tutte le 16 macchine`);
+  assert.ok(fallbackBarRes.every((m) => m.sourceReason === "ateco"));
+}
+
 console.log("=== TUTTI I TEST normativeMachineCatalog SUPERATI CON SUCCESSO! ===");
+

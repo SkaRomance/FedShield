@@ -2516,6 +2516,268 @@ export function getStandardEnvironmentsForAteco(atecoCode?: string): WorkEnviron
     ];
   }
 
+  // 0-nonies. Bar, Caffetteria, Snack Bar, Cocktail Bar, Wine Bar e Birreria (56.30, 56.3, 563000, 56300, 5630, 563)
+  if (
+    ateco.startsWith("563000") ||
+    ateco.startsWith("56300") ||
+    ateco.startsWith("5630") ||
+    ateco.startsWith("563")
+  ) {
+    return [
+      {
+        id: "env-bar-banco-caffetteria",
+        key: "bar_banco_caffetteria_mescita",
+        name: "Banco Bar Principale, Caffetteria & Mescita",
+        icon: "☕",
+        category: "sales_office",
+        isDefault: true,
+        surfaceSqM: 25,
+        heightM: 2.8,
+        volumeCuM: 70,
+        occupantsCount: 3,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 3.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("sales_office"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-bar-cocktail-station",
+        key: "bar_cocktail_station_mescita_alcolici",
+        name: "Zona Cocktail Bar, Mescita Alcolici & Banchi Bottiglie",
+        icon: "🍸",
+        category: "sales_office",
+        isDefault: true,
+        surfaceSqM: 12,
+        heightM: 2.8,
+        volumeCuM: 33.6,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 1.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("sales_office"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-bar-retrobanco-snack",
+        key: "bar_laboratorio_tavola_fredda_snack",
+        name: "Laboratorio Tavola Fredda, Piastre Panini & Preparazione Snack",
+        icon: "🥪",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 15,
+        heightM: 3.0,
+        volumeCuM: 45,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          forcedExhaustType: "kitchen_hood",
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-bar-spillatura-co2",
+        key: "bar_impianto_spillatura_birra_vano_co2",
+        name: "Impianto Spillatura Birra & Vano Bombole CO2 / Azoto Alimentare",
+        icon: "🍺",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 8,
+        heightM: 2.5,
+        volumeCuM: 20,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 1.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          emergencyLighting: true,
+          gasLeakDetectorPresent: true,
+        },
+      },
+      {
+        id: "env-bar-plonge-lavaggio",
+        key: "bar_plonge_lavaggio_bicchieri_stoviglie",
+        name: "Zona Lavaggio Bicchieri, Tazzine & Stoviglie (Plonge Separata)",
+        icon: "🧼",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 10,
+        heightM: 2.8,
+        volumeCuM: 28,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 1.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-bar-deposito-bevande",
+        key: "bar_deposito_merci_secche_bibite_fusti",
+        name: "Magazzino Merci Secche, Bibite, Fusti & Cantina Vini",
+        icon: "📦",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 30,
+        heightM: 3.0,
+        volumeCuM: 90,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          shelvingCertified: true,
+        },
+      },
+      {
+        id: "env-bar-celle-frigo",
+        key: "bar_armadi_frigoriferi_stoccaggio_deperibili",
+        name: "Armadi Frigoriferi di Stoccaggio Deperibili (+2/+4°C e -18°C)",
+        icon: "❄️",
+        category: "storage",
+        isDefault: true,
+        surfaceSqM: 12,
+        heightM: 2.6,
+        volumeCuM: 31.2,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("storage"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-bar-sala-consumo",
+        key: "bar_sala_somministrazione_tavoli_clienti",
+        name: "Sala Somministrazione, Tavoli & Zona Seduta Clienti (40-60 Coperti)",
+        icon: "🍽️",
+        category: "public",
+        isDefault: true,
+        surfaceSqM: 80,
+        heightM: 3.0,
+        volumeCuM: 240,
+        occupantsCount: 50,
+        emergencyExitsCount: 2,
+        windowSurfaceSqM: 12.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("public"),
+          emergencyLighting: true,
+          antiShatterGlass: true,
+        },
+      },
+      {
+        id: "env-bar-dehor-esterno",
+        key: "bar_dehor_esterno_tavoli_gazebo",
+        name: "Dehor Esterno / Area Tavoli all'Aperto & Gazebo",
+        icon: "☀️",
+        category: "public",
+        isDefault: true,
+        surfaceSqM: 40,
+        heightM: 2.8,
+        volumeCuM: 112,
+        occupantsCount: 30,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("public"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-bar-wc-clienti",
+        key: "bar_servizi_igienici_clienti_disabili",
+        name: "Servizi Igienici Clienti (Accessibile Disabili D.P.R. 503/96 - D.M. 236/89)",
+        icon: "♿",
+        category: "services",
+        isDefault: true,
+        surfaceSqM: 12,
+        heightM: 2.4,
+        volumeCuM: 28.8,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 1.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("services"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          forcedExhaustPresent: true,
+          forcedExhaustType: "blind_toilet_fan",
+        },
+      },
+      {
+        id: "env-bar-spogliatoi-staff",
+        key: "bar_spogliatoio_wc_personale_antibagno",
+        name: "Spogliatoio e Servizi Igienici del Personale con Antibagno",
+        icon: "🚻",
+        category: "changing_rooms",
+        isDefault: true,
+        surfaceSqM: 12,
+        heightM: 2.4,
+        volumeCuM: 28.8,
+        occupantsCount: 4,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 1.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("changing_rooms"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          forcedExhaustPresent: true,
+          forcedExhaustType: "blind_toilet_fan",
+        },
+      },
+      {
+        id: "env-bar-tecnico-trattamento-acque",
+        key: "bar_locale_tecnico_quadro_elettrico_trattamento_acque",
+        name: "Locale Tecnico / Quadro Elettrico & Impianto Trattamento Acque",
+        icon: "⚙️",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 8,
+        heightM: 2.5,
+        volumeCuM: 20,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          emergencyLighting: true,
+        },
+      },
+    ];
+  }
+
   // 1. Ristorazione, HoReCa, Somministrazione alimenti (56.x, 10.x, 11.x, 47.11, 47.2, 55.1)
   if (
     ateco.startsWith("56") ||
@@ -3367,7 +3629,20 @@ export function evaluateEnvironmentCompliance(
     env.id === "env-gelamb-centrale-idrica"
   ) {
     minHeightRequired = 1.2; // Vani tecnici veicolari ispezionabili
-  } else if (env.id === "env-gelamb-cella-stoccaggio" || env.key.includes("cella_negativa") || env.key.includes("cella_stoccaggio")) {
+  } else if (
+    env.id === "env-bar-plonge-lavaggio" ||
+    env.key.includes("bar_plonge") ||
+    env.id === "env-bar-banco-caffetteria" ||
+    env.id === "env-bar-cocktail-station"
+  ) {
+    minHeightRequired = 2.7; // 2,70 m per ambienti di somministrazione / bar e plonge lavabicchieri con deroga ASL / commerciale
+  } else if (
+    env.id === "env-bar-celle-frigo" ||
+    env.key.includes("bar_armadi_frigoriferi") ||
+    env.id === "env-gelamb-cella-stoccaggio" ||
+    env.key.includes("cella_negativa") ||
+    env.key.includes("cella_stoccaggio")
+  ) {
     minHeightRequired = 2.4; // 2,40 m per celle frigorifere prefabbricate e locali tecnici refrigerati
   } else if (env.category === "production" || env.category === "warehouse" || env.category === "storage") {
     minHeightRequired = 3.0; // 3,00 m per locali industriali, stoccaggio e lavorazioni
@@ -4288,6 +4563,178 @@ export function evaluateEnvironmentCompliance(
     });
   }
 
+  // 13. Regole ad hoc per Bar, Caffetteria, Snack Bar, Cocktail Bar e Birreria (56.30 / 56.3)
+  // a) Banco bar / caffetteria: altezza minima >= 2.70m, lavamani a comando non manuale con acqua calda/fredda, banco sanificabile MOCA
+  const isBarCounter =
+    env.id === "env-bar-banco-caffetteria" ||
+    env.key === "bar_banco_caffetteria_mescita" ||
+    (env.id.includes("bar-banco") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("563") ?? false));
+  if (isBarCounter) {
+    if (height >= 2.7) {
+      summaryBadges.push({
+        text: "☕ Banco bar e mescita a norma: altezza ≥ 2,70m, superficie lavabile e gocciolatoi MOCA",
+        status: "success",
+      });
+    }
+    summaryBadges.push({
+      text: "🚿 Lavamani a comando non manuale (ginocchio/pedale) con acqua calda e fredda",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "☕ Macchina caffè con valvola di sicurezza PED certificata & lancia vapore cool-touch",
+      status: "success",
+    });
+  }
+
+  // b) Zona Cocktail Bar & Mescita Alcolici
+  const isBarCocktail =
+    env.id === "env-bar-cocktail-station" ||
+    env.key === "bar_cocktail_station_mescita_alcolici";
+  if (isBarCocktail) {
+    summaryBadges.push({
+      text: "🍸 Cocktail station inox coibentata con vasca ghiaccio a scarico diretto e speed-rail",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "⚙️ Blender e tritaghiaccio insonorizzati conformi UNI EN 12852 con microinterruttore",
+      status: "success",
+    });
+  }
+
+  // c) Laboratorio Tavola Fredda & Preparazione Snack
+  const isBarSnack =
+    env.id === "env-bar-retrobanco-snack" ||
+    env.key === "bar_laboratorio_tavola_fredda_snack";
+  if (isBarSnack) {
+    summaryBadges.push({
+      text: "🥪 Laboratorio tavola fredda: cappa d'aspirazione sopra piastre panini & fornetti",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🔪 Affettatrice a gravità con anello paralama continuo 360° (UNI EN 1974) e blocco vela a zero",
+      status: "success",
+    });
+  }
+
+  // d) Impianto Spillatura Birra & Vano Bombole CO2 / Azoto
+  const isBarSpillatura =
+    env.id === "env-bar-spillatura-co2" ||
+    env.key === "bar_impianto_spillatura_birra_vano_co2";
+  if (isBarSpillatura) {
+    summaryBadges.push({
+      text: "🍺 Bombole CO2 ed azoto vincolate con catenelle verticali anticaduta (D.Lgs. 81/08 Titolo XI)",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🚨 Rilevatore fughe CO2 con allarme ottico-acustico anti-asfissia & aerazione forzata",
+      status: "danger",
+    });
+  }
+
+  // e) Plonge Lavaggio Bicchieri & Tazzine
+  const isBarPlonge =
+    env.id === "env-bar-plonge-lavaggio" ||
+    env.key === "bar_plonge_lavaggio_bicchieri_stoviglie";
+  if (isBarPlonge) {
+    summaryBadges.push({
+      text: "🧼 Lavabicchieri con risciacquo igienico ≥ 82-85°C & Break Tank UNI EN 1717",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "💧 Canalina di scolo a pavimento sifonata con griglia inox rimovibile",
+      status: "info",
+    });
+  }
+
+  // f) Magazzino Merci Secche, Bibite & Fusti
+  const isBarStorage =
+    env.id === "env-bar-deposito-bevande" ||
+    env.key === "bar_deposito_merci_secche_bibite_fusti";
+  if (isBarStorage) {
+    summaryBadges.push({
+      text: "📦 Stoccaggio bibite e fusti birra su scaffali certificati rialzati ≥ 15 cm da terra",
+      status: "info",
+    });
+  }
+
+  // g) Armadi Frigoriferi Deperibili (+2/+4°C e -18°C)
+  const isBarFrigo =
+    env.id === "env-bar-celle-frigo" ||
+    env.key === "bar_armadi_frigoriferi_stoccaggio_deperibili";
+  if (isBarFrigo) {
+    summaryBadges.push({
+      text: "❄️ Armadi frigoriferi positivi (+2/+4°C) e negativi (-18°C) con teletermometri continui HACCP",
+      status: "info",
+    });
+  }
+
+  // h) Sala Somministrazione Tavoli Clienti
+  const isBarHall =
+    env.id === "env-bar-sala-consumo" ||
+    env.key === "bar_sala_somministrazione_tavoli_clienti";
+  if (isBarHall) {
+    summaryBadges.push({
+      text: "🚪 Vie di esodo libere ≥ 1,20m & uscite di sicurezza con maniglioni antipanico",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🧯 Illuminazione di emergenza ≥ 5 lux & estintori omologati 34A 233B",
+      status: "success",
+    });
+  }
+
+  // i) Dehor Esterno & Area Tavoli all'Aperto
+  const isBarDehor =
+    env.id === "env-bar-dehor-esterno" ||
+    env.key === "bar_dehor_esterno_tavoli_gazebo";
+  if (isBarDehor) {
+    summaryBadges.push({
+      text: "☀️ Dehor esterno: paraventi certificati con ancoraggio antivento zavorrato/fissato",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🔥 Funghi riscaldanti GPL con valvola antiribaltamento o lampade IR marcate CE",
+      status: "success",
+    });
+  }
+
+  // j) Servizi Igienici Clienti Disabili
+  const isBarWc =
+    env.id === "env-bar-wc-clienti" ||
+    env.key === "bar_servizi_igienici_clienti_disabili";
+  if (isBarWc) {
+    summaryBadges.push({
+      text: "♿ W.C. accessibile disabili (D.P.R. 503/96 - D.M. 236/89) con tirante allarme a campanello",
+      status: "success",
+    });
+  }
+
+  // k) Spogliatoio & WC Staff
+  const isBarStaff =
+    env.id === "env-bar-spogliatoi-staff" ||
+    env.key === "bar_spogliatoio_wc_personale_antibagno";
+  if (isBarStaff) {
+    summaryBadges.push({
+      text: "🚻 Armadietti a doppio scomparto sporco/pulito & lavamani non manuale con antibagno",
+      status: "info",
+    });
+  }
+
+  // l) Locale Tecnico / Quadro Elettrico & Impianto Trattamento Acque
+  const isBarTech =
+    env.id === "env-bar-tecnico-trattamento-acque" ||
+    env.key === "bar_locale_tecnico_quadro_elettrico_trattamento_acque";
+  if (isBarTech) {
+    summaryBadges.push({
+      text: "💧 Addolcitore a resine e filtri conformi D.Lgs. 18/2023 & D.M. 174/2004 con disconnettore UNI EN 1717",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "⚡ Quadro elettrico con differenziale ad alta sensibilità e pulsante di sgancio rapido",
+      status: "warning",
+    });
+  }
+
   return {
     isHeightCompliant,
     minHeightRequired,
@@ -4359,7 +4806,9 @@ export function generateEnvironmentChecklistItems(
       env.id.includes("ft-") ||
       env.key.includes("ft_") ||
       env.id.includes("gelamb-") ||
-      env.key.includes("gelamb_"));
+      env.key.includes("gelamb_") ||
+      env.id.includes("bar-") ||
+      env.key.includes("bar_"));
 
   // 1. Requisito Dimensionale & Cubatura
   items.push({
@@ -7788,6 +8237,481 @@ export function generateEnvironmentChecklistItems(
       categoryTag: "cpi",
       suggestedNonConformity:
         "Estintori non accessibili o corsie di manovra dell'hangar ostruite da materiali con ostacolo all'evacuazione del veicolo in emergenza.",
+    });
+  }
+
+  // ============================================================================
+  // 13. Regole e Requisiti per Bar, Caffetteria, Snack Bar, Cocktail Bar e Birreria (56.30 / 56.3)
+  // ============================================================================
+
+  // a) Banco Bar Principale, Caffetteria & Mescita
+  if (env.id === "env-bar-banco-caffetteria" || env.id.includes("bar-banco-caffetteria")) {
+    items.push({
+      id: `${env.id}-macchina-espresso-valvola-ped-lancia-cooltouch`,
+      area: env.name,
+      title: "Macchina Caffè Espresso con Valvola di Sicurezza PED e Lance Vapore Cool-Touch",
+      question:
+        "La macchina per caffè espresso è dotata di valvola di sicurezza certificata PED (D.Lgs. 26/2016) revisionata, manometro di pressione caldaia funzionante e lance vapore con isolamento termico cool-touch per prevenire ustioni agli operatori?",
+      normReference: "D.Lgs. 26/2016 (Direttiva PED 2014/68/UE) e D.Lgs. 81/2008 Allegato IV e V",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Macchina caffè priva di verifica valvola PED o con lancia vapore priva di impugnatura antiscottatura con pericolo di ustioni gravi.",
+    });
+
+    items.push({
+      id: `${env.id}-macinadosatore-battifiltro-insonorizzato-rumore`,
+      area: env.name,
+      title: "Macinadosatori On-Demand con Cassetto Battifiltro Fonoassorbente (Titolo VIII Rumore)",
+      question:
+        "I macinadosatori del caffè sono provvisti di cassetto battifiltro fonoassorbente per attutire i colpi e di macine integre per limitare le vibrazioni e il rumore impulsivo continuo al banco mescita?",
+      normReference: "D.Lgs. 81/2008 Titolo VIII Capo II (Protezione dei lavoratori contro i rischi di esposizione al rumore)",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "microclima_luce",
+      suggestedNonConformity:
+        "Cassetto battifiltro metallico privo di gomma fonoassorbente con elevate emissioni di rumore impulsivo a carico dei baristi.",
+    });
+
+    items.push({
+      id: `${env.id}-vetrina-refrigerata-snack-parafiato-moca`,
+      area: env.name,
+      title: "Vetrina Refrigerata Snack con Schermo Parafiato e Temperatura di Conservazione +4°C",
+      question:
+        "La vetrina refrigerata espositiva per brioche salate, tramezzini e panini al banco è dotata di barriera parafiato verso il pubblico, gocciolatoi inox e termometro visibile attestante temperatura ≤ +4°C?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo IX e D.Lgs. 193/2007",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Vetrina snack con coperchio o parafiato rotto o temperatura interna superiore a +4°C con interruzione della catena del freddo per prodotti farciti.",
+    });
+
+    items.push({
+      id: `${env.id}-lavamani-banco-comando-non-manuale`,
+      area: env.name,
+      title: "Lavamani al Banco con Comando a Ginocchio/Pedale, Acqua Calda/Fredda e Asciugamani a Perdere",
+      question:
+        "Il banco mescita dispone di lavamani dedicato ad uso esclusivo del personale azionabile con comando a ginocchio o pedale, erogatore di sapone igienizzante e salviette monouso a perdere?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo I punto 4 e Capitolo II",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Lavamani del banco bar azionabile con manopole manuali o sprovvisto di asciugamani a perdere o acqua calda per il lavaggio frequente delle mani del personale.",
+    });
+  }
+
+  // b) Zona Cocktail Bar, Mescita Alcolici & Banchi Bottiglie
+  if (env.id === "env-bar-cocktail-station" || env.id.includes("bar-cocktail-station")) {
+    items.push({
+      id: `${env.id}-cocktail-station-vasca-ghiaccio-scarico-diretto`,
+      area: env.name,
+      title: "Cocktail Station Coibentata con Vasca Ghiaccio a Scarico Diretto Anticontaminazione",
+      question:
+        "La cocktail station presenta vasca per cubetti di ghiaccio in acciaio inox coibentata con pozzetto e scarico continuo a tenuta per evitare ristagni di acqua di fusione ed è dotata di palette dedicate MOCA per il prelievo esclusivo?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo II e Reg. CE 1935/2004 MOCA",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Prelievo del ghiaccio alimentare con bicchieri in vetro o ristagno di acqua torbida nella vasca della cocktail station per scarico ostruito.",
+    });
+
+    items.push({
+      id: `${env.id}-blender-tritaghiaccio-microinterruttore-uni-en-12852`,
+      area: env.name,
+      title: "Blender e Tritaghiaccio Professionali con Microinterruttore di Blocco (UNI EN 12852)",
+      question:
+        "Il frullatore/blender e il tritaghiaccio elettrico sono marcati CE e muniti di dispositivo di sicurezza (microinterruttore) che arresta istantaneamente la rotazione delle lame all'apertura del coperchio o campana insonorizzante?",
+      normReference: "UNI EN 12852 e D.Lgs. 81/2008 Allegato V punto 2",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Blender o tritaghiaccio privo di microinterruttore di sicurezza sul coperchio con pericolo di contatto accidentale delle mani con le lame rotanti.",
+    });
+
+    items.push({
+      id: `${env.id}-speed-rail-anticaduta-bottiglie-ergonomia`,
+      area: env.name,
+      title: "Speed-Rail Portabottiglie Rinforzato con Bordo Anticaduta e Lavello Bagnaghiaccio a Pressione",
+      question:
+        "Le rastrelliere portabottiglie (speed-rail) sono fissate saldamente al banco con parapetto anticaduta e il lavello con sciacquabicchiere a pressione (pitcher rinser) è provvisto di valvola antiriflusso?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.4 e UNI EN 1717",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Speed-rail instabile o privo di bordatura di contenimento con rischio di rottura bottiglie e ferite da taglio per gli operatori.",
+    });
+  }
+
+  // c) Laboratorio Tavola Fredda, Piastre Panini & Preparazione Snack
+  if (env.id === "env-bar-retrobanco-snack" || env.id.includes("bar-retrobanco-snack")) {
+    items.push({
+      id: `${env.id}-affettatrice-paralama-360-blocco-vela-uni-en-1974`,
+      area: env.name,
+      title: "Affettatrice a Gravità con Anello Paralama Fisso Continuo 360° e Blocco Vela a Zero (UNI EN 1974)",
+      question:
+        "L'affettatrice è conforme alla norma UNI EN 1974, provvista di anello paralama perimetrale fisso a 360°, blocco carrello con manopola graduata a zero per la pulizia e dispositivo premi-alimento trasparente?",
+      normReference: "UNI EN 1974 e D.Lgs. 81/2008 Titolo III Capo I e All. V",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Affettatrice con lama scoperta o priva del blocco carrello a lama chiusa, con gravissimo rischio di amputazione o lesioni da taglio durante le operazioni di smontaggio e pulizia.",
+    });
+
+    items.push({
+      id: `${env.id}-piastra-panini-isolamento-termico-cappa`,
+      area: env.name,
+      title: "Piastre Panini e Fornetti con Maniglie Termoisolanti e Aspirazione Idonea dei Fumi",
+      question:
+        "Le piastre in ghisa rigate/lisce e i fornetti/toaster sono provvisti di maniglie e comandi termicamente isolati, cavi resistenti al calore e posizionati sotto cappa o impianto di aerazione forzata idoneo per l'estrazione dei fumi di tostatura?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.9 e Reg. CE 852/2004 All. II Cap. II",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Piastra per panini priva di protezione dal calore sulle maniglie o fumi di cottura persistenti nel retrobanco per assenza di idonea estrazione o cappa.",
+    });
+
+    items.push({
+      id: `${env.id}-taglieri-coltelli-codice-colore-haccp`,
+      area: env.name,
+      title: "Taglieri in Polietilene a Codice Colore e Coltelli MOCA per Separazione Alimenti",
+      question:
+        "La preparazione di snack, panini, affettati e verdure avviene su taglieri in polietilene alimentare atossico differenziati per codice colore (es. rosso per carni cotte/salumi, verde per verdure) sanificati dopo ogni utilizzo?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo V e Reg. CE 1935/2004",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Utilizzo di taglieri unici fessurati o in legno non ammessi per la manipolazione promiscua di salumi e verdure con rischio di contaminazione crociata microbiologica.",
+    });
+  }
+
+  // d) Impianto Spillatura Birra & Vano Bombole CO2 / Azoto Alimentare
+  if (env.id === "env-bar-spillatura-co2" || env.id.includes("bar-spillatura-co2")) {
+    items.push({
+      id: `${env.id}-bombole-co2-azoto-catenelle-verticali-titolo-xi`,
+      area: env.name,
+      title: "Fissaggio Sicuro Bombole Gas Compresso CO2/Azoto con Catenelle Verticali (D.Lgs. 81/08)",
+      question:
+        "Tutte le bombole di gas compresso (anidride carbonica E290 e azoto E941 per spillatura) sono saldamente assicurate a muro mediante catenelle o collari metallici posti a 2/3 dell'altezza per prevenirne il ribaltamento accidentale?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.4 e Titolo XI (Atmosfere esplosive ed asfissianti)",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Bombole di CO2 per spillatura libere a terra o non vincolate con catenelle di sicurezza con rischio di caduta, rottura valvola ed effetto missile ad alta pressione.",
+    });
+
+    items.push({
+      id: `${env.id}-rilevatore-fughe-co2-allarme-anti-asfissia`,
+      area: env.name,
+      title: "Rilevatore Fughe Gas Asfissiante CO2 con Allarme Ottico-Acustico ed Estrattore d'Aria",
+      question:
+        "Nel vano spillatura/deposito fusti è installato un sensore per la rilevazione di perdite di anidride carbonica (CO2) con allarme ottico-acustico esterno e attivazione automatica della ventilazione forzata contro il rischio di asfissia e saturazione dell'aria?",
+      normReference: "D.Lgs. 81/2008 art. 66 e Allegato IV punto 1.9 e Titolo XI",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Locale bombole CO2 privo di sistema di rilevazione fughe o ventilazione con potenziale accumulo di gas pesante asfissiante sul fondo del locale e pericolo di morte.",
+    });
+
+    items.push({
+      id: `${env.id}-linee-spillatura-sanificazione-periodica-haccp`,
+      area: env.name,
+      title: "Sanificazione e Flussaggio Chimico Periodico Linee e Serpentini di Spillatura",
+      question:
+        "I tubi, serpentini di raffreddamento e rubinetti di mescita dell'impianto di spillatura sono sottoposti a ciclo documentato di sanificazione e decalcificazione chimica (con registro interventi HACCP) per prevenire biofilm e contaminazioni batteriche?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo V punto 1 e D.Lgs. 193/2007",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Linee dell'impianto di spillatura non sanificate periodicamente con depositi di tartaro di birra, lieviti e biofilm all'interno delle canne di mescita.",
+    });
+  }
+
+  // e) Zona Lavaggio Bicchieri, Tazzine & Stoviglie (Plonge Separata)
+  if (env.id === "env-bar-plonge-lavaggio" || env.id.includes("bar-plonge-lavaggio")) {
+    items.push({
+      id: `${env.id}-lavabicchieri-risciacquo-85c-break-tank-uni-en-1717`,
+      area: env.name,
+      title: "Lavabicchieri Professionale con Risciacquo Igienico a 85°C e Break Tank UNI EN 1717",
+      question:
+        "La lavabicchieri/lavastoviglie della plonge garantisce una temperatura di risciacquo finale non inferiore a 82-85°C per l'igienizzazione termica di tazze e bicchieri ed è provvista di Break Tank (disconnettore idrico antiriflusso UNI EN 1717)?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo V e UNI EN 1717",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Lavabicchieri con temperatura del boiler di risciacquo inferiore a 80°C o priva di dosatore automatico di brillantante/sanificante con mancata igienizzazione delle stoviglie.",
+    });
+
+    items.push({
+      id: `${env.id}-vasche-lavello-doccione-canalina-antiscivolo`,
+      area: env.name,
+      title: "Lavello Inox a Vasca Profonda con Doccione Sbarazzo Flessibile e Canalina Sifonata a Terra",
+      question:
+        "Il lavello di lavaggio è realizzato in acciaio inox con gocciolatoio e doccione flessibile a molla, e la zona calpestio è dotata di canalina di scolo sifonata con griglia inox per evitare allagamenti e scivolamenti?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.3 e Reg. CE 852/2004 All. II",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "pavimenti_pareti",
+      suggestedNonConformity:
+        "Pavimento della plonge con ristagni continui di acqua saponata per assenza di canaline di scolo o pendenze adeguate, con elevato rischio scivolamento.",
+    });
+  }
+
+  // f) Magazzino Merci Secche, Bibite, Fusti & Cantina Vini
+  if (env.id === "env-bar-deposito-bevande" || env.id.includes("bar-deposito-bevande")) {
+    items.push({
+      id: `${env.id}-scaffalature-portata-fusti-casse-acque`,
+      area: env.name,
+      title: "Scaffalature Industriali per Fusti e Casse d'Acqua con Portate Limite Verificate (UNI EN 15635)",
+      question:
+        "Le scaffalature metalliche destinate a sostenere il peso gravoso di fusti di birra, casse di bibite e bottiglie di vino presentano cartelli di portata massima, ancoraggi a parete/pavimento e campate sollevate ≥ 15 cm dal suolo?",
+      normReference: "UNI EN 15635 e D.Lgs. 81/2008 Allegato IV punto 1.4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Scaffali metallici sovraccarichi di casse di bottiglie e fusti privi di targhette di portata o deformati senza ancoraggi di sicurezza al muro.",
+    });
+
+    items.push({
+      id: `${env.id}-monitoraggio-infestanti-pallettizzazione-cantina`,
+      area: env.name,
+      title: "Stoccaggio Alimenti su Pedane Plastiche Lavabili e Monitoraggio Roditori/Blatte (Pest Control)",
+      question:
+        "I cartoni di bevande, vini e alimenti secchi sono stoccati su pallet o ripiani plastici lisci sanificabili e sono attive trappole collanti/monitoraggio infestanti conformi al manuale HACCP?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo IX punto 4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Casse di bottiglie o cartoni appoggiati direttamente sul pavimento umido del magazzino o assenza di postazioni di monitoraggio contro insetti e topi.",
+    });
+  }
+
+  // g) Armadi Frigoriferi di Stoccaggio Deperibili (+2/+4°C e -18°C)
+  if (env.id === "env-bar-celle-frigo" || env.id.includes("bar-celle-frigo")) {
+    items.push({
+      id: `${env.id}-teletermometri-registrazione-continua-haccp`,
+      area: env.name,
+      title: "Teletermometri a Lettura Esterna e Registrazione Continua Temperature HACCP (+4°C / -18°C)",
+      question:
+        "Gli armadi frigoriferi per latte fresco, salumi, formaggi e dessert (+2/+4°C) e il congelatore per prodotti surgelati (-18°C) sono muniti di teletermometro a display esterno con registro di controllo delle temperature?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo IX e Reg. CE 37/2005",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Frigorifero per il latte e farciture deperibili sprovvisto di termometro o con temperatura superiore a +4°C rilevata durante l'ispezione.",
+    });
+
+    items.push({
+      id: `${env.id}-guarnizioni-frigo-integre-illuminazione-interna`,
+      area: env.name,
+      title: "Guarnizioni Magnetiche Integre e Pulibili e Maniglie con Apertura di Sicurezza",
+      question:
+        "Le guarnizioni magnetiche delle porte dei frigoriferi si presentano prive di muffe, tagli o fessurazioni, assicurando la perfetta tenuta termica e la facile igienizzazione con detergenti idonei?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo V e D.Lgs. 81/2008 All. IV",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Guarnizioni degli armadi frigoriferi annerite da muffe persistenti o lacerate con dispersione di freddo e condensa a terra.",
+    });
+  }
+
+  // h) Sala Somministrazione, Tavoli & Zona Seduta Clienti (40-60 Coperti)
+  if (env.id === "env-bar-sala-consumo" || env.id.includes("bar-sala-consumo")) {
+    items.push({
+      id: `${env.id}-vie-esodo-corridoi-passaggio-liberi-120cm`,
+      area: env.name,
+      title: "Vie di Esodo e Passaggi tra i Tavoli Liberi e di Ampiezza ≥ 1,20 Metri",
+      question:
+        "I corridoi di transito principali tra i tavoli e i banchi verso le uscite di sicurezza presentano larghezza utile netta non inferiore a 1,20 metri e risultano costantemente sgombri da sedie, scatoloni o arredi provvisori?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.4 e D.M. 03/09/2021 (Minicodice)",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Vie di fuga e corridoi tra i tavoli del bar ristretti a meno di 1,20 m o ostruiti con rischio di intralcio e schiacciamento in caso di rapida evacuazione.",
+    });
+
+    items.push({
+      id: `${env.id}-uscite-sicurezza-maniglioni-antipanico-luci-emergenza`,
+      area: env.name,
+      title: "Uscite di Emergenza con Maniglioni Antipanico e Illuminazione di Sicurezza (≥ 5 lux)",
+      question:
+        "Le porte delle uscite di emergenza si aprono facilmente nel verso dell'esodo mediante maniglioni antipanico a barra orizzontale marcati CE (UNI EN 1125) ed è presente illuminazione di emergenza ad attivazione automatica in caso di blackout?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.4 e UNI EN 1125",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Uscita di emergenza della sala sbarrata a chiave o con maniglione antipanico bloccato o illuminazione di sicurezza non funzionante.",
+    });
+  }
+
+  // i) Dehor Esterno / Area Tavoli all'Aperto & Gazebo
+  if (env.id === "env-bar-dehor-esterno" || env.id.includes("bar-dehor-esterno")) {
+    items.push({
+      id: `${env.id}-paraventi-dehor-ancoraggio-antivento-certificato`,
+      area: env.name,
+      title: "Paraventi, Gazebo e Strutture del Dehor con Ancoraggio Antivento Certificato",
+      question:
+        "I paraventi perimetrali, tende, ombrelloni e coperture fisse/mobili del dehor esterno sono saldamente ancorati al suolo o zavorrati secondo i carichi di vento previsti per evitare ribaltamenti su clienti e passanti?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.1 e Regolamenti Comunali di Occupazione Suolo Pubblico",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Ombrelloni o paraventi del dehor non zavorrati adeguatamente con pericolo di ribaltamento per folate di vento e lesioni a persone.",
+    });
+
+    items.push({
+      id: `${env.id}-riscaldatori-dehor-funghi-gpl-lampade-infrarossi`,
+      area: env.name,
+      title: "Apparecchi Riscaldanti Esterni (Funghi a GPL o Lampade IR) a Norma con Valvola Antiribaltamento",
+      question:
+        "Gli apparecchi di riscaldamento del dehor (funghi radianti a GPL o stufe a infrarossi) sono provvisti di valvola di sicurezza antiribaltamento con spegnimento immediato della fiamma/alimentazione e posizionati a distanza di sicurezza da tendaggi infiammabili?",
+      normReference: "D.M. 03/09/2021, Norma UNI 10738 e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Fungo a gas GPL posizionato sotto tende infiammabili o privo di valvola termoelettrica antiribaltamento con grave pericolo di incendio e ustioni.",
+    });
+  }
+
+  // j) Servizi Igienici Clienti (Accessibile Disabili D.P.R. 503/96 - D.M. 236/89)
+  if (env.id === "env-bar-wc-clienti" || env.id.includes("bar-wc-clienti")) {
+    items.push({
+      id: `${env.id}-accessibilita-disabili-dpr-503-dm-236`,
+      area: env.name,
+      title: "Servizi Igienici Accessibili ai Disabili (D.P.R. 503/96 - D.M. 236/89) con Tirante Allarme",
+      question:
+        "Il bagno clienti è privo di barriere architettoniche, munito di porta con luce netta ≥ 85 cm, tazza W.C. con apertura frontale e maniglioni di sostegno, lavabo ergonomico e tirante di soccorso collegato a suoneria e luce fuori porta?",
+      normReference: "D.P.R. 503/1996, D.M. 236/1989 art. 5 e D.Lgs. 81/2008 Allegato IV punto 1.13",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Bagno clienti privo di tirante di allarme a campanello o con maniglioni per disabili mancanti o porta con larghezza insufficiente per carrozzine.",
+    });
+
+    items.push({
+      id: `${env.id}-antibagno-lavamani-non-manuale-aerazione-forzata`,
+      area: env.name,
+      title: "Antibagno con Lavamani Non Manuale e Ventilazione Meccanica se Bagno Cieco",
+      question:
+        "Il servizio igienico è preceduto da locale antibagno separato con porta a chiusura automatica, lavamani con miscelatore a ginocchio/fotocellula, dosatore sapone e aspiratore d'aria forzata temporizzato se il bagno è privo di finestra?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo I punto 3 e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Bagno clienti comunicante direttamente con la sala somministrazione senza antibagno o con aspiratore dell'aria guasto nel locale cieco.",
+    });
+  }
+
+  // k) Spogliatoio e Servizi Igienici del Personale con Antibagno
+  if (env.id === "env-bar-spogliatoi-staff" || env.id.includes("bar-spogliatoi-staff")) {
+    items.push({
+      id: `${env.id}-armadietti-doppio-scomparto-sporco-pulito-staff`,
+      area: env.name,
+      title: "Armadietti Individuali a Doppio Scomparto per Separazione Abiti Civili e da Lavoro",
+      question:
+        "Lo spogliatoio del personale dispone di armadietti metallici individuali a due scomparti (uno per gli indumenti civili e uno per le divise da barista/cameriere) lavabili e muniti di serratura a chiave o lucchetto?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.12 e Reg. CE 852/2004 All. II Cap. I",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Assenza di armadietti a doppio scomparto con promiscuità tra abiti civili e divise da lavoro a contatto con alimenti e bevande.",
+    });
+
+    items.push({
+      id: `${env.id}-servizio-igienico-personale-doccia-lavamani`,
+      area: env.name,
+      title: "Servizio Igienico Esclusivo Personale con Doccia e Lavamani con Comando a Pedale/Ginocchio",
+      question:
+        "Il bagno del personale è fisicamente distinto da quello dei clienti, dotato di antibagno con lavamani a comando non manuale, erogatore di sapone disinfettante, asciugamani monouso e piatto doccia con acqua calda?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.13 e Reg. CE 852/2004 Allegato II",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Bagno del personale utilizzato promiscuamente come ripostiglio merci o privo di sapone disinfettante e comando lavamani igienico.",
+    });
+  }
+
+  // l) Locale Tecnico / Quadro Elettrico & Impianto Trattamento Acque
+  if (env.id === "env-bar-tecnico-trattamento-acque" || env.id.includes("bar-tecnico-trattamento-acque")) {
+    items.push({
+      id: `${env.id}-impianto-addolcitore-resine-potabilita-dlgs-18-2023`,
+      area: env.name,
+      title: "Addolcitore Acque e Filtrazione Conforme a D.Lgs. 18/2023 e D.M. 174/2004",
+      question:
+        "L'impianto di addolcimento a scambio ionico e osmosi per la macchina del caffè e fabbricatore di ghiaccio rispetta i parametri di potabilità (durezza residua ≥ 15°F), impiega materiali atossici certificati D.M. 174/2004 ed è provvisto di registro manutenzione filtri?",
+      normReference: "D.Lgs. 18/2023 (Acque destinate al consumo umano) e D.M. 174/2004",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Mancata rigenerazione del sale dell'addolcitore o filtri a carboni attivi mai sostituiti con rischio di proliferazione batterica e cessione sostanze nell'acqua per il caffè e ghiaccio.",
+    });
+
+    items.push({
+      id: `${env.id}-quadro-elettrico-differenziale-sgancio-rapido-emergenza`,
+      area: env.name,
+      title: "Quadro Elettrico Generale con Differenziale Selettivo e Pulsante di Sgancio di Emergenza",
+      question:
+        "Il quadro elettrico generale presenta porta chiusa a chiave con simbolo di pericolo alta tensione, sezionamento indipendente per banchi frigo, cappe e prese mescita, interruttore differenziale ad alta sensibilità e pulsante di sgancio rapido accessibile?",
+      normReference: "Norma CEI 64-8 e D.Lgs. 81/2008 Titolo III Capo III",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Quadro elettrico aperto o con cavi a vista senza sportello di protezione e pulsante di sgancio di emergenza ostruito da cartoni.",
     });
   }
 

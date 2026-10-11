@@ -2818,4 +2818,478 @@ assert.ok(
   "In modalità safety_only nessun item banco pozzetti gelateria ambulante deve avere domain haccp",
 );
 
+// ============================================================================
+// Test 23: getStandardEnvironmentsForAteco & conformità per Bar / Caffetteria (56.30 / 56.3)
+// ============================================================================
+console.log("Test 23: getStandardEnvironmentsForAteco & conformità per Bar / Caffetteria (56.30 / 56.3)");
+
+const barEnvs1 = getStandardEnvironmentsForAteco("56.30");
+assert.equal(barEnvs1.length, 12, "Il Bar / Caffetteria deve avere esattamente 12 ambienti standard");
+
+// Verifica varianti codice ATECO (56.30.00, 56.30.0, 56.3, 563000, 56300, 5630, 563)
+const barEnvsVar1 = getStandardEnvironmentsForAteco("56.30.00");
+assert.equal(barEnvsVar1.length, 12, "Anche prefisso 56.30.00 deve restituire 12 ambienti bar");
+const barEnvsVar2 = getStandardEnvironmentsForAteco("56.30.0");
+assert.equal(barEnvsVar2.length, 12, "Anche prefisso 56.30.0 deve restituire 12 ambienti bar");
+const barEnvsVar3 = getStandardEnvironmentsForAteco("56.3");
+assert.equal(barEnvsVar3.length, 12, "Anche prefisso 56.3 deve restituire 12 ambienti bar");
+const barEnvsVar4 = getStandardEnvironmentsForAteco("563000");
+assert.equal(barEnvsVar4.length, 12, "Anche codice numerico 563000 deve restituire 12 ambienti bar");
+const barEnvsVar5 = getStandardEnvironmentsForAteco("56300");
+assert.equal(barEnvsVar5.length, 12, "Anche codice numerico 56300 deve restituire 12 ambienti bar");
+const barEnvsVar6 = getStandardEnvironmentsForAteco("5630");
+assert.equal(barEnvsVar6.length, 12, "Anche codice numerico 5630 deve restituire 12 ambienti bar");
+const barEnvsVar7 = getStandardEnvironmentsForAteco("563");
+assert.equal(barEnvsVar7.length, 12, "Anche codice numerico 563 deve restituire 12 ambienti bar");
+
+// Verifica ID dei 12 ambienti del Bar
+const expectedBarIds = [
+  "env-bar-banco-caffetteria",
+  "env-bar-cocktail-station",
+  "env-bar-retrobanco-snack",
+  "env-bar-spillatura-co2",
+  "env-bar-plonge-lavaggio",
+  "env-bar-deposito-bevande",
+  "env-bar-celle-frigo",
+  "env-bar-sala-consumo",
+  "env-bar-dehor-esterno",
+  "env-bar-wc-clienti",
+  "env-bar-spogliatoi-staff",
+  "env-bar-tecnico-trattamento-acque",
+];
+
+for (const id of expectedBarIds) {
+  assert.ok(
+    barEnvs1.some((e) => e.id === id),
+    `Ambiente ${id} deve essere presente nella lista per 56.30`,
+  );
+}
+
+// 1. Banco Bar Principale, Caffetteria & Mescita
+const barBanco = barEnvs1.find((e) => e.id === "env-bar-banco-caffetteria")!;
+assert.equal(barBanco.category, "sales_office");
+assert.equal(barBanco.surfaceSqM, 25);
+assert.equal(barBanco.heightM, 2.8);
+assert.equal(barBanco.volumeCuM, 70);
+assert.equal(barBanco.occupantsCount, 3);
+assert.equal(barBanco.windowSurfaceSqM, 3.0);
+assert.equal(barBanco.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(barBanco.features.flooringCondition, "compliant_anti_slip");
+assert.equal(barBanco.features.emergencyLighting, true);
+const compBancoBar = evaluateEnvironmentCompliance(barBanco, "56.30");
+assert.equal(compBancoBar.isHeightCompliant, true);
+assert.ok(
+  compBancoBar.summaryBadges.some((b) => b.text.includes("Banco bar e mescita a norma: altezza ≥ 2,70m")),
+  "Deve essere presente il badge altezza e gocciolatoi MOCA per banco bar",
+);
+assert.ok(
+  compBancoBar.summaryBadges.some((b) => b.text.includes("Lavamani a comando non manuale")),
+  "Deve essere presente il badge lavamani a comando non manuale banco bar",
+);
+assert.ok(
+  compBancoBar.summaryBadges.some((b) => b.text.includes("Macchina caffè con valvola di sicurezza PED")),
+  "Deve essere presente il badge valvola PED e lance cool-touch",
+);
+
+// 2. Zona Cocktail Bar, Mescita Alcolici & Banchi Bottiglie
+const barCocktail = barEnvs1.find((e) => e.id === "env-bar-cocktail-station")!;
+assert.equal(barCocktail.category, "sales_office");
+assert.equal(barCocktail.surfaceSqM, 12);
+assert.equal(barCocktail.heightM, 2.8);
+assert.equal(barCocktail.volumeCuM, 33.6);
+assert.equal(barCocktail.occupantsCount, 2);
+assert.equal(barCocktail.windowSurfaceSqM, 1.5);
+assert.equal(barCocktail.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(barCocktail.features.flooringCondition, "compliant_anti_slip");
+const compCocktailBar = evaluateEnvironmentCompliance(barCocktail, "56.30");
+assert.equal(compCocktailBar.isHeightCompliant, true);
+assert.ok(
+  compCocktailBar.summaryBadges.some((b) => b.text.includes("Cocktail station inox coibentata")),
+  "Deve essere presente il badge cocktail station inox e speed-rail",
+);
+assert.ok(
+  compCocktailBar.summaryBadges.some((b) => b.text.includes("Blender e tritaghiaccio insonorizzati conformi UNI EN 12852")),
+  "Deve essere presente il badge blender UNI EN 12852",
+);
+
+// 3. Laboratorio Tavola Fredda, Piastre Panini & Preparazione Snack
+const barSnack = barEnvs1.find((e) => e.id === "env-bar-retrobanco-snack")!;
+assert.equal(barSnack.category, "production");
+assert.equal(barSnack.surfaceSqM, 15);
+assert.equal(barSnack.heightM, 3.0);
+assert.equal(barSnack.volumeCuM, 45);
+assert.equal(barSnack.occupantsCount, 2);
+assert.equal(barSnack.windowSurfaceSqM, 2.0);
+assert.equal(barSnack.features.forcedExhaustPresent, true);
+assert.equal(barSnack.features.forcedExhaustType, "kitchen_hood");
+assert.equal(barSnack.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(barSnack.features.flooringCondition, "compliant_anti_slip");
+assert.equal(barSnack.features.insectScreens, true);
+assert.equal(barSnack.features.microclimateCompliant, true);
+const compSnackBar = evaluateEnvironmentCompliance(barSnack, "56.30");
+assert.equal(compSnackBar.isHeightCompliant, true);
+assert.ok(
+  compSnackBar.summaryBadges.some((b) => b.text.includes("Laboratorio tavola fredda: cappa d'aspirazione")),
+  "Deve essere presente il badge cappa laboratorio tavola fredda",
+);
+assert.ok(
+  compSnackBar.summaryBadges.some((b) => b.text.includes("Affettatrice a gravità con anello paralama continuo 360° (UNI EN 1974)")),
+  "Deve essere presente il badge affettatrice UNI EN 1974",
+);
+
+// 4. Impianto Spillatura Birra & Vano Bombole CO2 / Azoto Alimentare
+const barSpillatura = barEnvs1.find((e) => e.id === "env-bar-spillatura-co2")!;
+assert.equal(barSpillatura.category, "technical");
+assert.equal(barSpillatura.surfaceSqM, 8);
+assert.equal(barSpillatura.heightM, 2.5);
+assert.equal(barSpillatura.volumeCuM, 20);
+assert.equal(barSpillatura.occupantsCount, 1);
+assert.equal(barSpillatura.windowSurfaceSqM, 1.0);
+assert.equal(barSpillatura.features.forcedExhaustPresent, true);
+assert.equal(barSpillatura.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(barSpillatura.features.flooringCondition, "compliant_anti_slip");
+assert.equal(barSpillatura.features.emergencyLighting, true);
+assert.equal(barSpillatura.features.gasLeakDetectorPresent, true);
+const compSpillaturaBar = evaluateEnvironmentCompliance(barSpillatura, "56.30");
+assert.equal(compSpillaturaBar.isHeightCompliant, true);
+assert.ok(
+  compSpillaturaBar.summaryBadges.some((b) => b.text.includes("Bombole CO2 ed azoto vincolate con catenelle verticali")),
+  "Deve essere presente il badge catenelle bombole CO2",
+);
+assert.ok(
+  compSpillaturaBar.summaryBadges.some((b) => b.text.includes("Rilevatore fughe CO2 con allarme ottico-acustico anti-asfissia")),
+  "Deve essere presente il badge rilevatore fughe CO2",
+);
+
+// 5. Zona Lavaggio Bicchieri, Tazzine & Stoviglie (Plonge Separata)
+const barPlonge = barEnvs1.find((e) => e.id === "env-bar-plonge-lavaggio")!;
+assert.equal(barPlonge.category, "production");
+assert.equal(barPlonge.surfaceSqM, 10);
+assert.equal(barPlonge.heightM, 2.8);
+assert.equal(barPlonge.volumeCuM, 28);
+assert.equal(barPlonge.occupantsCount, 1);
+assert.equal(barPlonge.windowSurfaceSqM, 1.5);
+assert.equal(barPlonge.features.forcedExhaustPresent, true);
+assert.equal(barPlonge.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(barPlonge.features.flooringCondition, "compliant_anti_slip");
+const compPlongeBar = evaluateEnvironmentCompliance(barPlonge, "56.30");
+assert.equal(compPlongeBar.isHeightCompliant, true);
+assert.ok(
+  compPlongeBar.summaryBadges.some((b) => b.text.includes("Lavabicchieri con risciacquo igienico ≥ 82-85°C & Break Tank UNI EN 1717")),
+  "Deve essere presente il badge lavabicchieri 82-85°C e Break Tank UNI EN 1717",
+);
+assert.ok(
+  compPlongeBar.summaryBadges.some((b) => b.text.includes("Canalina di scolo a pavimento sifonata")),
+  "Deve essere presente il badge canalina di scolo a pavimento",
+);
+
+// 6. Magazzino Merci Secche, Bibite, Fusti & Cantina Vini
+const barDeposito = barEnvs1.find((e) => e.id === "env-bar-deposito-bevande")!;
+assert.equal(barDeposito.category, "warehouse");
+assert.equal(barDeposito.surfaceSqM, 30);
+assert.equal(barDeposito.heightM, 3.0);
+assert.equal(barDeposito.volumeCuM, 90);
+assert.equal(barDeposito.occupantsCount, 1);
+assert.equal(barDeposito.windowSurfaceSqM, 2.0);
+assert.equal(barDeposito.features.shelvingCertified, true);
+const compDepositoBar = evaluateEnvironmentCompliance(barDeposito, "56.30");
+assert.equal(compDepositoBar.isHeightCompliant, true);
+assert.ok(
+  compDepositoBar.summaryBadges.some((b) => b.text.includes("Stoccaggio bibite e fusti birra su scaffali certificati rialzati ≥ 15 cm")),
+  "Deve essere presente il badge stoccaggio fusti rialzati",
+);
+
+// 7. Armadi Frigoriferi di Stoccaggio Deperibili (+2/+4°C e -18°C)
+const barFrigo = barEnvs1.find((e) => e.id === "env-bar-celle-frigo")!;
+assert.equal(barFrigo.category, "storage");
+assert.equal(barFrigo.surfaceSqM, 12);
+assert.equal(barFrigo.heightM, 2.6);
+assert.equal(barFrigo.volumeCuM, 31.2);
+assert.equal(barFrigo.occupantsCount, 1);
+assert.equal(barFrigo.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(barFrigo.features.flooringCondition, "compliant_anti_slip");
+assert.equal(barFrigo.features.emergencyLighting, true);
+const compFrigoBar = evaluateEnvironmentCompliance(barFrigo, "56.30");
+assert.equal(compFrigoBar.isHeightCompliant, true);
+assert.ok(
+  compFrigoBar.summaryBadges.some((b) => b.text.includes("Armadi frigoriferi positivi (+2/+4°C) e negativi (-18°C)")),
+  "Deve essere presente il badge teletermometri continui HACCP per armadi frigo",
+);
+
+// 8. Sala Somministrazione, Tavoli & Zona Seduta Clienti (40-60 Coperti)
+const barSala = barEnvs1.find((e) => e.id === "env-bar-sala-consumo")!;
+assert.equal(barSala.category, "public");
+assert.equal(barSala.surfaceSqM, 80);
+assert.equal(barSala.heightM, 3.0);
+assert.equal(barSala.volumeCuM, 240);
+assert.equal(barSala.occupantsCount, 50);
+assert.equal(barSala.windowSurfaceSqM, 12.0);
+assert.equal(barSala.emergencyExitsCount, 2);
+assert.equal(barSala.features.emergencyLighting, true);
+assert.equal(barSala.features.antiShatterGlass, true);
+const compSalaBar = evaluateEnvironmentCompliance(barSala, "56.30");
+assert.equal(compSalaBar.isHeightCompliant, true);
+assert.ok(
+  compSalaBar.summaryBadges.some((b) => b.text.includes("Vie di esodo libere ≥ 1,20m & uscite di sicurezza con maniglioni antipanico")),
+  "Deve essere presente il badge vie di esodo e maniglioni antipanico",
+);
+assert.ok(
+  compSalaBar.summaryBadges.some((b) => b.text.includes("Illuminazione di emergenza ≥ 5 lux & estintori omologati 34A 233B")),
+  "Deve essere presente il badge estintori 34A 233B e illuminazione di sicurezza",
+);
+
+// 9. Dehor Esterno / Area Tavoli all'Aperto & Gazebo
+const barDehor = barEnvs1.find((e) => e.id === "env-bar-dehor-esterno")!;
+assert.equal(barDehor.category, "public");
+assert.equal(barDehor.surfaceSqM, 40);
+assert.equal(barDehor.heightM, 2.8);
+assert.equal(barDehor.volumeCuM, 112);
+assert.equal(barDehor.occupantsCount, 30);
+assert.equal(barDehor.features.emergencyLighting, true);
+const compDehorBar = evaluateEnvironmentCompliance(barDehor, "56.30");
+assert.equal(compDehorBar.isHeightCompliant, true);
+assert.ok(
+  compDehorBar.summaryBadges.some((b) => b.text.includes("Dehor esterno: paraventi certificati con ancoraggio antivento")),
+  "Deve essere presente il badge paraventi antivento",
+);
+assert.ok(
+  compDehorBar.summaryBadges.some((b) => b.text.includes("Funghi riscaldanti GPL con valvola antiribaltamento o lampade IR")),
+  "Deve essere presente il badge riscaldatori funghi GPL con valvola antiribaltamento",
+);
+
+// 10. Servizi Igienici Clienti (Accessibile Disabili D.P.R. 503/96 - D.M. 236/89)
+const barWcClienti = barEnvs1.find((e) => e.id === "env-bar-wc-clienti")!;
+assert.equal(barWcClienti.category, "services");
+assert.equal(barWcClienti.surfaceSqM, 12);
+assert.equal(barWcClienti.heightM, 2.4);
+assert.equal(barWcClienti.volumeCuM, 28.8);
+assert.equal(barWcClienti.occupantsCount, 2);
+assert.equal(barWcClienti.windowSurfaceSqM, 1.0);
+assert.equal(barWcClienti.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(barWcClienti.features.flooringCondition, "compliant_anti_slip");
+assert.equal(barWcClienti.features.forcedExhaustPresent, true);
+assert.equal(barWcClienti.features.forcedExhaustType, "blind_toilet_fan");
+const compWcClientiBar = evaluateEnvironmentCompliance(barWcClienti, "56.30");
+assert.equal(compWcClientiBar.isHeightCompliant, true);
+assert.ok(
+  compWcClientiBar.summaryBadges.some((b) => b.text.includes("W.C. accessibile disabili (D.P.R. 503/96 - D.M. 236/89)")),
+  "Deve essere presente il badge W.C. disabili con tirante",
+);
+
+// 11. Spogliatoio e Servizi Igienici del Personale con Antibagno
+const barSpogliatoi = barEnvs1.find((e) => e.id === "env-bar-spogliatoi-staff")!;
+assert.equal(barSpogliatoi.category, "changing_rooms");
+assert.equal(barSpogliatoi.surfaceSqM, 12);
+assert.equal(barSpogliatoi.heightM, 2.4);
+assert.equal(barSpogliatoi.volumeCuM, 28.8);
+assert.equal(barSpogliatoi.occupantsCount, 4);
+assert.equal(barSpogliatoi.windowSurfaceSqM, 1.0);
+assert.equal(barSpogliatoi.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(barSpogliatoi.features.flooringCondition, "compliant_anti_slip");
+assert.equal(barSpogliatoi.features.forcedExhaustPresent, true);
+assert.equal(barSpogliatoi.features.forcedExhaustType, "blind_toilet_fan");
+const compSpogliatoiBar = evaluateEnvironmentCompliance(barSpogliatoi, "56.30");
+assert.equal(compSpogliatoiBar.isHeightCompliant, true);
+assert.ok(
+  compSpogliatoiBar.summaryBadges.some((b) => b.text.includes("Armadietti a doppio scomparto sporco/pulito")),
+  "Deve essere presente il badge armadietti doppio scomparto personale",
+);
+
+// 12. Locale Tecnico / Quadro Elettrico & Impianto Trattamento Acque
+const barTecnico = barEnvs1.find((e) => e.id === "env-bar-tecnico-trattamento-acque")!;
+assert.equal(barTecnico.category, "technical");
+assert.equal(barTecnico.surfaceSqM, 8);
+assert.equal(barTecnico.heightM, 2.5);
+assert.equal(barTecnico.volumeCuM, 20);
+assert.equal(barTecnico.occupantsCount, 1);
+assert.equal(barTecnico.features.emergencyLighting, true);
+const compTecnicoBar = evaluateEnvironmentCompliance(barTecnico, "56.30");
+assert.equal(compTecnicoBar.isHeightCompliant, true);
+assert.ok(
+  compTecnicoBar.summaryBadges.some((b) => b.text.includes("Addolcitore a resine e filtri conformi D.Lgs. 18/2023 & D.M. 174/2004")),
+  "Deve essere presente il badge trattamento acque D.Lgs. 18/2023",
+);
+assert.ok(
+  compTecnicoBar.summaryBadges.some((b) => b.text.includes("Quadro elettrico con differenziale ad alta sensibilità")),
+  "Deve essere presente il badge quadro elettrico e pulsante di sgancio rapido",
+);
+
+// ============================================================================
+// Test 24: generateEnvironmentChecklistItems per locali Bar / Caffetteria (ATECO 56.30)
+// ============================================================================
+console.log("Test 24: generateEnvironmentChecklistItems per locali Bar / Caffetteria (ATECO 56.30)");
+
+// 1. Banco Bar Principale
+const barBancoItems = generateEnvironmentChecklistItems(barBanco, "56.30");
+assert.ok(
+  barBancoItems.some((it) => it.id.includes("macchina-espresso-valvola-ped-lancia-cooltouch") && it.domain === "safety"),
+  "Banco bar deve verificare valvola di sicurezza PED e lance cool-touch (domain: safety)",
+);
+assert.ok(
+  barBancoItems.some((it) => it.id.includes("macinadosatore-battifiltro-insonorizzato-rumore") && it.domain === "safety"),
+  "Banco bar deve verificare cassetto battifiltro fonoassorbente Titolo VIII rumore (domain: safety)",
+);
+assert.ok(
+  barBancoItems.some((it) => it.id.includes("vetrina-refrigerata-snack-parafiato-moca") && it.domain === "haccp"),
+  "Banco bar deve verificare vetrina refrigerata snack parafiato +4°C (domain: haccp)",
+);
+assert.ok(
+  barBancoItems.some((it) => it.id.includes("lavamani-banco-comando-non-manuale") && it.domain === "both"),
+  "Banco bar deve verificare lavamani a ginocchio/pedale con acqua calda/fredda (domain: both)",
+);
+
+// 2. Cocktail Station
+const barCocktailItems = generateEnvironmentChecklistItems(barCocktail, "56.30");
+assert.ok(
+  barCocktailItems.some((it) => it.id.includes("cocktail-station-vasca-ghiaccio-scarico-diretto") && it.domain === "haccp"),
+  "Cocktail station deve verificare vasca ghiaccio a scarico continuo e palette MOCA (domain: haccp)",
+);
+assert.ok(
+  barCocktailItems.some((it) => it.id.includes("blender-tritaghiaccio-microinterruttore-uni-en-12852") && it.domain === "safety"),
+  "Cocktail station deve verificare blender e tritaghiaccio UNI EN 12852 (domain: safety)",
+);
+assert.ok(
+  barCocktailItems.some((it) => it.id.includes("speed-rail-anticaduta-bottiglie-ergonomia") && it.domain === "both"),
+  "Cocktail station deve verificare speed-rail con bordo anticaduta e sciacquabicchieri UNI EN 1717 (domain: both)",
+);
+
+// 3. Laboratorio Tavola Fredda / Retrobanco Snack
+const barSnackItems = generateEnvironmentChecklistItems(barSnack, "56.30");
+assert.ok(
+  barSnackItems.some((it) => it.id.includes("affettatrice-paralama-360-blocco-vela-uni-en-1974") && it.domain === "safety"),
+  "Retrobanco snack deve verificare affettatrice con paralama 360° UNI EN 1974 (domain: safety)",
+);
+assert.ok(
+  barSnackItems.some((it) => it.id.includes("piastra-panini-isolamento-termico-cappa") && it.domain === "both"),
+  "Retrobanco snack deve verificare piastra panini con isolamento e cappa (domain: both)",
+);
+assert.ok(
+  barSnackItems.some((it) => it.id.includes("taglieri-coltelli-codice-colore-haccp") && it.domain === "haccp"),
+  "Retrobanco snack deve verificare taglieri a codice colore (domain: haccp)",
+);
+
+// 4. Impianto Spillatura Birra & Bombole CO2
+const barSpillaturaItems = generateEnvironmentChecklistItems(barSpillatura, "56.30");
+assert.ok(
+  barSpillaturaItems.some((it) => it.id.includes("bombole-co2-azoto-catenelle-verticali-titolo-xi") && it.domain === "safety"),
+  "Spillatura birra deve verificare catenelle verticali anticaduta bombole CO2 Titolo XI (domain: safety)",
+);
+assert.ok(
+  barSpillaturaItems.some((it) => it.id.includes("rilevatore-fughe-co2-allarme-anti-asfissia") && it.domain === "safety"),
+  "Spillatura birra deve verificare rilevatore fughe CO2 anti-asfissia con allarme (domain: safety)",
+);
+assert.ok(
+  barSpillaturaItems.some((it) => it.id.includes("linee-spillatura-sanificazione-periodica-haccp") && it.domain === "haccp"),
+  "Spillatura birra deve verificare flussaggio e sanificazione linee HACCP (domain: haccp)",
+);
+
+// 5. Plonge Lavaggio Bicchieri & Tazzine
+const barPlongeItems = generateEnvironmentChecklistItems(barPlonge, "56.30");
+assert.ok(
+  barPlongeItems.some((it) => it.id.includes("lavabicchieri-risciacquo-85c-break-tank-uni-en-1717") && it.domain === "both"),
+  "Plonge deve verificare lavabicchieri con risciacquo >= 82-85°C e Break Tank UNI EN 1717 (domain: both)",
+);
+assert.ok(
+  barPlongeItems.some((it) => it.id.includes("vasche-lavello-doccione-canalina-antiscivolo") && it.domain === "both"),
+  "Plonge deve verificare canalina di scolo a terra e doccione (domain: both)",
+);
+
+// 6. Magazzino Merci Secche, Bibite & Fusti
+const barDepositoItems = generateEnvironmentChecklistItems(barDeposito, "56.30");
+assert.ok(
+  barDepositoItems.some((it) => it.id.includes("scaffalature-portata-fusti-casse-acque") && it.domain === "safety"),
+  "Magazzino merci deve verificare scaffalature fusti UNI EN 15635 (domain: safety)",
+);
+assert.ok(
+  barDepositoItems.some((it) => it.id.includes("monitoraggio-infestanti-pallettizzazione-cantina") && it.domain === "haccp"),
+  "Magazzino merci deve verificare monitoraggio infestanti e pedane lisce (domain: haccp)",
+);
+
+// 7. Armadi Frigoriferi Deperibili
+const barFrigoItems = generateEnvironmentChecklistItems(barFrigo, "56.30");
+assert.ok(
+  barFrigoItems.some((it) => it.id.includes("teletermometri-registrazione-continua-haccp") && it.domain === "haccp"),
+  "Armadi frigoriferi devono verificare teletermometri HACCP (domain: haccp)",
+);
+assert.ok(
+  barFrigoItems.some((it) => it.id.includes("guarnizioni-frigo-integre-illuminazione-interna") && it.domain === "both"),
+  "Armadi frigoriferi devono verificare tenuta guarnizioni magnetiche (domain: both)",
+);
+
+// 8. Sala Somministrazione Tavoli Clienti
+const barSalaItems = generateEnvironmentChecklistItems(barSala, "56.30");
+assert.ok(
+  barSalaItems.some((it) => it.id.includes("vie-esodo-corridoi-passaggio-liberi-120cm") && it.domain === "safety"),
+  "Sala somministrazione deve verificare corridoi liberi >= 1,20m (domain: safety)",
+);
+assert.ok(
+  barSalaItems.some((it) => it.id.includes("uscite-sicurezza-maniglioni-antipanico-luci-emergenza") && it.domain === "safety"),
+  "Sala somministrazione deve verificare uscite con maniglioni antipanico UNI EN 1125 (domain: safety)",
+);
+
+// 9. Dehor Esterno
+const barDehorItems = generateEnvironmentChecklistItems(barDehor, "56.30");
+assert.ok(
+  barDehorItems.some((it) => it.id.includes("paraventi-dehor-ancoraggio-antivento-certificato") && it.domain === "safety"),
+  "Dehor esterno deve verificare paraventi e gazebo con ancoraggio antivento (domain: safety)",
+);
+assert.ok(
+  barDehorItems.some((it) => it.id.includes("riscaldatori-dehor-funghi-gpl-lampade-infrarossi") && it.domain === "safety"),
+  "Dehor esterno deve verificare funghi riscaldanti GPL con valvola antiribaltamento (domain: safety)",
+);
+
+// 10. WC Clienti Accessibile Disabili
+const barWcClientiItems = generateEnvironmentChecklistItems(barWcClienti, "56.30");
+assert.ok(
+  barWcClientiItems.some((it) => it.id.includes("accessibilita-disabili-dpr-503-dm-236") && it.domain === "safety"),
+  "WC clienti deve verificare accessibilità disabili D.P.R. 503/96 e tirante allarme (domain: safety)",
+);
+assert.ok(
+  barWcClientiItems.some((it) => it.id.includes("antibagno-lavamani-non-manuale-aerazione-forzata") && it.domain === "both"),
+  "WC clienti deve verificare antibagno e aerazione forzata (domain: both)",
+);
+
+// 11. Spogliatoio e Servizi Personale
+const barSpogliatoiItems = generateEnvironmentChecklistItems(barSpogliatoi, "56.30");
+assert.ok(
+  barSpogliatoiItems.some((it) => it.id.includes("armadietti-doppio-scomparto-sporco-pulito-staff") && it.domain === "both"),
+  "Spogliatoio deve verificare armadietti doppio scomparto sporco/pulito (domain: both)",
+);
+assert.ok(
+  barSpogliatoiItems.some((it) => it.id.includes("servizio-igienico-personale-doccia-lavamani") && it.domain === "both"),
+  "Spogliatoio deve verificare bagno personale con lavamani a pedale e doccia (domain: both)",
+);
+
+// 12. Locale Tecnico / Quadro Elettrico & Trattamento Acque
+const barTecnicoItems = generateEnvironmentChecklistItems(barTecnico, "56.30");
+assert.ok(
+  barTecnicoItems.some((it) => it.id.includes("impianto-addolcitore-resine-potabilita-dlgs-18-2023") && it.domain === "both"),
+  "Locale tecnico deve verificare addolcitore a resine conforme D.Lgs. 18/2023 e D.M. 174/2004 (domain: both)",
+);
+assert.ok(
+  barTecnicoItems.some((it) => it.id.includes("quadro-elettrico-differenziale-sgancio-rapido-emergenza") && it.domain === "safety"),
+  "Locale tecnico deve verificare quadro elettrico con differenziale e pulsante sgancio (domain: safety)",
+);
+
+// Verifica del filtraggio checklistMode su banco mescita bar
+const barBancoHaccpMode = filterEnvironmentItemsByChecklistMode(barBancoItems, "haccp_only");
+assert.ok(
+  barBancoHaccpMode.every((it) => it.domain === "haccp" || it.domain === "both"),
+  "In modalità haccp_only tutti gli item banco bar devono essere haccp o both",
+);
+assert.ok(
+  !barBancoHaccpMode.some((it) => it.domain === "safety"),
+  "In modalità haccp_only nessun item banco bar deve avere domain safety",
+);
+
+const barBancoSafetyMode = filterEnvironmentItemsByChecklistMode(barBancoItems, "safety_only");
+assert.ok(
+  barBancoSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item banco bar devono essere safety o both",
+);
+assert.ok(
+  !barBancoSafetyMode.some((it) => it.domain === "haccp"),
+  "In modalità safety_only nessun item banco bar deve avere domain haccp",
+);
+
 console.log("=== TUTTI I TEST Step2AmbientiDiLavoro SUPERATI CON SUCCESSO! ===");
