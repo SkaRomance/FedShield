@@ -920,4 +920,396 @@ assert.ok(
   "In modalità safety_only nessun item cucina deve avere domain haccp",
 );
 
+// ============================================================================
+// Test 13: getStandardEnvironmentsForAteco & conformità per Pizzeria (56.10.20 / 56.10.2)
+// ============================================================================
+console.log("Test 13: getStandardEnvironmentsForAteco & conformità per Pizzeria (56.10.20 / 56.10.2)");
+const pizEnvs = getStandardEnvironmentsForAteco("56.10.20");
+assert.equal(pizEnvs.length, 12, "La Pizzeria (56.10.20) deve avere esattamente 12 ambienti standard");
+
+// Verifica varianti di formato ATECO
+const pizEnvsVar1 = getStandardEnvironmentsForAteco("56.10.2");
+assert.equal(pizEnvsVar1.length, 12, "La variante 56.10.2 deve restituire 12 ambienti");
+const pizEnvsVar2 = getStandardEnvironmentsForAteco("561020");
+assert.equal(pizEnvsVar2.length, 12, "La variante 561020 deve restituire 12 ambienti");
+const pizEnvsVar3 = getStandardEnvironmentsForAteco("56102");
+assert.equal(pizEnvsVar3.length, 12, "La variante 56102 deve restituire 12 ambienti");
+
+// Verifica presenza di tutti i 12 ambienti specifici
+const expectedPizIds = [
+  "env-piz-laboratorio",
+  "env-piz-impasto",
+  "env-piz-forno-legna",
+  "env-piz-prep-ingredienti",
+  "env-piz-lavaggio",
+  "env-piz-celle",
+  "env-piz-dispensa",
+  "env-piz-sala-asporto",
+  "env-piz-spogliatoi",
+  "env-piz-wc-clienti",
+  "env-piz-rifiuti",
+  "env-piz-tecnico",
+];
+for (const id of expectedPizIds) {
+  assert.ok(
+    pizEnvs.some((e) => e.id === id),
+    `Ambiente ${id} deve essere presente nella lista standard Pizzeria`,
+  );
+}
+
+// Verifica parametri dimensionali e tecnici
+const pizLab = pizEnvs.find((e) => e.id === "env-piz-laboratorio")!;
+assert.equal(pizLab.category, "production");
+assert.equal(pizLab.surfaceSqM, 35);
+assert.equal(pizLab.heightM, 3.0);
+assert.equal(pizLab.volumeCuM, 105);
+assert.equal(pizLab.occupantsCount, 3);
+assert.equal(pizLab.windowSurfaceSqM, 3.5);
+assert.equal(pizLab.features.forcedExhaustPresent, true);
+assert.equal(pizLab.features.forcedExhaustType, "kitchen_hood");
+assert.equal(pizLab.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(pizLab.features.flooringCondition, "compliant_anti_slip");
+
+const pizImpasto = pizEnvs.find((e) => e.id === "env-piz-impasto")!;
+assert.equal(pizImpasto.category, "production");
+assert.equal(pizImpasto.surfaceSqM, 20);
+assert.equal(pizImpasto.heightM, 3.0);
+assert.equal(pizImpasto.volumeCuM, 60);
+assert.equal(pizImpasto.occupantsCount, 2);
+
+const pizForno = pizEnvs.find((e) => e.id === "env-piz-forno-legna")!;
+assert.equal(pizForno.category, "production");
+assert.equal(pizForno.surfaceSqM, 15);
+assert.equal(pizForno.heightM, 3.2);
+assert.equal(pizForno.volumeCuM, 48);
+assert.equal(pizForno.occupantsCount, 1);
+
+const pizPrep = pizEnvs.find((e) => e.id === "env-piz-prep-ingredienti")!;
+assert.equal(pizPrep.category, "production");
+assert.equal(pizPrep.surfaceSqM, 18);
+assert.equal(pizPrep.heightM, 3.0);
+assert.equal(pizPrep.volumeCuM, 54);
+
+const pizLavaggio = pizEnvs.find((e) => e.id === "env-piz-lavaggio")!;
+assert.equal(pizLavaggio.category, "production");
+assert.equal(pizLavaggio.surfaceSqM, 14);
+assert.equal(pizLavaggio.heightM, 3.0);
+assert.equal(pizLavaggio.volumeCuM, 42);
+
+const pizCelle = pizEnvs.find((e) => e.id === "env-piz-celle")!;
+assert.equal(pizCelle.category, "storage");
+assert.equal(pizCelle.surfaceSqM, 18);
+assert.equal(pizCelle.heightM, 2.6);
+assert.equal(pizCelle.volumeCuM, 46.8);
+assert.equal(pizCelle.features.hasTrappedPersonAlarm, true);
+
+const pizDispensa = pizEnvs.find((e) => e.id === "env-piz-dispensa")!;
+assert.equal(pizDispensa.category, "warehouse");
+assert.equal(pizDispensa.surfaceSqM, 25);
+assert.equal(pizDispensa.heightM, 2.7);
+assert.equal(pizDispensa.volumeCuM, 67.5);
+assert.equal(pizDispensa.features.shelvingCertified, true);
+
+const pizSala = pizEnvs.find((e) => e.id === "env-piz-sala-asporto")!;
+assert.equal(pizSala.category, "public");
+assert.equal(pizSala.surfaceSqM, 90);
+assert.equal(pizSala.heightM, 2.8);
+assert.equal(pizSala.volumeCuM, 252);
+assert.equal(pizSala.occupantsCount, 45);
+
+const pizSpogliatoi = pizEnvs.find((e) => e.id === "env-piz-spogliatoi")!;
+assert.equal(pizSpogliatoi.category, "changing_rooms");
+assert.equal(pizSpogliatoi.surfaceSqM, 15);
+assert.equal(pizSpogliatoi.heightM, 2.4);
+assert.equal(pizSpogliatoi.volumeCuM, 36);
+
+const pizWc = pizEnvs.find((e) => e.id === "env-piz-wc-clienti")!;
+assert.equal(pizWc.category, "services");
+assert.equal(pizWc.surfaceSqM, 12);
+assert.equal(pizWc.heightM, 2.4);
+assert.equal(pizWc.volumeCuM, 28.8);
+
+const pizRifiuti = pizEnvs.find((e) => e.id === "env-piz-rifiuti")!;
+assert.equal(pizRifiuti.category, "technical");
+assert.equal(pizRifiuti.surfaceSqM, 10);
+assert.equal(pizRifiuti.heightM, 2.6);
+assert.equal(pizRifiuti.volumeCuM, 26);
+
+const pizTecnico = pizEnvs.find((e) => e.id === "env-piz-tecnico")!;
+assert.equal(pizTecnico.category, "technical");
+assert.equal(pizTecnico.surfaceSqM, 10);
+assert.equal(pizTecnico.heightM, 2.5);
+assert.equal(pizTecnico.volumeCuM, 25);
+assert.equal(pizTecnico.features.gasLeakDetectorPresent, true);
+
+// Verifica evaluateEnvironmentCompliance per locali Pizzeria
+const evalPizLab = evaluateEnvironmentCompliance(pizLab, "56.10.20");
+assert.equal(evalPizLab.isHeightCompliant, true, "Laboratorio pizzeria h=3.00m è conforme");
+assert.ok(
+  evalPizLab.summaryBadges.some((b) => b.text.includes("Laboratorio pizzeria a norma")),
+  "Laboratorio deve avere badge altezza ≥ 3,00m e cappa",
+);
+assert.ok(
+  evalPizLab.summaryBadges.some((b) => b.text.includes("Lavamani comando non manuale")),
+  "Laboratorio deve avere badge lavamani comando non manuale",
+);
+
+const evalPizForno = evaluateEnvironmentCompliance(pizForno, "56.10.20");
+assert.ok(
+  evalPizForno.summaryBadges.some((b) => b.text.includes("Abbattitore fuliggine ad acqua")),
+  "Forno legna deve avere badge abbattitore fuliggine UNI 1127",
+);
+assert.ok(
+  evalPizForno.summaryBadges.some((b) => b.text.includes("Stoccaggio legna vergine")),
+  "Forno legna deve avere badge legna vergine certificata ed estintore",
+);
+
+const evalPizImpasto = evaluateEnvironmentCompliance(pizImpasto, "56.10.20");
+assert.ok(
+  evalPizImpasto.summaryBadges.some((b) => b.text.includes("Riparo interbloccato impastatrice")),
+  "Impasto deve avere badge riparo interbloccato UNI EN 453",
+);
+
+const evalPizDispensa = evaluateEnvironmentCompliance(pizDispensa, "56.10.20");
+assert.ok(
+  evalPizDispensa.summaryBadges.some((b) => b.text.includes("Sacchi farina su pedane sollevate")),
+  "Dispensa deve avere badge pedane sollevate e cartoni pizza MOCA",
+);
+
+const evalPizSala = evaluateEnvironmentCompliance(pizSala, "56.10.20");
+assert.ok(
+  evalPizSala.summaryBadges.some((b) => b.text.includes("Vie di esodo libere ≥ 1,20m")),
+  "Sala deve avere badge vie di esodo libere ≥ 1,20m",
+);
+assert.ok(
+  evalPizSala.summaryBadges.some((b) => b.text.includes("Illuminazione di emergenza ≥ 5 lux")),
+  "Sala deve avere badge illuminazione emergenza e banco ritiro asporto",
+);
+
+const evalPizCelle = evaluateEnvironmentCompliance(pizCelle, "56.10.20");
+assert.ok(
+  evalPizCelle.summaryBadges.some((b) => b.text.includes("Allarme uomo intrappolato")),
+  "Celle devono avere badge allarme uomo intrappolato UNI EN 378",
+);
+assert.ok(
+  evalPizCelle.summaryBadges.some((b) => b.text.includes("Teletermometri continui HACCP")),
+  "Celle devono avere badge teletermometri continui HACCP per mozzarelle e latticini",
+);
+
+const evalPizSpogliatoi = evaluateEnvironmentCompliance(pizSpogliatoi, "56.10.20");
+assert.ok(
+  evalPizSpogliatoi.summaryBadges.some((b) => b.text.includes("Armadietti doppio scomparto")),
+  "Spogliatoi devono avere badge armadietti doppio scomparto abiti civili/lavoro",
+);
+
+const evalPizRifiuti = evaluateEnvironmentCompliance(pizRifiuti, "56.10.20");
+assert.ok(
+  evalPizRifiuti.summaryBadges.some((b) => b.text.includes("Bidone metallico stagno per ceneri")),
+  "Area rifiuti deve avere badge bidone metallico stagno ceneri forno legna",
+);
+
+const evalPizTecnico = evaluateEnvironmentCompliance(pizTecnico, "56.10.20");
+assert.ok(
+  evalPizTecnico.summaryBadges.some((b) => b.text.includes("Elettrovalvola gas metano")),
+  "Locale tecnico deve avere badge elettrovalvola gas metano con sgancio e ricircolo fumi",
+);
+
+// ============================================================================
+// Test 14: generateEnvironmentChecklistItems per locali specifici Pizzeria
+// ============================================================================
+console.log("Test 14: generateEnvironmentChecklistItems per locali Pizzeria (ATECO 56.10.20)");
+
+// 1. Laboratorio Pizzeria
+const labItems = generateEnvironmentChecklistItems(pizLab, "56.10.20");
+assert.ok(
+  labItems.some((it) => it.id.includes("banco-stesura-moca") && it.domain === "haccp"),
+  "Laboratorio pizza deve avere verifica piano stesura MOCA (domain: haccp)",
+);
+assert.ok(
+  labItems.some((it) => it.id.includes("vetrina-ingredienti-refrigerata") && it.domain === "haccp"),
+  "Laboratorio pizza deve avere verifica vetrina ingredienti refrigerata +4°C con parafiato (domain: haccp)",
+);
+assert.ok(
+  labItems.some((it) => it.id.includes("cappa-aspirazione-bocca-forno") && it.domain === "safety"),
+  "Laboratorio pizza deve avere verifica cappa fumi bocca forno (domain: safety)",
+);
+assert.ok(
+  labItems.some((it) => it.id.includes("lavamani-pedale-ginocchio") && it.domain === "haccp"),
+  "Laboratorio pizza deve avere verifica lavamani comando pedale/ginocchio (domain: haccp)",
+);
+assert.ok(
+  labItems.some((it) => it.id.includes("canaline-inox-sifonate") && it.domain === "both"),
+  "Laboratorio pizza deve avere verifica canaline scolo sifonate griglie inox (domain: both)",
+);
+
+// 2. Locale Impasto
+const impastoItems = generateEnvironmentChecklistItems(pizImpasto, "56.10.20");
+assert.ok(
+  impastoItems.some((it) => it.id.includes("impastatrice-riparo-interbloccato") && it.domain === "safety"),
+  "Locale impasto deve avere verifica riparo interbloccato impastatrice spirale UNI EN 453 (domain: safety)",
+);
+assert.ok(
+  impastoItems.some((it) => it.id.includes("cassette-portapalline-moca") && it.domain === "haccp"),
+  "Locale impasto deve avere verifica cassette portapalline MOCA (domain: haccp)",
+);
+assert.ok(
+  impastoItems.some((it) => it.id.includes("aspirazione-polveri-farina") && it.domain === "safety"),
+  "Locale impasto deve avere verifica prevenzione/aspirazione polveri farina (domain: safety)",
+);
+
+// 3. Area Forno Legna
+const fornoItems = generateEnvironmentChecklistItems(pizForno, "56.10.20");
+assert.ok(
+  fornoItems.some((it) => it.id.includes("abbattitore-fuliggine-acqua") && it.domain === "both"),
+  "Area forno deve avere verifica abbattitore fuliggine ad acqua conforme UNI 1127 (domain: both)",
+);
+assert.ok(
+  fornoItems.some((it) => it.id.includes("canna-fumaria-indipendente") && it.domain === "safety"),
+  "Area forno deve avere verifica canna fumaria indipendente e pulizia periodica (domain: safety)",
+);
+assert.ok(
+  fornoItems.some((it) => it.id.includes("legna-vergine-certificata") && it.domain === "haccp"),
+  "Area forno deve avere verifica stoccaggio legna vergine certificata (domain: haccp)",
+);
+assert.ok(
+  fornoItems.some((it) => it.id.includes("pala-metallica-guanti-termici") && it.domain === "safety"),
+  "Area forno deve avere verifica guanti termici EN 407 ed estintore (domain: safety)",
+);
+
+// 4. Preparazione Ingredienti & Tagliamozzarella
+const prepItems = generateEnvironmentChecklistItems(pizPrep, "56.10.20");
+assert.ok(
+  prepItems.some((it) => it.id.includes("tagliamozzarella-microinterruttore") && it.domain === "safety"),
+  "Prep ingredienti deve avere verifica tagliamozzarella con microinterruttore e pestello UNI EN 12852 (domain: safety)",
+);
+assert.ok(
+  prepItems.some((it) => it.id.includes("lavello-verdure-condimenti") && it.domain === "haccp"),
+  "Prep ingredienti deve avere verifica lavello dedicato lavaggio verdure (domain: haccp)",
+);
+assert.ok(
+  prepItems.some((it) => it.id.includes("taglieri-coltelli-codice-colore") && it.domain === "haccp"),
+  "Prep ingredienti deve avere verifica taglieri con codice colore HACCP (domain: haccp)",
+);
+
+// 5. Lavaggio Teglie & Cassette
+const lavaggioItems = generateEnvironmentChecklistItems(pizLavaggio, "56.10.20");
+assert.ok(
+  lavaggioItems.some((it) => it.id.includes("lavaoggetti-dosatori-antiriflusso") && it.domain === "both"),
+  "Lavaggio deve avere verifica lavaoggetti con dosatori e valvola antiriflusso UNI EN 1717 (domain: both)",
+);
+assert.ok(
+  lavaggioItems.some((it) => it.id.includes("sanificazione-teglie-cassette") && it.domain === "haccp"),
+  "Lavaggio deve avere verifica sanificazione teglie 60x40 e cassette impasto (domain: haccp)",
+);
+
+// 6. Celle Deperibili
+const celleItemsPiz = generateEnvironmentChecklistItems(pizCelle, "56.10.20");
+assert.ok(
+  celleItemsPiz.some((it) => it.id.includes("allarme-uomo-intrappolato") && it.domain === "safety"),
+  "Celle deperibili pizzeria devono avere allarme uomo intrappolato UNI EN 378 (domain: safety)",
+);
+assert.ok(
+  celleItemsPiz.some((it) => it.id.includes("monitoraggio-mozzarella-salumi") && it.domain === "haccp"),
+  "Celle deperibili pizzeria devono avere monitoraggio continuo temperature mozzarella e salumi (domain: haccp)",
+);
+
+// 7. Dispensa Secco Farine & Cartoni
+const dispensaItemsPiz = generateEnvironmentChecklistItems(pizDispensa, "56.10.20");
+assert.ok(
+  dispensaItemsPiz.some((it) => it.id.includes("sacchi-farina-pedane") && it.domain === "haccp"),
+  "Dispensa farine deve avere verifica sacchi sollevati su pedane ≥ 15 cm (domain: haccp)",
+);
+assert.ok(
+  dispensaItemsPiz.some((it) => it.id.includes("cartoni-pizza-moca") && it.domain === "haccp"),
+  "Dispensa farine deve avere verifica cartoni pizza conformi MOCA Reg. CE 1935/2004 (domain: haccp)",
+);
+assert.ok(
+  dispensaItemsPiz.some((it) => it.id.includes("monitoraggio-infestanti-farfalline") && it.domain === "both"),
+  "Dispensa farine deve avere verifica monitoraggio infestanti e farfalline (domain: both)",
+);
+
+// 8. Sala Somministrazione & Asporto
+const salaItemsPiz = generateEnvironmentChecklistItems(pizSala, "56.10.20");
+assert.ok(
+  salaItemsPiz.some((it) => it.id.includes("vie-esodo-sala-asporto") && it.domain === "safety"),
+  "Sala/asporto deve avere verifica vie di esodo libere ≥ 1,20m (domain: safety)",
+);
+assert.ok(
+  salaItemsPiz.some((it) => it.id.includes("uscite-emergenza-antipanico") && it.domain === "safety"),
+  "Sala/asporto deve avere verifica porte emergenza antipanico UNI EN 1125 (domain: safety)",
+);
+assert.ok(
+  salaItemsPiz.some((it) => it.id.includes("illuminazione-sicurezza-estintori") && it.domain === "safety"),
+  "Sala/asporto deve avere verifica illuminazione emergenza ed estintori (domain: safety)",
+);
+
+// 9. Spogliatoi Personale
+const spogliatoiItemsPiz = generateEnvironmentChecklistItems(pizSpogliatoi, "56.10.20");
+assert.ok(
+  spogliatoiItemsPiz.some((it) => it.id.includes("armadietti-spogliatoio") && (it.domain === "both" || it.domain === "safety")),
+  "Spogliatoi pizzeria devono avere armadietti doppio scomparto per abiti da lavoro infarinati",
+);
+assert.ok(
+  spogliatoiItemsPiz.some((it) => it.id.includes("lavamani-antibagno-spogliatoio") && it.domain === "both"),
+  "Spogliatoi pizzeria devono avere lavamani con acqua calda/fredda nell'antibagno (domain: both)",
+);
+
+// 10. WC Clienti Disabili
+const wcItemsPiz = generateEnvironmentChecklistItems(pizWc, "56.10.20");
+assert.ok(
+  wcItemsPiz.some((it) => it.id.includes("wc-disabili-tirante-campanello") && it.domain === "safety"),
+  "WC Clienti deve avere verifica accessibilità disabili con tirante a campanello (domain: safety)",
+);
+assert.ok(
+  !wcItemsPiz.some((it) => it.id.includes("armadietti-spogliatoio")),
+  "WC Clienti non deve contenere armadietti da spogliatoio personale",
+);
+
+// 11. Deposito Rifiuti & Ceneri Forno Legna
+const rifiutiItemsPiz = generateEnvironmentChecklistItems(pizRifiuti, "56.10.20");
+assert.ok(
+  rifiutiItemsPiz.some((it) => it.id.includes("bidone-ceneri-forno-legna") && it.domain === "safety"),
+  "Area rifiuti deve avere verifica bidone metallico stagno ceneri forno a legna (domain: safety)",
+);
+assert.ok(
+  rifiutiItemsPiz.some((it) => it.id.includes("mastelli-differenziata-ermetici") && it.domain === "both"),
+  "Area rifiuti deve avere verifica mastelli differenziata ermetici (domain: both)",
+);
+
+// 12. Locale Tecnico Gas & Abbattitore Fumi
+const tecnicoItemsPiz = generateEnvironmentChecklistItems(pizTecnico, "56.10.20");
+assert.ok(
+  tecnicoItemsPiz.some((it) => it.id.includes("quadro-generale-elettrovalvola-gas") && it.domain === "safety"),
+  "Locale tecnico deve avere verifica elettrovalvola gas e quadro con sgancio rapido (domain: safety)",
+);
+assert.ok(
+  tecnicoItemsPiz.some((it) => it.id.includes("ricircolo-idraulico-abbattitore") && it.domain === "safety"),
+  "Locale tecnico deve avere verifica ricircolo idraulico abbattitore fuliggine (domain: safety)",
+);
+assert.ok(
+  !tecnicoItemsPiz.some((it) => it.id.includes("centrale-frigo-gas-refrigerante")),
+  "Locale tecnico pizzeria non deve contenere sensori centrale frigorifera supermercato",
+);
+
+// Verifica conformità del filtro checklistMode per laboratorio pizzeria
+const labHaccpMode = filterEnvironmentItemsByChecklistMode(labItems, "haccp_only");
+assert.ok(
+  labHaccpMode.every((it) => it.domain === "haccp" || it.domain === "both"),
+  "In modalità haccp_only tutti gli item laboratorio pizza devono essere haccp o both",
+);
+assert.ok(
+  !labHaccpMode.some((it) => it.domain === "safety"),
+  "In modalità haccp_only nessun item laboratorio pizza deve avere domain safety",
+);
+
+const labSafetyMode = filterEnvironmentItemsByChecklistMode(labItems, "safety_only");
+assert.ok(
+  labSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item laboratorio pizza devono essere safety o both",
+);
+assert.ok(
+  !labSafetyMode.some((it) => it.domain === "haccp"),
+  "In modalità safety_only nessun item laboratorio pizza deve avere domain haccp",
+);
+
 console.log("=== TUTTI I TEST Step2AmbientiDiLavoro SUPERATI CON SUCCESSO! ===");

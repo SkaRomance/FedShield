@@ -856,7 +856,717 @@ export const SECTOR_MACHINERY_CATALOGS: SectorMachineCatalog[] = [
     ],
   },
 
-  // 1. RISTORAZIONE & ALIMENTARE
+  // 1. PIZZERIA / ASPORTO (Pizzerie tradizionali al tavolo, Pizzerie al taglio, Pizzerie d'asporto e delivery - ATECO 56.10.20, 56.10.2)
+  {
+    sectorKey: "pizzeria_asporto",
+    sectorLabel: "Pizzeria Tradizionale, al Taglio e Asporto / Delivery",
+    atecoPrefixes: ["56.10.20", "56.10.2"],
+    machines: [
+      // --- REPARTO 1: LABORATORIO & COTTURA PIZZE (env-piz-laboratorio e env-piz-forno-legna) ---
+      {
+        machineKey: "forno_pizze_professionale",
+        name: "Forno Pizze Professionale (Elettrico / Gas / Legna)",
+        type: "Apparecchiatura Termica di Cottura Pizze ad Alta Temperatura",
+        suggestedManufacturer: "Moretti Forni / Marana Forni / Cuppone",
+        suggestedModel: "Neapolis / Rotoforno / Giotto",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "FORNO_PIZZA_VETRO_VENTILATO_ISOLANTE",
+            title: "Porta con Vetro Refrattario Ventilato Termoisolante e Maniglia a Doppio Scatto",
+            question: "La porta della camera di cottura è dotata di vetro refrattario o intercapedine termoisolante anti-ustione e maniglia di apertura atermica con meccanismo a doppio scatto per lo sfiato graduale dei vapori e calore a norma UNI EN 203-1?",
+            normReference: "UNI EN 203-1; D.Lgs. 81/2008 art. 71 c. 3 e All. V p. 6",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FORNO_PIZZA_TERMOSTATO_MASSIMA_RIARMO",
+            title: "Termostato di Massima Temperatura a Riarmo Manuale Indipendente",
+            question: "Il forno è equipaggiato con termostato di limite massimo di sicurezza a riarmo manuale indipendente dal controllo digitale/elettronico che interviene interrompendo l'alimentazione elettrica o l'erogazione del gas in caso di surriscaldamento?",
+            normReference: "CEI EN 60335-2-36; UNI EN 203-1; D.Lgs. 81/2008 All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FORNO_PIZZA_CANNA_FUMARIA_ABBATTITORE_UNI1127",
+            title: "Cappa Integrata o Canna Fumaria con Abbattitore Fuliggine ad Acqua (UNI 1127 / UNI 10683)",
+            question: "Il sistema di evacuazione fumi dispone di cappa integrata con filtri inox o canna fumaria dedicata con abbattitore di fuliggine ad acqua a circuito chiuso conforme a norma UNI 1127 e UNI 10683 per forni a legna o pellet?",
+            normReference: "UNI 1127; UNI 10683:2022; D.Lgs. 81/2008 All. IV p. 1.9; D.M. 03/09/2021",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FORNO_PIZZA_TERMOCOPPIA_INTERCETTAZIONE_GAS",
+            title: "Dispositivo Termocoppia di Sicurezza e Valvola Intercettazione Rapida",
+            question: "Nelle versioni a gas o ibride, i bruciatori della camera e della platea sono dotati di termocoppia rapida di sicurezza con valvola elettromagnetica e rubinetto generale di intercettazione gas a vista accessibile?",
+            normReference: "UNI EN 203-1:2021 punto 5.3; D.M. 12/04/1996; D.Lgs. 81/2008 All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "banco_pizza_refrigerato",
+        name: "Banco Pizza Refrigerato con Piano in Granito e Vetrina Ingredienti",
+        type: "Banco di Lavorazione Refrigerato con Piano di Lavoro MOCA",
+        suggestedManufacturer: "Fimar / Mercatus / Ilsa",
+        suggestedModel: "PZ02 / Granita Pro / Pastry-Pizza 3 Porte",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "BANCO_PIZZA_PIANO_GRANITO_MOCA",
+            title: "Piano di Lavoro in Granito Levigato Sanificabile MOCA Esente da Fessurazioni",
+            question: "Il piano superiore in granito o marmo naturale levigato è integro, privo di crepe, scheggiature o fessurazioni e conforme ai requisiti MOCA per il contatto diretto con alimenti e impasti (Reg. CE 1935/2004)?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004 All. II cap. V; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BANCO_PIZZA_VETRINA_INGREDIENTI_PARAFIATO",
+            title: "Vetrina Refrigerata Ingredienti con Cristalli Parafiato Igienici (+4°C)",
+            question: "La vetrina porta-bacinelle ingredienti è protetta da cristalli parafiato igienici integri, mantiene la temperatura controllata di conservazione (+0°C / +4°C) e dispone di coperchio igienico di chiusura?",
+            normReference: "Reg. CE 852/2004 All. II cap. IX; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BANCO_PIZZA_CONTROLLO_DIGITALE_HACCP",
+            title: "Termoregolatore Elettronico Digitale con Allarme HACCP",
+            question: "Il gruppo frigo è dotato di centralina elettronica con display digitale visibile per il monitoraggio continuo della temperatura e allarme visivo per anomalie di refrigerazione o porta aperta prolungata?",
+            normReference: "Reg. CE 852/2004 All. II cap. V; CEI EN 60335-2-89",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+          {
+            code: "BANCO_PIZZA_GUARNIZIONI_E_ISOLAMENTO_378",
+            title: "Guarnizioni Magnetiche Sfilabili e Circuito Frigo Sigillato UNI EN 378",
+            question: "Gli sportelli inferiori sono dotati di guarnizioni magnetiche perimetrali integre e sfilabili per la sanificazione, con circuito frigorifero a gas ecologico (R290) conforme alla norma UNI EN 378?",
+            normReference: "UNI EN 378:2020; Reg. CE 852/2004; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+      {
+        machineKey: "stendi_pizza_dilaminatrice",
+        name: "Formatrice / Dilaminatrice / Stendipizza a Rulli Inox",
+        type: "Macchina per Formatrice e Dilaminatura a Freddo Impasti",
+        suggestedManufacturer: "Fimar / Prismafood / OEM",
+        suggestedModel: "SI420 / DMA 500 / Roll Pizza 42",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "STENDIPIZZA_RIPARI_FISSI_RULLI_12042",
+            title: "Ripari di Sicurezza Fissi in Plexiglass/Inox su Imbocco Rulli (UNI EN 12042)",
+            question: "I rulli superiori e inferiori di laminazione sono segregati da protezioni fisse trasparenti o in acciaio inox sagomate per impedire l'introduzione accidentale delle dita e mani nella zona di schiacciamento a norma UNI EN 12042?",
+            normReference: "UNI EN 12042:2020; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "STENDIPIZZA_ARRESTO_EMERGENZA_FUNGO",
+            title: "Pulsante di Arresto di Emergenza a Fungo con Riarmo Manuale",
+            question: "Sulla struttura della macchina è presente un pulsante di arresto di emergenza a fungo rosso su fondo giallo ad azione positiva facilmente accessibile all'operatore in caso di trascinamento?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2.3; CEI EN 60204-1; UNI EN ISO 13850",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "STENDIPIZZA_RELE_MINIMA_TENSIONE",
+            title: "Relè di Minima Tensione Anti-Riavvio Accidentale",
+            question: "La centralina di alimentazione della stendipizza è provvista di relè di minima tensione (NVR) che impedisce categoricamente il riavvio spontaneo dei rulli a seguito del ripristino della tensione di rete?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2.1; CEI EN 60204-1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "STENDIPIZZA_RULLI_MOCA_TEFLON_INOX",
+            title: "Rulli di Scorrimento in Resina Alimentare o Acciaio Inox MOCA",
+            question: "I rulli cilindrici sono realizzati in resina acetalica atossica o acciaio inox idoneo al contatto alimentare MOCA Reg. CE 1935/2004, dotati di raschiatori smontabili per la pulizia quotidiana senza ausilio di utensili pericolosi?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004 All. II cap. V; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+      {
+        machineKey: "cappa_aspirazione_forno_pizze",
+        name: "Cappa di Aspirazione Forno Pizze con Impianto Abbattimento Fumi",
+        type: "Impianto di Aspirazione e Trattamento Fumi e Fuliggine Forno",
+        suggestedManufacturer: "Zainetti / Camini & Cappe / Smoki",
+        suggestedModel: "Smoki Junior / Maxi Cappa Pizza con Abbattitore ad Acqua",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "CAPPA_PIZZA_FILTRI_LABIRINTO_INOX",
+            title: "Filtri a Labirinto Antigrasso in Acciaio Inox Lavabili",
+            question: "La cappa sovrastante la bocca del forno è equipaggiata con filtri a labirinto in acciaio inox lavabili ad alta efficienza per la separazione dei grassi e particelle volatili, con canalina di scolo e vaschetta estraibile?",
+            normReference: "UNI EN 16282-6; D.Lgs. 81/2008 art. 64; Reg. CE 852/2004",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CAPPA_PIZZA_ABBATTITORE_FULIGGINE_UNI1127",
+            title: "Abbattitore di Fuliggine ad Acqua a Circuito Chiuso (UNI 1127)",
+            question: "Per forni alimentati a legna, cippato o pellet, l'impianto include un abbattitore di fuliggine ad acqua a circuito chiuso conforme a norma UNI 1127 per la bagnatura e sedimentazione delle scintille e polveri incombuste?",
+            normReference: "UNI 1127; UNI 10683; D.M. 03/09/2021; D.Lgs. 81/2008 All. IV p. 1.9",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CAPPA_PIZZA_CANNA_FUMARIA_INDIPENDENTE",
+            title: "Canalizzazione di Evacuazione a Tetto Indipendente e Tenuta Fumi",
+            question: "La canna fumaria del forno pizze è completamente autonoma e indipendente da altre canalizzazioni, a tenuta di fumo, sfociante al di sopra del colmo del tetto e dotata di portelli di ispezione per la pulizia periodica delle ceneri?",
+            normReference: "UNI EN 16282-7; UNI 10683; D.Lgs. 81/2008 art. 64",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CAPPA_PIZZA_SERRANDA_TAGLIAFUOCO",
+            title: "Serranda TagliafuOCO e Asservimento Motore Aspirazione",
+            question: "L'impianto di aspirazione è provvisto di dispositivo termofusibile o serranda tagliafuoco conforme alle norme di prevenzione incendi e interruttore di sgancio di sicurezza dedicato in posizione protetta?",
+            normReference: "D.M. 03/09/2021; UNI EN 1366-2; D.Lgs. 81/2008 All. IV p. 4",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // --- REPARTO 2: IMPASTO & LIEVITAZIONE (env-piz-impasto) ---
+      {
+        machineKey: "impastatrice_spirale_pizzeria",
+        name: "Impastatrice a Spirale Professionale per Pizza",
+        type: "Macchina Impastatrice Professionale a Spirale per Panificazione e Pizzeria",
+        suggestedManufacturer: "Sunmix / Pizzagroup / Pietro Berto",
+        suggestedModel: "Sun 20/30 / IR22 / Spiral Line 30",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "IMPASTATRICE_RIPARO_GRIGLIA_INTERBLOCCO_453",
+            title: "Riparo a Griglia Inox Interbloccato con Microinterruttore (UNI EN 453)",
+            question: "La vasca impastatrice è protetta da riparo superiore a griglia in acciaio inox interbloccato con microinterruttore di sicurezza a rilascio positivo che arresta istantaneamente la spirale e la vasca al sollevamento conforme a norma UNI EN 453?",
+            normReference: "UNI EN 453:2015; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "IMPASTATRICE_ARRESTO_EMERGENZA_FUNGO",
+            title: "Pulsante di Arresto di Emergenza a Fungo con Ritenuta Meccanica",
+            question: "Sulla testata della macchina è presente un pulsante a fungo rosso di arresto d'emergenza con autoritenuta meccanica conforme a CEI EN 60204-1 e UNI EN ISO 13850?",
+            normReference: "UNI EN ISO 13850; CEI EN 60204-1; D.Lgs. 81/2008 All. V p. 2.3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "IMPASTATRICE_DISTANZE_SICUREZZA_ORGANO_VASCA",
+            title: "Franchi e Distanze di Sicurezza Organo Lavoratore-Vasca",
+            question: "La spirale, lo spacca-pasta e i bordi vasca rispettano i franchi e le distanze minime di sicurezza previsti dalla norma UNI EN 453 per prevenire il trascinamento o lo schiacciamento delle dita dell'operatore?",
+            normReference: "UNI EN 453:2015 punto 5.2; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "IMPASTATRICE_RELE_MINIMA_TENSIONE",
+            title: "Relè di Minima Tensione Anti-Riavvio Spontaneo e Temporizzatore",
+            question: "L'impastatrice è munita di relè di minima tensione anti-riavvio in caso di blackout e timer di ciclo con comandi a bassa tensione IP55 privi di fessure per polveri di farina?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2.1; CEI EN 60204-1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "spezzatrice_arrotondatrice_pizze",
+        name: "Arrotondatrice / Spezzatrice per Palline di Impasto Pizza",
+        type: "Macchina Professionale Formatrice Palline Pizza",
+        suggestedManufacturer: "Vitella / OEM / FriulCo",
+        suggestedModel: "Round 300 / Spaziale BM / Arrotondatrice a Coclea",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "ARROTONDATRICE_TRAMOGGIA_SALVADITA_INTERBLOCCO",
+            title: "Tramoggia Protetta Salvadita con Microinterruttore di Sicurezza (UNI EN 12042)",
+            question: "La tramoggia superiore di immissione porzioni di pasta è dimensionata secondo i franchi di sicurezza della norma UNI EN 12042 ed è provvista di microinterruttore di blocco all'apertura del coperchio?",
+            normReference: "UNI EN 12042:2020; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ARROTONDATRICE_CARTER_PROTEZIONE_COCLEA",
+            title: "Carter di Protezione Organi in Movimento e Coclea/Elica",
+            question: "La coclea a spirale o cilindro arrotondatore è segregata da carter metallico fisso in acciaio inox che impedisce qualsiasi contatto con gli organi in rapida rotazione durante la lavorazione delle porzioni?",
+            normReference: "UNI EN 12042; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ARROTONDATRICE_ARRESTO_EMERGENZA_FUNGO",
+            title: "Pulsante di Arresto di Emergenza a Fungo ad Azione Rapida",
+            question: "È presente sulla parte frontale della macchina un pulsante a fungo di arresto immediato per l'interruzione istantanea del ciclo in caso di anomalia o inceppamento impasto?",
+            normReference: "UNI EN ISO 13850; CEI EN 60204-1; D.Lgs. 81/2008 All. V p. 2.3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ARROTONDATRICE_SUPERFICI_MOCA_TEFLONATE",
+            title: "Superfici a Contatto Impasti Idonee MOCA con Rivestimento Sanificabile",
+            question: "La coclea e il cilindro sono realizzati o trattati con materiali idonei MOCA (alluminio anodizzato / teflon alimentare / inox AISI 304) privi di abrasioni o distacchi di materiale antiaderente conforme al Reg. CE 1935/2004?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004 All. II cap. V; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+      {
+        machineKey: "armadio_ferma_lievitazione",
+        name: "Armadio Frigorifero / Cella Ferma-Lievitazione Impasti",
+        type: "Cella Climatizzata Elettronica per Ferma-Lievitazione e Maturazione Impasti",
+        suggestedManufacturer: "Coldline / Ilsa / Everlasting",
+        suggestedModel: "Levtronic 700 / Ilsa Lievito / King Pizza Ferma-Lievitazione",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "FERMA_LIEVITO_CONTROLLO_TERMO_IGROMETRICO",
+            title: "Controllo Elettronico Combinato Temperatura e Umidità Relativa",
+            question: "La centralina microprocessore gestisce accuratamente le fasi di raffreddamento, conservazione, riscaldamento e umidificazione programmata con registrazione dei parametri per la salubrità dell'impasto?",
+            normReference: "Reg. CE 852/2004 All. II cap. IX; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FERMA_LIEVITO_ALLARME_PORTA_APERTA",
+            title: "Allarme Visivo/Acustico Porta Aperta e Arresto Ventilazione",
+            question: "L'armadio dispone di microinterruttore porta che disattiva la ventilazione forzata interna all'apertura dell'anta ed emette un allarme acustico e visivo in caso di apertura prolungata?",
+            normReference: "CEI EN 60335-2-89; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+          {
+            code: "FERMA_LIEVITO_CIRCUITO_FRIGO_R290_378",
+            title: "Circuito Frigorifero a Tenuta Conforme UNI EN 378 (Gas R290)",
+            question: "Il gruppo motocondensante a gas refrigerante ecologico R290 è ermetico, conforme a norma UNI EN 378 e collocato in vano protetto provvisto di griglie di aerazione pulite e sgombre?",
+            normReference: "UNI EN 378:2020; Reg. UE 517/2014; CEI EN 60335-2-89",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FERMA_LIEVITO_CARICO_ACQUA_DISCONNETTORE_1717",
+            title: "Alimentazione Idrica Umidificatore con Dispositivo Anti-Reflusso UNI EN 1717",
+            question: "L'allacciamento alla rete idrica per il generatore di vapore/umidità è provvisto di disconnettore idraulico anti-reflusso a norma UNI EN 1717 per prevenire contaminazioni della rete potabile?",
+            normReference: "UNI EN 1717; D.Lgs. 31/2001; Reg. CE 852/2004",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // --- REPARTO 3: PREPARAZIONE CONDIMENTI & FRITTI (env-piz-prep-ingredienti) ---
+      {
+        machineKey: "tagliamozzarella_sfilacciatrice",
+        name: "Tagliamozzarella Elettrico / Sfilacciatrice per Formaggi",
+        type: "Macchina Professionale Taglia e Sfilaccia Mozzarella per Pizzeria",
+        suggestedManufacturer: "Sirman / Fimar / Celme",
+        suggestedModel: "TAS / TM Inox / Cheeser 250",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "TAGLIAMOZZARELLA_BOCCA_CARICO_PESTELLO",
+            title: "Bocca di Carico con Cono e Pestello Ergonomico Salvadita",
+            question: "La bocca di carico è provvista di pestello ergonomico sagomato conforme alle dimensioni di sicurezza per impedire l'accesso delle mani al disco/cono di taglio durante l'inserimento dei pani di formaggio?",
+            normReference: "UNI EN 1678; UNI EN 12852; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "TAGLIAMOZZARELLA_INTERBLOCCO_CAMPANA_12852",
+            title: "Interblocco a Microinterruttore su Campana con Arresto Immediato (UNI EN 12852)",
+            question: "Il coperchio/campana di chiusura corpo macchina è protetto da microinterruttore di sicurezza che toglie tensione arrestando istantaneamente il motore all'apertura del gruppo di taglio?",
+            normReference: "UNI EN 12852:2010; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "TAGLIAMOZZARELLA_DISCO_INOX_FERMO_MECCANICO",
+            title: "Disco di Taglio Inox con Fermo di Sicurezza e Protezione Scarico",
+            question: "Il cono o disco di sfilacciatura in acciaio inox alimentare MOCA è dotato di fermo meccanico di bloccaggio e la bocca di espulsione impedisce l'introduzione involontaria delle dita dal basso verso l'utensile?",
+            normReference: "Reg. CE 1935/2004; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "TAGLIAMOZZARELLA_RELE_MINIMA_TENSIONE_IP55",
+            title: "Pulsantiera Bassa Tensione IP55 con Relè di Minima Tensione",
+            question: "I comandi di avvio e arresto sono isolati con protezione stagna IP55 contro infiltrazioni di liquidi/siero e dotati di relè di minima tensione anti-riavvio spontaneo?",
+            normReference: "CEI EN 60204-1; D.Lgs. 81/2008 All. V p. 2.1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "affettatrice_gravita_pizzeria",
+        name: "Affettatrice Professionale a Gravità per Salumi Lama 350 mm",
+        type: "Macchina per Affettamento Salumi da Banco Pizzeria",
+        suggestedManufacturer: "Berkel / Sirman / RGV",
+        suggestedModel: "Domina 350 / Palladio 350 Autocheck",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "AFFETTATRICE_PIZZA_ANELLO_FISSO_PARALAMA",
+            title: "Anello Fisso Paralama Continuo a Norma UNI EN 1974",
+            question: "L'affettatrice è munita di anello fisso di protezione continuo che copre interamente il filo della lama non impegnato dal taglio a norma UNI EN 1974?",
+            normReference: "UNI EN 1974:2010 punto 5.2.2; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "AFFETTATRICE_PIZZA_BLOCCO_CARRO_SPESSORE_ZERO",
+            title: "Blocco Carro a Spessore Zero della Vela per Pulizia Sicura",
+            question: "Il piatto scorrevole portamerce può essere sfilato per la sanificazione solo con la manopola graduata dello spessore posizionata su '0' (filo lama completamente protetto dalla vela)?",
+            normReference: "UNI EN 1974:2010 punto 5.2.4; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "AFFETTATRICE_PIZZA_RELE_MINIMA_TENSIONE",
+            title: "Relè di Minima Tensione Anti-Riavvio Spontaneo",
+            question: "La centralina di accensione è dotata di relè di minima tensione (NVR) che impedisce categoricamente il riavvio spontaneo dopo una momentanea interruzione di alimentazione elettrica?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2.1; CEI EN 60204-1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "AFFETTATRICE_PIZZA_PRESSAMERCE_TRASPARENTE",
+            title: "Pressamerce Ergonomico con Schermo Trasparente Salvadita",
+            question: "Il pressamerce è dotato di impugnatura ergonomica protetta e schermo in policarbonato trasparente integro per preservare le dita dell'operatore durante l'avanzamento verso la lama?",
+            normReference: "UNI EN 1974:2010 punto 5.2.3; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "friggitrice_pizzeria",
+        name: "Friggitrice Professionale per Fritti e Pizze Fritte",
+        type: "Apparecchiatura di Cottura Professionale ad Olio",
+        suggestedManufacturer: "Lotus / Giorik / Angelo Po",
+        suggestedModel: "F18-94G / FryPro 20L / Alpha Fryer",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "FRIGGITRICE_PIZZA_TERMOSTATO_MAX_230",
+            title: "Termostato di Massima Temperatura a Riarmo Manuale (< 230°C)",
+            question: "La friggitrice è dotata di termostato di massima temperatura indipendente a riarmo manuale tarato sotto i 230°C contro l'autocombustione dell'olio in caso di blocco del termostato principale?",
+            normReference: "UNI EN 203-1:2021; D.Lgs. 81/2008 art. 71 e All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FRIGGITRICE_PIZZA_VALVOLA_SCARICO_SICURA",
+            title: "Valvola di Scarico Olio con Sicura Meccanica e Prolunga",
+            question: "Il rubinetto di svuotamento dell'olio esausto è dotato di sicura meccanica contro aperture involontarie e innesto a beccuccio sagomato per il travaso protetto nel fusto di recupero?",
+            normReference: "D.Lgs. 81/2008 All. V p. 7; UNI EN 203-1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FRIGGITRICE_PIZZA_ZONA_FREDDA_POLARI_25",
+            title: "Zona Fredda Fondo Vasca e Controllo Composti Polari (< 25%)",
+            question: "La vasca presenta una zona fredda sottostante per evitare la carbonizzazione dei residui di pastella e viene effettuato il controllo periodico dei composti polari con limite tassativo < 25%?",
+            normReference: "Reg. CE 852/2004; Circ. Min. Sanità 11/01/1991 n. 1; D.Lgs. 81/2008",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FRIGGITRICE_PIZZA_LIVELLO_MIN_MAX",
+            title: "Tacche di Livello Minimo e Massimo Olio Incise in Vasca",
+            question: "Sulla vasca di frittura sono chiaramente impresse le tacche di livello minimo e massimo per prevenire inneschi da scarso battente d'olio o traboccamenti durante l'immersione di cestelli o pizze fritte?",
+            normReference: "UNI EN 203-1 punto 5.5; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "cutter_robot_condimenti",
+        name: "Cutter / Robot Tagliaverdure per Farciture",
+        type: "Robot Tagliaverdure e Cutter da Banco per Farciture Pizzeria",
+        suggestedManufacturer: "Robot Coupe / Dito Sama / Sammic",
+        suggestedModel: "R 201 / TR210 / Sammic CA-31",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "CUTTER_PIZZA_COPERCHIO_INTERBLOCCO_2SEC",
+            title: "Coperchio Trasparente Interbloccato con Arresto Lama entro 2 Secondi (UNI EN 12852)",
+            question: "Il coperchio trasparente della vasca cutter è protetto da microinterruttore di sicurezza che arresta la rotazione delle lame da taglio entro 2 secondi dal sollevamento conforme a norma UNI EN 12852?",
+            normReference: "UNI EN 12852:2010; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CUTTER_PIZZA_PESTELLO_SALVADITA",
+            title: "Pestello Salvadita Sagomato per Tramoggia Verdure",
+            question: "La tramoggia tagliaverdure dispone del pestello sagomato per la spinta degli ortaggi nella bocca di taglio con divieto assoluto di spinta manuale diretta delle verdure?",
+            normReference: "UNI EN 1678:2010; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CUTTER_PIZZA_BLOCCO_VASCA_MECCANICO",
+            title: "Blocco Meccanico Vasca Inox con Microinterruttore di Consenso",
+            question: "Il corpo motore impedisce la rotazione del mozzo portalame se la vasca di lavorazione in acciaio inox non è perfettamente alloggiata e bloccata con lo scatto meccanico di sicurezza?",
+            normReference: "UNI EN 12852; Direttiva Macchine 2006/42/CE All. I",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CUTTER_PIZZA_PULSANTIERA_IP65_PULSE",
+            title: "Pulsantiera Bassa Tensione IP65 con Funzione Impulso (Pulse)",
+            question: "I pulsanti marcia/arresto sono a tenuta stagna IP65 in bassissima tensione di sicurezza con tasto impulso per lavorazioni intermittenti e sminuzzamento controllato delle farciture?",
+            normReference: "CEI EN 60204-1; D.Lgs. 81/2008 All. V p. 2.1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // --- REPARTO 4: LAVAGGIO TEGLIE & STOVIGLIE (env-piz-lavaggio) ---
+      {
+        machineKey: "lavaoggetti_lavateglie",
+        name: "Lavastoviglie Industriale Lavaoggetti / Lavateglie (Pot-Washer)",
+        type: "Lavaoggetti Professionale ad Alta Pressione per Teglie 60x40 e Cassette",
+        suggestedManufacturer: "Winterhalter / Meiko / Comenda",
+        suggestedModel: "UF-M / Point2 M-iQ / Prime Lavaoggetti",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "LAVATEGlie_VASCA_CAPOTTA_MICROINTERRUTTORE",
+            title: "Microinterruttore di Sicurezza Porta/Capotta con Arresto Pompe",
+            question: "La porta controbilanciata o capotta della lavaoggetti è interbloccata da microinterruttore stagno che arresta istantaneamente le pompe ad alta pressione e i getti d'acqua bollente al sollevamento?",
+            normReference: "CEI EN 60335-2-58; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVATEGlie_ANTI_REFLUSSO_UNI_EN_1717",
+            title: "Dispositivo Anti-Reflusso Idrico a Interruzione d'Aria (UNI EN 1717)",
+            question: "Il circuito idraulico di carico è dotato di dispositivo anti-reflusso a interruzione d'aria tipo AA/AB conforme UNI EN 1717 per prevenire ritorni di acque reflue verso l'acquedotto potabile?",
+            normReference: "UNI EN 1717; D.Lgs. 31/2001; D.Lgs. 18/2023; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVATEGlie_DOSATORI_PERISTALTICI",
+            title: "Dosatori Automatici Peristaltici Detergente e Brillantante",
+            question: "I prodotti chimici concentrati di lavaggio e risciacquo sono dosati tramite pompe peristaltiche automatiche integrate a circuito chiuso per evitare contatti cutanei od oculari con sostanze corrosive?",
+            normReference: "D.Lgs. 81/2008 Titolo IX art. 223 e 225; Reg. CE 852/2004",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVATEGlie_TERMOSTOP_SANIFICAZIONE_82",
+            title: "Dispositivo Thermostop Risciacquo Sanificante HACCP (>= 82°C)",
+            question: "La macchina è provvista del sistema Thermostop che garantisce l'avvio del ciclo di risciacquo finale solo quando l'acqua del boiler ha raggiunto la soglia termica di sanificazione di almeno 82°C?",
+            normReference: "DIN 10510; DIN 10512; Reg. CE 852/2004 All. II",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // --- REPARTO 5: FREDDO & MAGAZZINO (env-piz-celle) ---
+      {
+        machineKey: "armadio_frigo_deperibili_pizza",
+        name: "Armadio Frigorifero Statico/Ventilato TN 700/1400L",
+        type: "Armadio Frigorifero Professionale per Conservazione Materie Prime Deperibili",
+        suggestedManufacturer: "Friulinox / Polaris / Ilsa",
+        suggestedModel: "AR70 Pizza / Master 1400 TN / Polar Line",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "FRIGO_PIZZA_TERMOREGOLATORE_ALLARME_HACCP",
+            title: "Termoregolatore Digitale con Allarme Visivo/Acustico HACCP",
+            question: "Il display del termoregolatore digitale è visibile dall'esterno con allarme visivo e acustico per scostamento termico, porta aperta prolungata o guasto sonda a tutela della catena del freddo HACCP?",
+            normReference: "Reg. CE 852/2004 All. II cap. IX; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FRIGO_PIZZA_GUARNIZIONI_MAGNETICHE_PULIBILI",
+            title: "Guarnizioni Magnetiche Perimetrali Integre e Sfilabili",
+            question: "Le guarnizioni magnetiche perimetrali degli sportelli garantiscono tenuta ermetica, sono prive di fessurazioni o muffe e facilmente rimovibili per la regolare pulizia e disinfezione?",
+            normReference: "Reg. CE 852/2004 All. II cap. V; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+          {
+            code: "FRIGO_PIZZA_ISOLAMENTO_CICLOPENTANO_R290",
+            title: "Isolamento Ecologico in Ciclopentano e Circuito Sigillato UNI EN 378 (Gas R290)",
+            question: "L'armadio presenta isolamento ecologico privo di CFC con ciclopentano espanso e gruppo refrigerante sigillato conforme a norma UNI EN 378 operante con gas ecologico a basso impatto R290?",
+            normReference: "UNI EN 378:2020; Reg. UE 517/2014; CEI EN 60335-2-89",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FRIGO_PIZZA_ANGOLI_RAGGIATI_PULIZIA",
+            title: "Vano Interno in Acciaio Inox con Angoli Raggiati Sanificabili MOCA",
+            question: "La camera interna in acciaio inox presenta il fondo con angoli raggiati e piletta di scarico lavaggio per consentire la perfetta pulizia ed evitare accumuli di sporcizia e proliferazioni batteriche?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004 All. II cap. V",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // --- REPARTO 6: SALA & BAR (env-piz-sala-asporto) ---
+      {
+        machineKey: "fabbricatore_ghiaccio_pizzeria",
+        name: "Fabbricatore di Ghiaccio a Cubetti per Bevande",
+        type: "Apparecchiatura di Produzione Ghiaccio Alimentare a Cubetti",
+        suggestedManufacturer: "Brema / Icematic / Scotsman",
+        suggestedModel: "CB 184 / CS 28 / BarLine B20",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "GHIACCIO_PIZZA_CIRCUITO_SIGILLATO_378",
+            title: "Circuito Sigillato Conforme UNI EN 378",
+            question: "Il gruppo frigorifero a circuito sigillato ermetico risponde alla norma UNI EN 378 ed è installato in locale idoneo provvisto di adeguata ventilazione per il dissipamento del calore di condensazione?",
+            normReference: "UNI EN 378:2020; CEI EN 60335-2-24; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+          {
+            code: "GHIACCIO_PIZZA_MATERIALI_MOCA_REG_1935",
+            title: "Materiali Idonei MOCA (Reg. CE 1935/2004) e Piano Pulizia Anti-Legionella",
+            question: "Il contenitore di riserva e i componenti a contatto con l'acqua e il ghiaccio sono conformi alle normative MOCA e viene attuata una procedura periodica di sanificazione anticalcare e antibatterica?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004; Linee Guida Prevenzione Legionellosi",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "GHIACCIO_PIZZA_SCARICO_INTERRUZIONE_ARIA_1717",
+            title: "Scarico con Interruzione d'Aria Anti-Reflusso Fognario (UNI EN 1717)",
+            question: "La tubazione di scarico della vasca ghiaccio presenta un'interruzione d'aria aperta a caduta (air gap) per scongiurare qualsiasi risalita batterica o reflusso dalla rete fognaria?",
+            normReference: "UNI EN 1717; Reg. CE 852/2004 All. II cap. I; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "GHIACCIO_PIZZA_PALETTA_DEPOSITATA_ESTERNO",
+            title: "Paletta Prelievo Ghiaccio MOCA Alloggiata Esternamente",
+            question: "La paletta di prelievo ghiaccio in materiale alimentare MOCA è mantenuta pulita e riposta in apposito supporto esterno alla vasca per prevenire contaminazioni dirette delle mani degli operatori?",
+            normReference: "Reg. CE 852/2004 All. II cap. IX; Reg. CE 1935/2004",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+      {
+        machineKey: "macchina_caffe_pizzeria",
+        name: "Macchina per Caffè Espresso Professionale a 2 Gruppi",
+        type: "Apparecchiatura Idrotermica a Pressione per Somministrazione Bevande Calde",
+        suggestedManufacturer: "Faema / La Marzocco / Rancilio",
+        suggestedModel: "E71 / Linea Mini-PB / Classe 7",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "CAFFE_PIZZA_VALVOLA_PED_SOVRAPRESSIONE",
+            title: "Valvola di Sicurezza Sovrapressione Certificata PED (D.Lgs. 26/2016)",
+            question: "La caldaia a pressione è provvista di valvola di sicurezza contro le sovrapressioni certificata CE secondo la Direttiva PED (D.Lgs. 26/2016) con scarico convogliato verso la vaschetta di scolo?",
+            normReference: "Direttiva PED 2014/68/UE; D.Lgs. 26/2016; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CAFFE_PIZZA_LANCIA_VAPORE_COOL_TOUCH",
+            title: "Lancia Vapore Isolata Cool-Touch Antiscottatura",
+            question: "La lancia vapore presenta condotto isolato termicamente Cool-Touch con impugnatura protetta in gomma per scongiurare scottature alle dita durante l'erogazione del vapore?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3; CEI EN 60335-2-75",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CAFFE_PIZZA_MANOMETRI_DOPPIA_SCALA",
+            title: "Manometri Pressione Caldaia e Pompa Certificati",
+            question: "I manometri per il controllo della pressione in caldaia (1-1.5 bar) e della pressione di erogazione pompa (9 bar) sono integri, funzionanti e perfettamente visibili dal banco di lavoro?",
+            normReference: "D.Lgs. 81/2008 All. V p. 1.2; CEI EN 60335-2-75",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+          {
+            code: "CAFFE_PIZZA_ADDOLCITORE_DISCONNETTORE_1717",
+            title: "Addolcitore Acqua a Monte con Disconnettore Idrico UNI EN 1717",
+            question: "L'impianto di carico idrico è equipaggiato con addolcitore/filtro a resine e dispositivo di non ritorno a monte conforme a norma UNI EN 1717 per impedire qualsiasi riflusso verso l'acquedotto pubblico?",
+            normReference: "UNI EN 1717; D.Lgs. 31/2001; D.Lgs. 18/2023; Reg. CE 852/2004",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // --- REPARTO 7: AREA RIFIUTI & CENERI (env-piz-rifiuti) ---
+      {
+        machineKey: "bidone_metallico_ceneri",
+        name: "Contenitore Metallico con Coperchio Ermetico per Ceneri Forno a Legna",
+        type: "Contenitore Stagno Incombustibile per Gestione e Smaltimento Ceneri Forno",
+        suggestedManufacturer: "Inox Meccanica / MetalBox / F.lli Bonezzi",
+        suggestedModel: "Bidone Ceneri Inox 50L Ermetico con Manici Atermici",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "CENERI_STRUTTURA_METALLICA_INCOMBUSTIBILE",
+            title: "Contenitore Stagno in Lamiera Zincata o Acciaio Inox Incombustibile",
+            question: "Il bidone di raccolta delle ceneri è interamente realizzato in metallo incombustibile (acciaio inox o lamiera zincata spessa), a tenuta stagna sul fondo e sulle pareti per evitare la fuoriuscita di braci ardenti?",
+            normReference: "D.Lgs. 81/2008 All. IV p. 4; D.M. 03/09/2021 (Criteri Generali di Sicurezza Antincendio)",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CENERI_COPERCHIO_TENUTA_ERMETICA",
+            title: "Coperchio di Tenuta Ermetica con Chiusura di Sicurezza",
+            question: "Il fusto è munito di coperchio metallico sagomato a perfetta tenuta ermetica per soffocare eventuali inneschi ed evitare che faville o ceneri volatili si disperdano nell'ambiente o inneschino incendi?",
+            normReference: "D.Lgs. 81/2008 All. IV p. 4; D.M. 03/09/2021",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CENERI_MANICI_TERMOISOLANTI_SOLLEVAMENTO",
+            title: "Manici di Sollevamento Robusti con Impugnature Termoisolanti",
+            question: "Il contenitore è dotato di maniglie laterali saldate ad alta resistenza provviste di isolamento termico per consentire la movimentazione sicura senza rischio di ustioni termiche alle mani?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3 e Titolo VI (Movimentazione Manuale dei Carichi)",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CENERI_UBICAZIONE_SUPERFICIE_INCOMBUSTIBILE",
+            title: "Posizionamento su Basamento Incombustibile Distante da Infiammabili",
+            question: "Il bidone per le ceneri calde è collocato su pavimento incombustibile (gres, cemento, piastrelle) a distanza di sicurezza da scorte di legna, sacchi di farina, cartoni per pizza o altri materiali combustibili?",
+            normReference: "D.Lgs. 81/2008 All. IV p. 4; D.M. 03/09/2021; D.M. 10/03/1998",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+    ],
+  },
+
+  // 2. RISTORAZIONE & ALIMENTARE
   {
     sectorKey: "ristorazione_alimentare",
     sectorLabel: "Ristorazione, Bar, Pasticceria, Panificazione e Alimentare",
@@ -3290,6 +4000,15 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
   const ristSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "ristorazione_somministrazione");
   const ristMachines = ristSector ? ristSector.machines : [];
 
+  const isPizzeriaAteco = !!atecoCode && (
+    atecoCode.startsWith("56.10.20") ||
+    atecoCode.startsWith("56.10.2") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("561020") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("56102")
+  );
+  const pizSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "pizzeria_asporto");
+  const pizMachines = pizSector ? pizSector.machines : [];
+
   const isIperAteco = !!atecoCode && (
     atecoCode.startsWith("47.11.1") ||
     atecoCode.startsWith("47.11.10") ||
@@ -3378,6 +4097,91 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
         [
           "fabbricatore_ghiaccio_ristorante",
           "macchina_caffe_espresso",
+        ].includes(m.machineKey)
+      );
+    }
+
+    // Reparti Pizzeria Tradizionale, al Taglio e Asporto / Delivery (56.10.20 / 56.10.2 / 561020 / 56102)
+    else if (
+      envId === "env-piz-laboratorio" ||
+      envId === "env-piz-forno-legna" ||
+      envId.includes("piz-laboratorio") ||
+      envId.includes("piz-forno") ||
+      (isPizzeriaAteco && (envId === "env-laboratorio" || envId === "env-forno" || nameLower.includes("forno") || nameLower.includes("laboratorio") || nameLower.includes("cottura")))
+    ) {
+      matchingMachines = pizMachines.filter((m) =>
+        [
+          "forno_pizze_professionale",
+          "banco_pizza_refrigerato",
+          "stendi_pizza_dilaminatrice",
+          "cappa_aspirazione_forno_pizze",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-piz-impasto" ||
+      envId.includes("piz-impasto") ||
+      (isPizzeriaAteco && (nameLower.includes("impasto") || nameLower.includes("lievitazione")))
+    ) {
+      matchingMachines = pizMachines.filter((m) =>
+        [
+          "impastatrice_spirale_pizzeria",
+          "spezzatrice_arrotondatrice_pizze",
+          "armadio_ferma_lievitazione",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-piz-prep-ingredienti" ||
+      envId.includes("piz-prep") ||
+      (isPizzeriaAteco && (nameLower.includes("farcitur") || nameLower.includes("condiment") || nameLower.includes("ingredient") || nameLower.includes("preparazion")))
+    ) {
+      matchingMachines = pizMachines.filter((m) =>
+        [
+          "tagliamozzarella_sfilacciatrice",
+          "affettatrice_gravita_pizzeria",
+          "friggitrice_pizzeria",
+          "cutter_robot_condimenti",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-piz-lavaggio" ||
+      envId.includes("piz-lavaggio") ||
+      (isPizzeriaAteco && (envId === "env-lavaggio" || nameLower.includes("teglie") || (nameLower.includes("lavaggio") && !nameLower.includes("stoviglie")) || (isPizzeriaAteco && nameLower.includes("lavaggio"))))
+    ) {
+      matchingMachines = pizMachines.filter((m) =>
+        [
+          "lavaoggetti_lavateglie",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-piz-celle" ||
+      envId.includes("piz-celle") ||
+      (isPizzeriaAteco && (envId === "env-cella" || nameLower.includes("cella") || nameLower.includes("celle") || nameLower.includes("dispensa") || nameLower.includes("deperibil") || (nameLower.includes("frigo") && !nameLower.includes("banco"))))
+    ) {
+      matchingMachines = pizMachines.filter((m) =>
+        [
+          "armadio_frigo_deperibili_pizza",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-piz-sala-asporto" ||
+      envId.includes("piz-sala") ||
+      envId.includes("piz-asporto") ||
+      (isPizzeriaAteco && (nameLower.includes("sala") || nameLower.includes("asporto") || nameLower.includes("delivery") || nameLower.includes("bar") || nameLower.includes("cassa") || cat === "sales_office" || cat === "public"))
+    ) {
+      matchingMachines = pizMachines.filter((m) =>
+        [
+          "fabbricatore_ghiaccio_pizzeria",
+          "macchina_caffe_pizzeria",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-piz-rifiuti" ||
+      envId.includes("piz-rifiuti") ||
+      (isPizzeriaAteco && (nameLower.includes("ceneri") || nameLower.includes("rifiuti") || cat === "waste"))
+    ) {
+      matchingMachines = pizMachines.filter((m) =>
+        [
+          "bidone_metallico_ceneri",
         ].includes(m.machineKey)
       );
     } else if (

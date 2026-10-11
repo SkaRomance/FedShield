@@ -672,4 +672,266 @@ for (const code of ["56.10.10", "56.10.1", "561011", "56101"]) {
   assert.ok(fallbackRes.every((m) => m.sourceReason === "ateco"));
 }
 
+// -------------------------------------------------------------
+// TEST DEDICATI ATECO 56.10.20 - PIZZERIA TRADIZIONALE, AL TAGLIO E ASPORTO / DELIVERY
+// -------------------------------------------------------------
+console.log("\n=== INIZIO TEST normativeMachineCatalog (ATECO 56.10.20 Pizzeria / Asporto) ===");
+
+// -------------------------------------------------------------
+// Test 15: Verifica priorità settore pizzeria_asporto su 56.10.20 e 56.10.2
+// -------------------------------------------------------------
+console.log("Test 15: Verifica priorità catalogo ATECO per Pizzeria / Asporto (56.10.20 / 56.10.2 / 561020 / 56102)");
+const pizCatalogExact = getSectorMachineCatalogForAteco("56.10.20");
+assert.equal(pizCatalogExact.sectorKey, "pizzeria_asporto", "ATECO 56.10.20 deve restituire pizzeria_asporto");
+assert.ok(pizCatalogExact.sectorLabel.includes("Pizzeria"), "L'etichetta deve includere Pizzeria");
+
+const pizCatalogPrefix = getSectorMachineCatalogForAteco("56.10.2");
+assert.equal(pizCatalogPrefix.sectorKey, "pizzeria_asporto", "ATECO 56.10.2 deve restituire pizzeria_asporto");
+
+const pizCatalogNumeric = getSectorMachineCatalogForAteco("561020");
+assert.equal(pizCatalogNumeric.sectorKey, "pizzeria_asporto", "ATECO 561020 (senza punti) deve restituire pizzeria_asporto");
+
+const pizCatalogNumericPrefix = getSectorMachineCatalogForAteco("56102");
+assert.equal(pizCatalogNumericPrefix.sectorKey, "pizzeria_asporto", "ATECO 56102 (senza punti) deve restituire pizzeria_asporto");
+
+// Verifica posizionamento: pizzeria_asporto segue ristorazione_somministrazione e precede ristorazione_alimentare generico
+const ristSommIdx = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ristorazione_somministrazione");
+const pizIdx = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "pizzeria_asporto");
+const ristGenIdx = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ristorazione_alimentare");
+
+assert.ok(pizIdx !== -1, "Settore pizzeria_asporto deve esistere nel catalogo");
+assert.equal(pizIdx, 1, "pizzeria_asporto deve trovarsi subito dopo ristorazione_somministrazione (indice 1)");
+assert.ok(ristSommIdx < pizIdx, "ristorazione_somministrazione deve precedere pizzeria_asporto");
+assert.ok(pizIdx < ristGenIdx, "pizzeria_asporto deve precedere il settore generico ristorazione_alimentare");
+
+// -------------------------------------------------------------
+// Test 16: Verifica completezza delle 16 attrezzature professionali per pizzeria
+// -------------------------------------------------------------
+console.log("Test 16: Verifica completezza delle 16 attrezzature professionali per pizzeria con modelli reali e verifiche tecniche");
+assert.equal(pizCatalogExact.machines.length, 16, "Il catalogo Pizzeria deve contenere esattamente 16 macchine");
+
+const expectedPizMachineKeys = [
+  // Laboratorio & Cottura Pizze (4)
+  "forno_pizze_professionale",
+  "banco_pizza_refrigerato",
+  "stendi_pizza_dilaminatrice",
+  "cappa_aspirazione_forno_pizze",
+  // Impasto & Lievitazione (3)
+  "impastatrice_spirale_pizzeria",
+  "spezzatrice_arrotondatrice_pizze",
+  "armadio_ferma_lievitazione",
+  // Preparazione Condimenti & Fritti (4)
+  "tagliamozzarella_sfilacciatrice",
+  "affettatrice_gravita_pizzeria",
+  "friggitrice_pizzeria",
+  "cutter_robot_condimenti",
+  // Lavaggio Teglie & Stoviglie (1)
+  "lavaoggetti_lavateglie",
+  // Freddo & Magazzino (1)
+  "armadio_frigo_deperibili_pizza",
+  // Sala & Bar (2)
+  "fabbricatore_ghiaccio_pizzeria",
+  "macchina_caffe_pizzeria",
+  // Area Rifiuti & Ceneri (1)
+  "bidone_metallico_ceneri",
+];
+
+for (const key of expectedPizMachineKeys) {
+  const found = pizCatalogExact.machines.find((m) => m.machineKey === key);
+  assert.ok(found, `Attrezzatura Pizzeria con key '${key}' deve essere presente nel catalogo`);
+  assert.ok(found.name.length > 5, `Nome attrezzatura '${key}' deve essere descrittivo`);
+  assert.ok(found.suggestedManufacturer.length > 2, `Produttore presente per '${key}'`);
+  assert.ok(found.suggestedModel.length > 1, `Modello presente per '${key}'`);
+  assert.ok(found.safetyChecks.length >= 4, `L'attrezzatura '${key}' deve avere almeno 4 controlli di sicurezza specifici`);
+  assert.equal(found.isSubjectToInailCheck, false, `L'attrezzatura '${key}' non è soggetta a verifica periodica INAIL All. VII`);
+}
+
+// 1. Forno Pizze Professionale
+const fornoPiz = pizCatalogExact.machines.find((m) => m.machineKey === "forno_pizze_professionale")!;
+assert.ok(fornoPiz.suggestedManufacturer.includes("Moretti Forni") || fornoPiz.suggestedManufacturer.includes("Marana Forni"), "Produttore forno pizze deve includere Moretti Forni o Marana");
+assert.ok(fornoPiz.safetyChecks.some((c) => c.code === "FORNO_PIZZA_VETRO_VENTILATO_ISOLANTE"), "Forno deve avere vetro ventilato isolante");
+assert.ok(fornoPiz.safetyChecks.some((c) => c.code === "FORNO_PIZZA_TERMOSTATO_MASSIMA_RIARMO"), "Forno deve avere termostato massima a riarmo");
+assert.ok(fornoPiz.safetyChecks.some((c) => c.normReference.includes("UNI 1127")), "Forno deve citare UNI 1127 per abbattitore fuliggine");
+assert.ok(fornoPiz.safetyChecks.some((c) => c.code === "FORNO_PIZZA_TERMOCOPPIA_INTERCETTAZIONE_GAS"), "Forno deve avere termocoppia sicurezza gas");
+
+// 2. Banco Pizza Refrigerato
+const banco = pizCatalogExact.machines.find((m) => m.machineKey === "banco_pizza_refrigerato")!;
+assert.ok(banco.suggestedManufacturer.includes("Fimar") || banco.suggestedManufacturer.includes("Ilsa"), "Produttore banco pizza");
+assert.ok(banco.safetyChecks.some((c) => c.normReference.includes("Reg. CE 1935/2004")), "Banco pizza granito deve citare MOCA");
+assert.ok(banco.safetyChecks.some((c) => c.code === "BANCO_PIZZA_VETRINA_INGREDIENTI_PARAFIATO"), "Banco pizza deve avere vetrina parafiato");
+assert.ok(banco.safetyChecks.some((c) => c.code === "BANCO_PIZZA_CONTROLLO_DIGITALE_HACCP"), "Banco pizza controllo digitale");
+assert.ok(banco.safetyChecks.some((c) => c.normReference.includes("UNI EN 378")), "Banco pizza circuito frigo UNI EN 378");
+
+// 3. Stendipizza Dilaminatrice
+const stendipizza = pizCatalogExact.machines.find((m) => m.machineKey === "stendi_pizza_dilaminatrice")!;
+assert.ok(stendipizza.suggestedManufacturer.includes("Fimar") || stendipizza.suggestedManufacturer.includes("Prismafood"), "Produttore stendipizza");
+assert.ok(stendipizza.safetyChecks.some((c) => c.normReference.includes("UNI EN 12042")), "Stendipizza deve citare UNI EN 12042");
+assert.ok(stendipizza.safetyChecks.some((c) => c.code === "STENDIPIZZA_ARRESTO_EMERGENZA_FUNGO"), "Stendipizza arresto emergenza fungo");
+
+// 4. Cappa Aspirazione Forno Pizze
+const cappaPizze = pizCatalogExact.machines.find((m) => m.machineKey === "cappa_aspirazione_forno_pizze")!;
+assert.ok(cappaPizze.suggestedManufacturer.includes("Smoki") || cappaPizze.suggestedManufacturer.includes("Zainetti"), "Produttore cappa pizze Smoki/Zainetti");
+assert.ok(cappaPizze.safetyChecks.some((c) => c.normReference.includes("UNI 1127")), "Cappa pizze deve citare abbattitore fuliggine ad acqua UNI 1127");
+assert.ok(cappaPizze.safetyChecks.some((c) => c.code === "CAPPA_PIZZA_FILTRI_LABIRINTO_INOX"), "Cappa filtri labirinto inox");
+
+// 5. Impastatrice a Spirale Pizzeria
+const impastatrice = pizCatalogExact.machines.find((m) => m.machineKey === "impastatrice_spirale_pizzeria")!;
+assert.ok(impastatrice.suggestedManufacturer.includes("Sunmix") || impastatrice.suggestedManufacturer.includes("Pizzagroup"), "Produttore impastatrice");
+assert.ok(impastatrice.safetyChecks.some((c) => c.normReference.includes("UNI EN 453")), "Impastatrice deve citare UNI EN 453");
+assert.ok(impastatrice.safetyChecks.some((c) => c.code === "IMPASTATRICE_RIPARO_GRIGLIA_INTERBLOCCO_453"), "Impastatrice riparo griglia interbloccato");
+assert.ok(impastatrice.safetyChecks.some((c) => c.code === "IMPASTATRICE_DISTANZE_SICUREZZA_ORGANO_VASCA"), "Impastatrice distanze di sicurezza");
+
+// 6. Spezzatrice Arrotondatrice Pizze
+const arrotondatrice = pizCatalogExact.machines.find((m) => m.machineKey === "spezzatrice_arrotondatrice_pizze")!;
+assert.ok(arrotondatrice.suggestedManufacturer.includes("Vitella") || arrotondatrice.suggestedManufacturer.includes("OEM"), "Produttore arrotondatrice");
+assert.ok(arrotondatrice.safetyChecks.some((c) => c.normReference.includes("UNI EN 12042")), "Arrotondatrice deve citare UNI EN 12042");
+assert.ok(arrotondatrice.safetyChecks.some((c) => c.code === "ARROTONDATRICE_TRAMOGGIA_SALVADITA_INTERBLOCCO"), "Arrotondatrice tramoggia salvadita");
+
+// 7. Armadio Ferma-Lievitazione
+const fermaLievito = pizCatalogExact.machines.find((m) => m.machineKey === "armadio_ferma_lievitazione")!;
+assert.ok(fermaLievito.suggestedManufacturer.includes("Coldline") || fermaLievito.suggestedManufacturer.includes("Ilsa"), "Produttore ferma lievito Coldline/Ilsa");
+assert.ok(fermaLievito.safetyChecks.some((c) => c.code === "FERMA_LIEVITO_CONTROLLO_TERMO_IGROMETRICO"), "Ferma lievito controllo termo-igrometrico");
+assert.ok(fermaLievito.safetyChecks.some((c) => c.normReference.includes("UNI EN 1717")), "Ferma lievito disconnettore idrico UNI EN 1717");
+
+// 8. Tagliamozzarella Sfilacciatrice
+const tagliamozzarella = pizCatalogExact.machines.find((m) => m.machineKey === "tagliamozzarella_sfilacciatrice")!;
+assert.ok(tagliamozzarella.suggestedManufacturer.includes("Sirman") || tagliamozzarella.suggestedManufacturer.includes("Fimar"), "Produttore tagliamozzarella");
+assert.ok(tagliamozzarella.safetyChecks.some((c) => c.normReference.includes("UNI EN 12852")), "Tagliamozzarella deve citare UNI EN 12852");
+assert.ok(tagliamozzarella.safetyChecks.some((c) => c.code === "TAGLIAMOZZARELLA_BOCCA_CARICO_PESTELLO"), "Tagliamozzarella pestello salvadita");
+
+// 9. Affettatrice Gravità Pizzeria
+const affettatricePiz = pizCatalogExact.machines.find((m) => m.machineKey === "affettatrice_gravita_pizzeria")!;
+assert.ok(affettatricePiz.suggestedManufacturer.includes("Berkel") || affettatricePiz.suggestedManufacturer.includes("Sirman"), "Produttore affettatrice");
+assert.ok(affettatricePiz.safetyChecks.some((c) => c.normReference.includes("UNI EN 1974")), "Affettatrice deve citare UNI EN 1974");
+assert.ok(affettatricePiz.safetyChecks.some((c) => c.code === "AFFETTATRICE_PIZZA_ANELLO_FISSO_PARALAMA"), "Affettatrice anello fisso paralama");
+assert.ok(affettatricePiz.safetyChecks.some((c) => c.code === "AFFETTATRICE_PIZZA_BLOCCO_CARRO_SPESSORE_ZERO"), "Affettatrice blocco carro spessore zero");
+
+// 10. Friggitrice Pizzeria
+const friggitricePiz = pizCatalogExact.machines.find((m) => m.machineKey === "friggitrice_pizzeria")!;
+assert.ok(friggitricePiz.suggestedManufacturer.includes("Lotus") || friggitricePiz.suggestedManufacturer.includes("Giorik"), "Produttore friggitrice");
+assert.ok(friggitricePiz.safetyChecks.some((c) => c.code === "FRIGGITRICE_PIZZA_TERMOSTATO_MAX_230"), "Friggitrice termostato max < 230C");
+assert.ok(friggitricePiz.safetyChecks.some((c) => c.code === "FRIGGITRICE_PIZZA_ZONA_FREDDA_POLARI_25"), "Friggitrice composti polari < 25%");
+
+// 11. Cutter Robot Condimenti
+const cutterPiz = pizCatalogExact.machines.find((m) => m.machineKey === "cutter_robot_condimenti")!;
+assert.ok(cutterPiz.suggestedManufacturer.includes("Robot Coupe") || cutterPiz.suggestedManufacturer.includes("Dito Sama"), "Produttore cutter");
+assert.ok(cutterPiz.safetyChecks.some((c) => c.normReference.includes("UNI EN 12852")), "Cutter deve citare UNI EN 12852");
+assert.ok(cutterPiz.safetyChecks.some((c) => c.code === "CUTTER_PIZZA_COPERCHIO_INTERBLOCCO_2SEC"), "Cutter arresto lama entro 2s");
+
+// 12. Lavaoggetti Lavateglie
+const lavaoggetti = pizCatalogExact.machines.find((m) => m.machineKey === "lavaoggetti_lavateglie")!;
+assert.ok(lavaoggetti.suggestedManufacturer.includes("Winterhalter") || lavaoggetti.suggestedManufacturer.includes("Meiko"), "Produttore lavaoggetti");
+assert.ok(lavaoggetti.safetyChecks.some((c) => c.normReference.includes("UNI EN 1717")), "Lavaoggetti dispositivo anti-reflusso UNI EN 1717");
+assert.ok(lavaoggetti.safetyChecks.some((c) => c.code === "LAVATEGlie_VASCA_CAPOTTA_MICROINTERRUTTORE"), "Lavaoggetti microinterruttore capotta");
+
+// 13. Armadio Frigo Deperibili Pizza
+const frigoPiz = pizCatalogExact.machines.find((m) => m.machineKey === "armadio_frigo_deperibili_pizza")!;
+assert.ok(frigoPiz.suggestedManufacturer.includes("Friulinox") || frigoPiz.suggestedManufacturer.includes("Polaris"), "Produttore frigo");
+assert.ok(frigoPiz.safetyChecks.some((c) => c.normReference.includes("UNI EN 378")), "Frigo deperibili circuito UNI EN 378");
+assert.ok(frigoPiz.safetyChecks.some((c) => c.code === "FRIGO_PIZZA_TERMOREGOLATORE_ALLARME_HACCP"), "Frigo termoregolatore HACCP");
+
+// 14. Fabbricatore Ghiaccio Pizzeria
+const ghiaccioPiz = pizCatalogExact.machines.find((m) => m.machineKey === "fabbricatore_ghiaccio_pizzeria")!;
+assert.ok(ghiaccioPiz.suggestedManufacturer.includes("Brema") || ghiaccioPiz.suggestedManufacturer.includes("Icematic"), "Produttore ghiaccio");
+assert.ok(ghiaccioPiz.safetyChecks.some((c) => c.normReference.includes("Reg. CE 1935/2004")), "Fabbricatore ghiaccio materiali MOCA");
+assert.ok(ghiaccioPiz.safetyChecks.some((c) => c.normReference.includes("UNI EN 1717")), "Fabbricatore ghiaccio scarico anti-reflusso UNI EN 1717");
+
+// 15. Macchina Caffè Pizzeria
+const caffePiz = pizCatalogExact.machines.find((m) => m.machineKey === "macchina_caffe_pizzeria")!;
+assert.ok(caffePiz.suggestedManufacturer.includes("Faema") || caffePiz.suggestedManufacturer.includes("La Marzocco"), "Produttore caffè");
+assert.ok(caffePiz.safetyChecks.some((c) => c.normReference.includes("D.Lgs. 26/2016")), "Macchina caffè valvola PED D.Lgs. 26/2016");
+assert.ok(caffePiz.safetyChecks.some((c) => c.code === "CAFFE_PIZZA_LANCIA_VAPORE_COOL_TOUCH"), "Macchina caffè lancia Cool-Touch");
+
+// 16. Bidone Metallico Ceneri
+const bidoneCeneri = pizCatalogExact.machines.find((m) => m.machineKey === "bidone_metallico_ceneri")!;
+assert.ok(bidoneCeneri.suggestedManufacturer.includes("Inox Meccanica") || bidoneCeneri.suggestedManufacturer.includes("MetalBox") || bidoneCeneri.suggestedManufacturer.includes("Bonezzi"), "Produttore bidone metallico ceneri");
+assert.ok(bidoneCeneri.safetyChecks.some((c) => c.normReference.includes("D.Lgs. 81/2008 All. IV p. 4")), "Bidone ceneri deve citare D.Lgs. 81/08 All. IV p. 4");
+assert.ok(bidoneCeneri.safetyChecks.some((c) => c.code === "CENERI_STRUTTURA_METALLICA_INCOMBUSTIBILE"), "Bidone struttura metallica incombustibile");
+assert.ok(bidoneCeneri.safetyChecks.some((c) => c.code === "CENERI_COPERCHIO_TENUTA_ERMETICA"), "Bidone coperchio tenuta ermetica");
+
+// -------------------------------------------------------------
+// Test 17: Associazione 1-a-1 ambienti Step 2 Pizzeria (env-piz-*) -> Step 4 Macchine
+// -------------------------------------------------------------
+console.log("Test 17: Verifica associazione ambienti Step 2 Pizzeria (env-piz-*) -> Step 4 Macchine");
+const pizEnvironments = [
+  { id: "env-piz-laboratorio", name: "Laboratorio Pizzeria e Cottura", category: "production" },
+  { id: "env-piz-impasto", name: "Zona Impasto e Lievitazione", category: "production" },
+  { id: "env-piz-prep-ingredienti", name: "Preparazione Farciture e Friggitrice", category: "production" },
+  { id: "env-piz-lavaggio", name: "Lavaggio Teglie e Stoviglie (Plonge)", category: "production" },
+  { id: "env-piz-celle", name: "Celle e Armadi Frigoriferi Deperibili", category: "warehouse" },
+  { id: "env-piz-sala-asporto", name: "Sala Somministrazione e Banco Asporto/Delivery", category: "public" },
+  { id: "env-piz-rifiuti", name: "Area Rifiuti e Stoccaggio Ceneri", category: "waste" },
+];
+
+const suggestedWithPizEnvs = getSuggestedMachinesForEnvironmentsAndAteco(pizEnvironments, "56.10.20");
+assert.equal(suggestedWithPizEnvs.length, 16, "Tutte le 16 macchine devono essere raccomandate e collegate agli ambienti della pizzeria");
+
+// Verifica 1-a-1 per ciascun ambiente:
+const labMachines = suggestedWithPizEnvs.filter((m) => m.targetEnvironmentId === "env-piz-laboratorio");
+assert.equal(labMachines.length, 4, "env-piz-laboratorio deve contenere 4 macchine di cottura e stesura");
+assert.ok(labMachines.some((m) => m.machineKey === "forno_pizze_professionale"));
+assert.ok(labMachines.some((m) => m.machineKey === "banco_pizza_refrigerato"));
+assert.ok(labMachines.some((m) => m.machineKey === "stendi_pizza_dilaminatrice"));
+assert.ok(labMachines.some((m) => m.machineKey === "cappa_aspirazione_forno_pizze"));
+
+// Verifica anche supporto dedicato per env-piz-forno-legna
+const fornoLegnaEnvTest = getSuggestedMachinesForEnvironmentsAndAteco(
+  [{ id: "env-piz-forno-legna", name: "Area Forno a Legna", category: "production" }],
+  "56.10.20",
+);
+const fornoLegnaLinked = fornoLegnaEnvTest.filter((m) => m.targetEnvironmentId === "env-piz-forno-legna");
+assert.equal(fornoLegnaLinked.length, 4, "env-piz-forno-legna deve associare le 4 macchine di cottura e stesura");
+assert.ok(fornoLegnaLinked.some((m) => m.machineKey === "forno_pizze_professionale"));
+assert.ok(fornoLegnaLinked.some((m) => m.machineKey === "banco_pizza_refrigerato"));
+assert.ok(fornoLegnaLinked.some((m) => m.machineKey === "stendi_pizza_dilaminatrice"));
+assert.ok(fornoLegnaLinked.some((m) => m.machineKey === "cappa_aspirazione_forno_pizze"));
+
+const impastoMachines = suggestedWithPizEnvs.filter((m) => m.targetEnvironmentId === "env-piz-impasto");
+assert.equal(impastoMachines.length, 3, "env-piz-impasto deve contenere 3 macchine di impasto");
+assert.ok(impastoMachines.some((m) => m.machineKey === "impastatrice_spirale_pizzeria"));
+assert.ok(impastoMachines.some((m) => m.machineKey === "spezzatrice_arrotondatrice_pizze"));
+assert.ok(impastoMachines.some((m) => m.machineKey === "armadio_ferma_lievitazione"));
+
+const prepPizMachines = suggestedWithPizEnvs.filter((m) => m.targetEnvironmentId === "env-piz-prep-ingredienti");
+assert.equal(prepPizMachines.length, 4, "env-piz-prep-ingredienti deve contenere 4 macchine di preparazione condimenti");
+assert.ok(prepPizMachines.some((m) => m.machineKey === "tagliamozzarella_sfilacciatrice"));
+assert.ok(prepPizMachines.some((m) => m.machineKey === "affettatrice_gravita_pizzeria"));
+assert.ok(prepPizMachines.some((m) => m.machineKey === "friggitrice_pizzeria"));
+assert.ok(prepPizMachines.some((m) => m.machineKey === "cutter_robot_condimenti"));
+
+const lavaggioPizMachines = suggestedWithPizEnvs.filter((m) => m.targetEnvironmentId === "env-piz-lavaggio");
+assert.equal(lavaggioPizMachines.length, 1, "env-piz-lavaggio deve contenere 1 lavaoggetti/lavateglie");
+assert.ok(lavaggioPizMachines.some((m) => m.machineKey === "lavaoggetti_lavateglie"));
+
+const cellePizMachines = suggestedWithPizEnvs.filter((m) => m.targetEnvironmentId === "env-piz-celle");
+assert.equal(cellePizMachines.length, 1, "env-piz-celle deve contenere 1 armadio frigo deperibili");
+assert.ok(cellePizMachines.some((m) => m.machineKey === "armadio_frigo_deperibili_pizza"));
+
+const salaPizMachines = suggestedWithPizEnvs.filter((m) => m.targetEnvironmentId === "env-piz-sala-asporto");
+assert.equal(salaPizMachines.length, 2, "env-piz-sala-asporto deve contenere 2 attrezzature bar/sala");
+assert.ok(salaPizMachines.some((m) => m.machineKey === "fabbricatore_ghiaccio_pizzeria"));
+assert.ok(salaPizMachines.some((m) => m.machineKey === "macchina_caffe_pizzeria"));
+
+const rifiutiPizMachines = suggestedWithPizEnvs.filter((m) => m.targetEnvironmentId === "env-piz-rifiuti");
+assert.equal(rifiutiPizMachines.length, 1, "env-piz-rifiuti deve contenere 1 bidone metallico ceneri");
+assert.ok(rifiutiPizMachines.some((m) => m.machineKey === "bidone_metallico_ceneri"));
+
+// -------------------------------------------------------------
+// Test 18: Risoluzione solo su codice ATECO senza locali censiti (Pizzeria)
+// -------------------------------------------------------------
+console.log("Test 18: Integrazione automatica macchine per ATECO 56.10.20 senza ambienti preventivi");
+const suggestedPizOnlyAteco = getSuggestedMachinesForEnvironmentsAndAteco([], "56.10.20");
+assert.equal(suggestedPizOnlyAteco.length, 16, "Devono essere suggerite tutte le 16 macchine della pizzeria");
+assert.ok(
+  suggestedPizOnlyAteco.every((m) => m.sourceReason === "ateco"),
+  "Tutte le macchine devono avere sourceReason === 'ateco' se nessun locale è stato specificato",
+);
+
+// Verifica fallback automatico identico per varianti di codice ATECO ("56.10.2", "561020", "56102")
+for (const code of ["56.10.2", "561020", "56102"]) {
+  const fallbackRes = getSuggestedMachinesForEnvironmentsAndAteco([], code);
+  assert.equal(fallbackRes.length, 16, `ATECO variant '${code}' deve restituire tutte le 16 macchine`);
+  assert.ok(fallbackRes.every((m) => m.sourceReason === "ateco"));
+}
+
 console.log("=== TUTTI I TEST normativeMachineCatalog SUPERATI CON SUCCESSO! ===");

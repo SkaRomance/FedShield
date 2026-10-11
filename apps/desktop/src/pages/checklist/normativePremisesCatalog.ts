@@ -1248,6 +1248,258 @@ export function getStandardEnvironmentsForAteco(atecoCode?: string): WorkEnviron
     ];
   }
 
+  // 0-quater. Pizzeria / Asporto / Delivery (56.10.20, 56.10.2 - Pizzerie tradizionali, al taglio, asporto e delivery)
+  if (ateco.startsWith("561020") || ateco.startsWith("56102")) {
+    return [
+      {
+        id: "env-piz-laboratorio",
+        key: "piz_laboratorio_stesura_cottura",
+        name: "Laboratorio Pizzeria / Banco Stesura, Farcitura & Cottura Pizze",
+        icon: "🍕",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 35,
+        heightM: 3.0,
+        volumeCuM: 105,
+        occupantsCount: 3,
+        windowSurfaceSqM: 3.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          forcedExhaustType: "kitchen_hood",
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-piz-impasto",
+        key: "piz_impasto_lievitazione",
+        name: "Locale Impasto & Lievitazione / Fermentazione Impasti",
+        icon: "🥣",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 20,
+        heightM: 3.0,
+        volumeCuM: 60,
+        occupantsCount: 2,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-piz-forno-legna",
+        key: "piz_forno_legna_deposito",
+        name: "Area Forno Pizze & Deposito Legna da Ardere",
+        icon: "🔥",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 15,
+        heightM: 3.2,
+        volumeCuM: 48,
+        occupantsCount: 1,
+        windowSurfaceSqM: 1.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-piz-prep-ingredienti",
+        key: "piz_prep_ingredienti_tagliamozzarella",
+        name: "Zona Preparazione Ingredienti & Tagliamozzarella",
+        icon: "🧀",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 18,
+        heightM: 3.0,
+        volumeCuM: 54,
+        occupantsCount: 2,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+        },
+      },
+      {
+        id: "env-piz-lavaggio",
+        key: "piz_lavaggio_teglie_cassette",
+        name: "Zona Lavaggio Teglie, Cassette Impasto & Stoviglie",
+        icon: "🧼",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 14,
+        heightM: 3.0,
+        volumeCuM: 42,
+        occupantsCount: 1,
+        windowSurfaceSqM: 1.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-piz-celle",
+        key: "piz_celle_frigo_deperibili",
+        name: "Celle Frigorifere / Deposito Deperibili (Latticini, Mozzarelle, Salumi, Verdure)",
+        icon: "❄️",
+        category: "storage",
+        isDefault: true,
+        surfaceSqM: 18,
+        heightM: 2.6,
+        volumeCuM: 46.8,
+        occupantsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("storage"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          emergencyLighting: true,
+          hasTrappedPersonAlarm: true,
+        },
+      },
+      {
+        id: "env-piz-dispensa",
+        key: "piz_dispensa_secco_farine_cartoni",
+        name: "Dispensa Secco / Deposito Sacchi Farina & Cartoni Pizza MOCA",
+        icon: "📦",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 25,
+        heightM: 2.7,
+        volumeCuM: 67.5,
+        occupantsCount: 1,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          shelvingCertified: true,
+        },
+      },
+      {
+        id: "env-piz-sala-asporto",
+        key: "piz_sala_somministrazione_asporto",
+        name: "Sala Somministrazione & Area Ritiro Asporto / Delivery",
+        icon: "🍽️",
+        category: "public",
+        isDefault: true,
+        surfaceSqM: 90,
+        heightM: 2.8,
+        volumeCuM: 252,
+        occupantsCount: 45,
+        emergencyExitsCount: 2,
+        windowSurfaceSqM: 12.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("public"),
+          emergencyLighting: true,
+          antiShatterGlass: true,
+          emergencyExitsCount: 2,
+        },
+      },
+      {
+        id: "env-piz-spogliatoi",
+        key: "piz_spogliatoi_personale",
+        name: "Spogliatoio e Servizi Igienici Personale (con Antibagno)",
+        icon: "🚻",
+        category: "changing_rooms",
+        isDefault: true,
+        surfaceSqM: 15,
+        heightM: 2.4,
+        volumeCuM: 36,
+        occupantsCount: 5,
+        windowSurfaceSqM: 1.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("changing_rooms"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          forcedExhaustPresent: true,
+          forcedExhaustType: "blind_toilet_fan",
+        },
+      },
+      {
+        id: "env-piz-wc-clienti",
+        key: "piz_wc_clienti_disabili",
+        name: "Servizi Igienici Clienti (Accessibile Disabili D.P.R. 503/96 - D.M. 236/89)",
+        icon: "♿",
+        category: "services",
+        isDefault: true,
+        surfaceSqM: 12,
+        heightM: 2.4,
+        volumeCuM: 28.8,
+        occupantsCount: 2,
+        windowSurfaceSqM: 1.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("services"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          forcedExhaustPresent: true,
+          forcedExhaustType: "blind_toilet_fan",
+        },
+      },
+      {
+        id: "env-piz-rifiuti",
+        key: "piz_deposito_rifiuti_ceneri",
+        name: "Area Deposito Rifiuti & Smaltimento Ceneri Forno Legna",
+        icon: "🗑️",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 10,
+        heightM: 2.6,
+        volumeCuM: 26,
+        occupantsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-piz-tecnico",
+        key: "piz_locale_tecnico_gas_abbattitore",
+        name: "Locale Tecnico / Quadro Elettrico, Allacciamento Gas & Abbattitore Fumi",
+        icon: "⚡",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 10,
+        heightM: 2.5,
+        volumeCuM: 25,
+        occupantsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          emergencyLighting: true,
+          gasLeakDetectorPresent: true,
+        },
+      },
+    ];
+  }
+
   // 1. Ristorazione, HoReCa, Somministrazione alimenti (56.x, 10.x, 11.x, 47.11, 47.2, 55.1)
   if (
     ateco.startsWith("56") ||
@@ -2301,7 +2553,7 @@ export function evaluateEnvironmentCompliance(
       env.key.includes("centrale_frigo") ||
       env.id.includes("super-tecnico") ||
       env.key.includes("super_tecnico") ||
-      (!env.id.includes("rist") && !env.key.includes("rist") && (env.id.includes("tecnico") || env.key.includes("tecnico")))) &&
+      (!env.id.includes("rist") && !env.key.includes("rist") && !env.id.includes("piz") && !env.key.includes("piz") && (env.id.includes("tecnico") || env.key.includes("tecnico")))) &&
     !!env.features.gasLeakDetectorPresent;
   if (isRefrigerationPlant) {
     summaryBadges.push({
@@ -2403,6 +2655,126 @@ export function evaluateEnvironmentCompliance(
     });
   }
 
+  // 8. Regole ad hoc per Pizzeria / Asporto / Delivery (56.10.20 / 56.10.2)
+  // a) Laboratorio pizzeria: altezza minima 3.00m (o deroga ASL), cappa aspirazione sopra bocca forno, lavamani non manuale
+  const isPizzeriaLab =
+    env.id === "env-piz-laboratorio" ||
+    env.key === "piz_laboratorio_stesura_cottura" ||
+    (env.id.includes("laboratorio") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("56102") ?? false));
+  if (isPizzeriaLab) {
+    if (height >= 3.0) {
+      summaryBadges.push({
+        text: "🍕 Laboratorio pizzeria a norma: altezza ≥ 3,00m & cappa aspirazione fumi forno",
+        status: "success",
+      });
+    } else if (height >= 2.7) {
+      summaryBadges.push({
+        text: "🍕 Laboratorio con deroga ASL: altezza ≥ 2,70m con VMC e cappa fumi",
+        status: "warning",
+      });
+    }
+    summaryBadges.push({
+      text: "🚿 Lavamani comando non manuale a ginocchio/pedale (Reg. CE 852/04)",
+      status: "info",
+    });
+  }
+
+  // b) Area Forno a legna e ceneri: abbattitore fuliggine ad acqua UNI 1127, legna vergine certificata, estintore
+  const isPizzeriaWoodOven =
+    env.id === "env-piz-forno-legna" ||
+    env.key === "piz_forno_legna_deposito";
+  if (isPizzeriaWoodOven) {
+    summaryBadges.push({
+      text: "🔥 Abbattitore fuliggine ad acqua conforme UNI 1127 & canna fumaria",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "🪵 Stoccaggio legna vergine certificata (All. IV p. 4) & estintore 34A 233B",
+      status: "info",
+    });
+  }
+
+  // c) Locale Impasto: riparo interbloccato impastatrice a spirale UNI EN 453 e aspirazione polveri farina
+  const isPizzeriaDough =
+    env.id === "env-piz-impasto" ||
+    env.key === "piz_impasto_lievitazione";
+  if (isPizzeriaDough) {
+    summaryBadges.push({
+      text: "🥣 Riparo interbloccato impastatrice a spirale (UNI EN 453) & aspirazione polveri farina",
+      status: "info",
+    });
+  }
+
+  // d) Dispensa secco: stoccaggio sacchi farina su pedane sollevate >= 15 cm e cartoni pizza MOCA
+  const isPizzeriaPantry =
+    env.id === "env-piz-dispensa" ||
+    env.key === "piz_dispensa_secco_farine_cartoni";
+  if (isPizzeriaPantry) {
+    summaryBadges.push({
+      text: "📦 Sacchi farina su pedane sollevate ≥ 15 cm & cartoni pizza MOCA",
+      status: "info",
+    });
+  }
+
+  // e) Sala somministrazione & asporto: vie di esodo libere >= 1.20m, uscite di emergenza con maniglioni antipanico
+  const isPizzeriaHall =
+    env.id === "env-piz-sala-asporto" ||
+    env.key === "piz_sala_somministrazione_asporto";
+  if (isPizzeriaHall) {
+    summaryBadges.push({
+      text: "🚪 Vie di esodo libere ≥ 1,20m & uscite di emergenza con maniglioni antipanico",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "💡 Illuminazione di emergenza ≥ 5 lux & banco ritiro asporto",
+      status: "success",
+    });
+  }
+
+  // f) Celle deperibili: teletermometri continui HACCP
+  const isPizzeriaColdRoom =
+    env.id === "env-piz-celle" ||
+    env.key === "piz_celle_frigo_deperibili";
+  if (isPizzeriaColdRoom) {
+    summaryBadges.push({
+      text: "🌡️ Teletermometri continui HACCP (+2/+4°C latticini, mozzarelle e salumi)",
+      status: "info",
+    });
+  }
+
+  // g) Spogliatoi staff: armadietti a doppio scomparto abiti civili/lavoro infarinati
+  const isPizzeriaStaffLocker =
+    env.id === "env-piz-spogliatoi" ||
+    env.key === "piz_spogliatoi_personale";
+  if (isPizzeriaStaffLocker) {
+    summaryBadges.push({
+      text: "🚻 Armadietti doppio scomparto abiti civili/lavoro infarinati & antibagno",
+      status: "info",
+    });
+  }
+
+  // h) Deposito rifiuti e ceneri: bidone metallico stagno per ceneri forno a legna
+  const isPizzeriaWaste =
+    env.id === "env-piz-rifiuti" ||
+    env.key === "piz_deposito_rifiuti_ceneri";
+  if (isPizzeriaWaste) {
+    summaryBadges.push({
+      text: "🗑️ Bidone metallico stagno per ceneri forno a legna & mastelli differenziata",
+      status: "warning",
+    });
+  }
+
+  // i) Locale tecnico: elettrovalvola gas a riarmo manuale & ricircolo abbattitore fuliggine
+  const isPizzeriaTechnical =
+    env.id === "env-piz-tecnico" ||
+    env.key === "piz_locale_tecnico_gas_abbattitore";
+  if (isPizzeriaTechnical) {
+    summaryBadges.push({
+      text: "⚡ Elettrovalvola gas metano esterna a riarmo manuale & ricircolo abbattitore fuliggine",
+      status: "warning",
+    });
+  }
+
   return {
     isHeightCompliant,
     minHeightRequired,
@@ -2464,7 +2836,9 @@ export function generateEnvironmentChecklistItems(
       env.id.includes("prep-fredda") ||
       env.id.includes("rist-cucina") ||
       env.id.includes("rist-plonge") ||
-      env.id.includes("rist-celle"));
+      env.id.includes("rist-celle") ||
+      env.id.includes("piz-") ||
+      env.key.includes("piz_"));
 
   // 1. Requisito Dimensionale & Cubatura
   items.push({
@@ -2625,7 +2999,7 @@ export function generateEnvironmentChecklistItems(
     env.category === "changing_rooms" ||
     (env.category === "services" && !env.id.includes("wc-clienti") && !env.id.includes("clienti") && !env.key.includes("wc_clienti"))
   ) {
-    const isFoodSector = isFoodEnv || env.id.includes("rist") || env.id.includes("super") || env.id.includes("iper");
+    const isFoodSector = isFoodEnv || env.id.includes("rist") || env.id.includes("super") || env.id.includes("iper") || env.id.includes("piz");
     items.push({
       id: `${env.id}-armadietti-spogliatoio`,
       area: env.name,
@@ -3015,7 +3389,7 @@ export function generateEnvironmentChecklistItems(
       env.key.includes("centrale_frigo") ||
       env.id.includes("super-tecnico") ||
       env.key.includes("super_tecnico") ||
-      (!env.id.includes("rist") && !env.key.includes("rist") && (env.id.includes("tecnico") || env.key.includes("tecnico")))) &&
+      (!env.id.includes("rist") && !env.key.includes("rist") && !env.id.includes("piz") && !env.key.includes("piz") && (env.id.includes("tecnico") || env.key.includes("tecnico")))) &&
     !!env.features.gasLeakDetectorPresent
   ) {
     items.push({
@@ -3494,6 +3868,496 @@ export function generateEnvironmentChecklistItems(
       categoryTag: "cpi",
       suggestedNonConformity:
         "Elettrovalvola di intercettazione gas metano assente o con riarmo automatico non conforme, oppure pulsante di sgancio d'emergenza esterno non accessibile o privo di cartello identificativo.",
+    });
+  }
+
+  // ============================================================================
+  // 12. Requisiti Specifici Pizzeria / Asporto / Delivery (ATECO 56.10.20 / 56.10.2)
+  // ============================================================================
+
+  // a) Laboratorio Pizzeria / Banco Stesura, Farcitura & Cottura Pizze
+  if (env.id === "env-piz-laboratorio" || env.id.includes("piz-laboratorio")) {
+    items.push({
+      id: `${env.id}-banco-stesura-moca`,
+      area: env.name,
+      title: "Banco Stesura Pizze in Granito/Inox Conforme MOCA e Vetrina Refrigerata (+4°C)",
+      question:
+        "Il banco di stesura e farcitura pizze dispone di piano liscio e integro in granito o acciaio inox certificato per alimenti MOCA, privo di fessurazioni o porosità, e di vetrina refrigerata porta-ingredienti protetta da parafiato in vetro che mantiene la temperatura costante tra +2°C e +4°C?",
+      normReference: "Reg. CE 1935/2004 (MOCA), Reg. CE 852/2004 Allegato II Cap. V e Cap. IX",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Piano di stesura con fessurazioni o materiali non conformi MOCA, oppure vetrina ingredienti con temperatura superiore a +4°C o priva di vetro parafiato protettivo.",
+    });
+
+    items.push({
+      id: `${env.id}-vetrina-ingredienti-refrigerata`,
+      area: env.name,
+      title: "Vetrina Ingredienti Refrigerata (+4°C) con Parafiato Igienico",
+      question:
+        "La vetrina orizzontale porta-ingredienti (bacinelle GN) per la farcitura delle pizze assicura temperatura controllata tra +2°C e +4°C con display digitale visibile ed è provvista di struttura parafiato superiore in vetro a protezione degli alimenti?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo V e Capitolo IX",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Vetrina refrigerata ingredienti non funzionante o con display assente/spento e temperatura superiore al limite HACCP di +4°C.",
+    });
+
+    items.push({
+      id: `${env.id}-cappa-aspirazione-bocca-forno`,
+      area: env.name,
+      title: "Cappa di Aspirazione Fumi e Calore sopra la Bocca del Forno Pizze",
+      question:
+        "La bocca di infornamento del forno pizze è sovrastata da cappa di aspirazione ad alta captazione con canna fumaria dedicata conforme a UNI 7129 / UNI 1127, filtri metallici puliti e tiraggio efficiente a protezione dell'operatore pizzaiolo da esalazioni e colpi di calore?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.9 e art. 180 (microclima e calore radiante)",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Cappa fumi sopra la bocca del forno assente, sottodimensionata o con filtri saturi di fuliggine/grasso con dispersione di fumi e calore radiante nell'ambiente di lavoro.",
+    });
+
+    items.push({
+      id: `${env.id}-lavamani-pedale-ginocchio`,
+      area: env.name,
+      title: "Lavamani a Pedale o Ginocchio con Acqua Calda/Fredda e Salviette Monouso",
+      question:
+        "Il laboratorio pizzeria dispone di lavamani ad azionamento non manuale (a ginocchio o a pedale) con rubinetto miscelatore di acqua calda e fredda, dispenser di sapone antibatterico e distributore di salviette monouso a perdere con cestino a pedale?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo I punto 4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Rubinetteria del lavamani azionabile con le mani o priva di distributore di sapone liquido disinfettante e salviette monouso a perdere.",
+    });
+
+    items.push({
+      id: `${env.id}-canaline-inox-sifonate`,
+      area: env.name,
+      title: "Canaline di Scolo a Pavimento Sifonate con Griglie Inox Asportabili",
+      question:
+        "La pavimentazione del laboratorio è provvista di canaline di scolo con pendenze idonee verso chiusini sifonati antiodore con griglie carrabili in acciaio inox asportabili e lavabili per prevenire ristagni d'acqua, scivolamenti e risalita di esalazioni fognarie?",
+      normReference: "Reg. CE 852/2004 All. II Cap. II e D.Lgs. 81/2008 All. IV p.to 1.3",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "pavimenti_pareti",
+      suggestedNonConformity:
+        "Canaline di scolo a pavimento intasate, non sifonate o prive di griglie asportabili in acciaio inox con ristagno di residui e rischio scivolamento.",
+    });
+  }
+
+  // b) Locale Impasto & Lievitazione / Fermentazione Impasti
+  if (env.id === "env-piz-impasto" || env.id.includes("piz-impasto")) {
+    items.push({
+      id: `${env.id}-impastatrice-riparo-interbloccato`,
+      area: env.name,
+      title: "Impastatrice a Spirale con Riparo Interbloccato a Microinterruttore (UNI EN 453)",
+      question:
+        "L'impastatrice a spirale (o a forcella/bracci tuffanti) è dotata di griglia mobile di protezione in acciaio inox interbloccata che arresta immediatamente il movimento degli organi lavoratori in caso di sollevamento (norma UNI EN 453) e arresto di emergenza a fungo?",
+      normReference: "Norma UNI EN 453, D.Lgs. 81/2008 art. 70-71 e Allegato V",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Impastatrice con griglia di protezione mobile bypassata o microinterruttore di sicurezza manomesso con pericolo gravissimo di trascinamento e schiacciamento arti superiori.",
+    });
+
+    items.push({
+      id: `${env.id}-cassette-portapalline-moca`,
+      area: env.name,
+      title: "Cassette Portapalline Impasto Idonee al Contatto Alimentare MOCA e Sanificazione",
+      question:
+        "Le cassette per la lievitazione delle palline impasto pizza sono realizzate in polietilene alimentare conforme MOCA (Reg. CE 1935/2004), integre e prive di scheggiature, impilabili ermeticamente per prevenire contaminazioni aeree e sanificate periodicamente con schede di registrazione?",
+      normReference: "Reg. CE 1935/2004 (MOCA) e Reg. CE 852/2004 Allegato II Cap. V",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Cassette impasto fessurate, usurate o prive di marcatura MOCA per alimenti, o stoccate prive di coperchio a contatto con polveri ambientali.",
+    });
+
+    items.push({
+      id: `${env.id}-aspirazione-polveri-farina`,
+      area: env.name,
+      title: "Prevenzione e Aspirazione Polveri di Farina (Rischio Asma del Panettiere e ATEX)",
+      question:
+        "Il locale impasto è dotato di aerazione/aspirazione localizzata o procedure per limitare il sollevamento di polveri di farina durante il caricamento dell'impastatrice, ed è vietato l'uso di getti d'aria compressa o scopa a secco per la pulizia per prevenire asma professionale e atmosfere esplosive?",
+      normReference: "D.Lgs. 81/2008 Titolo IX (Agenti Chimici) e Titolo XI (Atmosfere Esplosive ATEX)",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Dispersione massiva di polveri di farina nell'ambiente di lavoro privo di ricambio d'aria adeguato, o pulizia eseguita a secco con scopa anziché mediante aspirapolvere industriale certificato.",
+    });
+  }
+
+  // c) Area Forno Pizze & Deposito Legna da Ardere
+  if (env.id === "env-piz-forno-legna" || env.id.includes("piz-forno-legna")) {
+    items.push({
+      id: `${env.id}-abbattitore-fuliggine-acqua`,
+      area: env.name,
+      title: "Abbattitore di Fuliggine ad Acqua Conforme UNI 1127 e Canna Fumaria Indipendente",
+      question:
+        "Il forno per pizze a legna è collegato a canna fumaria indipendente in acciaio inox coibentato dotata di abbattitore di fuliggine ad acqua a ricircolo conforme alla norma UNI 1127, sottoposto a manutenzione periodica certificata e con scarico oltre il colmo del tetto?",
+      normReference: "Norma UNI 1127, UNI 10683, D.Lgs. 81/2008 Allegato IV e D.M. 03/08/2015",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Canna fumaria del forno a legna sprovvista di abbattitore di fuliggine ad acqua a norma UNI 1127 o priva di registro di pulizia periodica delle canalizzazioni con elevato rischio incendio canna fumaria.",
+    });
+
+    items.push({
+      id: `${env.id}-canna-fumaria-indipendente`,
+      area: env.name,
+      title: "Canna Fumaria Indipendente Certificata e Pulizia Periodica",
+      question:
+        "La canna fumaria del forno a legna è totalmente indipendente da altri impianti, certificata secondo DM 37/08 con libretto d'impianto e sottoposta a spazzolatura e pulizia periodica registrata per la rimozione dei depositi di creosoto e fuliggine?",
+      normReference: "D.M. 37/2008 art. 7, UNI 10683 e D.Lgs. 81/2008 All. IV p.to 1.9",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Canna fumaria priva di dichiarazione di conformità DM 37/08 o assenza di registrazioni di pulizia periodica da parte di fumista abilitato.",
+    });
+
+    items.push({
+      id: `${env.id}-legna-vergine-certificata`,
+      area: env.name,
+      title: "Stoccaggio Esclusivo di Legna Vergine Certificata Priva di Trattamenti Chimici",
+      question:
+        "La legna da ardere utilizzata per la cottura delle pizze è esclusivamente legna vergine naturale certificata (faggio, rovere, carpino), priva di vernici, colle, impregnanti, resine o residui di bancali/scarti di falegnameria, stoccata sollevata da terra e al riparo da umidità e muffe?",
+      normReference: "Reg. CE 852/2004 Allegato II Cap. I e Cap. IX, D.Lgs. 152/2006 All. X",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Presenza nel deposito legna di bancali usati, legname verniciato o trattato chimicamente con rilascio di idrocarburi policiclici aromatici (IPA) e diossine tossiche sugli alimenti in cottura.",
+    });
+
+    items.push({
+      id: `${env.id}-pala-metallica-guanti-termici`,
+      area: env.name,
+      title: "Pale Metalliche, Guanti Termici Antiscottatura (EN 407) ed Estintore Dedicato",
+      question:
+        "Gli addetti al forno dispongono di pale in alluminio/inox con manico termoisolante, spazzole in ottone con asta idonea, guanti termici di protezione contro calore e fiamme certificati EN 407, ed è presente nelle immediate vicinanze un estintore a polvere/idrico 34A 233B?",
+      normReference: "D.Lgs. 81/2008 art. 75-77 e All. VIII, norma EN 407 e D.M. 02/09/2021",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Mancata dotazione di guanti di protezione termica certificati per alte temperature con rischio ustioni, o estintore antincendio assente nell'area forno.",
+    });
+  }
+
+  // d) Zona Preparazione Ingredienti & Tagliamozzarella
+  if (env.id === "env-piz-prep-ingredienti" || env.id.includes("piz-prep-ingredienti")) {
+    items.push({
+      id: `${env.id}-tagliamozzarella-microinterruttore`,
+      area: env.name,
+      title: "Tagliamozzarella / Sfilacciatrice Elettrica con Microinterruttore e Pestello Salvadita",
+      question:
+        "La macchina tagliamozzarella o sfilacciatrice elettrica è conforme alle norme di sicurezza (UNI EN 12852), provvista di microinterruttore sulla tramoggia che blocca la lama in apertura, pestello spingitore salvadita e anello fisso di protezione?",
+      normReference: "Norma UNI EN 12852, D.Lgs. 81/2008 Allegato V e VI",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Macchina tagliamozzarella con microinterruttore della bocca di carico manomesso o priva di pestello pressatore con rischio amputazione dita.",
+    });
+
+    items.push({
+      id: `${env.id}-lavello-verdure-condimenti`,
+      area: env.name,
+      title: "Lavello Dedicato al Lavaggio e Sanificazione Verdure per Farcitura Pizze",
+      question:
+        "La zona preparazione dispone di lavello in acciaio inox ad uso esclusivo per il lavaggio, mondatura e disinfezione delle verdure destinate alla farcitura delle pizze, con erogazione di acqua potabile e separato dai lavelli lavamani e lavastoviglie?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo II punto 2",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Mondatura e lavaggio verdure condimenti eseguito promiscuamente in lavelli utilizzati per il lavaggio mani o stoviglie sporche (contaminazione crociata).",
+    });
+
+    items.push({
+      id: `${env.id}-taglieri-coltelli-codice-colore`,
+      area: env.name,
+      title: "Taglieri e Coltelleria con Codice Colore HACCP per Ingredienti e Condimenti",
+      question:
+        "I taglieri in polietilene alimentare e la coltelleria sono differenziati per codice colore (verde verdure, rosso carni/salumi, bianco formaggi/latticini), integri e privi di solchi profondi, e periodicamente sanificati?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo V e Buone Pratiche Igieniche",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Uso di taglieri promiscui non codificati o taglieri in legno vietati per il taglio di salumi e verdure.",
+    });
+  }
+
+  // e) Zona Lavaggio Teglie, Cassette Impasto & Stoviglie
+  if (env.id === "env-piz-lavaggio" || env.id.includes("piz-lavaggio")) {
+    items.push({
+      id: `${env.id}-lavaoggetti-dosatori-antiriflusso`,
+      area: env.name,
+      title: "Lavaoggetti / Lavateglie Industriale con Dispositivo Antiriflusso (UNI EN 1717) e Dosatori",
+      question:
+        "La lavaoggetti per teglie 60x40 e cassette impasto è provvista di dosatori automatici di detergente/brillantante a circuito chiuso, boiler di risciacquo igienico ad alta temperatura (≥ 80-85°C) e valvola antiriflusso a norma UNI EN 1717 sulla rete idrica?",
+      normReference: "Reg. CE 852/2004 All. II Cap. V, norma UNI EN 1717 e D.Lgs. 81/2008 Titolo IX",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Lavaoggetti industriale priva di dispositivo antiriflusso sulla rete idrica o con temperatura di risciacquo insufficiente per la sanificazione delle teglie e cassette impasto.",
+    });
+
+    items.push({
+      id: `${env.id}-sanificazione-teglie-cassette`,
+      area: env.name,
+      title: "Lavaggio e Sanificazione Teglie 60x40 e Cassette Impasto MOCA con Doccione",
+      question:
+        "L'area lavaggio dispone di lavello profondo in acciaio inox con doccione flessibile per il prelavaggio di teglie e cassette, e di scaffali forati in acciaio inox per l'asciugatura all'aria pulita delle teglie sollevate da terra?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo II e Capitolo V",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Teglie da forno o cassette impasto stoccate a terra umide o prive di procedura di lavaggio e sgrassaggio ad alta temperatura.",
+    });
+  }
+
+  // f) Celle Frigorifere Deperibili (Latticini, Mozzarelle, Salumi, Verdure)
+  if (env.id === "env-piz-celle" || env.id.includes("piz-celle")) {
+    items.push({
+      id: `${env.id}-monitoraggio-mozzarella-salumi`,
+      area: env.name,
+      title: "Monitoraggio Continuo Temperature Mozzarelle, Salumi e Latticini (+2/+4°C)",
+      question:
+        "Le celle frigorifere di conservazione della pizzeria garantiscono il monitoraggio continuo e la registrazione su display delle temperature idonee per mozzarelle, latticini (+2/+4°C), salumi e verdure con verifica periodica delle sonde termometriche?",
+      normReference: "Reg. CE 852/2004 Allegato II Cap. IX e Manuale HACCP",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Cella frigorifera deperibili pizzeria con temperatura superiore a +4°C con rischio alterazione delle caratteristiche igieniche di mozzarelle e latticini.",
+    });
+  }
+
+  // g) Dispensa Secco / Deposito Sacchi Farina & Cartoni Pizza MOCA
+  if (env.id === "env-piz-dispensa" || env.id.includes("piz-dispensa")) {
+    items.push({
+      id: `${env.id}-sacchi-farina-pedane`,
+      area: env.name,
+      title: "Stoccaggio Sacchi Farina su Pedane Plastiche Sollevate (≥ 15 cm) e Areazione",
+      question:
+        "I sacchi di farina sono stoccati esclusivamente su pedane plastiche lisce e forate sollevate da terra almeno 15 cm, distanziate dalle pareti per consentire l'aerazione e il controllo infestanti, con divieto assoluto di appoggio diretto a pavimento?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo I e Capitolo X",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Sacchi di farina appoggiati direttamente sul pavimento o addossati alle pareti, con rischio di assorbimento umidità e contaminazione da infestanti.",
+    });
+
+    items.push({
+      id: `${env.id}-cartoni-pizza-moca`,
+      area: env.name,
+      title: "Cartoni Pizza da Asporto con Dichiarazione di Conformità MOCA (Reg. CE 1935/2004)",
+      question:
+        "I cartoni e contenitori per pizza d'asporto sono vergini, certificati per il contatto con alimenti caldi e grassi (simbolo forchetta e bicchiere), corredati di Dichiarazione di Conformità MOCA del produttore e stoccati sigillati al riparo da polvere e umidità?",
+      normReference: "Reg. CE 1935/2004 (MOCA), D.M. 21/03/1973 e Reg. CE 2023/2006 (GMP)",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Scatole pizza da asporto prive di dichiarazione di conformità MOCA del fornitore o stoccate aperte esposte a polvere e contaminanti ambientali.",
+    });
+
+    items.push({
+      id: `${env.id}-monitoraggio-infestanti-farfalline`,
+      area: env.name,
+      title: "Monitoraggio Infestanti e Trappole a Feromoni per Farfalline della Farina (Pest Control)",
+      question:
+        "Il locale dispensa dispone di monitoraggio continuo degli infestanti con lampade UV cattura-insetti a piastra collante e trappole a feromoni specifiche per insetti delle farine (Anagasta kuehniella / Plodia interpunctella), con registro controlli aggiornato?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo IX e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Dispensa farine priva di trappole di monitoraggio per insetti delle farine o riscontrata presenza di ragnatele/farfalline sui sacchi di farina.",
+    });
+  }
+
+  // h) Sala Somministrazione & Area Ritiro Asporto / Delivery
+  if (env.id === "env-piz-sala-asporto" || env.id.includes("piz-sala-asporto")) {
+    items.push({
+      id: `${env.id}-vie-esodo-sala-asporto`,
+      area: env.name,
+      title: "Vie di Esodo e Percorsi Ritiro Asporto / Delivery Liberi (≥ 1,20 m)",
+      question:
+        "I percorsi di transito della sala somministrazione e dell'area di attesa asporto/delivery mantengono una larghezza utile non inferiore a 1,20 metri, costantemente sgombri da scatoloni, sedie o biciclette/zaini dei rider?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.4 e D.M. 03/08/2015",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Percorsi di esodo o area di transito asporto ostruiti da zaini delivery, tavolini o merci con riduzione della larghezza utile di fuga a meno di 1,20 m.",
+    });
+
+    items.push({
+      id: `${env.id}-uscite-emergenza-antipanico`,
+      area: env.name,
+      title: "Porte di Sicurezza con Apertura a Spinta e Maniglioni Antipanico (UNI EN 1125)",
+      question:
+        "Le uscite di emergenza della sala/asporto si aprono nel verso dell'esodo, sono provviste di maniglioni antipanico certificati UNI EN 1125 facilmente azionabili e prive di catene o lucchetti durante l'orario di apertura al pubblico?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.4 e norma UNI EN 1125",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Porte di sicurezza con maniglione antipanico bloccato o uscite di sicurezza chiuse a chiave durante l'orario di servizio al pubblico.",
+    });
+
+    items.push({
+      id: `${env.id}-illuminazione-sicurezza-estintori`,
+      area: env.name,
+      title: "Illuminazione di Sicurezza (≥ 5 lux) ed Estintori Omologati (34A 233B)",
+      question:
+        "I locali aperti al pubblico dispongono di illuminazione di sicurezza ad intervento automatico (≥ 5 lux lungo le vie di fuga) ed estintori portatili omologati (classe minima 34A 233B) posizionati ad altezza norma e regolarmente revisionati ogni 6 mesi?",
+      normReference: "D.M. 02/09/2021, D.M. 03/08/2015 e norma UNI 9994-1",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "microclima_luce",
+      suggestedNonConformity:
+        "Lampade di emergenza guaste o assenti nell'area somministrazione/asporto, oppure estintori scaduti di revisione periodica.",
+    });
+  }
+
+  // i) Spogliatoi Personale
+  if (env.id === "env-piz-spogliatoi" || env.id.includes("piz-spogliatoi")) {
+    items.push({
+      id: `${env.id}-lavamani-antibagno-spogliatoio`,
+      area: env.name,
+      title: "Lavamani con Acqua Calda/Fredda e Comandi Igienici nell'Antibagno Spogliatoio",
+      question:
+        "L'antibagno dei servizi spogliatoio personale dispone di lavamani erogante acqua calda e fredda, dispenser di sapone liquido, salviette monouso a perdere e rubinetteria a comando non manuale?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.13 e Reg. CE 852/2004 All. II",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Assenza di acqua calda al lavamani dell'antibagno spogliatoio o distributore di sapone e salviette monouso mancante.",
+    });
+  }
+
+  // j) Servizi Igienici Clienti Disabili
+  if (env.id === "env-piz-wc-clienti" || env.id.includes("piz-wc-clienti")) {
+    items.push({
+      id: `${env.id}-wc-disabili-tirante-campanello`,
+      area: env.name,
+      title: "Accessibilità Disabili, Campanello a Tirante e Maniglioni Laterali (D.P.R. 503/96 - D.M. 236/89)",
+      question:
+        "Il bagno clienti accessibile a persone con disabilità dispone di porta con luce netta ≥ 85 cm apribile verso l'esterno, tazza WC con maniglioni di sostegno laterali e specchio reclinabile, e tirante allarme a cordicella per soccorso collegato a segnalatore esterno?",
+      normReference: "D.M. 236/1989 art. 8.2, D.P.R. 503/1996 e D.Lgs. 81/2008 All. IV p.to 1.13",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Tirante a cordicella per allarme soccorso disabili mancante o non funzionante, o maniglione laterale di sostegno assente.",
+    });
+  }
+
+  // k) Deposito Rifiuti & Smaltimento Ceneri Forno Legna
+  if (env.id === "env-piz-rifiuti" || env.id.includes("piz-rifiuti")) {
+    items.push({
+      id: `${env.id}-bidone-ceneri-forno-legna`,
+      area: env.name,
+      title: "Bidone Metallico Stagno con Coperchio per Ceneri e Carboni Spenti Forno a Legna",
+      question:
+        "Le ceneri e i carboni spenti estratti dal forno a legna sono raccolti esclusivamente in apposito bidone metallico stagno in lamiera con coperchio ermetico per prevenire qualsiasi innesco accidentale di incendi, tenuto distante da materiali combustibili e lasciato raffreddare prima dello smaltimento?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 4 (Misure contro l'incendio) e D.M. 03/08/2015",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Ceneri del forno a legna depositate in contenitori di plastica o cartone, o bidone metallico privo di coperchio posizionato a ridosso di materiali combustibili con gravissimo rischio di incendio.",
+    });
+
+    items.push({
+      id: `${env.id}-mastelli-differenziata-ermetici`,
+      area: env.name,
+      title: "Mastelli Rifiuti Differenziati Ermetici, Lavabili e Piano Antinfestanti",
+      question:
+        "I contenitori per rifiuti organici e differenziati sono realizzati in materiale plastico rigido lavabile, provvisti di coperchio a tenuta per prevenire odori e richiamo di infestanti, e l'area è dotata di pavimentazione lavabile con pendenza a scarico sifonato?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo VI e D.Lgs. 152/2006",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Mastelli rifiuti tenuti aperti o privi di coperchio con presenza di mosche e richiamo di infestanti, o area rifiuti sporca priva di punto acqua per il lavaggio.",
+    });
+  }
+
+  // l) Locale Tecnico / Quadro Elettrico, Gas & Abbattitore Fumi
+  if (env.id === "env-piz-tecnico" || env.id.includes("piz-tecnico")) {
+    items.push({
+      id: `${env.id}-quadro-generale-elettrovalvola-gas`,
+      area: env.name,
+      title: "Elettrovalvola Esterna Gas Metano a Riarmo Manuale e Quadro Elettrico con Sgancio",
+      question:
+        "La conduttura del gas per forni e impianti dispone di elettrovalvola esterna a riarmo manuale collegata a pulsante di sgancio d'emergenza esterno in cassetta piombata e a sensori di fughe gas, e il quadro elettrico generale dispone di sgancio rapido accessibile?",
+      normReference: "D.M. 08/11/2019, norma UNI CIG 7129 e D.Lgs. 81/2008 Allegato IV p.to 1.4",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Elettrovalvola gas metano assente o con riarmo automatico, oppure pulsante di sgancio d'emergenza ostruito o privo di cartellonistica.",
+    });
+
+    items.push({
+      id: `${env.id}-ricircolo-idraulico-abbattitore`,
+      area: env.name,
+      title: "Impianto Idraulico di Ricircolo Acqua Abbattitore di Fuliggine e Pompa di Pressione",
+      question:
+        "Il circuito idraulico di alimentazione e ricircolo dell'abbattitore di fuliggine del forno a legna dispone di pompa di pressione funzionante, manometro di controllo pressione idrica, filtro autopulente e valvola di sicurezza contro sovrapressioni e allagamenti?",
+      normReference: "Norma UNI 1127, D.Lgs. 81/2008 art. 71 e All. IV punto 1.4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Pompa di ricircolo acqua dell'abbattitore fumi non funzionante o perdite idriche nel circuito con abbattimento fumi inefficace.",
     });
   }
 
