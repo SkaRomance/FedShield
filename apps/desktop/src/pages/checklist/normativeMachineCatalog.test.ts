@@ -2157,5 +2157,270 @@ for (const code of ["56.30.00", "56.3", "5630", "563"]) {
   assert.ok(fallbackBarRes.every((m) => m.sourceReason === "ateco"));
 }
 
+// -------------------------------------------------------------
+// Test 39: Priorità e risoluzione catalogo ATECO Hotel e Strutture Ricettive (55.10.00 / 55.10.0 / 55.10 / 55.1)
+// -------------------------------------------------------------
+console.log("\n=== INIZIO TEST normativeMachineCatalog (ATECO 55.10 Hotel e Strutture Ricettive) ===");
+console.log("Test 39: Verifica priorità catalogo ATECO per Hotel, Alberghi, Resort e Strutture Ricettive (55.10.00 / 55.10 / 55.1 / 551000 / 55100 / 5510 / 551)");
+const catalogHotelExact = getSectorMachineCatalogForAteco("55.10.00");
+assert.equal(catalogHotelExact.sectorKey, "hotel_strutture_ricettive", "ATECO 55.10.00 deve restituire hotel_strutture_ricettive");
+assert.ok(catalogHotelExact.sectorLabel.includes("Hotel"), "L'etichetta del catalogo deve includere Hotel");
+assert.ok(catalogHotelExact.sectorLabel.includes("Alberghi"), "L'etichetta del catalogo deve includere Alberghi");
+assert.ok(catalogHotelExact.sectorLabel.includes("Resort"), "L'etichetta del catalogo deve includere Resort");
+assert.ok(catalogHotelExact.sectorLabel.includes("Strutture Ricettive"), "L'etichetta del catalogo deve includere Strutture Ricettive");
+
+for (const variant of ["55.10.00", "55.10.0", "55.10", "55.1", "551000", "55100", "5510", "551"]) {
+  const hotelVar = getSectorMachineCatalogForAteco(variant);
+  assert.equal(hotelVar.sectorKey, "hotel_strutture_ricettive", `Variante '${variant}' deve restituire hotel_strutture_ricettive`);
+}
+
+// Posizionamento: subito dopo bar_caffetteria e prima di ristorazione_alimentare
+const barIdxHotel = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "bar_caffetteria");
+const hotelIdx = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "hotel_strutture_ricettive");
+const ristGenIdxHotel = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ristorazione_alimentare");
+assert.ok(barIdxHotel !== -1, "Settore bar_caffetteria deve esistere");
+assert.ok(hotelIdx !== -1, "Settore hotel_strutture_ricettive deve esistere");
+assert.ok(ristGenIdxHotel !== -1, "Settore generic ristorazione_alimentare deve esistere");
+assert.equal(hotelIdx, barIdxHotel + 1, "hotel_strutture_ricettive deve seguire immediatamente bar_caffetteria");
+assert.equal(hotelIdx + 1, ristGenIdxHotel, "hotel_strutture_ricettive deve precedere immediatamente ristorazione_alimentare nel catalogo");
+
+// -------------------------------------------------------------
+// Test 40: Verifica completezza delle 16 macchine professionali per Hotel con modelli reali, corsi e controlli tecnici
+// -------------------------------------------------------------
+console.log("Test 40: Verifica completezza delle 16 attrezzature professionali con verifiche, corsi e modelli reali");
+assert.equal(catalogHotelExact.machines.length, 16, "Il catalogo Hotel deve contenere esattamente 16 macchine");
+
+const expectedHotelMachineKeys = [
+  "centrale_antincendio_evac",
+  "gruppo_elettrogeno_emergenza",
+  "ascensore_passeggeri_hotel",
+  "montacarichi_servizio_piani",
+  "impianto_dosaggio_biossido_legionella",
+  "caldaia_centrale_termica_hotel",
+  "centrale_trattamento_aria_uta",
+  "lavatrice_industriale_hotel",
+  "essiccatore_rotativo_industriale",
+  "calandra_mangano_stireria",
+  "distributore_bevande_calde_colazione",
+  "linea_buffet_calda_induzione",
+  "linea_buffet_refrigerata_colazioni",
+  "carrelli_housekeeping_piani",
+  "monospazzola_lavasciuga_moquette",
+  "sanificatore_ozono_perossido",
+];
+
+for (const key of expectedHotelMachineKeys) {
+  const found = catalogHotelExact.machines.find((m) => m.machineKey === key);
+  assert.ok(found, `Macchina ${key} deve essere presente nel catalogo Hotel / Strutture Ricettive`);
+  assert.ok(found.name.length > 5, `Nome macchina ${key} deve essere esaustivo`);
+  assert.ok(found.type.length > 5, `Tipologia macchina ${key} deve essere specificata`);
+  assert.ok(found.suggestedManufacturer.length > 0, `Produttore suggerito per ${key} deve essere presente`);
+  assert.ok(found.suggestedModel.length > 0, `Modello suggerito per ${key} deve essere presente`);
+  assert.ok(found.safetyChecks.length >= 3, `Macchina ${key} deve avere almeno 3 controlli di sicurezza`);
+  assert.ok(found.training, `Macchina ${key} deve avere un corso di formazione/addestramento associato`);
+}
+
+// Verifiche puntuali su modelli reali e controlli tecnici specifici per ciascuna delle 16 macchine:
+// 1. Centrale Antincendio & EVAC
+const antincendio = catalogHotelExact.machines.find((m) => m.machineKey === "centrale_antincendio_evac")!;
+assert.ok(antincendio.suggestedManufacturer.includes("Notifier") || antincendio.suggestedManufacturer.includes("Inim") || antincendio.suggestedManufacturer.includes("Siemens"), "Notifier, Inim o Siemens");
+assert.ok(antincendio.suggestedModel.includes("AM-8200") || antincendio.suggestedModel.includes("Previdia") || antincendio.suggestedModel.includes("Cerberus"), "AM-8200, Previdia o Cerberus");
+assert.ok(antincendio.safetyChecks.some((c) => c.code === "CENTRALE_ANTINCENDIO_CONFORMITA_EN54_EVAC_ISO7240" && c.normReference.includes("UNI EN 54")), "Conformità EN 54 e EVAC ISO 7240");
+assert.ok(antincendio.safetyChecks.some((c) => c.code === "CENTRALE_ANTINCENDIO_VERIFICA_SEMESTRALE_UNI11224" && c.normReference.includes("UNI 11224")), "Verifica semestrale UNI 11224");
+
+// 2. Gruppo Elettrogeno Emergenza
+const generatore = catalogHotelExact.machines.find((m) => m.machineKey === "gruppo_elettrogeno_emergenza")!;
+assert.ok(generatore.suggestedManufacturer.includes("Pramac") || generatore.suggestedManufacturer.includes("Caterpillar") || generatore.suggestedManufacturer.includes("Bruno"), "Pramac, Caterpillar o Bruno Generators");
+assert.ok(generatore.safetyChecks.some((c) => c.code === "GRUPPO_ELETTROGENO_QUADRO_ATS_INTERVENTO_15S" && c.question.includes("15 secondi")), "ATS entro 15s in blackout");
+assert.ok(generatore.safetyChecks.some((c) => c.code === "GRUPPO_ELETTROGENO_BACINO_CONTENIMENTO_GASOLIO_110" && c.normReference.includes("13/07/2011")), "Bacino contenimento 110% DM 13/07/2011 Attività 49");
+
+// 3. Ascensore Passeggeri Hotel
+const ascensore = catalogHotelExact.machines.find((m) => m.machineKey === "ascensore_passeggeri_hotel")!;
+assert.ok(ascensore.suggestedManufacturer.includes("Otis") || ascensore.suggestedManufacturer.includes("Schindler") || ascensore.suggestedManufacturer.includes("Kone"), "Otis, Schindler o Kone");
+assert.equal(ascensore.isSubjectToInailCheck, true, "Ascensore passeggeri soggetto a verifiche periodiche biennali");
+assert.equal(ascensore.inailFrequencyYears, 2, "Frequenza verifica biennale DPR 162/99");
+assert.ok(ascensore.safetyChecks.some((c) => c.code === "ASCENSORE_HOTEL_TELEALLARME_BIDIREZIONALE_EN81_28" && c.normReference.includes("EN 81-28")), "Teleallarme bidirezionale EN 81-28");
+assert.ok(ascensore.safetyChecks.some((c) => c.code === "ASCENSORE_HOTEL_VERIFICHE_BIENNALI_DPR162_99" && c.normReference.includes("D.P.R. 162/99")), "Verifiche biennali DPR 162/99");
+
+// 4. Montacarichi Servizio Piani
+const montacarichi = catalogHotelExact.machines.find((m) => m.machineKey === "montacarichi_servizio_piani")!;
+assert.ok(montacarichi.suggestedManufacturer.includes("Daldoss") || montacarichi.suggestedManufacturer.includes("Kone") || montacarichi.suggestedManufacturer.includes("Schindler"), "Daldoss, Kone o Schindler");
+assert.equal(montacarichi.isSubjectToInailCheck, true, "Montacarichi servizio soggetto a verifiche periodiche");
+assert.equal(montacarichi.inailFrequencyYears, 2, "Verifica periodica biennale");
+assert.ok(montacarichi.safetyChecks.some((c) => c.code === "MONTACARICHI_HOTEL_PARACADUTE_MECCANICO_ROTTURA_FUNI"), "Paracadute meccanico rottura funi");
+assert.ok(montacarichi.safetyChecks.some((c) => c.code === "MONTACARICHI_HOTEL_INTERBLOCCO_PORTE_PIANO_DOPPIO_SCATTO"), "Interblocco porte doppio scatto");
+
+// 5. Impianto Dosaggio Biossido Legionella
+const legionella = catalogHotelExact.machines.find((m) => m.machineKey === "impianto_dosaggio_biossido_legionella")!;
+assert.ok(legionella.suggestedManufacturer.includes("ProMinent") || legionella.suggestedManufacturer.includes("Grundfos") || legionella.suggestedManufacturer.includes("BWT"), "ProMinent, Grundfos o BWT");
+assert.ok(legionella.safetyChecks.some((c) => c.code === "DOSAGGIO_LEGIONELLA_PROPORZIONALE_DLGS18_2023" && c.normReference.includes("18/2023")), "Dosaggio proporzionale D.Lgs. 18/2023");
+assert.ok(legionella.safetyChecks.some((c) => c.code === "DOSAGGIO_LEGIONELLA_REGISTRO_CAMPIONAMENTI_SEMESTRALI" && c.normReference.includes("07/05/2015")), "Registro legionella e campionamenti semestrali Accordo SR 07/05/2015");
+
+// 6. Caldaia Centrale Termica Hotel
+const caldaia = catalogHotelExact.machines.find((m) => m.machineKey === "caldaia_centrale_termica_hotel")!;
+assert.ok(caldaia.suggestedManufacturer.includes("Viessmann") || caldaia.suggestedManufacturer.includes("Ferroli") || caldaia.suggestedManufacturer.includes("Riello"), "Viessmann, Ferroli o Riello");
+assert.equal(caldaia.isSubjectToInailCheck, true, "Centrale termica > 116 kW soggetta a verifiche INAIL");
+assert.equal(caldaia.inailFrequencyYears, 1, "Verifica annuale INAIL rendimento e sicurezza");
+assert.ok(caldaia.safetyChecks.some((c) => c.code === "CALDAIA_HOTEL_CIRCUITO_PED_VALVOLE_INAIL" && c.normReference.includes("PED")), "Circuito PED e valvole INAIL");
+assert.ok(caldaia.safetyChecks.some((c) => c.code === "CALDAIA_HOTEL_ELETTROVALVOLA_GAS_ESTERNA_RIARMO"), "Elettrovalvola esterna gas a riarmo");
+
+// 7. Centrale Trattamento Aria (UTA)
+const uta = catalogHotelExact.machines.find((m) => m.machineKey === "centrale_trattamento_aria_uta")!;
+assert.ok(uta.suggestedManufacturer.includes("Daikin") || uta.suggestedManufacturer.includes("Carrier") || uta.suggestedManufacturer.includes("Sabiana"), "Daikin, Carrier o Sabiana");
+assert.ok(uta.safetyChecks.some((c) => c.code === "UTA_HOTEL_FILTRI_ALTA_EFFICIENZA_E95_HEPA"), "Filtri e95/HEPA");
+assert.ok(uta.safetyChecks.some((c) => c.code === "UTA_HOTEL_SANIFICAZIONE_PERIODICA_LINEE_GUIDA_SALUTE" && c.normReference.includes("Salute")), "Sanificazione canalizzazioni Linee Guida Ministero Salute");
+
+// 8. Lavatrice Industriale Hotel
+const lavatrice = catalogHotelExact.machines.find((m) => m.machineKey === "lavatrice_industriale_hotel")!;
+assert.ok(lavatrice.suggestedManufacturer.includes("Miele") || lavatrice.suggestedManufacturer.includes("Electrolux") || lavatrice.suggestedManufacturer.includes("Grandimpianti"), "Miele, Electrolux o Grandimpianti");
+assert.ok(lavatrice.safetyChecks.some((c) => c.code === "LAVATRICE_HOTEL_MICROINTERRUTTORE_BLOCCO_TERMOELETTRICO" && c.normReference.includes("ISO 10472-2")), "Blocco termoelettrico UNI EN ISO 10472-2");
+assert.ok(lavatrice.safetyChecks.some((c) => c.code === "LAVATRICE_HOTEL_DOSATORI_AUTOMATICI_DETERSIVI_CHIMICI"), "Dosatori automatici detersivi");
+
+// 9. Essiccatore Rotativo Industriale
+const essiccatore = catalogHotelExact.machines.find((m) => m.machineKey === "essiccatore_rotativo_industriale")!;
+assert.ok(essiccatore.suggestedManufacturer.includes("Miele") || essiccatore.suggestedManufacturer.includes("Electrolux") || essiccatore.suggestedManufacturer.includes("Girbau"), "Miele, Electrolux o Girbau");
+assert.ok(essiccatore.safetyChecks.some((c) => c.code === "ESSICCATORE_HOTEL_FILTRO_LANUGINE_ALLARME_INTASAMENTO" && c.normReference.includes("ISO 10472-4")), "Filtro lanugine allarme intasamento UNI EN ISO 10472-4");
+assert.ok(essiccatore.safetyChecks.some((c) => c.code === "ESSICCATORE_HOTEL_TERMOSTATO_MASSIMA_RIARMO_MANUALE"), "Termostato di massima a riarmo manuale");
+
+// 10. Mangano / Calandra Stireria
+const mangano = catalogHotelExact.machines.find((m) => m.machineKey === "calandra_mangano_stireria")!;
+assert.ok(mangano.suggestedManufacturer.includes("Grandimpianti") || mangano.suggestedManufacturer.includes("Electrolux") || mangano.suggestedManufacturer.includes("Miele"), "Grandimpianti, Electrolux o Miele");
+assert.ok(mangano.safetyChecks.some((c) => c.code === "CALANDRA_HOTEL_BARRA_SALVADITA_BASCULANTE_ISO10472_5" && c.normReference.includes("ISO 10472-5")), "Barra salvadita basculante UNI EN ISO 10472-5");
+assert.ok(mangano.safetyChecks.some((c) => c.code === "CALANDRA_HOTEL_PEDALE_COMANDO_AZIONE_MANTENUTA"), "Pedale comando azione mantenuta");
+
+// 11. Distributore Bevande Calde Buffet Colazioni
+const distributore = catalogHotelExact.machines.find((m) => m.machineKey === "distributore_bevande_calde_colazione")!;
+assert.ok(distributore.suggestedManufacturer.includes("WMF") || distributore.suggestedManufacturer.includes("Franke") || distributore.suggestedManufacturer.includes("Schaerer"), "WMF, Franke o Schaerer");
+assert.ok(distributore.safetyChecks.some((c) => c.code === "DISTRIBUTORE_COLAZIONI_BREAK_TANK_DISCONNESSIONE_UNI1717" && c.normReference.includes("UNI EN 1717")), "Dispositivo Break Tank UNI EN 1717");
+assert.ok(distributore.safetyChecks.some((c) => c.code === "DISTRIBUTORE_COLAZIONI_EROGATORI_SANIFICABILI_MOCA" && c.normReference.includes("1935/2004")), "Erogatori MOCA 1935/2004");
+
+// 12. Banco Buffet Riscaldato Caldo
+const buffetCaldo = catalogHotelExact.machines.find((m) => m.machineKey === "linea_buffet_calda_induzione")!;
+assert.ok(buffetCaldo.suggestedManufacturer.includes("Enofrigo") || buffetCaldo.suggestedManufacturer.includes("Afinox") || buffetCaldo.suggestedManufacturer.includes("Scaiola"), "Enofrigo, Afinox o Scaiola");
+assert.ok(buffetCaldo.safetyChecks.some((c) => c.code === "BUFFET_CALDO_MANTENIMENTO_65C_HACCP_TERMOSTATO_DIGITALE" && c.question.includes("65°C")), "Mantenimento >= 65°C HACCP");
+assert.ok(buffetCaldo.safetyChecks.some((c) => c.code === "BUFFET_CALDO_CRISTALLI_CURVI_PARAFIATO_ANTIAEROSOL"), "Cristalli curvi parafiato antiaerosol");
+
+// 13. Banco Buffet Refrigerato Colazioni
+const buffetFreddo = catalogHotelExact.machines.find((m) => m.machineKey === "linea_buffet_refrigerata_colazioni")!;
+assert.ok(buffetFreddo.suggestedManufacturer.includes("Enofrigo") || buffetFreddo.suggestedManufacturer.includes("Afinox") || buffetFreddo.suggestedManufacturer.includes("IFI"), "Enofrigo, Afinox o IFI");
+assert.ok(buffetFreddo.safetyChecks.some((c) => c.code === "BUFFET_FREDDO_TEMPERATURA_4C_DISPLAY_OSPITI_ALLARME"), "Temperatura +4°C display ospiti allarme HACCP");
+assert.ok(buffetFreddo.safetyChecks.some((c) => c.code === "BUFFET_FREDDO_GAS_ECOLOGICO_R290_SBRINAMENTO_AUTOMATICO" && c.title.includes("R290")), "Gas ecologico R290");
+
+// 14. Carrelli Housekeeping Piani
+const carrelli = catalogHotelExact.machines.find((m) => m.machineKey === "carrelli_housekeeping_piani")!;
+assert.ok(carrelli.suggestedManufacturer.includes("TTS") || carrelli.suggestedManufacturer.includes("Filmop") || carrelli.suggestedManufacturer.includes("IPC"), "TTS Cleaning, Filmop o IPC");
+assert.ok(carrelli.safetyChecks.some((c) => c.code === "CARRELLO_HOTEL_TELAIO_TECNOPOLIMERO_FRENO_STAZIONAMENTO"), "Freno stazionamento a pedale");
+assert.ok(carrelli.safetyChecks.some((c) => c.code === "CARRELLO_HOTEL_VANI_CHIUSI_SERRATURA_CHIMICI" && c.normReference.includes("Titolo IX")), "Vani chiusi serratura chimici D.Lgs. 81/08");
+
+// 15. Monospazzola & Lavasciuga Moquette
+const monospazzola = catalogHotelExact.machines.find((m) => m.machineKey === "monospazzola_lavasciuga_moquette")!;
+assert.ok(monospazzola.suggestedManufacturer.includes("Comac") || monospazzola.suggestedManufacturer.includes("Nilfisk") || monospazzola.suggestedManufacturer.includes("Kärcher"), "Comac, Nilfisk o Kärcher");
+assert.ok(monospazzola.safetyChecks.some((c) => c.code === "MONOSPAZZOLA_HOTEL_TIMONE_UOMO_PRESENTE_DOPPIO_INTERRUTTORE"), "Timone uomo presente doppio interruttore");
+assert.ok(monospazzola.safetyChecks.some((c) => c.code === "MONOSPAZZOLA_HOTEL_ISOLAMENTO_IPX4_CAVO_ALTA_VISIBILITA" && c.title.includes("IPX4")), "Grado isolamento IPX4");
+
+// 16. Sanificatore Ozono / Perossido
+const ozono = catalogHotelExact.machines.find((m) => m.machineKey === "sanificatore_ozono_perossido")!;
+assert.ok(ozono.suggestedManufacturer.includes("Ozonosan") || ozono.suggestedManufacturer.includes("Sanity") || ozono.suggestedManufacturer.includes("Caleffi"), "Ozonosan, Sanity System o Caleffi");
+assert.ok(ozono.safetyChecks.some((c) => c.code === "SANIFICATORE_HOTEL_TIMER_DIGITALE_ALLARME_RICONVERSIONE"), "Timer digitale e riconversione catalitica rapida");
+assert.ok(ozono.safetyChecks.some((c) => c.code === "SANIFICATORE_HOTEL_MARCATURA_CE_PROCEDURE_SICUREZZA" && c.normReference.includes("81/2008")), "Marcatura CE e procedure sicurezza D.Lgs. 81/08");
+
+// -------------------------------------------------------------
+// Test 41: Associazione 1-a-1 ambienti Step 2 Hotel (env-hotel-*) -> Step 4 Macchine
+// -------------------------------------------------------------
+console.log("Test 41: Verifica associazione ambienti Step 2 Hotel (env-hotel-*) -> Step 4 Macchine");
+const hotelEnvironments = [
+  { id: "env-hotel-reception-hall", name: "Reception, Hall e Portineria", category: "reception" },
+  { id: "env-hotel-camere-piano", name: "Camere Ospiti e Corridoi Piani", category: "rooms" },
+  { id: "env-hotel-sala-colazioni", name: "Sala Buffet Colazioni", category: "dining" },
+  { id: "env-hotel-office-cucina-colazioni", name: "Office e Preparazione Colazioni", category: "kitchen" },
+  { id: "env-hotel-lavanderia-stireria", name: "Lavanderia e Stireria Interna", category: "laundry" },
+  { id: "env-hotel-deposito-housekeeping", name: "Deposito Housekeeping e Biancheria", category: "storage" },
+  { id: "env-hotel-centrale-idrica-legionella", name: "Centrale Idrica e Sanificazione Anti-Legionella", category: "technical" },
+  { id: "env-hotel-centrale-termica-clima", name: "Centrale Termica e Trattamento Aria (UTA)", category: "technical" },
+  { id: "env-hotel-vano-gruppo-elettrogeno", name: "Locale Gruppo Elettrogeno di Emergenza", category: "technical" },
+  { id: "env-hotel-vani-ascensori-montacarichi", name: "Vani Ascensori e Montacarichi di Servizio", category: "technical" },
+];
+
+const suggestedWithHotelEnvs = getSuggestedMachinesForEnvironmentsAndAteco(hotelEnvironments, "55.10.00");
+
+// 1. Reception / Hall -> 2 macchine (centrale_antincendio_evac, ascensore_passeggeri_hotel)
+const receptionMachines = suggestedWithHotelEnvs.filter((m) => m.targetEnvironmentId === "env-hotel-reception-hall");
+assert.equal(receptionMachines.length, 2, "env-hotel-reception-hall deve associare 2 macchine");
+assert.ok(receptionMachines.some((m) => m.machineKey === "centrale_antincendio_evac"), "centrale_antincendio_evac in reception");
+assert.ok(receptionMachines.some((m) => m.machineKey === "ascensore_passeggeri_hotel"), "ascensore_passeggeri_hotel in reception");
+
+// 2. Camere Piano -> 2 macchine (centrale_antincendio_evac, sanificatore_ozono_perossido)
+const camereMachines = suggestedWithHotelEnvs.filter((m) => m.targetEnvironmentId === "env-hotel-camere-piano");
+assert.equal(camereMachines.length, 2, "env-hotel-camere-piano deve associare 2 macchine");
+assert.ok(camereMachines.some((m) => m.machineKey === "centrale_antincendio_evac"), "centrale_antincendio_evac in camere");
+assert.ok(camereMachines.some((m) => m.machineKey === "sanificatore_ozono_perossido"), "sanificatore_ozono_perossido in camere");
+
+// 3. Sala Colazioni -> 3 macchine (distributore_bevande_calde_colazione, linea_buffet_calda_induzione, linea_buffet_refrigerata_colazioni)
+const colazioniMachines = suggestedWithHotelEnvs.filter((m) => m.targetEnvironmentId === "env-hotel-sala-colazioni");
+assert.equal(colazioniMachines.length, 3, "env-hotel-sala-colazioni deve associare 3 macchine");
+assert.ok(colazioniMachines.some((m) => m.machineKey === "distributore_bevande_calde_colazione"), "distributore colazioni");
+assert.ok(colazioniMachines.some((m) => m.machineKey === "linea_buffet_calda_induzione"), "buffet caldo");
+assert.ok(colazioniMachines.some((m) => m.machineKey === "linea_buffet_refrigerata_colazioni"), "buffet freddo");
+
+// 4. Office Cucina Colazioni -> 2 macchine (distributore_bevande_calde_colazione, linea_buffet_calda_induzione)
+const officeMachines = suggestedWithHotelEnvs.filter((m) => m.targetEnvironmentId === "env-hotel-office-cucina-colazioni");
+assert.equal(officeMachines.length, 2, "env-hotel-office-cucina-colazioni deve associare 2 macchine");
+assert.ok(officeMachines.some((m) => m.machineKey === "distributore_bevande_calde_colazione"), "distributore bevande");
+assert.ok(officeMachines.some((m) => m.machineKey === "linea_buffet_calda_induzione"), "linea buffet calda");
+
+// 5. Lavanderia Stireria -> 3 macchine (lavatrice_industriale_hotel, essiccatore_rotativo_industriale, calandra_mangano_stireria)
+const lavanderiaMachines = suggestedWithHotelEnvs.filter((m) => m.targetEnvironmentId === "env-hotel-lavanderia-stireria");
+assert.equal(lavanderiaMachines.length, 3, "env-hotel-lavanderia-stireria deve associare 3 macchine");
+assert.ok(lavanderiaMachines.some((m) => m.machineKey === "lavatrice_industriale_hotel"), "lavatrice industriale");
+assert.ok(lavanderiaMachines.some((m) => m.machineKey === "essiccatore_rotativo_industriale"), "essiccatore rotativo");
+assert.ok(lavanderiaMachines.some((m) => m.machineKey === "calandra_mangano_stireria"), "calandra mangano");
+
+// 6. Deposito Housekeeping -> 2 macchine (carrelli_housekeeping_piani, monospazzola_lavasciuga_moquette)
+const hkMachines = suggestedWithHotelEnvs.filter((m) => m.targetEnvironmentId === "env-hotel-deposito-housekeeping");
+assert.equal(hkMachines.length, 2, "env-hotel-deposito-housekeeping deve associare 2 macchine");
+assert.ok(hkMachines.some((m) => m.machineKey === "carrelli_housekeeping_piani"), "carrelli housekeeping");
+assert.ok(hkMachines.some((m) => m.machineKey === "monospazzola_lavasciuga_moquette"), "monospazzola");
+
+// 7. Centrale Idrica Legionella -> 1 macchina (impianto_dosaggio_biossido_legionella)
+const idricaMachines = suggestedWithHotelEnvs.filter((m) => m.targetEnvironmentId === "env-hotel-centrale-idrica-legionella");
+assert.equal(idricaMachines.length, 1, "env-hotel-centrale-idrica-legionella deve associare 1 macchina");
+assert.ok(idricaMachines.some((m) => m.machineKey === "impianto_dosaggio_biossido_legionella"), "impianto dosaggio biossido legionella");
+
+// 8. Centrale Termica Clima -> 2 macchine (caldaia_centrale_termica_hotel, centrale_trattamento_aria_uta)
+const termicaMachines = suggestedWithHotelEnvs.filter((m) => m.targetEnvironmentId === "env-hotel-centrale-termica-clima");
+assert.equal(termicaMachines.length, 2, "env-hotel-centrale-termica-clima deve associare 2 macchine");
+assert.ok(termicaMachines.some((m) => m.machineKey === "caldaia_centrale_termica_hotel"), "caldaia centrale termica");
+assert.ok(termicaMachines.some((m) => m.machineKey === "centrale_trattamento_aria_uta"), "centrale UTA");
+
+// 9. Vano Gruppo Elettrogeno -> 1 macchina (gruppo_elettrogeno_emergenza)
+const elettrogenoMachines = suggestedWithHotelEnvs.filter((m) => m.targetEnvironmentId === "env-hotel-vano-gruppo-elettrogeno");
+assert.equal(elettrogenoMachines.length, 1, "env-hotel-vano-gruppo-elettrogeno deve associare 1 macchina");
+assert.ok(elettrogenoMachines.some((m) => m.machineKey === "gruppo_elettrogeno_emergenza"), "gruppo elettrogeno emergenza");
+
+// 10. Vani Ascensori e Montacarichi -> 2 macchine (ascensore_passeggeri_hotel, montacarichi_servizio_piani)
+const ascMontMachines = suggestedWithHotelEnvs.filter((m) => m.targetEnvironmentId === "env-hotel-vani-ascensori-montacarichi");
+assert.equal(ascMontMachines.length, 2, "env-hotel-vani-ascensori-montacarichi deve associare 2 macchine");
+assert.ok(ascMontMachines.some((m) => m.machineKey === "ascensore_passeggeri_hotel"), "ascensore passeggeri");
+assert.ok(ascMontMachines.some((m) => m.machineKey === "montacarichi_servizio_piani"), "montacarichi servizio piani");
+
+// -------------------------------------------------------------
+// Test 42: Risoluzione solo su codice ATECO senza locali censiti (Hotel / Strutture Ricettive 55.10.00)
+// -------------------------------------------------------------
+console.log("Test 42: Integrazione automatica macchine per ATECO 55.10.00 senza ambienti preventivi");
+const suggestedHotelOnlyAteco = getSuggestedMachinesForEnvironmentsAndAteco([], "55.10.00");
+assert.equal(suggestedHotelOnlyAteco.length, 16, "Devono essere suggerite tutte le 16 macchine dell'hotel");
+assert.ok(
+  suggestedHotelOnlyAteco.every((m) => m.sourceReason === "ateco"),
+  "Tutte le macchine devono avere sourceReason === 'ateco' se nessun locale è stato specificato",
+);
+
+// Verifica fallback automatico identico per tutte le varianti di codice ATECO ("55.10.00", "55.10.0", "55.10", "55.1", "551000", "55100", "5510", "551")
+for (const code of ["55.10.00", "55.10.0", "55.10", "55.1", "551000", "55100", "5510", "551"]) {
+  const fallbackHotelRes = getSuggestedMachinesForEnvironmentsAndAteco([], code);
+  assert.equal(fallbackHotelRes.length, 16, `ATECO variant '${code}' deve restituire tutte le 16 macchine`);
+  assert.ok(fallbackHotelRes.every((m) => m.sourceReason === "ateco"), `Tutte le macchine con ATECO variant '${code}' devono avere sourceReason === 'ateco'`);
+}
+
 console.log("=== TUTTI I TEST normativeMachineCatalog SUPERATI CON SUCCESSO! ===");
+
 

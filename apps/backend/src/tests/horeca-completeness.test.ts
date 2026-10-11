@@ -282,7 +282,81 @@ async function run() {
     }
   }
 
-  console.log("HoReCa completeness test passed");
+  // Verifica varianti ATECO per Hotel / Ricettività (55.10.00, 55.10, 55.1, 551000)
+  const hotelVariants = ["55.10.00", "55.10", "55.1", "551000"];
+  for (const variant of hotelVariants) {
+    const templatesRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(templatesRes.statusCode, 200, `Templates request failed for hotel variant ${variant}`);
+    const templates = templatesRes.json() as Array<{ id: string; name: string }>;
+    const specificTemplates = templates.filter((t) => t.name.includes("Hotel"));
+    assert.equal(
+      specificTemplates.length,
+      2,
+      `Expected 2 specific templates for hotel variant ${variant}, found ${specificTemplates.length}`,
+    );
+
+    const docsRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/document-templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(docsRes.statusCode, 200, `Document templates request failed for hotel variant ${variant}`);
+    const docs = docsRes.json() as DocumentTemplateLite[];
+    const hotelDocs = docs.filter((d) => d.macroGroup === "HOTEL");
+    assert.ok(
+      hotelDocs.length >= 15,
+      `Expected at least 15 hotel docs for variant ${variant}, found ${hotelDocs.length}`,
+    );
+  }
+
+  // Verifica integrazione ispezioni per azienda Hotel con ATECO variante (55.10)
+  const hotelCompany = await app.prisma.company.upsert({
+    where: { id: "test-hotel-integration-company" },
+    update: { atecoCode: "55.10" },
+    create: {
+      id: "test-hotel-integration-company",
+      name: "Grand Hotel FedShield",
+      vatNumber: "IT99887766554",
+      atecoCode: "55.10",
+      legalAddress: "Via Roma 10, Milano",
+    },
+  });
+
+  const hotelInspection = await app.inject({
+    method: "POST",
+    url: "/api/inspections",
+    headers,
+    payload: {
+      companyId: hotelCompany.id,
+      title: "Ispezione Hotel Test",
+    },
+  });
+  assert.equal(hotelInspection.statusCode, 201);
+  const hotelInspectionId = hotelInspection.json().id as string;
+
+  const inspectionDocsRes = await app.inject({
+    method: "GET",
+    url: `/api/inspections/${hotelInspectionId}/documents/requirements`,
+    headers,
+  });
+  assert.equal(inspectionDocsRes.statusCode, 200);
+  const inspectionDocs = inspectionDocsRes.json() as Array<{ name: string; documentTemplateId: string }>;
+  const hotelSpecificDocs = inspectionDocs.filter(
+    (d) =>
+      d.name.toLowerCase().includes("hotel") ||
+      d.name.toLowerCase().includes("struttura ricettiva") ||
+      d.name.toLowerCase().includes("colazioni"),
+  );
+  assert.ok(
+    hotelSpecificDocs.length >= 5,
+    `Expected at least 5 hotel-specific document requirements for inspection, found ${hotelSpecificDocs.length}`,
+  );
+
+  console.log("HoReCa completeness test passed (including Hotel ATECO variants and inspection integration)");
   await app.close();
 }
 

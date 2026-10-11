@@ -2778,6 +2778,262 @@ export function getStandardEnvironmentsForAteco(atecoCode?: string): WorkEnviron
     ];
   }
 
+  // 0-decies. Hotel, Albergo, Resort e Strutture Ricettive Turistiche (55.10.00, 55.10.0, 55.10, 55.1, 551000, 55100, 5510, 551)
+  if (
+    ateco.startsWith("551000") ||
+    ateco.startsWith("55100") ||
+    ateco.startsWith("5510") ||
+    ateco.startsWith("551") ||
+    ateco.startsWith("55.1")
+  ) {
+    return [
+      {
+        id: "env-hotel-reception-hall",
+        key: "hotel_reception_hall_accoglienza",
+        name: "Hall Principale, Reception & Area Accoglienza Clienti",
+        icon: "🛎️",
+        category: "sales_office",
+        isDefault: true,
+        surfaceSqM: 120,
+        heightM: 3.5,
+        volumeCuM: 420,
+        occupantsCount: 8,
+        emergencyExitsCount: 2,
+        windowSurfaceSqM: 15.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("sales_office"),
+          emergencyLighting: true,
+          antiShatterGlass: true,
+        },
+      },
+      {
+        id: "env-hotel-camere-piano",
+        key: "hotel_camere_ospiti_suite_corridoi_piani",
+        name: "Camere Ospiti, Suite & Corridoi ai Piani (con Camere Disabili)",
+        icon: "🛏️",
+        category: "public",
+        isDefault: true,
+        surfaceSqM: 400,
+        heightM: 2.7,
+        volumeCuM: 1080,
+        occupantsCount: 80,
+        emergencyExitsCount: 4,
+        windowSurfaceSqM: 60.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("public"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-hotel-sala-colazioni",
+        key: "hotel_sala_colazioni_ristorazione_ospiti",
+        name: "Sala Colazioni & Ristorazione Ospiti (80-120 Coperti)",
+        icon: "☕",
+        category: "public",
+        isDefault: true,
+        surfaceSqM: 150,
+        heightM: 3.0,
+        volumeCuM: 450,
+        occupantsCount: 100,
+        emergencyExitsCount: 2,
+        windowSurfaceSqM: 20.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("public"),
+          emergencyLighting: true,
+          antiShatterGlass: true,
+        },
+      },
+      {
+        id: "env-hotel-office-cucina-colazioni",
+        key: "hotel_office_cucina_colazioni_rigenerazione",
+        name: "Office / Cucina Preparazione Colazioni & Rigenerazione Cibi",
+        icon: "🍳",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 30,
+        heightM: 3.0,
+        volumeCuM: 90,
+        occupantsCount: 3,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 3.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          forcedExhaustType: "kitchen_hood",
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-hotel-lavanderia-stireria",
+        key: "hotel_lavanderia_stireria_gestione_biancheria",
+        name: "Lavanderia e Stireria Interna / Gestione Biancheria",
+        icon: "🧺",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 40,
+        heightM: 3.0,
+        volumeCuM: 120,
+        occupantsCount: 3,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 4.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-hotel-deposito-housekeeping",
+        key: "hotel_guardaroba_magazzino_biancheria_depositi",
+        name: "Guardaroba / Magazzino Biancheria Pulita & Depositi Piani",
+        icon: "📦",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 35,
+        heightM: 2.7,
+        volumeCuM: 94.5,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          shelvingCertified: true,
+        },
+      },
+      {
+        id: "env-hotel-centrale-idrica-legionella",
+        key: "hotel_centrale_idrica_acs_anti_legionella",
+        name: "Centrale Idrica, Impianto ACS & Dosaggio Anti-Legionella",
+        icon: "💧",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 25,
+        heightM: 2.7,
+        volumeCuM: 67.5,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-hotel-centrale-termica-clima",
+        key: "hotel_centrale_termica_gruppi_frigo_cta",
+        name: "Centrale Termica / Gruppi Frigo & Centrale Trattamento Aria (CTA)",
+        icon: "❄️",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 35,
+        heightM: 3.0,
+        volumeCuM: 105,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          emergencyLighting: true,
+          gasLeakDetectorPresent: true,
+        },
+      },
+      {
+        id: "env-hotel-vano-gruppo-elettrogeno",
+        key: "hotel_locale_gruppo_elettrogeno_serbatoio_gasolio",
+        name: "Locale Gruppo Elettrogeno & Vano Serbatoio Gasolio Emergenza",
+        icon: "⚡",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 20,
+        heightM: 2.8,
+        volumeCuM: 56,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-hotel-vani-ascensori-montacarichi",
+        key: "hotel_vani_corsa_ascensori_montacarichi_servizio",
+        name: "Vani Corsa Ascensori Ospiti & Montacarichi di Servizio",
+        icon: "🛗",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 30,
+        heightM: 3.0,
+        volumeCuM: 90,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-hotel-spogliatoi-personale",
+        key: "hotel_spogliatoi_servizi_personale_uomini_donne",
+        name: "Spogliatoi e Servizi Igienici Personale (Uomini e Donne)",
+        icon: "🚻",
+        category: "changing_rooms",
+        isDefault: true,
+        surfaceSqM: 30,
+        heightM: 2.4,
+        volumeCuM: 72,
+        occupantsCount: 15,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("changing_rooms"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          forcedExhaustPresent: true,
+          forcedExhaustType: "blind_toilet_fan",
+        },
+      },
+      {
+        id: "env-hotel-deposito-rifiuti-differenziata",
+        key: "hotel_area_deposito_rifiuti_differenziata_compattatore",
+        name: "Area Deposito Rifiuti, Differenziata & Vano Compattatore",
+        icon: "🗑️",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 20,
+        heightM: 2.6,
+        volumeCuM: 52,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+    ];
+  }
+
   // 1. Ristorazione, HoReCa, Somministrazione alimenti (56.x, 10.x, 11.x, 47.11, 47.2, 55.1)
   if (
     ateco.startsWith("56") ||
@@ -3644,6 +3900,11 @@ export function evaluateEnvironmentCompliance(
     env.key.includes("cella_stoccaggio")
   ) {
     minHeightRequired = 2.4; // 2,40 m per celle frigorifere prefabbricate e locali tecnici refrigerati
+  } else if (
+    env.id === "env-hotel-deposito-housekeeping" ||
+    env.key.includes("hotel_guardaroba")
+  ) {
+    minHeightRequired = 2.7; // 2,70 m per guardaroba e magazzini biancheria ai piani alberghieri
   } else if (env.category === "production" || env.category === "warehouse" || env.category === "storage") {
     minHeightRequired = 3.0; // 3,00 m per locali industriali, stoccaggio e lavorazioni
   } else if (env.category === "services" || env.category === "changing_rooms" || env.category === "technical") {
@@ -3801,6 +4062,49 @@ export function evaluateEnvironmentCompliance(
         "Capienza elevata o superficie estesa: obbligatorie almeno 2 uscite di sicurezza contrapposte con maniglioni antipanico (UNI EN 1125).",
     };
     summaryBadges.push({ text: "🔥 Alta Capienza (Attività 65 / Esodo Rilevante)", status: "warning" });
+  }
+
+  // Attività 66: Alberghi, pensioni, motel, villaggi alberghieri con oltre 25 posti letto (D.M. 09/04/1994 e D.P.R. 151/2011)
+  if (
+    env.id === "env-hotel-camere-piano" ||
+    env.key.includes("hotel_camere") ||
+    (env.id.includes("hotel-") && occupants > 25)
+  ) {
+    cpiActivityAlert = {
+      code: "Attività 66 (D.P.R. 151/2011)",
+      title: "Albergo / Struttura Ricettiva con oltre 25 Posti Letto - Soggetto a CPI VVF",
+      description:
+        "Struttura ricettiva alberghiera con capacità ricettiva superiore a 25 posti letto: soggetta a controllo di prevenzione incendi secondo D.M. 09/04/1994, D.M. 14/07/2015 o D.M. 09/08/2016 (RTV V.5).",
+    };
+    summaryBadges.push({ text: "🔥 Soggetto a CPI (Attività 66 - Albergo >25 posti letto)", status: "danger" });
+  }
+
+  // Attività 74: Impianti per la produzione di calore / Centrale termica con potenza > 116 kW (D.M. 08/11/2019 e D.P.R. 151/2011)
+  if (
+    env.id === "env-hotel-centrale-termica-clima" ||
+    env.key.includes("hotel_centrale_termica")
+  ) {
+    cpiActivityAlert = {
+      code: "Attività 74 (D.P.R. 151/2011)",
+      title: "Centrale Termica / Impianto Produzione Calore > 116 kW - CPI VVF",
+      description:
+        "Impianto termico centralizzato per riscaldamento/climatizzazione con potenzialità termica > 116 kW: soggetto a prevenzione incendi D.M. 08/11/2019.",
+    };
+    summaryBadges.push({ text: "🔥 Soggetto a CPI (Attività 74 - Centrale Termica >116 kW)", status: "danger" });
+  }
+
+  // Attività 49: Gruppi elettrogeni con motore a combustione interna con potenza > 25 kW (D.M. 13/07/2011 e D.P.R. 151/2011)
+  if (
+    env.id === "env-hotel-vano-gruppo-elettrogeno" ||
+    env.key.includes("hotel_locale_gruppo_elettrogeno")
+  ) {
+    cpiActivityAlert = {
+      code: "Attività 49 (D.P.R. 151/2011)",
+      title: "Gruppo Elettrogeno di Emergenza > 25 kW - CPI VVF",
+      description:
+        "Installazione fissa di gruppo elettrogeno con motore endotermico diesel > 25 kW e serbatoio gasolio di emergenza: soggetta a D.M. 13/07/2011 e D.P.R. 151/2011.",
+    };
+    summaryBadges.push({ text: "🔥 Soggetto a CPI (Attività 49 - Gruppo Elettrogeno >25 kW)", status: "danger" });
   }
 
   // 6. Regole ad hoc per reparti Ipermercato/Supermercato e impianti specifici
@@ -4735,6 +5039,209 @@ export function evaluateEnvironmentCompliance(
     });
   }
 
+  // ========================================================================
+  // REGOLE AD HOC HOTEL, RESORT E STRUTTURE RICETTIVE (55.10.00 / 55.1)
+  // ========================================================================
+  // 1. Reception & Hall
+  const isHotelReception =
+    env.id === "env-hotel-reception-hall" ||
+    env.key === "hotel_reception_hall_accoglienza" ||
+    (env.id.includes("hotel-reception") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isHotelReception) {
+    summaryBadges.push({
+      text: "🛎️ Reception a norma VDT D.Lgs. 81/08 Titolo VII & percorsi di esodo ampi ≥ 1,50 m",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🚪 Porte automatiche scorrevoli a norma UNI EN 16005 con apertura di sicurezza a spinta per vie di fuga",
+      status: "success",
+    });
+  }
+
+  // 2. Camere Ospiti, Suite & Corridoi ai Piani
+  const isHotelCamere =
+    env.id === "env-hotel-camere-piano" ||
+    env.key === "hotel_camere_ospiti_suite_corridoi_piani" ||
+    (env.id.includes("hotel-camere") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isHotelCamere) {
+    summaryBadges.push({
+      text: "🚪 Porte tagliafuoco EI 30 / EI 60 con chiudiporta omologato a norma D.M. 09/04/1994",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "🚨 Rilevatori ottici di fumo indirizzati in ogni camera e corridoio con impianto IRAI",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🗺️ Planimetrie bilingue di evacuazione dietro ogni porta con indicazione vie di fuga",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "♿ Bagni camere disabili D.P.R. 503/96 con tirante allarme a campanello e maniglioni",
+      status: "success",
+    });
+  }
+
+  // 3. Sala Colazioni & Ristorazione Ospiti
+  const isHotelSalaColazioni =
+    env.id === "env-hotel-sala-colazioni" ||
+    env.key === "hotel_sala_colazioni_ristorazione_ospiti" ||
+    (env.id.includes("hotel-sala-colazioni") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isHotelSalaColazioni) {
+    summaryBadges.push({
+      text: "☕ Vie di esodo libere ≥ 1,20 m & uscite antipanico UNI EN 1125",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🛡️ Linea buffet calda/fredda con cristalli parafiato igienici antiaerosol",
+      status: "info",
+    });
+  }
+
+  // 4. Office / Cucina Preparazione Colazioni & Rigenerazione Cibi
+  const isHotelOffice =
+    env.id === "env-hotel-office-cucina-colazioni" ||
+    env.key === "hotel_office_cucina_colazioni_rigenerazione" ||
+    (env.id.includes("hotel-office") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isHotelOffice) {
+    summaryBadges.push({
+      text: "🍳 Cappa d'aspirazione fumi con filtri a labirinto & forni con porta doppio vetro",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🧼 Lavamani a ginocchio/pedale & lavastoviglie con Break Tank UNI EN 1717 e risciacquo a 85°C",
+      status: "success",
+    });
+  }
+
+  // 5. Lavanderia e Stireria Interna
+  const isHotelLavanderia =
+    env.id === "env-hotel-lavanderia-stireria" ||
+    env.key === "hotel_lavanderia_stireria_gestione_biancheria" ||
+    (env.id.includes("hotel-lavanderia") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isHotelLavanderia) {
+    summaryBadges.push({
+      text: "🧺 Calandra mangano con barra salvadita a microinterruttore (UNI EN ISO 10472-5)",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "🔄 Separazione marcia in avanti circuito sporco/pulito & ventilazione forzata anti-umidità",
+      status: "info",
+    });
+  }
+
+  // 6. Guardaroba / Magazzino Housekeeping
+  const isHotelGuardaroba =
+    env.id === "env-hotel-deposito-housekeeping" ||
+    env.key === "hotel_guardaroba_magazzino_biancheria_depositi" ||
+    (env.id.includes("hotel-deposito-housekeeping") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isHotelGuardaroba) {
+    summaryBadges.push({
+      text: "📦 Scaffalature metalliche lisce sollevate ≥ 15 cm da terra & stoccaggio carrelli piani",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🧪 Schede di sicurezza detergenti consultabili per gli addetti ai piani (D.Lgs. 81/08 art. 227)",
+      status: "info",
+    });
+  }
+
+  // 7. Centrale Idrica, Impianto ACS & Dosaggio Anti-Legionella
+  const isHotelCentraleIdrica =
+    env.id === "env-hotel-centrale-idrica-legionella" ||
+    env.key === "hotel_centrale_idrica_acs_anti_legionella" ||
+    (env.id.includes("hotel-centrale-idrica") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isHotelCentraleIdrica) {
+    summaryBadges.push({
+      text: "💧 Accumulo ACS ≥ 60°C e ricircolo ≥ 50°C a norma Accordo Stato-Regioni 07/05/2015 e D.Lgs. 18/2023",
+      status: "danger",
+    });
+    summaryBadges.push({
+      text: "📋 Registro Legionella aggiornato con campionamenti periodici & dosaggio biossido di cloro",
+      status: "warning",
+    });
+  }
+
+  // 8. Centrale Termica / Gruppi Frigo & CTA
+  const isHotelCentraleTermica =
+    env.id === "env-hotel-centrale-termica-clima" ||
+    env.key === "hotel_centrale_termica_gruppi_frigo_cta" ||
+    (env.id.includes("hotel-centrale-termica") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isHotelCentraleTermica) {
+    summaryBadges.push({
+      text: "❄️ Caldaie con valvole INAIL, vaso espansione PED & registro manutenzione filtri CTA/UTA",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "⚠️ Rilevatore fughe gas metano con elettrovalvola esterna a riarmo manuale",
+      status: "warning",
+    });
+  }
+
+  // 9. Locale Gruppo Elettrogeno & Vano Gasolio
+  const isHotelGruppoElettrogeno =
+    env.id === "env-hotel-vano-gruppo-elettrogeno" ||
+    env.key === "hotel_locale_gruppo_elettrogeno_serbatoio_gasolio" ||
+    (env.id.includes("hotel-vano-gruppo-elettrogeno") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isHotelGruppoElettrogeno) {
+    summaryBadges.push({
+      text: "⚡ Vasca di contenimento gasolio al 110% & aerazione permanente D.M. 13/07/2011",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "🚪 Porta tagliafuoco EI 120 verso l'esterno & alimentazione di emergenza pompe antincendio",
+      status: "danger",
+    });
+  }
+
+  // 10. Vani Ascensori e Montacarichi
+  const isHotelAscensori =
+    env.id === "env-hotel-vani-ascensori-montacarichi" ||
+    env.key === "hotel_vani_corsa_ascensori_montacarichi_servizio" ||
+    (env.id.includes("hotel-vani-ascensori") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isHotelAscensori) {
+    summaryBadges.push({
+      text: "🛗 Dispositivo di comunicazione bidirezionale h24 EN 81-28 & ritorno automatico al piano in blackout",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "📜 Verifica periodica biennale ascensori D.P.R. 162/99 art. 13 con verbale ente notificato",
+      status: "success",
+    });
+  }
+
+  // 11. Spogliatoi e Servizi Igienici Personale
+  const isHotelSpogliatoi =
+    env.id === "env-hotel-spogliatoi-personale" ||
+    env.key === "hotel_spogliatoi_servizi_personale_uomini_donne" ||
+    (env.id.includes("hotel-spogliatoi") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isHotelSpogliatoi) {
+    summaryBadges.push({
+      text: "🚻 Armadietti a doppio scomparto per separazione abiti civili e divise alberghiere",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🚿 Servizi igienici con docce, lavamani non manuali e aerazione forzata temporizzata",
+      status: "success",
+    });
+  }
+
+  // 12. Area Deposito Rifiuti, Differenziata & Compattatore
+  const isHotelRifiuti =
+    env.id === "env-hotel-deposito-rifiuti-differenziata" ||
+    env.key === "hotel_area_deposito_rifiuti_differenziata_compattatore" ||
+    (env.id.includes("hotel-deposito-rifiuti") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isHotelRifiuti) {
+    summaryBadges.push({
+      text: "🗑️ Area lavabile e disinfettabile con canaletta di scolo sifonata & cassonetti ermetici",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "📦 Compattatore cartone/plastica a norma UNI EN 16500 & separazione frazione umida",
+      status: "success",
+    });
+  }
+
   return {
     isHeightCompliant,
     minHeightRequired,
@@ -4808,7 +5315,9 @@ export function generateEnvironmentChecklistItems(
       env.id.includes("gelamb-") ||
       env.key.includes("gelamb_") ||
       env.id.includes("bar-") ||
-      env.key.includes("bar_"));
+      env.key.includes("bar_") ||
+      env.id.includes("hotel-office-cucina") ||
+      env.key.includes("hotel_office_cucina"));
 
   // 1. Requisito Dimensionale & Cubatura
   items.push({
@@ -4969,7 +5478,17 @@ export function generateEnvironmentChecklistItems(
     env.category === "changing_rooms" ||
     (env.category === "services" && !env.id.includes("wc-clienti") && !env.id.includes("clienti") && !env.key.includes("wc_clienti"))
   ) {
-    const isFoodSector = isFoodEnv || env.id.includes("rist") || env.id.includes("super") || env.id.includes("iper") || env.id.includes("piz") || env.id.includes("mensa") || env.id.includes("cat-") || env.key.includes("cat_");
+    const isFoodSector =
+      isFoodEnv ||
+      env.id.includes("rist") ||
+      env.id.includes("super") ||
+      env.id.includes("iper") ||
+      env.id.includes("piz") ||
+      env.id.includes("mensa") ||
+      env.id.includes("cat-") ||
+      env.key.includes("cat_") ||
+      env.id.includes("hotel-") ||
+      env.key.includes("hotel_");
     items.push({
       id: `${env.id}-armadietti-spogliatoio`,
       area: env.name,
@@ -8712,6 +9231,556 @@ export function generateEnvironmentChecklistItems(
       categoryTag: "cpi",
       suggestedNonConformity:
         "Quadro elettrico aperto o con cavi a vista senza sportello di protezione e pulsante di sgancio di emergenza ostruito da cartoni.",
+    });
+  }
+
+  // ========================================================================
+  // REQUISITI SPECIFICI HOTEL, RESORT E STRUTTURE RICETTIVE (ATECO 55.10.00 / 55.1)
+  // ========================================================================
+
+  // a) Hall Principale, Reception & Area Accoglienza Clienti
+  if (env.id === "env-hotel-reception-hall" || env.id.includes("hotel-reception-hall")) {
+    items.push({
+      id: `${env.id}-porte-automatiche-uni-en-16005-esodo`,
+      area: env.name,
+      title: "Porte Scorrevoli Automatiche con Dispositivo a Spinta per Esodo (UNI EN 16005)",
+      question:
+        "Le porte scorrevoli automatiche della hall principale dispongono di sistema a sfondamento o apertura di sicurezza a spinta manuale nel verso dell'esodo in conformità alla norma UNI EN 16005 e D.M. 09/04/1994?",
+      normReference: "Norma UNI EN 16005, D.M. 09/04/1994 Titolo II e D.Lgs. 81/2008 Allegato IV punto 1.4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Porte scorrevoli automatiche dell'ingresso hall prive di dispositivo di sicurezza per apertura a spinta in emergenza o non collegate al sistema di allarme antincendio.",
+    });
+
+    items.push({
+      id: `${env.id}-banco-reception-ergonomia-vdt-presidio-h24`,
+      area: env.name,
+      title: "Banco Reception a Norma VDT (D.Lgs. 81/08 Titolo VII) e Presidio Allarmi H24",
+      question:
+        "Il banco reception presenta postazioni videoterminale ergonomiche con schermi antiriflesso, sedute regolabili e quadro di controllo/segnalazione centrale antincendio continuamente presidiato o rinviato?",
+      normReference: "D.Lgs. 81/2008 Titolo VII, Allegato XXXIV e D.M. 09/04/1994 Titolo II",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "microclima_luce",
+      suggestedNonConformity:
+        "Postazioni reception con schermi VDT esposti ad abbagliamenti molesti, sedie prive di regolazione lombare o pannello di allarme incendi privo di istruzioni operative per il personale.",
+    });
+
+    items.push({
+      id: `${env.id}-percorsi-esodo-hall-planimetrie-luci-emergenza`,
+      area: env.name,
+      title: "Vie di Esodo della Hall (≥ 1,50 m), Planimetrie di Evacuazione e Luci Emergenza (≥ 5 lux)",
+      question:
+        "I percorsi di esodo principali attraverso la hall sono mantenuti liberi con larghezza non inferiore a 1,50 metri, dotati di illuminazione di emergenza ≥ 5 lux e planimetrie di evacuazione orientate?",
+      normReference: "D.M. 09/04/1994 Titolo II punto 6 e D.Lgs. 81/2008 Allegato IV punto 1.4",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Vie di fuga della hall parzialmente ostruite da carrelli bagagli o espositori con larghezza utile ridotta sotto 1,50 m, o illuminazione di sicurezza insufficiente.",
+    });
+  }
+
+  // b) Camere Ospiti, Suite & Corridoi ai Piani (con Camere Disabili)
+  if (env.id === "env-hotel-camere-piano" || env.id.includes("hotel-camere-piano")) {
+    items.push({
+      id: `${env.id}-porte-tagliafuoco-camere-ei30-chiudiporta-dm-1994`,
+      area: env.name,
+      title: "Porte Tagliafuoco delle Camere EI 30 / EI 60 con Dispositivo di Autochiusura (D.M. 09/04/1994)",
+      question:
+        "Tutte le porte delle camere ospiti che prospettano sui corridoi di piano possiedono resistenza al fuoco almeno EI 30 (o EI 60 per edifici oltre determinata altezza antincendio) con chiudiporta omologato a norma D.M. 09/04/1994?",
+      normReference: "D.M. 09/04/1994 Titolo II punto 4 e D.P.R. 151/2011 Attività 66",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Porte delle camere d'albergo con chiudiporta guasto/manomesso o bloccate con cunei/zeppe a terra con compromissione della compartimentazione tagliafuoco.",
+    });
+
+    items.push({
+      id: `${env.id}-rilevatori-fumo-irai-planimetrie-bilingue-evacuazione`,
+      area: env.name,
+      title: "Rilevatori Ottici di Fumo Indirizzati in Camera e Planimetrie Bilingue con Vie di Fuga",
+      question:
+        "Ogni camera e corridoio è dotato di rilevatore ottico di fumo indirizzato collegato alla centrale IRAI, ed è esposta sul retro della porta d'ingresso la planimetria di evacuazione bilingue indicante la posizione e le vie di fuga?",
+      normReference: "D.M. 09/04/1994 Titolo II punto 10, Norma UNI 9795 e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Mancanza di planimetria di evacuazione bilingue dietro la porta della camera o rilevatore di fumo schermato/scollegato con pericolo di ritardo allarme in caso di incendio notturno.",
+    });
+
+    items.push({
+      id: `${env.id}-bagni-camere-disabili-dpr-503-tirante-soccorso`,
+      area: env.name,
+      title: "Bagni Camere Accessibili Disabili con Tirante Allarme a Campanello (D.P.R. 503/96 - D.M. 236/89)",
+      question:
+        "Le camere destinate ad ospiti con ridotta capacità motoria dispongono di bagno a norma D.P.R. 503/1996 e D.M. 236/1989 con porta scorrevole o verso l'esterno, maniglioni accostamento e tirante d'allarme a campanello con suoneria e luce fuori porta?",
+      normReference: "D.P.R. 503/1996 art. 5, D.M. 236/1989 e Legge 104/1992",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Bagno per disabili privo di tirante a campanello per chiamata di soccorso o maniglioni di sostegno non fissati saldamente con rischio di caduta dell'ospite.",
+    });
+  }
+
+  // c) Sala Colazioni & Ristorazione Ospiti (80-120 Coperti)
+  if (env.id === "env-hotel-sala-colazioni" || env.id.includes("hotel-sala-colazioni")) {
+    items.push({
+      id: `${env.id}-buffet-colazioni-parafiato-cristallo-temperature-haccp`,
+      area: env.name,
+      title: "Linea Buffet Calda/Fredda con Cristalli Parafiato e Monitoraggio Temperature HACCP",
+      question:
+        "I banchi del buffet colazioni sono dotati di schermi parafiato continui in cristallo/vetro stratificato igienico, vasche calde a bagnomaria mantenute a ≥ 60°C e ripiani refrigerati a ≤ 4°C a tutela degli alimenti deperibili?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitoli V e IX e Linee Guida HACCP Ristorazione",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Alimenti sfusi al buffet (affettati, formaggi, yogurt) esposti senza protezione da goccioline respiratorie o privi di refrigerazione controllata.",
+    });
+
+    items.push({
+      id: `${env.id}-vie-esodo-sala-coperti-porte-antipanico-uni-en-1125`,
+      area: env.name,
+      title: "Vie di Esodo tra i Tavoli (≥ 1,20 m) e Uscite con Maniglioni Antipanico (UNI EN 1125)",
+      question:
+        "La sala colazioni (80-120 coperti) garantisce corridoi di transito principali liberi di larghezza ≥ 1,20 m e uscite di emergenza con maniglioni antipanico a norma UNI EN 1125 apribili verso l'esterno?",
+      normReference: "D.M. 09/04/1994 Titolo II punto 6 e D.Lgs. 81/2008 Allegato IV punto 1.4",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Passaggi tra i tavoli della sala colazioni ristretti da carrelli di sbarazzo o uscite di sicurezza con maniglione antipanico ostruito.",
+    });
+
+    items.push({
+      id: `${env.id}-estintori-omologati-34a-233b-luci-emergenza`,
+      area: env.name,
+      title: "Dotazione Estintori Omologati 34A 233B e Illuminazione di Emergenza",
+      question:
+        "La sala è dotata di estintori portatili omologati con capacità estinguente minima 34A 233B regolarmente revisionati e di illuminazione di emergenza autonoma conforme (D.M. 09/04/1994)?",
+      normReference: "D.M. 09/04/1994 Titolo II punto 9 e D.M. 03/09/2021",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Estintori della sala colazioni non revisionati entro i 6 mesi o lampade di sicurezza non funzionanti in test di blackout.",
+    });
+  }
+
+  // d) Office / Cucina Preparazione Colazioni & Rigenerazione Cibi
+  if (env.id === "env-hotel-office-cucina-colazioni" || env.id.includes("hotel-office-cucina-colazioni")) {
+    items.push({
+      id: `${env.id}-cappa-aspirazione-filtri-labirinto-forni-doppio-vetro`,
+      area: env.name,
+      title: "Cappa d'Aspirazione Fumi con Filtri a Labirinto e Forni con Porta a Doppio Vetro",
+      question:
+        "L'office colazioni e rigenerazione dispone di cappa d'aspirazione fumi e vapori con filtri metallici a labirinto lavabili, canna fumaria con scarico a tetto e forni rigenerazione con porta a doppio vetro termoisolante?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.9 e Reg. CE 852/2004 Allegato II Capitolo I",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Filtri a labirinto della cappa saturi di unto e grasso con pericolo di innesco incendio o porta del forno non termoisolata con pericolo di ustioni.",
+    });
+
+    items.push({
+      id: `${env.id}-lavamani-ginocchio-pedale-sapone-antibatterico`,
+      area: env.name,
+      title: "Lavamani a Comando Non Manuale (Ginocchio/Pedale) con Sapone Antibatterico",
+      question:
+        "È installato nell'office un lavamani dedicato ad azionamento non manuale (ginocchio o pedale), provvisto di miscelatore per acqua calda/fredda, erogatore di sapone liquido antibatterico e carta monouso a perdere?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo I punto 4 e Capitolo II",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Rubinetto lavamani ad azionamento manuale o assenza di sapone disinfettante e rotoli asciugamani a perdere.",
+    });
+
+    items.push({
+      id: `${env.id}-lavastoviglie-break-tank-uni-en-1717-risciacquo-85c`,
+      area: env.name,
+      title: "Lavastoviglie Professionale con Break Tank UNI EN 1717 e Risciacquo a 85°C",
+      question:
+        "La lavastoviglie dell'office è provvista di Break Tank con disconnessione idrica conforme a UNI EN 1717 contro riflussi nella rete potabile e garantisce ciclo di risciacquo igienizzante a 85°C?",
+      normReference: "Norma UNI EN 1717, Reg. CE 852/2004 Allegato II e D.Lgs. 18/2023",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Lavastoviglie priva di boiler di risciacquo a temperatura controllata (inferiore a 80-85°C) con rischio di sanificazione insufficiente di tazze e bicchieri.",
+    });
+  }
+
+  // e) Lavanderia e Stireria Interna / Gestione Biancheria
+  if (env.id === "env-hotel-lavanderia-stireria" || env.id.includes("hotel-lavanderia-stireria")) {
+    items.push({
+      id: `${env.id}-lavatrici-essiccatori-industriali-uni-en-iso-10472`,
+      area: env.name,
+      title: "Lavatrici ed Essiccatori Industriali a Norma UNI EN ISO 10472 con Blocchi di Sicurezza",
+      question:
+        "I macchinari di lavanderia ed essiccazione industriale rispondono alla norma UNI EN ISO 10472 e dispongono di interblocchi di sicurezza sull'apertura degli oblò e dispositivi di arresto di emergenza a riarmo manuale?",
+      normReference: "Norma UNI EN ISO 10472 (parti 1-4) e D.Lgs. 81/2008 Allegato V",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Oblò della lavatrice industriale privo di blocco elettromeccanico di sicurezza durante la centrifuga con rischio di lesioni gravissime per gli operatori.",
+    });
+
+    items.push({
+      id: `${env.id}-calandra-mangano-barra-salvadita-microinterruttore-uni-en-iso-10472-5`,
+      area: env.name,
+      title: "Calandra Mangano con Barra Salvadita a Microinterruttore (UNI EN ISO 10472-5)",
+      question:
+        "La calandra mangano per stiratura lenzuola dispone di barra salvadita frontale con microinterruttore di sicurezza a contatto positivo che arresta istantaneamente la rotazione del rullo riscaldato in caso di contatto accidentale delle mani?",
+      normReference: "Norma UNI EN ISO 10472-5 e D.Lgs. 81/2008 art. 70-71 e All. V",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Barra salvadita del mangano disallineata o manomessa con grave pericolo di schiacciamento e ustione delle mani dell'addetto alla stireria.",
+    });
+
+    items.push({
+      id: `${env.id}-separazione-marcia-in-avanti-sporco-pulito-ventilazione`,
+      area: env.name,
+      title: "Separazione Marcia in Avanti Circuito Sporco/Pulito e Ventilazione Forzata Anti-Umidità",
+      question:
+        "Il locale lavanderia prevede un percorso a 'marcia in avanti' senza incrocio tra biancheria sporca da lavare e pulita stirata, con ventilazione meccanica forzata per l'estrazione di calore e vapori umidi?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.9 e Linee Guida di Igiene e Sanificazione Tessile",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Stoccaggio promiscuo di sacchi di biancheria sporca a contatto con la biancheria pulita pronta per i piani o umidità e condensa diffusa per mancata estrazione forzata.",
+    });
+  }
+
+  // f) Guardaroba / Magazzino Biancheria Pulita & Depositi Piani
+  if (env.id === "env-hotel-deposito-housekeeping" || env.id.includes("hotel-deposito-housekeeping")) {
+    items.push({
+      id: `${env.id}-scaffalature-biancheria-sollevate-15cm-portata-certificata`,
+      area: env.name,
+      title: "Scaffalature Metalliche Lisce Sollevate ≥ 15 cm da Terra con Cartello di Portata (UNI EN 15635)",
+      question:
+        "I ripiani del magazzino biancheria sono costituiti da scaffalature metalliche lisce e forate, sollevate almeno 15 cm dal pavimento per agevolare la pulizia, fissate stabilmente a parete e provviste di cartello di portata certificata?",
+      normReference: "Norma UNI EN 15635 e D.Lgs. 81/2008 Allegato IV punto 1.4 e art. 71",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Scaffali metallici di stoccaggio biancheria privi di fissaggio a parete, instabili o caricati oltre la portata limite senza cartellino indicatore.",
+    });
+
+    items.push({
+      id: `${env.id}-stoccaggio-carrelli-piani-schede-sicurezza-detergenti`,
+      area: env.name,
+      title: "Stoccaggio Carrelli Piani, Prodotti Cortesia e Schede di Sicurezza Detergenti (SDS)",
+      question:
+        "Il guardaroba di piano garantisce spazi idonei di sosta per i carrelli delle cameriere ai piani e conserva i prodotti chimici di pulizia nei flaconi originali con etichettatura CLP e schede di sicurezza (SDS) accessibili?",
+      normReference: "D.Lgs. 81/2008 Titolo IX artt. 223-227 e Reg. CE 1272/2008 (CLP)",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Presenza di prodotti per la pulizia delle camere travasi in bottiglie non etichettate o mancata disponibilità delle schede di sicurezza per gli addetti all'housekeeping.",
+    });
+  }
+
+  // g) Centrale Idrica, Impianto ACS & Dosaggio Anti-Legionella
+  if (env.id === "env-hotel-centrale-idrica-legionella" || env.id.includes("hotel-centrale-idrica-legionella")) {
+    items.push({
+      id: `${env.id}-temperatura-accumulo-acs-60c-ricircolo-50c-legionella`,
+      area: env.name,
+      title: "Temperatura Accumulo ACS ≥ 60°C e Rete di Ricircolo ≥ 50°C (Accordo Stato-Regioni 07/05/2015)",
+      question:
+        "I boiler di accumulo dell'acqua calda sanitaria (ACS) mantengono costantemente una temperatura non inferiore a 60°C e la rete di ricircolo garantisce almeno 50°C al rientro e sui punti terminali più distanti a prevenzione della Legionella?",
+      normReference: "Accordo Stato-Regioni 07/05/2015 (Linee Guida Controllo Legionellosi) e D.Lgs. 18/2023",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Temperatura dell'acqua calda sanitaria erogata o del circuito di ricircolo inferiore a 50°C con rischio critico di proliferazione batterica di Legionella pneumophila.",
+    });
+
+    items.push({
+      id: `${env.id}-registro-legionella-campionamenti-periodici-dosaggio-cloro`,
+      area: env.name,
+      title: "Registro Legionella Aggiornato, Campionamenti Periodici e Dosaggio Biossido di Cloro",
+      question:
+        "La struttura dispone di Registro Aziendale per il Rischio Legionellosi aggiornato, con Valutazione del Rischio redatta da tecnico qualificato, esecuzione di campionamenti periodici accreditati e impianto di dosaggio biossido di cloro / argento funzionante?",
+      normReference: "Accordo Stato-Regioni 07/05/2015 par. 5, D.Lgs. 81/2008 Titolo X e D.Lgs. 18/2023",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Assenza del Registro di Controllo Legionellosi o mancata esecuzione dei campionamenti analitici microbiologici periodici sui terminali idrici dell'hotel.",
+    });
+
+    items.push({
+      id: `${env.id}-disconnettori-idrici-uni-en-1717-vaso-espansione-sicurezza`,
+      area: env.name,
+      title: "Disconnettori Idrici a Norma UNI EN 1717 e Valvole di Sicurezza Boiler Verificate",
+      question:
+        "La centrale idrica dispone di disconnettori idraulici certificati UNI EN 1717 per prevenire ritorni d'acqua contaminata nell'acquedotto potabile e di valvole di sicurezza tarate e convogliate sui vasi di espansione dei boiler?",
+      normReference: "Norma UNI EN 1717, D.Lgs. 18/2023 e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Mancanza di disconnettore idraulico a riflusso o valvole di sovrapressione dei boiler di accumulo con scarico libero non convogliato verso pozzetto.",
+    });
+  }
+
+  // h) Centrale Termica / Gruppi Frigo & Centrale Trattamento Aria (CTA)
+  if (env.id === "env-hotel-centrale-termica-clima" || env.id.includes("hotel-centrale-termica-clima")) {
+    items.push({
+      id: `${env.id}-rilevatore-fughe-gas-elettrovalvola-esterna-dm-2019`,
+      area: env.name,
+      title: "Rilevatore Fughe Gas Metano con Elettrovalvola Esterna a Riarmo Manuale (D.M. 08/11/2019)",
+      question:
+        "La centrale termica a gas metano è dotata di sensore fughe gas tarato e omologato collegato a elettrovalvola esterna d'intercettazione a riarmo manuale normalmente chiusa e pulsante di sgancio rapido esterno?",
+      normReference: "D.M. 08/11/2019, D.P.R. 151/2011 Attività 74 e Norma CEI 64-8",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Sensore di rilevazione gas metano non revisionato o elettrovalvola esterna bloccata in posizione aperta anche durante la prova di sgancio d'emergenza.",
+    });
+
+    items.push({
+      id: `${env.id}-caldaie-valvole-inail-vaso-ped-attivita-74`,
+      area: env.name,
+      title: "Caldaie Centralizzate con Valvole di Sicurezza INAIL e Vasi Espansione PED (Attività 74)",
+      question:
+        "I generatori termici centralizzati dispongono di libretto d'impianto, valvole di sicurezza omologate con verbale di verifica periodica INAIL e vasi di espansione a norma della direttiva PED 2014/68/UE?",
+      normReference: "Raccolta R INAIL, D.M. 01/12/1975, Direttiva PED 2014/68/UE e D.P.R. 151/2011 Attività 74",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Generatori di calore centralizzati privi di libretto di centrale aggiornato o con valvole di sicurezza INAIL prive di sigillo e verifica periodica.",
+    });
+
+    items.push({
+      id: `${env.id}-centrale-trattamento-aria-cta-filtri-sanificazione-canali`,
+      area: env.name,
+      title: "Centrale Trattamento Aria (CTA/UTA): Pulizia Periodica Filtri e Sanificazione Canali",
+      question:
+        "Le Unità di Trattamento Aria (UTA) e canalizzazioni di climatizzazione sono sottoposte a pulizia periodica, sostituzione filtri semestrale e sanificazione antimicrobica certificata a tutela della qualità dell'aria?",
+      normReference: "Accordo Stato-Regioni 07/05/2015, D.Lgs. 81/2008 Allegato IV punto 1.9 e Linee Guida AIISA",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "microclima_luce",
+      suggestedNonConformity:
+        "Filtri aria della CTA intasati o assenza di evidenza documentale di sanificazione e bonifica microbiologica dei canali dell'aria primaria.",
+    });
+  }
+
+  // i) Locale Gruppo Elettrogeno & Vano Serbatoio Gasolio Emergenza
+  if (env.id === "env-hotel-vano-gruppo-elettrogeno" || env.id.includes("hotel-vano-gruppo-elettrogeno")) {
+    items.push({
+      id: `${env.id}-vasca-contenimento-gasolio-110-dm-13-07-2011-attivita-49`,
+      area: env.name,
+      title: "Vasca di Contenimento Gasolio al 110% e Valvola di Intercettazione Combustibile (D.M. 13/07/2011)",
+      question:
+        "Il serbatoio di gasolio a servizio del gruppo elettrogeno è posizionato all'interno di bacino/vasca di contenimento metallica a tenuta stagna con capacità pari ad almeno il 110% del serbatoio stesso a norma D.M. 13/07/2011?",
+      normReference: "D.M. 13/07/2011 Titolo I punto 5 e D.P.R. 151/2011 Attività 49",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Serbatoio gasolio del generatore privo di vasca di contenimento o con presenza di perdite di carburante non contenute sul pavimento del locale.",
+    });
+
+    items.push({
+      id: `${env.id}-porta-tagliafuoco-ei120-aerazione-permanente-dm-2011`,
+      area: env.name,
+      title: "Porta Tagliafuoco EI 120 e Aperture di Aerazione Permanente verso l'Esterno",
+      question:
+        "Il locale del gruppo elettrogeno è compartimentato con porta tagliafuoco EI 120 dotata di chiudiporta a molla e dispone di aerazione naturale permanente verso l'esterno calcolata secondo il D.M. 13/07/2011?",
+      normReference: "D.M. 13/07/2011 Titolo I punto 4 e D.Lgs. 81/2008 Allegato IV punto 1.4",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Porta tagliafuoco del vano generatore manomessa o aperture di aerazione permanente ostruite da materiali o fogliame.",
+    });
+
+    items.push({
+      id: `${env.id}-continuita-alimentazione-pompe-antincendio-luci-sicurezza`,
+      area: env.name,
+      title: "Quadro Elettrico di Commutazione e Continuità Alimentazione Pompe Antincendio",
+      question:
+        "Il generatore diesel garantisce avviamento automatico entro pochi secondi dal blackout con alimentazione preferenziale delle pompe del gruppo antincendio (UNI EN 12845) e degli ascensori antincendio?",
+      normReference: "Norma CEI 64-8/7 sez. 718, UNI EN 12845 e D.M. 09/04/1994",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Mancata esecuzione della prova periodica mensile di accensione del generatore sotto carico o batterie di avviamento scariche.",
+    });
+  }
+
+  // j) Vani Corsa Ascensori Ospiti & Montacarichi di Servizio
+  if (env.id === "env-hotel-vani-ascensori-montacarichi" || env.id.includes("hotel-vani-ascensori-montacarichi")) {
+    items.push({
+      id: `${env.id}-teleallarme-bidirezionale-h24-uni-en-81-28`,
+      area: env.name,
+      title: "Dispositivo di Comunicazione Bidirezionale H24 a Norma UNI EN 81-28",
+      question:
+        "Tutte le cabine ascensori e montacarichi sono provviste di dispositivo di comunicazione bidirezionale a due vie costantemente attivo e collegato h24 a un centro di soccorso (UNI EN 81-28) per emergenze intrappolamento?",
+      normReference: "Norma UNI EN 81-28 e D.P.R. 162/1999 art. 12",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Dispositivo di soccorso bidirezionale in cabina non funzionante, linea telefonica staccata o mancata risposta della centrale di soccorso nelle prove periodiche.",
+    });
+
+    items.push({
+      id: `${env.id}-ritorno-automatico-piano-blackout-uni-en-81-20`,
+      area: env.name,
+      title: "Dispositivo di Ritorno Automatico al Piano con Apertura Porte in Caso di Blackout",
+      question:
+        "Gli ascensori dispongono di dispositivo di emergenza a batterie per la manovra automatica di accostamento al piano più vicino e riapertura delle porte in caso di improvvisa interruzione dell'alimentazione elettrica?",
+      normReference: "Norma UNI EN 81-20 e D.M. 09/04/1994 Titolo II",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Assenza del dispositivo di manovra automatica al piano con conseguente blocco della cabina tra due piani e panico per gli occupanti in blackout.",
+    });
+
+    items.push({
+      id: `${env.id}-verifica-biennale-ascensori-dpr-162-99-ente-notificato`,
+      area: env.name,
+      title: "Verifica Periodica Biennale dell'Impianto da parte di Ente Notificato (D.P.R. 162/99)",
+      question:
+        "È disponibile il libretto di immatricolazione dell'ascensore con regolare assegnazione del numero di matricola comunale e verbale di verifica periodica biennale in corso di validità rilasciato da Ente Notificato o ASL/ARPA?",
+      normReference: "D.P.R. 162/1999 art. 13 e 14 e D.Lgs. 81/2008 art. 71",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Verifica biennale obbligatoria dell'ascensore scaduta da oltre 24 mesi senza verbale di collaudo periodico dell'Organismo Notificato abilitato.",
+    });
+  }
+
+  // k) Spogliatoi e Servizi Igienici Personale (Uomini e Donne)
+  if (env.id === "env-hotel-spogliatoi-personale" || env.id.includes("hotel-spogliatoi-personale")) {
+    items.push({
+      id: `${env.id}-armadietti-doppio-scomparto-divise-alberghiere`,
+      area: env.name,
+      title: "Armadietti a Doppio Scomparto per Separazione Abiti Civili e Divise Alberghiere",
+      question:
+        "Gli spogliatoi del personale (uomini e donne) dispongono di armadietti metallici individuali lavabili a doppio scomparto con feritoie di aerazione per separare gli indumenti civili dalle divise da lavoro (camerieri, facchini, cuochi)?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.12 e Reg. CE 852/2004 Allegato II",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Armadietti a scomparto singolo con promiscuità tra abiti civili e divise da servizio o numero insufficiente rispetto ai dipendenti in forza.",
+    });
+
+    items.push({
+      id: `${env.id}-docce-lavamani-non-manuali-aerazione-temporizzata`,
+      area: env.name,
+      title: "Servizi Igienici con Docce Calde, Lavamani Non Manuali e Aerazione Temporizzata",
+      question:
+        "I servizi igienici annessi agli spogliatoi sono provvisti di piatti doccia con acqua calda, lavamani con comando a pedale/ginocchio, dispenser di sapone disinfettante e impianto di aspirazione forzata temporizzato se privi di finestre?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punti 1.13-1.14 e Reg. CE 852/2004 Allegato II",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Mancanza di erogazione di acqua calda nei bagni del personale, piatto doccia ostruito o estrattore dell'aria inattivo nel locale cieco.",
+    });
+  }
+
+  // l) Area Deposito Rifiuti, Differenziata & Vano Compattatore
+  if (env.id === "env-hotel-deposito-rifiuti-differenziata" || env.id.includes("hotel-deposito-rifiuti-differenziata")) {
+    items.push({
+      id: `${env.id}-area-rifiuti-lavabile-chiusino-sifonato-igiene`,
+      area: env.name,
+      title: "Area Rifiuti con Pavimentazione Lavabile, Presa d'Acqua e Canaletta di Scolo Sifonata",
+      question:
+        "Il locale di deposito rifiuti presenta pavimento e pareti impermeabili, presa d'acqua per il lavaggio frequente con gomma e canaletta di scolo a terra con chiusino sifonato per evitare ristagni e fuoriuscita di odori?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo VI e Regolamento di Igiene Pubblica",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Area rifiuti priva di allacciamento idrico per la pulizia o con pavimentazione fessurata e priva di scolo con formazione di percolato maleodorante.",
+    });
+
+    items.push({
+      id: `${env.id}-cassonetti-ermetici-differenziata-protezione-infestanti`,
+      area: env.name,
+      title: "Cassonetti Ermetici con Coperchio per Raccolta Differenziata e Barriere Anti-Infestanti",
+      question:
+        "I rifiuti (umido/organico, vetro, plastica, cartone e indifferenziato) sono stoccati in contenitori rigidi chiudibili, puliti e sanificati periodicamente, in locale protetto dall'accesso di roditori e insetti?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo VI e D.Lgs. 152/2006 art. 188",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Cassonetti dei rifiuti privi di coperchio, tracimanti o con sacchi depositati direttamente a terra con forte attrazione di mosche e roditori.",
+    });
+
+    items.push({
+      id: `${env.id}-pressa-compattatore-uni-en-16500-dispositivi-protezione`,
+      area: env.name,
+      title: "Pressa Compattatrice Cartone/Plastica a Norma UNI EN 16500 con Protezioni Operatore",
+      question:
+        "L'eventuale pressa compattatrice per imballaggi in cartone o plastica è conforme alla norma armonizzata UNI EN 16500, dotata di sportello interbloccato a chiusura protetta e comandi bimanuali uomo presente?",
+      normReference: "Norma UNI EN 16500 e D.Lgs. 81/2008 Allegato V e art. 71",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Compattatore di rifiuti con interblocco di sicurezza dello sportello manomesso o privo di istruzioni di emergenza e DPI obbligatori per l'uso.",
     });
   }
 

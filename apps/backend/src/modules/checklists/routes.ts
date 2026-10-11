@@ -3,12 +3,13 @@ import { z } from "zod";
 import { ChecklistSection, ComplianceDomain, InspectionChecklistMode } from "@prisma/client";
 import { writeAudit } from "../../plugins/audit.js";
 
-function buildAtecoVariants(atecoCode?: string) {
+function buildAtecoVariants(atecoCode?: string | null) {
   if (!atecoCode) {
     return [];
   }
 
   const normalized = atecoCode.trim();
+  const digits = normalized.replace(/\D/g, "");
   const parts = normalized.split(".");
   const variants = new Set<string>([normalized]);
 
@@ -19,34 +20,144 @@ function buildAtecoVariants(atecoCode?: string) {
     variants.add(parts[0]);
   }
 
-  if (parts[0] === "56") {
+  // Normalizzazione per codici ATECO privi di separatori (es. "551000", "561011", "5510", "551")
+  if (digits.length >= 2) {
+    const d2 = digits.slice(0, 2);
+    variants.add(d2);
+    if (digits.length >= 4) {
+      const d4 = `${d2}.${digits.slice(2, 4)}`;
+      variants.add(d4);
+      if (digits.length >= 6) {
+        variants.add(`${d4}.${digits.slice(4, 6)}`);
+      }
+    }
+  }
+
+  // Macrosettori HoReCa / Ricettività / Alloggio per Divisione ATECO 55
+  if (parts[0] === "55" || digits.startsWith("55")) {
+    variants.add("HO.RE.CA");
+    variants.add("HORECA");
+    variants.add("RICETTIVITA");
+    variants.add("RICETTIVITÀ");
+    variants.add("STRUTTURE_RICETTIVE");
+    variants.add("ALLOGGIO");
+  }
+
+  // Hotel / Alberghi (55.10.00, 55.10, 55.1, 551000, 5510, 551)
+  if (
+    normalized.startsWith("55.10") ||
+    normalized.startsWith("55.1") ||
+    digits.startsWith("5510") ||
+    digits === "551"
+  ) {
+    variants.add("55.10.00");
+    variants.add("55.10");
+    variants.add("55.1");
+    variants.add("551000");
+    variants.add("5510");
+    variants.add("HOTEL");
+    variants.add("ALBERGO");
+    variants.add("ALBERGHI");
+  }
+
+  // B&B e Affittacamere (55.20.51, 55.20.5, 552051)
+  if (normalized.startsWith("55.20.5") || digits.startsWith("55205")) {
+    variants.add("55.20.51");
+    variants.add("55.20.5");
+    variants.add("55.20");
+    variants.add("552051");
+    variants.add("BEB_AFFITTACAMERE");
+    variants.add("AFFITTACAMERE");
+    variants.add("B&B");
+  }
+
+  // Ostelli e Residence (55.20.20, 55.20.2, 552020)
+  if (normalized.startsWith("55.20.2") || digits.startsWith("55202")) {
+    variants.add("55.20.20");
+    variants.add("55.20.2");
+    variants.add("55.20");
+    variants.add("552020");
+    variants.add("OSTELLI_RESIDENCE");
+    variants.add("RESIDENCE");
+    variants.add("OSTELLI");
+  }
+
+  // Campeggi e Villaggi turistici (55.30.00, 55.30, 55.3, 553000)
+  if (normalized.startsWith("55.3") || digits.startsWith("553")) {
+    variants.add("55.30.00");
+    variants.add("55.30");
+    variants.add("55.3");
+    variants.add("553000");
+    variants.add("5530");
+    variants.add("CAMPEGGI_VILLAGGI");
+    variants.add("CAMPEGGI");
+    variants.add("VILLAGGI_TURISTICI");
+  }
+
+  // Divisione ATECO 56 (Ristorazione e somministrazione alimenti / HoReCa)
+  if (parts[0] === "56" || digits.startsWith("56")) {
     variants.add("HO.RE.CA");
     variants.add("HORECA");
   }
 
-  if (normalized.startsWith("56.10.41")) {
+  if (normalized.startsWith("56.10.41") || digits.startsWith("561041")) {
     variants.add("PASTICCERIA_AMBULANTE");
   }
-  if (normalized.startsWith("56.10.42")) {
+  if (normalized.startsWith("56.10.42") || digits.startsWith("561042")) {
     variants.add("FOOD_TRUCK");
   }
-  if (normalized.startsWith("56.10.30")) {
+  if (normalized.startsWith("56.10.30") || digits.startsWith("561030")) {
     variants.add("PASTICCERIA_GELATERIA");
   }
-  if (normalized.startsWith("56.10.20")) {
+  if (normalized.startsWith("56.10.20") || digits.startsWith("561020")) {
     variants.add("PIZZERIA_ASPORTO");
   }
-  if (normalized.startsWith("56.10.11")) {
+  if (normalized.startsWith("56.10.11") || digits.startsWith("561011") || normalized === "56.10.1") {
     variants.add("RISTORANTI");
   }
-  if (normalized.startsWith("56.29.10")) {
+  if (normalized.startsWith("56.29.10") || digits.startsWith("562910")) {
     variants.add("MENSE_CATERING");
   }
-  if (normalized.startsWith("56.21.00")) {
+  if (normalized.startsWith("56.21.00") || digits.startsWith("562100")) {
     variants.add("CATERING_EVENTI");
   }
-  if (normalized.startsWith("56.30")) {
+  if (normalized.startsWith("56.30") || digits.startsWith("5630")) {
     variants.add("BAR");
+  }
+
+  // Settori HoReCa collegati a somministrazione / tempo libero
+  if (normalized.startsWith("93.29.2") || digits.startsWith("93292")) {
+    variants.add("STABILIMENTI_BALNEARI");
+    variants.add("HO.RE.CA");
+    variants.add("HORECA");
+  }
+  if (normalized.startsWith("93.29.1") || digits.startsWith("93291")) {
+    variants.add("LOCALI_SERALI");
+    variants.add("HO.RE.CA");
+    variants.add("HORECA");
+  }
+
+  // Ricerca testuale diretta per nome macrosettore
+  const upper = normalized.toUpperCase();
+  if (upper === "HOTEL" || upper === "ALBERGO" || upper === "ALBERGHI") {
+    variants.add("55.10.00");
+    variants.add("55.10");
+    variants.add("55.1");
+    variants.add("551000");
+    variants.add("HOTEL");
+    variants.add("ALBERGO");
+    variants.add("HO.RE.CA");
+    variants.add("HORECA");
+    variants.add("RICETTIVITA");
+  }
+  if (upper === "HORECA" || upper === "HO.RE.CA" || upper === "RICETTIVITA" || upper === "RICETTIVITÀ") {
+    variants.add("HO.RE.CA");
+    variants.add("HORECA");
+    variants.add("RICETTIVITA");
+    variants.add("RICETTIVITÀ");
+    variants.add("HOTEL");
+    variants.add("55.10.00");
+    variants.add("55.10");
   }
 
   if (parts[0] === "47" && !normalized.startsWith("47.11")) {

@@ -162,6 +162,78 @@ export const TRAINING_REQUIREMENTS_LIBRARY: Record<string, MachineTrainingRequir
     requiresPatentinoAccordoSR: false,
     targetRoleDescription: "Baristi, spillatori e personale addetto alla sostituzione e gestione bombole CO2/azoto",
   },
+  antincendio_evac: {
+    courseCode: "FORMAZ_ANTINCENDIO_EVAC",
+    courseTitle: "Formazione e Addestramento Addetti Antincendio, Gestione Allarmi ed Evacuazione EVAC (Livello 2/3)",
+    normReference: "D.M. 02/09/2021; D.Lgs. 81/2008 art. 37 c. 9, art. 43; D.M. 09/04/1994 e D.M. 03/09/2021",
+    minHours: 8,
+    frequencyYears: 3,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Addetti alle emergenze, reception e personale di presidio alberghiero abilitato antincendio",
+  },
+  gruppi_elettrogeni: {
+    courseCode: "FORMAZ_GRUPPI_ELETTROGENI",
+    courseTitle: "Formazione e Addestramento alla Conduzione e Gestione in Sicurezza di Gruppi Elettrogeni di Emergenza",
+    normReference: "D.Lgs. 81/2008 art. 71 c. 7, art. 73 c. 4; D.M. 13/07/2011; CEI 64-8",
+    minHours: 4,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Manutentori tecnici, responsabili impianti tecnologici e addetti ai servizi generali hotel",
+  },
+  ascensori_montacarichi: {
+    courseCode: "FORMAZ_ASCENSORI_MANOVRA_EMERGENZA",
+    courseTitle: "Istruzione e Addestramento alla Manovra di Emergenza e Soccorso Passeggeri in Ascensore",
+    normReference: "D.P.R. 162/99 art. 15; UNI EN 81-20/28; D.Lgs. 81/2008 art. 71 c. 7",
+    minHours: 4,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Personale di reception, portieri di notte e tecnici manutentori addetti alle manovre di soccorso",
+  },
+  trattamento_acque_legionella: {
+    courseCode: "FORMAZ_LEGIONELLA_RISCHIO_BIOLOGICO",
+    courseTitle: "Formazione Specifica sulla Prevenzione e Controllo della Legionellosi e Gestione Prodotti Chimici Biocidi",
+    normReference: "Accordo Stato-Regioni 07/05/2015; D.Lgs. 81/2008 Titolo X (Rischio Biologico) e Titolo IX; D.Lgs. 18/2023",
+    minHours: 6,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Responsabili impianti idrici, manutentori dell'hotel e incaricati del dosaggio biocidi",
+  },
+  centrali_termiche_clima: {
+    courseCode: "FORMAZ_CENTRALI_TERMICHE_CLIMA",
+    courseTitle: "Conduzione e Manutenzione Sicura di Impianti Termici ad Alta Potenza e UTA (Patentino Conduzione Impianti Termici)",
+    normReference: "D.Lgs. 152/2006 art. 287; D.Lgs. 81/2008 art. 71 c. 7; D.Lgs. 26/2016 (PED)",
+    minHours: 8,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Conduttori di impianti termici, tecnici manutentori e operatori centrali tecnologiche hotel",
+  },
+  lavanderia_stireria_industriale: {
+    courseCode: "FORMAZ_LAVANDERIA_STIRERIA_INDUSTRIALE",
+    courseTitle: "Addestramento all'Uso Sicuro di Macchinari per Lavanderia e Stireria Industriale (Lavatrici, Essiccatori, Mangani)",
+    normReference: "D.Lgs. 81/2008 art. 71 c. 7 e art. 73 c. 4; UNI EN ISO 10472",
+    minHours: 4,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Addetti al guardaroba, lavanderia, stireria e gestione biancheria hotel",
+  },
+  housekeeping_sanificazione: {
+    courseCode: "FORMAZ_HOUSEKEEPING_SANIFICAZIONE",
+    courseTitle: "Formazione Ergonomia, Movimentazione Carichi e Uso Sicuro Prodotti Chimici e Ozono nel Housekeeping",
+    normReference: "D.Lgs. 81/2008 Titolo VI (MMC ISO 11228), Titolo IX (Agenti Chimici) e art. 71",
+    minHours: 4,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Governante, cameriere ai piani, facchini e addetti al riassetto e sanificazione camere",
+  },
+  buffet_colazioni_haccp: {
+    courseCode: "FORMAZ_BUFFET_COLAZIONI_HACCP",
+    courseTitle: "Addestramento all'Uso Sicuro di Attrezzature Calde/Refrigerate per Buffet e Igiene HACCP",
+    normReference: "Reg. CE 852/2004; D.Lgs. 81/2008 art. 71 c. 7 e art. 73 c. 4",
+    minHours: 4,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Personale di sala colazioni, camerieri, addetti al buffet e commis di sala",
+  },
 };
 
 // -------------------------------------------------------------
@@ -5219,6 +5291,738 @@ export const SECTOR_MACHINERY_CATALOGS: SectorMachineCatalog[] = [
     ],
   },
 
+  // 1-quinquies. HOTEL, ALBERGHI, RESORT, VILLAGGI ALBERGHIERI E STRUTTURE RICETTIVE
+  // ATECO 55.10.00, 55.10.0, 55.10, 55.1 (Hotel / Albergo, Resort, Villaggi alberghieri e Strutture Ricettive Turistiche)
+  {
+    sectorKey: "hotel_strutture_ricettive",
+    sectorLabel: "Hotel, Alberghi, Resort e Strutture Ricettive Turistiche",
+    atecoPrefixes: ["55.10.00", "55.10.0", "55.10", "55.1"],
+    machines: [
+      // 1. CENTRALE RIVELAZIONE FUMI, ALLARME INCENDI & SISTEMA EVAC (env-hotel-reception-hall, env-hotel-camere-piano)
+      {
+        machineKey: "centrale_antincendio_evac",
+        name: "Centrale di Rivelazione Fumi, Allarme Incendi & Sistema EVAC",
+        type: "Centrale Indirizzata Antincendio e Sistema Vocale di Evacuazione (EVAC)",
+        suggestedManufacturer: "Notifier / Inim Electronics / Siemens",
+        suggestedModel: "Notifier AM-8200 / Inim Previdia / Siemens Cerberus",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.antincendio_evac,
+        safetyChecks: [
+          {
+            code: "CENTRALE_ANTINCENDIO_CONFORMITA_EN54_EVAC_ISO7240",
+            title: "Centrale Indirizzata Conforme UNI EN 54 e Messaggi Vocali EVAC UNI ISO 7240-19",
+            question: "La centrale antincendio è di tipo analogico indirizzato conforme alle norme UNI EN 54-2 e EN 54-4, integrata con sistema di allarme vocale EVAC conforme a UNI ISO 7240-19 con messaggi registrati multilingua per l'evacuazione ordinata degli ospiti e del personale?",
+            normReference: "UNI EN 54-2; UNI ISO 7240-19; D.M. 09/04/1994; D.M. 02/09/2021; D.Lgs. 81/2008 art. 46",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CENTRALE_ANTINCENDIO_BATTERIE_TAMPONE_RISERVA",
+            title: "Alimentatore Certificato EN 54-4 e Batterie Tampone di Riserva Autonome",
+            question: "L'apparato è provvisto di alimentatore caricabatteria conforme UNI EN 54-4 con doppio set di batterie tampone al piombo sigillato capaci di garantire l'autonomia di sorveglianza per almeno 24 ore e 30 minuti consecutivi di allarme generale ed evacuazione vocale?",
+            normReference: "UNI EN 54-4; UNI 9795; D.Lgs. 81/2008 art. 46",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CENTRALE_ANTINCENDIO_PULSANTI_MANUALI_FUMI",
+            title: "Rivelatori Ottici di Fumo Indirizzati e Pulsanti Manuali a Rottura Vetro",
+            question: "Tutte le camere, i corridoi e le aree comuni sono presidiati da rivelatori ottici di fumo indirizzati e pulsanti manuali a rottura vetro posti lungo le vie d'esodo con indicatore ottico d'azione e cartellinatura conforme D.Lgs. 81/08?",
+            normReference: "UNI 9795; D.M. 09/04/1994 Titolo I; D.Lgs. 81/2008 Allegato XXIV",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CENTRALE_ANTINCENDIO_VERIFICA_SEMESTRALE_UNI11224",
+            title: "Verifica Periodica Semestrale e Registro dei Controlli Antincendio UNI 11224",
+            question: "L'impianto è sottoposto a manutenzione e verifica periodica con cadenza semestrale da parte di tecnico qualificato secondo la norma UNI 11224 con regolare annotazione sul Registro dei Controlli Antincendio?",
+            normReference: "UNI 11224; D.M. 02/09/2021 Allegato I; D.Lgs. 81/2008 art. 46 c. 2",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 2. GRUPPO ELETTROGENO DIESEL AUTOMATICO DI EMERGENZA (env-hotel-vano-gruppo-elettrogeno)
+      {
+        machineKey: "gruppo_elettrogeno_emergenza",
+        name: "Gruppo Elettrogeno Diesel Automatico di Emergenza (50-200 kVA)",
+        type: "Gruppo Elettrogeno Diesel Autonomo di Emergenza e Continuità Elettrica",
+        suggestedManufacturer: "Pramac / Caterpillar / Bruno Generators",
+        suggestedModel: "Pramac GSW / Caterpillar / Bruno Generators",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.gruppi_elettrogeni,
+        safetyChecks: [
+          {
+            code: "GRUPPO_ELETTROGENO_QUADRO_ATS_INTERVENTO_15S",
+            title: "Quadro Automatico d'Intervento ATS entro 15s in Blackout per Pompe Antincendio ed Emergenza",
+            question: "Il gruppo elettrogeno è dotato di quadro di commutazione automatica ATS tarato per l'avviamento e l'assunzione del carico elettrico prioritario entro 15 secondi dall'interruzione di rete, garantendo l'alimentazione delle pompe antincendio, ascensori e illuminazione di sicurezza?",
+            normReference: "CEI 64-8/7; D.M. 09/04/1994; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "GRUPPO_ELETTROGENO_BACINO_CONTENIMENTO_GASOLIO_110",
+            title: "Bacino di Contenimento Gasolio 110% Conforme D.M. 13/07/2011 e CPI Attività 49",
+            question: "Il serbatoio incorporato o di servizio del gasolio è alloggiato entro bacino metallico di contenimento stagno avente capacità volumetrica pari ad almeno il 110% del serbatoio a norma del D.M. 13/07/2011 per attività soggetta a CPI (Attività 49)?",
+            normReference: "D.M. 13/07/2011 art. 4; D.P.R. 151/2011 Attività 49; D.Lgs. 152/2006",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "GRUPPO_ELETTROGENO_PULSANTE_EMERGENZA_INTERCETTAZIONE",
+            title: "Pulsante di Arresto Emergenza e Intercettazione Fuori Locale",
+            question: "All'esterno del locale gruppo elettrogeno sono installati in posizione protetta e segnalata il pulsante a fungo d'arresto di emergenza e la valvola a tirante di rapida intercettazione manuale del combustibile?",
+            normReference: "D.M. 13/07/2011; D.Lgs. 81/2008 All. IV e All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "GRUPPO_ELETTROGENO_VERIFICA_AVVIAMENTO_MENSILE_CARICO",
+            title: "Verifiche Periodiche di Avviamento a Vuoto Mensile e Sotto Carico Semestrale",
+            question: "Vengono eseguite e documentate con regolarità le prove di avviamento a vuoto con frequenza mensile e le verifiche funzionali sotto carico reale con frequenza semestrale con annotazione nel registro manutenzioni?",
+            normReference: "CEI 64-8/7 sez. 718; D.Lgs. 81/2008 art. 71 c. 8",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 3. ASCENSORE ELETTRICO/IDRAULICO PER PASSEGGERI (env-hotel-reception-hall, env-hotel-vani-ascensori-montacarichi)
+      {
+        machineKey: "ascensore_passeggeri_hotel",
+        name: "Ascensore Elettrico/Idraulico per Passeggeri (Conformità D.P.R. 162/99)",
+        type: "Ascensore per Passeggeri ed Ospiti a Funi o Oleodinamico",
+        suggestedManufacturer: "Otis / Schindler / Kone",
+        suggestedModel: "Otis Gen2 / Schindler 3300 / Kone MonoSpace",
+        isSubjectToInailCheck: true,
+        inailFrequencyYears: 2,
+        training: TRAINING_REQUIREMENTS_LIBRARY.ascensori_montacarichi,
+        safetyChecks: [
+          {
+            code: "ASCENSORE_HOTEL_TELEALLARME_BIDIREZIONALE_EN81_28",
+            title: "Teleallarme Bidirezionale H24 Conforme EN 81-28 con Batteria Autonoma",
+            question: "La cabina dell'ascensore è equipaggiata con dispositivo di comunicazione bidirezionale h24 conforme alla norma EN 81-28, dotato di alimentazione autonoma di riserva e collegato permanentemente al pronto intervento ascensori per il soccorso immediato dei passeggeri intrappolati?",
+            normReference: "UNI EN 81-28; D.P.R. 162/99 art. 15; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ASCENSORE_HOTEL_FOTOCELLULA_BARRIERA_PORTE",
+            title: "Fotocellula a Barriera a Tutta Altezza su Porte Cabina Anti-Schiacciamento",
+            question: "Le porte automatiche di cabina e di piano sono provviste di barriera fotoelettrica multiraggio a infrarossi a tutta altezza che inverte tempestivamente il movimento di chiusura al rilevamento di un ospite o bagaglio per prevenire schiacciamenti?",
+            normReference: "UNI EN 81-20 punto 5.3.6; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ASCENSORE_HOTEL_MANOVRA_EMERGENZA_BLACKOUT",
+            title: "Manovra Automatica di Emergenza al Piano in Mancanza Rete Elettrica",
+            question: "L'impianto ascensore è dotato di dispositivo automatico di emergenza che, in caso di blackout dell'energia elettrica principale, riporta dolcemente la cabina al piano più vicino e apre le porte consentendo l'uscita sicura dei passeggeri?",
+            normReference: "UNI EN 81-20; D.P.R. 162/99; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: false,
+          },
+          {
+            code: "ASCENSORE_HOTEL_VERIFICHE_BIENNALI_DPR162_99",
+            title: "Verifiche Periodiche Biennali Art. 13 D.P.R. 162/99 con Ente Notificato",
+            question: "L'ascensore è sottoposto a regolare verifica periodica biennale di sicurezza ex art. 13 D.P.R. 162/99 effettuata da Organismo Notificato o ASL/ARPA con esito favorevole e annotazione sul libretto d'immatricolazione?",
+            normReference: "D.P.R. 162/99 art. 13 e 14; D.Lgs. 81/2008 art. 71 c. 11",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 4. MONTACARICHI / ASCENSORE DI SERVIZIO PER BIANCHERIA E PIANI (env-hotel-vani-ascensori-montacarichi)
+      {
+        machineKey: "montacarichi_servizio_piani",
+        name: "Montacarichi / Ascensore di Servizio per Biancheria e Piani (Portata 500-1000 kg)",
+        type: "Montacarichi e Ascensore di Servizio Verticale per Movimentazione Merci e Biancheria",
+        suggestedManufacturer: "Daldoss / Kone / Schindler",
+        suggestedModel: "Daldoss Microfreight / Kone / Schindler",
+        isSubjectToInailCheck: true,
+        inailFrequencyYears: 2,
+        training: TRAINING_REQUIREMENTS_LIBRARY.ascensori_montacarichi,
+        safetyChecks: [
+          {
+            code: "MONTACARICHI_HOTEL_PARACADUTE_MECCANICO_ROTTURA_FUNI",
+            title: "Paracadute Meccanico Istantaneo a Rottura Funi con Limitatore di Velocità",
+            question: "Il montacarichi è provvisto di paracadute meccanico istantaneo o progressivo d'emergenza asservito a limitatore di velocità in grado di arrestare saldamente la cabina sulle guide in caso di allentamento o rottura funi a pieno carico?",
+            normReference: "UNI EN 81-20 / EN 81-31; D.P.R. 162/99; D.Lgs. 81/2008 All. V p. 4",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "MONTACARICHI_HOTEL_INTERBLOCCO_PORTE_PIANO_DOPPIO_SCATTO",
+            title: "Interblocco Porte di Piano a Doppio Scatto Elettromeccanico di Sicurezza",
+            question: "Le porte di accesso al vano su tutti i piani sono dotate di serrature di sicurezza a doppio scatto con contatti elettrici positivi certificati che impediscono l'apertura delle porte se la cabina non è al piano e ne bloccano il movimento ad anta aperta?",
+            normReference: "UNI EN 81-20; D.Lgs. 81/2008 All. V p. 6; D.P.R. 162/99",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "MONTACARICHI_HOTEL_AVVISATORE_ACUSTICO_SOVRACCARICO",
+            title: "Dispositivo di Pesatura e Avvisatore Acustico Sovraccarico di Portata",
+            question: "La cabina è dotata di sensore di sovraccarico con avvisatore acustico e luminoso che impedisce la chiusura delle porte e la partenza dell'impianto qualora venga superata la portata massima omologata (500-1000 kg)?",
+            normReference: "UNI EN 81-20; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "MONTACARICHI_HOTEL_VERIFICA_BIENNALE_DPR162_99",
+            title: "Verifica Periodica Biennale D.P.R. 162/99 e Libretto Matricola",
+            question: "L'impianto di elevazione di servizio è registrato con regolare numero di matricola e sottoposto a collaudo e verifiche periodiche biennali ai sensi del D.P.R. 162/99 con verbale dell'organismo di controllo allegato al registro?",
+            normReference: "D.P.R. 162/99 art. 13; D.Lgs. 81/2008 art. 71 c. 11",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 5. IMPIANTO DI DOSAGGIO BIOSSIDO DI CLORO / SANIFICAZIONE ACQUE ANTI-LEGIONELLA (env-hotel-centrale-idrica-legionella)
+      {
+        machineKey: "impianto_dosaggio_biossido_legionella",
+        name: "Impianto di Dosaggio Biossido di Cloro / Sanificazione Acque Anti-Legionella",
+        type: "Impianto Automatizzato di Generazione e Dosaggio Biossido di Cloro per Trattamento Rete ACS",
+        suggestedManufacturer: "ProMinent / Grundfos / BWT",
+        suggestedModel: "ProMinent Bello Zon / Grundfos Oxiperm / BWT",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.trattamento_acque_legionella,
+        safetyChecks: [
+          {
+            code: "DOSAGGIO_LEGIONELLA_PROPORZIONALE_DLGS18_2023",
+            title: "Dosaggio Proporzionale Continuo su Rete ACS e Monitoraggio Residuo Biossido Cloro",
+            question: "L'impianto effettua il dosaggio continuo e proporzionale alla portata del biossido di cloro sulla rete acqua calda sanitaria (ACS) con sonda amperometrica di monitoraggio del residuo mantenuto nei limiti di legge (0.2 - 0.4 mg/l) ex D.Lgs. 18/2023?",
+            normReference: "D.Lgs. 18/2023 All. I; Accordo Stato-Regioni 07/05/2015; D.Lgs. 81/2008 Titolo X",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DOSAGGIO_LEGIONELLA_ALLARME_ESAURIMENTO_REAGENTE",
+            title: "Sonde di Livello con Allarme Esaurimento Reagente e Interblocco Pompa",
+            question: "I contenitori dei precursori chimici sono dotati di lance di aspirazione con sonde di livello che segnalano acusticamente e visivamente l'esaurimento dei reagenti bloccando la pompa prima dell'aspirazione d'aria?",
+            normReference: "D.Lgs. 81/2008 Titolo IX e art. 71; Accordo Stato-Regioni 07/05/2015",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DOSAGGIO_LEGIONELLA_BACINI_CONTENIMENTO_DPI_CHIMICI",
+            title: "Bacini di Contenimento Antispandimento e DPI di Protezione Chimica",
+            question: "Le taniche dei reattivi sono posizionate entro distinti bacini di contenimento in materiale anticorrosivo per evitare miscelazioni accidentali e sono presenti occhiali a mascherina, guanti in nitrile e visiera per gli operatori (D.Lgs. 81/08 Titolo IX)?",
+            normReference: "D.Lgs. 81/2008 art. 77, art. 225 e All. V p. 9",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DOSAGGIO_LEGIONELLA_REGISTRO_CAMPIONAMENTI_SEMESTRALI",
+            title: "Registro di Controllo Legionella con Campionamenti Microbiologici Semestrali",
+            question: "L'albergo detiene il Piano di Valutazione e Gestione del Rischio Legionellosi e il relativo Registro con registrazione dei controlli dosatore e dei referti di laboratorio dei campionamenti analitici semestrali sui punti critici?",
+            normReference: "Accordo Stato-Regioni 07/05/2015; D.Lgs. 81/2008 art. 271, 280; D.Lgs. 18/2023",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 6. CALDAIA A CONDENSAZIONE AD ALTA POTENZA (env-hotel-centrale-termica-clima)
+      {
+        machineKey: "caldaia_centrale_termica_hotel",
+        name: "Caldaia a Condensazione ad Alta Potenza per Riscaldamento e ACS",
+        type: "Centrale Termica con Generatore a Condensazione a Gas ad Alta Potenzialità (> 116 kW)",
+        suggestedManufacturer: "Viessmann / Ferroli / Riello",
+        suggestedModel: "Viessmann Vitocrossal / Ferroli Quadrifoglio / Riello",
+        isSubjectToInailCheck: true,
+        inailFrequencyYears: 1,
+        training: TRAINING_REQUIREMENTS_LIBRARY.centrali_termiche_clima,
+        safetyChecks: [
+          {
+            code: "CALDAIA_HOTEL_CIRCUITO_PED_VALVOLE_INAIL",
+            title: "Generatore Termico > 116 kW con Circuito Certificato PED (D.Lgs. 26/2016) e Valvole INAIL",
+            question: "La centrale termica di potenza superiore a 116 kW ha circuito certificato secondo la Direttiva PED (D.Lgs. 26/2016), con valvole di sicurezza omologate INAIL, pressostato di blocco, termostato di limite e vasi di espansione piombati?",
+            normReference: "D.Lgs. 26/2016 (PED); D.M. 01/12/1975 (Raccolta R INAIL); D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CALDAIA_HOTEL_ELETTROVALVOLA_GAS_ESTERNA_RIARMO",
+            title: "Intercettazione Automatica Gas con Elettrovalvola Esterna a Riarmo Manuale",
+            question: "La tubazione di alimentazione gas a monte del locale è dotata di elettrovalvola esterna normalmente chiusa a riarmo manuale asservita a pulsante di emergenza a sgancio rapido e rivelatori fughe gas?",
+            normReference: "D.M. 08/11/2019 (Regola Tecnica Impianti Termici); D.M. 03/09/2021; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CALDAIA_HOTEL_AERAZIONE_LOCALE_PORTA_REI",
+            title: "Apertura Permanente di Aerazione e Porta Tagliafuoco REI/EI con Maniglione",
+            question: "Il locale centrale termica è provvisto di apertura permanente di aerazione diretta verso l'esterno conforme a D.M. 08/11/2019 e porta tagliafuoco resistente al fuoco REI/EI con congegno di autochiusura e maniglione antipanico?",
+            normReference: "D.M. 08/11/2019; D.Lgs. 81/2008 All. IV p. 1.5; D.M. 09/04/1994",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CALDAIA_HOTEL_VERIFICA_ANNUALE_INAIL_RENDIMENTO",
+            title: "Verifica Annuale Rendimento di Combustione e Sicurezza INAIL",
+            question: "L'impianto termico è sottoposto a verifica annuale di sicurezza INAIL e a controllo di efficienza energetica e analisi dei fumi con trasmissione del rapporto al catasto termico regionale (CURIT/CIT)?",
+            normReference: "D.M. 11/04/2011; D.P.R. 74/2013; D.Lgs. 81/2008 art. 71 c. 11",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 7. CENTRALE DI TRATTAMENTO ARIA (UTA / CTA) E RECUPERATORE DI CALORE (env-hotel-centrale-termica-clima)
+      {
+        machineKey: "centrale_trattamento_aria_uta",
+        name: "Centrale di Trattamento Aria (UTA / CTA) e Recuperatore di Calore",
+        type: "Unità Trattamento Aria e Recupero Termico Centralizzata con Ventilazione Meccanica Controllata",
+        suggestedManufacturer: "Daikin / Carrier / Sabiana",
+        suggestedModel: "Daikin Modular / Carrier / Sabiana",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.centrali_termiche_clima,
+        safetyChecks: [
+          {
+            code: "UTA_HOTEL_FILTRI_ALTA_EFFICIENZA_E95_HEPA",
+            title: "Filtri Aria ad Alta Efficienza e95/HEPA con Monitoraggio Intasamento",
+            question: "La centrale di trattamento aria è equipaggiata con stadi di filtrazione ad alta efficienza (ePM1 80-95% o HEPA) dotati di manometri differenziali per la segnalazione immediata della necessità di sostituzione filtri per garantire la qualità dell'aria indoor (IAQ)?",
+            normReference: "UNI EN ISO 16890; Linee Guida Tutela Qualità Aria Indoor; D.Lgs. 81/2008 All. IV p. 1.9",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "UTA_HOTEL_RECUPERATORE_CALORE_SEPARAZIONE_FLUSSI",
+            title: "Recuperatore Termico a Flussi Incrociati a Tenuta Senza Ricircolo Microbiologico",
+            question: "Il recuperatore di calore è di tipo a flussi incrociati o a piastre con tenuta certificata per evitare qualsiasi contaminazione incrociata o ricircolo di aria viziata proveniente da servizi igienici e cucine verso le camere degli ospiti?",
+            normReference: "UNI EN 308; D.Lgs. 81/2008 All. IV p. 1.9; D.M. 09/04/1994",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "UTA_HOTEL_SERRANDE_TAGLIAFUOCO_CANALI_VENTILAZIONE",
+            title: "Serrande Tagliafuoco Certificate EI/REI Asservite a Rivelatori Fumi",
+            question: "I canali aeraulici di mandata e ripresa sono provvisti di serrande tagliafuoco certificate EI a marchio CE con microinterruttore di segnalazione posizione asservite all'impianto centrale antincendio per isolare le compartimentazioni dell'hotel?",
+            normReference: "UNI EN 15650; D.M. 09/04/1994 Titolo II; D.Lgs. 81/2008 art. 46",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "UTA_HOTEL_SANIFICAZIONE_PERIODICA_LINEE_GUIDA_SALUTE",
+            title: "Canalizzazioni Sanificabili con Monitoraggio Periodico Polveri e Carica Microbica",
+            question: "È attuato un programma periodico documentato di ispezione visiva, bonifica e sanificazione igienico-sanitaria delle canalizzazioni e batterie con monitoraggio microbiologico a norma delle Linee Guida Ministero della Salute e D.Lgs. 81/08?",
+            normReference: "Linee Guida Ministero Salute 07/02/2013; D.Lgs. 81/2008 art. 71 e All. IV p. 1.9",
+            defaultSeverity: 4,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 8. LAVATRICE INDUSTRIALE SUPERCENTRIFUGANTE (env-hotel-lavanderia-stireria)
+      {
+        machineKey: "lavatrice_industriale_hotel",
+        name: "Lavatrice Industriale Supercentrifugante per Lavanderia Interna (18-35 kg)",
+        type: "Lavatrice Industriale Supercentrifugante Professionale a Carico Frontale",
+        suggestedManufacturer: "Miele Professional / Electrolux Professional / Grandimpianti",
+        suggestedModel: "Miele Professional PWM / Electrolux Professional Line 6000 / Grandimpianti",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.lavanderia_stireria_industriale,
+        safetyChecks: [
+          {
+            code: "LAVATRICE_HOTEL_MICROINTERRUTTORE_BLOCCO_TERMOELETTRICO",
+            title: "Microinterruttore di Sicurezza Sportello con Blocco Termoelettrico a Cestello in Movimento UNI EN ISO 10472-2",
+            question: "Lo sportello di carico della lavatrice è provvisto di sistema di interblocco di sicurezza con blocco termoelettrico conforme a UNI EN ISO 10472-2 che impedisce categoricamente l'apertura finché il cestello è in rotazione o la temperatura dell'acqua supera i 50°C?",
+            normReference: "UNI EN ISO 10472-2; Direttiva Macchine 2006/42/CE All. I; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVATRICE_HOTEL_FUNGO_ARRESTO_EMERGENZA",
+            title: "Fungo d'Arresto Emergenza ad Azione Ritenuta sul Cruscotto Frontale",
+            question: "È presente sul pannello frontale comandi un pulsante a fungo d'arresto di emergenza a ritenuta meccanica per l'arresto immediato di tutte le funzioni dell'apparecchiatura in caso di anomalia o intrappolamento indumenti?",
+            normReference: "UNI EN ISO 13850; D.Lgs. 81/2008 All. V p. 2.1; Direttiva 2006/42/CE",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVATRICE_HOTEL_DOSATORI_AUTOMATICI_DETERSIVI_CHIMICI",
+            title: "Dosatori Automatici Detersivi per Prevenzione Contatto Chimico",
+            question: "L'impianto è alimentato da dosatori automatici a pompa peristaltica a circuito chiuso per candeggianti, detergenti alcalini e neutralizzanti, azzerando il rischio di contatto cutaneo ed inalatorio degli operatori con sostanze chimiche corrosive?",
+            normReference: "D.Lgs. 81/2008 Titolo IX (Agenti Chimici Pericolosi); UNI EN ISO 10472-2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVATRICE_HOTEL_SISTEMA_AMMORTIZZATORI_ANTI_SBILANCIAMENTO",
+            title: "Sistema Ammortizzatori e Sensore Dinamico Anti-Sbilanciamento di Carico",
+            question: "La macchina è dotata di sospensioni elastiche industriali con sensore dinamico di vibrazione che interrompe o riequilibra la centrifuga ad alta velocità qualora si verifichi uno sbilanciamento anomalo del carico tessile?",
+            normReference: "UNI EN ISO 10472-2; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 9. ESSICCATORE / ASCIUGATRICE ROTATIVA INDUSTRIALE (env-hotel-lavanderia-stireria)
+      {
+        machineKey: "essiccatore_rotativo_industriale",
+        name: "Essiccatore / Asciugatrice Rotativa Industriale per Biancheria (20-40 kg)",
+        type: "Asciugatrice Industriale a Tamburo Rotante con Filtrazione Lanugine",
+        suggestedManufacturer: "Miele Professional / Electrolux Professional / Girbau",
+        suggestedModel: "Miele Professional PDR / Electrolux Professional TD6 / Girbau",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.lavanderia_stireria_industriale,
+        safetyChecks: [
+          {
+            code: "ESSICCATORE_HOTEL_FILTRO_LANUGINE_ALLARME_INTASAMENTO",
+            title: "Filtro Lanugine Estraibile con Allarme Intasamento per Prevenzione Inneschi Termici",
+            question: "L'essiccatore è dotato di filtro raccogli-lanugine facilmente estraibile e pulibile, assistito da sensore di depressione con allarme ottico-acustico di intasamento per prevenire il surriscaldamento e l'innesco di principi d'incendio da lanugine calda?",
+            normReference: "UNI EN ISO 10472-4 punto 5.2; D.Lgs. 81/2008 All. V p. 9; D.M. 02/09/2021",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ESSICCATORE_HOTEL_TERMOSTATO_MASSIMA_RIARMO_MANUALE",
+            title: "Termostato di Massima a Riarmo Manuale Contro Sovratemperature",
+            question: "Il circuito termico è protetto da termostato di massima a sicurezza positiva e riarmo esclusivamente manuale che disalimenta istantaneamente il riscaldamento (elettrico o gas) in caso di superamento della soglia termica limite?",
+            normReference: "UNI EN ISO 10472-4; CEI EN 60335-2-11; D.Lgs. 81/2008 All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ESSICCATORE_HOTEL_SPEGNIMENTO_AUTOMATICO_FINE_CICLO",
+            title: "Spegnimento Automatico a Fine Ciclo e Fase di Raffreddamento UNI EN ISO 10472-4",
+            question: "La macchina esegue a fine ciclo di asciugatura una fase automatica di raffreddamento a ventilazione fredda (Cool Down) e arresta automaticamente la rotazione all'apertura dell'oblò conforme a norma UNI EN ISO 10472-4 per evitare ustioni e autocombustione della biancheria?",
+            normReference: "UNI EN ISO 10472-4; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ESSICCATORE_HOTEL_CANALIZZAZIONE_ARIA_ESTERNO",
+            title: "Canalizzazione di Evacuazione Aria Umida Diretta all'Esterno",
+            question: "La condotta di scarico dell'aria calda umida è realizzata in materiale metallico incombustibile, sigillata e convogliata direttamente all'esterno dell'edificio senza accumulo di umidità e polveri nel locale lavanderia?",
+            normReference: "UNI EN ISO 10472-4; D.Lgs. 81/2008 All. IV p. 1.9",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 10. MANGANO / CALANDRA INDUSTRIALE ASCIUGANTE (env-hotel-lavanderia-stireria)
+      {
+        machineKey: "calandra_mangano_stireria",
+        name: "Mangano / Calandra Industriale Asciugante per Lenzuola e Tovaglie",
+        type: "Calandra e Mangano Industriale per Stiratura e Asciugatura Biancheria Piana",
+        suggestedManufacturer: "Grandimpianti / Electrolux Professional / Miele",
+        suggestedModel: "Grandimpianti S140 / Electrolux Professional IC4 / Miele",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.lavanderia_stireria_industriale,
+        safetyChecks: [
+          {
+            code: "CALANDRA_HOTEL_BARRA_SALVADITA_BASCULANTE_ISO10472_5",
+            title: "Barra Salvadita Basculante a Microinterruttore per Arresto Immediato Rullo e Apertura Conca UNI EN ISO 10472-5",
+            question: "La bocca di introduzione biancheria è dotata di barra salvadita basculante a microinterruttore di sicurezza conforme a UNI EN ISO 10472-5 che comanda l'arresto istantaneo della rotazione del rullo e l'allontanamento immediato della conca riscaldata al minimo tocco delle dita dell'operatore?",
+            normReference: "UNI EN ISO 10472-5 punto 5.2.2; Direttiva Macchine 2006/42/CE; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CALANDRA_HOTEL_PEDALE_COMANDO_AZIONE_MANTENUTA",
+            title: "Pedale di Comando ad Azione Mantenuta per Controllo Avanzamento Rullo",
+            question: "Il comando di avanzamento della biancheria è governato da pedale ad azione mantenuta con arresto della rotazione al rilascio del piede e pulsante a fungo d'emergenza laterale facilmente accessibile?",
+            normReference: "UNI EN ISO 10472-5; D.Lgs. 81/2008 All. V p. 2.1",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CALANDRA_HOTEL_CARTERATURE_ISOLATE_TERMICAMENTE",
+            title: "Carterature Esterne Termicamente Coibentate Contro Ustioni da Contatto",
+            question: "Tutti i carter metallici e i pannelli laterali accessibili all'operatore durante le normali operazioni di stiratura sono termoisolati e mantengono temperature superficiali non ustionanti (< 55°C) conforme a UNI EN ISO 13732-1?",
+            normReference: "UNI EN ISO 13732-1; D.Lgs. 81/2008 All. V p. 9.1",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CALANDRA_HOTEL_DISPOSITIVO_MANUALE_ESTRAZIONE_BLACKOUT",
+            title: "Dispositivo Meccanico Manuale di Estrazione Biancheria in Assenza di Corrente",
+            question: "È presente apposita manovella meccanica o leva di apertura d'emergenza della conca stirante per consentire il disimpegno immediato della biancheria e prevenire rischi di bruciatura tessuti e innesco fumi in caso di blackout elettrico improvviso?",
+            normReference: "UNI EN ISO 10472-5; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 11. MACCHINA AUTOMATICA CAFFÈ E BEVANDE CALDE BUFFET COLAZIONI (env-hotel-sala-colazioni, env-hotel-office-cucina-colazioni)
+      {
+        machineKey: "distributore_bevande_calde_colazione",
+        name: "Macchina Automatica Caffè in Grani e Bevande Calde per Buffet Colazioni",
+        type: "Distributore Superautomatico da Banco per Caffetteria e Bevande Calde Self-Service",
+        suggestedManufacturer: "WMF / Franke / Schaerer",
+        suggestedModel: "WMF 1500S+ / Franke A600 / Schaerer Coffee Soul",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.buffet_colazioni_haccp,
+        safetyChecks: [
+          {
+            code: "DISTRIBUTORE_COLAZIONI_BOILER_PED_VALVOLA_SICUREZZA",
+            title: "Boiler Vapore Certificato PED con Valvola di Sicurezza e Scarico Convogliato",
+            question: "Il circuito generatore di vapore e acqua calda è costruito e collaudato secondo la Direttiva PED (D.Lgs. 26/2016) ed è provvisto di valvola di sicurezza tarata contro le sovrapressioni con scarico idraulico convogliato protetto?",
+            normReference: "D.Lgs. 26/2016 (PED 2014/68/UE); CEI EN 60335-2-75; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DISTRIBUTORE_COLAZIONI_BREAK_TANK_DISCONNESSIONE_UNI1717",
+            title: "Dispositivo Break Tank con Disconnessione Idrica Anti-Reflusso Conforme UNI EN 1717",
+            question: "La macchina è collegata alla rete idrica mediante dispositivo di disconnessione idraulica a battente libero Break Tank con valvola di non ritorno conforme a UNI EN 1717 per impedire qualsiasi reflusso o contaminazione dell'acqua potabile?",
+            normReference: "UNI EN 1717; D.Lgs. 18/2023; Reg. CE 852/2004 All. II cap. VII",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DISTRIBUTORE_COLAZIONI_EROGATORI_SANIFICABILI_MOCA",
+            title: "Circuiti Erogatori Latte e Caffè Sanificabili e Certificati MOCA (Reg. CE 1935/2004)",
+            question: "Tutti i condotti interni, le lance e i gruppi di erogazione di latte e caffè sono realizzati in materiali conformi MOCA (Reg. CE 1935/2004) e provvisti di ciclo automatico quotidiano di lavaggio termico e disinfezione HACCP?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004; D.Lgs. 29/2017",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DISTRIBUTORE_COLAZIONI_MACINACAFFE_PROTEZIONE_GRIGLIA",
+            title: "Macinacaffè Integrato con Griglia di Protezione e Micro di Sicurezza",
+            question: "La campana dei grani di caffè è dotata di griglia fissa o microinterruttore di sicurezza che impedisce il contatto delle dita con le macine coniche/piatte in movimento durante il caricamento da parte del personale?",
+            normReference: "Direttiva Macchine 2006/42/CE; D.Lgs. 81/2008 All. V p. 6; CEI EN 60335-2-75",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 12. BANCO BUFFET RISCALDATO A BAGNOMARIA / INDUZIONE (env-hotel-sala-colazioni, env-hotel-office-cucina-colazioni)
+      {
+        machineKey: "linea_buffet_calda_induzione",
+        name: "Banco Buffet Riscaldato a Bagnomaria / Induzione per Colazioni (GN 1/1 - GN 3/1)",
+        type: "Banco Buffet Termico Riscaldato a Bagnomaria o Induzione per Self-Service Colazioni",
+        suggestedManufacturer: "Enofrigo / Afinox / Scaiola",
+        suggestedModel: "Enofrigo / Afinox / Scaiola",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.buffet_colazioni_haccp,
+        safetyChecks: [
+          {
+            code: "BUFFET_CALDO_MANTENIMENTO_65C_HACCP_TERMOSTATO_DIGITALE",
+            title: "Mantenimento Temperatura Alimenti Cotti Costante >= 65°C a Norma HACCP con Termostato Digitale",
+            question: "Il piano riscaldato o la vasca bagnomaria mantengono la temperatura delle uova, bacon e vivande calde costantemente a valori >= +65°C a norma del piano HACCP, monitorata mediante display digitale visibile agli addetti?",
+            normReference: "Reg. CE 852/2004 All. II cap. IX; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BUFFET_CALDO_CRISTALLI_CURVI_PARAFIATO_ANTIAEROSOL",
+            title: "Cristalli Curvi Panoramici Parafiato Igienici Antiaerosol a Protezione Alimenti",
+            question: "La linea buffet è dotata di schermi parafiato panoramici in cristallo temperato o policarbonato trasparente antiaerosol a protezione completa delle pietanze esposte contro goccioline respiratorie e contaminazioni esterne da parte degli ospiti?",
+            normReference: "Reg. CE 852/2004 All. II cap. IX; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BUFFET_CALDO_PROTEZIONE_RESISTENZE_LIVELLO_ACQUA",
+            title: "Sensore di Livello Minimo Acqua e Termostato di Sicurezza Anti-Ebollizione a Secco",
+            question: "La vasca è dotata di termostato di sicurezza limite e sensore galleggiante di livello acqua che disalimenta le resistenze elettriche in caso di evaporazione totale per prevenire rischi di fumi, incendio o rottura dell'acciaio?",
+            normReference: "CEI EN 60335-2-49; D.Lgs. 81/2008 All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BUFFET_CALDO_ISOLAMENTO_IPX4_COLLEGAMENTO_TERRA",
+            title: "Grado di Protezione IPX4 e Collegamento Equipotenziale di Terra",
+            question: "La struttura in acciaio inox presenta grado di protezione da liquidi IPX4, con cavo elettrico con spina industriale o blocco presa con interruttore differenziale ad alta sensibilità da 30 mA a protezione di ospiti e operatori?",
+            normReference: "CEI 64-8; CEI EN 60335-2-49; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 13. VETRINA / BANCO BUFFET REFRIGERATO PER COLAZIONI (env-hotel-sala-colazioni)
+      {
+        machineKey: "linea_buffet_refrigerata_colazioni",
+        name: "Vetrina / Banco Buffet Refrigerato per Salumi, Formaggi, Latticini e Frutta (+4°C)",
+        type: "Isola Buffet Refrigerata Ventilata da Esposizione per Buffet Colazioni",
+        suggestedManufacturer: "Enofrigo / Afinox / IFI",
+        suggestedModel: "Enofrigo / Afinox / IFI",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.buffet_colazioni_haccp,
+        safetyChecks: [
+          {
+            code: "BUFFET_FREDDO_TEMPERATURA_4C_DISPLAY_OSPITI_ALLARME",
+            title: "Piano o Vasca Refrigerata Ventilata con Display Temperatura Visibile e Allarme HACCP (+4°C)",
+            question: "La vasca o piano buffet refrigerato mantiene i prodotti deperibili (formaggi, yogurt, salumi affettati) a temperatura conforme fra 0°C e +4°C, con visualizzatore digitale ben leggibile e allarme acustico in caso di anomalia termica?",
+            normReference: "Reg. CE 852/2004 All. II cap. IX; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BUFFET_FREDDO_RIPARI_PARAFIATO_VETRO_TEMPERATO",
+            title: "Ripari Parafiato Igienici in Vetro Temperato Antigoccia e Antirottura",
+            question: "La vetrina o banco buffet refrigerato monta barriere parafiato in vetro temperato di sicurezza anti-rottura con illuminazione LED fredda specifica senza dispersione termica per salvaguardare la freschezza degli alimenti esposti?",
+            normReference: "Reg. CE 852/2004; UNI EN 1672-2; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BUFFET_FREDDO_GAS_ECOLOGICO_R290_SBRINAMENTO_AUTOMATICO",
+            title: "Circuito Ecologico R290 Ermetico e Sbrinamento Automatico Condensa",
+            question: "Il gruppo frigorifero adotta gas refrigerante ecologico naturale R290 (propano) conforme alle normative ambientali e F-Gas, con sbrinamento automatico temporizzato ed evaporazione automatica della condensa senza perdite d'acqua a pavimento?",
+            normReference: "Regolamento UE 2024/573 (F-Gas); UNI EN 378; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BUFFET_FREDDO_VASCA_INOX_MOCA_RAGGIATA",
+            title: "Vasca in Acciaio Inox AISI 304 Certificata MOCA con Spigoli Raggiati",
+            question: "La vasca refrigerata è realizzata in acciaio inox AISI 304 per contatto alimentare MOCA con fondo raggiato per convogliare i liquidi di scolo verso foro di scarico con rubinetto, consentendo rapida sanificazione quotidiana senza accumuli?",
+            normReference: "Reg. CE 1935/2004 (MOCA); Reg. CE 852/2004; D.Lgs. 29/2017",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 14. CARRELLO ERGONOMICO HOUSEKEEPING PER BIANCHERIA E PIANI (env-hotel-deposito-housekeeping)
+      {
+        machineKey: "carrelli_housekeeping_piani",
+        name: "Carrello Ergonomico Housekeeping per Biancheria e Riassetto Camere",
+        type: "Carrello Professionale su Ruote per Servizio ai Piani e Housekeeping Alberghiero",
+        suggestedManufacturer: "TTS Cleaning / Filmop / IPC",
+        suggestedModel: "TTS Cleaning Magic Hotel / Filmop Morgan / IPC",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.housekeeping_sanificazione,
+        safetyChecks: [
+          {
+            code: "CARRELLO_HOTEL_TELAIO_TECNOPOLIMERO_FRENO_STAZIONAMENTO",
+            title: "Telaio in Tecnopolimero Leggero e Freno di Stazionamento a Pedale sulle Ruote Piroettanti",
+            question: "Il carrello housekeeping ha telaio ergonomico ultraleggero in tecnopolimero antiruggine ed è provvisto di freno di stazionamento a pedale sulle ruote piroettanti posteriori per impedire lo scivolamento accidentale del carrello lungo i corridoi in pendenza?",
+            normReference: "D.Lgs. 81/2008 Titolo VI (MMC ISO 11228); UNI EN ISO 11228-2; art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CARRELLO_HOTEL_VANI_CHIUSI_SERRATURA_CHIMICI",
+            title: "Vani Chiusi con Serratura per Detergenti Chimici Concentrati Contro Accesso Ospiti",
+            question: "I cassetti o vani contenenti prodotti chimici di pulizia, disinfettanti concentrati e decalcificanti sono provvisti di sportelli richiudibili a chiave/serratura per impedire l'accesso o l'ingestione accidentale da parte di ospiti e bambini dell'hotel?",
+            normReference: "D.Lgs. 81/2008 Titolo IX (Agenti Chimici Pericolosi) e art. 71; Reg. CLP",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CARRELLO_HOTEL_MANIGLIE_ERGONOMICHE_LIMITI_SPINTA_MMC",
+            title: "Maniglie di Spinta Ergonomiche e Rispetto Limiti Spinta/Traino MMC",
+            question: "Le maniglie di spinta sono regolabili e conformate per evitare sovraccarichi biomeccanici agli arti superiori e alla colonna vertebrale delle cameriere ai piani, mantenendo le forze di spinta iniziali e di mantenimento conformi ai limiti ISO 11228-2?",
+            normReference: "D.Lgs. 81/2008 Titolo VI e All. XXXIII; UNI ISO 11228-2",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "CARRELLO_HOTEL_PARACOLPI_ANGOLARI_GOMMA",
+            title: "Paracolpi Angolari in Gomma Antistatica Anti-Urti",
+            question: "La base del carrello è dotata su ogni angolo di paracolpi rotanti in gomma morbida antitraccia per smorzare gli urti contro porte, pareti e battiscopa evitando cadute accidentali del carico trasportato?",
+            normReference: "D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 15. MONOSPAZZOLA PROFESSIONALE E MACCHINA AD INIEZIONE-ESTRAZIONE PER MOQUETTE (env-hotel-deposito-housekeeping)
+      {
+        machineKey: "monospazzola_lavasciuga_moquette",
+        name: "Monospazzola Professionale e Macchina a Iniezione-Estrazione per Moquette e Pavimenti",
+        type: "Monospazzola e Lavamoquette Professionale Elettrica a Iniezione-Estrazione",
+        suggestedManufacturer: "Comac / Nilfisk / Kärcher",
+        suggestedModel: "Comac CM43 / Nilfisk Viper / Kärcher Puzzi",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.housekeeping_sanificazione,
+        safetyChecks: [
+          {
+            code: "MONOSPAZZOLA_HOTEL_TIMONE_UOMO_PRESENTE_DOPPIO_INTERRUTTORE",
+            title: "Timone Ergonomico Regolabile con Comando Uomo Presente a Doppio Interruttore",
+            question: "Il timone di guida della monospazzola è provvisto di comando a sicurezza positiva 'uomo presente' con leva a doppio interruttore che impedisce la rotazione involontaria della spazzola al rilascio o con impugnatura in posizione di riposo?",
+            normReference: "CEI EN 60335-2-67; Direttiva Macchine 2006/42/CE; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "MONOSPAZZOLA_HOTEL_ISOLAMENTO_IPX4_CAVO_ALTA_VISIBILITA",
+            title: "Grado di Isolamento Elettrico IPX4 per Ambienti Umidi e Cavo ad Alta Visibilità",
+            question: "Il motore e i componenti elettrici sono certificati con grado di protezione minimo IPX4 contro spruzzi d'acqua e detergenti, e il cavo elettrico flessibile è antistrappo ad alta visibilità (giallo/arancione) lungo almeno 15 metri privo di abrasioni?",
+            normReference: "CEI EN 60335-2-67; CEI 64-8; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "MONOSPAZZOLA_HOTEL_LIVELLO_VIBRAZIONI_MANO_BRACCIO",
+            title: "Monitoraggio Livello di Vibrazioni Trasmesse al Sistema Mano-Braccio (HAV)",
+            question: "La macchina monospazzola presenta livello di emissione di vibrazioni meccaniche trasmesse al sistema mano-braccio (HAV) inferiore a 2,5 m/s² per prevenire patologie osteoarticolari e vascolari durante l'uso continuativo (D.Lgs. 81/08 Titolo VIII Capo III)?",
+            normReference: "D.Lgs. 81/2008 art. 201, 202; UNI EN ISO 5349-1",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "MONOSPAZZOLA_HOTEL_SERBATOIO_ACQUE_RECUPERO_SANIFICABILE",
+            title: "Serbatoio Recupero Acque Reflue Smontabile e Sanificabile Contro Rischio Biologico",
+            question: "Il gruppo a iniezione-estrazione per moquette ha serbatoio di recupero delle acque reflue trasparente, facilmente estraibile e lavabile per evitare la formazione di bioaerosol, muffe e cattivi odori durante lo svuotamento?",
+            normReference: "D.Lgs. 81/2008 Titolo X; Reg. CE 852/2004",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 16. GENERATORE DI OZONO / ATOMIZZATORE PER SANIFICAZIONE CAMERE (env-hotel-camere-piano)
+      {
+        machineKey: "sanificatore_ozono_perossido",
+        name: "Generatore di Ozono / Atomizzatore per Sanificazione e Disinfezione Camere Ospiti",
+        type: "Apparecchiatura Elettronica di Generazione Ozono e Sanificazione Ambientale ad Azione Virucida",
+        suggestedManufacturer: "Ozonosan / Sanity System / Caleffi",
+        suggestedModel: "Ozonosan / Sanity System Sany Plus / Caleffi",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.housekeeping_sanificazione,
+        safetyChecks: [
+          {
+            code: "SANIFICATORE_HOTEL_TIMER_DIGITALE_ALLARME_RICONVERSIONE",
+            title: "Timer Digitale Programmabile con Allarme Acustico e Sensore di Riconversione Rapida Catalitica",
+            question: "Il generatore di ozono è provvisto di timer digitale programmabile con allarme sonoro pre-avvio e di dispositivo di riconversione catalitica rapida dell'ozono in ossigeno per consentire la rioccupazione immediata della camera in totale sicurezza per addetti ed ospiti?",
+            normReference: "D.Lgs. 81/2008 Titolo IX (Agenti Chimici); Rapporto ISS COVID-19 n. 56/2020; Circolare Min. Salute 22/05/2020",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SANIFICATORE_HOTEL_MARCATURA_CE_PROCEDURE_SICUREZZA",
+            title: "Marcatura CE e Procedure di Sicurezza Operative D.Lgs. 81/08 con Cartellinatura Divieto Accesso",
+            question: "L'apparecchio possiede marcatura CE ed è impiegato esclusivamente secondo procedura standardizzata con apposizione all'esterno della porta della camera del cartello 'Sanificazione in corso - Divieto d'accesso' durante l'intero ciclo di trattamento?",
+            normReference: "Direttiva 2006/42/CE; D.Lgs. 81/2008 art. 71 c. 7, Allegato XXIV",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SANIFICATORE_HOTEL_SENSORE_OZONO_RESIDUO_SICUREZZA",
+            title: "Sensore Elettrochimico di Controllo Concentrazione Residua di Ozono (< 0.1 ppm)",
+            question: "L'apparato interrompe il ciclo e sblocca l'accesso solo dopo che la concentrazione residua di ozono in ambiente è scesa al di sotto del valore limite di soglia TLV-TWA di 0.1 ppm a salvaguardia delle vie respiratorie?",
+            normReference: "D.Lgs. 81/2008 All. XXXVIII; ACGIH TLV-TWA; Rapporto ISS 56/2020",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SANIFICATORE_HOTEL_DPI_EMERGENZA_VIE_RESPIRATORIE",
+            title: "DPI di Riserva per le Vie Respiratorie con Filtro per Gas Inorganici",
+            question: "Il personale addetto ha in dotazione e a portata di mano semimaschera filtrante facciale conforme EN 140/EN 14387 con filtro B (gas inorganici) da impiegare in caso di ingresso accidentale o manovra d'emergenza a ciclo in corso?",
+            normReference: "D.Lgs. 81/2008 art. 75, 77 e All. VIII",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+    ],
+  },
+
   // 2. RISTORAZIONE & ALIMENTARE
   {
     sectorKey: "ristorazione_alimentare",
@@ -7736,6 +8540,15 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
   const barSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "bar_caffetteria");
   const barMachines = barSector ? barSector.machines : [];
 
+  const isHotelAteco = !!atecoCode && (
+    atecoCode.startsWith("55.10") ||
+    atecoCode.startsWith("55.1") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("5510") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("551")
+  );
+  const hotelSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "hotel_strutture_ricettive");
+  const hotelMachines = hotelSector ? hotelSector.machines : [];
+
   // 1. MACCHINE SUGGERITE IN BASE AI LOCALI CENSITI NELLO STEP 2
   for (const env of environments) {
     const envId = (env.id || "").toLowerCase();
@@ -8385,6 +9198,108 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
         [
           "impianto_addolcitore_acque",
         ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-hotel-reception-hall" ||
+      envId.includes("hotel-reception-hall") ||
+      envId.includes("hotel-reception") ||
+      (isHotelAteco && (nameLower.includes("reception") || nameLower.includes("hall") || nameLower.includes("portineria") || cat === "reception"))
+    ) {
+      matchingMachines = hotelMachines.filter((m) =>
+        ["centrale_antincendio_evac", "ascensore_passeggeri_hotel"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-hotel-camere-piano" ||
+      envId.includes("hotel-camere-piano") ||
+      envId.includes("hotel-camere") ||
+      (isHotelAteco && (nameLower.includes("camere") || nameLower.includes("camera") || nameLower.includes("piano ospiti") || cat === "rooms"))
+    ) {
+      matchingMachines = hotelMachines.filter((m) =>
+        ["centrale_antincendio_evac", "sanificatore_ozono_perossido"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-hotel-sala-colazioni" ||
+      envId.includes("hotel-sala-colazioni") ||
+      (isHotelAteco && (nameLower.includes("sala colazioni") || nameLower.includes("buffet colazioni") || nameLower.includes("sala buffet")))
+    ) {
+      matchingMachines = hotelMachines.filter((m) =>
+        [
+          "distributore_bevande_calde_colazione",
+          "linea_buffet_calda_induzione",
+          "linea_buffet_refrigerata_colazioni",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-hotel-office-cucina-colazioni" ||
+      envId.includes("hotel-office-cucina-colazioni") ||
+      envId.includes("hotel-office-cucina") ||
+      envId.includes("office-cucina-colazioni") ||
+      (isHotelAteco && (nameLower.includes("office") || nameLower.includes("preparazione colazioni") || nameLower.includes("cucina colazioni")))
+    ) {
+      matchingMachines = hotelMachines.filter((m) =>
+        ["distributore_bevande_calde_colazione", "linea_buffet_calda_induzione"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-hotel-lavanderia-stireria" ||
+      envId.includes("hotel-lavanderia-stireria") ||
+      envId.includes("hotel-lavanderia") ||
+      envId.includes("lavanderia-stireria") ||
+      (isHotelAteco && (nameLower.includes("lavanderia") || nameLower.includes("stireria") || nameLower.includes("guardaroba") || cat === "laundry"))
+    ) {
+      matchingMachines = hotelMachines.filter((m) =>
+        [
+          "lavatrice_industriale_hotel",
+          "essiccatore_rotativo_industriale",
+          "calandra_mangano_stireria",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-hotel-deposito-housekeeping" ||
+      envId.includes("hotel-deposito-housekeeping") ||
+      envId.includes("deposito-housekeeping") ||
+      (isHotelAteco && (nameLower.includes("housekeeping") || nameLower.includes("riassetto") || nameLower.includes("deposito piani") || nameLower.includes("governante")))
+    ) {
+      matchingMachines = hotelMachines.filter((m) =>
+        ["carrelli_housekeeping_piani", "monospazzola_lavasciuga_moquette"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-hotel-centrale-idrica-legionella" ||
+      envId.includes("hotel-centrale-idrica-legionella") ||
+      envId.includes("hotel-centrale-idrica") ||
+      envId.includes("centrale-idrica-legionella") ||
+      (isHotelAteco && (nameLower.includes("idrica") || nameLower.includes("legionella") || nameLower.includes("autoclave") || nameLower.includes("biossido")))
+    ) {
+      matchingMachines = hotelMachines.filter((m) =>
+        ["impianto_dosaggio_biossido_legionella"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-hotel-centrale-termica-clima" ||
+      envId.includes("hotel-centrale-termica-clima") ||
+      envId.includes("hotel-centrale-termica") ||
+      envId.includes("centrale-termica-clima") ||
+      (isHotelAteco && (nameLower.includes("termica") || nameLower.includes("climatizzazione") || nameLower.includes("uta") || (nameLower.includes("centrale") && !nameLower.includes("antincendio") && !nameLower.includes("idrica"))))
+    ) {
+      matchingMachines = hotelMachines.filter((m) =>
+        ["caldaia_centrale_termica_hotel", "centrale_trattamento_aria_uta"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-hotel-vano-gruppo-elettrogeno" ||
+      envId.includes("hotel-vano-gruppo-elettrogeno") ||
+      envId.includes("gruppo-elettrogeno") ||
+      (isHotelAteco && (nameLower.includes("elettrogeno") || nameLower.includes("generatore") || nameLower.includes("gruppo elettrogeno")))
+    ) {
+      matchingMachines = hotelMachines.filter((m) =>
+        ["gruppo_elettrogeno_emergenza"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-hotel-vani-ascensori-montacarichi" ||
+      envId.includes("hotel-vani-ascensori-montacarichi") ||
+      envId.includes("hotel-vani-ascensori") ||
+      envId.includes("ascensori-montacarichi") ||
+      (isHotelAteco && (nameLower.includes("ascensori") || nameLower.includes("montacarichi") || nameLower.includes("elevatori")))
+    ) {
+      matchingMachines = hotelMachines.filter((m) =>
+        ["ascensore_passeggeri_hotel", "montacarichi_servizio_piani"].includes(m.machineKey)
       );
     } else if (
       envId === "env-super-magazzino" ||

@@ -3292,4 +3292,515 @@ assert.ok(
   "In modalità safety_only nessun item banco bar deve avere domain haccp",
 );
 
+// ============================================================================
+// 10. Test Hotel, Albergo, Resort e Strutture Ricettive ATECO 55.10.00 (o 55.10.0 / 55.10 / 55.1 / 551000 / 55100 / 5510 / 551)
+// ============================================================================
+console.log("Test 25: getStandardEnvironmentsForAteco & conformità per Hotel / Albergo (55.10.00 / 55.10 / 55.1)");
+
+const hotelEnvs = getStandardEnvironmentsForAteco("55.10.00");
+assert.equal(hotelEnvs.length, 12, "L'Hotel / Struttura ricettiva deve avere esattamente 12 ambienti standard");
+
+// Verifica varianti codice ATECO (55.10.0, 55.10, 55.1, 551000, 55100, 5510, 551)
+const hotelEnvsVar1 = getStandardEnvironmentsForAteco("55.10.0");
+assert.equal(hotelEnvsVar1.length, 12, "Anche prefisso 55.10.0 deve restituire 12 ambienti hotel");
+const hotelEnvsVar2 = getStandardEnvironmentsForAteco("55.10");
+assert.equal(hotelEnvsVar2.length, 12, "Anche prefisso 55.10 deve restituire 12 ambienti hotel");
+const hotelEnvsVar3 = getStandardEnvironmentsForAteco("55.1");
+assert.equal(hotelEnvsVar3.length, 12, "Anche prefisso 55.1 deve restituire 12 ambienti hotel");
+const hotelEnvsVar4 = getStandardEnvironmentsForAteco("551000");
+assert.equal(hotelEnvsVar4.length, 12, "Anche codice numerico 551000 deve restituire 12 ambienti hotel");
+const hotelEnvsVar5 = getStandardEnvironmentsForAteco("55100");
+assert.equal(hotelEnvsVar5.length, 12, "Anche codice numerico 55100 deve restituire 12 ambienti hotel");
+const hotelEnvsVar6 = getStandardEnvironmentsForAteco("5510");
+assert.equal(hotelEnvsVar6.length, 12, "Anche codice numerico 5510 deve restituire 12 ambienti hotel");
+const hotelEnvsVar7 = getStandardEnvironmentsForAteco("551");
+assert.equal(hotelEnvsVar7.length, 12, "Anche codice numerico 551 deve restituire 12 ambienti hotel");
+
+// Verifica ID dei 12 ambienti standard dell'Hotel
+const expectedHotelIds = [
+  "env-hotel-reception-hall",
+  "env-hotel-camere-piano",
+  "env-hotel-sala-colazioni",
+  "env-hotel-office-cucina-colazioni",
+  "env-hotel-lavanderia-stireria",
+  "env-hotel-deposito-housekeeping",
+  "env-hotel-centrale-idrica-legionella",
+  "env-hotel-centrale-termica-clima",
+  "env-hotel-vano-gruppo-elettrogeno",
+  "env-hotel-vani-ascensori-montacarichi",
+  "env-hotel-spogliatoi-personale",
+  "env-hotel-deposito-rifiuti-differenziata",
+];
+
+for (const id of expectedHotelIds) {
+  assert.ok(
+    hotelEnvs.some((e) => e.id === id),
+    `Ambiente ${id} deve essere presente nella lista standard Hotel per 55.10.00`,
+  );
+}
+
+// 1. Reception & Hall Principale
+const hotelReception = hotelEnvs.find((e) => e.id === "env-hotel-reception-hall")!;
+assert.equal(hotelReception.category, "sales_office");
+assert.equal(hotelReception.surfaceSqM, 120);
+assert.equal(hotelReception.heightM, 3.5);
+assert.equal(hotelReception.volumeCuM, 420);
+assert.equal(hotelReception.occupantsCount, 8);
+assert.equal(hotelReception.windowSurfaceSqM, 15.0);
+assert.equal(hotelReception.features.emergencyLighting, true);
+assert.equal(hotelReception.features.antiShatterGlass, true);
+const compReception = evaluateEnvironmentCompliance(hotelReception, "55.10.00");
+assert.equal(compReception.isHeightCompliant, true);
+assert.equal(compReception.isCubatureCompliant, true);
+assert.ok(
+  compReception.summaryBadges.some((b) => b.text.includes("UNI EN 16005")),
+  "Reception deve includere badge porte automatiche scorrevoli UNI EN 16005",
+);
+assert.ok(
+  compReception.summaryBadges.some((b) => b.text.includes("VDT D.Lgs. 81/08")),
+  "Reception deve includere badge postazioni VDT ergonomiche D.Lgs. 81/08 Titolo VII",
+);
+
+// 2. Camere Ospiti, Suite & Corridoi ai Piani
+const hotelCamere = hotelEnvs.find((e) => e.id === "env-hotel-camere-piano")!;
+assert.equal(hotelCamere.category, "public");
+assert.equal(hotelCamere.surfaceSqM, 400);
+assert.equal(hotelCamere.heightM, 2.7);
+assert.equal(hotelCamere.volumeCuM, 1080);
+assert.equal(hotelCamere.occupantsCount, 80);
+assert.equal(hotelCamere.windowSurfaceSqM, 60.0);
+assert.equal(hotelCamere.features.emergencyLighting, true);
+const compCamere = evaluateEnvironmentCompliance(hotelCamere, "55.10.00");
+assert.equal(compCamere.isHeightCompliant, true);
+assert.equal(compCamere.isCubatureCompliant, true);
+assert.ok(
+  compCamere.cpiActivityAlert !== null && compCamere.cpiActivityAlert.code.includes("Attività 66"),
+  "Camere albergo (>25 posti letto) devono essere assoggettate ad Attività 66 D.P.R. 151/2011",
+);
+assert.ok(
+  compCamere.summaryBadges.some((b) => b.text.includes("EI 30 / EI 60") && b.text.includes("D.M. 09/04/1994")),
+  "Camere piano devono avere badge porte tagliafuoco EI 30 / EI 60 D.M. 09/04/1994",
+);
+assert.ok(
+  compCamere.summaryBadges.some((b) => b.text.includes("IRAI")),
+  "Camere piano devono avere badge rilevatori ottici di fumo IRAI",
+);
+assert.ok(
+  compCamere.summaryBadges.some((b) => b.text.includes("D.P.R. 503/96")),
+  "Camere piano devono avere badge bagni disabili D.P.R. 503/96 con tirante allarme",
+);
+
+// 3. Sala Colazioni & Ristorazione Ospiti
+const hotelSalaColazioni = hotelEnvs.find((e) => e.id === "env-hotel-sala-colazioni")!;
+assert.equal(hotelSalaColazioni.category, "public");
+assert.equal(hotelSalaColazioni.surfaceSqM, 150);
+assert.equal(hotelSalaColazioni.heightM, 3.0);
+assert.equal(hotelSalaColazioni.volumeCuM, 450);
+assert.equal(hotelSalaColazioni.occupantsCount, 100);
+assert.equal(hotelSalaColazioni.windowSurfaceSqM, 20.0);
+assert.equal(hotelSalaColazioni.features.emergencyLighting, true);
+assert.equal(hotelSalaColazioni.features.antiShatterGlass, true);
+const compSalaColazioni = evaluateEnvironmentCompliance(hotelSalaColazioni, "55.10.00");
+assert.equal(compSalaColazioni.isHeightCompliant, true);
+assert.ok(
+  compSalaColazioni.summaryBadges.some((b) => b.text.includes("1,20 m") && b.text.includes("antipanico")),
+  "Sala colazioni deve avere badge vie di esodo libere >= 1,20m e uscite antipanico",
+);
+assert.ok(
+  compSalaColazioni.summaryBadges.some((b) => b.text.includes("parafiato igienici")),
+  "Sala colazioni deve avere badge cristalli parafiato buffet",
+);
+
+// 4. Office / Cucina Preparazione Colazioni
+const hotelOffice = hotelEnvs.find((e) => e.id === "env-hotel-office-cucina-colazioni")!;
+assert.equal(hotelOffice.category, "production");
+assert.equal(hotelOffice.surfaceSqM, 30);
+assert.equal(hotelOffice.heightM, 3.0);
+assert.equal(hotelOffice.volumeCuM, 90);
+assert.equal(hotelOffice.occupantsCount, 3);
+assert.equal(hotelOffice.windowSurfaceSqM, 3.0);
+assert.equal(hotelOffice.features.forcedExhaustPresent, true);
+assert.equal(hotelOffice.features.forcedExhaustType, "kitchen_hood");
+assert.equal(hotelOffice.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(hotelOffice.features.flooringCondition, "compliant_anti_slip");
+assert.equal(hotelOffice.features.insectScreens, true);
+assert.equal(hotelOffice.features.microclimateCompliant, true);
+const compOffice = evaluateEnvironmentCompliance(hotelOffice, "55.10.00");
+assert.equal(compOffice.isHeightCompliant, true);
+assert.equal(compOffice.isCubatureCompliant, true);
+assert.ok(
+  compOffice.summaryBadges.some((b) => b.text.includes("labirinto")),
+  "Office colazioni deve avere badge cappa filtri a labirinto",
+);
+assert.ok(
+  compOffice.summaryBadges.some((b) => b.text.includes("Break Tank") && b.text.includes("85°C")),
+  "Office colazioni deve avere badge lavastoviglie con Break Tank e risciacquo a 85°C",
+);
+
+// 5. Lavanderia e Stireria Interna
+const hotelLavanderia = hotelEnvs.find((e) => e.id === "env-hotel-lavanderia-stireria")!;
+assert.equal(hotelLavanderia.category, "production");
+assert.equal(hotelLavanderia.surfaceSqM, 40);
+assert.equal(hotelLavanderia.heightM, 3.0);
+assert.equal(hotelLavanderia.volumeCuM, 120);
+assert.equal(hotelLavanderia.occupantsCount, 3);
+assert.equal(hotelLavanderia.windowSurfaceSqM, 4.0);
+assert.equal(hotelLavanderia.features.forcedExhaustPresent, true);
+assert.equal(hotelLavanderia.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(hotelLavanderia.features.flooringCondition, "compliant_anti_slip");
+const compLavanderia = evaluateEnvironmentCompliance(hotelLavanderia, "55.10.00");
+assert.equal(compLavanderia.isHeightCompliant, true);
+assert.equal(compLavanderia.isCubatureCompliant, true);
+assert.ok(
+  compLavanderia.summaryBadges.some((b) => b.text.includes("salvadita") && b.text.includes("UNI EN ISO 10472-5")),
+  "Lavanderia deve avere badge calandra mangano con barra salvadita UNI EN ISO 10472-5",
+);
+assert.ok(
+  compLavanderia.summaryBadges.some((b) => b.text.includes("marcia in avanti")),
+  "Lavanderia deve avere badge marcia in avanti circuito sporco/pulito",
+);
+
+// 6. Guardaroba / Magazzino Housekeeping
+const hotelHousekeeping = hotelEnvs.find((e) => e.id === "env-hotel-deposito-housekeeping")!;
+assert.equal(hotelHousekeeping.category, "warehouse");
+assert.equal(hotelHousekeeping.surfaceSqM, 35);
+assert.equal(hotelHousekeeping.heightM, 2.7);
+assert.equal(hotelHousekeeping.volumeCuM, 94.5);
+assert.equal(hotelHousekeeping.occupantsCount, 2);
+assert.equal(hotelHousekeeping.windowSurfaceSqM, 2.0);
+assert.equal(hotelHousekeeping.features.shelvingCertified, true);
+const compHousekeeping = evaluateEnvironmentCompliance(hotelHousekeeping, "55.10.00");
+assert.equal(compHousekeeping.isHeightCompliant, true);
+assert.equal(compHousekeeping.isCubatureCompliant, true);
+assert.ok(
+  compHousekeeping.summaryBadges.some((b) => b.text.includes("15 cm")),
+  "Housekeeping deve avere badge scaffalature sollevate >= 15 cm da terra",
+);
+
+// 7. Centrale Idrica, Impianto ACS & Dosaggio Anti-Legionella
+const hotelCentraleIdrica = hotelEnvs.find((e) => e.id === "env-hotel-centrale-idrica-legionella")!;
+assert.equal(hotelCentraleIdrica.category, "technical");
+assert.equal(hotelCentraleIdrica.surfaceSqM, 25);
+assert.equal(hotelCentraleIdrica.heightM, 2.7);
+assert.equal(hotelCentraleIdrica.volumeCuM, 67.5);
+assert.equal(hotelCentraleIdrica.occupantsCount, 1);
+assert.equal(hotelCentraleIdrica.windowSurfaceSqM, 0);
+assert.equal(hotelCentraleIdrica.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(hotelCentraleIdrica.features.flooringCondition, "compliant_anti_slip");
+assert.equal(hotelCentraleIdrica.features.emergencyLighting, true);
+const compCentraleIdrica = evaluateEnvironmentCompliance(hotelCentraleIdrica, "55.10.00");
+assert.equal(compCentraleIdrica.isHeightCompliant, true);
+assert.equal(compCentraleIdrica.isCubatureCompliant, true);
+assert.ok(
+  compCentraleIdrica.summaryBadges.some((b) => b.text.includes("60°C") && b.text.includes("50°C")),
+  "Centrale idrica deve verificare temperatura ACS >= 60°C e ricircolo >= 50°C",
+);
+assert.ok(
+  compCentraleIdrica.summaryBadges.some((b) => b.text.includes("Registro Legionella")),
+  "Centrale idrica deve verificare registro Legionella aggiornato",
+);
+
+// 8. Centrale Termica / Gruppi Frigo & CTA
+const hotelCentraleTermica = hotelEnvs.find((e) => e.id === "env-hotel-centrale-termica-clima")!;
+assert.equal(hotelCentraleTermica.category, "technical");
+assert.equal(hotelCentraleTermica.surfaceSqM, 35);
+assert.equal(hotelCentraleTermica.heightM, 3.0);
+assert.equal(hotelCentraleTermica.volumeCuM, 105);
+assert.equal(hotelCentraleTermica.occupantsCount, 1);
+assert.equal(hotelCentraleTermica.windowSurfaceSqM, 0);
+assert.equal(hotelCentraleTermica.features.emergencyLighting, true);
+assert.equal(hotelCentraleTermica.features.gasLeakDetectorPresent, true);
+const compCentraleTermica = evaluateEnvironmentCompliance(hotelCentraleTermica, "55.10.00");
+assert.equal(compCentraleTermica.isHeightCompliant, true);
+assert.ok(
+  compCentraleTermica.cpiActivityAlert !== null && compCentraleTermica.cpiActivityAlert.code.includes("Attività 74"),
+  "Centrale termica hotel deve essere assoggettata ad Attività 74 D.P.R. 151/2011",
+);
+assert.ok(
+  compCentraleTermica.summaryBadges.some((b) => b.text.includes("INAIL") && b.text.includes("PED")),
+  "Centrale termica deve verificare valvole INAIL e vasi di espansione PED",
+);
+assert.ok(
+  compCentraleTermica.summaryBadges.some((b) => b.text.includes("Rilevatore fughe gas")),
+  "Centrale termica deve verificare rilevatore fughe gas con elettrovalvola esterna",
+);
+
+// 9. Locale Gruppo Elettrogeno & Vano Gasolio Emergenza
+const hotelGruppoElettrogeno = hotelEnvs.find((e) => e.id === "env-hotel-vano-gruppo-elettrogeno")!;
+assert.equal(hotelGruppoElettrogeno.category, "technical");
+assert.equal(hotelGruppoElettrogeno.surfaceSqM, 20);
+assert.equal(hotelGruppoElettrogeno.heightM, 2.8);
+assert.equal(hotelGruppoElettrogeno.volumeCuM, 56);
+assert.equal(hotelGruppoElettrogeno.occupantsCount, 1);
+assert.equal(hotelGruppoElettrogeno.windowSurfaceSqM, 0);
+assert.equal(hotelGruppoElettrogeno.features.emergencyLighting, true);
+const compGruppoElettrogeno = evaluateEnvironmentCompliance(hotelGruppoElettrogeno, "55.10.00");
+assert.equal(compGruppoElettrogeno.isHeightCompliant, true);
+assert.ok(
+  compGruppoElettrogeno.cpiActivityAlert !== null && compGruppoElettrogeno.cpiActivityAlert.code.includes("Attività 49"),
+  "Gruppo elettrogeno hotel deve essere assoggettato ad Attività 49 D.P.R. 151/2011",
+);
+assert.ok(
+  compGruppoElettrogeno.summaryBadges.some((b) => b.text.includes("110%")),
+  "Gruppo elettrogeno deve verificare vasca di contenimento gasolio al 110%",
+);
+assert.ok(
+  compGruppoElettrogeno.summaryBadges.some((b) => b.text.includes("EI 120")),
+  "Gruppo elettrogeno deve verificare porta tagliafuoco EI 120",
+);
+
+// 10. Vani Corsa Ascensori & Montacarichi
+const hotelAscensori = hotelEnvs.find((e) => e.id === "env-hotel-vani-ascensori-montacarichi")!;
+assert.equal(hotelAscensori.category, "technical");
+assert.equal(hotelAscensori.surfaceSqM, 30);
+assert.equal(hotelAscensori.heightM, 3.0);
+assert.equal(hotelAscensori.volumeCuM, 90);
+assert.equal(hotelAscensori.occupantsCount, 1);
+assert.equal(hotelAscensori.windowSurfaceSqM, 0);
+assert.equal(hotelAscensori.features.emergencyLighting, true);
+const compAscensori = evaluateEnvironmentCompliance(hotelAscensori, "55.10.00");
+assert.equal(compAscensori.isHeightCompliant, true);
+assert.ok(
+  compAscensori.summaryBadges.some((b) => b.text.includes("EN 81-28")),
+  "Ascensori devono verificare teleallarme bidirezionale h24 EN 81-28",
+);
+assert.ok(
+  compAscensori.summaryBadges.some((b) => b.text.includes("D.P.R. 162/99")),
+  "Ascensori devono verificare verifica periodica biennale DPR 162/99",
+);
+
+// 11. Spogliatoi e Servizi Personale
+const hotelSpogliatoi = hotelEnvs.find((e) => e.id === "env-hotel-spogliatoi-personale")!;
+assert.equal(hotelSpogliatoi.category, "changing_rooms");
+assert.equal(hotelSpogliatoi.surfaceSqM, 30);
+assert.equal(hotelSpogliatoi.heightM, 2.4);
+assert.equal(hotelSpogliatoi.volumeCuM, 72);
+assert.equal(hotelSpogliatoi.occupantsCount, 15);
+assert.equal(hotelSpogliatoi.windowSurfaceSqM, 2.0);
+assert.equal(hotelSpogliatoi.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(hotelSpogliatoi.features.flooringCondition, "compliant_anti_slip");
+assert.equal(hotelSpogliatoi.features.forcedExhaustPresent, true);
+assert.equal(hotelSpogliatoi.features.forcedExhaustType, "blind_toilet_fan");
+const compHotelSpogliatoi = evaluateEnvironmentCompliance(hotelSpogliatoi, "55.10.00");
+assert.equal(compHotelSpogliatoi.isHeightCompliant, true);
+assert.ok(
+  compHotelSpogliatoi.summaryBadges.some((b) => b.text.includes("doppio scomparto")),
+  "Spogliatoi personale devono verificare armadietti a doppio scomparto",
+);
+
+// 12. Deposito Rifiuti e Compattatore
+const hotelRifiuti = hotelEnvs.find((e) => e.id === "env-hotel-deposito-rifiuti-differenziata")!;
+assert.equal(hotelRifiuti.category, "technical");
+assert.equal(hotelRifiuti.surfaceSqM, 20);
+assert.equal(hotelRifiuti.heightM, 2.6);
+assert.equal(hotelRifiuti.volumeCuM, 52);
+assert.equal(hotelRifiuti.occupantsCount, 1);
+assert.equal(hotelRifiuti.windowSurfaceSqM, 0);
+assert.equal(hotelRifiuti.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(hotelRifiuti.features.flooringCondition, "compliant_anti_slip");
+const compHotelRifiuti = evaluateEnvironmentCompliance(hotelRifiuti, "55.10.00");
+assert.equal(compHotelRifiuti.isHeightCompliant, true);
+assert.ok(
+  compHotelRifiuti.summaryBadges.some((b) => b.text.includes("UNI EN 16500")),
+  "Deposito rifiuti deve verificare compattatore cartone/plastica UNI EN 16500",
+);
+
+// ============================================================================
+// Test 26: generateEnvironmentChecklistItems per locali Hotel (ATECO 55.10.00)
+// ============================================================================
+console.log("Test 26: generateEnvironmentChecklistItems per locali Hotel (ATECO 55.10.00)");
+
+// 1. Reception
+const hotelReceptionItems = generateEnvironmentChecklistItems(hotelReception, "55.10.00");
+assert.ok(
+  hotelReceptionItems.some((it) => it.id.includes("porte-automatiche-uni-en-16005-esodo") && it.domain === "safety"),
+  "Reception hotel deve verificare porte automatiche scorrevoli UNI EN 16005 (domain: safety)",
+);
+assert.ok(
+  hotelReceptionItems.some((it) => it.id.includes("banco-reception-ergonomia-vdt-presidio-h24") && it.domain === "safety"),
+  "Reception hotel deve verificare banco reception VDT D.Lgs. 81/08 Titolo VII (domain: safety)",
+);
+assert.ok(
+  hotelReceptionItems.some((it) => it.id.includes("percorsi-esodo-hall-planimetrie-luci-emergenza") && it.domain === "safety"),
+  "Reception hotel deve verificare vie di esodo hall >= 1,50 m e luci emergenza (domain: safety)",
+);
+
+// 2. Camere ai piani
+const hotelCamereItems = generateEnvironmentChecklistItems(hotelCamere, "55.10.00");
+assert.ok(
+  hotelCamereItems.some((it) => it.id.includes("porte-tagliafuoco-camere-ei30-chiudiporta-dm-1994") && it.domain === "safety"),
+  "Camere piano devono verificare porte tagliafuoco EI 30 / EI 60 con chiudiporta D.M. 09/04/1994 (domain: safety)",
+);
+assert.ok(
+  hotelCamereItems.some((it) => it.id.includes("rilevatori-fumo-irai-planimetrie-bilingue-evacuazione") && it.domain === "safety"),
+  "Camere piano devono verificare rilevatori fumo indirizzati IRAI e planimetrie bilingue (domain: safety)",
+);
+assert.ok(
+  hotelCamereItems.some((it) => it.id.includes("bagni-camere-disabili-dpr-503-tirante-soccorso") && it.domain === "safety"),
+  "Camere piano devono verificare bagni disabili D.P.R. 503/96 con tirante allarme (domain: safety)",
+);
+
+// 3. Sala colazioni
+const hotelSalaColazioniItems = generateEnvironmentChecklistItems(hotelSalaColazioni, "55.10.00");
+assert.ok(
+  hotelSalaColazioniItems.some((it) => it.id.includes("buffet-colazioni-parafiato-cristallo-temperature-haccp") && it.domain === "haccp"),
+  "Sala colazioni deve verificare buffet con cristalli parafiato e temperature HACCP (domain: haccp)",
+);
+assert.ok(
+  hotelSalaColazioniItems.some((it) => it.id.includes("vie-esodo-sala-coperti-porte-antipanico-uni-en-1125") && it.domain === "safety"),
+  "Sala colazioni deve verificare corridoi liberi >= 1,20 m e maniglioni antipanico UNI EN 1125 (domain: safety)",
+);
+assert.ok(
+  hotelSalaColazioniItems.some((it) => it.id.includes("estintori-omologati-34a-233b-luci-emergenza") && it.domain === "safety"),
+  "Sala colazioni deve verificare estintori 34A 233B e illuminazione emergenza (domain: safety)",
+);
+
+// 4. Office cucina colazioni
+const hotelOfficeItems = generateEnvironmentChecklistItems(hotelOffice, "55.10.00");
+assert.ok(
+  hotelOfficeItems.some((it) => it.id.includes("cappa-aspirazione-filtri-labirinto-forni-doppio-vetro") && it.domain === "both"),
+  "Office cucina colazioni deve verificare cappa filtri a labirinto e forni doppio vetro (domain: both)",
+);
+assert.ok(
+  hotelOfficeItems.some((it) => it.id.includes("lavamani-ginocchio-pedale-sapone-antibatterico") && it.domain === "both"),
+  "Office cucina colazioni deve verificare lavamani a ginocchio/pedale (domain: both)",
+);
+assert.ok(
+  hotelOfficeItems.some((it) => it.id.includes("lavastoviglie-break-tank-uni-en-1717-risciacquo-85c") && it.domain === "both"),
+  "Office cucina colazioni deve verificare lavastoviglie con Break Tank UNI EN 1717 e risciacquo a 85°C (domain: both)",
+);
+
+// 5. Lavanderia e stireria
+const hotelLavanderiaItems = generateEnvironmentChecklistItems(hotelLavanderia, "55.10.00");
+assert.ok(
+  hotelLavanderiaItems.some((it) => it.id.includes("lavatrici-essiccatori-industriali-uni-en-iso-10472") && it.domain === "safety"),
+  "Lavanderia deve verificare lavatrici/essiccatori UNI EN ISO 10472 (domain: safety)",
+);
+assert.ok(
+  hotelLavanderiaItems.some((it) => it.id.includes("calandra-mangano-barra-salvadita-microinterruttore-uni-en-iso-10472-5") && it.domain === "safety"),
+  "Lavanderia deve verificare calandra mangano con barra salvadita a microinterruttore UNI EN ISO 10472-5 (domain: safety)",
+);
+assert.ok(
+  hotelLavanderiaItems.some((it) => it.id.includes("separazione-marcia-in-avanti-sporco-pulito-ventilazione") && it.domain === "both"),
+  "Lavanderia deve verificare circuito sporco/pulito marcia in avanti e ventilazione forzata (domain: both)",
+);
+
+// 6. Deposito housekeeping
+const hotelHousekeepingItems = generateEnvironmentChecklistItems(hotelHousekeeping, "55.10.00");
+assert.ok(
+  hotelHousekeepingItems.some((it) => it.id.includes("scaffalature-biancheria-sollevate-15cm-portata-certificata") && it.domain === "safety"),
+  "Housekeeping deve verificare scaffalature sollevate >= 15 cm e portata certificata (domain: safety)",
+);
+assert.ok(
+  hotelHousekeepingItems.some((it) => it.id.includes("stoccaggio-carrelli-piani-schede-sicurezza-detergenti") && it.domain === "both"),
+  "Housekeeping deve verificare stoccaggio carrelli e schede di sicurezza detergenti (domain: both)",
+);
+
+// 7. Centrale idrica & Legionella
+const hotelCentraleIdricaItems = generateEnvironmentChecklistItems(hotelCentraleIdrica, "55.10.00");
+assert.ok(
+  hotelCentraleIdricaItems.some((it) => it.id.includes("temperatura-accumulo-acs-60c-ricircolo-50c-legionella") && it.domain === "both"),
+  "Centrale idrica deve verificare temperatura ACS >= 60°C e ricircolo >= 50°C Accordo 07/05/2015 (domain: both)",
+);
+assert.ok(
+  hotelCentraleIdricaItems.some((it) => it.id.includes("registro-legionella-campionamenti-periodici-dosaggio-cloro") && it.domain === "both"),
+  "Centrale idrica deve verificare Registro Legionella e campionamenti periodici (domain: both)",
+);
+assert.ok(
+  hotelCentraleIdricaItems.some((it) => it.id.includes("disconnettori-idrici-uni-en-1717-vaso-espansione-sicurezza") && it.domain === "both"),
+  "Centrale idrica deve verificare disconnettori UNI EN 1717 e valvole di sicurezza (domain: both)",
+);
+
+// 8. Centrale termica & CTA
+const hotelCentraleTermicaItems = generateEnvironmentChecklistItems(hotelCentraleTermica, "55.10.00");
+assert.ok(
+  hotelCentraleTermicaItems.some((it) => it.id.includes("rilevatore-fughe-gas-elettrovalvola-esterna-dm-2019") && it.domain === "safety"),
+  "Centrale termica deve verificare rilevatore gas metano con elettrovalvola esterna D.M. 08/11/2019 (domain: safety)",
+);
+assert.ok(
+  hotelCentraleTermicaItems.some((it) => it.id.includes("caldaie-valvole-inail-vaso-ped-attivita-74") && it.domain === "safety"),
+  "Centrale termica deve verificare caldaie con valvole INAIL e vasi espansione PED (domain: safety)",
+);
+assert.ok(
+  hotelCentraleTermicaItems.some((it) => it.id.includes("centrale-trattamento-aria-cta-filtri-sanificazione-canali") && it.domain === "both"),
+  "Centrale termica/CTA deve verificare manutenzione filtri e sanificazione canali (domain: both)",
+);
+
+// 9. Vano gruppo elettrogeno
+const hotelGruppoElettrogenoItems = generateEnvironmentChecklistItems(hotelGruppoElettrogeno, "55.10.00");
+assert.ok(
+  hotelGruppoElettrogenoItems.some((it) => it.id.includes("vasca-contenimento-gasolio-110-dm-13-07-2011-attivita-49") && it.domain === "safety"),
+  "Gruppo elettrogeno deve verificare vasca di contenimento gasolio al 110% D.M. 13/07/2011 (domain: safety)",
+);
+assert.ok(
+  hotelGruppoElettrogenoItems.some((it) => it.id.includes("porta-tagliafuoco-ei120-aerazione-permanente-dm-2011") && it.domain === "safety"),
+  "Gruppo elettrogeno deve verificare porta tagliafuoco EI 120 e aerazione permanente (domain: safety)",
+);
+assert.ok(
+  hotelGruppoElettrogenoItems.some((it) => it.id.includes("continuita-alimentazione-pompe-antincendio-luci-sicurezza") && it.domain === "safety"),
+  "Gruppo elettrogeno deve verificare alimentazione pompe antincendio e luci emergenza (domain: safety)",
+);
+
+// 10. Vani ascensori e montacarichi
+const hotelAscensoriItems = generateEnvironmentChecklistItems(hotelAscensori, "55.10.00");
+assert.ok(
+  hotelAscensoriItems.some((it) => it.id.includes("teleallarme-bidirezionale-h24-uni-en-81-28") && it.domain === "safety"),
+  "Ascensori devono verificare teleallarme bidirezionale h24 UNI EN 81-28 (domain: safety)",
+);
+assert.ok(
+  hotelAscensoriItems.some((it) => it.id.includes("ritorno-automatico-piano-blackout-uni-en-81-20") && it.domain === "safety"),
+  "Ascensori devono verificare ritorno automatico al piano in blackout UNI EN 81-20 (domain: safety)",
+);
+assert.ok(
+  hotelAscensoriItems.some((it) => it.id.includes("verifica-biennale-ascensori-dpr-162-99-ente-notificato") && it.domain === "safety"),
+  "Ascensori devono verificare verifica periodica biennale D.P.R. 162/99 (domain: safety)",
+);
+
+// 11. Spogliatoi e servizi personale
+const hotelSpogliatoiItems = generateEnvironmentChecklistItems(hotelSpogliatoi, "55.10.00");
+assert.ok(
+  hotelSpogliatoiItems.some((it) => it.id.includes("armadietti-doppio-scomparto-divise-alberghiere") && it.domain === "both"),
+  "Spogliatoi personale devono verificare armadietti doppio scomparto per divise (domain: both)",
+);
+assert.ok(
+  hotelSpogliatoiItems.some((it) => it.id.includes("docce-lavamani-non-manuali-aerazione-temporizzata") && it.domain === "both"),
+  "Spogliatoi personale devono verificare docce e lavamani non manuali (domain: both)",
+);
+
+// 12. Deposito rifiuti e compattatore
+const hotelRifiutiItems = generateEnvironmentChecklistItems(hotelRifiuti, "55.10.00");
+assert.ok(
+  hotelRifiutiItems.some((it) => it.id.includes("area-rifiuti-lavabile-chiusino-sifonato-igiene") && it.domain === "both"),
+  "Area rifiuti deve verificare pavimentazione lavabile con chiusino sifonato (domain: both)",
+);
+assert.ok(
+  hotelRifiutiItems.some((it) => it.id.includes("cassonetti-ermetici-differenziata-protezione-infestanti") && it.domain === "both"),
+  "Area rifiuti deve verificare cassonetti differenziata a tenuta ermetica (domain: both)",
+);
+assert.ok(
+  hotelRifiutiItems.some((it) => it.id.includes("pressa-compattatore-uni-en-16500-dispositivi-protezione") && it.domain === "safety"),
+  "Area rifiuti deve verificare compattatore UNI EN 16500 con protezioni operatore (domain: safety)",
+);
+
+// Verifica del filtraggio checklistMode su office colazioni hotel
+const hotelOfficeHaccpMode = filterEnvironmentItemsByChecklistMode(hotelOfficeItems, "haccp_only");
+assert.ok(
+  hotelOfficeHaccpMode.every((it) => it.domain === "haccp" || it.domain === "both"),
+  "In modalità haccp_only tutti gli item office colazioni hotel devono essere haccp o both",
+);
+assert.ok(
+  !hotelOfficeHaccpMode.some((it) => it.domain === "safety"),
+  "In modalità haccp_only nessun item office colazioni hotel deve avere domain safety",
+);
+
+const hotelOfficeSafetyMode = filterEnvironmentItemsByChecklistMode(hotelOfficeItems, "safety_only");
+assert.ok(
+  hotelOfficeSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item office colazioni hotel devono essere safety o both",
+);
+assert.ok(
+  !hotelOfficeSafetyMode.some((it) => it.domain === "haccp"),
+  "In modalità safety_only nessun item office colazioni hotel deve avere domain haccp",
+);
+
 console.log("=== TUTTI I TEST Step2AmbientiDiLavoro SUPERATI CON SUCCESSO! ===");
