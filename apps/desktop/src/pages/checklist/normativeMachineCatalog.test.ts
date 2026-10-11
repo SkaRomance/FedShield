@@ -934,4 +934,248 @@ for (const code of ["56.10.2", "561020", "56102"]) {
   assert.ok(fallbackRes.every((m) => m.sourceReason === "ateco"));
 }
 
+// =============================================================
+// TEST ATECO 56.29.10 / 56.29.20 / 56.29 (Mense e Ristorazione Collettiva / Centri Cottura)
+// =============================================================
+console.log("\n=== INIZIO TEST normativeMachineCatalog (ATECO 56.29.10 Mense e Ristorazione Collettiva) ===");
+
+// -------------------------------------------------------------
+// Test 19: Priorità e risoluzione catalogo ATECO Mense e Ristorazione Collettiva
+// -------------------------------------------------------------
+console.log("Test 19: Verifica priorità catalogo ATECO per Mense e Ristorazione Collettiva (56.29.10 / 56.29.1 / 56.29.20 / 56.29)");
+const catalogMenseExact = getSectorMachineCatalogForAteco("56.29.10");
+assert.equal(catalogMenseExact.sectorKey, "mense_catering_collettiva", "ATECO 56.29.10 deve restituire mense_catering_collettiva");
+assert.ok(catalogMenseExact.sectorLabel.includes("Mense"), "L'etichetta deve includere Mense");
+
+for (const code of ["56.29.1", "56.29.20", "56.29", "562910", "5629"]) {
+  const catVariant = getSectorMachineCatalogForAteco(code);
+  assert.equal(catVariant.sectorKey, "mense_catering_collettiva", `ATECO '${code}' deve risolvere su mense_catering_collettiva`);
+}
+
+// Verifica posizionamento: mense_catering_collettiva viene dopo pizzeria_asporto e prima di ristorazione_alimentare
+const pizSectorIndex = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "pizzeria_asporto");
+const menseSectorIndex = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "mense_catering_collettiva");
+const restSectorIndex = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ristorazione_alimentare");
+assert.ok(menseSectorIndex !== -1, "Settore mense_catering_collettiva deve esistere nel catalogo");
+assert.equal(menseSectorIndex, pizSectorIndex + 1, "mense_catering_collettiva deve seguire immediatamente pizzeria_asporto");
+assert.equal(restSectorIndex, menseSectorIndex + 1, "ristorazione_alimentare deve seguire immediatamente mense_catering_collettiva");
+
+// -------------------------------------------------------------
+// Test 20: Verifica completezza delle 18 attrezzature professionali per mense/collettività
+// -------------------------------------------------------------
+console.log("Test 20: Verifica completezza delle 18 attrezzature professionali per mense con modelli reali e controlli tecnici");
+assert.equal(catalogMenseExact.machines.length, 18, "Il catalogo Mense e Ristorazione Collettiva deve contenere esattamente 18 macchine");
+
+const expectedMensaKeys = [
+  // Grandi Cotture & Blocco Caldo Industriale (6)
+  "forno_industriale_carrello",
+  "brasiera_ribaltabile_industriale",
+  "pentola_cottura_indiretta",
+  "abbattitore_roll_in",
+  "cuocipasta_ribaltabile_industriale",
+  "cappa_compensata_collettivita",
+  // Mondatura Ortofrutta (1)
+  "pelapatate_lavaverdure_industriale",
+  // Preparazione Fredda & Lavorazione Carni/Verdure (2)
+  "tagliaverdure_cutter_industriale",
+  "affettatrice_industriale_continua",
+  // Confezionamento & Logistica Pasti Veicolati (3)
+  "termosigillatrice_automatica_vaschette",
+  "contenitori_isotermici_trasporto",
+  "transpallet_inox_alimentare",
+  // Distribuzione Pasti & Sala (2)
+  "linea_distribuzione_selfservice",
+  "carrelli_termici_porta_gn",
+  // Centrale Lavaggio Meccanizzato (2)
+  "lavastoviglie_tunnel_traino",
+  "lavaoggetti_ghigliottina_collettivita",
+  // Freddo, Campioni & Stoccaggio (2)
+  "armadio_congelatore_campioni",
+  "celle_frigorifere_walkin",
+];
+
+for (const key of expectedMensaKeys) {
+  const found = catalogMenseExact.machines.find((m) => m.machineKey === key);
+  assert.ok(found, `Attrezzatura con key '${key}' deve essere presente nel catalogo`);
+  assert.ok(found.name.length > 5, `Nome attrezzatura '${key}' deve essere descrittivo`);
+  assert.ok(found.suggestedManufacturer.length > 2, `Produttore suggerito presente per '${key}'`);
+  assert.ok(found.suggestedModel.length > 1, `Modello suggerito presente per '${key}'`);
+  assert.ok(found.safetyChecks.length >= 4, `L'attrezzatura '${key}' deve avere almeno 4 controlli di sicurezza specifici`);
+}
+
+// Controlli specifici per attrezzature critiche di ristorazione collettiva:
+const fornoCarrello = catalogMenseExact.machines.find((m) => m.machineKey === "forno_industriale_carrello")!;
+assert.ok(fornoCarrello.suggestedManufacturer.includes("Rational"), "Forno a carrello deve citare Rational");
+assert.ok(fornoCarrello.suggestedModel.includes("iCombi Pro"), "Forno a carrello modello iCombi Pro");
+assert.ok(fornoCarrello.safetyChecks.some((c) => c.code === "FORNO_CARRELLO_PORTA_TRIPLO_VETRO_VENTILATO" && c.normReference.includes("UNI EN 203-1")), "Porta triplo vetro ventilato UNI EN 203-1");
+assert.ok(fornoCarrello.safetyChecks.some((c) => c.code === "FORNO_CARRELLO_ARRESTO_VENTOLE_VAPORE"), "Arresto ventole e vapore all'apertura");
+assert.ok(fornoCarrello.safetyChecks.some((c) => c.code === "FORNO_CARRELLO_SONDA_CUORE_6_PUNTI"), "Sonda al cuore a 6 punti HACCP");
+
+const brasiera = catalogMenseExact.machines.find((m) => m.machineKey === "brasiera_ribaltabile_industriale")!;
+assert.ok(brasiera.suggestedManufacturer.includes("Angelo Po") || brasiera.suggestedManufacturer.includes("Firex"), "Brasiera Angelo Po / Firex");
+assert.ok(brasiera.safetyChecks.some((c) => c.code === "BRASIERA_RIBALTAMENTO_MOTORIZZATO_UNI13885" && c.normReference.includes("UNI EN 13885")), "Ribaltamento motorizzato progressivo UNI EN 13885");
+assert.ok(brasiera.safetyChecks.some((c) => c.code === "BRASIERA_ARRESTO_RISCALDAMENTO_INCLINATA"), "Arresto riscaldamento a vasca inclinata");
+
+const pentolaIndiretta = catalogMenseExact.machines.find((m) => m.machineKey === "pentola_cottura_indiretta")!;
+assert.ok(pentolaIndiretta.safetyChecks.some((c) => c.code === "PENTOLA_INTERCAPEDINE_PED_VALVOLA_MANOMETRO" && (c.normReference.includes("PED") || c.normReference.includes("26/2016"))), "Intercapedine certificata PED D.Lgs. 26/2016 con valvola di sicurezza");
+assert.ok(pentolaIndiretta.safetyChecks.some((c) => c.code === "PENTOLA_RUBINETTO_FARFALLA_BLOCCO_MECCANICO"), "Rubinetto a farfalla da 2 pollici con blocco meccanico");
+
+const abbattitoreMensa = catalogMenseExact.machines.find((m) => m.machineKey === "abbattitore_roll_in")!;
+assert.ok(abbattitoreMensa.suggestedManufacturer.includes("Irinox"), "Abbattitore Irinox");
+assert.ok(abbattitoreMensa.safetyChecks.some((c) => c.code === "ABBATTITORE_CICLO_COOK_CHILL_REG852" && c.normReference.includes("852/2004")), "Ciclo Cook & Chill +90/+3 e -18 Reg. CE 852/04");
+assert.ok(abbattitoreMensa.safetyChecks.some((c) => c.code === "ABBATTITORE_RAMPA_CARRELLO_A_FILO"), "Rampa accesso carrelli a filo pavimento");
+
+const cuocipastaMensa = catalogMenseExact.machines.find((m) => m.machineKey === "cuocipasta_ribaltabile_industriale")!;
+assert.ok(cuocipastaMensa.safetyChecks.some((c) => c.code === "CUOCIPASTA_SOLLEVAMENTO_AUTOMATICO_CESTELLI" && c.normReference.includes("Titolo VI")), "Sollevamento automatico cestelli prevenzione MMC Titolo VI");
+assert.ok(cuocipastaMensa.safetyChecks.some((c) => c.code === "CUOCIPASTA_RIEMPIMENTO_DISCONNESSIONE_UNI1717" && c.normReference.includes("UNI EN 1717")), "Riempimento acqua con interruzione d'aria UNI EN 1717");
+
+const cappaAnsul = catalogMenseExact.machines.find((m) => m.machineKey === "cappa_compensata_collettivita")!;
+assert.ok(cappaAnsul.safetyChecks.some((c) => c.code === "CAPPA_COLLETTIVITA_ESTINZIONE_ANSUL_R102" && (c.normReference.includes("NFPA 96") || c.normReference.includes("UNI ISO 15371"))), "Impianto Ansul R-102 conforme NFPA 96 / UNI ISO 15371");
+
+const pelapatate = catalogMenseExact.machines.find((m) => m.machineKey === "pelapatate_lavaverdure_industriale")!;
+assert.ok(pelapatate.safetyChecks.some((c) => c.code === "PELAPATATE_MICROINTERRUTTORE_UNI13208" && c.normReference.includes("UNI EN 13208")), "Microinterruttore su coperchio e bocca scarico UNI EN 13208");
+
+const cutterMensa = catalogMenseExact.machines.find((m) => m.machineKey === "tagliaverdure_cutter_industriale")!;
+assert.ok(cutterMensa.safetyChecks.some((c) => c.code === "CUTTER_ARRESTO_MOTORE_RAPIDO_UNI12852" && c.normReference.includes("UNI EN 12852")), "Arresto motore immediato < 2s UNI EN 12852");
+
+const affettatriceMensa = catalogMenseExact.machines.find((m) => m.machineKey === "affettatrice_industriale_continua")!;
+assert.ok(affettatriceMensa.safetyChecks.some((c) => c.code === "AFFETTATRICE_CONTINUA_RIPARI_INTERBLOCCATI_UNI1974" && c.normReference.includes("UNI EN 1974")), "Ripari integrali fissi e interbloccati UNI EN 1974");
+assert.ok(affettatriceMensa.safetyChecks.some((c) => c.code === "AFFETTATRICE_CONTINUA_BLOCCO_SPESSORE_ZERO"), "Blocco a spessore zero della vela");
+
+const termosigillatriceMensa = catalogMenseExact.machines.find((m) => m.machineKey === "termosigillatrice_automatica_vaschette")!;
+assert.ok(termosigillatriceMensa.safetyChecks.some((c) => c.code === "TERMOSIGILLATRICE_CARTER_INTERBLOCCATI_SCHIACCIAMENTO"), "Carter perimetrali interbloccati anti-schiacciamento");
+assert.ok(termosigillatriceMensa.safetyChecks.some((c) => c.code === "TERMOSIGILLATRICE_EVACUAZIONE_ARIA_GAS_INERTE"), "Evacuazione aria e iniezione gas inerte alimentare ATM");
+
+const contenitoriMensa = catalogMenseExact.machines.find((m) => m.machineKey === "contenitori_isotermici_trasporto")!;
+assert.ok(contenitoriMensa.safetyChecks.some((c) => c.code === "CONTENITORI_ISOTERMICI_CONFORMITA_ATP_TEMP" && c.normReference.includes("ATP")), "Conformità ATP legame caldo >= 65°C e legame freddo <= 4°C");
+assert.ok(contenitoriMensa.safetyChecks.some((c) => c.code === "CONTENITORI_ISOTERMICI_GUARNIZIONI_SILICONICHE_MOCA" && c.normReference.includes("1935/2004")), "Guarnizioni siliconiche sanificabili MOCA Reg. CE 1935/2004");
+
+const transpalletInox = catalogMenseExact.machines.find((m) => m.machineKey === "transpallet_inox_alimentare")!;
+assert.ok(transpalletInox.suggestedManufacturer.includes("Pramac"), "Transpallet inox Pramac");
+assert.ok(transpalletInox.safetyChecks.some((c) => c.code === "TRANSPALLET_INOX_POMPA_STAGNA_LAVAGGI"), "Pompa idraulica stagna resistente a lavaggi ad alta pressione");
+
+const lineaSelf = catalogMenseExact.machines.find((m) => m.machineKey === "linea_distribuzione_selfservice")!;
+assert.ok(lineaSelf.safetyChecks.some((c) => c.code === "LINEA_SELFSERVICE_BAGNOMARIA_CALDO_65C"), "Bagnomaria caldo mantenimento >= 65°C");
+assert.ok(lineaSelf.safetyChecks.some((c) => c.code === "LINEA_SELFSERVICE_CRISTALLI_PARAFIATO_CURVI"), "Cristalli parafiato curvi igienici");
+
+const carrelliTermici = catalogMenseExact.machines.find((m) => m.machineKey === "carrelli_termici_porta_gn")!;
+assert.ok(carrelliTermici.safetyChecks.some((c) => c.code === "CARRELLO_TERMICO_MANTENIMENTO_TEMPERATURA_65C"), "Mantenimento legame caldo >= 65°C");
+assert.ok(carrelliTermici.safetyChecks.some((c) => c.code === "CARRELLO_TERMICO_RUOTE_PIROETTANTI_FRENO"), "Ruote piroettanti con freno");
+
+const lavastoviglieTunnel = catalogMenseExact.machines.find((m) => m.machineKey === "lavastoviglie_tunnel_traino")!;
+assert.ok(lavastoviglieTunnel.safetyChecks.some((c) => c.code === "LAVASTOVIGLIE_TUNNEL_ARRESTO_EMERGENZA_FUNE_UNI50416" && c.normReference.includes("UNI EN 50416")), "Arresto emergenza a fune o fungo UNI EN 50416");
+assert.ok(lavastoviglieTunnel.safetyChecks.some((c) => c.code === "LAVASTOVIGLIE_TUNNEL_RISCIACQUO_82C_DIN10510" && c.normReference.includes("DIN 10510")), "Risciacquo igienico >= 82°C DIN 10510");
+
+const potWasher = catalogMenseExact.machines.find((m) => m.machineKey === "lavaoggetti_ghigliottina_collettivita")!;
+assert.ok(potWasher.safetyChecks.some((c) => c.code === "LAVAOGGETTI_GHIGLIOTTINA_CONTROBILANCIATA_MICRO"), "Porta controbilanciata a ghigliottina con microinterruttore");
+assert.ok(potWasher.safetyChecks.some((c) => c.code === "LAVAOGGETTI_DISPOSITIVO_ANTIRIFLUSSO_UNI1717" && c.normReference.includes("UNI EN 1717")), "Dispositivo antiriflusso UNI EN 1717");
+
+const congelatoreCampioni = catalogMenseExact.machines.find((m) => m.machineKey === "armadio_congelatore_campioni")!;
+assert.ok(congelatoreCampioni.safetyChecks.some((c) => c.code === "CONGELATORE_CAMPIONI_SERRATURA_CHIAVE_NAS"), "Serratura a chiave per custodia campioni testimoniali 72 ore ASL/NAS");
+assert.ok(congelatoreCampioni.safetyChecks.some((c) => c.code === "CONGELATORE_CAMPIONI_TEMPERATURA_COSTANTE_18"), "Temperatura costante <= -18°C per 72 ore");
+
+const celleWalkin = catalogMenseExact.machines.find((m) => m.machineKey === "celle_frigorifere_walkin")!;
+assert.ok(celleWalkin.safetyChecks.some((c) => c.code === "CELLE_WALKIN_ALLARME_UOMO_INTRAPPOLATO_UNI378" && c.normReference.includes("UNI EN 378")), "Allarme uomo intrappolato a 24V UNI EN 378");
+assert.ok(celleWalkin.safetyChecks.some((c) => c.code === "CELLE_WALKIN_APERTURA_INTERNA_LUMINESCENTE"), "Apertura interna luminescente di sicurezza");
+assert.ok(celleWalkin.safetyChecks.some((c) => c.code === "CELLE_WALKIN_PAVIMENTO_FILO_RAMPA_CARRELLI"), "Pavimentazione calpestabile a filo pavimento con rampa carrelli");
+
+// -------------------------------------------------------------
+// Test 21: Associazione 1-a-1 ambienti Step 2 Mensa (env-mensa-*) -> Step 4 Macchine
+// -------------------------------------------------------------
+console.log("Test 21: Verifica associazione ambienti Step 2 Mensa (env-mensa-*) -> Step 4 Macchine");
+const mensaEnvironments = [
+  { id: "env-mensa-cottura", name: "Cucina e Cottura Industriale (Blocco Caldo)", category: "production" },
+  { id: "env-mensa-mondatura", name: "Locale Mondatura Ortofrutta e Legumi", category: "production" },
+  { id: "env-mensa-prep-fredda", name: "Preparazione Fredda, Carni e Gastronomia", category: "production" },
+  { id: "env-mensa-confezionamento", name: "Area Confezionamento e Logistica Pasti Veicolati", category: "production" },
+  { id: "env-mensa-sala-selfservice", name: "Sala Ristorazione e Linea Distribuzione Self-Service", category: "public" },
+  { id: "env-mensa-tunnel-stoviglie", name: "Centrale Lavaggio Meccanizzato Stoviglie", category: "production" },
+  { id: "env-mensa-lavaggio-pentole", name: "Area Lavaggio Pentole e Contenitori Cottura", category: "production" },
+  { id: "env-mensa-celle-frigo", name: "Celle Frigorifere e Conservazione Materie Prime", category: "warehouse" },
+];
+
+const suggestedWithMensaEnvs = getSuggestedMachinesForEnvironmentsAndAteco(mensaEnvironments, "56.29.10");
+assert.equal(suggestedWithMensaEnvs.length, 18, "Tutte le 18 macchine devono essere raccomandate e collegate agli 8 ambienti censiti");
+
+// Verifica 1-a-1 per ciascun ambiente:
+const cotturaMachines = suggestedWithMensaEnvs.filter((m) => m.targetEnvironmentId === "env-mensa-cottura");
+assert.equal(cotturaMachines.length, 6, "env-mensa-cottura deve associare 6 macchine del blocco caldo");
+assert.ok(cotturaMachines.some((m) => m.machineKey === "forno_industriale_carrello"));
+assert.ok(cotturaMachines.some((m) => m.machineKey === "brasiera_ribaltabile_industriale"));
+assert.ok(cotturaMachines.some((m) => m.machineKey === "pentola_cottura_indiretta"));
+assert.ok(cotturaMachines.some((m) => m.machineKey === "abbattitore_roll_in"));
+assert.ok(cotturaMachines.some((m) => m.machineKey === "cuocipasta_ribaltabile_industriale"));
+assert.ok(cotturaMachines.some((m) => m.machineKey === "cappa_compensata_collettivita"));
+
+const mondaturaMachines = suggestedWithMensaEnvs.filter((m) => m.targetEnvironmentId === "env-mensa-mondatura");
+assert.equal(mondaturaMachines.length, 1, "env-mensa-mondatura deve associare 1 macchina pelapatate/lavaverdure");
+assert.ok(mondaturaMachines.some((m) => m.machineKey === "pelapatate_lavaverdure_industriale"));
+
+const prepFreddaMensaMachines = suggestedWithMensaEnvs.filter((m) => m.targetEnvironmentId === "env-mensa-prep-fredda");
+assert.equal(prepFreddaMensaMachines.length, 2, "env-mensa-prep-fredda deve associare cutter e affettatrice");
+assert.ok(prepFreddaMensaMachines.some((m) => m.machineKey === "tagliaverdure_cutter_industriale"));
+assert.ok(prepFreddaMensaMachines.some((m) => m.machineKey === "affettatrice_industriale_continua"));
+
+// Verifica anche supporto dedicato per env-mensa-diete-speciali
+const dieteEnvTest = getSuggestedMachinesForEnvironmentsAndAteco(
+  [{ id: "env-mensa-diete-speciali", name: "Laboratorio Diete Speciali e Celiachia", category: "production" }],
+  "56.29.10",
+);
+const dieteLinked = dieteEnvTest.filter((m) => m.targetEnvironmentId === "env-mensa-diete-speciali");
+assert.equal(dieteLinked.length, 2, "env-mensa-diete-speciali deve associare cutter e affettatrice");
+assert.ok(dieteLinked.some((m) => m.machineKey === "tagliaverdure_cutter_industriale"));
+assert.ok(dieteLinked.some((m) => m.machineKey === "affettatrice_industriale_continua"));
+
+const confezMachines = suggestedWithMensaEnvs.filter((m) => m.targetEnvironmentId === "env-mensa-confezionamento");
+assert.equal(confezMachines.length, 3, "env-mensa-confezionamento deve associare termosigillatrice, contenitori e transpallet");
+assert.ok(confezMachines.some((m) => m.machineKey === "termosigillatrice_automatica_vaschette"));
+assert.ok(confezMachines.some((m) => m.machineKey === "contenitori_isotermici_trasporto"));
+assert.ok(confezMachines.some((m) => m.machineKey === "transpallet_inox_alimentare"));
+
+const salaSelfMachines = suggestedWithMensaEnvs.filter((m) => m.targetEnvironmentId === "env-mensa-sala-selfservice");
+assert.equal(salaSelfMachines.length, 2, "env-mensa-sala-selfservice deve associare linea self-service e carrelli termici");
+assert.ok(salaSelfMachines.some((m) => m.machineKey === "linea_distribuzione_selfservice"));
+assert.ok(salaSelfMachines.some((m) => m.machineKey === "carrelli_termici_porta_gn"));
+
+const tunnelMachines = suggestedWithMensaEnvs.filter((m) => m.targetEnvironmentId === "env-mensa-tunnel-stoviglie");
+assert.equal(tunnelMachines.length, 1, "env-mensa-tunnel-stoviglie deve associare lavastoviglie a tunnel");
+assert.ok(tunnelMachines.some((m) => m.machineKey === "lavastoviglie_tunnel_traino"));
+
+const pentoleMachines = suggestedWithMensaEnvs.filter((m) => m.targetEnvironmentId === "env-mensa-lavaggio-pentole");
+assert.equal(pentoleMachines.length, 1, "env-mensa-lavaggio-pentole deve associare lavaoggetti ghigliottina");
+assert.ok(pentoleMachines.some((m) => m.machineKey === "lavaoggetti_ghigliottina_collettivita"));
+
+const celleMensaMachines = suggestedWithMensaEnvs.filter((m) => m.targetEnvironmentId === "env-mensa-celle-frigo");
+assert.equal(celleMensaMachines.length, 2, "env-mensa-celle-frigo deve associare congelatore campioni e celle walk-in");
+assert.ok(celleMensaMachines.some((m) => m.machineKey === "armadio_congelatore_campioni"));
+assert.ok(celleMensaMachines.some((m) => m.machineKey === "celle_frigorifere_walkin"));
+
+// Verifica anche supporto per env-mensa-dispensa
+const dispensaMensaEnvTest = getSuggestedMachinesForEnvironmentsAndAteco(
+  [{ id: "env-mensa-dispensa", name: "Dispensa Secca e Deposito Alimentari", category: "warehouse" }],
+  "56.29.10",
+);
+const dispensaMensaLinked = dispensaMensaEnvTest.filter((m) => m.targetEnvironmentId === "env-mensa-dispensa");
+assert.equal(dispensaMensaLinked.length, 2, "env-mensa-dispensa deve associare congelatore campioni e celle walk-in");
+assert.ok(dispensaMensaLinked.some((m) => m.machineKey === "armadio_congelatore_campioni"));
+assert.ok(dispensaMensaLinked.some((m) => m.machineKey === "celle_frigorifere_walkin"));
+
+// -------------------------------------------------------------
+// Test 22: Risoluzione solo su codice ATECO senza locali censiti (Mense)
+// -------------------------------------------------------------
+console.log("Test 22: Integrazione automatica macchine per ATECO 56.29.10 senza ambienti preventivi");
+const suggestedMensaOnlyAteco = getSuggestedMachinesForEnvironmentsAndAteco([], "56.29.10");
+assert.equal(suggestedMensaOnlyAteco.length, 18, "Devono essere suggerite tutte le 18 macchine della mensa");
+assert.ok(
+  suggestedMensaOnlyAteco.every((m) => m.sourceReason === "ateco"),
+  "Tutte le macchine devono avere sourceReason === 'ateco' se nessun locale è stato specificato",
+);
+
+// Verifica fallback automatico identico per varianti di codice ATECO ("56.29.1", "56.29.20", "56.29", "562910", "5629")
+for (const code of ["56.29.1", "56.29.20", "56.29", "562910", "5629"]) {
+  const fallbackRes = getSuggestedMachinesForEnvironmentsAndAteco([], code);
+  assert.equal(fallbackRes.length, 18, `ATECO variant '${code}' deve restituire tutte le 18 macchine`);
+  assert.ok(fallbackRes.every((m) => m.sourceReason === "ateco"));
+}
+
 console.log("=== TUTTI I TEST normativeMachineCatalog SUPERATI CON SUCCESSO! ===");

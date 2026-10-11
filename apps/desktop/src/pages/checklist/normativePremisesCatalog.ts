@@ -1500,6 +1500,265 @@ export function getStandardEnvironmentsForAteco(atecoCode?: string): WorkEnviron
     ];
   }
 
+  // 0-quinquies. Mense e Ristorazione Collettiva / Centri Cottura (56.29.10, 56.29.1, 56.29.20, 56.29 - Mense aziendali, scolastiche, ospedaliere, pasti veicolati caldo e Cook & Chill)
+  if (
+    ateco.startsWith("562910") ||
+    ateco.startsWith("56291") ||
+    ateco.startsWith("56292") ||
+    ateco.startsWith("5629")
+  ) {
+    return [
+      {
+        id: "env-mensa-cottura",
+        key: "mensa_cucina_grandi_cotture",
+        name: "Cucina Calda & Zona Grandi Cotture Industriali",
+        icon: "🍳",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 80,
+        heightM: 3.5,
+        volumeCuM: 280,
+        occupantsCount: 5,
+        windowSurfaceSqM: 8.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          forcedExhaustType: "kitchen_hood",
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-mensa-prep-fredda",
+        key: "mensa_prep_fredda_salumi_condimenti",
+        name: "Laboratorio Preparazione Fredda, Salumi & Condimenti",
+        icon: "🥗",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 35,
+        heightM: 3.0,
+        volumeCuM: 105,
+        occupantsCount: 3,
+        windowSurfaceSqM: 3.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-mensa-diete-speciali",
+        key: "mensa_diete_speciali_senza_glutine",
+        name: "Area Dedicata Diete Speciali & Senza Glutine (Prevenzione Cross-Contact)",
+        icon: "🛡️",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 16,
+        heightM: 3.0,
+        volumeCuM: 48,
+        occupantsCount: 2,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+        },
+      },
+      {
+        id: "env-mensa-mondatura",
+        key: "mensa_ricevimento_mondatura_ortofrutta",
+        name: "Locale Ricevimento & Mondatura Ortofrutta",
+        icon: "🥔",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 25,
+        heightM: 3.0,
+        volumeCuM: 75,
+        occupantsCount: 2,
+        windowSurfaceSqM: 2.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-mensa-confezionamento",
+        key: "mensa_porzionamento_termosigillatura_veicolati",
+        name: "Area Porzionamento, Termosigillatura & Spedizione Pasti Veicolati",
+        icon: "📦",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 40,
+        heightM: 3.2,
+        volumeCuM: 128,
+        occupantsCount: 3,
+        windowSurfaceSqM: 4.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-mensa-celle-frigo",
+        key: "mensa_celle_frigo_deperibili_abbattuti",
+        name: "Celle Frigorifere Walk-in Deperibili & Cella Abbattuti (Cook & Chill)",
+        icon: "❄️",
+        category: "storage",
+        isDefault: true,
+        surfaceSqM: 45,
+        heightM: 3.0,
+        volumeCuM: 135,
+        occupantsCount: 2,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("storage"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          emergencyLighting: true,
+          hasTrappedPersonAlarm: true,
+        },
+      },
+      {
+        id: "env-mensa-dispensa",
+        key: "mensa_magazzino_merci_secche_scorte",
+        name: "Magazzino Merci Secche & Scorte Non Deperibili",
+        icon: "🏢",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 50,
+        heightM: 3.5,
+        volumeCuM: 175,
+        occupantsCount: 2,
+        windowSurfaceSqM: 3.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          shelvingCertified: true,
+        },
+      },
+      {
+        id: "env-mensa-lavaggio-pentole",
+        key: "mensa_plonge_lavaggio_pentolame_teglie",
+        name: "Plonge Industriale Lavaggio Pentolame & Teglie GN 2/1",
+        icon: "🧽",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 25,
+        heightM: 3.0,
+        volumeCuM: 75,
+        occupantsCount: 2,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-mensa-tunnel-stoviglie",
+        key: "mensa_centrale_lavaggio_tunnel_stoviglie",
+        name: "Centrale Lavaggio Meccanizzato Stoviglie & Vassoi (Tunnel a Traino/Nastro)",
+        icon: "🍽️",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 35,
+        heightM: 3.0,
+        volumeCuM: 105,
+        occupantsCount: 3,
+        windowSurfaceSqM: 3.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-mensa-sala-selfservice",
+        key: "mensa_sala_ristorazione_distribuzione_selfservice",
+        name: "Sala Ristorazione & Linea Distribuzione Self-Service / Free-Flow",
+        icon: "🏢",
+        category: "public",
+        isDefault: true,
+        surfaceSqM: 180,
+        heightM: 3.0,
+        volumeCuM: 540,
+        occupantsCount: 120,
+        emergencyExitsCount: 3,
+        windowSurfaceSqM: 20.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("public"),
+          emergencyLighting: true,
+          antiShatterGlass: true,
+          emergencyExitsCount: 3,
+        },
+      },
+      {
+        id: "env-mensa-spogliatoi-filtro",
+        key: "mensa_spogliatoi_personale_filtro_igienico",
+        name: "Spogliatoi del Personale con Zona Filtro Igienico",
+        icon: "🚻",
+        category: "changing_rooms",
+        isDefault: true,
+        surfaceSqM: 35,
+        heightM: 2.7,
+        volumeCuM: 94.5,
+        occupantsCount: 15,
+        windowSurfaceSqM: 3.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("changing_rooms"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          forcedExhaustPresent: true,
+          forcedExhaustType: "blind_toilet_fan",
+        },
+      },
+      {
+        id: "env-mensa-rifiuti-tecnico",
+        key: "mensa_locale_rifiuti_climatizzato_cella_umido_tecnico",
+        name: "Locale Rifiuti Climatizzato, Impianti & Cella Frigo Rifiuti Umidi",
+        icon: "🗑️",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 25,
+        heightM: 2.7,
+        volumeCuM: 67.5,
+        occupantsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          emergencyLighting: true,
+          gasLeakDetectorPresent: true,
+        },
+      },
+    ];
+  }
+
   // 1. Ristorazione, HoReCa, Somministrazione alimenti (56.x, 10.x, 11.x, 47.11, 47.2, 55.1)
   if (
     ateco.startsWith("56") ||
@@ -2775,6 +3034,105 @@ export function evaluateEnvironmentCompliance(
     });
   }
 
+  // 9. Regole ad hoc per Mense e Ristorazione Collettiva / Centri Cottura (56.29.10 / 56.29)
+  // a) Cucina Grandi Cotture Industriali
+  const isMensaCooking =
+    env.id === "env-mensa-cottura" ||
+    env.key === "mensa_cucina_grandi_cotture" ||
+    (env.id.includes("cottura") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("5629") ?? false));
+  if (isMensaCooking) {
+    if (height >= 3.5) {
+      summaryBadges.push({
+        text: "🍳 Cucina grandi cotture: altezza ottimale ≥ 3,50m, cappa compensata con Ansul & canaline con degrassatore UNI EN 1825",
+        status: "success",
+      });
+    } else if (height >= 3.0) {
+      summaryBadges.push({
+        text: "🍳 Cucina grandi cotture a norma: altezza ≥ 3,00m, cappa compensata Ansul & degrassatore",
+        status: "success",
+      });
+    } else {
+      summaryBadges.push({
+        text: "🍳 Cucina grandi cotture con altezza ridotta: necessaria deroga ASL e VMC potenziata",
+        status: "warning",
+      });
+    }
+    summaryBadges.push({
+      text: "🚿 Lavamani comando non manuale a ginocchio/pedale con sapone antibatterico (Reg. CE 852/04)",
+      status: "info",
+    });
+  }
+
+  // b) Area Diete Speciali & Senza Glutine
+  const isMensaSpecialDiets =
+    env.id === "env-mensa-diete-speciali" ||
+    env.key === "mensa_diete_speciali_senza_glutine";
+  if (isMensaSpecialDiets) {
+    summaryBadges.push({
+      text: "🛡️ Area diete speciali & gluten-free: postazione isolata prevenzione cross-contact (Reg. UE 1169/2011)",
+      status: "info",
+    });
+  }
+
+  // c) Confezionamento e Spedizione Pasti Veicolati
+  const isMensaPackaging =
+    env.id === "env-mensa-confezionamento" ||
+    env.key === "mensa_porzionamento_termosigillatura_veicolati";
+  if (isMensaPackaging) {
+    summaryBadges.push({
+      text: "📦 Confezionamento pasti veicolati: legame caldo ≥ 65°C / legame freddo ≤ 4°C (Cook & Chill)",
+      status: "info",
+    });
+  }
+
+  // d) Celle Frigorifere Deperibili & Abbattuti
+  const isMensaColdRooms =
+    env.id === "env-mensa-celle-frigo" ||
+    env.key === "mensa_celle_frigo_deperibili_abbattuti";
+  if (isMensaColdRooms) {
+    summaryBadges.push({
+      text: "🌡️ Teletermometri continui HACCP per celle pluritemperatura & cella abbattuti Cook & Chill (0-3°C)",
+      status: "info",
+    });
+  }
+
+  // e) Sala Ristorazione & Self-Service
+  const isMensaDiningHall =
+    env.id === "env-mensa-sala-selfservice" ||
+    env.key === "mensa_sala_ristorazione_distribuzione_selfservice";
+  if (isMensaDiningHall) {
+    summaryBadges.push({
+      text: "🚪 Vie di esodo libere ≥ 1,20m & uscite di emergenza con maniglioni antipanico",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🍽️ Linea self-service bagnomaria ≥ 65°C con parafiato igienico & illuminazione emergenza",
+      status: "success",
+    });
+  }
+
+  // f) Spogliatoi con Filtro Igienico
+  const isMensaLockerFilter =
+    env.id === "env-mensa-spogliatoi-filtro" ||
+    env.key === "mensa_spogliatoi_personale_filtro_igienico";
+  if (isMensaLockerFilter) {
+    summaryBadges.push({
+      text: "🚻 Filtro igienico con lavamani a fotocellula & armadietti doppio scomparto sporco/pulito",
+      status: "info",
+    });
+  }
+
+  // g) Locale Rifiuti Climatizzato e Tecnico
+  const isMensaWasteTechnical =
+    env.id === "env-mensa-rifiuti-tecnico" ||
+    env.key === "mensa_locale_rifiuti_climatizzato_cella_umido_tecnico";
+  if (isMensaWasteTechnical) {
+    summaryBadges.push({
+      text: "🗑️ Cella frigorifera rifiuti umidi (≤ 5°C), oli vegetali esausti CER 20 01 25 & elettrovalvola gas",
+      status: "warning",
+    });
+  }
+
   return {
     isHeightCompliant,
     minHeightRequired,
@@ -2838,7 +3196,9 @@ export function generateEnvironmentChecklistItems(
       env.id.includes("rist-plonge") ||
       env.id.includes("rist-celle") ||
       env.id.includes("piz-") ||
-      env.key.includes("piz_"));
+      env.key.includes("piz_") ||
+      env.id.includes("mensa-") ||
+      env.key.includes("mensa_"));
 
   // 1. Requisito Dimensionale & Cubatura
   items.push({
@@ -2932,7 +3292,7 @@ export function generateEnvironmentChecklistItems(
     let exhaustQuestion = "L'impianto di aspirazione forzata / cappa è efficiente, canalizzato all'esterno con filtri puliti e sottoposto a manutenzione periodica?";
     let exhaustNote = "Impianto di aspirazione forzata non funzionante o con filtri intasati di polveri/grassi privo di registro manutenzione.";
 
-    if (env.features.forcedExhaustType === "kitchen_hood" || env.key.includes("cucina")) {
+    if (env.features.forcedExhaustType === "kitchen_hood" || env.key.includes("cucina") || env.id.includes("mensa-cottura")) {
       exhaustTitle = "Cappa Aspirante e Canna Fumaria Cucina";
       exhaustQuestion = "La cappa aspirante è dimensionata per la cottura, canalizzata all'esterno con canna fumaria certificata e filtri antigrasso puliti?";
       exhaustNote = "Cappa aspirante con filtri colmi di grasso e canna fumaria priva di dichiarazione di conformità DM 37/08 e pulizia canalizzazioni.";
@@ -2999,7 +3359,7 @@ export function generateEnvironmentChecklistItems(
     env.category === "changing_rooms" ||
     (env.category === "services" && !env.id.includes("wc-clienti") && !env.id.includes("clienti") && !env.key.includes("wc_clienti"))
   ) {
-    const isFoodSector = isFoodEnv || env.id.includes("rist") || env.id.includes("super") || env.id.includes("iper") || env.id.includes("piz");
+    const isFoodSector = isFoodEnv || env.id.includes("rist") || env.id.includes("super") || env.id.includes("iper") || env.id.includes("piz") || env.id.includes("mensa");
     items.push({
       id: `${env.id}-armadietti-spogliatoio`,
       area: env.name,
@@ -4358,6 +4718,496 @@ export function generateEnvironmentChecklistItems(
       categoryTag: "aspirazione",
       suggestedNonConformity:
         "Pompa di ricircolo acqua dell'abbattitore fumi non funzionante o perdite idriche nel circuito con abbattimento fumi inefficace.",
+    });
+  }
+
+  // ============================================================================
+  // 13. Requisiti Specifici Mense e Ristorazione Collettiva / Centri Cottura (ATECO 56.29.10 / 56.29)
+  // ============================================================================
+
+  // a) Cucina Calda & Zona Grandi Cotture Industriali
+  if (env.id === "env-mensa-cottura" || env.id.includes("mensa-cottura")) {
+    items.push({
+      id: `${env.id}-pentole-vapore-ped`,
+      area: env.name,
+      title: "Pentole a Vapore a Cottura Indiretta e Valvole di Sicurezza PED",
+      question:
+        "Le pentole industriali a cottura indiretta a vapore sono conformi alla Direttiva PED (2014/68/UE), dotate di valvole di sicurezza tarate e sigillate sull'intercapedine, manometro di pressione con settore rosso di pericolo ben visibile e sottoposte a verifiche periodiche di integrità ai sensi dell'art. 71 D.Lgs. 81/08?",
+      normReference: "D.Lgs. 81/2008 art. 71, Direttiva 2014/68/UE (PED) e Raccolta ISPESL",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Pentole industriali a vapore con valvola di sicurezza intercapedine bloccata, manometro illeggibile o verifica periodica recipienti a pressione scaduta (art. 71 D.Lgs. 81/08).",
+    });
+
+    items.push({
+      id: `${env.id}-brasiere-ribaltabili-sicurezza`,
+      area: env.name,
+      title: "Brasiere Ribaltabili Industriali con Arresto Riscaldamento (UNI EN 13885)",
+      question:
+        "Le brasiere industriali ribaltabili motorizzate sono conformi alla norma UNI EN 13885, dotate di dispositivo di interblocco che arresta automaticamente l'erogazione di calore (gas o elettrico) non appena inizia la rotazione della vasca e comando di ribaltamento ad azione mantenuta (uomo presente)?",
+      normReference: "Norma UNI EN 13885 e D.Lgs. 81/2008 Allegato V e VI",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Brasiera ribaltabile con dispositivo di spegnimento riscaldamento manomesso durante lo scarico o sistema di ribaltamento privo di pulsante ad azione mantenuta.",
+    });
+
+    items.push({
+      id: `${env.id}-impianto-spegnimento-ansul`,
+      area: env.name,
+      title: "Impianto Spegnimento Automatico Cappa Ansul R-102 e Filtri a Labirinto",
+      question:
+        "La cappa d'aspirazione compensata è provvista di filtri a labirinto in acciaio inox e di impianto fisso di estinzione automatica incendi a umido a protezione di brasiere, friggitrici e blocchi cottura (tipo Ansul R-102 conforme UNI EN 16282-7), con sgancio manuale di emergenza accessibile e bombole cariche?",
+      normReference: "UNI EN 16282-7, D.M. 08/11/2019 e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Cappa grandi cotture sprovvista di impianto automatico di spegnimento tipo Ansul R-102 o con ugelli erogatori ostruiti e bombole estinguenti prive di revisione periodica.",
+    });
+
+    items.push({
+      id: `${env.id}-canaline-degrassatore-disoleatore`,
+      area: env.name,
+      title: "Canaline Sifonate Inox e Pozzetto Separatore Grassi / Disoleatore (UNI EN 1825)",
+      question:
+        "La pavimentazione è dotata di ampie canaline di scolo con griglie carrabili in acciaio inox asportabili e chiusini sifonati antiodore, e la linea di scarico è collegata a un degrassatore/separatore di grassi esterno conforme alla norma UNI EN 1825 con spurgo periodico registrato?",
+      normReference: "Norma UNI EN 1825-1/2, D.Lgs. 152/2006 art. 101 e Reg. CE 852/2004 All. II",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "pavimenti_pareti",
+      suggestedNonConformity:
+        "Assenza di pozzetto degrassatore conforme UNI EN 1825 sulla linea di scarico acque reflue cucina o canaline a pavimento intasate da sedimenti e prive di sifonatura.",
+    });
+
+    items.push({
+      id: `${env.id}-lavamani-non-manuale-antibatterico`,
+      area: env.name,
+      title: "Lavamani a Comando non Manuale con Sapone Antibatterico",
+      question:
+        "La cucina dispone di lavamani con comando non manuale a ginocchio o pedale erogante acqua calda e fredda miscelata, distributore a parete di sapone liquido antibatterico e salviette monouso a perdere con cestino a pedale?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo I punto 4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Lavamani della cucina grandi cotture con rubinetteria manuale o sprovvisto di sapone liquido antibatterico e salviette a perdere.",
+    });
+  }
+
+  // b) Laboratorio Preparazione Fredda, Salumi & Condimenti
+  if (env.id === "env-mensa-prep-fredda" || env.id.includes("mensa-prep-fredda")) {
+    items.push({
+      id: `${env.id}-temperatura-climatizzata-18c`,
+      area: env.name,
+      title: "Climatizzazione a Temperatura Controllata (≤ 18°C) e Filtrazione Aria",
+      question:
+        "Il laboratorio di preparazione fredda e porzionamento salumi garantisce una temperatura ambientale controllata non superiore a 18°C durante le lavorazioni di alimenti deperibili, con impianto di climatizzazione sanificato regolarmente e ricambio d'aria privo di getti diretti sugli operatori?",
+      normReference: "Reg. CE 852/2004 Allegato II Cap. I e D.Lgs. 81/2008 Allegato IV punto 1.9",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "microclima_luce",
+      suggestedNonConformity:
+        "Temperatura ambiente nel laboratorio preparazione fredda superiore a 18°C durante la manipolazione di salumi e carni deperibili, o climatizzatore privo di sanificazione filtri.",
+    });
+
+    items.push({
+      id: `${env.id}-tavoli-refrigerati-affettatrici`,
+      area: env.name,
+      title: "Tavoli Refrigerati Inox (+0/+4°C) e Affettatrici/Tagliaverdure con Interblocchi (UNI EN 1974 / UNI EN 1678)",
+      question:
+        "I banchi da lavoro e tavoli refrigerati in acciaio inox mantengono temperatura tra 0°C e +4°C con display digitale visibile, e le macchine affettatrici e tagliaverdure industriali dispongono di carter fissi, pressamerce, interblocchi di sicurezza conformi a UNI EN 1974 e UNI EN 1678 e pulsanti di arresto di emergenza?",
+      normReference: "Reg. CE 852/2004 All. II Cap. V, norma UNI EN 1974 e UNI EN 1678",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Tavolo refrigerato con display spento o temperatura superiore a +4°C, oppure affettatrice/tagliaverdure con dispositivo di sicurezza carter manomesso.",
+    });
+
+    items.push({
+      id: `${env.id}-lavello-disinfezione-ortaggi`,
+      area: env.name,
+      title: "Lavello Dedicato Sanificazione e Disinfezione Ortaggi e Crudi",
+      question:
+        "L'area di preparazione dispone di vasca e lavello in acciaio inox riservati esclusivamente al lavaggio, risciacquo e disinfezione di verdure fresche e crudi con acqua potabile, fisicamente separati dai lavamani e dai punti lavaggio stoviglie?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo II punto 2",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Lavaggio e disinfezione verdure eseguito in lavelli promiscui utilizzati per stoviglie o pentolame con pericolo grave di contaminazione microbiologica.",
+    });
+  }
+
+  // c) Area Dedicata Diete Speciali & Senza Glutine (Prevenzione Cross-Contact)
+  if (env.id === "env-mensa-diete-speciali" || env.id.includes("mensa-diete-speciali")) {
+    items.push({
+      id: `${env.id}-cross-contact-allergeni-glutine`,
+      area: env.name,
+      title: "Prevenzione Cross-Contact Allergeni e Celiachia (Reg. UE 1169/2011 e D.Lgs. 231/2017)",
+      question:
+        "La postazione di preparazione pasti speciali e senza glutine è fisicamente isolata dal flusso delle grandi cotture con farine, provvista di utensili, taglieri, pentole e contenitori dedicati con marcatura o codice colore specifico, per prevenire qualsiasi cross-contact con allergeni e glutine?",
+      normReference: "Reg. UE 1169/2011, D.Lgs. 231/2017 e Reg. CE 852/2004 Allegato II",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Mancata segregazione fisica o promiscuità di piani di lavoro e utensili tra linea pasti convenzionali e pasti per celiaci/allergici con rischio letale di cross-contamination.",
+    });
+
+    items.push({
+      id: `${env.id}-armadietto-chiuso-gluten-free`,
+      area: env.name,
+      title: "Armadietto Chiuso Esclusivo per Materie Prime Gluten-Free ed Allergeni",
+      question:
+        "Gli ingredienti, le materie prime confezionate e i condimenti riservati alle diete speciali e celiachia sono stoccati in armadietto chiuso esclusivo identificato, protetto da polveri volatili di farina e accessibile solo da personale specificamente formato?",
+      normReference: "Reg. UE 1169/2011 e Linee Guida Ministero della Salute per la Celiachia",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Materie prime gluten-free stoccate su scaffali aperti promiscui esposti alla ricaduta di polveri di farine ordinarie.",
+    });
+  }
+
+  // d) Locale Ricevimento & Mondatura Ortofrutta
+  if (env.id === "env-mensa-mondatura" || env.id.includes("mensa-mondatura")) {
+    items.push({
+      id: `${env.id}-pelapatate-microinterruttori-carter`,
+      area: env.name,
+      title: "Pelapatate Industriale con Filtro Decantatore Bucce e Microinterruttori (UNI EN 13208)",
+      question:
+        "La macchina pelapatate industriale è provvista di marcatura CE a norma UNI EN 13208, microinterruttore di sicurezza che arresta il disco abrasivo all'apertura del coperchio o della bocca di scarico, e cestello/filtro decantatore estraibile per la separazione delle bucce prima dello scarico idrico?",
+      normReference: "Norma UNI EN 13208 e D.Lgs. 81/2008 Allegato V e VI",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Pelapatate industriale con microinterruttore di protezione manomesso o privo di filtro decantatore bucce con intasamento della linea di scarico.",
+    });
+
+    items.push({
+      id: `${env.id}-vasche-lavaggio-vortice-disinfezione`,
+      area: env.name,
+      title: "Vasche di Lavaggio a Vortice Continuo e Procedure di Disinfezione Ortofrutta",
+      question:
+        "Le vasche di lavaggio ortaggi a gorgogliamento/vortice continuo garantiscono flusso idrico regolabile di acqua potabile, scarico di troppo-pieno con griglia e procedure validate di disinfezione alimentare con registrazione dei tempi di contatto e concentrazioni?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo II e Capitolo IX",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Vasche di lavaggio ortaggi prive di ricambio idrico continuo o disinfezione eseguita senza dosaggio controllato di sanificante.",
+    });
+
+    items.push({
+      id: `${env.id}-pavimento-antiscivolo-canaletta-mondatura`,
+      area: env.name,
+      title: "Pavimentazione Antiscivolo R13 e Canale di Scolo con Griglia Sifonata",
+      question:
+        "Il pavimento del locale mondatura presenta grado antisdrucciolo elevato R13 con pendenze marcate verso canalette di scolo con griglie asportabili inox sifonate per convogliare i costanti flussi idrici e scarti terrosi evitando scivolamenti e pozzanghere?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.3 e Reg. CE 852/2004 All. II",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "pavimenti_pareti",
+      suggestedNonConformity:
+        "Pavimentazione con pendenze insufficienti e ristagni d'acqua e terra nel locale mondatura, con rischio scivolamento e proliferazione batterica.",
+    });
+  }
+
+  // e) Area Porzionamento, Termosigillatura & Spedizione Pasti Veicolati
+  if (env.id === "env-mensa-confezionamento" || env.id.includes("mensa-confezionamento")) {
+    items.push({
+      id: `${env.id}-termosigillatrice-carter-fotocellule`,
+      area: env.name,
+      title: "Termosigillatrice Automatica Vaschette con Carter e Fotocellule di Sicurezza (UNI EN 415-3)",
+      question:
+        "La linea di termosigillatura automatica vaschette (monoporzione/multiporzione anche in atmosfera protettiva ATM) è dotata di ripari fissi, barriere fotoelettriche di protezione contro l'accesso allo stampo saldante riscaldato e arresto rapido d'emergenza a fungo conforme a UNI EN 415-3?",
+      normReference: "Norma UNI EN 415-3, Direttiva Macchine 2006/42/CE e D.Lgs. 81/2008 All. V",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Termosigillatrice con barriere di sicurezza disattivate o carter di protezione stampo rimosso con rischio grave di ustioni e schiacciamento arti.",
+    });
+
+    items.push({
+      id: `${env.id}-temperatura-legame-caldo-freddo`,
+      area: env.name,
+      title: "Controllo Termico Legame Caldo (≥ 65°C) o Freddo (≤ 4°C Cook & Chill) alla Spedizione",
+      question:
+        "Prima della sigillatura e chiusura nei contenitori termici viene effettuata e registrata la misurazione della temperatura al cuore dei cibi per garantire il mantenimento del legame caldo a temperatura costante non inferiore a +65°C o del legame refrigerato (Cook & Chill) a non più di +4°C fino al consumo?",
+      normReference: "Reg. CE 852/2004 All. II Cap. IX e Linee Guida Ristorazione Collettiva",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Pasti veicolati in legame caldo sigillati e spediti con temperatura al cuore inferiore a +65°C o cibi refrigerati Cook & Chill sopra i +4°C con rischio proliferazione tossine batteriche.",
+    });
+
+    items.push({
+      id: `${env.id}-contenitori-isotermici-trasporto-atp`,
+      area: env.name,
+      title: "Contenitori Isotermici Gastronorm e Automezzi Coibentati ATP",
+      question:
+        "I contenitori isotermici Gastronorm (polipropilene espanso o inox riscaldati/refrigerati) sono integri, sanificati e corredati di guarnizioni a tenuta, e il carico avviene tramite baia o rampa protetta direttamente su furgoni isotermici muniti di attestazione ATP valida?",
+      normReference: "Accordo ATP, Reg. CE 852/2004 All. II Cap. IV e Reg. CE 1935/2004",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Contenitori isotermici con chiusure rotte o guarnizioni mancanti, o trasporto pasti eseguito su automezzi privi di certificato ATP o non idonei al trasporto alimenti.",
+    });
+  }
+
+  // f) Celle Frigorifere Walk-in Deperibili & Cella Abbattuti (Cook & Chill)
+  if (env.id === "env-mensa-celle-frigo" || env.id.includes("mensa-celle-frigo")) {
+    items.push({
+      id: `${env.id}-registrazione-temperature-campioni-72h`,
+      area: env.name,
+      title: "Teletermometria Continua HACCP, Cella Abbattuti (0-3°C) e Campionatura Pasti Testimone (72h)",
+      question:
+        "Tutte le celle walk-in (carni 0-4°C, ortofrutta +6°C, latticini +4°C, surgelati -18°C e cella piatti cotti abbattuti Cook & Chill 0-3°C) dispongono di registrazione teletermometrica continua HACCP con allarmi di soglia, e viene conservata la campionatura testimone di ogni pasto erogato per almeno 72 ore a temperatura congelata (≤ -18°C)?",
+      normReference: "Reg. CE 852/2004 All. II Cap. IX, Reg. CE 37/2005 e Linee Guida Ristorazione Scolastica/Ospedaliera",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Mancata conservazione dei pasti testimone congelati per 72h o teletermometri delle celle deperibili/abbattuti privi di registrazione continua e allarmi di scostamento.",
+    });
+  }
+
+  // g) Magazzino Merci Secche & Scorte Non Deperibili
+  if (env.id === "env-mensa-dispensa" || env.id.includes("mensa-dispensa")) {
+    items.push({
+      id: `${env.id}-scaffali-sollevati-ispezione-infestanti`,
+      area: env.name,
+      title: "Scaffalature Sollevate (≥ 15 cm) e Piano Monitoraggio Infestanti / Roditori",
+      question:
+        "Le scaffalature industriali per lo stoccaggio scorte secche sono metalliche/plastiche lavabili, sollevate da terra almeno 15 cm e distanziate dalle pareti per agevolare il lavaggio e il monitoraggio contro roditori e insetti, con pedane plastiche lisce e trappole pest control numerate?",
+      normReference: "Reg. CE 852/2004 All. II Cap. I e Cap. X, D.Lgs. 81/2008 All. IV",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Imballaggi alimentari e scatolame stoccati direttamente sul pavimento o scaffali addossati ai muri che impediscono le ispezioni del monitoraggio infestanti.",
+    });
+  }
+
+  // h) Plonge Industriale Lavaggio Pentolame & Teglie GN 2/1
+  if (env.id === "env-mensa-lavaggio-pentole" || env.id.includes("mensa-lavaggio-pentole")) {
+    items.push({
+      id: `${env.id}-dispositivo-antiriflusso-rete-idrica`,
+      area: env.name,
+      title: "Dispositivo di Protezione Antiriflusso Rete Idrica Potabile (UNI EN 1717)",
+      question:
+        "La lavaoggetti industriale e i doccioni di ammollo delle grandi pentole sono allacciati alla rete idrica mediante disconnettore idraulico antiriflusso conforme a UNI EN 1717 per impedire qualsiasi contaminazione della rete di acqua potabile da sostanze chimiche o reflui?",
+      normReference: "Norma UNI EN 1717, D.Lgs. 18/2023 e Reg. CE 852/2004 All. II Cap. VII",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Lavaoggetti o doccione di lavaggio pentole privo di dispositivo antiriflusso UNI EN 1717 con rischio grave di contaminazione della rete idrica potabile.",
+    });
+
+    items.push({
+      id: `${env.id}-cappa-aspirazione-vapori-plonge`,
+      area: env.name,
+      title: "Cappa di Aspirazione e Condensazione Vapori Plonge Industriale",
+      question:
+        "La zona plonge pentolame dispone di cappa di aspirazione ed estrazione dei vapori caldi posizionata sopra la lavaoggetti e vasche di ammollo per evitare accumulo di calore, condensa e muffe a soffitto a tutela del benessere microclimatico degli addetti?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.9",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Assenza di cappa o impianto di estrazione vapori sopra la plonge industriale con condensa gocciolante su pareti e soffitti e microclima disagevole.",
+    });
+
+    items.push({
+      id: `${env.id}-dosatori-chimici-contatto`,
+      area: env.name,
+      title: "Dosatori Automatici Detergenti Caustici e Vasche di Contenimento",
+      question:
+        "I detergenti sgrassanti caustici e disincrostanti per pentolame sono collegati a dosatori automatici sigillati con pescanti a circuito chiuso, taniche posizionate in bacini di contenimento plastici e disponibilità di DPI specifici (guanti in nitrile lunghi, visiera paraschizzi)?",
+      normReference: "D.Lgs. 81/2008 Titolo IX (Agenti Chimici) e All. IV p.to 1.4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Travaso manuale di prodotti chimici corrosivi ad alta concentrazione senza dosatore o taniche prive di vasca di contenimento.",
+    });
+  }
+
+  // i) Centrale Lavaggio Meccanizzato Stoviglie & Vassoi (Tunnel a Traino/Nastro)
+  if (env.id === "env-mensa-tunnel-stoviglie" || env.id.includes("mensa-tunnel-stoviglie")) {
+    items.push({
+      id: `${env.id}-arresto-emergenza-tunnel-nastro`,
+      area: env.name,
+      title: "Dispositivi di Arresto di Emergenza a Fungo lungo il Nastro Trasportatore (UNI EN ISO 13850)",
+      question:
+        "La macchina lavastoviglie a tunnel o nastro continuo è provvista di pulsanti a fungo di arresto di emergenza ben visibili sia sul lato carico sporco sia sul lato scarico pulito (UNI EN ISO 13850), ripari fissi sugli organi di traino e carter paraspruzzi integri?",
+      normReference: "Norma UNI EN ISO 13850, Direttiva 2006/42/CE e D.Lgs. 81/2008 All. V",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Lavastoviglie a tunnel continuo priva di pulsanti di arresto di emergenza sui punti operatore o pulsante a fungo non funzionante.",
+    });
+
+    items.push({
+      id: `${env.id}-risciacquo-termico-82c-sanificazione`,
+      area: env.name,
+      title: "Risciacquo Termico Igienizzante a Temperatura Costante (≥ 82°C) e Recuperatore Calore",
+      question:
+        "Il modulo di risciacquo finale del tunnel di lavaggio garantisce temperatura dell'acqua costante di almeno 82°C (norma DIN 10510) rilevabile su termometro digitale visibile per la termodisinfezione certificata di piatti e posate, con condensatore o recuperatore di calore fumi funzionante?",
+      normReference: "Reg. CE 852/2004 Allegato II Cap. V e norma DIN 10510",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Temperatura del boiler di risciacquo inferiore a 82°C con mancata igienizzazione termica di stoviglie e vassoi della mensa.",
+    });
+
+    items.push({
+      id: `${env.id}-separazione-sbarazzo-pulito`,
+      area: env.name,
+      title: "Netta Separazione tra Area Sbarazzo Sporco e Ricevimento Stoviglie Pulite",
+      question:
+        "È garantita la netta separazione fisica ed operativa tra la zona di ricezione e sbarazzo vassoi sporchi (con lavello tritarifiuti/sbarazzo) e la zona di prelievo e stoccaggio vassoi e stoviglie pulite sanificate, per prevenire qualsiasi contaminazione crociata (marcia in avanti)?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo II e D.Lgs. 81/2008 All. IV",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Promiscuità di percorsi tra vassoi sporchi in rientro e stoviglie pulite appena lavate con rischio di ricontaminazione batterica.",
+    });
+  }
+
+  // j) Sala Ristorazione & Linea Distribuzione Self-Service / Free-Flow
+  if (env.id === "env-mensa-sala-selfservice" || env.id.includes("mensa-sala-selfservice")) {
+    items.push({
+      id: `${env.id}-bagnomaria-parafiato-selfservice`,
+      area: env.name,
+      title: "Mantenimento Caldo a Bagnomaria (≥ 65°C) e Schermi Parafiato Igienici",
+      question:
+        "I moduli della linea di distribuzione self-service per pietanze calde mantengono la temperatura continua non inferiore a +65°C mediante bagnomaria o piastre riscaldanti con display tarato, e sono protetti verso l'utenza da schermi parafiato in vetro/plexiglas trasparente?",
+      normReference: "Reg. CE 852/2004 Allegato II Cap. IX e Cap. V",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Banchi bagnomaria caldi della linea self-service con temperatura inferiore a 65°C o privi di schermo parafiato igienico parasputi a protezione dei cibi.",
+    });
+
+    items.push({
+      id: `${env.id}-vie-esodo-maniglioni-sala-mensa`,
+      area: env.name,
+      title: "Vie di Fuga (≥ 1,20 m), Uscite Antipanico ed Estintori Omologati",
+      question:
+        "I percorsi di esodo principali della sala ristorazione collettiva garantiscono larghezza libera costante di almeno 1,20 metri, le porte di sicurezza verso l'esterno sono provviste di maniglioni antipanico certificati UNI EN 1125 apribili a spinta e sono presenti estintori portatili omologati 34A 233B?",
+      normReference: "D.M. 03/08/2015, D.M. 02/09/2021 e D.Lgs. 81/2008 All. IV p.to 1.4",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Vie di fuga della sala mensa intralciate da arredi o porte di emergenza chiuse a chiave o con maniglione antipanico duro o bloccato.",
+    });
+  }
+
+  // k) Spogliatoi del Personale con Zona Filtro Igienico
+  if (env.id === "env-mensa-spogliatoi-filtro" || env.id.includes("mensa-spogliatoi-filtro")) {
+    items.push({
+      id: `${env.id}-filtro-igienico-lavaggio-mani-dpi`,
+      area: env.name,
+      title: "Zona Filtro Igienico: Lavamani a Fotocellula, Sanificazione Mani e Calzari/Copricapo",
+      question:
+        "Il varco di accesso dalla zona spogliatoi ai reparti di preparazione alimentare è configurato come filtro igienico obbligatorio provvisto di lavamani a fotocellula, distributore automatico di disinfettante mani alcolico, cestino a pedale e dispenser di copricapo, mascherine e copriscarpe/calzari monouso?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo I punto 4 e Capitolo VIII",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Accesso alla cucina privo di filtro igienico funzionante, con lavamani a comando manuale o dispenser di disinfettante e copricapo esauriti.",
+    });
+  }
+
+  // l) Locale Rifiuti Climatizzato, Impianti & Cella Frigo Rifiuti Umidi
+  if (env.id === "env-mensa-rifiuti-tecnico" || env.id.includes("mensa-rifiuti-tecnico")) {
+    items.push({
+      id: `${env.id}-cella-frigo-rifiuti-umidi-5c`,
+      area: env.name,
+      title: "Cella Frigorifera Rifiuti Umidi / Organici (≤ 5°C) per Abbattimento Odori e Fermentazioni",
+      question:
+        "Il locale rifiuti dispone di cella frigorifera chiusa e dedicata al mantenimento della frazione umida e scarti organici a temperatura non superiore a +5°C fino al conferimento, al fine di inibire fermentazioni batteriche, miasmi maleodoranti e richiamo di infestanti e mosche?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo VI punto 3 e D.Lgs. 81/2008 All. IV",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Cella frigorifera rifiuti organici guasta o rifiuti umidi stoccati a temperatura ambiente con fermentazioni, odori nauseabondi e presenza di mosche.",
+    });
+
+    items.push({
+      id: `${env.id}-fusti-oli-vegetali-esausti-cer`,
+      area: env.name,
+      title: "Stoccaggio Olio Vegetale Esausto (CER 20 01 25) con Bacino di Contenimento e FIR",
+      question:
+        "Gli oli vegetali esausti derivanti da friggitrici e cotture sono stoccati in fusti stagni metallici/plastici alloggiati all'interno di bacino di contenimento di sicurezza, etichettati con codice CER 20 01 25 e smaltiti tramite trasportatore autorizzato con formulario FIR?",
+      normReference: "D.Lgs. 152/2006 art. 190-193 e Reg. CE 852/2004 All. II Cap. VI",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Fusti di olio vegetale esausto privi di bacino di contenimento con sversamenti a pavimento o mancata tenuta dei formulari di smaltimento FIR.",
+    });
+
+    items.push({
+      id: `${env.id}-elettrovalvola-gas-sgancio-mensa`,
+      area: env.name,
+      title: "Elettrovalvola Esterna Gas Metano a Riarmo Manuale e Pulsante Sgancio d'Emergenza",
+      question:
+        "La conduttura di adduzione del gas metano a servizio della centrale termica e cucina è provvista di elettrovalvola normalmente chiusa a riarmo manuale asservita a pulsante di sgancio di emergenza esterno in cassetta protetta e a sensori di fughe gas, con quadro elettrico dotato di interruttore generale con bobina di sgancio?",
+      normReference: "D.M. 08/11/2019, norma UNI CIG 7129 e D.Lgs. 81/2008 All. IV p.to 1.4",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Conduttura del gas metano priva di elettrovalvola esterna normalmente chiusa o pulsante di sgancio d'emergenza esterno inaccessibile.",
     });
   }
 

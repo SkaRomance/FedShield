@@ -1312,4 +1312,347 @@ assert.ok(
   "In modalità safety_only nessun item laboratorio pizza deve avere domain haccp",
 );
 
+// ============================================================================
+// Test 15: getStandardEnvironmentsForAteco & conformità per Mense e Ristorazione Collettiva (ATECO 56.29.10 / 56.29)
+// ============================================================================
+console.log("Test 15: getStandardEnvironmentsForAteco & conformità per Mensa / Centri Cottura (56.29.10 / 56.29)");
+
+// Verifica priorità e varianti di prefisso ATECO per Mense
+const mensaEnvs1 = getStandardEnvironmentsForAteco("56.29.10");
+const mensaEnvs2 = getStandardEnvironmentsForAteco("56.29.1");
+const mensaEnvs3 = getStandardEnvironmentsForAteco("56.29.20");
+const mensaEnvs4 = getStandardEnvironmentsForAteco("562910");
+const mensaEnvs5 = getStandardEnvironmentsForAteco("56.29");
+
+assert.equal(mensaEnvs1.length, 12, "ATECO 56.29.10 deve restituire esattamente 12 ambienti standard");
+assert.equal(mensaEnvs2.length, 12, "ATECO 56.29.1 deve restituire 12 ambienti");
+assert.equal(mensaEnvs3.length, 12, "ATECO 56.29.20 deve restituire 12 ambienti");
+assert.equal(mensaEnvs4.length, 12, "ATECO 562910 deve restituire 12 ambienti");
+assert.equal(mensaEnvs5.length, 12, "ATECO 56.29 deve restituire 12 ambienti");
+
+const expectedMensaIds = [
+  "env-mensa-cottura",
+  "env-mensa-prep-fredda",
+  "env-mensa-diete-speciali",
+  "env-mensa-mondatura",
+  "env-mensa-confezionamento",
+  "env-mensa-celle-frigo",
+  "env-mensa-dispensa",
+  "env-mensa-lavaggio-pentole",
+  "env-mensa-tunnel-stoviglie",
+  "env-mensa-sala-selfservice",
+  "env-mensa-spogliatoi-filtro",
+  "env-mensa-rifiuti-tecnico",
+];
+
+for (const id of expectedMensaIds) {
+  assert.ok(
+    mensaEnvs1.some((e) => e.id === id),
+    `Ambiente con id '${id}' deve essere presente negli ambienti standard della mensa`,
+  );
+}
+
+// 1. Cucina Grandi Cotture Industriali
+const mensaCottura = mensaEnvs1.find((e) => e.id === "env-mensa-cottura")!;
+assert.equal(mensaCottura.surfaceSqM, 80);
+assert.equal(mensaCottura.heightM, 3.5);
+assert.equal(mensaCottura.volumeCuM, 280);
+assert.equal(mensaCottura.occupantsCount, 5);
+const compCottura = evaluateEnvironmentCompliance(mensaCottura, "56.29.10");
+assert.equal(compCottura.isHeightCompliant, true, "Altezza 3.50m deve essere a norma (≥ 3.00m)");
+assert.equal(compCottura.isCubatureCompliant, true, "Cubatura 280/5 = 56 mc/op deve essere a norma (≥ 10 mc)");
+assert.ok(
+  compCottura.summaryBadges.some((b) => b.text.includes("Cucina grandi cotture: altezza ottimale ≥ 3,50m")),
+  "Deve essere presente il badge altezza ottimale cucina grandi cotture con Ansul e canaline",
+);
+assert.ok(
+  compCottura.summaryBadges.some((b) => b.text.includes("Lavamani comando non manuale")),
+  "Deve essere presente il badge lavamani a comando non manuale",
+);
+
+// 2. Prep Fredda, Salumi & Condimenti
+const mensaPrepFredda = mensaEnvs1.find((e) => e.id === "env-mensa-prep-fredda")!;
+assert.equal(mensaPrepFredda.surfaceSqM, 35);
+assert.equal(mensaPrepFredda.heightM, 3.0);
+const compPrep = evaluateEnvironmentCompliance(mensaPrepFredda, "56.29.10");
+assert.equal(compPrep.isHeightCompliant, true);
+
+// 3. Area Diete Speciali & Senza Glutine
+const mensaDiete = mensaEnvs1.find((e) => e.id === "env-mensa-diete-speciali")!;
+assert.equal(mensaDiete.surfaceSqM, 16);
+const compDiete = evaluateEnvironmentCompliance(mensaDiete, "56.29.10");
+assert.ok(
+  compDiete.summaryBadges.some((b) => b.text.includes("Area diete speciali & gluten-free")),
+  "Deve essere presente il badge diete speciali e gluten-free Reg. UE 1169/2011",
+);
+
+// 4. Mondatura Ortofrutta
+const mensaMondatura = mensaEnvs1.find((e) => e.id === "env-mensa-mondatura")!;
+assert.equal(mensaMondatura.surfaceSqM, 25);
+assert.equal(mensaMondatura.heightM, 3.0);
+
+// 5. Confezionamento, Termosigillatura & Spedizione
+const mensaConfez = mensaEnvs1.find((e) => e.id === "env-mensa-confezionamento")!;
+assert.equal(mensaConfez.surfaceSqM, 40);
+const compConfez = evaluateEnvironmentCompliance(mensaConfez, "56.29.10");
+assert.ok(
+  compConfez.summaryBadges.some((b) => b.text.includes("Confezionamento pasti veicolati")),
+  "Deve essere presente il badge legame caldo ≥ 65°C / legame freddo ≤ 4°C Cook & Chill",
+);
+
+// 6. Celle Frigorifere Walk-in Deperibili & Abbattuti
+const mensaCelle = mensaEnvs1.find((e) => e.id === "env-mensa-celle-frigo")!;
+assert.equal(mensaCelle.surfaceSqM, 45);
+assert.equal(mensaCelle.heightM, 3.0);
+const compCelle = evaluateEnvironmentCompliance(mensaCelle, "56.29.10");
+assert.ok(
+  compCelle.summaryBadges.some((b) => b.text.includes("Allarme uomo intrappolato") && b.text.includes("UNI EN 378")),
+  "Celle deperibili devono avere allarme uomo intrappolato a norma UNI EN 378",
+);
+assert.ok(
+  compCelle.summaryBadges.some((b) => b.text.includes("Teletermometri continui HACCP per celle pluritemperatura")),
+  "Celle deperibili devono avere badge teletermometri continui HACCP",
+);
+
+// 7. Magazzino Merci Secche
+const mensaDispensa = mensaEnvs1.find((e) => e.id === "env-mensa-dispensa")!;
+assert.equal(mensaDispensa.surfaceSqM, 50);
+assert.equal(mensaDispensa.heightM, 3.5);
+
+// 8. Plonge Pentolame & Teglie
+const mensaPlonge = mensaEnvs1.find((e) => e.id === "env-mensa-lavaggio-pentole")!;
+assert.equal(mensaPlonge.surfaceSqM, 25);
+
+// 9. Tunnel Meccanizzato Stoviglie & Vassoi
+const mensaTunnel = mensaEnvs1.find((e) => e.id === "env-mensa-tunnel-stoviglie")!;
+assert.equal(mensaTunnel.surfaceSqM, 35);
+
+// 10. Sala Ristorazione & Self-Service
+const mensaSala = mensaEnvs1.find((e) => e.id === "env-mensa-sala-selfservice")!;
+assert.equal(mensaSala.surfaceSqM, 180);
+assert.equal(mensaSala.occupantsCount, 120);
+const compSala = evaluateEnvironmentCompliance(mensaSala, "56.29.10");
+assert.ok(compSala.cpiActivityAlert !== null, "Con 120 persone deve scattare allerta CPI / alta capienza");
+assert.ok(
+  compSala.summaryBadges.some((b) => b.text.includes("Vie di esodo libere ≥ 1,20m")),
+  "Sala mensa deve avere badge vie di esodo libere ≥ 1,20m",
+);
+assert.ok(
+  compSala.summaryBadges.some((b) => b.text.includes("Linea self-service bagnomaria ≥ 65°C")),
+  "Sala mensa deve avere badge bagnomaria e parafiato",
+);
+
+// 11. Spogliatoi con Filtro Igienico
+const mensaSpogliatoi = mensaEnvs1.find((e) => e.id === "env-mensa-spogliatoi-filtro")!;
+assert.equal(mensaSpogliatoi.surfaceSqM, 35);
+assert.equal(mensaSpogliatoi.occupantsCount, 15);
+const compSpogliatoi = evaluateEnvironmentCompliance(mensaSpogliatoi, "56.29.10");
+assert.ok(
+  compSpogliatoi.summaryBadges.some((b) => b.text.includes("Filtro igienico con lavamani a fotocellula")),
+  "Spogliatoi mensa devono avere badge filtro igienico e armadietti doppio scomparto",
+);
+
+// 12. Locale Rifiuti Climatizzato e Tecnico
+const mensaRifiuti = mensaEnvs1.find((e) => e.id === "env-mensa-rifiuti-tecnico")!;
+assert.equal(mensaRifiuti.surfaceSqM, 25);
+const compRifiuti = evaluateEnvironmentCompliance(mensaRifiuti, "56.29.10");
+assert.ok(
+  compRifiuti.summaryBadges.some((b) => b.text.includes("Cella frigorifera rifiuti umidi (≤ 5°C)")),
+  "Locale rifiuti deve avere badge cella frigo umidi e oli esausti CER 20 01 25",
+);
+
+// ============================================================================
+// Test 16: generateEnvironmentChecklistItems per locali Mensa (ATECO 56.29.10)
+// ============================================================================
+console.log("Test 16: generateEnvironmentChecklistItems per locali Mensa / Centri Cottura (ATECO 56.29.10)");
+
+// 1. Cucina Grandi Cotture
+const mensaCotturaItems = generateEnvironmentChecklistItems(mensaCottura, "56.29.10");
+assert.ok(
+  mensaCotturaItems.some((it) => it.id.includes("pentole-vapore-ped") && it.domain === "safety"),
+  "Cucina grandi cotture deve verificare pentole a vapore PED (domain: safety)",
+);
+assert.ok(
+  mensaCotturaItems.some((it) => it.id.includes("brasiere-ribaltabili-sicurezza") && it.domain === "safety"),
+  "Cucina grandi cotture deve verificare brasiere ribaltabili UNI EN 13885 (domain: safety)",
+);
+assert.ok(
+  mensaCotturaItems.some((it) => it.id.includes("impianto-spegnimento-ansul") && it.domain === "both"),
+  "Cucina grandi cotture deve verificare impianto spegnimento cappa Ansul R-102 (domain: both)",
+);
+assert.ok(
+  mensaCotturaItems.some((it) => it.id.includes("canaline-degrassatore-disoleatore") && it.domain === "both"),
+  "Cucina grandi cotture deve verificare canaline e pozzetto degrassatore UNI EN 1825 (domain: both)",
+);
+assert.ok(
+  mensaCotturaItems.some((it) => it.id.includes("lavamani-non-manuale-antibatterico") && it.domain === "haccp"),
+  "Cucina grandi cotture deve verificare lavamani a comando non manuale con sapone antibatterico (domain: haccp)",
+);
+
+// 2. Prep Fredda & Salumi
+const mensaPrepFreddaItems = generateEnvironmentChecklistItems(mensaPrepFredda, "56.29.10");
+assert.ok(
+  mensaPrepFreddaItems.some((it) => it.id.includes("temperatura-climatizzata-18c") && it.domain === "both"),
+  "Prep fredda deve verificare temperatura controllata ≤ 18°C (domain: both)",
+);
+assert.ok(
+  mensaPrepFreddaItems.some((it) => it.id.includes("tavoli-refrigerati-affettatrici") && it.domain === "both"),
+  "Prep fredda deve verificare tavoli refrigerati e interblocchi affettatrici UNI EN 1974 (domain: both)",
+);
+assert.ok(
+  mensaPrepFreddaItems.some((it) => it.id.includes("lavello-disinfezione-ortaggi") && it.domain === "haccp"),
+  "Prep fredda deve verificare lavello dedicato disinfezione verdure (domain: haccp)",
+);
+
+// 3. Area Diete Speciali & Senza Glutine
+const mensaDieteItems = generateEnvironmentChecklistItems(mensaDiete, "56.29.10");
+assert.ok(
+  mensaDieteItems.some((it) => it.id.includes("cross-contact-allergeni-glutine") && it.domain === "haccp"),
+  "Diete speciali deve verificare prevenzione cross-contact allergeni e celiachia (domain: haccp)",
+);
+assert.ok(
+  mensaDieteItems.some((it) => it.id.includes("armadietto-chiuso-gluten-free") && it.domain === "haccp"),
+  "Diete speciali deve verificare armadietto chiuso esclusivo gluten-free (domain: haccp)",
+);
+
+// 4. Ricevimento & Mondatura Ortofrutta
+const mensaMondaturaItems = generateEnvironmentChecklistItems(mensaMondatura, "56.29.10");
+assert.ok(
+  mensaMondaturaItems.some((it) => it.id.includes("pelapatate-microinterruttori-carter") && it.domain === "safety"),
+  "Mondatura deve verificare pelapatate con microinterruttori e decantatore UNI EN 13208 (domain: safety)",
+);
+assert.ok(
+  mensaMondaturaItems.some((it) => it.id.includes("vasche-lavaggio-vortice-disinfezione") && it.domain === "haccp"),
+  "Mondatura deve verificare vasche lavaggio a vortice e disinfezione (domain: haccp)",
+);
+assert.ok(
+  mensaMondaturaItems.some((it) => it.id.includes("pavimento-antiscivolo-canaletta-mondatura") && it.domain === "both"),
+  "Mondatura deve verificare pavimento antiscivolo R13 e canale di scolo (domain: both)",
+);
+
+// 5. Confezionamento Pasti Veicolati
+const mensaConfezItems = generateEnvironmentChecklistItems(mensaConfez, "56.29.10");
+assert.ok(
+  mensaConfezItems.some((it) => it.id.includes("termosigillatrice-carter-fotocellule") && it.domain === "safety"),
+  "Confezionamento deve verificare termosigillatrice con fotocellule UNI EN 415-3 (domain: safety)",
+);
+assert.ok(
+  mensaConfezItems.some((it) => it.id.includes("temperatura-legame-caldo-freddo") && it.domain === "haccp"),
+  "Confezionamento deve verificare temperatura legame caldo ≥ 65°C / freddo ≤ 4°C (domain: haccp)",
+);
+assert.ok(
+  mensaConfezItems.some((it) => it.id.includes("contenitori-isotermici-trasporto-atp") && it.domain === "haccp"),
+  "Confezionamento deve verificare contenitori isotermici e trasporto ATP (domain: haccp)",
+);
+
+// 6. Celle Frigorifere Walk-in & Cella Abbattuti
+const celleItemsMensa = generateEnvironmentChecklistItems(mensaCelle, "56.29.10");
+assert.ok(
+  celleItemsMensa.some((it) => it.id.includes("allarme-uomo-intrappolato") && it.domain === "safety"),
+  "Celle frigorifere mensa devono avere allarme uomo intrappolato UNI EN 378 (domain: safety)",
+);
+assert.ok(
+  celleItemsMensa.some((it) => it.id.includes("registrazione-temperature-campioni-72h") && it.domain === "haccp"),
+  "Celle frigorifere mensa devono avere registrazione temperature e campioni testimone 72h (domain: haccp)",
+);
+
+// 7. Magazzino Merci Secche
+const dispensaItemsMensa = generateEnvironmentChecklistItems(mensaDispensa, "56.29.10");
+assert.ok(
+  dispensaItemsMensa.some((it) => it.id.includes("scaffali-sollevati-ispezione-infestanti") && it.domain === "both"),
+  "Magazzino secco deve verificare scaffalature sollevate ≥ 15 cm e pest control (domain: both)",
+);
+assert.ok(
+  dispensaItemsMensa.some((it) => it.id.includes("scaffali-portata") && it.domain === "safety"),
+  "Magazzino secco deve verificare portata scaffali UNI EN 15635 (domain: safety)",
+);
+
+// 8. Plonge Industriale Pentolame
+const mensaPlongeItems = generateEnvironmentChecklistItems(mensaPlonge, "56.29.10");
+assert.ok(
+  mensaPlongeItems.some((it) => it.id.includes("dispositivo-antiriflusso-rete-idrica") && it.domain === "both"),
+  "Plonge industriale deve verificare dispositivo antiriflusso UNI EN 1717 (domain: both)",
+);
+assert.ok(
+  mensaPlongeItems.some((it) => it.id.includes("cappa-aspirazione-vapori-plonge") && it.domain === "safety"),
+  "Plonge industriale deve verificare cappa aspirazione vapori (domain: safety)",
+);
+assert.ok(
+  mensaPlongeItems.some((it) => it.id.includes("dosatori-chimici-contatto") && it.domain === "safety"),
+  "Plonge industriale deve verificare dosatori automatici detergenti caustici (domain: safety)",
+);
+
+// 9. Tunnel Meccanizzato Stoviglie & Vassoi
+const mensaTunnelItems = generateEnvironmentChecklistItems(mensaTunnel, "56.29.10");
+assert.ok(
+  mensaTunnelItems.some((it) => it.id.includes("arresto-emergenza-tunnel-nastro") && it.domain === "safety"),
+  "Tunnel stoviglie deve verificare arresto di emergenza a fungo su nastro (domain: safety)",
+);
+assert.ok(
+  mensaTunnelItems.some((it) => it.id.includes("risciacquo-termico-82c-sanificazione") && it.domain === "haccp"),
+  "Tunnel stoviglie deve verificare risciacquo termico a ≥ 82°C DIN 10510 (domain: haccp)",
+);
+assert.ok(
+  mensaTunnelItems.some((it) => it.id.includes("separazione-sbarazzo-pulito") && it.domain === "both"),
+  "Tunnel stoviglie deve verificare separazione sbarazzo sporco e uscita pulito (domain: both)",
+);
+
+// 10. Sala Ristorazione & Linea Distribuzione Self-Service
+const salaItemsMensa = generateEnvironmentChecklistItems(mensaSala, "56.29.10");
+assert.ok(
+  salaItemsMensa.some((it) => it.id.includes("bagnomaria-parafiato-selfservice") && it.domain === "haccp"),
+  "Sala self-service deve verificare bagnomaria caldo ≥ 65°C con schermo parafiato (domain: haccp)",
+);
+assert.ok(
+  salaItemsMensa.some((it) => it.id.includes("vie-esodo-maniglioni-sala-mensa") && it.domain === "safety"),
+  "Sala self-service deve verificare vie di fuga ≥ 1,20m e uscite antipanico (domain: safety)",
+);
+
+// 11. Spogliatoi del Personale con Zona Filtro Igienico
+const spogliatoiItemsMensa = generateEnvironmentChecklistItems(mensaSpogliatoi, "56.29.10");
+assert.ok(
+  spogliatoiItemsMensa.some((it) => it.id.includes("filtro-igienico-lavaggio-mani-dpi") && it.domain === "haccp"),
+  "Spogliatoi con filtro igienico devono verificare lavamani a fotocellula e sanificazione mani (domain: haccp)",
+);
+assert.ok(
+  spogliatoiItemsMensa.some((it) => it.id.includes("armadietti-spogliatoio") && (it.domain === "both" || it.domain === "safety")),
+  "Spogliatoi mensa devono avere armadietti a doppio scomparto sporco/pulito",
+);
+
+// 12. Locale Rifiuti Climatizzato & Impianti
+const rifiutiItemsMensa = generateEnvironmentChecklistItems(mensaRifiuti, "56.29.10");
+assert.ok(
+  rifiutiItemsMensa.some((it) => it.id.includes("cella-frigo-rifiuti-umidi-5c") && it.domain === "both"),
+  "Locale rifiuti mensa deve verificare cella frigo umidi ≤ 5°C (domain: both)",
+);
+assert.ok(
+  rifiutiItemsMensa.some((it) => it.id.includes("fusti-oli-vegetali-esausti-cer") && it.domain === "both"),
+  "Locale rifiuti mensa deve verificare stoccaggio olio vegetale esausto CER 20 01 25 (domain: both)",
+);
+assert.ok(
+  rifiutiItemsMensa.some((it) => it.id.includes("elettrovalvola-gas-sgancio-mensa") && it.domain === "safety"),
+  "Locale tecnico rifiuti deve verificare elettrovalvola gas e pulsante sgancio (domain: safety)",
+);
+
+// Verifica del filtraggio checklistMode su cucina e diete speciali mensa
+const cotturaHaccpMode = filterEnvironmentItemsByChecklistMode(mensaCotturaItems, "haccp_only");
+assert.ok(
+  cotturaHaccpMode.every((it) => it.domain === "haccp" || it.domain === "both"),
+  "In modalità haccp_only tutti gli item cucina mensa devono essere haccp o both",
+);
+assert.ok(
+  !cotturaHaccpMode.some((it) => it.domain === "safety"),
+  "In modalità haccp_only nessun item cucina mensa deve avere domain safety",
+);
+
+const cotturaSafetyMode = filterEnvironmentItemsByChecklistMode(mensaCotturaItems, "safety_only");
+assert.ok(
+  cotturaSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item cucina mensa devono essere safety o both",
+);
+assert.ok(
+  !cotturaSafetyMode.some((it) => it.domain === "haccp"),
+  "In modalità safety_only nessun item cucina mensa deve avere domain haccp",
+);
+
 console.log("=== TUTTI I TEST Step2AmbientiDiLavoro SUPERATI CON SUCCESSO! ===");
