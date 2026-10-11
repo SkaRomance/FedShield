@@ -2005,6 +2005,267 @@ export function getStandardEnvironmentsForAteco(atecoCode?: string): WorkEnviron
     ];
   }
 
+  // 0-octies. Gelateria e Pasticceria Ambulante (56.10.41, 56.10.4, 561041, 56104 - Furgoni, ape car, rimorchi e carretti allestiti per gelato artigianale/soft, granite, crepes, waffle, pasticceria con laboratorio di produzione/pastorizzazione e hangar di rimessaggio)
+  if (
+    ateco.startsWith("561041") ||
+    (ateco.startsWith("56104") && !ateco.startsWith("561042"))
+  ) {
+    return [
+      {
+        id: "env-gelamb-banco-veicolare",
+        key: "gelamb_banco_pozzetti_porzionatura_veicolare",
+        name: "Vano Operativo Banco Pozzetti Gelato & Porzionatura Veicolare",
+        icon: "🍦",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 8,
+        heightM: 2.2,
+        volumeCuM: 17.6,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 2.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          forcedExhaustType: "kitchen_hood",
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-ft-crepes-waffle",
+        key: "ft_crepes_waffle_farciture_calde_bordo",
+        name: "Zona Piastre Crêpes, Waffle & Farciture Calde a Bordo",
+        icon: "🥞",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 4,
+        heightM: 2.2,
+        volumeCuM: 8.8,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 1.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          forcedExhaustType: "kitchen_hood",
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-gelamb-vano-tecnico-batterie",
+        key: "gelamb_vano_tecnico_batterie_litio_inverter",
+        name: "Vano Tecnico Batterie Litio, Inverter & Quadro CEE Veicolare",
+        icon: "⚡",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 3,
+        heightM: 1.2,
+        volumeCuM: 3.6,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-gelamb-centrale-idrica",
+        key: "gelamb_centrale_idrica_veicolare_boiler",
+        name: "Centrale Idrica Veicolare (Acqua Potabile, Boiler & Lavaporzionatore)",
+        icon: "💧",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 2,
+        heightM: 1.2,
+        volumeCuM: 2.4,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          wallsCondition: "washable_sanitizable_2m",
+        },
+      },
+      {
+        id: "env-gelamb-cabina-guida",
+        key: "gelamb_cabina_guida_apecar_furgone",
+        name: "Cabina di Guida Furgone / Ape Car Allestito Gelateria",
+        icon: "🚚",
+        category: "sales_office",
+        isDefault: true,
+        surfaceSqM: 4,
+        heightM: 1.8,
+        volumeCuM: 7.2,
+        occupantsCount: 1,
+        emergencyExitsCount: 2,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("sales_office"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-gelamb-lab-pastorizzazione",
+        key: "gelamb_lab_pastorizzazione_maturazione_miscele",
+        name: "Laboratorio Base: Zona Pastorizzazione & Maturazione Miscele Gelato",
+        icon: "🥛",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 25,
+        heightM: 3.0,
+        volumeCuM: 75,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 2.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-gelamb-lab-mantecazione",
+        key: "gelamb_lab_mantecazione_abbattimento_farcitura",
+        name: "Laboratorio Base: Zona Mantecazione, Abbattimento & Farcitura",
+        icon: "🍨",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 30,
+        heightM: 3.0,
+        volumeCuM: 90,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 3.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-gelamb-lab-pasticceria",
+        key: "gelamb_lab_pasticceria_forno_cialde_coni",
+        name: "Laboratorio Base: Reparto Pasticceria da Forno, Cialde & Coni",
+        icon: "🥐",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 25,
+        heightM: 3.0,
+        volumeCuM: 75,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 2.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          forcedExhaustType: "kitchen_hood",
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+        },
+      },
+      {
+        id: "env-gelamb-cella-stoccaggio",
+        key: "gelamb_cella_negativa_stoccaggio_carapine_20c",
+        name: "Cella Frigorifera Negativa Stoccaggio Carapine & Torte Gelato (-20°C)",
+        icon: "❄️",
+        category: "storage",
+        isDefault: true,
+        surfaceSqM: 20,
+        heightM: 2.6,
+        volumeCuM: 52,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("storage"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-gelamb-dispensa-coni",
+        key: "gelamb_magazzino_secco_coni_packaging_moca",
+        name: "Magazzino Secco, Coni, Coppette & Packaging MOCA di Sede",
+        icon: "📦",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 25,
+        heightM: 3.0,
+        volumeCuM: 75,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          shelvingCertified: true,
+        },
+      },
+      {
+        id: "env-gelamb-lavaggio-carapine",
+        key: "gelamb_plonge_sede_lavaggio_carapine_fruste",
+        name: "Plonge di Sede: Lavaggio & Sanificazione Carapine e Fruste",
+        icon: "🧼",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 18,
+        heightM: 3.0,
+        volumeCuM: 54,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 1.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-gelamb-hangar-ricarica",
+        key: "gelamb_hangar_rimessaggio_coperto_ricarica_notturna",
+        name: "Hangar Rimessaggio Coperto con Colonnina di Ricarica Notturna Frigo",
+        icon: "🏢",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 45,
+        heightM: 4.0,
+        volumeCuM: 180,
+        occupantsCount: 2,
+        emergencyExitsCount: 2,
+        windowSurfaceSqM: 4.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          emergencyLighting: true,
+        },
+      },
+    ];
+  }
+
   // 0-septies. Food Truck / Cibo di Strada e Ristorazione Ambulante (56.10.42, 56.10.4, 561042, 56104 - Furgoni e autonegozi speciali allestiti per somministrazione itinerante, chioschi mobili, paninoteche ambulanti, rosticcerie mobili con laboratorio/rimessaggio di sede)
   if (
     ateco.startsWith("561042") ||
@@ -3091,17 +3352,23 @@ export function evaluateEnvironmentCompliance(
   if (
     env.id === "env-ft-vano-cottura" ||
     env.id === "env-ft-banco-somministrazione" ||
-    env.id === "env-ft-vano-refrigerazione"
+    env.id === "env-ft-vano-refrigerazione" ||
+    env.id === "env-gelamb-banco-veicolare" ||
+    env.id === "env-ft-crepes-waffle"
   ) {
     minHeightRequired = 2.0; // Deroga per autonegozi speciali e veicoli allestiti con ventilazione forzata certificata
-  } else if (env.id === "env-ft-cabina-guida") {
+  } else if (env.id === "env-ft-cabina-guida" || env.id === "env-gelamb-cabina-guida") {
     minHeightRequired = 1.8; // Cabina di guida veicolare omologata
   } else if (
     env.id === "env-ft-vano-bombole-gpl" ||
     env.id === "env-ft-vano-generatore" ||
-    env.id === "env-ft-impianto-idrico"
+    env.id === "env-ft-impianto-idrico" ||
+    env.id === "env-gelamb-vano-tecnico-batterie" ||
+    env.id === "env-gelamb-centrale-idrica"
   ) {
     minHeightRequired = 1.2; // Vani tecnici veicolari ispezionabili
+  } else if (env.id === "env-gelamb-cella-stoccaggio" || env.key.includes("cella_negativa") || env.key.includes("cella_stoccaggio")) {
+    minHeightRequired = 2.4; // 2,40 m per celle frigorifere prefabbricate e locali tecnici refrigerati
   } else if (env.category === "production" || env.category === "warehouse" || env.category === "storage") {
     minHeightRequired = 3.0; // 3,00 m per locali industriali, stoccaggio e lavorazioni
   } else if (env.category === "services" || env.category === "changing_rooms" || env.category === "technical") {
@@ -3814,6 +4081,213 @@ export function evaluateEnvironmentCompliance(
     });
   }
 
+  // 12. Regole ad hoc per Gelateria e Pasticceria Ambulante (56.10.41 / 56.10.4)
+  // a) Banco pozzetti veicolare & porzionatura
+  const isGelambCounter =
+    env.id === "env-gelamb-banco-veicolare" ||
+    env.key === "gelamb_banco_pozzetti_porzionatura_veicolare" ||
+    (env.id.includes("gelamb-banco") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("56104") ?? false));
+  if (isGelambCounter) {
+    if (height >= 2.0) {
+      summaryBadges.push({
+        text: "🍦 Banco pozzetti veicolare a norma: altezza ≥ 2,00m con banco a glicole -12/-14°C",
+        status: "success",
+      });
+    } else {
+      summaryBadges.push({
+        text: "🍦 Banco pozzetti veicolare con altezza insufficiente (< 2,00m)",
+        status: "warning",
+      });
+    }
+    summaryBadges.push({
+      text: "🚿 Lavamani con comando non manuale a ginocchio & lavaporzionatore a flusso continuo/sanificato",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🛡️ Vetrina parafiato curvo antiaerosol & portellone con pistoni e fermo meccanico anticaduta",
+      status: "success",
+    });
+  }
+
+  // b) Zona Piastre Crêpes, Waffle & Farciture Calde a Bordo
+  const isGelambCrepes =
+    env.id === "env-ft-crepes-waffle" ||
+    env.key === "ft_crepes_waffle_farciture_calde_bordo" ||
+    env.id.includes("crepes-waffle");
+  if (isGelambCrepes) {
+    if (height >= 2.0) {
+      summaryBadges.push({
+        text: "🥞 Postazione crêpes/waffle a norma: altezza veicolare ≥ 2,00m e piastre MOCA",
+        status: "success",
+      });
+    } else {
+      summaryBadges.push({
+        text: "🥞 Postazione crêpes/waffle con altezza insufficiente (< 2,00m)",
+        status: "warning",
+      });
+    }
+    summaryBadges.push({
+      text: "🍳 Cappa aspirazione fumi inox a tetto & paraspruzzi perimetrale di sicurezza",
+      status: "info",
+    });
+  }
+
+  // c) Vano Tecnico Batterie Litio & Inverter Veicolare
+  const isGelambBatteries =
+    env.id === "env-gelamb-vano-tecnico-batterie" ||
+    env.key === "gelamb_vano_tecnico_batterie_litio_inverter" ||
+    env.id.includes("tecnico-batterie");
+  if (isGelambBatteries) {
+    summaryBadges.push({
+      text: "⚡ Pacco batterie LiFePO4 con BMS di sicurezza termica & inverter sinusoidale 230V",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "🔌 Quadro elettrico veicolare con salvavita differenziale 30 mA & presa CEE esterna",
+      status: "success",
+    });
+  }
+
+  // d) Centrale Idrica Veicolare (Acqua Potabile, Boiler & Lavaporzionatore)
+  const isGelambWater =
+    env.id === "env-gelamb-centrale-idrica" ||
+    env.key === "gelamb_centrale_idrica_veicolare_boiler" ||
+    (env.id.includes("gelamb-centrale-idrica") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("56104") ?? false));
+  if (isGelambWater) {
+    summaryBadges.push({
+      text: "💧 Centrale idrica veicolare: serbatoio acqua potabile MOCA 80L, autoclave 12V e boiler sanitario",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🚰 Serbatoio acque grigie con saracinesca di scarico a tenuta",
+      status: "warning",
+    });
+  }
+
+  // e) Cabina di Guida Furgone / Ape Car Allestito Gelateria
+  const isGelambCab =
+    env.id === "env-gelamb-cabina-guida" ||
+    env.key === "gelamb_cabina_guida_apecar_furgone" ||
+    env.id.includes("gelamb-cabina");
+  if (isGelambCab) {
+    summaryBadges.push({
+      text: "🚚 Postazione guida omologata con paratia divisoria fissa di sicurezza anti-intrusione",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🧯 Estintore veicolare a polvere 2 kg pronto all'uso",
+      status: "success",
+    });
+  }
+
+  // f) Laboratorio Base: Zona Pastorizzazione & Maturazione Miscele Gelato
+  const isGelambPast =
+    env.id === "env-gelamb-lab-pastorizzazione" ||
+    env.key === "gelamb_lab_pastorizzazione_maturazione_miscele" ||
+    env.id.includes("pastorizzazione");
+  if (isGelambPast) {
+    summaryBadges.push({
+      text: "🥛 Ciclo termico pastorizzazione HACCP (+85°C) e shock termico rapido (+4°C) a norma Reg. CE 853/04",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🚿 Lavamani a comando non manuale a ginocchio con sapone antibatterico",
+      status: "info",
+    });
+  }
+
+  // g) Laboratorio Base: Zona Mantecazione, Abbattimento & Farcitura
+  const isGelambMantecazione =
+    env.id === "env-gelamb-lab-mantecazione" ||
+    env.key === "gelamb_lab_mantecazione_abbattimento_farcitura" ||
+    env.id.includes("mantecazione");
+  if (isGelambMantecazione) {
+    summaryBadges.push({
+      text: "🍨 Mantecazione e abbattimento rapido carapine a -35°C per stabilizzazione cristalli",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "⚙️ Mantecatore orizzontale con microinterruttore di sicurezza & canaline sifonate inox a pavimento",
+      status: "success",
+    });
+  }
+
+  // h) Laboratorio Base: Reparto Pasticceria da Forno, Cialde & Coni
+  const isGelambPasticceria =
+    env.id === "env-gelamb-lab-pasticceria" ||
+    env.key === "gelamb_lab_pasticceria_forno_cialde_coni" ||
+    env.id.includes("lab-pasticceria");
+  if (isGelambPasticceria) {
+    summaryBadges.push({
+      text: "🥐 Macchine pasticceria a norma: planetaria con riparo UNI EN 454 e sfogliatrice UNI EN 1674",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🔥 Forno pasticceria con cappa d'aspirazione e piastra coni/cialde artigianali",
+      status: "info",
+    });
+  }
+
+  // i) Cella Frigorifera Negativa Stoccaggio Carapine & Torte Gelato (-20°C)
+  const isGelambCella =
+    env.id === "env-gelamb-cella-stoccaggio" ||
+    env.key === "gelamb_cella_negativa_stoccaggio_carapine_20c" ||
+    env.id.includes("gelamb-cella");
+  if (isGelambCella) {
+    summaryBadges.push({
+      text: "❄️ Stoccaggio carapine gelato a -20°C con teletermometri continui HACCP",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🚨 Allarme acustico-visivo uomo intrappolato a 24V h24 a norma UNI EN 378 e sblocco fluorescente",
+      status: "danger",
+    });
+  }
+
+  // j) Magazzino Secco, Coni, Coppette & Packaging MOCA di Sede
+  const isGelambPackaging =
+    env.id === "env-gelamb-dispensa-coni" ||
+    env.key === "gelamb_magazzino_secco_coni_packaging_moca" ||
+    env.id.includes("dispensa-coni");
+  if (isGelambPackaging) {
+    summaryBadges.push({
+      text: "📦 Stoccaggio coni, coppette e packaging MOCA rialzato ≥ 15 cm (Reg. CE 1935/2004)",
+      status: "info",
+    });
+  }
+
+  // k) Plonge di Sede: Lavaggio & Sanificazione Carapine e Fruste
+  const isGelambPlonge =
+    env.id === "env-gelamb-lavaggio-carapine" ||
+    env.key === "gelamb_plonge_sede_lavaggio_carapine_fruste" ||
+    env.id.includes("lavaggio-carapine");
+  if (isGelambPlonge) {
+    summaryBadges.push({
+      text: "🧼 Plonge e lavaoggetti con risciacquo igienico ≥ 82°C per sanificazione carapine inox",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🚰 Disconnettore idrico antiriflusso a norma UNI EN 1717",
+      status: "info",
+    });
+  }
+
+  // l) Hangar Rimessaggio Coperto con Colonnina di Ricarica Notturna Frigo
+  const isGelambHangar =
+    env.id === "env-gelamb-hangar-ricarica" ||
+    env.key === "gelamb_hangar_rimessaggio_coperto_ricarica_notturna" ||
+    env.id.includes("hangar-ricarica");
+  if (isGelambHangar) {
+    summaryBadges.push({
+      text: "🏢 Colonnina allaccio elettrico notturno a norma CEI per mantenimento freddo glicole a veicolo fermo",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🧯 Estintori carrellati e vie di manovra libere nell'hangar",
+      status: "success",
+    });
+  }
+
   return {
     isHeightCompliant,
     minHeightRequired,
@@ -3881,7 +4355,11 @@ export function generateEnvironmentChecklistItems(
       env.id.includes("mensa-") ||
       env.key.includes("mensa_") ||
       env.id.includes("cat-") ||
-      env.key.includes("cat_"));
+      env.key.includes("cat_") ||
+      env.id.includes("ft-") ||
+      env.key.includes("ft_") ||
+      env.id.includes("gelamb-") ||
+      env.key.includes("gelamb_"));
 
   // 1. Requisito Dimensionale & Cubatura
   items.push({
@@ -6823,6 +7301,493 @@ export function generateEnvironmentChecklistItems(
       categoryTag: "igiene",
       suggestedNonConformity:
         "Wc senza antibagno o lavamani con rubinetto a vite manuale nei servizi igienici della sede.",
+    });
+  }
+
+  // 12. Regole e Requisiti per Gelateria e Pasticceria Ambulante (56.10.41 / 56.10.4)
+  // a) Vano Operativo Banco Pozzetti Gelato & Porzionatura Veicolare
+  if (env.id === "env-gelamb-banco-veicolare" || env.id.includes("gelamb-banco-veicolare")) {
+    items.push({
+      id: `${env.id}-temperatura-pozzetti-carapine-glicole`,
+      area: env.name,
+      title: "Mantenimento Temperatura Pozzetti a Glicole (-12°C / -14°C) per Porzionatura Gelato",
+      question:
+        "Il banco a pozzetti a glicole del veicolo mantiene costantemente la temperatura di servizio tra -12°C e -14°C verificata con termometro digitale ben visibile all'operatore, garantendo la consistenza idonea e la sicurezza igienico-sanitaria del gelato?",
+      normReference: "Reg. CE 852/2004 Allegato II Cap. IX e Reg. CE 37/2005",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "microclima_luce",
+      suggestedNonConformity:
+        "Temperatura del banco pozzetti veicolare non conforme (> -12°C) o display termometrico guasto con rischio fusione e proliferazione microbiologica nel gelato.",
+    });
+
+    items.push({
+      id: `${env.id}-lavaporzionatore-flusso-continuo-sanificante`,
+      area: env.name,
+      title: "Lavaporzionatore a Flusso Continuo d'Acqua o Vaschetta con Acqua Sanificante Rinnovata",
+      question:
+        "Il lavaporzionatore per palette e dosatori di gelato a bordo è alimentato a flusso d'acqua continuo a perdere oppure, se a pozzetto statico, l'acqua viene addizionata con disinfettante alimentare idoneo e rinnovata frequentemente ad ogni turno operativo?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo V punto 1",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Lavaporzionatore con acqua stagnante non rinnovata o privo di sanificante a bordo con rischio contaminazione crociata microbica e da allergeni tra gusti.",
+    });
+
+    items.push({
+      id: `${env.id}-vetrina-parafiato-curvo-antiaerosol`,
+      area: env.name,
+      title: "Vetrina Parafiato Igienico Curvo Antiaerosol per Protezione Pozzetti e Clienti",
+      question:
+        "La postazione di porzionatura e somministrazione verso il pubblico è protetta da vetrata parafiato curva trasparente e igienica di altezza idonea per isolare le carapine da polveri stradali e goccioline aerosol dei clienti?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo III punto 1 e 2",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Vetrina parafiato assente, danneggiata o di altezza insufficiente a proteggere le carapine del gelato e le cialde dalle contaminazioni esterne dei clienti.",
+    });
+
+    items.push({
+      id: `${env.id}-fermo-meccanico-portellone-veicolare`,
+      area: env.name,
+      title: "Portellone Panoramico Veicolare con Pistoni Idraulici e Fermo Meccanico Anticaduta",
+      question:
+        "Il portellone panoramico sollevabile del veicolo dispone di pistoni idraulici/a gas in piena efficienza e di perno/asta di fermo meccanico di sicurezza anticaduta per prevenire la discesa improvvisa dovuta a folate di vento o cedimento della pressione?",
+      normReference: "D.Lgs. 81/2008 Allegato V punto 1 e art. 71",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Portellone panoramico del furgone/ape car privo di blocco meccanico anticaduta o con pistoni a gas usurati con pericolo di schiacciamento dell'operatore.",
+    });
+
+    items.push({
+      id: `${env.id}-lavamani-comando-non-manuale-acqua-calda`,
+      area: env.name,
+      title: "Lavamani a Bordo Veicolo con Comando a Ginocchio, Acqua Calda Sanitaria ed Erogatori",
+      question:
+        "Il vano banco del veicolo dispone di lavamani autonomo in acciaio inox con comando ad azionamento non manuale (a ginocchio o pedale), boiler per acqua calda sanitaria, erogatore di sapone antibatterico e asciugamani a perdere?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo I punto 4 e Cap. III",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Lavamani a bordo veicolo privo di comando a ginocchio, mancante di acqua calda sanitaria o sprovvisto di sapone antibatterico e salviette monouso.",
+    });
+  }
+
+  // b) Zona Piastre Crêpes, Waffle & Farciture Calde a Bordo
+  if (env.id === "env-ft-crepes-waffle" || env.id.includes("ft-crepes-waffle") || env.id.includes("crepes-waffle")) {
+    items.push({
+      id: `${env.id}-piastre-ghisa-moca-certificazione`,
+      area: env.name,
+      title: "Piastre per Crêpes e Waffle in Ghisa Alimentare Certificata MOCA",
+      question:
+        "Le piastre per crêpes e le piastre da cialde/waffle a bordo sono realizzate in ghisa alimentare o rivestimenti antiaderenti certificati conformi MOCA, mantenute prive di scrostature, ruggine o residui carbonizzati?",
+      normReference: "Reg. CE 1935/2004 e D.M. 21/03/1973 (Materiali ed Oggetti a Contatto con Alimenti)",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Piastre per crêpes/waffle usurate o prive di attestato di conformità MOCA con rischio cessione di composti nocivi agli alimenti cotti.",
+    });
+
+    items.push({
+      id: `${env.id}-paraspruzzi-inox-perimetrale`,
+      area: env.name,
+      title: "Paraspruzzi Inox Perimetrale di Protezione contro Contatti Termici e Ustioni Operatore",
+      question:
+        "Il piano di lavoro delle piastre è provvisto di paraspruzzi perimetrali in acciaio inox per isolare le superfici ad alta temperatura (200-250°C), prevenendo schizzi di pastella bollente e contatti termici accidentali dell'operatore a bordo?",
+      normReference: "D.Lgs. 81/2008 Allegato V punto 6 (Rischio termico e ustioni)",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "pavimenti_pareti",
+      suggestedNonConformity:
+        "Assenza di paratie o paraspruzzi perimetrali in acciaio inox attorno alle piastre calde con pericolo ustione per il personale a bordo.",
+    });
+
+    items.push({
+      id: `${env.id}-cappa-aspirazione-scarico-tetto`,
+      area: env.name,
+      title: "Cappa di Aspirazione Inox con Filtri a Labirinto e Scarico Fumi Canalizzato a Tetto",
+      question:
+        "La zona piastre crêpes e scaldatopping a bordo veicolo è dotata di cappa aspirante in acciaio inox con filtri a labirinto asportabili e condotto di espulsione fumi e vapori canalizzato all'esterno a tetto con comignolo antivento?",
+      normReference: "Reg. CE 852/2004 All. II Cap. III e D.Lgs. 81/2008 Allegato IV punto 1.9",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Cappa di aspirazione fumi piastre priva di scarico canalizzato a tetto o filtri antigrasso intasati all'interno dell'abitacolo operativo.",
+    });
+  }
+
+  // c) Vano Tecnico Batterie Litio, Inverter & Quadro CEE Veicolare
+  if (env.id === "env-gelamb-vano-tecnico-batterie" || env.id.includes("gelamb-vano-tecnico-batterie")) {
+    items.push({
+      id: `${env.id}-batterie-litio-bms-ventilazione`,
+      area: env.name,
+      title: "Pacco Batterie Litio LiFePO4 con BMS di Controllo Termico e Vano Areato",
+      question:
+        "Il pacco batterie di accumulo LiFePO4 per l'alimentazione in marcia dei pozzetti a glicole è alloggiato in vano tecnico dedicato con griglie di aerazione, sensore di temperatura e sistema BMS con distacco automatico in caso di surriscaldamento?",
+      normReference: "D.Lgs. 81/2008 art. 80 e CEI EN 62619 (Sicurezza accumulatori litio industriali)",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Pacco batterie litio privo di BMS con allarmi termici o vano batterie privo di ventilazione con pericolo surriscaldamento a bordo veicolo.",
+    });
+
+    items.push({
+      id: `${env.id}-salvavita-30ma-inverter-quadro-cee`,
+      area: env.name,
+      title: "Interruttore Differenziale Salvavita 30 mA su Inverter e Presa CEE Esterna di Rete",
+      question:
+        "Il quadro elettrico veicolare è protetto da interruttore differenziale (salvavita) ad alta sensibilità da 30 mA sia durante l'alimentazione tramite inverter 230V che durante l'allaccio alla colonnina CEE esterna?",
+      normReference: "Norma CEI 64-8 sez. 717 e D.Lgs. 81/2008 Titolo III Capo III",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Quadro elettrico del veicolo privo di interruttore differenziale salvavita 30 mA efficiente a monte delle linee di alimentazione frigoriferi e piastre.",
+    });
+  }
+
+  // d) Centrale Idrica Veicolare (Acqua Potabile, Boiler & Lavaporzionatore)
+  if (env.id === "env-gelamb-centrale-idrica" || env.id.includes("gelamb-centrale-idrica")) {
+    items.push({
+      id: `${env.id}-serbatoio-moca-pompa-autoclave-pressostato`,
+      area: env.name,
+      title: "Serbatoio Acqua Potabile MOCA e Autoclave Sanitaria a Pressostato Certificata",
+      question:
+        "Il serbatoio per l'acqua potabile da 80L e l'elettropompa autoclave a pressostato 12V sono realizzati in materiali certificati MOCA e sottoposti a programma documentato di sanificazione e disinfezione periodica?",
+      normReference: "D.Lgs. 18/2023 (Acque destinate al consumo umano) e Reg. CE 852/2004 All. II Cap. VII",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Serbatoio acqua non certificato MOCA o assenza di sanificazione periodica documentata dell'impianto idrico di bordo con rischio contaminazione biologica.",
+    });
+
+    items.push({
+      id: `${env.id}-boiler-acqua-calda-funzionamento`,
+      area: env.name,
+      title: "Boiler Elettrico per Acqua Calda Sanitaria e Verifica Temperatura Erogazione (45-50°C)",
+      question:
+        "Il boiler compatto installato a bordo assicura l'erogazione costante di acqua calda a temperatura idonea (45-50°C) al lavamani e al lavaporzionatore per garantire l'efficacia igienica delle operazioni?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo I punto 4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Boiler elettrico inefficiente o acqua fredda al lavamani di bordo che impedisce la corretta igiene delle mani dell'operatore e delle attrezzature.",
+    });
+
+    items.push({
+      id: `${env.id}-serbatoio-acque-grigie-saracinesca-scarico`,
+      area: env.name,
+      title: "Tenuta Serbatoio Acque Grigie Reflue con Saracinesca Ermetica di Scarico",
+      question:
+        "Il serbatoio di recupero delle acque grigie provenienti dal lavaporzionatore e lavamani è dotato di sfiato canalizzato e saracinesca ermetica di scarico a tenuta stagna senza perdite durante il trasporto?",
+      normReference: "D.Lgs. 152/2006 (Testo Unico Ambientale) e Reg. CE 852/2004 All. II Cap. III",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Serbatoio acque reflue con saracinesca non ermetica o gocciolante con potenziale dispersione di acque sporche a terra.",
+    });
+  }
+
+  // e) Cabina di Guida Furgone / Ape Car Allestito Gelateria
+  if (env.id === "env-gelamb-cabina-guida" || env.id.includes("gelamb-cabina-guida")) {
+    items.push({
+      id: `${env.id}-paratia-divisoria-fissa-sicurezza`,
+      area: env.name,
+      title: "Paratia Divisoria Fissa di Sicurezza tra Cabina di Guida e Laboratorio Gelato",
+      question:
+        "La cabina di guida è separata dal comparto laboratorio/banco posteriore da una paratia rigida fissa di sicurezza a norma CdS, idonea a trattenere carichi e strumenti in caso di frenata brusca?",
+      normReference: "D.Lgs. 81/2008 Allegato V punto 1 e Codice della Strada art. 164",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Paratia di sicurezza tra cabina di guida e laboratorio assente o non fissata saldamente con rischio impatto carichi sul conducente.",
+    });
+
+    items.push({
+      id: `${env.id}-estintore-veicolare-polvere-2kg`,
+      area: env.name,
+      title: "Estintore Veicolare Omologato da 2 kg a Polvere con Fissaggio a Sgancio Rapido",
+      question:
+        "In cabina di guida è presente un estintore a polvere da almeno 2 kg, provvisto di controllo semestrale valido e fissato con staffa metallica a sgancio rapido?",
+      normReference: "D.M. 03/09/2021 e D.Lgs. 81/2008 Allegato IV punto 4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Estintore veicolare assente in cabina di guida o con revisione semestrale scaduta.",
+    });
+  }
+
+  // f) Laboratorio Base: Zona Pastorizzazione & Maturazione Miscele Gelato
+  if (env.id === "env-gelamb-lab-pastorizzazione" || env.id.includes("gelamb-lab-pastorizzazione")) {
+    items.push({
+      id: `${env.id}-registrazione-ciclo-pastorizzazione-shock-termico`,
+      area: env.name,
+      title: "Registrazione Digitale Ciclo Termico Pastorizzazione (+85°C) e Shock Rapido (+4°C)",
+      question:
+        "Il pastorizzatore elettronico registra digitalmente i parametri del ciclo termico ad almeno +85°C e del successivo rapido abbattimento/shock a +4°C a norma Reg. CE 853/2004, con archiviazione verificabile dei lotti delle miscele?",
+      normReference: "Reg. CE 853/2004 Allegato III Sezione IX e Reg. CE 852/2004",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "microclima_luce",
+      suggestedNonConformity:
+        "Mancata registrazione digitale del ciclo termico di pastorizzazione (+85°C) e shock a +4°C delle miscele gelato con grave rischio biologico.",
+    });
+
+    items.push({
+      id: `${env.id}-lavamani-antibagno-laboratorio-pedale`,
+      area: env.name,
+      title: "Lavamani a Ginocchio/Pedale con Sapone Disinfettante e Asciugamani a Perdere nel Laboratorio",
+      question:
+        "Il laboratorio di preparazione e pastorizzazione dispone di lavamani ad azionamento non manuale (a ginocchio o a pedale) completo di sapone liquido antibatterico, salviette monouso in dispenser e cestino con comando a pedale?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo I punto 4 e D.Lgs. 81/2008 All. IV",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Lavamani del laboratorio con comando a manopola manuale o privo di sapone disinfettante e salviette monouso.",
+    });
+  }
+
+  // g) Laboratorio Base: Zona Mantecazione, Abbattimento & Farcitura
+  if (env.id === "env-gelamb-lab-mantecazione" || env.id.includes("gelamb-lab-mantecazione")) {
+    items.push({
+      id: `${env.id}-microinterruttore-sicurezza-scarico-mantecatore`,
+      area: env.name,
+      title: "Microinterruttore di Sicurezza Interbloccato su Portella e Bocca Scarico Mantecatore",
+      question:
+        "Il mantecatore professionale orizzontale è equipaggiato con microinterruttore di sicurezza interbloccato che arresta istantaneamente la rotazione delle pale raschianti all'apertura della bocca di estrazione del gelato?",
+      normReference: "D.Lgs. 81/2008 Allegato V punto 2 e Direttiva Macchine 2006/42/CE (UNI EN 203 / UNI EN 1672-2)",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Mantecatore con microinterruttore di sicurezza disattivato o non conforme sulla bocca di scarico con grave pericolo di lesioni e amputazione dita.",
+    });
+
+    items.push({
+      id: `${env.id}-abbattimento-rapido-carapine-35c`,
+      area: env.name,
+      title: "Abbattitore Rapido Surgelazione Carapine (-35°C) per Stabilizzazione Cristalli di Ghiaccio",
+      question:
+        "È presente un abbattitore rapido di temperatura a -35°C in grado di portare a cuore le carapine di gelato appena estratte dal mantecatore per la rapida microcristallizzazione prima dello stoccaggio?",
+      normReference: "Reg. CE 852/2004 Allegato II Cap. IX punto 5 e Manuale HACCP di Gelateria",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "microclima_luce",
+      suggestedNonConformity:
+        "Assenza di abbattimento rapido post-mantecazione delle carapine con formazione di macrocristalli e decadimento qualitativo e microbiologico del gelato.",
+    });
+  }
+
+  // h) Laboratorio Base: Reparto Pasticceria da Forno, Cialde & Coni
+  if (env.id === "env-gelamb-lab-pasticceria" || env.id.includes("gelamb-lab-pasticceria")) {
+    items.push({
+      id: `${env.id}-griglia-interbloccata-planetaria-uni-en-454`,
+      area: env.name,
+      title: "Griglia Inox di Protezione Interbloccata per Vasca Planetaria (UNI EN 454)",
+      question:
+        "L'impastatrice planetaria del laboratorio dispone di griglia inox di protezione conforme a UNI EN 454 con microinterruttore di arresto istantaneo della rotazione degli utensili in caso di sollevamento del riparo?",
+      normReference: "UNI EN 454 e D.Lgs. 81/2008 Allegato V punto 2",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Planetaria per creme e impasti priva di riparo grigliato interbloccato con rischio trascinamento arti superiori.",
+    });
+
+    items.push({
+      id: `${env.id}-ripari-mobili-sfogliatrice-uni-en-1674`,
+      area: env.name,
+      title: "Ripari Mobili Interbloccati all'Imbocco dei Cilindri della Sfogliatrice (UNI EN 1674)",
+      question:
+        "La sfogliatrice per la laminazione degli impasti è dotata di ripari interbloccati a norma UNI EN 1674 all'imbocco dei rulli per impedire l'introduzione delle mani durante la lavorazione?",
+      normReference: "UNI EN 1674 e D.Lgs. 81/2008 Allegato V punto 2",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Sfogliatrice da banco priva di ripari interbloccati sui rulli laminatori con pericolo schiacciamento mani.",
+    });
+
+    items.push({
+      id: `${env.id}-arresto-ventola-forno-pasticceria`,
+      area: env.name,
+      title: "Arresto Automatico Ventole di Convezione all'Apertura del Portellone del Forno",
+      question:
+        "Il forno di pasticceria dispone di interruttore finecorsa sulla porta che blocca immediatamente la ventola di convezione all'apertura del portellone, evitando violenti ritorni di vapori e calore verso l'operatore?",
+      normReference: "D.Lgs. 81/2008 Allegato V punto 6 e Allegato VI punto 1",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Forno di pasticceria con ventola di convezione attiva all'apertura del portellone con rischio ustioni da vapori incandescenti.",
+    });
+  }
+
+  // i) Cella Frigorifera Negativa Stoccaggio Carapine & Torte Gelato (-20°C)
+  if (env.id === "env-gelamb-cella-stoccaggio" || env.id.includes("gelamb-cella-stoccaggio")) {
+    items.push({
+      id: `${env.id}-allarme-uomo-intrappolato-batteria-tampone-24v`,
+      area: env.name,
+      title: "Allarme Acustico-Visivo Uomo Intrappolato a 24V h24 e Maniglia Fluorescente (UNI EN 378)",
+      question:
+        "La cella frigorifera a bassa temperatura (-20°C) è dotata di pulsante luminoso di allarme uomo intrappolato a 24V alimentato da batteria tampone h24 con segnalatore ottico-acustico esterno e maniglia interna fluorescente a sblocco meccanico permanente?",
+      normReference: "UNI EN 378-1/2/3 e D.Lgs. 81/2008 Allegato IV punto 1.11",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Cella frigorifera a -20°C priva di allarme uomo intrappolato a 24V con batteria tampone o con maniglia di apertura interna di sicurezza guasta.",
+    });
+
+    items.push({
+      id: `${env.id}-teletermometro-registratore-continuo-haccp-20c`,
+      area: env.name,
+      title: "Monitoraggio e Registrazione Continua Temperature Stoccaggio (≤ -20°C)",
+      question:
+        "La cella di conservazione carapine e torte gelato è dotata di teletermometro registratore continuo digitale HACCP conforme a Reg. CE 37/2005 per la verifica del mantenimento costante della catena del freddo a temperatura ≤ -20°C?",
+      normReference: "Reg. CE 852/2004 All. II Cap. IX e Reg. CE 37/2005",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "microclima_luce",
+      suggestedNonConformity:
+        "Mancata registrazione della temperatura nella cella congelatore del gelato o temperatura superiore a -18°C con perdita di stabilità dei prodotti.",
+    });
+  }
+
+  // j) Magazzino Secco, Coni, Coppette & Packaging MOCA di Sede
+  if (env.id === "env-gelamb-dispensa-coni" || env.id.includes("gelamb-dispensa-coni")) {
+    items.push({
+      id: `${env.id}-conformita-moca-coni-coppette-palette`,
+      area: env.name,
+      title: "Conformità MOCA e Rintracciabilità per Coni, Coppette e Palette Monouso (Reg. CE 1935/2004)",
+      question:
+        "Tutti i coni, cialde, coppette, coperchi e palette monouso destinati al contatto con il gelato sono provvisti di dichiarazione di conformità MOCA del produttore e stoccati in imballi chiusi e protetti da polvere e contaminanti?",
+      normReference: "Reg. CE 1935/2004, Reg. CE 2023/2006 (GMP) e D.Lgs. 29/2017",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Packaging monouso e palette per gelato sprovvisti di conformità MOCA o conservati aperti esposti a polvere nel magazzino.",
+    });
+
+    items.push({
+      id: `${env.id}-stoccaggio-rialzato-scaffali-scorte`,
+      area: env.name,
+      title: "Stoccaggio Merci Secche e Cialde su Scaffalature Rialzate ≥ 15 cm e Monitoraggio Farfalline",
+      question:
+        "Le scorte di basi per gelato, zuccheri, paste aromatizzanti e cartoni di coni sono collocate su scaffalature sollevate da terra almeno 15 cm ed è attivo un piano di monitoraggio per insetti e farfalline della farina?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo IX e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Cartoni di coni o sacchi di zucchero appoggiati direttamente a terra sul pavimento o assenza di monitoraggio infestanti alimentari.",
+    });
+  }
+
+  // k) Plonge di Sede: Lavaggio & Sanificazione Carapine e Fruste
+  if (env.id === "env-gelamb-lavaggio-carapine" || env.id.includes("gelamb-lavaggio-carapine")) {
+    items.push({
+      id: `${env.id}-lavaoggetti-risciacquo-igienico-82c`,
+      area: env.name,
+      title: "Lavaoggetti Industriale con Risciacquo Termico Igienico a Temperatura ≥ 82°C",
+      question:
+        "La lavaoggetti della plonge assicura un risciacquo termico a una temperatura non inferiore a 82°C per la termodisinfezione di carapine inox, fruste, vasche e pale dei mantecatori rientrate dal servizio itinerante?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo V punto 1",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Lavaoggetti della plonge con temperatura di risciacquo inferiore a 82°C o priva di dosatore automatico di sanificante.",
+    });
+
+    items.push({
+      id: `${env.id}-disconnettore-antiriflusso-uni-en-1717`,
+      area: env.name,
+      title: "Disconnettore Idraulico Antiriflusso a Protezione della Rete Potabile (UNI EN 1717)",
+      question:
+        "Il gruppo lavello con doccione e l'alimentazione della lavaoggetti sono muniti di dispositivo antiriflusso conforme a UNI EN 1717 a salvaguardia della rete idrica potabile?",
+      normReference: "UNI EN 1717 e D.Lgs. 18/2023",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Punto di attacco doccione della plonge privo di valvola antiriflusso con rischio di aspirazione di reflui nella rete potabile.",
+    });
+  }
+
+  // l) Hangar Rimessaggio Coperto con Colonnina di Ricarica Notturna Frigo
+  if (env.id === "env-gelamb-hangar-ricarica" || env.id.includes("gelamb-hangar-ricarica")) {
+    items.push({
+      id: `${env.id}-colonnina-ricarica-notturna-norma-cei`,
+      area: env.name,
+      title: "Colonnina con Presa Industriale CEE IP67 Dedicata per Mantenimento Notturno Pozzetti a Glicole",
+      question:
+        "L'area di rimessaggio dispone di presa industriale CEE IP67 dedicata protetta da differenziale magneto-termico per garantire l'allaccio notturno del veicolo e il mantenimento del freddo a glicole a motore spento?",
+      normReference: "Norma CEI 64-8 e D.Lgs. 81/2008 Titolo III Capo III",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Allacciamento elettrico notturno per il mantenimento dei pozzetti frigo privo di presa industriale stagna a norma CEI o senza salvavita.",
+    });
+
+    items.push({
+      id: `${env.id}-estintori-carrellati-hangar`,
+      area: env.name,
+      title: "Estintori Carrellati/Portatili e Vie di Manovra Libere nel Rimessaggio Furgoni",
+      question:
+        "L'hangar di rimessaggio è dotato di estintori idonei posizionati lungo le vie di fuga e le corsie di manovra dei furgoni/carretti sono mantenute costantemente sgombre da ostacoli?",
+      normReference: "D.M. 03/09/2021 e D.Lgs. 81/2008 Allegato IV punto 1.4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Estintori non accessibili o corsie di manovra dell'hangar ostruite da materiali con ostacolo all'evacuazione del veicolo in emergenza.",
     });
   }
 

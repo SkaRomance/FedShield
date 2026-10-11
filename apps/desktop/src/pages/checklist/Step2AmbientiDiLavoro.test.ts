@@ -2377,4 +2377,445 @@ assert.ok(
   "In modalità safety_only nessun item vano cottura food truck deve avere domain haccp",
 );
 
+// ============================================================================
+// Test 21: getStandardEnvironmentsForAteco & conformità per Gelateria e Pasticceria Ambulante (56.10.41 / 56.10.4)
+// ============================================================================
+console.log("Test 21: getStandardEnvironmentsForAteco per Gelateria e Pasticceria Ambulante (ATECO 56.10.41 / 561041 / 56.10.4)");
+
+const gelambEnvs1 = getStandardEnvironmentsForAteco("56.10.41");
+assert.equal(gelambEnvs1.length, 12, "Gelateria ambulante deve avere esattamente 12 ambienti standard");
+
+const gelambEnvs2 = getStandardEnvironmentsForAteco("561041");
+assert.equal(gelambEnvs2.length, 12, "Anche formato 561041 deve restituire i 12 ambienti di gelateria ambulante");
+
+const gelambEnvs3 = getStandardEnvironmentsForAteco("56.10.4");
+assert.equal(gelambEnvs3.length, 12, "Anche formato 56.10.4 senza suffisso 2 deve restituire i 12 ambienti");
+
+// Verifica ID ambienti generati
+const expectedGelambIds = [
+  "env-gelamb-banco-veicolare",
+  "env-ft-crepes-waffle",
+  "env-gelamb-vano-tecnico-batterie",
+  "env-gelamb-centrale-idrica",
+  "env-gelamb-cabina-guida",
+  "env-gelamb-lab-pastorizzazione",
+  "env-gelamb-lab-mantecazione",
+  "env-gelamb-lab-pasticceria",
+  "env-gelamb-cella-stoccaggio",
+  "env-gelamb-dispensa-coni",
+  "env-gelamb-lavaggio-carapine",
+  "env-gelamb-hangar-ricarica",
+];
+
+for (const id of expectedGelambIds) {
+  assert.ok(
+    gelambEnvs1.some((e) => e.id === id),
+    `Ambiente ${id} deve essere presente nella lista per 56.10.41`,
+  );
+}
+
+// 1. Vano Operativo Banco Pozzetti Gelato & Porzionatura Veicolare
+const gelambBanco = gelambEnvs1.find((e) => e.id === "env-gelamb-banco-veicolare")!;
+assert.equal(gelambBanco.category, "production");
+assert.equal(gelambBanco.surfaceSqM, 8);
+assert.equal(gelambBanco.heightM, 2.2);
+assert.equal(gelambBanco.volumeCuM, 17.6);
+assert.equal(gelambBanco.occupantsCount, 2);
+assert.equal(gelambBanco.windowSurfaceSqM, 2.5);
+assert.equal(gelambBanco.features.forcedExhaustPresent, true);
+assert.equal(gelambBanco.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(gelambBanco.features.flooringCondition, "compliant_anti_slip");
+assert.equal(gelambBanco.features.insectScreens, true);
+assert.equal(gelambBanco.features.microclimateCompliant, true);
+const compBancoGelamb = evaluateEnvironmentCompliance(gelambBanco, "56.10.41");
+assert.equal(compBancoGelamb.isHeightCompliant, true);
+assert.ok(
+  compBancoGelamb.summaryBadges.some((b) => b.text.includes("Banco pozzetti veicolare a norma")),
+  "Deve essere presente il badge altezza veicolare a norma banco pozzetti",
+);
+assert.ok(
+  compBancoGelamb.summaryBadges.some((b) => b.text.includes("Lavamani con comando non manuale a ginocchio & lavaporzionatore")),
+  "Deve essere presente il badge lavamani a ginocchio e lavaporzionatore",
+);
+assert.ok(
+  compBancoGelamb.summaryBadges.some((b) => b.text.includes("Vetrina parafiato curvo antiaerosol & portellone")),
+  "Deve essere presente il badge vetrina parafiato e portellone",
+);
+
+// 2. Zona Piastre Crêpes, Waffle & Farciture Calde a Bordo
+const gelambCrepes = gelambEnvs1.find((e) => e.id === "env-ft-crepes-waffle")!;
+assert.equal(gelambCrepes.category, "production");
+assert.equal(gelambCrepes.surfaceSqM, 4);
+assert.equal(gelambCrepes.heightM, 2.2);
+assert.equal(gelambCrepes.volumeCuM, 8.8);
+assert.equal(gelambCrepes.occupantsCount, 1);
+assert.equal(gelambCrepes.windowSurfaceSqM, 1.5);
+assert.equal(gelambCrepes.features.forcedExhaustPresent, true);
+assert.equal(gelambCrepes.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(gelambCrepes.features.flooringCondition, "compliant_anti_slip");
+const compCrepesGelamb = evaluateEnvironmentCompliance(gelambCrepes, "56.10.41");
+assert.equal(compCrepesGelamb.isHeightCompliant, true);
+assert.ok(
+  compCrepesGelamb.summaryBadges.some((b) => b.text.includes("Postazione crêpes/waffle a norma")),
+  "Deve essere presente il badge postazione crêpes a norma",
+);
+assert.ok(
+  compCrepesGelamb.summaryBadges.some((b) => b.text.includes("Cappa aspirazione fumi inox a tetto & paraspruzzi")),
+  "Deve essere presente il badge cappa a tetto e paraspruzzi",
+);
+
+// 3. Vano Tecnico Batterie Litio, Inverter & Quadro CEE Veicolare
+const gelambBatterie = gelambEnvs1.find((e) => e.id === "env-gelamb-vano-tecnico-batterie")!;
+assert.equal(gelambBatterie.category, "technical");
+assert.equal(gelambBatterie.surfaceSqM, 3);
+assert.equal(gelambBatterie.heightM, 1.2);
+assert.equal(gelambBatterie.volumeCuM, 3.6);
+assert.equal(gelambBatterie.occupantsCount, 1);
+assert.equal(gelambBatterie.features.emergencyLighting, true);
+const compBatterieGelamb = evaluateEnvironmentCompliance(gelambBatterie, "56.10.41");
+assert.equal(compBatterieGelamb.isHeightCompliant, true);
+assert.ok(
+  compBatterieGelamb.summaryBadges.some((b) => b.text.includes("Pacco batterie LiFePO4 con BMS")),
+  "Deve essere presente il badge batterie LiFePO4 con BMS",
+);
+assert.ok(
+  compBatterieGelamb.summaryBadges.some((b) => b.text.includes("Quadro elettrico veicolare con salvavita")),
+  "Deve essere presente il badge salvavita 30 mA",
+);
+
+// 4. Centrale Idrica Veicolare
+const gelambIdrica = gelambEnvs1.find((e) => e.id === "env-gelamb-centrale-idrica")!;
+assert.equal(gelambIdrica.category, "technical");
+assert.equal(gelambIdrica.surfaceSqM, 2);
+assert.equal(gelambIdrica.heightM, 1.2);
+assert.equal(gelambIdrica.volumeCuM, 2.4);
+assert.equal(gelambIdrica.occupantsCount, 1);
+assert.equal(gelambIdrica.features.wallsCondition, "washable_sanitizable_2m");
+const compIdricaGelamb = evaluateEnvironmentCompliance(gelambIdrica, "56.10.41");
+assert.equal(compIdricaGelamb.isHeightCompliant, true);
+assert.ok(
+  compIdricaGelamb.summaryBadges.some((b) => b.text.includes("Centrale idrica veicolare: serbatoio acqua potabile")),
+  "Deve essere presente il badge idrica potabile MOCA",
+);
+assert.ok(
+  compIdricaGelamb.summaryBadges.some((b) => b.text.includes("Serbatoio acque grigie con saracinesca")),
+  "Deve essere presente il badge acque grigie saracinesca",
+);
+
+// 5. Cabina di Guida Furgone / Ape Car Allestito Gelateria
+const gelambCabina = gelambEnvs1.find((e) => e.id === "env-gelamb-cabina-guida")!;
+assert.equal(gelambCabina.category, "sales_office");
+assert.equal(gelambCabina.surfaceSqM, 4);
+assert.equal(gelambCabina.heightM, 1.8);
+assert.equal(gelambCabina.volumeCuM, 7.2);
+assert.equal(gelambCabina.occupantsCount, 1);
+assert.equal(gelambCabina.features.emergencyLighting, true);
+const compCabinaGelamb = evaluateEnvironmentCompliance(gelambCabina, "56.10.41");
+assert.equal(compCabinaGelamb.isHeightCompliant, true);
+assert.ok(
+  compCabinaGelamb.summaryBadges.some((b) => b.text.includes("Postazione guida omologata con paratia")),
+  "Deve essere presente il badge paratia divisoria fissa di sicurezza",
+);
+
+// 6. Laboratorio Base: Zona Pastorizzazione & Maturazione Miscele Gelato
+const gelambPastorizzazione = gelambEnvs1.find((e) => e.id === "env-gelamb-lab-pastorizzazione")!;
+assert.equal(gelambPastorizzazione.category, "production");
+assert.equal(gelambPastorizzazione.surfaceSqM, 25);
+assert.equal(gelambPastorizzazione.heightM, 3.0);
+assert.equal(gelambPastorizzazione.volumeCuM, 75);
+assert.equal(gelambPastorizzazione.occupantsCount, 2);
+assert.equal(gelambPastorizzazione.features.forcedExhaustPresent, true);
+assert.equal(gelambPastorizzazione.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(gelambPastorizzazione.features.flooringCondition, "compliant_anti_slip");
+assert.equal(gelambPastorizzazione.features.insectScreens, true);
+assert.equal(gelambPastorizzazione.features.microclimateCompliant, true);
+const compPastGelamb = evaluateEnvironmentCompliance(gelambPastorizzazione, "56.10.41");
+assert.equal(compPastGelamb.isHeightCompliant, true);
+assert.ok(
+  compPastGelamb.summaryBadges.some((b) => b.text.includes("Ciclo termico pastorizzazione HACCP (+85°C)")),
+  "Deve essere presente il badge ciclo termico pastorizzazione e shock +4°C",
+);
+
+// 7. Laboratorio Base: Zona Mantecazione, Abbattimento & Farcitura
+const gelambMantecazione = gelambEnvs1.find((e) => e.id === "env-gelamb-lab-mantecazione")!;
+assert.equal(gelambMantecazione.category, "production");
+assert.equal(gelambMantecazione.surfaceSqM, 30);
+assert.equal(gelambMantecazione.heightM, 3.0);
+assert.equal(gelambMantecazione.volumeCuM, 90);
+assert.equal(gelambMantecazione.occupantsCount, 2);
+assert.equal(gelambMantecazione.features.forcedExhaustPresent, true);
+assert.equal(gelambMantecazione.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(gelambMantecazione.features.flooringCondition, "compliant_anti_slip");
+const compMantecazioneGelamb = evaluateEnvironmentCompliance(gelambMantecazione, "56.10.41");
+assert.equal(compMantecazioneGelamb.isHeightCompliant, true);
+assert.ok(
+  compMantecazioneGelamb.summaryBadges.some((b) => b.text.includes("Mantecazione e abbattimento rapido carapine a -35°C")),
+  "Deve essere presente il badge mantecazione e abbattimento a -35°C",
+);
+
+// 8. Laboratorio Base: Reparto Pasticceria da Forno, Cialde & Coni
+const gelambPasticceria = gelambEnvs1.find((e) => e.id === "env-gelamb-lab-pasticceria")!;
+assert.equal(gelambPasticceria.category, "production");
+assert.equal(gelambPasticceria.surfaceSqM, 25);
+assert.equal(gelambPasticceria.heightM, 3.0);
+assert.equal(gelambPasticceria.volumeCuM, 75);
+assert.equal(gelambPasticceria.occupantsCount, 2);
+assert.equal(gelambPasticceria.features.forcedExhaustPresent, true);
+assert.equal(gelambPasticceria.features.forcedExhaustType, "kitchen_hood");
+const compPasticceriaGelamb = evaluateEnvironmentCompliance(gelambPasticceria, "56.10.41");
+assert.equal(compPasticceriaGelamb.isHeightCompliant, true);
+assert.ok(
+  compPasticceriaGelamb.summaryBadges.some((b) => b.text.includes("Macchine pasticceria a norma: planetaria con riparo UNI EN 454")),
+  "Deve essere presente il badge planetaria e sfogliatrice",
+);
+
+// 9. Cella Frigorifera Negativa Stoccaggio Carapine & Torte Gelato (-20°C)
+const gelambCella = gelambEnvs1.find((e) => e.id === "env-gelamb-cella-stoccaggio")!;
+assert.equal(gelambCella.category, "storage");
+assert.equal(gelambCella.surfaceSqM, 20);
+assert.equal(gelambCella.heightM, 2.6);
+assert.equal(gelambCella.volumeCuM, 52);
+assert.equal(gelambCella.occupantsCount, 1);
+assert.equal(gelambCella.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(gelambCella.features.emergencyLighting, true);
+const compCellaGelamb = evaluateEnvironmentCompliance(gelambCella, "56.10.41");
+assert.equal(compCellaGelamb.isHeightCompliant, true);
+assert.ok(
+  compCellaGelamb.summaryBadges.some((b) => b.text.includes("Stoccaggio carapine gelato a -20°C")),
+  "Deve essere presente il badge teletermometri carapine a -20°C",
+);
+assert.ok(
+  compCellaGelamb.summaryBadges.some((b) => b.text.includes("Allarme acustico-visivo uomo intrappolato a 24V h24")),
+  "Deve essere presente il badge uomo intrappolato a 24V h24",
+);
+
+// 10. Magazzino Secco, Coni, Coppette & Packaging MOCA di Sede
+const gelambPackaging = gelambEnvs1.find((e) => e.id === "env-gelamb-dispensa-coni")!;
+assert.equal(gelambPackaging.category, "warehouse");
+assert.equal(gelambPackaging.surfaceSqM, 25);
+assert.equal(gelambPackaging.heightM, 3.0);
+assert.equal(gelambPackaging.volumeCuM, 75);
+assert.equal(gelambPackaging.occupantsCount, 1);
+assert.equal(gelambPackaging.features.shelvingCertified, true);
+const compPackagingGelamb = evaluateEnvironmentCompliance(gelambPackaging, "56.10.41");
+assert.equal(compPackagingGelamb.isHeightCompliant, true);
+assert.ok(
+  compPackagingGelamb.summaryBadges.some((b) => b.text.includes("Stoccaggio coni, coppette e packaging MOCA")),
+  "Deve essere presente il badge packaging MOCA",
+);
+
+// 11. Plonge di Sede: Lavaggio & Sanificazione Carapine e Fruste
+const gelambPlonge = gelambEnvs1.find((e) => e.id === "env-gelamb-lavaggio-carapine")!;
+assert.equal(gelambPlonge.category, "production");
+assert.equal(gelambPlonge.surfaceSqM, 18);
+assert.equal(gelambPlonge.heightM, 3.0);
+assert.equal(gelambPlonge.volumeCuM, 54);
+assert.equal(gelambPlonge.occupantsCount, 1);
+assert.equal(gelambPlonge.features.forcedExhaustPresent, true);
+assert.equal(gelambPlonge.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(gelambPlonge.features.flooringCondition, "compliant_anti_slip");
+const compPlongeGelamb = evaluateEnvironmentCompliance(gelambPlonge, "56.10.41");
+assert.equal(compPlongeGelamb.isHeightCompliant, true);
+assert.ok(
+  compPlongeGelamb.summaryBadges.some((b) => b.text.includes("Plonge e lavaoggetti con risciacquo igienico ≥ 82°C")),
+  "Deve essere presente il badge risciacquo igienico >= 82°C",
+);
+
+// 12. Hangar Rimessaggio Coperto con Colonnina di Ricarica Notturna Frigo
+const gelambHangar = gelambEnvs1.find((e) => e.id === "env-gelamb-hangar-ricarica")!;
+assert.equal(gelambHangar.category, "warehouse");
+assert.equal(gelambHangar.surfaceSqM, 45);
+assert.equal(gelambHangar.heightM, 4.0);
+assert.equal(gelambHangar.volumeCuM, 180);
+assert.equal(gelambHangar.occupantsCount, 2);
+assert.equal(gelambHangar.features.emergencyLighting, true);
+const compHangarGelamb = evaluateEnvironmentCompliance(gelambHangar, "56.10.41");
+assert.equal(compHangarGelamb.isHeightCompliant, true);
+assert.ok(
+  compHangarGelamb.summaryBadges.some((b) => b.text.includes("Colonnina allaccio elettrico notturno a norma CEI")),
+  "Deve essere presente il badge colonnina elettrica notturna norma CEI",
+);
+
+// ============================================================================
+// Test 22: generateEnvironmentChecklistItems per locali Gelateria e Pasticceria Ambulante (ATECO 56.10.41)
+// ============================================================================
+console.log("Test 22: generateEnvironmentChecklistItems per locali Gelateria e Pasticceria Ambulante (ATECO 56.10.41)");
+
+// 1. Banco Pozzetti Veicolare
+const gelambBancoItems = generateEnvironmentChecklistItems(gelambBanco, "56.10.41");
+assert.ok(
+  gelambBancoItems.some((it) => it.id.includes("temperatura-pozzetti-carapine-glicole") && it.domain === "haccp"),
+  "Banco pozzetti deve verificare mantenimento temperatura -12/-14°C (domain: haccp)",
+);
+assert.ok(
+  gelambBancoItems.some((it) => it.id.includes("lavaporzionatore-flusso-continuo-sanificante") && it.domain === "haccp"),
+  "Banco pozzetti deve verificare lavaporzionatore a flusso continuo o sanificante (domain: haccp)",
+);
+assert.ok(
+  gelambBancoItems.some((it) => it.id.includes("vetrina-parafiato-curvo-antiaerosol") && it.domain === "haccp"),
+  "Banco pozzetti deve verificare vetrina parafiato curvo antiaerosol (domain: haccp)",
+);
+assert.ok(
+  gelambBancoItems.some((it) => it.id.includes("fermo-meccanico-portellone-veicolare") && it.domain === "safety"),
+  "Banco pozzetti deve verificare fermo meccanico anticaduta portellone (domain: safety)",
+);
+assert.ok(
+  gelambBancoItems.some((it) => it.id.includes("lavamani-comando-non-manuale-acqua-calda") && it.domain === "haccp"),
+  "Banco pozzetti deve verificare lavamani a ginocchio con acqua calda sanitaria (domain: haccp)",
+);
+
+// 2. Zona Piastre Crêpes e Waffle
+const gelambCrepesItems = generateEnvironmentChecklistItems(gelambCrepes, "56.10.41");
+assert.ok(
+  gelambCrepesItems.some((it) => it.id.includes("piastre-ghisa-moca-certificazione") && it.domain === "haccp"),
+  "Zona piastre deve verificare ghisa alimentare certificata MOCA (domain: haccp)",
+);
+assert.ok(
+  gelambCrepesItems.some((it) => it.id.includes("paraspruzzi-inox-perimetrale") && it.domain === "safety"),
+  "Zona piastre deve verificare paraspruzzi inox perimetrale (domain: safety)",
+);
+assert.ok(
+  gelambCrepesItems.some((it) => it.id.includes("cappa-aspirazione-scarico-tetto") && it.domain === "both"),
+  "Zona piastre deve verificare cappa aspirazione con scarico a tetto (domain: both)",
+);
+
+// 3. Vano Tecnico Batterie Litio
+const gelambBatterieItems = generateEnvironmentChecklistItems(gelambBatterie, "56.10.41");
+assert.ok(
+  gelambBatterieItems.some((it) => it.id.includes("batterie-litio-bms-ventilazione") && it.domain === "safety"),
+  "Vano batterie deve verificare stato e ventilazione pacco LiFePO4 con BMS (domain: safety)",
+);
+assert.ok(
+  gelambBatterieItems.some((it) => it.id.includes("salvavita-30ma-inverter-quadro-cee") && it.domain === "safety"),
+  "Vano batterie deve verificare efficienza salvavita 30 mA (domain: safety)",
+);
+
+// 4. Centrale Idrica Veicolare
+const gelambIdricaItems = generateEnvironmentChecklistItems(gelambIdrica, "56.10.41");
+assert.ok(
+  gelambIdricaItems.some((it) => it.id.includes("serbatoio-moca-pompa-autoclave-pressostato") && it.domain === "haccp"),
+  "Centrale idrica deve verificare atossicità MOCA serbatoio e autoclave (domain: haccp)",
+);
+assert.ok(
+  gelambIdricaItems.some((it) => it.id.includes("boiler-acqua-calda-funzionamento") && it.domain === "haccp"),
+  "Centrale idrica deve verificare funzionamento boiler acqua calda (domain: haccp)",
+);
+assert.ok(
+  gelambIdricaItems.some((it) => it.id.includes("serbatoio-acque-grigie-saracinesca-scarico") && it.domain === "both"),
+  "Centrale idrica deve verificare saracinesca scarico acque grigie (domain: both)",
+);
+
+// 5. Cabina di Guida Furgone / Ape Car
+const gelambCabinaItems = generateEnvironmentChecklistItems(gelambCabina, "56.10.41");
+assert.ok(
+  gelambCabinaItems.some((it) => it.id.includes("paratia-divisoria-fissa-sicurezza") && it.domain === "safety"),
+  "Cabina guida deve verificare paratia divisoria fissa di sicurezza anti-intrusione (domain: safety)",
+);
+assert.ok(
+  gelambCabinaItems.some((it) => it.id.includes("estintore-veicolare-polvere-2kg") && it.domain === "safety"),
+  "Cabina guida deve verificare estintore veicolare (domain: safety)",
+);
+
+// 6. Laboratorio Pastorizzazione & Maturazione
+const gelambPastItems = generateEnvironmentChecklistItems(gelambPastorizzazione, "56.10.41");
+assert.ok(
+  gelambPastItems.some((it) => it.id.includes("registrazione-ciclo-pastorizzazione-shock-termico") && it.domain === "haccp"),
+  "Laboratorio pastorizzazione deve verificare ciclo pastorizzazione +85°C e shock +4°C (domain: haccp)",
+);
+assert.ok(
+  gelambPastItems.some((it) => it.id.includes("lavamani-antibagno-laboratorio-pedale") && it.domain === "both"),
+  "Laboratorio pastorizzazione deve verificare lavamani a comando non manuale (domain: both)",
+);
+
+// 7. Laboratorio Mantecazione & Abbattimento
+const gelambMantecazioneItems = generateEnvironmentChecklistItems(gelambMantecazione, "56.10.41");
+assert.ok(
+  gelambMantecazioneItems.some((it) => it.id.includes("microinterruttore-sicurezza-scarico-mantecatore") && it.domain === "safety"),
+  "Laboratorio mantecazione deve verificare microinterruttore su scarico mantecatore (domain: safety)",
+);
+assert.ok(
+  gelambMantecazioneItems.some((it) => it.id.includes("abbattimento-rapido-carapine-35c") && it.domain === "haccp"),
+  "Laboratorio mantecazione deve verificare abbattimento rapido carapine a -35°C (domain: haccp)",
+);
+
+// 8. Laboratorio Pasticceria da Forno, Cialde & Coni
+const gelambPasticceriaItems = generateEnvironmentChecklistItems(gelambPasticceria, "56.10.41");
+assert.ok(
+  gelambPasticceriaItems.some((it) => it.id.includes("griglia-interbloccata-planetaria-uni-en-454") && it.domain === "safety"),
+  "Laboratorio pasticceria deve verificare griglia interbloccata planetaria UNI EN 454 (domain: safety)",
+);
+assert.ok(
+  gelambPasticceriaItems.some((it) => it.id.includes("ripari-mobili-sfogliatrice-uni-en-1674") && it.domain === "safety"),
+  "Laboratorio pasticceria deve verificare ripari mobili sfogliatrice UNI EN 1674 (domain: safety)",
+);
+assert.ok(
+  gelambPasticceriaItems.some((it) => it.id.includes("arresto-ventola-forno-pasticceria") && it.domain === "safety"),
+  "Laboratorio pasticceria deve verificare arresto ventola forno all'apertura (domain: safety)",
+);
+
+// 9. Cella Frigorifera Negativa Stoccaggio Carapine (-20°C)
+const gelambCellaItems = generateEnvironmentChecklistItems(gelambCella, "56.10.41");
+assert.ok(
+  gelambCellaItems.some((it) => it.id.includes("allarme-uomo-intrappolato-batteria-tampone-24v") && it.domain === "safety"),
+  "Cella carapine deve verificare allarme uomo intrappolato a 24V h24 con batteria tampone (domain: safety)",
+);
+assert.ok(
+  gelambCellaItems.some((it) => it.id.includes("teletermometro-registratore-continuo-haccp-20c") && it.domain === "haccp"),
+  "Cella carapine deve verificare monitoraggio continuo <= -20°C (domain: haccp)",
+);
+
+// 10. Magazzino Packaging e Coni MOCA
+const gelambPackagingItems = generateEnvironmentChecklistItems(gelambPackaging, "56.10.41");
+assert.ok(
+  gelambPackagingItems.some((it) => it.id.includes("conformita-moca-coni-coppette-palette") && it.domain === "haccp"),
+  "Magazzino packaging deve verificare conformità MOCA coppette, coni e palette (domain: haccp)",
+);
+assert.ok(
+  gelambPackagingItems.some((it) => it.id.includes("stoccaggio-rialzato-scaffali-scorte") && it.domain === "both"),
+  "Magazzino packaging deve verificare stoccaggio sollevato da terra (domain: both)",
+);
+
+// 11. Plonge Carapine e Fruste
+const gelambPlongeItems = generateEnvironmentChecklistItems(gelambPlonge, "56.10.41");
+assert.ok(
+  gelambPlongeItems.some((it) => it.id.includes("lavaoggetti-risciacquo-igienico-82c") && it.domain === "haccp"),
+  "Plonge deve verificare risciacquo >= 82°C per sanificazione carapine inox (domain: haccp)",
+);
+assert.ok(
+  gelambPlongeItems.some((it) => it.id.includes("disconnettore-antiriflusso-uni-en-1717") && it.domain === "both"),
+  "Plonge deve verificare disconnettore antiriflusso UNI EN 1717 (domain: both)",
+);
+
+// 12. Hangar Rimessaggio Coperto
+const gelambHangarItems = generateEnvironmentChecklistItems(gelambHangar, "56.10.41");
+assert.ok(
+  gelambHangarItems.some((it) => it.id.includes("colonnina-ricarica-notturna-norma-cei") && it.domain === "safety"),
+  "Hangar deve verificare quadro colonnina allacciamento notturno CEE stagno (domain: safety)",
+);
+assert.ok(
+  gelambHangarItems.some((it) => it.id.includes("estintori-carrellati-hangar") && it.domain === "safety"),
+  "Hangar deve verificare estintori e vie di manovra libere (domain: safety)",
+);
+
+// Verifica del filtraggio checklistMode su banco pozzetti gelateria ambulante
+const gelambBancoHaccpMode = filterEnvironmentItemsByChecklistMode(gelambBancoItems, "haccp_only");
+assert.ok(
+  gelambBancoHaccpMode.every((it) => it.domain === "haccp" || it.domain === "both"),
+  "In modalità haccp_only tutti gli item banco pozzetti gelateria ambulante devono essere haccp o both",
+);
+assert.ok(
+  !gelambBancoHaccpMode.some((it) => it.domain === "safety"),
+  "In modalità haccp_only nessun item banco pozzetti gelateria ambulante deve avere domain safety",
+);
+
+const gelambBancoSafetyMode = filterEnvironmentItemsByChecklistMode(gelambBancoItems, "safety_only");
+assert.ok(
+  gelambBancoSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item banco pozzetti gelateria ambulante devono essere safety o both",
+);
+assert.ok(
+  !gelambBancoSafetyMode.some((it) => it.domain === "haccp"),
+  "In modalità safety_only nessun item banco pozzetti gelateria ambulante deve avere domain haccp",
+);
+
 console.log("=== TUTTI I TEST Step2AmbientiDiLavoro SUPERATI CON SUCCESSO! ===");

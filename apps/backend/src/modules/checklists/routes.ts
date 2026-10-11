@@ -24,6 +24,31 @@ function buildAtecoVariants(atecoCode?: string) {
     variants.add("HORECA");
   }
 
+  if (normalized.startsWith("56.10.41")) {
+    variants.add("PASTICCERIA_AMBULANTE");
+  }
+  if (normalized.startsWith("56.10.42")) {
+    variants.add("FOOD_TRUCK");
+  }
+  if (normalized.startsWith("56.10.30")) {
+    variants.add("PASTICCERIA_GELATERIA");
+  }
+  if (normalized.startsWith("56.10.20")) {
+    variants.add("PIZZERIA_ASPORTO");
+  }
+  if (normalized.startsWith("56.10.11")) {
+    variants.add("RISTORANTI");
+  }
+  if (normalized.startsWith("56.29.10")) {
+    variants.add("MENSE_CATERING");
+  }
+  if (normalized.startsWith("56.21.00")) {
+    variants.add("CATERING_EVENTI");
+  }
+  if (normalized.startsWith("56.30")) {
+    variants.add("BAR");
+  }
+
   if (parts[0] === "47" && !normalized.startsWith("47.11")) {
     variants.add("COMMERCIO_NON_FOOD");
   }

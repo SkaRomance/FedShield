@@ -6798,7 +6798,38 @@ export async function seedHoreca() {
   // generava duplicati al reseed). seedSource e' popolato dal createMany
   // sotto e da nessun'altra fonte (record API hanno seedSource: null).
   await prisma.documentTemplate.deleteMany({
-    where: { seedSource: "horeca" },
+    where: {
+      OR: [
+        { seedSource: "horeca" },
+        {
+          macroGroup: {
+            in: [
+              "ALL",
+              "RISTORANTI",
+              "BAR",
+              "HOTEL",
+              "PASTICCERIA_GELATERIA",
+              "PIZZERIA_ASPORTO",
+              "MENSE_CATERING",
+              "CATERING_EVENTI",
+              "FOOD_TRUCK",
+              "PASTICCERIA_AMBULANTE",
+              "GASTRONOMIA_PRODUZIONE",
+              "BEB_AFFITTACAMERE",
+              "OSTELLI_RESIDENCE",
+              "CAMPEGGI_VILLAGGI",
+              "STABILIMENTI_BALNEARI",
+              "LOCALI_SERALI",
+              "RETAIL_LARGE_FOOD",
+              "RETAIL_LARGE_BUTCHER",
+              "RETAIL_LARGE_FISH",
+              "RETAIL_LARGE_PRODUCE",
+              "RETAIL_LARGE_DELI",
+            ],
+          },
+        },
+      ],
+    },
   });
 
   const documentTemplates = [

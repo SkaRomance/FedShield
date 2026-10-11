@@ -1701,4 +1701,230 @@ for (const code of ["56.10.4", "561042", "56104"]) {
   assert.ok(fallbackRes.every((m) => m.sourceReason === "ateco"));
 }
 
+// -------------------------------------------------------------
+// Test 31: Priorità e risoluzione catalogo ATECO per Gelateria e Pasticceria Ambulante (56.10.41 / 561041)
+// -------------------------------------------------------------
+console.log("\n=== INIZIO TEST normativeMachineCatalog (ATECO 56.10.41 Gelateria e Pasticceria Ambulante) ===");
+console.log("Test 31: Verifica priorità catalogo ATECO per Gelateria e Pasticceria Ambulante (56.10.41 / 561041)");
+const catalogGelExact = getSectorMachineCatalogForAteco("56.10.41");
+assert.equal(catalogGelExact.sectorKey, "gelateria_pasticceria_ambulante", "ATECO 56.10.41 deve restituire gelateria_pasticceria_ambulante");
+assert.ok(catalogGelExact.sectorLabel.includes("Gelateria"), "L'etichetta del catalogo deve includere Gelateria");
+assert.ok(catalogGelExact.sectorLabel.includes("Pasticceria Ambulante"), "L'etichetta del catalogo deve includere Pasticceria Ambulante");
+assert.ok(catalogGelExact.sectorLabel.includes("Street Gelato"), "L'etichetta del catalogo deve includere Street Gelato");
+
+for (const variant of ["56.10.41", "561041"]) {
+  const gelVar = getSectorMachineCatalogForAteco(variant);
+  assert.equal(gelVar.sectorKey, "gelateria_pasticceria_ambulante", `Variante '${variant}' deve restituire gelateria_pasticceria_ambulante`);
+}
+
+// Verifica posizionamento: gelateria_pasticceria_ambulante segue food_truck_street_food e precede ristorazione_alimentare
+const ftIdxGel = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "food_truck_street_food");
+const gelIdx = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "gelateria_pasticceria_ambulante");
+const ristGenIdxGel = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ristorazione_alimentare");
+assert.ok(ftIdxGel !== -1, "Settore food_truck_street_food deve esistere");
+assert.ok(gelIdx !== -1, "Settore gelateria_pasticceria_ambulante deve esistere");
+assert.ok(ristGenIdxGel !== -1, "Settore generico ristorazione_alimentare deve esistere");
+assert.equal(gelIdx, ftIdxGel + 1, "gelateria_pasticceria_ambulante deve seguire immediatamente food_truck_street_food");
+assert.ok(gelIdx < ristGenIdxGel, "gelateria_pasticceria_ambulante deve precedere ristorazione_alimentare nel catalogo");
+
+// -------------------------------------------------------------
+// Test 32: Verifica completezza delle 16 macchine per Gelateria Ambulante
+// -------------------------------------------------------------
+console.log("Test 32: Verifica completezza delle 16 attrezzature professionali con modelli reali e controlli normativi dedicati");
+assert.equal(catalogGelExact.machines.length, 16, "Il catalogo Gelateria Ambulante deve contenere esattamente 16 macchine");
+
+const expectedGelMachineKeys = [
+  // Veicolare Street Gelato & Servizio (8)
+  "banco_pozzetti_gelato_veicolare",
+  "lavaporzionatore_flusso_continuo",
+  "piastra_crepes_veicolare",
+  "piastra_waffle_gaufre",
+  "macchina_gelato_soft_veicolare",
+  "vetrina_monoporzioni_gelato",
+  "portellone_panoramico_gelateria",
+  "sistema_batterie_inverter_litio",
+  // Laboratorio Base di Produzione & Freddo (8)
+  "pastorizzatore_elettronico_gelato",
+  "mantecatore_orizzontale_gelato",
+  "abbattitore_surgelatore_carapine",
+  "planetaria_pasticceria_base",
+  "sfogliatrice_banco_pasticceria",
+  "forno_ventilato_pasticceria",
+  "lavaoggetti_carapine_stoviglie",
+  "armadio_congelatore_carapine_sede",
+];
+
+for (const key of expectedGelMachineKeys) {
+  const found = catalogGelExact.machines.find((m) => m.machineKey === key);
+  assert.ok(found, `Macchina ${key} deve essere presente nel catalogo Gelateria Ambulante`);
+  assert.ok(found.name.length > 5, `Nome macchina ${key} deve essere esaustivo`);
+  assert.ok(found.type.length > 5, `Tipologia macchina ${key} deve essere specificata`);
+  assert.ok(found.suggestedManufacturer.length > 0, `Produttore suggerito per ${key} deve essere presente`);
+  assert.ok(found.suggestedModel.length > 0, `Modello suggerito per ${key} deve essere presente`);
+  assert.ok(found.safetyChecks.length >= 3, `Macchina ${key} deve avere almeno 3 controlli di sicurezza`);
+  assert.ok(found.training, `Macchina ${key} deve avere un corso di formazione/addestramento associato`);
+}
+
+// Verifiche puntuali su modelli reali e controlli normativi specifici (Reg. CE 853/04 pastorizzazione +85°C, UNI EN 12852 mantecatore, UNI EN 454 planetaria, UNI EN 1674 sfogliatrice, MOCA 1935/2004, DIN 10510, LiFePO4 BMS):
+const bancoGel = catalogGelExact.machines.find((m) => m.machineKey === "banco_pozzetti_gelato_veicolare")!;
+assert.ok(bancoGel.suggestedManufacturer.includes("IFI") || bancoGel.suggestedManufacturer.includes("Frigomeccanica") || bancoGel.suggestedManufacturer.includes("Orion"), "IFI, Frigomeccanica o Orion");
+assert.ok(bancoGel.safetyChecks.some((c) => c.code === "BANCO_POZZETTI_GLICOLE_RISERVA_FREDDO" && c.question.includes("glicole")), "Refrigerazione a glicole e riserva di freddo");
+assert.ok(bancoGel.safetyChecks.some((c) => c.code === "BANCO_POZZETTI_COPERCHI_CAMPANA_BLOCCO_CURVA"), "Coperchi a campana inox con blocco curva");
+assert.ok(bancoGel.safetyChecks.some((c) => c.code === "BANCO_POZZETTI_CIRCUITO_ERMETICO_R290" && c.normReference.includes("UNI EN 378")), "Circuito R290 UNI EN 378");
+
+const lavaGel = catalogGelExact.machines.find((m) => m.machineKey === "lavaporzionatore_flusso_continuo")!;
+assert.ok(lavaGel.suggestedManufacturer.includes("Stöckel") || lavaGel.suggestedManufacturer.includes("San Jamar"), "Stöckel o San Jamar");
+assert.ok(lavaGel.safetyChecks.some((c) => c.code === "LAVAPORZIONATORE_GETTO_CONTINUO_TROPPOPIENO_ASL" && c.normReference.includes("852/2004")), "Getto d'acqua continuo con troppopieno a norma ASL");
+assert.ok(lavaGel.safetyChecks.some((c) => c.code === "LAVAPORZIONATORE_MATERIALI_MOCA_1935_2004" && c.normReference.includes("1935/2004")), "Materiali conformi MOCA Reg. CE 1935/2004");
+
+const crepesGel = catalogGelExact.machines.find((m) => m.machineKey === "piastra_crepes_veicolare")!;
+assert.ok(crepesGel.suggestedManufacturer.includes("Krampouz") || crepesGel.suggestedManufacturer.includes("Roller Grill"), "Krampouz o Roller Grill");
+assert.ok(crepesGel.safetyChecks.some((c) => c.code === "PIASTRA_CREPES_GHISA_CERTIFICATA_MOCA" && c.normReference.includes("1935/2004")), "Piastra in ghisa certificata MOCA priva di rivestimenti tossici");
+assert.ok(crepesGel.safetyChecks.some((c) => c.code === "PIASTRA_CREPES_TERMOSTATO_SPIA_RESIDUO"), "Spia calore residuo");
+
+const waffleGel = catalogGelExact.machines.find((m) => m.machineKey === "piastra_waffle_gaufre")!;
+assert.ok(waffleGel.suggestedManufacturer.includes("Krampouz") || waffleGel.suggestedManufacturer.includes("Neumärker"), "Krampouz o Neumärker");
+assert.ok(waffleGel.safetyChecks.some((c) => c.code === "PIASTRA_WAFFLE_MANIGLIA_ISOLATA_180" && c.title.includes("180°")), "Maniglia termoisolante anti-ustione e apertura 180°");
+assert.ok(waffleGel.safetyChecks.some((c) => c.code === "PIASTRA_WAFFLE_STAMPI_GHISA_SMALTATA_MOCA" && c.normReference.includes("1935/2004")), "Stampi in ghisa smaltata antiaderente alimentare MOCA");
+
+const softGel = catalogGelExact.machines.find((m) => m.machineKey === "macchina_gelato_soft_veicolare")!;
+assert.ok(softGel.suggestedManufacturer.includes("Carpigiani") || softGel.suggestedManufacturer.includes("Gel Matic"), "Carpigiani o Gel Matic");
+assert.ok(softGel.safetyChecks.some((c) => c.code === "GELATO_SOFT_VASCA_CONSERVAZIONE_4C" && c.question.includes("+4°C")), "Vasca refrigerata a +4°C");
+assert.ok(softGel.safetyChecks.some((c) => c.code === "GELATO_SOFT_MICRO_ARRESTO_AGITATORE" && c.normReference.includes("UNI EN 12852")), "Micro di arresto all'apertura UNI EN 12852");
+assert.ok(softGel.safetyChecks.some((c) => c.code === "GELATO_SOFT_CIRCUITO_FRIGO_UNI378" && c.normReference.includes("UNI EN 378")), "Circuito frigorifero ermetico UNI EN 378");
+
+const vetrinaGel = catalogGelExact.machines.find((m) => m.machineKey === "vetrina_monoporzioni_gelato")!;
+assert.ok(vetrinaGel.suggestedManufacturer.includes("Isa") || vetrinaGel.suggestedManufacturer.includes("IFI"), "Isa o IFI");
+assert.ok(vetrinaGel.safetyChecks.some((c) => c.code === "VETRINA_MONOPORZIONI_CRISTALLI_RISCALDATI"), "Cristalli doppi riscaldati anticondensa");
+assert.ok(vetrinaGel.safetyChecks.some((c) => c.code === "VETRINA_MONOPORZIONI_ALLARME_HACCP"), "Controllo digitale temperatura con allarme di soglia HACCP");
+
+const portelloneGel = catalogGelExact.machines.find((m) => m.machineKey === "portellone_panoramico_gelateria")!;
+assert.ok(portelloneGel.safetyChecks.some((c) => c.code === "PORTELLONE_GEL_PISTONI_E_PERNO_BLOCCO_VENTO" && c.question.includes("vento")), "Pistoni a gas rinforzati e blocco meccanico anti-vento");
+assert.ok(portelloneGel.safetyChecks.some((c) => c.code === "PORTELLONE_GEL_ILLUMINAZIONE_LED_24V"), "Illuminazione LED 24V");
+
+const batterieGel = catalogGelExact.machines.find((m) => m.machineKey === "sistema_batterie_inverter_litio")!;
+assert.ok(batterieGel.suggestedManufacturer.includes("Victron") || batterieGel.suggestedManufacturer.includes("Mastervolt"), "Victron Energy o Mastervolt");
+assert.ok(batterieGel.safetyChecks.some((c) => c.code === "BATTERIE_LITIO_BMS_SOVRATEMPERATURA_CORTO" && c.question.includes("BMS")), "BMS di protezione da sovratemperatura e cortocircuito");
+assert.ok(batterieGel.safetyChecks.some((c) => c.code === "BATTERIE_LITIO_INVERTER_ONDA_PURA_SALVAVITA" && c.question.includes("30 mA")), "Inverter sinusoidale puro con salvavita 30 mA");
+
+const pastoGel = catalogGelExact.machines.find((m) => m.machineKey === "pastorizzatore_elettronico_gelato")!;
+assert.ok(pastoGel.suggestedManufacturer.includes("Carpigiani") || pastoGel.suggestedManufacturer.includes("Bravo") || pastoGel.suggestedManufacturer.includes("Cattabriga"), "Carpigiani, Bravo o Cattabriga");
+assert.ok(pastoGel.safetyChecks.some((c) => c.code === "PASTORIZZATORE_CICLO_TERMICO_85_4_HACCP" && c.normReference.includes("853/2004")), "Ciclo termico +85°C e raffreddamento rapido +4°C Reg. CE 853/04");
+assert.ok(pastoGel.safetyChecks.some((c) => c.code === "PASTORIZZATORE_MICRO_SICUREZZA_COPERCHIO"), "Micro di sicurezza al sollevamento coperchio");
+
+const manteGel = catalogGelExact.machines.find((m) => m.machineKey === "mantecatore_orizzontale_gelato")!;
+assert.ok(manteGel.suggestedManufacturer.includes("Carpigiani") || manteGel.suggestedManufacturer.includes("Cattabriga") || manteGel.suggestedManufacturer.includes("Frigomat"), "Carpigiani, Cattabriga o Frigomat");
+assert.ok(manteGel.safetyChecks.some((c) => c.code === "MANTECATORE_GRIGLIA_SALVADITA_UNI12852" && c.normReference.includes("12852")), "Griglia salvadita e portello interbloccato UNI EN 12852");
+assert.ok(manteGel.safetyChecks.some((c) => c.code === "MANTECATORE_AGITATORE_RASCHIATORI_MOCA" && c.normReference.includes("1935/2004")), "Agitatore inox con pattini raschiatori atossici MOCA 1935/2004");
+
+const abbattGel = catalogGelExact.machines.find((m) => m.machineKey === "abbattitore_surgelatore_carapine")!;
+assert.ok(abbattGel.suggestedManufacturer.includes("Irinox") || abbattGel.suggestedManufacturer.includes("Coldline"), "Irinox o Coldline");
+assert.ok(abbattGel.safetyChecks.some((c) => c.code === "ABBATTITORE_GEL_INDURIMENTO_35C_CRISTALLI" && c.question.includes("-35°C")), "Indurimento rapido carapine a -35°C");
+
+const planetGel = catalogGelExact.machines.find((m) => m.machineKey === "planetaria_pasticceria_base")!;
+assert.ok(planetGel.suggestedManufacturer.includes("Dito Sama") || planetGel.suggestedManufacturer.includes("Pietro Berto") || planetGel.suggestedManufacturer.includes("Fimar"), "Dito Sama, Pietro Berto o Fimar");
+assert.ok(planetGel.safetyChecks.some((c) => c.code === "PLANETARIA_GEL_GRIGLIA_INTERBLOCCATA_UNI454" && c.normReference.includes("UNI EN 454")), "Griglia di protezione interbloccata UNI EN 454");
+assert.ok(planetGel.safetyChecks.some((c) => c.code === "PLANETARIA_GEL_FUNGO_EMERGENZA_RIARMO"), "Fungo di emergenza a riarmo");
+
+const sfogliaGel = catalogGelExact.machines.find((m) => m.machineKey === "sfogliatrice_banco_pasticceria")!;
+assert.ok(sfogliaGel.suggestedManufacturer.includes("Rollmatic") || sfogliaGel.suggestedManufacturer.includes("Rondo") || sfogliaGel.suggestedManufacturer.includes("Flamic"), "Rollmatic, Rondo o Flamic");
+assert.ok(sfogliaGel.safetyChecks.some((c) => c.code === "SFOGLIATRICE_GEL_RIPARI_INTERBLOCCATI_UNI1674" && c.normReference.includes("UNI EN 1674")), "Ripari di sicurezza interbloccati sui cilindri UNI EN 1674");
+
+const fornoGel = catalogGelExact.machines.find((m) => m.machineKey === "forno_ventilato_pasticceria")!;
+assert.ok(fornoGel.suggestedManufacturer.includes("Unox") || fornoGel.suggestedManufacturer.includes("Rational"), "Unox o Rational");
+assert.ok(fornoGel.safetyChecks.some((c) => c.code === "FORNO_GEL_DOPPIO_VETRO_ANTIUSTIONE"), "Porta con doppio vetro ventilato termoisolante anti-ustione");
+assert.ok(fornoGel.safetyChecks.some((c) => c.code === "FORNO_GEL_ARRESTO_VENTOLA_APERTURA"), "Arresto ventola all'apertura della porta");
+
+const lavaoggettiGel = catalogGelExact.machines.find((m) => m.machineKey === "lavaoggetti_carapine_stoviglie")!;
+assert.ok(lavaoggettiGel.suggestedManufacturer.includes("Winterhalter") || lavaoggettiGel.suggestedManufacturer.includes("Comenda"), "Winterhalter o Comenda");
+assert.ok(lavaoggettiGel.safetyChecks.some((c) => c.code === "LAVAOGGETTI_RISCIACQUO_82C_DIN10510" && c.normReference.includes("DIN 10510")), "Risciacquo igienico ad alta temperatura >= 82°C DIN 10510");
+assert.ok(lavaoggettiGel.safetyChecks.some((c) => c.code === "LAVAOGGETTI_DISPOSITIVO_ANTIRIFLUSSO_UNI1717" && c.normReference.includes("UNI EN 1717")), "Dispositivo antiriflusso UNI EN 1717");
+
+const congelatoreGel = catalogGelExact.machines.find((m) => m.machineKey === "armadio_congelatore_carapine_sede")!;
+assert.ok(congelatoreGel.suggestedManufacturer.includes("Friulinox") || congelatoreGel.suggestedManufacturer.includes("Coldline") || congelatoreGel.suggestedManufacturer.includes("Liebherr"), "Friulinox, Coldline o Liebherr");
+assert.ok(congelatoreGel.safetyChecks.some((c) => c.code === "CONGELATORE_CARAPINE_TEMP_25C_REGOLABILE" && c.question.includes("-25°C")), "Temperatura costante regolabile fino a -25°C");
+
+// -------------------------------------------------------------
+// Test 33: Associazione 1-a-1 ambienti Step 2 Gelateria (env-gelamb-*) -> Step 4 Macchine
+// -------------------------------------------------------------
+console.log("Test 33: Verifica associazione ambienti Step 2 Gelateria (env-gelamb-*) -> Step 4 Macchine");
+const gelEnvironments = [
+  { id: "env-gelamb-banco-veicolare", name: "Banco Somministrazione e Carapine Veicolare", category: "sales_office" },
+  { id: "env-ft-crepes-waffle", name: "Postazione Calda Crêpes e Waffle", category: "cucina" },
+  { id: "env-gelamb-vano-tecnico-batterie", name: "Vano Tecnico Batterie ed Erogatore Soft", category: "tecnici_esterno" },
+  { id: "env-gelamb-lab-pastorizzazione", name: "Laboratorio Base Pastorizzazione Miscele", category: "production" },
+  { id: "env-gelamb-lab-mantecazione", name: "Laboratorio Base Mantecazione e Abbattimento", category: "production" },
+  { id: "env-gelamb-lab-pasticceria", name: "Laboratorio Pasticceria Cialde e Forno", category: "production" },
+  { id: "env-gelamb-lavaggio-carapine", name: "Area Lavaggio Carapine e Pentolame", category: "services" },
+  { id: "env-gelamb-cella-stoccaggio", name: "Cella Stoccaggio Carapine e Rimessaggio Sede", category: "warehouse" },
+];
+
+const suggestedWithGelEnvs = getSuggestedMachinesForEnvironmentsAndAteco(gelEnvironments, "56.10.41");
+assert.equal(suggestedWithGelEnvs.length, 16, "Tutte le 16 macchine devono essere raccomandate e collegate agli 8 ambienti censiti");
+
+const bancoMachines = suggestedWithGelEnvs.filter((m) => m.targetEnvironmentId === "env-gelamb-banco-veicolare");
+assert.equal(bancoMachines.length, 4, "env-gelamb-banco-veicolare deve associare banco pozzetti, lavaporzionatore, vetrina e portellone");
+assert.ok(bancoMachines.some((m) => m.machineKey === "banco_pozzetti_gelato_veicolare"));
+assert.ok(bancoMachines.some((m) => m.machineKey === "lavaporzionatore_flusso_continuo"));
+assert.ok(bancoMachines.some((m) => m.machineKey === "vetrina_monoporzioni_gelato"));
+assert.ok(bancoMachines.some((m) => m.machineKey === "portellone_panoramico_gelateria"));
+
+const crepesWaffleMachines = suggestedWithGelEnvs.filter((m) => m.targetEnvironmentId === "env-ft-crepes-waffle");
+assert.equal(crepesWaffleMachines.length, 2, "env-ft-crepes-waffle deve associare piastra crepes e piastra waffle");
+assert.ok(crepesWaffleMachines.some((m) => m.machineKey === "piastra_crepes_veicolare"));
+assert.ok(crepesWaffleMachines.some((m) => m.machineKey === "piastra_waffle_gaufre"));
+
+const tecnicoMachines = suggestedWithGelEnvs.filter((m) => m.targetEnvironmentId === "env-gelamb-vano-tecnico-batterie");
+assert.equal(tecnicoMachines.length, 2, "env-gelamb-vano-tecnico-batterie deve associare macchina gelato soft e batterie litio");
+assert.ok(tecnicoMachines.some((m) => m.machineKey === "macchina_gelato_soft_veicolare"));
+assert.ok(tecnicoMachines.some((m) => m.machineKey === "sistema_batterie_inverter_litio"));
+
+const pastorizzatoreMachines = suggestedWithGelEnvs.filter((m) => m.targetEnvironmentId === "env-gelamb-lab-pastorizzazione");
+assert.equal(pastorizzatoreMachines.length, 1, "env-gelamb-lab-pastorizzazione deve associare pastorizzatore");
+assert.ok(pastorizzatoreMachines.some((m) => m.machineKey === "pastorizzatore_elettronico_gelato"));
+
+const mantecazioneMachines = suggestedWithGelEnvs.filter((m) => m.targetEnvironmentId === "env-gelamb-lab-mantecazione");
+assert.equal(mantecazioneMachines.length, 2, "env-gelamb-lab-mantecazione deve associare mantecatore e abbattitore carapine");
+assert.ok(mantecazioneMachines.some((m) => m.machineKey === "mantecatore_orizzontale_gelato"));
+assert.ok(mantecazioneMachines.some((m) => m.machineKey === "abbattitore_surgelatore_carapine"));
+
+const pasticceriaMachines = suggestedWithGelEnvs.filter((m) => m.targetEnvironmentId === "env-gelamb-lab-pasticceria");
+assert.equal(pasticceriaMachines.length, 3, "env-gelamb-lab-pasticceria deve associare planetaria, sfogliatrice e forno");
+assert.ok(pasticceriaMachines.some((m) => m.machineKey === "planetaria_pasticceria_base"));
+assert.ok(pasticceriaMachines.some((m) => m.machineKey === "sfogliatrice_banco_pasticceria"));
+assert.ok(pasticceriaMachines.some((m) => m.machineKey === "forno_ventilato_pasticceria"));
+
+const lavaggioMachines = suggestedWithGelEnvs.filter((m) => m.targetEnvironmentId === "env-gelamb-lavaggio-carapine");
+assert.equal(lavaggioMachines.length, 1, "env-gelamb-lavaggio-carapine deve associare lavaoggetti");
+assert.ok(lavaggioMachines.some((m) => m.machineKey === "lavaoggetti_carapine_stoviglie"));
+
+const cellaMachines = suggestedWithGelEnvs.filter((m) => m.targetEnvironmentId === "env-gelamb-cella-stoccaggio");
+assert.equal(cellaMachines.length, 1, "env-gelamb-cella-stoccaggio deve associare armadio congelatore sede");
+assert.ok(cellaMachines.some((m) => m.machineKey === "armadio_congelatore_carapine_sede"));
+
+// Verifica anche associazione con hangar ricarica
+const hangarTest = getSuggestedMachinesForEnvironmentsAndAteco(
+  [{ id: "env-gelamb-hangar-ricarica", name: "Hangar Rimessaggio e Ricarica Furgoni Gelato", category: "warehouse" }],
+  "56.10.41",
+);
+const hangarLinked = hangarTest.filter((m) => m.targetEnvironmentId === "env-gelamb-hangar-ricarica");
+assert.equal(hangarLinked.length, 1, "env-gelamb-hangar-ricarica deve associare armadio congelatore sede");
+assert.ok(hangarLinked.some((m) => m.machineKey === "armadio_congelatore_carapine_sede"));
+
+// -------------------------------------------------------------
+// Test 34: Risoluzione solo su codice ATECO senza locali censiti (Gelateria Ambulante)
+// -------------------------------------------------------------
+console.log("Test 34: Integrazione automatica macchine per ATECO 56.10.41 senza ambienti preventivi");
+const suggestedGelOnlyAteco = getSuggestedMachinesForEnvironmentsAndAteco([], "56.10.41");
+assert.equal(suggestedGelOnlyAteco.length, 16, "Devono essere suggerite tutte le 16 macchine della gelateria ambulante");
+assert.ok(
+  suggestedGelOnlyAteco.every((m) => m.sourceReason === "ateco"),
+  "Tutte le macchine devono avere sourceReason === 'ateco' se nessun locale è stato specificato",
+);
+
+// Verifica fallback identico per variante senza punti ("561041")
+const fallbackGelVar = getSuggestedMachinesForEnvironmentsAndAteco([], "561041");
+assert.equal(fallbackGelVar.length, 16, "Variante 561041 deve restituire tutte le 16 macchine");
+assert.ok(fallbackGelVar.every((m) => m.sourceReason === "ateco"));
+
 console.log("=== TUTTI I TEST normativeMachineCatalog SUPERATI CON SUCCESSO! ===");

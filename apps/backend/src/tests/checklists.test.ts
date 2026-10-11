@@ -165,7 +165,130 @@ async function run() {
   });
   assert.equal(sendToAdmin.statusCode, 200);
 
-  console.log("Checklist routes test passed");
+  // ---- Verifica ATECO 56.10.41 (Gelateria/Pasticceria Ambulante) ----
+  const ambulantPastryCompany = await app.prisma.company.upsert({
+    where: { vatNumber: "IT99956104101" },
+    update: { atecoCode: "56.10.41" },
+    create: {
+      name: "Gelateria & Pasticceria Ambulante Da Mario",
+      vatNumber: "IT99956104101",
+      atecoCode: "56.10.41",
+      legalAddress: "Piazza Garibaldi 1, 80142 Napoli",
+    },
+  });
+
+  // 1. ChecklistMode haccp_only su inspection ATECO 56.10.41
+  const ambulantHaccpInspection = await app.inject({
+    method: "POST",
+    url: "/api/inspections",
+    headers: { authorization: `Bearer ${token}` },
+    payload: {
+      companyId: ambulantPastryCompany.id,
+      title: "Sopralluogo HACCP Gelateria Ambulante",
+      checklistMode: "haccp_only",
+    },
+  });
+  assert.equal(ambulantHaccpInspection.statusCode, 201);
+  const ambulantHaccpId = ambulantHaccpInspection.json().id as string;
+
+  const ambulantHaccpDocsRes = await app.inject({
+    method: "GET",
+    url: `/api/inspections/${ambulantHaccpId}/documents/requirements`,
+    headers: { authorization: `Bearer ${token}` },
+  });
+  assert.equal(ambulantHaccpDocsRes.statusCode, 200);
+  const ambulantHaccpDocs = ambulantHaccpDocsRes.json() as Array<{
+    documentTemplateId: string;
+    name: string;
+    isRequired: boolean;
+  }>;
+  assert.ok(ambulantHaccpDocs.length >= 12, `Attesi almeno 12 documenti HACCP/both per 56.10.41, trovati ${ambulantHaccpDocs.length}`);
+
+  const ambulantHaccpDocIds = ambulantHaccpDocs.map((d) => d.documentTemplateId);
+  const ambulantHaccpTemplates = await app.prisma.documentTemplate.findMany({
+    where: { id: { in: ambulantHaccpDocIds } },
+  });
+  for (const t of ambulantHaccpTemplates) {
+    assert.notEqual(t.domain, "safety", `Template ${t.name} non deve avere domain 'safety' in haccp_only per 56.10.41`);
+    assert.ok(t.domain === "haccp" || t.domain === "both");
+  }
+
+  // Verifica presenza documenti chiave settore alimentare ambulante
+  const docNames = ambulantHaccpDocs.map((d) => d.name.toLowerCase());
+  assert.ok(docNames.some((n) => n.includes("scia") || n.includes("notifica sanitaria")), "Manca SCIA sanitaria per 56.10.41");
+  assert.ok(docNames.some((n) => n.includes("manuale haccp")), "Manca Manuale HACCP per 56.10.41");
+  assert.ok(docNames.some((n) => n.includes("catena del freddo") || n.includes("ccp")), "Manca procedura CCP/freddo per 56.10.41");
+  assert.ok(docNames.some((n) => n.includes("allergeni")), "Manca matrice allergeni per 56.10.41");
+  assert.ok(docNames.some((n) => n.includes("moca")), "Manca dichiarazione MOCA per 56.10.41");
+
+  // 2. ChecklistMode safety_only su inspection ATECO 56.10.41
+  const ambulantSafetyInspection = await app.inject({
+    method: "POST",
+    url: "/api/inspections",
+    headers: { authorization: `Bearer ${token}` },
+    payload: {
+      companyId: ambulantPastryCompany.id,
+      title: "Sopralluogo Sicurezza Gelateria Ambulante",
+      checklistMode: "safety_only",
+    },
+  });
+  assert.equal(ambulantSafetyInspection.statusCode, 201);
+  const ambulantSafetyId = ambulantSafetyInspection.json().id as string;
+
+  const ambulantSafetyDocsRes = await app.inject({
+    method: "GET",
+    url: `/api/inspections/${ambulantSafetyId}/documents/requirements`,
+    headers: { authorization: `Bearer ${token}` },
+  });
+  assert.equal(ambulantSafetyDocsRes.statusCode, 200);
+  const ambulantSafetyDocs = ambulantSafetyDocsRes.json() as Array<{
+    documentTemplateId: string;
+    name: string;
+  }>;
+  const ambulantSafetyDocIds = ambulantSafetyDocs.map((d) => d.documentTemplateId);
+  const ambulantSafetyTemplates = await app.prisma.documentTemplate.findMany({
+    where: { id: { in: ambulantSafetyDocIds } },
+  });
+  for (const t of ambulantSafetyTemplates) {
+    assert.notEqual(t.domain, "haccp", `Template ${t.name} non deve avere domain 'haccp' in safety_only per 56.10.41`);
+    assert.ok(t.domain === "safety" || t.domain === "both");
+  }
+
+  // 3. ChecklistMode unified su inspection ATECO 56.10.41
+  const ambulantUnifiedInspection = await app.inject({
+    method: "POST",
+    url: "/api/inspections",
+    headers: { authorization: `Bearer ${token}` },
+    payload: {
+      companyId: ambulantPastryCompany.id,
+      title: "Sopralluogo Unificato Gelateria Ambulante",
+      checklistMode: "unified",
+    },
+  });
+  assert.equal(ambulantUnifiedInspection.statusCode, 201);
+  const ambulantUnifiedId = ambulantUnifiedInspection.json().id as string;
+
+  const ambulantUnifiedDocsRes = await app.inject({
+    method: "GET",
+    url: `/api/inspections/${ambulantUnifiedId}/documents/requirements`,
+    headers: { authorization: `Bearer ${token}` },
+  });
+  assert.equal(ambulantUnifiedDocsRes.statusCode, 200);
+  const ambulantUnifiedDocs = ambulantUnifiedDocsRes.json() as Array<{
+    documentTemplateId: string;
+    name: string;
+  }>;
+  // Deve contenere tutti i 14 documenti specifici di categoria per PASTICCERIA_AMBULANTE
+  const unifiedDocIds = ambulantUnifiedDocs.map((d) => d.documentTemplateId);
+  const unifiedSpecificDocs = await app.prisma.documentTemplate.findMany({
+    where: {
+      id: { in: unifiedDocIds },
+      atecoCode: "56.10.41",
+    },
+  });
+  assert.equal(unifiedSpecificDocs.length, 14, "Tutti i 14 documenti specifici per 56.10.41 devono essere presenti nel modo unificato");
+
+  console.log("Checklist routes test passed (inclusa verifica ATECO 56.10.41 Gelateria/Pasticceria Ambulante)");
   await app.close();
 }
 

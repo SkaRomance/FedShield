@@ -3827,6 +3827,659 @@ export const SECTOR_MACHINERY_CATALOGS: SectorMachineCatalog[] = [
     ],
   },
 
+  // 1-ter. GELATERIA E PASTICCERIA AMBULANTE ITINERANTE (STREET GELATO)
+  // ATECO 56.10.41, 56.10.4 (Furgoni, ape car, rimorchi e carretti allestiti per la vendita itinerante di gelato artigianale/soft, granite, crepes, waffle, pasticceria con laboratorio di produzione/pastorizzazione e rimessaggio)
+  {
+    sectorKey: "gelateria_pasticceria_ambulante",
+    sectorLabel: "Gelateria e Pasticceria Ambulante Itinerante (Street Gelato)",
+    atecoPrefixes: ["56.10.41", "56.10.4"],
+    machines: [
+      // --- VEICOLARE STREET GELATO & SERVIZIO (env-gelamb-banco-veicolare, env-ft-crepes-waffle, env-gelamb-vano-tecnico-batterie) ---
+      {
+        machineKey: "banco_pozzetti_gelato_veicolare",
+        name: "Banco a Pozzetti per Carapine Gelato a Glicole da Furgone (6-10 Carapine)",
+        type: "Banco Frigorifero Veicolare a Pozzetti a Riserva di Freddo (Glicole)",
+        suggestedManufacturer: "IFI / Frigomeccanica / Orion",
+        suggestedModel: "IFI Panorama Veicolare / Frigomeccanica Pozzetti Glicole / Orion Core",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "BANCO_POZZETTI_GLICOLE_RISERVA_FREDDO",
+            title: "Termostato Digitale HACCP e Riserva di Freddo a Glicole (-12°C/-14°C)",
+            question: "Il banco a pozzetti a glicole garantisce il mantenimento costante della temperatura di somministrazione (-12°C / -14°C) per oltre 6-8 ore di servizio itinerante senza allaccio elettrico, con termostato digitale HACCP e allarme visivo di temperatura?",
+            normReference: "Reg. CE 852/2004 All. II cap. III; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BANCO_POZZETTI_COPERCHI_CAMPANA_BLOCCO_CURVA",
+            title: "Coperchi a Campana Inox a Tenuta con Chiusure Anti-Ribaltamento in Curva",
+            question: "I coperchi a campana in acciaio inox sono dotati di guarnizioni ermetiche e perni o levette di blocco meccanico anti-apertura e anti-ribaltamento accidentale durante la marcia e le curve del veicolo?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3 e All. V p. 6; Reg. CE 852/2004",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BANCO_POZZETTI_CIRCUITO_ERMETICO_R290",
+            title: "Circuito Frigorifero Ermetico con Gas Ecologico R290 (UNI EN 378)",
+            question: "Il gruppo refrigerante ermetico di carica del glicole impiega gas ecologico naturale R290 (propano) ed è installato in vano aerato e conforme alle norme UNI EN 378 e Direttiva Macchine?",
+            normReference: "UNI EN 378-1/2; CEI EN 60335-2-89; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BANCO_POZZETTI_CARAPINE_COLLARE_ANTIROTAZIONE",
+            title: "Pozzetti con Collari di Tenuta e Anello Sagomato Anti-Rotazione Carapine",
+            question: "Ciascun alloggiamento per carapina cilindrica è provvisto di anello in gomma alimentare o sagomatura di fermo anti-rotazione per impedire che il cilindro giri su se stesso durante la spatolatura del gelato duro?",
+            normReference: "D.Lgs. 81/2008 art. 71; Reg. CE 1935/2004",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+      {
+        machineKey: "lavaporzionatore_flusso_continuo",
+        name: "Lavaporzionatore Professionale per Palette Gelato a Getto d'Acqua Continuo",
+        type: "Dispositivo Igienico di Flussaggio per Porzionatori e Palette Gelato",
+        suggestedManufacturer: "Stöckel / San Jamar",
+        suggestedModel: "Stöckel Modell E / San Jamar Dipper Well / Celli Group Dispenser",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "LAVAPORZIONATORE_GETTO_CONTINUO_TROPPOPIENO_ASL",
+            title: "Lavaporzionatore a Flusso Continuo con Troppopieno a Norma ASL ed Eliminazione Ristagni",
+            question: "Il lavaporzionatore è alimentato da un getto d'acqua continuo a perdere con scarico a troppopieno canalizzato verso le acque grigie a norma ASL, escludendo l'uso di vaschette con acqua stagnante che favoriscono la proliferazione batterica?",
+            normReference: "Reg. CE 852/2004 All. II cap. V; D.Lgs. 193/2007; Linee Guida ASL Igiene Alimenti",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVAPORZIONATORE_MATERIALI_MOCA_1935_2004",
+            title: "Materiali Conformi MOCA Reg. CE 1935/2004 e Facile Smontaggio Sanificazione",
+            question: "La vaschetta, il distributore d'acqua e la griglia poggia-palette sono realizzati in acciaio inox o polimeri certificati per contatto con alimenti (MOCA Reg. CE 1935/2004) e sono completamente smontabili a mano per sanificazione giornaliera?",
+            normReference: "Reg. CE 1935/2004; D.Lgs. 29/2017; Reg. CE 852/2004 All. II cap. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVAPORZIONATORE_REGOLAZIONE_PORTATA_DISCONNESSIONE",
+            title: "Valvola Micrometrica di Portata e Disconnessione Idrica Anti-Riflusso",
+            question: "Il circuito di adduzione è provvisto di rubinetto di regolazione micrometrica del flusso idrico per contenere i consumi della cisterna di bordo ed è protetto da valvola di non ritorno anti-inquinamento idrico UNI EN 1717?",
+            normReference: "UNI EN 1717; D.Lgs. 31/2001; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "piastra_crepes_veicolare",
+        name: "Piastra Professionale per Crêpes Tonda da Banco in Ghisa Lavorata",
+        type: "Apparecchiatura Termica Elettrica da Banco per Crêpes",
+        suggestedManufacturer: "Krampouz / Roller Grill",
+        suggestedModel: "Krampouz Standard Round 40cm / Roller Grill CDE 400",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "PIASTRA_CREPES_GHISA_CERTIFICATA_MOCA",
+            title: "Piano Cottura in Ghisa Certificata MOCA Priva di Rivestimenti Tossici (Reg. CE 1935/2004)",
+            question: "Il disco di cottura è realizzato in fusione di ghisa lavorata con certificazione MOCA esente da smalti o rivestimenti antiaderenti chimici deperibili ad alta temperatura, garantendo l'atossicità e la cessione conforme ai test analitici (Reg. CE 1935/2004)?",
+            normReference: "Reg. CE 1935/2004; D.M. 21/03/1973; D.Lgs. 29/2017; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PIASTRA_CREPES_TERMOSTATO_SPIA_RESIDUO",
+            title: "Termostato Regolabile con Spia di Calore Residuo Anti-Ustione",
+            question: "L'apparecchio dispone di termostato regolabile (50-300°C) con spia luminosa indicatrice di inserimento resistenze e spia ottica di calore residuo per segnalare agli operatori la piastra rovente anche dopo lo spegnimento?",
+            normReference: "CEI EN 60335-2-38; D.Lgs. 81/2008 All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PIASTRA_CREPES_PARASPRUZZI_INOX_BORDO",
+            title: "Paraspruzzi Inox Perimetrale di Protezione e Fissaggio Meccanico al Banco",
+            question: "La piastra è dotata di paraspruzzi circolare perimetrale amovibile in acciaio inox per contenimento colature di pastella bollente ed è saldamente staffata o dotata di piedini a ventosa antiscivolo rinforzati per prevenire spostamenti durante il servizio sul furgone?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3 e All. V p. 2; Reg. CE 852/2004",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+      {
+        machineKey: "piastra_waffle_gaufre",
+        name: "Piastra Elettrica per Waffle / Cialde con Apertura a 180°",
+        type: "Apparecchiatura Elettrica Professionale per Cottura Waffle e Cialde",
+        suggestedManufacturer: "Krampouz / Neumärker",
+        suggestedModel: "Krampouz Waffle Maker 180° / Neumärker Brussels 180°",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "PIASTRA_WAFFLE_STAMPI_GHISA_SMALTATA_MOCA",
+            title: "Stampi Sagomati in Ghisa Smaltata Antiaderente Alimentare MOCA",
+            question: "Gli stampi alveolari di cottura sono in ghisa lavorata ad alta conducibilità termica con certificato MOCA di conformità alimentare per contatto ripetuto ad alta temperatura (Reg. CE 1935/2004)?",
+            normReference: "Reg. CE 1935/2004; D.M. 21/03/1973; D.Lgs. 29/2017",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PIASTRA_WAFFLE_MANIGLIA_ISOLATA_180",
+            title: "Maniglia Termoisolante Anti-Ustione e Apertura Bilanciata a 180°",
+            question: "Le impugnature di apertura e rotazione sono costruite in bachelite o tecnopolimero atermico termoisolante anti-ustione, con cerniera a frizione bilanciata a 180° per evitare ricadute accidentali del coperchio superiore rovente sulle dita?",
+            normReference: "CEI EN 60335-2-38; D.Lgs. 81/2008 All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PIASTRA_WAFFLE_CASSETTO_BRICIOLE_ESTRAIBILE",
+            title: "Cassetto Raccoglibriciole e Colature Estraibile Lavabile",
+            question: "Sotto il blocco rotante è installato un vassoio estraibile in acciaio inox a bordi alti per la raccolta di briciole carbonizzate e sfridi di pastella, prevenendo inneschi di fumo e facilitando la pulizia igienica periodica?",
+            normReference: "Reg. CE 852/2004 All. II cap. V; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+      {
+        machineKey: "macchina_gelato_soft_veicolare",
+        name: "Macchina per Gelato Espresso / Soft e Frozen Yogurt da Banco",
+        type: "Macchina Professionale Erogatrice di Gelato Soft ed Espresso",
+        suggestedManufacturer: "Carpigiani / Gel Matic",
+        suggestedModel: "Carpigiani 161 G SP / Gel Matic BV 100 PM / Carpigiani 191",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "GELATO_SOFT_VASCA_CONSERVAZIONE_4C",
+            title: "Vasca Refrigerata con Conservazione a +4°C e Registrazione Digitale HACCP",
+            question: "La vasca superiore di alimentazione è costantemente refrigerata e termoregolata a +4°C a tenuta stagna per la conservazione della miscela liquida anche durante le pause di lavoro prolungate, in piena conformità con le temperature HACCP?",
+            normReference: "Reg. CE 852/2004 All. II cap. IX; D.Lgs. 193/2007; UNI EN 12852",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "GELATO_SOFT_MICRO_ARRESTO_AGITATORE",
+            title: "Microinterruttore di Arresto Immediato Agitatore all'Apertura Vasca (UNI EN 12852)",
+            question: "Il coperchio della vasca e la leva di erogazione sono interbloccati con microinterruttori di sicurezza a norma UNI EN 12852 che arrestano istantaneamente la rotazione dell'agitatore e della pompa se il coperchio viene sollevato?",
+            normReference: "UNI EN 12852; D.Lgs. 81/2008 All. V p. 2 e Direttiva Macchine 2006/42/CE",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "GELATO_SOFT_POMPA_PRESSURIZZAZIONE_MOCA",
+            title: "Pompa ad Ingranaggi MOCA e Componenti di Erogazione Sanificabili",
+            question: "La pompa ad ingranaggi per la regolazione dell'overrun e il cilindro di mantecazione sono certificati MOCA (Reg. CE 1935/2004) e completamente smontabili senza utensili complessi per il lavaggio e sanificazione chimica a fine turno?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004 All. II cap. V; D.Lgs. 29/2017",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "GELATO_SOFT_CIRCUITO_FRIGO_UNI378",
+            title: "Circuito Frigorifero Ermetico Veicolare a Norma UNI EN 378",
+            question: "Il circuito frigorifero autonomo condensato ad aria è ermeticamente sigillato a prova di vibrazioni stradali, conforme alla norma UNI EN 378, con scarico convogliato dell'aria calda verso l'esterno dell'autonegozio?",
+            normReference: "UNI EN 378; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+      {
+        machineKey: "vetrina_monoporzioni_gelato",
+        name: "Vetrina Refrigerata Panoramica per Monoporzioni e Torte Gelato (-18°C / +4°C)",
+        type: "Vetrina Espositiva Refrigerata Panoramica a Bassa Temperatura",
+        suggestedManufacturer: "Isa / IFI",
+        suggestedModel: "Isa Cristal Tower / IFI Chocolat / Isa Il Chicco",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "VETRINA_MONOPORZIONI_CRISTALLI_RISCALDATI",
+            title: "Cristalli Doppi Riscaldati Anticondensa e Vetrocamera di Sicurezza",
+            question: "I cristalli perimetrali panoramici sono realizzati in vetrocamera temprato stratificato con sbrinamento o riscaldamento anticondensa, garantendo totale visibilità igienica e protezione contro la rottura da urti accidentali di clienti e operatori?",
+            normReference: "UNI EN 12150; D.Lgs. 81/2008 All. IV p. 1.3.6 e All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "VETRINA_MONOPORZIONI_ALLARME_HACCP",
+            title: "Controllo Digitale Temperatura con Allarme di Soglia HACCP (-18°C / +4°C)",
+            question: "Il display di controllo elettronico visualizza costantemente la temperatura interna d'esercizio ed è corredato da allarme acustico e visivo in caso di innalzamento anomalo oltre le soglie critiche HACCP (-15°C per torte gelato / +5°C per semifreddi)?",
+            normReference: "Reg. CE 852/2004 All. II cap. IX; D.Lgs. 193/2007",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "VETRINA_MONOPORZIONI_ILLUMINAZIONE_LED_BASSA_TENSIONE",
+            title: "Illuminazione LED a Bassa Tensione e Ripiani con Fermo Meccanico",
+            question: "L'illuminazione interna è a LED a bassissima tensione di sicurezza (SELV) a luce fredda senza riscaldamento delle superfici esposte, e le griglie/ripiani espositivi sono vincolati con ganci anti-sfilamento in curva?",
+            normReference: "CEI EN 60598-2-1; CEI 64-8; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+      {
+        machineKey: "portellone_panoramico_gelateria",
+        name: "Portellone Laterale Panoramico con Pistoni a Gas Rinforzati e Blocco Meccanico",
+        type: "Apertura Laterale Veicolare per Banco Vendita e Tettoia Parasole",
+        suggestedManufacturer: "Allestimenti Speciali Veicolari / Cofi / Carrozzeria Mobile",
+        suggestedModel: "Portellone Coibentato Street Gelato / Wings Wing-Van 24V",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "PORTELLONE_GEL_PISTONI_E_PERNO_BLOCCO_VENTO",
+            title: "Pistoni a Gas Rinforzati e Perno di Blocco Meccanico Anti-Chiusura da Vento",
+            question: "Il portellone sollevabile ad ala è sostenuto da doppi pistoni a gas pressurizzati ad alta portata ed è provvisto di perno o asta telescopica di fermo meccanico obbligatorio per impedire il crollo improvviso del battente causato da raffiche di vento?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2; Direttiva Macchine 2006/42/CE; UNI EN ISO 12100",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PORTELLONE_GEL_ILLUMINAZIONE_LED_24V",
+            title: "Illuminazione LED Integrata a 24V con Diffusori Sigillati",
+            question: "Il cielino interno del portellone integra plafoniere o barre LED alimentate a tensione di sicurezza (24V c.c.) con grado di protezione minimo IP65 contro l'umidità atmosferica e gli spruzzi durante il lavaggio?",
+            normReference: "CEI 64-8 sez. 7; CEI EN 60529 (IP65); D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "PORTELLONE_GEL_SERRATURE_CHIAVE_VIAGGIO",
+            title: "Serrature Meccaniche a Chiave con Doppio Riscontro per Trasferimento Stradale",
+            question: "Il portellone dispone di maniglie incassate con serrature a chiave a doppio punto di chiusura meccanica che garantiscono la perfetta aderenza alle guarnizioni perimetrali a tenuta e impediscono l'apertura accidentale durante il tragitto stradale?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3; Codice della Strada art. 164",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "sistema_batterie_inverter_litio",
+        name: "Gruppo Batterie LiFePO4 con Inverter Sinusoidale Puro per Autonomia Frigo",
+        type: "Sistema Ausiliario Elettrico di Accumulo al Litio e Conversione Tensione",
+        suggestedManufacturer: "Victron Energy / Mastervolt",
+        suggestedModel: "Victron Lithium SuperPack LiFePO4 + MultiPlus-II / Mastervolt MLI Ultra",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "BATTERIE_LITIO_BMS_SOVRATEMPERATURA_CORTO",
+            title: "Pacco Batterie LiFePO4 con BMS di Protezione da Sovratemperatura e Cortocircuito",
+            question: "Il banco accumulatori al litio ferro fosfato (LiFePO4) è dotato di sistema integrato Battery Management System (BMS) con sgancio rapido automatico in caso di sovratemperatura, sovraccarico, sovrascarica profonda o cortocircuito?",
+            normReference: "CEI EN 62619; CEI EN 62133-2; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BATTERIE_LITIO_INVERTER_ONDA_PURA_SALVAVITA",
+            title: "Inverter Sinusoidale Puro con Differenziale Salvavita 30 mA (CEI 64-8)",
+            question: "L'inverter DC/AC ad onda sinusoidale pura (12V/24V a 230V) è protetto a monte da fusibile calibrato ad alto potere di interruzione e a valle da interruttore differenziale salvavita ad alta sensibilità Idn=30 mA tipo B/F con efficace messa a terra veicolare?",
+            normReference: "Norma CEI 64-8/7 art. 717; CEI EN 62109-1; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BATTERIE_LITIO_VANO_VENTILATO_ISOLATO",
+            title: "Vano Tecnico Coibentato e Ventilato per Dissipazione Termica",
+            question: "Il pacco batterie e l'inverter sono posizionati in vano tecnico dedicato con griglie di ventilazione forzata o naturale adeguate, esenti da polveri e vapori umidi, e separati termicamente dal vano banco gelato?",
+            normReference: "CEI 64-8; D.Lgs. 81/2008 art. 71 e art. 80",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // --- LABORATORIO BASE DI PRODUZIONE & FREDDO (env-gelamb-lab-pastorizzazione, env-gelamb-lab-mantecazione, env-gelamb-lab-pasticceria, env-gelamb-cella-stoccaggio) ---
+      {
+        machineKey: "pastorizzatore_elettronico_gelato",
+        name: "Pastorizzatore Elettronico Professionale per Miscele Gelato (60-120 Litri)",
+        type: "Apparecchiatura Termica per Trattamento Termico Miscele e Pastorizzazione",
+        suggestedManufacturer: "Carpigiani / Bravo / Cattabriga",
+        suggestedModel: "Carpigiani Pastomaster 60 RTL / Bravo Trittico Executive / Cattabriga PSK 65",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "PASTORIZZATORE_CICLO_TERMICO_85_4_HACCP",
+            title: "Ciclo Termico Alta Pastorizzazione +85°C e Raffreddamento +4°C (Reg. CE 853/04 HACCP)",
+            question: "Il pastorizzatore esegue in modo automatico e documentato il ciclo termico ad alta pastorizzazione (+85°C con sosta termica) e abbattimento rapido a +4°C entro i tempi limite prescritti dal Reg. CE 853/2004 per eliminazione di patogeni (Salmonella, Listeria) con memorizzazione dei lotti HACCP?",
+            normReference: "Reg. CE 853/2004 All. III sez. IX; Reg. CE 852/2004; D.Lgs. 193/2007",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PASTORIZZATORE_MICRO_SICUREZZA_COPERCHIO",
+            title: "Microinterruttore di Sicurezza al Sollevamento Coperchio con Blocco Agitatore",
+            question: "Il coperchio trasparente o in acciaio inox della vasca è munito di microinterruttore di sicurezza a rottura positiva che interrompe istantaneamente il motore dell'agitatore/emulsionatore al minimo accenno di apertura, prevenendo contatti traumatici con gli organi in rapida rotazione (D.Lgs. 81/08 All. V)?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2; UNI EN 12852; Direttiva Macchine 2006/42/CE",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PASTORIZZATORE_RUBINETTO_LAVAGGIO_IGIENICO",
+            title: "Rubinetto di Estrazione a Tenuta con Doccetta di Lavaggio Incorporata MOCA",
+            question: "Il rubinetto di estrazione della miscela calda/fredda è a tenuta ermetica, privo di zone morte o ristagni microbiologici, conforme MOCA (Reg. CE 1935/2004) ed è dotato di doccetta integrata per il risciacquo idrico guidato del condotto tra una spillatura e l'altra?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004 All. II cap. V; D.Lgs. 29/2017",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PASTORIZZATORE_PROTEZIONE_BRUCIATORE_RESISTENZE",
+            title: "Isolamento Termico Pareti Vasca Anti-Scottatura Operatore",
+            question: "Il mantello esterno della vasca è provvisto di isolamento termico ad alta efficienza per impedire che le pareti esterne raggiungano temperature pericolose durante la fase di riscaldamento a +85°C, prevenendo rischi di ustione per gli addetti?",
+            normReference: "UNI EN ISO 13732-1; D.Lgs. 81/2008 All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "mantecatore_orizzontale_gelato",
+        name: "Mantecatore Orizzontale Professionale per Gelato Artigianale",
+        type: "Macchina per la Mantecazione e Congelamento Dinamico del Gelato",
+        suggestedManufacturer: "Carpigiani / Cattabriga / Frigomat",
+        suggestedModel: "Carpigiani Labo 20/30 XPL P / Cattabriga Multifreeze PRO / Frigomat Titan",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "MANTECATORE_GRIGLIA_SALVADITA_UNI12852",
+            title: "Griglia Salvadita Bocca Carica e Portello Frontale Interbloccato UNI EN 12852",
+            question: "La tramoggia di introduzione ingredienti è dotata di griglia salvadita fissa conforme a UNI EN 12852 che impedisce l'introduzione delle dita o spatole verso l'elica, e il portello frontale di estrazione è vincolato a microinterruttore di sicurezza che arresta immediatamente il rotore all'apertura?",
+            normReference: "UNI EN 12852; D.Lgs. 81/2008 All. V p. 2; Direttiva Macchine 2006/42/CE",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "MANTECATORE_AGITATORE_RASCHIATORI_MOCA",
+            title: "Agitatore Inox con Pattini Raschiatori Polimerici Atossici MOCA",
+            question: "L'elica agitatrice interna in acciaio inox è corredata di pattini raschiatori elastici in materiale polimerico certificato per contatto con alimenti (Reg. CE 1935/2004), integri e privi di usure anomale che possano rilasciare particelle estranee nel gelato?",
+            normReference: "Reg. CE 1935/2004; D.Lgs. 29/2017; Reg. CE 852/2004 All. II cap. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "MANTECATORE_PORTA_ISOLATA_SCARICO_PROTETTO",
+            title: "Portello Frontale Termoisolante con Scivolo di Estrazione Raggiato",
+            question: "Il portello di chiusura cilindro è coibentato per evitare condense e contatto con parti a -30°C ed è dotato di scivolo salvagoccia raggiato facilmente asportabile e sanificabile senza fessurazioni?",
+            normReference: "Reg. CE 852/2004 All. II cap. V; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "MANTECATORE_PULSANTE_EMERGENZA_FUNGO",
+            title: "Pulsante di Arresto di Emergenza a Fungo e Circuito Frigorifero Ermetico",
+            question: "Il quadro comandi dispone di pulsante di arresto di emergenza a fungo a ritenuta meccanica a norma CEI EN 60204-1 e il circuito frigorifero a gas ecologico è conforme alle direttive di sicurezza UNI EN 378?",
+            normReference: "CEI EN 60204-1; UNI EN 378; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "abbattitore_surgelatore_carapine",
+        name: "Abbattitore Rapido e Surgelatore Dedicato per Gelateria (-35°C)",
+        type: "Abbattitore di Temperatura e Surgelatore Rapido per Carapine e Vaschette",
+        suggestedManufacturer: "Irinox / Coldline",
+        suggestedModel: "Irinox MultiFresh Next Gelato / Coldline Modi Up Gelato",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "ABBATTITORE_GEL_INDURIMENTO_35C_CRISTALLI",
+            title: "Ciclo Indurimento Rapido Gelato a -35°C per Micro-Cristallizzazione Stabile",
+            question: "L'apparecchiatura dispone di programma specifico per gelateria con ventilazione indiretta a -35°C che congela rapidamente l'acqua libera nella carapina appena estratta dal mantecatore, stabilizzando i microcristalli di ghiaccio ed evitando la formazione di macro-strutture vetrose?",
+            normReference: "Reg. CE 852/2004 All. II cap. IX; D.Lgs. 193/2007; Manuale Buone Prassi Gelateria",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ABBATTITORE_GEL_SONDA_SPILLONE_CALIBRATA",
+            title: "Sonda al Cuore a Spillone Multipunto MOCA Calibrata HACCP",
+            question: "La sonda a spillone è interamente in acciaio inox per contatto alimentare MOCA (Reg. CE 1935/2004), regolarmente tarata e corredata di supporto igienico su porta per prevenire contaminazioni crociate?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ABBATTITORE_GEL_CAMERA_RAGGIATA_SANIFICAZIONE",
+            title: "Camera Interna Inox AISI 304 con Angoli Raggiati e Scarico Condensa",
+            question: "La camera interna e la griglia portacarapine sono in acciaio inox AISI 304 con fondo diamantato e pilette di scarico condensa con tappo ermetico per consentire la completa igienizzazione e sbrinamento?",
+            normReference: "Reg. CE 852/2004 All. II cap. V; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "ABBATTITORE_GEL_ALLARME_PORTA_GUARNIZIONE_RISCALDATA",
+            title: "Guarnizione Magnetica Riscaldata Anticongelamento e Allarme Porta Aperta",
+            question: "Il perimetro della porta presenta resistenza elettrica anticongelamento per evitare il bloccaggio della guarnizione a temperature criogeniche (-35°C) ed è presente allarme ottico/acustico per porta aperta prolungata?",
+            normReference: "UNI EN 378; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+      {
+        machineKey: "planetaria_pasticceria_base",
+        name: "Impastatrice Planetaria Professionale con Vasca 20-40 Litri",
+        type: "Macchina Planetaria per Paste, Creme, Mousse e Cialde",
+        suggestedManufacturer: "Dito Sama / Pietro Berto / Fimar",
+        suggestedModel: "Dito Sama BE-20 / Pietro Berto King 40 / Fimar IP/20F",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "PLANETARIA_GEL_GRIGLIA_INTERBLOCCATA_UNI454",
+            title: "Griglia di Protezione Inox Interbloccata con Arresto Immediato (UNI EN 454)",
+            question: "La vasca è protetta da schermo di protezione grigliato o trasparente in policarbonato a norma UNI EN 454, munito di microinterruttore di sicurezza che arresta istantaneamente la rotazione dell'utensile (tempo di arresto < 2 secondi) al sollevamento della griglia o all'abbassamento della vasca?",
+            normReference: "UNI EN 454; D.Lgs. 81/2008 All. V p. 2; Direttiva Macchine 2006/42/CE",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PLANETARIA_GEL_FUNGO_EMERGENZA_RIARMO",
+            title: "Pulsante di Emergenza a Fungo a Riarmo Manuale e Relè di Minima Tensione",
+            question: "La macchina è equipaggiata con pulsante di arresto d'emergenza a fungo e dispositivo contro il riavvio spontaneo dopo interruzione accidentale dell'alimentazione elettrica (relè di minima tensione) a norma CEI EN 60204-1?",
+            normReference: "CEI EN 60204-1; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PLANETARIA_GEL_LEVA_SOLLEVAMENTO_VASCA",
+            title: "Leva di Sollevamento Vasca Assistita con Blocco di Posizione Meccanico",
+            question: "Il meccanismo di sollevamento e abbassamento vasca è dotato di blocco di fine corsa meccanico e sicura per prevenire la discesa improvvisa della vasca durante il funzionamento o il caricamento degli ingredienti?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3 e All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PLANETARIA_GEL_UTENSILI_MOCA_1935_2004",
+            title: "Utensili di Miscelazione (Frusta, Foglia, Gancio) in Acciaio Inox MOCA",
+            question: "Tutti gli utensili intercambiabili di lavorazione sono realizzati in acciaio inox o alluminio anodizzato speciale per alimenti corredati da dichiarazione di conformità MOCA (Reg. CE 1935/2004) e privi di cricche o fili metallici deformati?",
+            normReference: "Reg. CE 1935/2004; D.Lgs. 29/2017; Reg. CE 852/2004 All. II cap. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "sfogliatrice_banco_pasticceria",
+        name: "Sfogliatrice Professionale da Banco per Paste e Cialde",
+        type: "Laminatrice / Sfogliatrice a Cilindri per Laboratorio Pasticceria",
+        suggestedManufacturer: "Rollmatic / Rondo / Flamic",
+        suggestedModel: "Rollmatic R50B / Rondo Econom / Flamic SF450B",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "SFOGLIATRICE_GEL_RIPARI_INTERBLOCCATI_UNI1674",
+            title: "Ripari di Protezione Fissi/Mobili Interbloccati sui Cilindri di Laminazione (UNI EN 1674)",
+            question: "I cilindri di laminazione dell'impasto sono segregati su entrambi i lati di ingresso da ripari di protezione in acciaio inox o policarbonato a norma UNI EN 1674, provvisti di microinterruttori di arresto immediato del moto se sollevati anche parzialmente?",
+            normReference: "UNI EN 1674; D.Lgs. 81/2008 All. V p. 2; Direttiva Macchine 2006/42/CE",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SFOGLIATRICE_GEL_INVERSIONE_MARCIA_PEDALE",
+            title: "Comando di Inversione di Marcia con Protezione Anti-Trascina Dita",
+            question: "I comandi a joystick o pedale di inversione del senso di avanzamento dei tappeti funzionano a uomo presente e sono configurati per prevenire l'avvicinamento imprudente delle mani ai cilindri in movimento?",
+            normReference: "UNI EN 1674; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SFOGLIATRICE_GEL_TAPPETI_ALIMENTARI_MOCA",
+            title: "Tappeti Trasportatori in Tessuto Sintetico Certificato MOCA Privi di Sfilacciamenti",
+            question: "I nastri trasportatori scorrevoli sono conformi alle normative MOCA (Reg. CE 1935/2004) per alimenti a base grassa/secca e risultano integri, privi di sfrangiature o bordi sfilacciati che possano rilasciare particelle tessili negli impasti?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004 All. II cap. V; D.Lgs. 29/2017",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SFOGLIATRICE_GEL_RASCHIATORI_CILINDRI_PULIZIA",
+            title: "Raschiatori Rimovibili per Pulizia a Cilindri Fermi e Spenti",
+            question: "I raschiatori inferiori dei cilindri sono facilmente smontabili per le ordinarie operazioni di pulizia e sanificazione a fine turno mediante procedura sicura a macchina spenta e scollegata elettricamente?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2; Reg. CE 852/2004",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+      {
+        machineKey: "forno_ventilato_pasticceria",
+        name: "Forno Elettrico Ventilato Professionale per Pasticceria e Cialde",
+        type: "Forno Combinato / Ventilato a Convezione per Pasticceria e Bakery",
+        suggestedManufacturer: "Unox / Rational",
+        suggestedModel: "Unox Bakertop Mind.Maps / Rational iCombi Classic Bakery",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "FORNO_GEL_DOPPIO_VETRO_ANTIUSTIONE",
+            title: "Porta a Doppio Vetro Ventilato Termoisolante Anti-Ustione",
+            question: "La porta del forno è munita di doppio o triplo vetro camera basso-emissivo con intercapedine ventilata d'aria che mantiene la temperatura superficiale esterna al di sotto delle soglie di sicurezza (< 60°C) prevenendo ustioni da contatto accidentale?",
+            normReference: "UNI EN ISO 13732-1; CEI EN 60335-2-42; D.Lgs. 81/2008 All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FORNO_GEL_ARRESTO_VENTOLA_APERTURA",
+            title: "Microinterruttore su Porta per Arresto Immediato Ventole all'Apertura",
+            question: "L'apertura della porta attiva un microinterruttore di sicurezza che disinserisce immediatamente le ventole di convezione e l'iniezione vapore, impedendo violente fuoriuscite di correnti di calore bollente verso il viso dell'operatore?",
+            normReference: "CEI EN 60335-2-42; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FORNO_GEL_CAPPA_CONDENSAZIONE_VAPORI",
+            title: "Cappa a Condensazione Vapori Canalizzata e Filtri Antigrasso Inox",
+            question: "Il forno è sovrastato da cappa di aspirazione a condensazione canalizzata verso l'esterno o con ricircolo filtrato certificato, con filtri a labirinto in acciaio inox lavabili per prevenire accumuli di vapori nel laboratorio?",
+            normReference: "Reg. CE 852/2004 All. II cap. I; D.Lgs. 81/2008 art. 64 e All. IV",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FORNO_GEL_SICURA_DOPPIO_SCATTO_MANIGLIA",
+            title: "Maniglia di Apertura a Doppio Scatto per Sfiato Vapore Controllato",
+            question: "La maniglia della porta presenta un meccanismo a doppio scatto di sicurezza che obbliga a un primo sgancio di sfiato vapore prima dello spalancamento completo dell'anta?",
+            normReference: "CEI EN 60335-2-42; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+      {
+        machineKey: "lavaoggetti_carapine_stoviglie",
+        name: "Lavaoggetti Industriale per Carapine, Vaschette e Fruste (Pot-Washer)",
+        type: "Lavastoviglie e Lavaoggetti Industriale ad Alta Pressione per Pasticceria/Gelateria",
+        suggestedManufacturer: "Winterhalter / Comenda",
+        suggestedModel: "Winterhalter UF-M / Comenda GE 655 RCD / Hoonved EDI",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "LAVAOGGETTI_RISCIACQUO_82C_DIN10510",
+            title: "Ciclo di Risciacquo Igienizzante ad Alta Temperatura (>= 82°C) DIN 10510",
+            question: "La lavaoggetti garantisce boiler e risciacquo finale con temperatura costante superiore a 82°C certificata secondo la norma DIN 10510, per assicurare la termodisinfezione battericida completa di carapine e residui di miscele lattiero-casearie?",
+            normReference: "DIN 10510; Reg. CE 852/2004 All. II cap. V; D.Lgs. 193/2007",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVAOGGETTI_CESTO_SAGOMATO_CARAPINE",
+            title: "Cesto Sagomato Inox con Supporti Antiribaltamento per Carapine e Fruste",
+            question: "I cesti di lavaggio in acciaio inox rinforzato dispongono di alloggiamenti sagomati per sostenere carapine cilindriche pesanti e fruste planetaria, impedendo urti, cadute o danneggiamenti delle giranti rotanti dell'acqua?",
+            normReference: "D.Lgs. 81/2008 art. 71; Direttiva Macchine 2006/42/CE",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "LAVAOGGETTI_DISPOSITIVO_ANTIRIFLUSSO_UNI1717",
+            title: "Dispositivo Antiriflusso Idrico a Norma UNI EN 1717 (Break Tank con Air Gap)",
+            question: "L'allacciamento alla rete idrica potabile è protetto da sistema a serbatoio atmosferico con disconnessione d'aria (Break Tank - Air Gap tipo A) a norma UNI EN 1717, escludendo qualsiasi contaminazione per riflusso verso l'acquedotto?",
+            normReference: "UNI EN 1717; D.Lgs. 31/2001; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVAOGGETTI_MICRO_PORTA_DOSATORI_INTEGRATI",
+            title: "Microinterruttore di Arresto Apertura Porta e Dosatori Automatici Detergente",
+            question: "La porta o capotta controbilanciata è dotata di microinterruttore che blocca istantaneamente le pompe di lavaggio ad alta pressione in caso di apertura e i dosatori perimetrali di detergente chimico sono sigillati a prelievo automatico?",
+            normReference: "CEI EN 60335-2-58; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "armadio_congelatore_carapine_sede",
+        name: "Armadio Frigorifero a Bassa Temperatura per Stoccaggio Carapine (-25°C)",
+        type: "Armadio Frigorifero Verticale a Bassa Temperatura per Conservazione Gelato",
+        suggestedManufacturer: "Friulinox / Coldline / Liebherr",
+        suggestedModel: "Friulinox Gelato Line / Coldline Master Gelato -25°C / Liebherr GGv 5860",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "CONGELATORE_CARAPINE_TEMP_25C_REGOLABILE",
+            title: "Temperatura Negativa Costante Regolabile da -15°C a -25°C con Tracciabilità HACCP",
+            question: "L'armadio congelatore garantisce refrigerazione ventilata uniforme a bassa temperatura (-15°C / -25°C) con display elettronico visibile e registrazione conforme ai piani di autocontrollo HACCP?",
+            normReference: "Reg. CE 852/2004 All. II cap. IX; D.Lgs. 193/2007",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CONGELATORE_CARAPINE_CREMAGLIERE_INOX_PORTATA",
+            title: "Cremagliere e Guide Rinforzate in Acciaio Inox per Carico Pesante Carapine",
+            question: "La struttura interna è provvista di cremagliere e ripiani in acciaio inox rinforzato specificamente calcolati per sostenere il carico concentrato delle carapine piene di gelato senza rischio di flessioni o collassi strutturali?",
+            normReference: "D.Lgs. 81/2008 art. 71; Reg. CE 852/2004 All. II cap. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CONGELATORE_CARAPINE_ALLARME_HACCP_PORTA",
+            title: "Allarme Visivo/Acustico Sovratemperatura e Porta Aperta con Serratura a Chiave",
+            question: "La centralina elettronica emette allarme ottico e sonoro in caso di porta lasciata inavvertitamente aperta o di innalzamento termico critico ed è provvista di serratura a chiave per la sicurezza delle scorte durante la chiusura?",
+            normReference: "Reg. CE 852/2004 All. II cap. IX; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: false,
+          },
+          {
+            code: "CONGELATORE_CARAPINE_VALVOLA_COMPENSAZIONE_VUOTO",
+            title: "Valvola Termica di Compensazione Pressione per Agevole Riapertura Anta",
+            question: "La camera è provvista di valvola riscaldata di compensazione della depressione che consente la riapertura immediata della porta senza forzature traumatiche da parte dell'operatore?",
+            normReference: "UNI EN 378; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+    ],
+  },
+
   // 2. RISTORAZIONE & ALIMENTARE
   {
     sectorKey: "ristorazione_alimentare",
@@ -6105,15 +6758,26 @@ export function getSectorMachineCatalogForAteco(atecoCode?: string | null): Sect
 
   const clean = atecoCode.trim();
   const digitsOnly = clean.replace(/[^0-9]/g, "");
+
+  // Troviamo il catalogo con il prefisso coincidente più lungo/specifico
+  let bestMatch: { catalog: SectorMachineCatalog; matchLength: number } | null = null;
+
   for (const cat of SECTOR_MACHINERY_CATALOGS) {
-    if (
-      cat.atecoPrefixes.some((p) => {
-        const pDigits = p.replace(/[^0-9]/g, "");
-        return clean.startsWith(p) || (pDigits.length >= 2 && digitsOnly.startsWith(pDigits));
-      })
-    ) {
-      return cat;
+    for (const p of cat.atecoPrefixes) {
+      const pDigits = p.replace(/[^0-9]/g, "");
+      const matchesClean = clean.startsWith(p);
+      const matchesDigits = pDigits.length >= 2 && digitsOnly.startsWith(pDigits);
+      if (matchesClean || matchesDigits) {
+        const matchLen = Math.max(matchesClean ? p.length : 0, matchesDigits ? pDigits.length : 0);
+        if (!bestMatch || matchLen > bestMatch.matchLength) {
+          bestMatch = { catalog: cat, matchLength: matchLen };
+        }
+      }
     }
+  }
+
+  if (bestMatch) {
+    return bestMatch.catalog;
   }
 
   // Fallback logistica/magazzino per settori industriali/commerciali generici
@@ -6291,11 +6955,19 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
   const catSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "catering_eventi_banqueting");
   const catMachines = catSector ? catSector.machines : [];
 
+  const isGelateriaAmbulanteAteco = !!atecoCode && (
+    atecoCode.startsWith("56.10.41") ||
+    (atecoCode.startsWith("56.10.4") && !atecoCode.startsWith("56.10.42")) ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("561041")
+  );
+  const gelSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "gelateria_pasticceria_ambulante");
+  const gelMachines = gelSector ? gelSector.machines : [];
+
   const isFoodTruckAteco = !!atecoCode && (
     atecoCode.startsWith("56.10.42") ||
-    atecoCode.startsWith("56.10.4") ||
+    (atecoCode.startsWith("56.10.4") && !atecoCode.startsWith("56.10.41") && !atecoCode.replace(/[^0-9]/g, "").startsWith("561041")) ||
     atecoCode.replace(/[^0-9]/g, "").startsWith("561042") ||
-    atecoCode.replace(/[^0-9]/g, "").startsWith("56104")
+    (atecoCode.replace(/[^0-9]/g, "").startsWith("56104") && !atecoCode.replace(/[^0-9]/g, "").startsWith("561041"))
   );
   const ftSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "food_truck_street_food");
   const ftMachines = ftSector ? ftSector.machines : [];
@@ -6781,6 +7453,101 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
           "affettatrice_compatta_blocco",
           "cappa_aspirazione_foodtruck",
           "lavello_inox_ginocchio_veicolare",
+        ].includes(m.machineKey)
+      );
+    }
+
+    // Reparti Gelateria e Pasticceria Ambulante Itinerante (56.10.41 / 56.10.4 / 561041)
+    else if (
+      envId === "env-gelamb-banco-veicolare" ||
+      envId.includes("gelamb-banco") ||
+      (isGelateriaAmbulanteAteco && (nameLower.includes("banco") || nameLower.includes("pozzetti") || (nameLower.includes("carapine") && !nameLower.includes("lavaggio") && !nameLower.includes("cella") && !nameLower.includes("stoccaggio")) || nameLower.includes("somministrazione") || cat === "sales_office" || cat === "public"))
+    ) {
+      matchingMachines = gelMachines.filter((m) =>
+        [
+          "banco_pozzetti_gelato_veicolare",
+          "lavaporzionatore_flusso_continuo",
+          "vetrina_monoporzioni_gelato",
+          "portellone_panoramico_gelateria",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-ft-crepes-waffle" ||
+      envId.includes("crepes") ||
+      envId.includes("waffle") ||
+      (isGelateriaAmbulanteAteco && (nameLower.includes("crepe") || nameLower.includes("waffle")))
+    ) {
+      matchingMachines = gelMachines.filter((m) =>
+        [
+          "piastra_crepes_veicolare",
+          "piastra_waffle_gaufre",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-gelamb-vano-tecnico-batterie" ||
+      envId.includes("gelamb-vano-tecnico") ||
+      envId.includes("gelamb-batterie") ||
+      (isGelateriaAmbulanteAteco && (nameLower.includes("batterie") || nameLower.includes("inverter") || (nameLower.includes("tecnico") && !nameLower.includes("cucina")) || nameLower.includes("soft") || cat === "tecnici_esterno"))
+    ) {
+      matchingMachines = gelMachines.filter((m) =>
+        [
+          "macchina_gelato_soft_veicolare",
+          "sistema_batterie_inverter_litio",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-gelamb-lab-pastorizzazione" ||
+      envId.includes("gelamb-lab-pastorizzazione") ||
+      (isGelateriaAmbulanteAteco && (nameLower.includes("pastorizz") || nameLower.includes("miscele")))
+    ) {
+      matchingMachines = gelMachines.filter((m) =>
+        [
+          "pastorizzatore_elettronico_gelato",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-gelamb-lab-mantecazione" ||
+      envId.includes("gelamb-lab-mantecazione") ||
+      (isGelateriaAmbulanteAteco && (nameLower.includes("manteca") || (nameLower.includes("laboratorio") && nameLower.includes("gelato"))))
+    ) {
+      matchingMachines = gelMachines.filter((m) =>
+        [
+          "mantecatore_orizzontale_gelato",
+          "abbattitore_surgelatore_carapine",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-gelamb-lab-pasticceria" ||
+      envId.includes("gelamb-lab-pasticceria") ||
+      (isGelateriaAmbulanteAteco && (nameLower.includes("pasticceria") || nameLower.includes("ciald") || (nameLower.includes("laboratorio") && !nameLower.includes("gelato") && !nameLower.includes("pastorizz")) || cat === "production"))
+    ) {
+      matchingMachines = gelMachines.filter((m) =>
+        [
+          "planetaria_pasticceria_base",
+          "sfogliatrice_banco_pasticceria",
+          "forno_ventilato_pasticceria",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-gelamb-lavaggio-carapine" ||
+      envId.includes("gelamb-lavaggio") ||
+      (isGelateriaAmbulanteAteco && (nameLower.includes("lavaggio") || nameLower.includes("lavaoggetti") || nameLower.includes("stoviglie") || cat === "services"))
+    ) {
+      matchingMachines = gelMachines.filter((m) =>
+        [
+          "lavaoggetti_carapine_stoviglie",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-gelamb-cella-stoccaggio" ||
+      envId === "env-gelamb-hangar-ricarica" ||
+      envId.includes("gelamb-cella") ||
+      envId.includes("gelamb-hangar") ||
+      (isGelateriaAmbulanteAteco && (nameLower.includes("cella") || nameLower.includes("stoccaggio") || nameLower.includes("hangar") || nameLower.includes("rimessaggio") || cat === "warehouse"))
+    ) {
+      matchingMachines = gelMachines.filter((m) =>
+        [
+          "armadio_congelatore_carapine_sede",
         ].includes(m.machineKey)
       );
     } else if (
