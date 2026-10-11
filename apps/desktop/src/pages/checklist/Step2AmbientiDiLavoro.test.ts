@@ -1655,4 +1655,319 @@ assert.ok(
   "In modalità safety_only nessun item cucina mensa deve avere domain haccp",
 );
 
+// ============================================================================
+// Test 17: getStandardEnvironmentsForAteco & conformità per Catering per Eventi e Banqueting (ATECO 56.21.00 / 56.21)
+// ============================================================================
+console.log("Test 17: getStandardEnvironmentsForAteco & conformità per Catering Eventi / Banqueting (56.21.00 / 56.21)");
+
+// Verifica priorità e varianti di prefisso ATECO per Catering
+const catEnvs1 = getStandardEnvironmentsForAteco("56.21.00");
+const catEnvs2 = getStandardEnvironmentsForAteco("56.21.0");
+const catEnvs3 = getStandardEnvironmentsForAteco("56.21");
+const catEnvs4 = getStandardEnvironmentsForAteco("562100");
+const catEnvs5 = getStandardEnvironmentsForAteco("5621");
+
+assert.equal(catEnvs1.length, 12, "ATECO 56.21.00 deve restituire esattamente 12 ambienti standard");
+assert.equal(catEnvs2.length, 12, "ATECO 56.21.0 deve restituire 12 ambienti");
+assert.equal(catEnvs3.length, 12, "ATECO 56.21 deve restituire 12 ambienti");
+assert.equal(catEnvs4.length, 12, "ATECO 562100 deve restituire 12 ambienti");
+assert.equal(catEnvs5.length, 12, "ATECO 5621 deve restituire 12 ambienti");
+
+const expectedCatIds = [
+  "env-cat-cucina-centrale",
+  "env-cat-prep-fingerfood",
+  "env-cat-diete-allergeni",
+  "env-cat-celle-frigo",
+  "env-cat-dispensa-dry",
+  "env-cat-deposito-noleggio",
+  "env-cat-deposito-arredi",
+  "env-cat-banchina-carico",
+  "env-cat-lavaggio-rientro",
+  "env-cat-deposito-gpl",
+  "env-cat-spogliatoi",
+  "env-cat-ufficio-logistica",
+];
+
+for (const id of expectedCatIds) {
+  assert.ok(
+    catEnvs1.some((e) => e.id === id),
+    `Ambiente con id '${id}' deve essere presente negli ambienti standard del Catering`,
+  );
+}
+
+// 1. Cucina Centrale & Cotture di Base
+const catCucina = catEnvs1.find((e) => e.id === "env-cat-cucina-centrale")!;
+assert.equal(catCucina.surfaceSqM, 60);
+assert.equal(catCucina.heightM, 3.2);
+assert.equal(catCucina.volumeCuM, 192);
+assert.equal(catCucina.occupantsCount, 4);
+const compCucinaCat = evaluateEnvironmentCompliance(catCucina, "56.21.00");
+assert.equal(compCucinaCat.isHeightCompliant, true, "Altezza 3.20m deve essere a norma (≥ 3.00m)");
+assert.equal(compCucinaCat.isCubatureCompliant, true, "Cubatura 192/4 = 48 mc/op deve essere a norma (≥ 10 mc)");
+assert.ok(
+  compCucinaCat.summaryBadges.some((b) => b.text.includes("Cucina centrale eventi a norma") && b.text.includes("Ansul R-102")),
+  "Deve essere presente il badge cucina centrale eventi con Ansul R-102 e canaline con degrassatore",
+);
+assert.ok(
+  compCucinaCat.summaryBadges.some((b) => b.text.includes("Lavamani a ginocchio/pedale")),
+  "Deve essere presente il badge lavamani a ginocchio/pedale Reg. CE 852/04",
+);
+
+// 2. Prep Finger Food
+const catPrepFinger = catEnvs1.find((e) => e.id === "env-cat-prep-fingerfood")!;
+assert.equal(catPrepFinger.surfaceSqM, 30);
+assert.equal(catPrepFinger.heightM, 3.0);
+assert.equal(catPrepFinger.volumeCuM, 90);
+assert.equal(catPrepFinger.occupantsCount, 3);
+const compPrepCat = evaluateEnvironmentCompliance(catPrepFinger, "56.21.00");
+assert.equal(compPrepCat.isHeightCompliant, true);
+
+// 3. Area Diete Speciali & Buffet Intolleranze
+const catDiete = catEnvs1.find((e) => e.id === "env-cat-diete-allergeni")!;
+assert.equal(catDiete.surfaceSqM, 15);
+assert.equal(catDiete.heightM, 3.0);
+assert.equal(catDiete.volumeCuM, 45);
+assert.equal(catDiete.occupantsCount, 2);
+const compDieteCat = evaluateEnvironmentCompliance(catDiete, "56.21.00");
+assert.ok(
+  compDieteCat.summaryBadges.some((b) => b.text.includes("Area diete speciali & buffet allergeni")),
+  "Deve essere presente il badge diete speciali Reg. UE 1169/2011 & D.Lgs. 231/2017",
+);
+
+// 4. Celle Frigorifere Walk-in Deperibili & Cella Stoccaggio Eventi
+const catCelle = catEnvs1.find((e) => e.id === "env-cat-celle-frigo")!;
+assert.equal(catCelle.surfaceSqM, 35);
+assert.equal(catCelle.heightM, 2.8);
+assert.equal(catCelle.volumeCuM, 98);
+assert.equal(catCelle.occupantsCount, 2);
+const compCelleCat = evaluateEnvironmentCompliance(catCelle, "56.21.00");
+assert.ok(
+  compCelleCat.summaryBadges.some((b) => b.text.includes("Teletermometri continui HACCP per deperibili (0-4°C)")),
+  "Celle devono avere teletermometri continui HACCP",
+);
+assert.ok(
+  compCelleCat.summaryBadges.some((b) => b.text.includes("Allarme uomo intrappolato a 24V h24 a norma UNI EN 378")),
+  "Celle devono avere allarme uomo intrappolato UNI EN 378 e sblocco fluorescente",
+);
+
+// 5. Magazzino Merci Secche & Beverage
+const catDispensa = catEnvs1.find((e) => e.id === "env-cat-dispensa-dry")!;
+assert.equal(catDispensa.surfaceSqM, 45);
+assert.equal(catDispensa.heightM, 3.2);
+
+// 6. Magazzino Stoviglie & Noleggio
+const catNoleggio = catEnvs1.find((e) => e.id === "env-cat-deposito-noleggio")!;
+assert.equal(catNoleggio.surfaceSqM, 80);
+assert.equal(catNoleggio.heightM, 3.5);
+assert.equal(catNoleggio.volumeCuM, 280);
+
+// 7. Deposito Arredi & Ricevimenti
+const catArredi = catEnvs1.find((e) => e.id === "env-cat-deposito-arredi")!;
+assert.equal(catArredi.surfaceSqM, 70);
+assert.equal(catArredi.heightM, 3.5);
+assert.equal(catArredi.volumeCuM, 245);
+
+// 8. Baia di Carico / Scarico Furgoni Coibentati
+const catBanchina = catEnvs1.find((e) => e.id === "env-cat-banchina-carico")!;
+assert.equal(catBanchina.surfaceSqM, 60);
+assert.equal(catBanchina.heightM, 4.0);
+assert.equal(catBanchina.volumeCuM, 240);
+const compBanchinaCat = evaluateEnvironmentCompliance(catBanchina, "56.21.00");
+assert.ok(
+  compBanchinaCat.summaryBadges.some((b) => b.text.includes("Baia logistica eventi") && b.text.includes("rampe di carico") && b.text.includes("prese industriali CEE")),
+  "Baia di carico deve avere badge rampe certificate e prese ricarica ATP",
+);
+
+// 9. Plonge & Centrale Lavaggio Rientro
+const catLavaggio = catEnvs1.find((e) => e.id === "env-cat-lavaggio-rientro")!;
+assert.equal(catLavaggio.surfaceSqM, 35);
+assert.equal(catLavaggio.heightM, 3.0);
+const compLavaggioCat = evaluateEnvironmentCompliance(catLavaggio, "56.21.00");
+assert.ok(
+  compLavaggioCat.summaryBadges.some((b) => b.text.includes("Centrale lavaggio rientro: marcia in avanti")),
+  "Plonge rientro deve avere badge marcia in avanti contro contaminazioni incrociate",
+);
+
+// 10. Deposito Bombole GPL per Cucina da Campo
+const catGpl = catEnvs1.find((e) => e.id === "env-cat-deposito-gpl")!;
+assert.equal(catGpl.surfaceSqM, 10);
+assert.equal(catGpl.heightM, 2.5);
+assert.equal(catGpl.volumeCuM, 25);
+const compGplCat = evaluateEnvironmentCompliance(catGpl, "56.21.00");
+assert.ok(
+  compGplCat.summaryBadges.some((b) => b.text.includes("Stoccaggio bombole GPL per cucine da campo")),
+  "Deposito bombole GPL deve avere badge gabbia metallica areata ed estintore",
+);
+
+// 11. Spogliatoi del Personale
+const catSpogliatoi = catEnvs1.find((e) => e.id === "env-cat-spogliatoi")!;
+assert.equal(catSpogliatoi.surfaceSqM, 25);
+assert.equal(catSpogliatoi.heightM, 2.7);
+assert.equal(catSpogliatoi.occupantsCount, 10);
+
+// 12. Ufficio Pianificazione Eventi
+const catUfficio = catEnvs1.find((e) => e.id === "env-cat-ufficio-logistica")!;
+assert.equal(catUfficio.surfaceSqM, 20);
+assert.equal(catUfficio.heightM, 2.7);
+
+// ============================================================================
+// Test 18: generateEnvironmentChecklistItems per locali Catering (ATECO 56.21.00)
+// ============================================================================
+console.log("Test 18: generateEnvironmentChecklistItems per locali Catering Eventi / Banqueting (ATECO 56.21.00)");
+
+// 1. Cucina Centrale
+const catCucinaItems = generateEnvironmentChecklistItems(catCucina, "56.21.00");
+assert.ok(
+  catCucinaItems.some((it) => it.id.includes("termocoppie-fuochi-ansul-r102") && it.domain === "both"),
+  "Cucina centrale deve verificare termocoppie fuochi e Ansul R-102 (domain: both)",
+);
+assert.ok(
+  catCucinaItems.some((it) => it.id.includes("canaline-degrassatore-uni-en-1825") && it.domain === "both"),
+  "Cucina centrale deve verificare canaline inox e degrassatore UNI EN 1825 (domain: both)",
+);
+assert.ok(
+  catCucinaItems.some((it) => it.id.includes("lavamani-non-manuale-ginocchio-pedale") && it.domain === "haccp"),
+  "Cucina centrale deve verificare lavamani a comando non manuale (domain: haccp)",
+);
+
+// 2. Prep Finger Food
+const catPrepItems = generateEnvironmentChecklistItems(catPrepFinger, "56.21.00");
+assert.ok(
+  catPrepItems.some((it) => it.id.includes("catena-freddo-fingerfood-18c") && it.domain === "haccp"),
+  "Prep finger food deve verificare catena del freddo <= 18°C (domain: haccp)",
+);
+assert.ok(
+  catPrepItems.some((it) => it.id.includes("tenuta-saldatura-sottovuoto-evento") && it.domain === "haccp"),
+  "Prep finger food deve verificare tenuta saldatura sottovuoto (domain: haccp)",
+);
+assert.ok(
+  catPrepItems.some((it) => it.id.includes("protezioni-salvadita-affettatrici-cutter") && it.domain === "safety"),
+  "Prep finger food deve verificare protezioni salvadita su affettatrici e cutter (domain: safety)",
+);
+
+// 3. Area Diete Speciali
+const catDieteItems = generateEnvironmentChecklistItems(catDiete, "56.21.00");
+assert.ok(
+  catDieteItems.some((it) => it.id.includes("utensili-codice-colore-celiachia-allergeni") && it.domain === "haccp"),
+  "Diete speciali deve verificare utensili esclusivi codice colore celiachia/allergeni (domain: haccp)",
+);
+assert.ok(
+  catDieteItems.some((it) => it.id.includes("armadietto-chiuso-ingredienti-gluten-free") && it.domain === "haccp"),
+  "Diete speciali deve verificare armadietto chiuso gluten-free (domain: haccp)",
+);
+
+// 4. Celle Frigorifere Walk-in
+const catCelleItems = generateEnvironmentChecklistItems(catCelle, "56.21.00");
+assert.ok(
+  catCelleItems.some((it) => it.id.includes("allarme-uomo-intrappolato-batteria-tampone") && it.domain === "safety"),
+  "Celle catering devono verificare allarme uomo intrappolato a 24V h24 UNI EN 378 (domain: safety)",
+);
+assert.ok(
+  catCelleItems.some((it) => it.id.includes("monitoraggio-temperature-haccp-carrelli") && it.domain === "haccp"),
+  "Celle catering devono verificare teletermometri deperibili e carrelli pronti (domain: haccp)",
+);
+
+// 5. Magazzino Noleggio
+const catNoleggioItems = generateEnvironmentChecklistItems(catNoleggio, "56.21.00");
+assert.ok(
+  catNoleggioItems.some((it) => it.id.includes("integrita-sanificazione-ceste-stoviglie-antipolvere") && it.domain === "haccp"),
+  "Magazzino noleggio deve verificare sanificazione ceste e cappe antipolvere (domain: haccp)",
+);
+assert.ok(
+  catNoleggioItems.some((it) => it.id.includes("stabilita-scaffalature-porta-casse-noleggio") && it.domain === "safety"),
+  "Magazzino noleggio deve verificare stabilità scaffalature porta-casse UNI EN 15635 (domain: safety)",
+);
+
+// 6. Deposito Arredi Mobili
+const catArrediItems = generateEnvironmentChecklistItems(catArredi, "56.21.00");
+assert.ok(
+  catArrediItems.some((it) => it.id.includes("stoccaggio-sicuro-arredi-gazebi-ribaltamento") && it.domain === "safety"),
+  "Deposito arredi deve verificare stoccaggio sicuro arredi e gazebi contro ribaltamento (domain: safety)",
+);
+assert.ok(
+  catArrediItems.some((it) => it.id.includes("bruciatori-gel-chafing-dish-spegnifiamma") && it.domain === "both"),
+  "Deposito arredi deve verificare bruciatori e gel atossico chafing dish con spegnifiamma (domain: both)",
+);
+
+// 7. Baia di Carico Furgoni
+const catBanchinaItems = generateEnvironmentChecklistItems(catBanchina, "56.21.00");
+assert.ok(
+  catBanchinaItems.some((it) => it.id.includes("portata-rampe-alluminio-mandorlato") && it.domain === "safety"),
+  "Baia di carico deve verificare portata rampe alluminio mandorlato antiscivolo (domain: safety)",
+);
+assert.ok(
+  catBanchinaItems.some((it) => it.id.includes("cavi-prese-industriali-cee-veicoli-atp") && it.domain === "safety"),
+  "Baia di carico deve verificare prese industriali CEE stagne per veicoli ATP (domain: safety)",
+);
+assert.ok(
+  catBanchinaItems.some((it) => it.id.includes("igiene-vani-carico-coibentati-atp") && it.domain === "haccp"),
+  "Baia di carico deve verificare igiene vani di carico coibentati ATP (domain: haccp)",
+);
+
+// 8. Plonge & Centrale Lavaggio Rientro Stoviglie
+const catLavaggioItems = generateEnvironmentChecklistItems(catLavaggio, "56.21.00");
+assert.ok(
+  catLavaggioItems.some((it) => it.id.includes("separazione-stoviglie-sporche-rientro-pulito") && it.domain === "haccp"),
+  "Plonge rientro deve verificare separazione sporco/pulito marcia in avanti (domain: haccp)",
+);
+assert.ok(
+  catLavaggioItems.some((it) => it.id.includes("cappa-aspirazione-vapori-lavastoviglie-rientro") && it.domain === "safety"),
+  "Plonge rientro deve verificare cappa aspirazione vapori su lavastoviglie (domain: safety)",
+);
+assert.ok(
+  catLavaggioItems.some((it) => it.id.includes("dispositivo-antiriflusso-uni-en-1717-lavaggio") && it.domain === "both"),
+  "Plonge rientro deve verificare dispositivo antiriflusso UNI EN 1717 (domain: both)",
+);
+
+// 9. Deposito Bombole GPL per Cucina da Campo
+const catGplItems = generateEnvironmentChecklistItems(catGpl, "56.21.00");
+assert.ok(
+  catGplItems.some((it) => it.id.includes("catenelle-metalliche-anticaduta-bombole-gpl") && it.domain === "safety"),
+  "Deposito bombole GPL deve verificare catenelle metalliche anticaduta UNI 7131 (domain: safety)",
+);
+assert.ok(
+  catGplItems.some((it) => it.id.includes("ventilazione-naturale-permanente-gpl-esterno") && it.domain === "safety"),
+  "Deposito bombole GPL deve verificare ventilazione naturale permanente all'aperto (domain: safety)",
+);
+assert.ok(
+  catGplItems.some((it) => it.id.includes("estintore-polvere-34a-233b-deposito-gpl") && it.domain === "safety"),
+  "Deposito bombole GPL deve verificare estintore a polvere 34A 233B (domain: safety)",
+);
+assert.ok(
+  catGplItems.some((it) => it.id.includes("scadenza-tubi-flessibili-uni-7140-gpl") && it.domain === "safety"),
+  "Deposito bombole GPL deve verificare data scadenza tubi flessibili UNI 7140 (domain: safety)",
+);
+
+// 10. Ufficio Pianificazione & Logistica
+const catUfficioItems = generateEnvironmentChecklistItems(catUfficio, "56.21.00");
+assert.ok(
+  catUfficioItems.some((it) => it.id.includes("ergonomia-postazioni-vdt-logistica") && it.domain === "safety"),
+  "Ufficio logistica deve verificare ergonomia postazioni VDT (domain: safety)",
+);
+assert.ok(
+  catUfficioItems.some((it) => it.id.includes("tracciabilita-lotti-schede-allergeni-commesse") && it.domain === "haccp"),
+  "Ufficio logistica deve verificare tracciabilità lotti e schede allergeni per ciascun evento (domain: haccp)",
+);
+
+// Verifica del filtraggio checklistMode su cucina e finger food catering
+const catCucinaHaccpMode = filterEnvironmentItemsByChecklistMode(catCucinaItems, "haccp_only");
+assert.ok(
+  catCucinaHaccpMode.every((it) => it.domain === "haccp" || it.domain === "both"),
+  "In modalità haccp_only tutti gli item cucina catering devono essere haccp o both",
+);
+assert.ok(
+  !catCucinaHaccpMode.some((it) => it.domain === "safety"),
+  "In modalità haccp_only nessun item cucina catering deve avere domain safety",
+);
+
+const catCucinaSafetyMode = filterEnvironmentItemsByChecklistMode(catCucinaItems, "safety_only");
+assert.ok(
+  catCucinaSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item cucina catering devono essere safety o both",
+);
+assert.ok(
+  !catCucinaSafetyMode.some((it) => it.domain === "haccp"),
+  "In modalità safety_only nessun item cucina catering deve avere domain haccp",
+);
+
 console.log("=== TUTTI I TEST Step2AmbientiDiLavoro SUPERATI CON SUCCESSO! ===");

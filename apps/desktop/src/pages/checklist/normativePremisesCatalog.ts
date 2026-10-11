@@ -1759,6 +1759,252 @@ export function getStandardEnvironmentsForAteco(atecoCode?: string): WorkEnviron
     ];
   }
 
+  // 0-sexies. Catering per Eventi e Banqueting (56.21.00, 56.21.0, 56.21, 562100, 5621 - Matrimoni, convegni, fiere, ricevimenti con laboratorio di preparazione centrale, allestimenti mobili e logistica delle attrezzature da trasferta)
+  if (
+    ateco.startsWith("562100") ||
+    ateco.startsWith("56210") ||
+    ateco.startsWith("5621")
+  ) {
+    return [
+      {
+        id: "env-cat-cucina-centrale",
+        key: "cat_cucina_centrale_cotture_base",
+        name: "Cucina Centrale & Cotture di Base per Eventi",
+        icon: "🍳",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 60,
+        heightM: 3.2,
+        volumeCuM: 192,
+        occupantsCount: 4,
+        windowSurfaceSqM: 6.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          forcedExhaustType: "kitchen_hood",
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-cat-prep-fingerfood",
+        key: "cat_laboratorio_prep_fredda_fingerfood",
+        name: "Laboratorio Preparazione Fredda, Pasticceria Salata & Finger Food",
+        icon: "🥗",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 30,
+        heightM: 3.0,
+        volumeCuM: 90,
+        occupantsCount: 3,
+        windowSurfaceSqM: 3.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-cat-diete-allergeni",
+        key: "cat_area_diete_speciali_buffet_allergeni",
+        name: "Area Dedicata Diete Speciali & Buffet Intolleranze",
+        icon: "🛡️",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 15,
+        heightM: 3.0,
+        volumeCuM: 45,
+        occupantsCount: 2,
+        windowSurfaceSqM: 1.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+        },
+      },
+      {
+        id: "env-cat-celle-frigo",
+        key: "cat_celle_frigo_walkin_stoccaggio_eventi",
+        name: "Celle Frigorifere Walk-in Deperibili & Cella Stoccaggio Eventi",
+        icon: "❄️",
+        category: "storage",
+        isDefault: true,
+        surfaceSqM: 35,
+        heightM: 2.8,
+        volumeCuM: 98,
+        occupantsCount: 2,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("storage"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-cat-dispensa-dry",
+        key: "cat_magazzino_merci_secche_beverage",
+        name: "Magazzino Merci Secche & Beverage (Vini, Liquori, Bevande)",
+        icon: "🍾",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 45,
+        heightM: 3.2,
+        volumeCuM: 144,
+        occupantsCount: 2,
+        windowSurfaceSqM: 3.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          shelvingCertified: true,
+        },
+      },
+      {
+        id: "env-cat-deposito-noleggio",
+        key: "cat_magazzino_stoviglie_tovagliato_noleggio",
+        name: "Magazzino Stoviglie, Tovagliato, Posateria & Attrezzature Noleggio",
+        icon: "🍽️",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 80,
+        heightM: 3.5,
+        volumeCuM: 280,
+        occupantsCount: 3,
+        windowSurfaceSqM: 4.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          shelvingCertified: true,
+        },
+      },
+      {
+        id: "env-cat-deposito-arredi",
+        key: "cat_deposito_arredi_chafing_banchi_bar",
+        name: "Deposito Arredi Mobili, Chafing Dish & Banchi Bar per Ricevimenti",
+        icon: "🪑",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 70,
+        heightM: 3.5,
+        volumeCuM: 245,
+        occupantsCount: 2,
+        windowSurfaceSqM: 4.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          shelvingCertified: true,
+        },
+      },
+      {
+        id: "env-cat-banchina-carico",
+        key: "cat_baia_carico_scarico_furgoni_flotta",
+        name: "Baia di Carico/Scarico Furgoni Coibentati & Flotta Logistica",
+        icon: "🚚",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 60,
+        heightM: 4.0,
+        volumeCuM: 240,
+        occupantsCount: 3,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-cat-lavaggio-rientro",
+        key: "cat_plonge_lavaggio_rientro_stoviglie",
+        name: "Plonge & Centrale Lavaggio Rientro Stoviglie Sporche da Eventi",
+        icon: "🧼",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 35,
+        heightM: 3.0,
+        volumeCuM: 105,
+        occupantsCount: 2,
+        windowSurfaceSqM: 2.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-cat-deposito-gpl",
+        key: "cat_deposito_bombole_gpl_cucina_campo",
+        name: "Locale / Area Esterna Stoccaggio Bombole GPL per Cucina da Campo",
+        icon: "🛢️",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 10,
+        heightM: 2.5,
+        volumeCuM: 25,
+        occupantsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          emergencyLighting: true,
+          gasLeakDetectorPresent: true,
+        },
+      },
+      {
+        id: "env-cat-spogliatoi",
+        key: "cat_spogliatoio_servizi_personale_laboratorio",
+        name: "Spogliatoio e Servizi Igienici Personale di Laboratorio e Servizio",
+        icon: "🚻",
+        category: "changing_rooms",
+        isDefault: true,
+        surfaceSqM: 25,
+        heightM: 2.7,
+        volumeCuM: 67.5,
+        occupantsCount: 10,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("changing_rooms"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          forcedExhaustPresent: true,
+          forcedExhaustType: "blind_toilet_fan",
+        },
+      },
+      {
+        id: "env-cat-ufficio-logistica",
+        key: "cat_ufficio_pianificazione_banqueting_logistica",
+        name: "Ufficio Pianificazione Eventi, Banqueting & Spedizioni",
+        icon: "💻",
+        category: "sales_office",
+        isDefault: true,
+        surfaceSqM: 20,
+        heightM: 2.7,
+        volumeCuM: 54,
+        occupantsCount: 2,
+        windowSurfaceSqM: 3.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("sales_office"),
+          emergencyLighting: true,
+        },
+      },
+    ];
+  }
+
   // 1. Ristorazione, HoReCa, Somministrazione alimenti (56.x, 10.x, 11.x, 47.11, 47.2, 55.1)
   if (
     ateco.startsWith("56") ||
@@ -3133,6 +3379,89 @@ export function evaluateEnvironmentCompliance(
     });
   }
 
+  // 10. Regole ad hoc per Catering per Eventi e Banqueting (56.21.00 / 56.21)
+  // a) Cucina Centrale & Cotture di Base per Eventi
+  const isCateringKitchen =
+    env.id === "env-cat-cucina-centrale" ||
+    env.key === "cat_cucina_centrale_cotture_base" ||
+    (env.id.includes("cat-cucina") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("5621") ?? false));
+  if (isCateringKitchen) {
+    if (height >= 3.0) {
+      summaryBadges.push({
+        text: "🍳 Cucina centrale eventi a norma: altezza ≥ 3,00m, cappa con Ansul R-102 & canaline sifonate con degrassatore",
+        status: "success",
+      });
+    } else {
+      summaryBadges.push({
+        text: "🍳 Cucina centrale eventi con altezza ridotta (< 3,00m): necessaria deroga ASL e aspirazione potenziata",
+        status: "warning",
+      });
+    }
+    summaryBadges.push({
+      text: "🚿 Lavamani a ginocchio/pedale acqua calda/fredda con sapone e salviette a perdere (Reg. CE 852/04)",
+      status: "info",
+    });
+  }
+
+  // b) Area Dedicata Diete Speciali & Buffet Intolleranze
+  const isCateringSpecialDiets =
+    env.id === "env-cat-diete-allergeni" ||
+    env.key === "cat_area_diete_speciali_buffet_allergeni";
+  if (isCateringSpecialDiets) {
+    summaryBadges.push({
+      text: "🛡️ Area diete speciali & buffet allergeni: postazione isolata prevenzione cross-contact (Reg. UE 1169/2011 & D.Lgs. 231/2017)",
+      status: "info",
+    });
+  }
+
+  // c) Baia di Carico/Scarico Furgoni Coibentati & Flotta Logistica
+  const isCateringLoadingBay =
+    env.id === "env-cat-banchina-carico" ||
+    env.key === "cat_baia_carico_scarico_furgoni_flotta";
+  if (isCateringLoadingBay) {
+    summaryBadges.push({
+      text: "🚚 Baia logistica eventi: rampe di carico certificate e prese industriali CEE ricarica gruppi frigo ATP",
+      status: "info",
+    });
+  }
+
+  // d) Locale / Area Esterna Stoccaggio Bombole GPL
+  const isCateringGplStorage =
+    env.id === "env-cat-deposito-gpl" ||
+    env.key === "cat_deposito_bombole_gpl_cucina_campo";
+  if (isCateringGplStorage) {
+    summaryBadges.push({
+      text: "🛢️ Stoccaggio bombole GPL per cucine da campo: gabbia metallica areata esterna con catenelle ed estintore a polvere",
+      status: "warning",
+    });
+  }
+
+  // e) Celle Frigorifere Walk-in Deperibili & Cella Stoccaggio Eventi
+  const isCateringColdRooms =
+    env.id === "env-cat-celle-frigo" ||
+    env.key === "cat_celle_frigo_walkin_stoccaggio_eventi";
+  if (isCateringColdRooms) {
+    summaryBadges.push({
+      text: "🌡️ Teletermometri continui HACCP per deperibili (0-4°C) & carrelli pronti (0-3°C)",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🚨 Allarme uomo intrappolato a 24V h24 a norma UNI EN 378 e sblocco fluorescente interno",
+      status: "success",
+    });
+  }
+
+  // f) Plonge & Centrale Lavaggio Rientro Stoviglie Sporche da Eventi
+  const isCateringReturnDishwash =
+    env.id === "env-cat-lavaggio-rientro" ||
+    env.key === "cat_plonge_lavaggio_rientro_stoviglie";
+  if (isCateringReturnDishwash) {
+    summaryBadges.push({
+      text: "🧼 Centrale lavaggio rientro: marcia in avanti per stoviglie sporche da eventi contro contaminazioni incrociate",
+      status: "info",
+    });
+  }
+
   return {
     isHeightCompliant,
     minHeightRequired,
@@ -3198,7 +3527,9 @@ export function generateEnvironmentChecklistItems(
       env.id.includes("piz-") ||
       env.key.includes("piz_") ||
       env.id.includes("mensa-") ||
-      env.key.includes("mensa_"));
+      env.key.includes("mensa_") ||
+      env.id.includes("cat-") ||
+      env.key.includes("cat_"));
 
   // 1. Requisito Dimensionale & Cubatura
   items.push({
@@ -3292,7 +3623,7 @@ export function generateEnvironmentChecklistItems(
     let exhaustQuestion = "L'impianto di aspirazione forzata / cappa è efficiente, canalizzato all'esterno con filtri puliti e sottoposto a manutenzione periodica?";
     let exhaustNote = "Impianto di aspirazione forzata non funzionante o con filtri intasati di polveri/grassi privo di registro manutenzione.";
 
-    if (env.features.forcedExhaustType === "kitchen_hood" || env.key.includes("cucina") || env.id.includes("mensa-cottura")) {
+    if (env.features.forcedExhaustType === "kitchen_hood" || env.key.includes("cucina") || env.id.includes("mensa-cottura") || env.id.includes("cat-cucina-centrale")) {
       exhaustTitle = "Cappa Aspirante e Canna Fumaria Cucina";
       exhaustQuestion = "La cappa aspirante è dimensionata per la cottura, canalizzata all'esterno con canna fumaria certificata e filtri antigrasso puliti?";
       exhaustNote = "Cappa aspirante con filtri colmi di grasso e canna fumaria priva di dichiarazione di conformità DM 37/08 e pulizia canalizzazioni.";
@@ -3359,7 +3690,7 @@ export function generateEnvironmentChecklistItems(
     env.category === "changing_rooms" ||
     (env.category === "services" && !env.id.includes("wc-clienti") && !env.id.includes("clienti") && !env.key.includes("wc_clienti"))
   ) {
-    const isFoodSector = isFoodEnv || env.id.includes("rist") || env.id.includes("super") || env.id.includes("iper") || env.id.includes("piz") || env.id.includes("mensa");
+    const isFoodSector = isFoodEnv || env.id.includes("rist") || env.id.includes("super") || env.id.includes("iper") || env.id.includes("piz") || env.id.includes("mensa") || env.id.includes("cat-") || env.key.includes("cat_");
     items.push({
       id: `${env.id}-armadietti-spogliatoio`,
       area: env.name,
@@ -5208,6 +5539,448 @@ export function generateEnvironmentChecklistItems(
       categoryTag: "cpi",
       suggestedNonConformity:
         "Conduttura del gas metano priva di elettrovalvola esterna normalmente chiusa o pulsante di sgancio d'emergenza esterno inaccessibile.",
+    });
+  }
+
+  // ============================================================================
+  // 14. Requisiti Specifici Catering per Eventi e Banqueting (ATECO 56.21.00 / 56.21)
+  // ============================================================================
+
+  // a) Cucina Centrale & Cotture di Base per Eventi
+  if (env.id === "env-cat-cucina-centrale" || env.id.includes("cat-cucina-centrale")) {
+    items.push({
+      id: `${env.id}-termocoppie-fuochi-ansul-r102`,
+      area: env.name,
+      title: "Termocoppie di Sicurezza Fuochi e Impianto di Spegnimento Ansul R-102 (UNI EN 16282-7)",
+      question:
+        "Tutti i bruciatori e fornelli a gas della cucina centrale sono dotati di termocoppia di sicurezza con blocco automatico dell'erogazione in caso di spegnimento fiamma e la cappa con filtri inox a labirinto è protetta da un impianto fisso di spegnimento automatico ad umido Ansul R-102 con comando manuale d'emergenza ad altezza uomo?",
+      normReference: "UNI EN 16282-7, UNI CIG 7129 e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Fornelli a gas privi di termocoppia attiva o cappa della cucina centrale priva di impianto di spegnimento automatico Ansul R-102.",
+    });
+
+    items.push({
+      id: `${env.id}-canaline-degrassatore-uni-en-1825`,
+      area: env.name,
+      title: "Canaline Inox Sifonate con Griglie Asportabili e Pozzetto Degrassatore (UNI EN 1825)",
+      question:
+        "La pavimentazione è provvista di canaline di scolo in acciaio inox con griglie carrabili asportabili e chiusini sifonati antiodore, collegate a un pozzetto degrassatore/disoleatore esterno conforme alla norma UNI EN 1825 con spurgo periodico registrato?",
+      normReference: "Norma UNI EN 1825-1/2, D.Lgs. 152/2006 art. 101 e Reg. CE 852/2004 All. II",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "pavimenti_pareti",
+      suggestedNonConformity:
+        "Canaline di scolo a pavimento ostruite o assenza di pozzetto degrassatore conforme UNI EN 1825 a protezione degli scarichi idrici.",
+    });
+
+    items.push({
+      id: `${env.id}-lavamani-non-manuale-ginocchio-pedale`,
+      area: env.name,
+      title: "Lavamani a Comando non Manuale con Acqua Calda/Fredda e Sapone Antibatterico",
+      question:
+        "La cucina centrale dispone di lavamani ad azionamento non manuale a ginocchio o pedale erogante acqua calda e fredda miscelata, distributore di sapone liquido antibatterico e asciugamani monouso a perdere con cestino a pedale?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo I punto 4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Lavamani della cucina con rubinetto a vite manuale o assenza di sapone antibatterico e salviette monouso a perdere.",
+    });
+  }
+
+  // b) Laboratorio Preparazione Fredda, Pasticceria Salata & Finger Food
+  if (env.id === "env-cat-prep-fingerfood" || env.id.includes("cat-prep-fingerfood")) {
+    items.push({
+      id: `${env.id}-catena-freddo-fingerfood-18c`,
+      area: env.name,
+      title: "Rispetto della Catena del Freddo nelle Lavorazioni Deperibili (≤ 18°C)",
+      question:
+        "Nel laboratorio di preparazione finger food e antipasti la temperatura ambientale è mantenuta costantemente non superiore a 18°C durante la manipolazione di alimenti deperibili per eventi, con impianto di climatizzazione sanificato regolarmente?",
+      normReference: "Reg. CE 852/2004 Allegato II Cap. I e D.Lgs. 81/2008 Allegato IV punto 1.9",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "microclima_luce",
+      suggestedNonConformity:
+        "Temperatura nel laboratorio finger food superiore a 18°C con rischio interruzione della catena del freddo per semilavorati deperibili.",
+    });
+
+    items.push({
+      id: `${env.id}-tenuta-saldatura-sottovuoto-evento`,
+      area: env.name,
+      title: "Confezionatrice Sottovuoto a Doppia Barra e Verifica Tenuta Saldatura Buste Evento",
+      question:
+        "La macchina confezionatrice sottovuoto è provvista di doppia barra saldante integra, vacuometro tarato e viene effettuato il controllo quotidiano della tenuta della sigillatura delle buste destinate alla conservazione e trasferta per eventi?",
+      normReference: "Reg. CE 852/2004 All. II Cap. V e Reg. CE 1935/2004 (MOCA)",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Barra saldante della macchina sottovuoto usurata con perdita di vuoto nelle buste contenenti basi alimentari da trasferta.",
+    });
+
+    items.push({
+      id: `${env.id}-protezioni-salvadita-affettatrici-cutter`,
+      area: env.name,
+      title: "Protezioni Salvadita e Dispositivi di Sicurezza su Affettatrici e Tagliaverdure (UNI EN 1974)",
+      question:
+        "L'affettatrice a gravità, il tagliaverdure e il cutter da laboratorio sono conformi alla norma UNI EN 1974 e UNI EN 12852, dotati di carter salvadita trasparente, pressamerce con impugnatura ergonomica, anello coprilama fisso e microinterruttori di blocco all'apertura?",
+      normReference: "UNI EN 1974, UNI EN 12852 e D.Lgs. 81/2008 art. 71, All. V",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Affettatrice o tagliaverdure con protezione salvadita smontata o microinterruttore di sicurezza bloccato.",
+    });
+  }
+
+  // c) Area Dedicata Diete Speciali & Buffet Intolleranze
+  if (env.id === "env-cat-diete-allergeni" || env.id.includes("cat-diete-allergeni")) {
+    items.push({
+      id: `${env.id}-utensili-codice-colore-celiachia-allergeni`,
+      area: env.name,
+      title: "Utensili Esclusivi con Codice Colore per Celiachia e Diete Speciali (Cross-Contact)",
+      question:
+        "La postazione dedicata alle diete speciali ed intolleranze dispone di un set completo ed esclusivo di taglieri, coltelli e contenitori identificati con codice colore (es. viola), impiegati unicamente per menu celiaci e allergeni al fine di azzerare il rischio di cross-contact (Reg. UE 1169/2011 e D.Lgs. 231/2017)?",
+      normReference: "Reg. UE 1169/2011, D.Lgs. 231/2017 e Reg. CE 852/2004 All. II",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Uso promiscuo di stoviglie o taglieri tra preparazioni ordinarie e menu speciali per celiaci o soggetti allergici per eventi.",
+    });
+
+    items.push({
+      id: `${env.id}-armadietto-chiuso-ingredienti-gluten-free`,
+      area: env.name,
+      title: "Armadietto Chiuso e Sigillato per Ingredienti e Semilavorati Gluten-Free",
+      question:
+        "Gli ingredienti, farine e prodotti specifici senza glutine e per diete speciali sono conservati in armadietto dedicato chiuso ad ante, al fine di evitare ogni contaminazione da polveri volatili di farina convenzionale?",
+      normReference: "Reg. UE 1169/2011 art. 9 e Reg. CE 852/2004 Allegato II",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Materie prime gluten-free stoccate su ripiani aperti a contatto con polveri di farina convenzionale o ingredienti con allergeni non sigillati.",
+    });
+  }
+
+  // d) Celle Frigorifere Walk-in Deperibili & Cella Stoccaggio Eventi
+  if (env.id === "env-cat-celle-frigo" || env.id.includes("cat-celle-frigo")) {
+    items.push({
+      id: `${env.id}-allarme-uomo-intrappolato-batteria-tampone`,
+      area: env.name,
+      title: "Allarme Uomo Intrappolato a 24V h24 con Batteria Tampone e Sblocco Interno (UNI EN 378)",
+      question:
+        "Le celle frigorifere walk-in sono dotate di dispositivo di apertura interna di sicurezza fluorescente/luminoso e di pulsante di allarme uomo intrappolato a 24V con segnalatore ottico-acustico esterno alimentato da batteria tampone a norma UNI EN 378?",
+      normReference: "UNI EN 378-1/2 e D.Lgs. 81/2008 Allegato IV punto 1.11",
+      defaultSeverity: 5,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "microclima_luce",
+      suggestedNonConformity:
+        "Allarme uomo intrappolato della cella frigorifera walk-in non funzionante o maniglia di sblocco interno fluorescente mancante.",
+    });
+
+    items.push({
+      id: `${env.id}-monitoraggio-temperature-haccp-carrelli`,
+      area: env.name,
+      title: "Monitoraggio Temperature HACCP per Carni/Pesce (0-4°C) e Carrelli Buffet Pronti (0-3°C)",
+      question:
+        "Le celle frigorifere dispongono di teletermometri continui con display e allarmi di superamento soglia per il mantenimento dei deperibili (0-4°C) e della cella carrelli buffet pronti per il carico evento (0-3°C), con registrazione sistematica delle schede HACCP?",
+      normReference: "Reg. CE 852/2004 All. II Cap. IX e Reg. CE 853/2004",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "microclima_luce",
+      suggestedNonConformity:
+        "Mancata registrazione delle temperature delle celle o cella stoccaggio carrelli evento a temperatura superiore a +3°C.",
+    });
+  }
+
+  // e) Magazzino Merci Secche & Beverage
+  if (env.id === "env-cat-dispensa-dry" || env.id.includes("cat-dispensa-dry")) {
+    items.push({
+      id: `${env.id}-scaffali-sollevati-derattizzazione-beverage`,
+      area: env.name,
+      title: "Scaffalature Sollevate da Terra (≥ 15 cm) e Monitoraggio Pest Control Beverage",
+      question:
+        "Le scaffalature del magazzino merci secche e beverage sono metalliche, lavabili, sollevate dal pavimento di almeno 15 cm e distanziate dalle pareti per consentire ispezione e derattizzazione/pest control, con pedane plastiche lisce?",
+      normReference: "Reg. CE 852/2004 Allegato II Cap. III e D.Lgs. 81/2008 All. IV p.to 1.4",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Scatoloni di alimenti e bevande stoccati a diretto contatto con il pavimento o scaffali non distanziati da terra e pareti per il pest control.",
+    });
+  }
+
+  // f) Magazzino Stoviglie, Tovagliato, Posateria & Attrezzature Noleggio
+  if (env.id === "env-cat-deposito-noleggio" || env.id.includes("cat-deposito-noleggio")) {
+    items.push({
+      id: `${env.id}-integrita-sanificazione-ceste-stoviglie-antipolvere`,
+      area: env.name,
+      title: "Integrità e Sanificazione Ceste Bicchieri e Piatti con Coperture Antipolvere Sigillate",
+      question:
+        "Le stoviglie, i bicchieri lavati e sanificati e la posateria MOCA sono riposti in ceste sagomate protette da film plastico o coperture antipolvere sigillate, e il tovagliato stirato è conservato in sacchi protettivi chiusi fino al momento del carico per l'evento?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo V e Reg. CE 1935/2004 (MOCA)",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Ceste con piatti e bicchieri sanificati lasciate aperte a contatto con polvere a magazzino o tovagliato esposto a sporcizia e umidità.",
+    });
+
+    items.push({
+      id: `${env.id}-stabilita-scaffalature-porta-casse-noleggio`,
+      area: env.name,
+      title: "Stabilità Scaffalature Porta-Casse e Portata Certificata (UNI EN 15635)",
+      question:
+        "Le scaffalature industriali per lo stoccaggio delle casse stoviglie e carrelli sono ancorate saldamente alle pareti/pavimento, provviste di cartelli di portata massima ammissibile (UNI EN 15635) e prive di deformazioni strutturali sui montanti?",
+      normReference: "UNI EN 15635 e D.Lgs. 81/2008 art. 71, Allegato IV punto 1.4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Scaffalature porta-casse pesanti prive di cartelli di portata o montanti danneggiati con rischio crollo o ribaltamento.",
+    });
+  }
+
+  // g) Deposito Arredi Mobili, Chafing Dish & Banchi Bar per Ricevimenti
+  if (env.id === "env-cat-deposito-arredi" || env.id.includes("cat-deposito-arredi")) {
+    items.push({
+      id: `${env.id}-stoccaggio-sicuro-arredi-gazebi-ribaltamento`,
+      area: env.name,
+      title: "Stoccaggio Sicuro Arredi Mobili, Tavoli Buffet e Gazebi contro il Ribaltamento",
+      question:
+        "I tavoli tondi buffet, le sedie impilate, gli ombrelloni e i gazebi modulari sono stoccati su appositi carrelli o rastrelliere dotati di cinghie e barre di contenimento per prevenirne il ribaltamento accidentale e facilitare la movimentazione carichi?",
+      normReference: "D.Lgs. 81/2008 art. 71, Titolo VI (MMC) e Allegato IV punto 1.4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Sedie o tavoli da banqueting impilati in modo instabile ad altezze pericolose o gazebi privi di ritegno anticaduta.",
+    });
+
+    items.push({
+      id: `${env.id}-bruciatori-gel-chafing-dish-spegnifiamma`,
+      area: env.name,
+      title: "Verifica Bruciatori, Gel Atossico per Chafing Dish e Dispositivi Spegnifiamma",
+      question:
+        "Gli scaldavivande chafing dish da buffet sono provvisti di bruciatori integri con coperchio spegnifiamma e viene impiegato esclusivamente gel combustibile atossico per buffet stoccato in armadietto di sicurezza lontano da fiamme e fonti di calore?",
+      normReference: "D.Lgs. 81/2008 Titolo IX (Agenti Chimici), Allegato IV e D.M. 03/09/2021",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Barattoli di gel combustibile per chafing dish stoccati aperti, privi di scheda di sicurezza o scaldavivande privi di spegnifiamma.",
+    });
+  }
+
+  // h) Baia di Carico/Scarico Furgoni Coibentati & Flotta Logistica
+  if (env.id === "env-cat-banchina-carico" || env.id.includes("cat-banchina-carico")) {
+    items.push({
+      id: `${env.id}-portata-rampe-alluminio-mandorlato`,
+      area: env.name,
+      title: "Verifica Portata Rampe di Carico in Alluminio Mandorlato Antiscivolo",
+      question:
+        "Le rampe e pedane di carico mobili utilizzate per la movimentazione dei roll-container sui furgoni sono in alluminio mandorlato antiscivolo, con bordi laterali di contenimento, marcatura CE, portata certificata leggibile e blocco di sicurezza di aggancio al mezzo?",
+      normReference: "D.Lgs. 81/2008 Allegato V punto 2.3 e Allegato VI",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "pavimenti_pareti",
+      suggestedNonConformity:
+        "Rampe di carico furgoni prive di superficie antiscivolo, deformate o usate senza blocco di sicurezza di appoggio al veicolo.",
+    });
+
+    items.push({
+      id: `${env.id}-cavi-prese-industriali-cee-veicoli-atp`,
+      area: env.name,
+      title: "Prese Industriali CEE Stagne per Alimentazione Gruppi Frigoriferi ATP in Sosta",
+      question:
+        "La baia di carico dispone di prese industriali CEE con grado di protezione IP67 e quadro protetto da interruttore magnetotermico differenziale per l'alimentazione stazionaria dei gruppi frigoriferi dei furgoni ATP in sosta?",
+      normReference: "Norma CEI 64-8 e D.Lgs. 81/2008 Titolo III Capo III",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Cavi elettrici prolunga volanti logorati o prese di alimentazione per i gruppi frigo ATP danneggiate e non stagne.",
+    });
+
+    items.push({
+      id: `${env.id}-igiene-vani-carico-coibentati-atp`,
+      area: env.name,
+      title: "Igiene e Sanificazione Vani di Carico Coibentati dei Veicoli ATP e Contenitori Isotermici",
+      question:
+        "I vani di carico coibentati degli automezzi e i contenitori isotermici per il trasporto dei pasti all'evento sono sottoposti a lavaggio e disinfezione prima di ciascuna trasferta e i veicoli frigoriferi dispongono di attestato di omologazione ATP in corso di validità?",
+      normReference: "Reg. CE 852/2004 All. II Cap. IV e Accordo ATP D.P.R. 29/05/1979 n. 404",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Vani di carico dei furgoni sporchi o trasporto alimenti deperibili effettuato su veicoli privi di certificato ATP in corso di validità.",
+    });
+  }
+
+  // i) Plonge & Centrale Lavaggio Rientro Stoviglie Sporche da Eventi
+  if (env.id === "env-cat-lavaggio-rientro" || env.id.includes("cat-lavaggio-rientro")) {
+    items.push({
+      id: `${env.id}-separazione-stoviglie-sporche-rientro-pulito`,
+      area: env.name,
+      title: "Separazione Fisica Percorso Stoviglie Sporche da Eventi rispetto al Pulito (Marcia in Avanti)",
+      question:
+        "La centrale di lavaggio rientro assicura una rigorosa separazione fisica e un flusso 'marcia in avanti' tra le stoviglie sporche di rientro dalle location esterne e le stoviglie pulite sanificate pronte per il reimballo, scongiurando ogni contaminazione incrociata?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo II punto 1",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Contatto o incrocio tra ceste di piatti sporchi di rientro da eventi e stoviglie pulite in uscita dalla lavastoviglie.",
+    });
+
+    items.push({
+      id: `${env.id}-cappa-aspirazione-vapori-lavastoviglie-rientro`,
+      area: env.name,
+      title: "Cappa d'Aspirazione Vapori su Lavastoviglie e Vasche di Sbarazzo",
+      question:
+        "Sopra la lavastoviglie industriale a capotta/tunnel e le vasche di sbarazzo è installata una cappa d'aspirazione vapori efficiente con espulsione all'esterno per impedire condense persistenti, muffe e vapori caldi nell'ambiente di lavoro?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.9 e Reg. CE 852/2004 All. II Cap. I",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "microclima_luce",
+      suggestedNonConformity:
+        "Plonge di rientro priva di cappa di aspirazione vapori con condense persistenti a soffitto e sgocciolamento.",
+    });
+
+    items.push({
+      id: `${env.id}-dispositivo-antiriflusso-uni-en-1717-lavaggio`,
+      area: env.name,
+      title: "Dispositivo di Disconnessione Idrica Antiriflusso (UNI EN 1717) su Lavastoviglie e Dosatori",
+      question:
+        "I collegamenti idrici della lavastoviglie industriale e dei doccioni di lavaggio sono equipaggiati con valvola di non ritorno o disconnettore idraulico a norma UNI EN 1717 per prevenire l'inquinamento della rete idropotabile da acque saponate o reflue?",
+      normReference: "Norma UNI EN 1717, D.Lgs. 18/2023 e Reg. CE 852/2004 All. II Cap. VII",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Assenza di disconnettore antiriflusso conforme UNI EN 1717 sulla linea idrica di alimentazione della lavastoviglie industriale.",
+    });
+  }
+
+  // j) Locale / Area Esterna Stoccaggio Bombole GPL per Cucina da Campo
+  if (env.id === "env-cat-deposito-gpl" || env.id.includes("cat-deposito-gpl")) {
+    items.push({
+      id: `${env.id}-catenelle-metalliche-anticaduta-bombole-gpl`,
+      area: env.name,
+      title: "Catenelle Metalliche Anticaduta per Bombole GPL Piene e Vuote (UNI 7131)",
+      question:
+        "Le bombole GPL per le cucine mobili da campo sono stoccate in posizione verticale in gabbia metallica areata, assicurate singolarmente con catenelle o collari antiribaltamento e con netta separazione tra bombole piene e vuote?",
+      normReference: "Norma UNI 7131, D.Lgs. 81/2008 art. 71, Allegato IV punto 4 e Allegato V",
+      defaultSeverity: 5,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Bombole GPL mobili lasciate libere prive di catenella anticaduta o stoccate in orizzontale.",
+    });
+
+    items.push({
+      id: `${env.id}-ventilazione-naturale-permanente-gpl-esterno`,
+      area: env.name,
+      title: "Ventilazione Naturale Permanente all'Aperto e Distanza da Cantine e Caditoie",
+      question:
+        "L'area di stoccaggio delle bombole GPL è all'aperto in gabbia metallica grigliata o in vano con aperture permanenti di ventilazione naturale a filo pavimento e a soffitto, distante da pozzetti fognari, caditoie e scantinati?",
+      normReference: "D.M. 08/11/2019, UNI 7131 e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 5,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Deposito bombole GPL situato in locale privo di ventilazione permanente o in prossimità di caditoie fognarie.",
+    });
+
+    items.push({
+      id: `${env.id}-estintore-polvere-34a-233b-deposito-gpl`,
+      area: env.name,
+      title: "Presenza di Estintore a Polvere Omologato (Classe 34A 233B C) Pronto all'Uso",
+      question:
+        "In prossimità immediata del deposito bombole GPL è presente almeno un estintore a polvere idoneo per fuochi di gas (classi A-B-C, minimo 34A 233B), chiaramente segnalato e con revisione periodica semestrale in corso di validità?",
+      normReference: "D.M. 03/09/2021, D.Lgs. 81/2008 art. 46 e UNI 9994-1",
+      defaultSeverity: 5,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Deposito bombole GPL privo di estintore a polvere nelle immediate vicinanze o con estintore scaduto di revisione.",
+    });
+
+    items.push({
+      id: `${env.id}-scadenza-tubi-flessibili-uni-7140-gpl`,
+      area: env.name,
+      title: "Controllo Data di Scadenza dei Tubi Flessibili in Gomma (UNI 7140)",
+      question:
+        "Tutti i tubi flessibili per il collegamento delle bombole GPL ai bruciatori mobili sono conformi a norma UNI 7140 (o metallici UNI EN 14800), con data di scadenza stampigliata non superata (max 5 anni), privi di screpolature e serrati con fascette adeguate?",
+      normReference: "Norma UNI 7140, UNI 7131 e D.Lgs. 81/2008 Allegato V",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Tubi in gomma per bombole GPL con data di scadenza superata o fessurazioni da invecchiamento.",
+    });
+  }
+
+  // k) Ufficio Pianificazione Eventi, Banqueting & Spedizioni
+  if (env.id === "env-cat-ufficio-logistica" || env.id.includes("cat-ufficio-logistica")) {
+    items.push({
+      id: `${env.id}-ergonomia-postazioni-vdt-logistica`,
+      area: env.name,
+      title: "Ergonomia delle Postazioni Videoterminale e Regolazione Sedute (All. XXXIV D.Lgs. 81/08)",
+      question:
+        "Le postazioni dell'ufficio pianificazione eventi e logistica sono conformi al Titolo VII D.Lgs. 81/2008, con schermi orientabili privi di riflessi molesti, sedute ergonomiche regolabili e cablaggi elettrici protetti contro il rischio inciampo?",
+      normReference: "D.Lgs. 81/2008 Titolo VII e Allegato XXXIV",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Postazioni VDT con sedie non ergonomiche o cavi elettrici volanti lungo le vie di transito dell'ufficio.",
+    });
+
+    items.push({
+      id: `${env.id}-tracciabilita-lotti-schede-allergeni-commesse`,
+      area: env.name,
+      title: "Tracciabilità Lotti Alimentari e Schede Allergeni Menu per Ciascun Evento",
+      question:
+        "L'ufficio pianificazione gestisce e conserva i fogli di viaggio con la tracciabilità dei lotti alimentari utilizzati per ogni evento (Reg. CE 178/2002) e il fascicolo delle schede allergeni/ingredienti dei menu fornito ai clienti e committenti (Reg. UE 1169/2011 e D.Lgs. 231/2017)?",
+      normReference: "Reg. CE 178/2002 art. 18, Reg. UE 1169/2011 e D.Lgs. 231/2017",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Mancata registrazione della tracciabilità lotti per i banchetti o schede allergeni non trasmesse/conservate per gli eventi serviti.",
     });
   }
 

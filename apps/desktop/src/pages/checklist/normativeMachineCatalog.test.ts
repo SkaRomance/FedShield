@@ -447,9 +447,9 @@ assert.ok(ristGenIndex !== -1, "Settore generico ristorazione_alimentare deve es
 assert.equal(ristSommIndex, 0, "ristorazione_somministrazione deve trovarsi al primo posto della lista");
 assert.ok(ristSommIndex < ristGenIndex, "ristorazione_somministrazione deve precedere il settore generico");
 
-// Verifica che codici generici (es. 56.21 catering) continuino a risolvere su ristorazione_alimentare
-const cateringCatalog = getSectorMachineCatalogForAteco("56.21");
-assert.equal(cateringCatalog.sectorKey, "ristorazione_alimentare", "ATECO 56.21 deve ricadere sul fallback generico ristorazione_alimentare");
+// Verifica che codici generici (es. 56.30 bar) continuino a risolvere su ristorazione_alimentare
+const genericBarCatalog = getSectorMachineCatalogForAteco("56.30");
+assert.equal(genericBarCatalog.sectorKey, "ristorazione_alimentare", "ATECO 56.30 deve ricadere sul fallback generico ristorazione_alimentare");
 
 // -------------------------------------------------------------
 // Test 12: Verifica completezza delle 16 macchine professionali
@@ -958,7 +958,7 @@ const menseSectorIndex = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey 
 const restSectorIndex = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ristorazione_alimentare");
 assert.ok(menseSectorIndex !== -1, "Settore mense_catering_collettiva deve esistere nel catalogo");
 assert.equal(menseSectorIndex, pizSectorIndex + 1, "mense_catering_collettiva deve seguire immediatamente pizzeria_asporto");
-assert.equal(restSectorIndex, menseSectorIndex + 1, "ristorazione_alimentare deve seguire immediatamente mense_catering_collettiva");
+assert.ok(restSectorIndex > menseSectorIndex, "mense_catering_collettiva deve precedere il settore generico ristorazione_alimentare");
 
 // -------------------------------------------------------------
 // Test 20: Verifica completezza delle 18 attrezzature professionali per mense/collettività
@@ -1173,6 +1173,272 @@ assert.ok(
 
 // Verifica fallback automatico identico per varianti di codice ATECO ("56.29.1", "56.29.20", "56.29", "562910", "5629")
 for (const code of ["56.29.1", "56.29.20", "56.29", "562910", "5629"]) {
+  const fallbackRes = getSuggestedMachinesForEnvironmentsAndAteco([], code);
+  assert.equal(fallbackRes.length, 18, `ATECO variant '${code}' deve restituire tutte le 18 macchine`);
+  assert.ok(fallbackRes.every((m) => m.sourceReason === "ateco"));
+}
+
+// ============================================================================
+// TEST ATECO 56.21.00 — CATERING PER EVENTI, BANQUETING E RICEVIMENTI
+// ============================================================================
+console.log("\n=== INIZIO TEST normativeMachineCatalog (ATECO 56.21.00 Catering Eventi / Banqueting) ===");
+
+// -------------------------------------------------------------
+// Test 23: Priorità e risoluzione catalogo ATECO 56.21.00
+// -------------------------------------------------------------
+console.log("Test 23: Verifica priorità catalogo ATECO per Catering Eventi e Banqueting (56.21.00 / 56.21.0 / 56.21)");
+const catalogCatExact = getSectorMachineCatalogForAteco("56.21.00");
+assert.equal(catalogCatExact.sectorKey, "catering_eventi_banqueting", "ATECO 56.21.00 deve restituire catering_eventi_banqueting");
+assert.ok(catalogCatExact.sectorLabel.includes("Catering"), "L'etichetta del catalogo deve includere Catering");
+assert.ok(catalogCatExact.sectorLabel.includes("Banqueting"), "L'etichetta del catalogo deve includere Banqueting");
+
+for (const variant of ["56.21.0", "56.21", "562100", "5621"]) {
+  const catVar = getSectorMachineCatalogForAteco(variant);
+  assert.equal(catVar.sectorKey, "catering_eventi_banqueting", `Variante '${variant}' deve restituire catering_eventi_banqueting`);
+}
+
+// Verifica posizionamento: catering_eventi_banqueting segue immediatamente mense_catering_collettiva e precede ristorazione_alimentare
+const menseIdx = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "mense_catering_collettiva");
+const catIdx = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "catering_eventi_banqueting");
+const ristGenIdxCat = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ristorazione_alimentare");
+assert.ok(menseIdx !== -1, "Settore mense_catering_collettiva deve esistere");
+assert.ok(catIdx !== -1, "Settore catering_eventi_banqueting deve esistere");
+assert.ok(ristGenIdxCat !== -1, "Settore generico ristorazione_alimentare deve esistere");
+assert.equal(catIdx, menseIdx + 1, "catering_eventi_banqueting deve seguire immediatamente mense_catering_collettiva");
+assert.ok(catIdx < ristGenIdxCat, "catering_eventi_banqueting deve precedere ristorazione_alimentare nel catalogo");
+
+// -------------------------------------------------------------
+// Test 24: Verifica completezza delle 18 macchine per Catering / Banqueting
+// -------------------------------------------------------------
+console.log("Test 24: Verifica completezza delle 18 attrezzature professionali con modelli reali e controlli tecnici");
+assert.equal(catalogCatExact.machines.length, 18, "Il catalogo Catering Eventi / Banqueting deve contenere esattamente 18 macchine");
+
+const expectedCatMachineKeys = [
+  // Reparto 1: Cucina Centrale & Produzione Base (4)
+  "forno_combinato_catering",
+  "abbattitore_temperatura_catering",
+  "brasiera_ribaltabile_catering",
+  "confezionatrice_sottovuoto_catering",
+  // Reparto 2: Preparazione Finger Food & Lavorazione (2)
+  "affettatrice_gravita_catering",
+  "cutter_robot_catering",
+  // Reparto 3: Attrezzature Mobili da Trasferta & Banqueting (5)
+  "forno_rigeneratore_mobile",
+  "chafing_dish_scaldavivande",
+  "friggitrice_mobile_catering",
+  "fabbricatore_ghiaccio_catering",
+  "banco_bar_mobile_luminoso",
+  // Reparto 4: Logistica, Spedizioni & Banchina (3)
+  "contenitori_isotermici_catering",
+  "rampa_carico_alluminio",
+  "roll_container_isotermico",
+  // Reparto 5: Centrale Lavaggio Rientro Eventi (2)
+  "lavastoviglie_capotta_catering",
+  "lavaoggetti_teglie_catering",
+  // Reparto 6: Impianti da Campo & Sicurezza Mobile (2)
+  "quadro_elettrico_mobile",
+  "bombole_gpl_cucina_campo",
+];
+
+for (const key of expectedCatMachineKeys) {
+  const found = catalogCatExact.machines.find((m) => m.machineKey === key);
+  assert.ok(found, `Macchina ${key} deve essere presente nel catalogo Catering Eventi`);
+  assert.ok(found.name.length > 5, `Nome macchina ${key} deve essere esaustivo`);
+  assert.ok(found.type.length > 5, `Tipologia macchina ${key} deve essere specificata`);
+  assert.ok(found.suggestedManufacturer.length > 0, `Produttore suggerito per ${key} deve essere presente`);
+  assert.ok(found.suggestedModel.length > 0, `Modello suggerito per ${key} deve essere presente`);
+  assert.ok(found.safetyChecks.length >= 3, `Macchina ${key} deve avere almeno 3 controlli di sicurezza`);
+  assert.ok(found.training, `Macchina ${key} deve avere un corso di formazione/addestramento associato`);
+}
+
+// Verifiche puntuali su modelli e controlli normativi specifici:
+const fornoCat = catalogCatExact.machines.find((m) => m.machineKey === "forno_combinato_catering")!;
+assert.ok(fornoCat.suggestedManufacturer.includes("Rational") || fornoCat.suggestedManufacturer.includes("Unox"), "Forno Rational o Unox");
+assert.ok(fornoCat.safetyChecks.some((c) => c.code === "FORNO_CATERING_PORTA_TRIPLO_VETRO_VENTILATO" && c.normReference.includes("UNI EN 203-1")), "Porta triplo vetro ventilato anti-ustione UNI EN 203-1");
+assert.ok(fornoCat.safetyChecks.some((c) => c.code === "FORNO_CATERING_SONDA_CUORE_6_PUNTI_CCP" && c.normReference.includes("852/2004")), "Sonda al cuore a 6 punti CCP");
+assert.ok(fornoCat.safetyChecks.some((c) => c.code === "FORNO_CATERING_CAPPA_CONDENSAZIONE_SCARICO_GRASSI"), "Cappa condensazione canalizzata con scarico grassi");
+
+const abbattitoreCat = catalogCatExact.machines.find((m) => m.machineKey === "abbattitore_temperatura_catering")!;
+assert.ok(abbattitoreCat.suggestedManufacturer.includes("Irinox") || abbattitoreCat.suggestedManufacturer.includes("Coldline"), "Abbattitore Irinox o Coldline");
+assert.ok(abbattitoreCat.safetyChecks.some((c) => c.code === "ABBATTITORE_CATERING_CICLO_RAPIDO_POSITIVO_NEGATIVO" && c.normReference.includes("852/2004")), "Ciclo rapido positivo e negativo Reg. CE 852/04");
+assert.ok(abbattitoreCat.safetyChecks.some((c) => c.code === "ABBATTITORE_CATERING_SONDA_SPILLONE_RISCALDATA"), "Sonda spillone multipunto riscaldata a fine ciclo");
+assert.ok(abbattitoreCat.safetyChecks.some((c) => c.code === "ABBATTITORE_CATERING_ALLARME_PORTA_RAMPA_CARRELLO"), "Allarme porta e rampa carrelli");
+
+const brasieraCat = catalogCatExact.machines.find((m) => m.machineKey === "brasiera_ribaltabile_catering")!;
+assert.ok(brasieraCat.suggestedManufacturer.includes("Firex") || brasieraCat.suggestedManufacturer.includes("Angelo Po"), "Brasiera Firex o Angelo Po");
+assert.ok(brasieraCat.safetyChecks.some((c) => c.code === "BRASIERA_CATERING_RIBALTAMENTO_MOTORIZZATO_UNI13885" && c.normReference.includes("UNI EN 13885")), "Ribaltamento motorizzato progressivo hold-to-run UNI EN 13885");
+assert.ok(brasieraCat.safetyChecks.some((c) => c.code === "BRASIERA_CATERING_ARRESTO_RISCALDAMENTO_INCLINATA"), "Arresto riscaldamento a vasca inclinata");
+assert.ok(brasieraCat.safetyChecks.some((c) => c.code === "BRASIERA_CATERING_COPERCHIO_CONTROBILANCIATO_SFIATO"), "Coperchio controbilanciato con sfiato");
+
+const sottovuotoCat = catalogCatExact.machines.find((m) => m.machineKey === "confezionatrice_sottovuoto_catering")!;
+assert.ok(sottovuotoCat.suggestedManufacturer.includes("Orved") || sottovuotoCat.suggestedManufacturer.includes("Besser"), "Sottovuoto Orved o Besser");
+assert.ok(sottovuotoCat.safetyChecks.some((c) => c.code === "SOTTOVUOTO_CATERING_CAMPANA_PLEXIGLASS_PISTONI"), "Coperchio bombato in plexiglass con pistoni anticaduta");
+assert.ok(sottovuotoCat.safetyChecks.some((c) => c.code === "SOTTOVUOTO_CATERING_DOPPIA_BARRA_SALDANTE_SOUSVIDE"), "Doppia barra saldante ermetica per conservazione e sous-vide");
+
+const affettatriceCat = catalogCatExact.machines.find((m) => m.machineKey === "affettatrice_gravita_catering")!;
+assert.ok(affettatriceCat.suggestedManufacturer.includes("Berkel") || affettatriceCat.suggestedManufacturer.includes("Sirman"), "Affettatrice Berkel o Sirman 370");
+assert.ok(affettatriceCat.safetyChecks.some((c) => c.code === "AFFETTATRICE_CATERING_ANELLO_FISSO_PARALAMA_UNI1974" && c.normReference.includes("UNI EN 1974")), "Anello fisso paralama continuo UNI EN 1974");
+assert.ok(affettatriceCat.safetyChecks.some((c) => c.code === "AFFETTATRICE_CATERING_BLOCCO_CARRO_SPESSORE_ZERO"), "Blocco carro a spessore zero della vela");
+
+const cutterCat = catalogCatExact.machines.find((m) => m.machineKey === "cutter_robot_catering")!;
+assert.ok(cutterCat.suggestedManufacturer.includes("Robot Coupe") || cutterCat.suggestedManufacturer.includes("Dito"), "Robot Coupe o Dito Sama");
+assert.ok(cutterCat.safetyChecks.some((c) => c.code === "CUTTER_CATERING_INTERBLOCCO_COPERCHIO_FRENO_LAMA_UNI12852" && c.normReference.includes("UNI EN 12852")), "Arresto lama entro 2 secondi UNI EN 12852");
+assert.ok(cutterCat.safetyChecks.some((c) => c.code === "CUTTER_CATERING_PESTELLO_SALVADITA_TRAMOGGIA"), "Pestello salvadita");
+
+const fornoRigen = catalogCatExact.machines.find((m) => m.machineKey === "forno_rigeneratore_mobile")!;
+assert.ok(fornoRigen.suggestedManufacturer.includes("Angelo Po") || fornoRigen.suggestedManufacturer.includes("Moduline") || fornoRigen.suggestedManufacturer.includes("Lainox"), "Forno rigeneratore Angelo Po/Moduline/Lainox");
+assert.ok(fornoRigen.safetyChecks.some((c) => c.code === "FORNO_RIGENERATORE_RIGENERAZIONE_TEMP_75C"), "Rigenerazione carrelli >= 75°C");
+assert.ok(fornoRigen.safetyChecks.some((c) => c.code === "FORNO_RIGENERATORE_RUOTE_PIROETTANTI_FRENO_PEDALE"), "Ruote piroettanti con freno");
+
+const chafingDish = catalogCatExact.machines.find((m) => m.machineKey === "chafing_dish_scaldavivande")!;
+assert.ok(chafingDish.suggestedManufacturer.includes("Pinti") || chafingDish.suggestedManufacturer.includes("Sambonet") || chafingDish.suggestedManufacturer.includes("Paderno"), "Pinti / Sambonet / Paderno");
+assert.ok(chafingDish.safetyChecks.some((c) => c.code === "CHAFING_DISH_COPERCHIO_ROLLTOP_FRIZIONATO"), "Coperchio roll-top frizionato a scomparsa");
+assert.ok(chafingDish.safetyChecks.some((c) => c.code === "CHAFING_DISH_PORTA_FORNELLETTO_GEL_SICURO"), "Porta-fornelletto protetto gel atossico");
+
+const friggitriceCat = catalogCatExact.machines.find((m) => m.machineKey === "friggitrice_mobile_catering")!;
+assert.ok(friggitriceCat.suggestedManufacturer.includes("Lotus") || friggitriceCat.suggestedManufacturer.includes("Giorik"), "Lotus o Giorik");
+assert.ok(friggitriceCat.safetyChecks.some((c) => c.code === "FRIGGITRICE_CATERING_TERMOSTATO_SICUREZZA_230C"), "Termostato limite < 230°C contro autocombustione olio");
+assert.ok(friggitriceCat.safetyChecks.some((c) => c.code === "FRIGGITRICE_CATERING_RUBINETTO_SCARICO_SICURA"), "Valvola scarico olio con sicura");
+
+const fabbricatoreCat = catalogCatExact.machines.find((m) => m.machineKey === "fabbricatore_ghiaccio_catering")!;
+assert.ok(fabbricatoreCat.suggestedManufacturer.includes("Brema") || fabbricatoreCat.suggestedManufacturer.includes("Icematic"), "Brema o Icematic");
+assert.ok(fabbricatoreCat.safetyChecks.some((c) => c.code === "GHIACCIO_CATERING_SCARICO_INTERRUZIONE_ARIA_UNI1717" && c.normReference.includes("UNI EN 1717")), "Scarico con interruzione d'aria anti-reflusso UNI EN 1717");
+assert.ok(fabbricatoreCat.safetyChecks.some((c) => c.code === "GHIACCIO_CATERING_MATERIALI_MOCA_DEPURATORE" && c.normReference.includes("1935/2004")), "Materiali idonei MOCA");
+
+const bancoBar = catalogCatExact.machines.find((m) => m.machineKey === "banco_bar_mobile_luminoso")!;
+assert.ok(bancoBar.safetyChecks.some((c) => c.code === "BANCO_BAR_MOBILE_PIANO_INOX_MOCA"), "Piano lavoro inox MOCA");
+assert.ok(bancoBar.safetyChecks.some((c) => c.code === "BANCO_BAR_MOBILE_ILLUMINAZIONE_LED_IP65_SELV"), "Illuminazione LED a bassa tensione IP65");
+
+const contenitoriCat = catalogCatExact.machines.find((m) => m.machineKey === "contenitori_isotermici_catering")!;
+assert.ok(contenitoriCat.suggestedManufacturer.includes("Melform") || contenitoriCat.suggestedManufacturer.includes("Rieber"), "Melform o Rieber");
+assert.ok(contenitoriCat.safetyChecks.some((c) => c.code === "CONTENITORI_ISOTERMICI_OMOLOGAZIONE_ATP_TEMP" && c.normReference.includes("ATP")), "Omologazione ATP legame caldo >= 65°C e freddo <= 4°C");
+
+const rampaCarico = catalogCatExact.machines.find((m) => m.machineKey === "rampa_carico_alluminio")!;
+assert.ok(rampaCarico.suggestedManufacturer.includes("Altec") || rampaCarico.suggestedManufacturer.includes("WM System"), "Altec o WM System");
+assert.ok(rampaCarico.safetyChecks.some((c) => c.code === "RAMPA_CARICO_BORDI_LATERALI_ANTI_USCITA" && c.normReference.includes("UNI EN 1398")), "Bordi laterali di sicurezza UNI EN 1398");
+assert.ok(rampaCarico.safetyChecks.some((c) => c.code === "RAMPA_CARICO_PORTATA_CERTIFICATA_TARGHETTA"), "Portata certificata 500-1000 kg");
+
+const rollIsotermico = catalogCatExact.machines.find((m) => m.machineKey === "roll_container_isotermico")!;
+assert.ok(rollIsotermico.suggestedManufacturer.includes("Melform") || rollIsotermico.suggestedManufacturer.includes("Olivo"), "Melform o Olivo");
+assert.ok(rollIsotermico.safetyChecks.some((c) => c.code === "ROLL_ISOTERMICO_MANIGLIONI_SPINTA_ERGONOMIA" && c.normReference.includes("Titolo VI")), "Maniglioni di spinta ergonomici Titolo VI MMC");
+
+const lavastoviglieCat = catalogCatExact.machines.find((m) => m.machineKey === "lavastoviglie_capotta_catering")!;
+assert.ok(lavastoviglieCat.suggestedManufacturer.includes("Winterhalter") || lavastoviglieCat.suggestedManufacturer.includes("Meiko"), "Winterhalter o Meiko");
+assert.ok(lavastoviglieCat.safetyChecks.some((c) => c.code === "LAVASTOVIGLIE_CAPOTTA_RISCIACQUO_82C_DIN10510"), "Risciacquo ad alta temperatura >= 82°C");
+assert.ok(lavastoviglieCat.safetyChecks.some((c) => c.code === "LAVASTOVIGLIE_CAPOTTA_ANTIRIFLUSSO_UNI1717" && c.normReference.includes("UNI EN 1717")), "Dispositivo antiriflusso UNI EN 1717");
+
+const lavaoggettiCat = catalogCatExact.machines.find((m) => m.machineKey === "lavaoggetti_teglie_catering")!;
+assert.ok(lavaoggettiCat.suggestedManufacturer.includes("Winterhalter") || lavaoggettiCat.suggestedManufacturer.includes("Comenda"), "Winterhalter o Comenda");
+assert.ok(lavaoggettiCat.safetyChecks.some((c) => c.code === "LAVAOGGETTI_CATERING_MICRO_PORTA_BLOCCO_POMPA"), "Microinterruttore di blocco pompe all'apertura");
+
+const quadroMobile = catalogCatExact.machines.find((m) => m.machineKey === "quadro_elettrico_mobile")!;
+assert.ok(quadroMobile.suggestedManufacturer.includes("Gewiss") || quadroMobile.suggestedManufacturer.includes("Scame") || quadroMobile.suggestedManufacturer.includes("Rosi"), "Gewiss / Scame / Rosi");
+assert.ok(quadroMobile.safetyChecks.some((c) => c.code === "QUADRO_MOBILE_INVOLUCRO_ISOLANTE_IP65"), "Involucro stagno IP65");
+assert.ok(quadroMobile.safetyChecks.some((c) => c.code === "QUADRO_MOBILE_INTERRUTTORE_DIFFERENZIALE_30MA"), "Differenziale 30 mA salvavita");
+assert.ok(quadroMobile.safetyChecks.some((c) => c.code === "QUADRO_MOBILE_PRESE_CEE_INTERBLOCCATE"), "Prese CEE interbloccate");
+
+const bomboleGpl = catalogCatExact.machines.find((m) => m.machineKey === "bombole_gpl_cucina_campo")!;
+assert.ok(bomboleGpl.safetyChecks.some((c) => c.code === "BOMBOLE_GPL_COLLARE_CATENELLE_ANTICADUTA"), "Catenelle anticaduta e collare di protezione");
+assert.ok(bomboleGpl.safetyChecks.some((c) => c.code === "BOMBOLE_GPL_REGOLATORE_ECCESSO_FLUSSO_UNI7131"), "Regolatore con valvola blocco eccesso flusso");
+assert.ok(bomboleGpl.safetyChecks.some((c) => c.code === "BOMBOLE_GPL_TUBI_FLESSIBILI_UNI7140_SCADENZA" && c.normReference.includes("UNI 7140")), "Tubi flessibili UNI 7140 con data di scadenza");
+
+// -------------------------------------------------------------
+// Test 25: Associazione 1-a-1 ambienti Step 2 Catering (env-cat-*) -> Step 4 Macchine
+// -------------------------------------------------------------
+console.log("Test 25: Verifica associazione ambienti Step 2 Catering (env-cat-*) -> Step 4 Macchine");
+const catEnvironments = [
+  { id: "env-cat-cucina-centrale", name: "Cucina Centrale di Produzione e Preparazione Basi", category: "production" },
+  { id: "env-cat-prep-fingerfood", name: "Laboratorio Finger Food e Porzionamento Ricevimenti", category: "production" },
+  { id: "env-cat-deposito-arredi", name: "Deposito Arredi Mobili, Chafing Dish e Attrezzature Ricevimenti", category: "warehouse" },
+  { id: "env-cat-banchina-carico", name: "Banchina Carico Furgoni e Logistica Spedizioni", category: "warehouse" },
+  { id: "env-cat-lavaggio-rientro", name: "Centrale Lavaggio e Sanificazione Stoviglie di Rientro", category: "production" },
+  { id: "env-cat-deposito-gpl", name: "Area Deposito Bombole GPL e Quadri Mobili da Campo", category: "technical" },
+];
+
+const suggestedWithCatEnvs = getSuggestedMachinesForEnvironmentsAndAteco(catEnvironments, "56.21.00");
+assert.equal(suggestedWithCatEnvs.length, 18, "Tutte le 18 macchine devono essere raccomandate e collegate ai 6 ambienti censiti");
+
+// Verifica 1-a-1 per ciascun ambiente:
+const cucinaCentraleMachines = suggestedWithCatEnvs.filter((m) => m.targetEnvironmentId === "env-cat-cucina-centrale");
+assert.equal(cucinaCentraleMachines.length, 4, "env-cat-cucina-centrale deve associare 4 macchine di produzione base");
+assert.ok(cucinaCentraleMachines.some((m) => m.machineKey === "forno_combinato_catering"));
+assert.ok(cucinaCentraleMachines.some((m) => m.machineKey === "abbattitore_temperatura_catering"));
+assert.ok(cucinaCentraleMachines.some((m) => m.machineKey === "brasiera_ribaltabile_catering"));
+assert.ok(cucinaCentraleMachines.some((m) => m.machineKey === "confezionatrice_sottovuoto_catering"));
+
+const prepFingerMachines = suggestedWithCatEnvs.filter((m) => m.targetEnvironmentId === "env-cat-prep-fingerfood");
+assert.equal(prepFingerMachines.length, 2, "env-cat-prep-fingerfood deve associare affettatrice e cutter");
+assert.ok(prepFingerMachines.some((m) => m.machineKey === "affettatrice_gravita_catering"));
+assert.ok(prepFingerMachines.some((m) => m.machineKey === "cutter_robot_catering"));
+
+// Verifica anche supporto dedicato per env-cat-diete-allergeni
+const dieteCatEnvTest = getSuggestedMachinesForEnvironmentsAndAteco(
+  [{ id: "env-cat-diete-allergeni", name: "Area Preparazione Diete Speciali e Senza Glutine", category: "production" }],
+  "56.21.00",
+);
+const dieteCatLinked = dieteCatEnvTest.filter((m) => m.targetEnvironmentId === "env-cat-diete-allergeni");
+assert.equal(dieteCatLinked.length, 2, "env-cat-diete-allergeni deve associare affettatrice e cutter");
+assert.ok(dieteCatLinked.some((m) => m.machineKey === "affettatrice_gravita_catering"));
+assert.ok(dieteCatLinked.some((m) => m.machineKey === "cutter_robot_catering"));
+
+const depositoArrediMachines = suggestedWithCatEnvs.filter((m) => m.targetEnvironmentId === "env-cat-deposito-arredi");
+assert.equal(depositoArrediMachines.length, 5, "env-cat-deposito-arredi deve associare 5 attrezzature da ricevimento e banqueting");
+assert.ok(depositoArrediMachines.some((m) => m.machineKey === "forno_rigeneratore_mobile"));
+assert.ok(depositoArrediMachines.some((m) => m.machineKey === "chafing_dish_scaldavivande"));
+assert.ok(depositoArrediMachines.some((m) => m.machineKey === "friggitrice_mobile_catering"));
+assert.ok(depositoArrediMachines.some((m) => m.machineKey === "fabbricatore_ghiaccio_catering"));
+assert.ok(depositoArrediMachines.some((m) => m.machineKey === "banco_bar_mobile_luminoso"));
+
+const banchinaMachines = suggestedWithCatEnvs.filter((m) => m.targetEnvironmentId === "env-cat-banchina-carico");
+assert.equal(banchinaMachines.length, 3, "env-cat-banchina-carico deve associare contenitori, rampa e roll-container");
+assert.ok(banchinaMachines.some((m) => m.machineKey === "contenitori_isotermici_catering"));
+assert.ok(banchinaMachines.some((m) => m.machineKey === "rampa_carico_alluminio"));
+assert.ok(banchinaMachines.some((m) => m.machineKey === "roll_container_isotermico"));
+
+// Verifica anche supporto per env-cat-deposito-noleggio
+const noleggioCatEnvTest = getSuggestedMachinesForEnvironmentsAndAteco(
+  [{ id: "env-cat-deposito-noleggio", name: "Magazzino Materiale a Noleggio e Arredi", category: "warehouse" }],
+  "56.21.00",
+);
+const noleggioCatLinked = noleggioCatEnvTest.filter((m) => m.targetEnvironmentId === "env-cat-deposito-noleggio");
+assert.equal(noleggioCatLinked.length, 3, "env-cat-deposito-noleggio deve associare contenitori, rampa e roll-container");
+assert.ok(noleggioCatLinked.some((m) => m.machineKey === "contenitori_isotermici_catering"));
+assert.ok(noleggioCatLinked.some((m) => m.machineKey === "rampa_carico_alluminio"));
+assert.ok(noleggioCatLinked.some((m) => m.machineKey === "roll_container_isotermico"));
+
+const lavaggioRientroMachines = suggestedWithCatEnvs.filter((m) => m.targetEnvironmentId === "env-cat-lavaggio-rientro");
+assert.equal(lavaggioRientroMachines.length, 2, "env-cat-lavaggio-rientro deve associare lavastoviglie capotta e lavaoggetti");
+assert.ok(lavaggioRientroMachines.some((m) => m.machineKey === "lavastoviglie_capotta_catering"));
+assert.ok(lavaggioRientroMachines.some((m) => m.machineKey === "lavaoggetti_teglie_catering"));
+
+const depositoGplMachines = suggestedWithCatEnvs.filter((m) => m.targetEnvironmentId === "env-cat-deposito-gpl");
+assert.equal(depositoGplMachines.length, 2, "env-cat-deposito-gpl deve associare quadro elettrico e bombole GPL");
+assert.ok(depositoGplMachines.some((m) => m.machineKey === "quadro_elettrico_mobile"));
+assert.ok(depositoGplMachines.some((m) => m.machineKey === "bombole_gpl_cucina_campo"));
+
+// Verifica anche supporto per env-cat-ufficio-logistica
+const ufficioCatEnvTest = getSuggestedMachinesForEnvironmentsAndAteco(
+  [{ id: "env-cat-ufficio-logistica", name: "Ufficio Logistica e Pianificazione Eventi", category: "offices" }],
+  "56.21.00",
+);
+const ufficioCatLinked = ufficioCatEnvTest.filter((m) => m.targetEnvironmentId === "env-cat-ufficio-logistica");
+assert.equal(ufficioCatLinked.length, 2, "env-cat-ufficio-logistica deve associare quadro elettrico e bombole GPL");
+assert.ok(ufficioCatLinked.some((m) => m.machineKey === "quadro_elettrico_mobile"));
+assert.ok(ufficioCatLinked.some((m) => m.machineKey === "bombole_gpl_cucina_campo"));
+
+// -------------------------------------------------------------
+// Test 26: Risoluzione solo su codice ATECO senza locali censiti (Catering)
+// -------------------------------------------------------------
+console.log("Test 26: Integrazione automatica macchine per ATECO 56.21.00 senza ambienti preventivi");
+const suggestedCatOnlyAteco = getSuggestedMachinesForEnvironmentsAndAteco([], "56.21.00");
+assert.equal(suggestedCatOnlyAteco.length, 18, "Devono essere suggerite tutte le 18 macchine del catering");
+assert.ok(
+  suggestedCatOnlyAteco.every((m) => m.sourceReason === "ateco"),
+  "Tutte le macchine devono avere sourceReason === 'ateco' se nessun locale è stato specificato",
+);
+
+// Verifica fallback automatico identico per varianti di codice ATECO ("56.21.0", "56.21", "562100", "5621")
+for (const code of ["56.21.0", "56.21", "562100", "5621"]) {
   const fallbackRes = getSuggestedMachinesForEnvironmentsAndAteco([], code);
   assert.equal(fallbackRes.length, 18, `ATECO variant '${code}' deve restituire tutte le 18 macchine`);
   assert.ok(fallbackRes.every((m) => m.sourceReason === "ateco"));

@@ -2403,6 +2403,721 @@ export const SECTOR_MACHINERY_CATALOGS: SectorMachineCatalog[] = [
     ],
   },
 
+  // 1.3 CATERING PER EVENTI, BANQUETING E RICEVIMENTI
+  // ATECO 56.21.00, 56.21.0, 56.21
+  {
+    sectorKey: "catering_eventi_banqueting",
+    sectorLabel: "Catering per Eventi, Banqueting e Ricevimenti",
+    atecoPrefixes: ["56.21.00", "56.21.0", "56.21"],
+    machines: [
+      // --- REPARTO 1: CUCINA CENTRALE & PRODUZIONE BASE (env-cat-cucina-centrale) ---
+      {
+        machineKey: "forno_combinato_catering",
+        name: "Forno Combinato Convezione/Vapore Professionale per Grandi Volumi",
+        type: "Apparecchiatura Termica di Cottura Professionale a Vapore/Convezione per Grandi Volumi",
+        suggestedManufacturer: "Rational / Unox",
+        suggestedModel: "iCombi Pro 10 o 20 teglie GN / Cheftop Mind.Maps",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "FORNO_CATERING_PORTA_TRIPLO_VETRO_VENTILATO",
+            title: "Porta con Triplo Vetro Ventilato e Temperatura Esterna Anti-Ustione (UNI EN 203-1)",
+            question: "La porta della camera di cottura è provvista di triplo vetro ventilato con rivestimento atermico basso-emissivo conforme a norma UNI EN 203-1 per prevenire ustioni da contatto ed è dotata di maniglia con meccanismo di apertura a doppio scatto con sfogo controllato del vapore residuo?",
+            normReference: "UNI EN 203-1; CEI EN 60335-2-42; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FORNO_CATERING_ARRESTO_VENTOLE_INIEZIONE_VAPORE",
+            title: "Arresto Immediato di Rotazione Ventole e Generatore di Vapore all'Apertura Porta",
+            question: "L'apertura della porta aziona microinterruttore di sicurezza che blocca tempestivamente la rotazione delle ventole di convezione e l'erogazione del vapore saturo per impedire getti violenti di calore convettivo e vapore verso il viso dell'operatore?",
+            normReference: "CEI EN 60335-2-42; UNI EN 203-1; D.Lgs. 81/2008 art. 71 c. 3 e All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FORNO_CATERING_SONDA_CUORE_6_PUNTI_CCP",
+            title: "Sonda al Cuore Multipunto a 6 Punti di Misura con Registrazione Termica HACCP",
+            question: "La sonda termometrica a spillone a 6 punti di rilevazione è calibrata, priva di lesioni al cavo di raccordo e integrata con il sistema digitale del forno per garantire e registrare il superamento del punto critico CCP di cottura (>= +75°C al cuore) secondo i protocolli per banqueting?",
+            normReference: "Reg. CE 852/2004 All. II cap. IX; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "FORNO_CATERING_CAPPA_CONDENSAZIONE_SCARICO_GRASSI",
+            title: "Cappa a Condensazione Integrata o Canalizzata con Scarico Grassi Indipendente",
+            question: "Il forno combinato per grandi volumi è asservito a cappa di aspirazione/condensazione vapori con separatore di grassi canalizzato e vaschetta di raccolta per prevenire fumi, accumuli scivolosi a pavimento e condense oleose?",
+            normReference: "D.Lgs. 81/2008 All. IV p. 1.9 e All. V p. 7; Reg. CE 852/2004 All. II cap. I",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "abbattitore_temperatura_catering",
+        name: "Abbattitore Rapido e Surgelatore Professionale a Carrello",
+        type: "Apparecchiatura di Refrigerazione Rapida e Surgelazione Positiva/Negativa a Carrello",
+        suggestedManufacturer: "Irinox / Coldline",
+        suggestedModel: "MultiFresh Next / Vision Heavy Duty",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "ABBATTITORE_CATERING_CICLO_RAPIDO_POSITIVO_NEGATIVO",
+            title: "Ciclo Rapido di Abbattimento Positivo (+3°C) e Negativo (-18°C) nei Tempi di Legge (Reg. CE 852/04)",
+            question: "L'abbattitore garantisce il completamento dei cicli entro i limiti normativi (abbattimento positivo da +70°C a +3°C al cuore entro 90 minuti; surgelazione da +70°C a -18°C entro 240 minuti) per la pianificazione anticipata in sicurezza dei menu dell'evento?",
+            normReference: "Reg. CE 852/2004 All. II cap. IX; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ABBATTITORE_CATERING_SONDA_SPILLONE_RISCALDATA",
+            title: "Sonda al Cuore Multipunto Riscaldata per Estrazione Sicura Senza Lacerazione Alimenti",
+            question: "La sonda a spillone multipunto è integra, calibrata periodicamente ed è dotata di riscaldamento automatico a fine ciclo di surgelazione per consentirne l'estrazione senza sforzi traumatici dell'operatore né danneggiamento del prodotto?",
+            normReference: "Reg. CE 852/2004; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "ABBATTITORE_CATERING_ALLARME_PORTA_RAMPA_CARRELLO",
+            title: "Allarme Porta Aperta, Maniglia Ergonomica e Rampa Filo Pavimento per Carrelli GN",
+            question: "La camera è provvista di avvisatore acustico/visivo di porta aperta prolungata, guarnizioni magnetiche riscaldate anticongelamento e rampa di invito a filo pavimento per l'inserimento senza urti o ribaltamenti dei carrelli teglie GN?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3 e Titolo VI (MMC); CEI EN 60335-2-89",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ABBATTITORE_CATERING_CIRCUITO_FRIGO_GAS_ECOLOGICO",
+            title: "Circuito Frigorifero Sigillato con Gas Ecologico e Connessione Allarmi HACCP (EN 378)",
+            question: "Il circuito refrigerante a gas ecologico è a tenuta conforme a norma UNI EN 378, con registro apparecchiature F-Gas aggiornato (se applicabile per carica refrigerante) e modulo telemetria per archiviazione dei grafici di abbattimento?",
+            normReference: "UNI EN 378; Reg. UE 517/2014 / Reg. UE 2024/573; Reg. CE 852/2004",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+      {
+        machineKey: "brasiera_ribaltabile_catering",
+        name: "Brasiera Ribaltabile Professionale 80-120 Litri",
+        type: "Macchina Termica di Cottura Multifunzione a Vasca Ribaltabile Motorizzata",
+        suggestedManufacturer: "Firex / Angelo Po",
+        suggestedModel: "Cucimix CBTG100 / Icon9000 80-120L",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "BRASIERA_CATERING_RIBALTAMENTO_MOTORIZZATO_UNI13885",
+            title: "Comando di Ribaltamento Motorizzato ad Azione Mantenuta Hold-To-Run (UNI EN 13885)",
+            question: "Il sistema di ribaltamento vasca (80-120 litri) è motorizzato a bassa velocità controllata e azionato da comando a pulsante ad azione mantenuta (uomo presente) conforme a norma UNI EN 13885 per impedire versamenti improvvisi e ustioni da liquidi caldi?",
+            normReference: "UNI EN 13885; D.Lgs. 81/2008 art. 71 c. 3 e All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BRASIERA_CATERING_ARRESTO_RISCALDAMENTO_INCLINATA",
+            title: "Interblocco di Sicurezza con Arresto Automatico Riscaldamento a Vasca Inclinata",
+            question: "È presente un microinterruttore o finecorsa certificato che disattiva immediatamente bruciatori a gas o resistenze elettriche non appena la vasca viene inclinata oltre l'assetto orizzontale di cottura?",
+            normReference: "UNI EN 13885; CEI EN 60335-2-39; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BRASIERA_CATERING_COPERCHIO_CONTROBILANCIATO_SFIATO",
+            title: "Coperchio Controbilanciato Antiraduta con Sfiato Vapori e Maniglia Atermica",
+            question: "Il coperchio in acciaio inox è montato su cerniere con molle di controbilanciamento progressive anticaduta, maniglia isolata atermica e condotto di sfiato orientato posteriormente per evitare getti di vapore sul corpo dell'operatore?",
+            normReference: "UNI EN 13885; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BRASIERA_CATERING_VALVOLA_SCARICO_BECCUCCIO_FRONTALE",
+            title: "Beccuccio di Scarico Frontale Sagomato con Convogliatore per Bacinelle Gastronorm",
+            question: "Il bordo vasca dispone di beccuccio o canalina sagomata di scolo per il travaso progressivo senza schizzi di brodi, salse o stufati nei contenitori carrellati posizionati sottostanti?",
+            normReference: "UNI EN 13885; D.Lgs. 81/2008 All. V p. 6; Reg. CE 852/2004",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "confezionatrice_sottovuoto_catering",
+        name: "Confezionatrice Sottovuoto a Doppia Barra Saldante per Linee Eventi",
+        type: "Macchina Confezionatrice Sottovuoto a Campana con Doppia Barra Saldante",
+        suggestedManufacturer: "Orved / Besser Vacuum",
+        suggestedModel: "VM 18 / Mistral 42 DUAL",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "SOTTOVUOTO_CATERING_CAMPANA_PLEXIGLASS_PISTONI",
+            title: "Coperchio Bombato in Plexiglass Antiurto con Pistoni a Gas Ammortizzati Anticaduta",
+            question: "La campana di chiusura trasparente in materiale ad alta resistenza è integra (priva di fessurazioni o crepe strutturali) e supportata da pistoni a gas tarati che ne prevengono la ricaduta accidentale sulle mani dell'operatore?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2; Direttiva Macchine 2006/42/CE",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SOTTOVUOTO_CATERING_MICRO_SICUREZZA_CAMPANA_APERTA",
+            title: "Microinterruttore di Sicurezza e Inibizione Ciclo di Vuoto a Campana Aperta",
+            question: "Il ciclo di vuoto e l'impulso elettrico ad alta corrente alle doppie barre saldanti si attivano unicamente a campana completamente abbassata e si arrestano all'apertura d'emergenza della vasca?",
+            normReference: "CEI EN 60335-2-45; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "SOTTOVUOTO_CATERING_DOPPIA_BARRA_SALDANTE_SOUSVIDE",
+            title: "Doppia Barra Saldante Ermetica per Sigillatura Buste da Cottura Sous-Vide e Conservazione",
+            question: "Le barre saldanti dispongono di teflon protettivo integro, doppio filo di saldatura ad accostamento parallelo e regolazione elettronica del tempo di saldatura per garantire tenuta ermetica senza perdita di liquidi durante il trasporto e la rigenerazione?",
+            normReference: "Reg. CE 852/2004 All. II cap. X; Reg. CE 1935/2004 (MOCA)",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "SOTTOVUOTO_CATERING_POMPA_VUOTO_FILTRO_DISOLEATORE",
+            title: "Pompa Vuoto a Bagno d'Olio con Filtro Disoleatore Fumi e Scarico Condense",
+            question: "La pompa del vuoto è sottoposta a manutenzione periodica del livello e qualità dell'olio ed è provvista di filtro disoleatore per evitare l'emissione di aerosol e vapori oleosi nell'ambiente di lavoro?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 4 e All. IV p. 1.9",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // --- REPARTO 2: PREPARAZIONE FINGER FOOD & LAVORAZIONE (env-cat-prep-fingerfood e env-cat-diete-allergeni) ---
+      {
+        machineKey: "affettatrice_gravita_catering",
+        name: "Affettatrice Professionale a Gravità Lama 370 mm per Salumi e Carni",
+        type: "Macchina per il Taglio Professionale di Salumi e Carni a Gravità Lama 370 mm",
+        suggestedManufacturer: "Berkel / Sirman",
+        suggestedModel: "Domina 370 / Palladio 370",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "AFFETTATRICE_CATERING_ANELLO_FISSO_PARALAMA_UNI1974",
+            title: "Anello Fisso di Protezione Paralama Continuo a 360° Conforme a UNI EN 1974",
+            question: "L'affettatrice con lama da 370 mm è dotata di anello di protezione fisso e continuo che copre interamente il filo della lama nella porzione non utilizzata durante il taglio, garantendo protezione anche a coprilama rimosso?",
+            normReference: "UNI EN 1974; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "AFFETTATRICE_CATERING_BLOCCO_CARRO_SPESSORE_ZERO",
+            title: "Dispositivo di Blocco Meccanico del Carro e Vela Chiusa a Spessore Zero per Pulizia",
+            question: "Il carro portamerce può essere sfilato per le operazioni di sanificazione solo quando la manopola graduata della vela regolatrice è posizionata a zero ('0') e il carro è bloccato in posizione di finecorsa di sicurezza?",
+            normReference: "UNI EN 1974; D.Lgs. 81/2008 art. 71 c. 3 e All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "AFFETTATRICE_CATERING_PRESSAMERCE_SALVADITA",
+            title: "Pressamerce Ergonomico con Paraspruzzi Trasparente Salvadita",
+            question: "Il piatto porta-alimenti è dotato di pressamerce con impugnatura ergonomica, spuntoni di trattenuta e schermo para-mano trasparente rigido per mantenere le mani dell'operatore a distanza di sicurezza dalla lama?",
+            normReference: "UNI EN 1974; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "AFFETTATRICE_CATERING_RELE_MINIMA_TENSIONE_NVR",
+            title: "Comando Avvio/Arresto con Relè di Minima Tensione (Protezione da Riavvio Accidentale)",
+            question: "La pulsantiera a bassa tensione è provvista di bobina di sgancio di minima tensione (NVR) che impedisce il riavvio spontaneo e pericoloso della macchina dopo un'interruzione improvvisa dell'alimentazione elettrica?",
+            normReference: "CEI EN 60204-1; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "cutter_robot_catering",
+        name: "Cutter Robot / Tagliaverdure Professionale per Finger Food",
+        type: "Robot Multifunzione Tagliaverdure ed Emulsionatore per Finger Food",
+        suggestedManufacturer: "Robot Coupe / Dito Sama",
+        suggestedModel: "R 402 / K45",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "CUTTER_CATERING_INTERBLOCCO_COPERCHIO_FRENO_LAMA_UNI12852",
+            title: "Interblocco di Sicurezza con Freno Motore Arresto Lama <= 2 Secondi (UNI EN 12852)",
+            question: "L'apertura o rotazione del coperchio trasparente determina l'arresto immediato delle lame rotanti entro un tempo massimo di 2 secondi tramite dispositivo di frenatura elettromeccanica conforme a norma UNI EN 12852?",
+            normReference: "UNI EN 12852; D.Lgs. 81/2008 art. 71 c. 3 e All. V p. 2",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CUTTER_CATERING_PESTELLO_SALVADITA_TRAMOGGIA",
+            title: "Pestello Ergonomico Salvadita e Tramoggia Tagliaverdure Protetta",
+            question: "L'accessorio tagliaverdure dispone di pestello sagomato per l'introduzione guidata di ortaggi e tuberi, con tramoggia progettata geometricamente per impedire l'introduzione accidentale delle dita verso i dischi rotanti?",
+            normReference: "UNI EN 1678; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CUTTER_CATERING_BLOCCO_MECCANICO_VASCA",
+            title: "Dispositivo di Blocco a Baionetta della Vasca in Acciaio Inox con Micro di Presenza",
+            question: "La vasca di lavorazione in acciaio inox è vincolata al basamento motore mediante incastro a baionetta sicuro, con sensore che inibisce l'avviamento del motore qualora la vasca non sia correttamente serrata?",
+            normReference: "UNI EN 12852; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // --- REPARTO 3: ATTREZZATURE MOBILI DA TRASFERTA & BANQUETING (env-cat-deposito-arredi) ---
+      {
+        machineKey: "forno_rigeneratore_mobile",
+        name: "Forno Rigeneratore di Temperatura Mobile su Ruote per Ricevimenti",
+        type: "Apparecchiatura Termica Mobile per Rigenerazione Pasti e Mantenimento Umidità su Ruote",
+        suggestedManufacturer: "Angelo Po / Moduline / Lainox",
+        suggestedModel: "CombiWave / Retigo Regenerator / Moduline RRV",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "FORNO_RIGENERATORE_RIGENERAZIONE_TEMP_75C",
+            title: "Rigenerazione Termica Rapida al Cuore >= +75°C con Mantenimento Umidità da Trasferta",
+            question: "Il forno rigeneratore mobile garantisce il riscaldamento uniforme e rapido delle pietanze pre-cotte fino a raggiungere e mantenere >= +75°C al cuore dell'alimento nel rispetto delle schede HACCP di somministrazione agli eventi?",
+            normReference: "Reg. CE 852/2004 All. II cap. IX; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FORNO_RIGENERATORE_RUOTE_PIROETTANTI_FRENO_PEDALE",
+            title: "Ruote Piroettanti Antitraccia ad Alta Resistenza con Freno Meccanico a Pedale",
+            question: "Il forno mobile su ruote è equipaggiato con ruote piroettanti in gomma antitraccia provviste di freno meccanico a pedale per lo stazionamento stabile e sicuro durante le fasi operative e di carico/scarico?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3 e All. V p. 6; Titolo VI (MMC)",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FORNO_RIGENERATORE_MANIGLIE_ISOLANTI_CAVO_PROTETTO",
+            title: "Maniglioni Perimetrali di Spinta Termoisolanti e Cavo Elettrico Industriale con Spina CEE",
+            question: "La scocca esterna dispone di maniglioni tubolari di manovra protetti contro il calore per la spinta ergonomica, e cavo flessibile H07RN-F ad alta resistenza con spina industriale CEE IP44/IP67?",
+            normReference: "CEI EN 60335-2-42; CEI 64-8; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "chafing_dish_scaldavivande",
+        name: "Chafing Dish Scaldavivande a Bagnomaria con Coperchio a Scomparsa (Roll-Top)",
+        type: "Scaldavivande da Buffet e Ricevimenti a Bagnomaria con Coperchio Roll-Top",
+        suggestedManufacturer: "Pinti Inox / Sambonet / Paderno",
+        suggestedModel: "5 Stelle Roll-Top GN 1/1 / Elite Buffet",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "CHAFING_DISH_COPERCHIO_ROLLTOP_FRIZIONATO",
+            title: "Coperchio Roll-Top a Scomparsa con Frizione di Arresto Anti-Scottatura (90° e 180°)",
+            question: "Il coperchio del chafing dish è dotato di meccanismo roll-top frizionato che si arresta stabilmente a 90° e 180° senza rischio di ricadute improvvise e con maniglia atermica isolata per prevenire scottature agli operatori e agli ospiti?",
+            normReference: "D.Lgs. 81/2008 All. V p. 6; Reg. CE 852/2004 All. II cap. V",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "CHAFING_DISH_PORTA_FORNELLETTO_GEL_SICURO",
+            title: "Alloggiamento Protetto per Fornelletti a Gel Combustibile con Spegnifiamma Rotante",
+            question: "I portabicchieri inferiori per combustibile in pasta/gel sono provvisti di schermatura termica, calotta girevole per la regolazione e spegnimento istantaneo della fiamma senza rischio di fuoriuscita di materiale infiammabile?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3 e All. IV p. 4 (Prevenzione Incendi); DM 03/09/2021",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CHAFING_DISH_IDONEITA_MOCA_VASCHETTE_GN",
+            title: "Bacinelle Gastronorm e Vasca Bagnomaria in Acciaio Inox AISI 304 Idonee MOCA",
+            question: "I contenitori a contatto con alimenti e la vasca bagnomaria sono realizzati in acciaio inossidabile conforme ai requisiti MOCA (Reg. CE 1935/2004), privi di corrosioni o ammaccature e facilmente igienizzabili?",
+            normReference: "Reg. CE 1935/2004; D.M. 21/03/1973; Reg. CE 852/2004",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "friggitrice_mobile_catering",
+        name: "Friggitrice Professionale Mobile per Cotture Espresse Finger Food",
+        type: "Friggitrice Elettrica o a Gas Professionale da Banco/Mobile per Cotture Espresse",
+        suggestedManufacturer: "Lotus / Giorik",
+        suggestedModel: "F13-74ET / Unika 700 Mobile",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "FRIGGITRICE_CATERING_TERMOSTATO_SICUREZZA_230C",
+            title: "Termostato di Sicurezza a Riarmo Manuale Anti-Autocombustione dell'Olio (< 230°C)",
+            question: "La friggitrice mobile è equipaggiata con termostato di sicurezza a riarmo manuale indipendente tarato per intervenire tassativamente sotto i 230°C per prevenire il punto di fumo critico e l'autocombustione dei grassi?",
+            normReference: "CEI EN 60335-2-37; UNI EN 203-1; D.Lgs. 81/2008 All. V p. 6 e All. IV p. 4",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FRIGGITRICE_CATERING_RUBINETTO_SCARICO_SICURA",
+            title: "Rubinetto di Scarico Olio con Sicura Meccanica, Prolunga e Bacinella di Raccolta Filtro",
+            question: "Il condotto di svuotamento dell'olio esausto dispone di leva con blocco meccanico accidentale, tubo prolunga sagomato e filtro di trattenuta residui per consentire il deflusso controllato senza schizzi su pavimenti o corpo dell'operatore?",
+            normReference: "UNI EN 203-1; D.Lgs. 81/2008 All. V p. 6; Reg. CE 852/2004",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FRIGGITRICE_CATERING_PARASPRUZZI_ALTEZZA_MINIMA",
+            title: "Paraspruzzi Perimetrale in Acciaio Inox e Indicatori Livello Minimo/Massimo Olio",
+            question: "La vasca dispone di bordi paraspruzzi perimetrali rialzati per evitare schizzi di olio bollente durante l'immersione di cestelli e finger food, e serigrafia indelebile con livelli di olio min/max?",
+            normReference: "UNI EN 203-1; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "fabbricatore_ghiaccio_catering",
+        name: "Fabbricatore di Ghiaccio Trasportabile ad Alta Resa per Open-Bar",
+        type: "Fabbricatore di Ghiaccio Portatile ad Alta Resa per Open-Bar ed Eventi Esterni",
+        suggestedManufacturer: "Brema / Icematic",
+        suggestedModel: "CB 425 / Castor CS40",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "GHIACCIO_CATERING_MATERIALI_MOCA_DEPURATORE",
+            title: "Superfici di Evaporazione e Deposito Ghiaccio Idonee al Contatto Alimentare MOCA",
+            question: "La vasca di raccolta e l'evaporatore a spruzzo sono realizzati con materiali atossici conformi al Reg. CE 1935/2004 ed è presente idoneo sistema di filtrazione/trattamento dell'acqua di alimentazione conforme ai requisiti dell'acqua potabile?",
+            normReference: "Reg. CE 1935/2004; D.Lgs. 18/2023 (Acque Potabili); Reg. CE 852/2004",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "GHIACCIO_CATERING_SCARICO_INTERRUZIONE_ARIA_UNI1717",
+            title: "Scarico Condense e Troppopieno con Interruzione d'Aria Anti-Reflusso (UNI EN 1717)",
+            question: "La tubazione di scarico della condensa e del troppopieno è collegata con spazio d'aria libero conforme a UNI EN 1717 per impedire qualsiasi reflusso o contaminazione microbiologica della riserva di ghiaccio alimentare?",
+            normReference: "UNI EN 1717; Reg. CE 852/2004 All. II cap. I e cap. VII",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "GHIACCIO_CATERING_MANIGLIE_CIRCUITO_SIGILLATO_UNI378",
+            title: "Maniglie Ergonomiche di Movimentazione e Circuito Ermetico Refrigerante (UNI EN 378)",
+            question: "Il telaio trasportabile per open-bar è dotato di maniglie laterali a scatto per il sollevamento ergonomico a norma Titolo VI D.Lgs. 81/08 e circuito refrigerante ermetico sigillato conforme a UNI EN 378?",
+            normReference: "UNI EN 378; D.Lgs. 81/2008 Titolo VI e art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+      {
+        machineKey: "banco_bar_mobile_luminoso",
+        name: "Banco Bar Modulare Trasportabile per Open-Bar ed Eventi Esterni",
+        type: "Banco Bar Modulare Trasportabile e Allestimento Mobile per Ricevimenti",
+        suggestedManufacturer: "Plust / Slide / RG Mania",
+        suggestedModel: "Bartolomeo Modular Bar / Break Bar LED",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "BANCO_BAR_MOBILE_PIANO_INOX_MOCA",
+            title: "Piano di Lavoro Superiore in Acciaio Inox Sanificabile e Idoneo MOCA",
+            question: "Il piano mescita e preparazione cocktail è in acciaio inossidabile liscio, privo di interstizi, angoli vivi o asperità, conforme alle norme MOCA e sanificabile facilmente tra un servizio e l'altro?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004 All. II cap. V",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "BANCO_BAR_MOBILE_ILLUMINAZIONE_LED_IP65_SELV",
+            title: "Impianto di Illuminazione LED Integrato a Bassissima Tensione di Sicurezza (SELV) IP65",
+            question: "L'eventuale impianto di retroilluminazione LED del modulo bar è alimentato a bassissima tensione di sicurezza (<= 12V/24V SELV) con alimentatore isolato IP65 protetto contro penetrazione di acqua, umidità esterna e getti di bevande?",
+            normReference: "CEI 64-8 parte 7; CEI EN 60598-1; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BANCO_BAR_MOBILE_STABILITA_MODULARE_SPEEDRAIL",
+            title: "Stabilità Strutturale Antiribaltamento, Giunzioni Modulari e Speed-Rail Portabottiglie",
+            question: "I moduli assemblabili dispongono di sistemi di aggancio solido tra elementi adiacenti, piedini regolabili per terreni sconnessi (giardini, sabbiati, terrazze) e speed-rail con barriere anticaduta bottiglie?",
+            normReference: "D.Lgs. 81/2008 All. IV p. 1.3 e All. V p. 2",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // --- REPARTO 4: LOGISTICA, SPEDIZIONI & BANCHINA (env-cat-banchina-carico e env-cat-deposito-noleggio) ---
+      {
+        machineKey: "contenitori_isotermici_catering",
+        name: "Contenitori Isotermici Gastronorm e Carrelli Termici Porta-Teglie",
+        type: "Attrezzatura Isotermica e Contenitori Omologati ATP per Trasporto Pasti e Bacinelle GN",
+        suggestedManufacturer: "Melform / Rieber",
+        suggestedModel: "Thermax GN 1/1 / Thermoport 1000 K",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "CONTENITORI_ISOTERMICI_OMOLOGAZIONE_ATP_TEMP",
+            title: "Mantenimento Termico Certificato ATP: Legame Caldo >= 65°C e Legame Freddo <= 4°C",
+            question: "I contenitori isotermici monoblocco per il trasporto pasti sono omologati per garantire il rispetto dei limiti HACCP durante il tragitto dalla cucina centrale alla location (caldo >= +65°C, freddo <= +4°C per oltre 3 ore)?",
+            normReference: "Accordo ATP; Reg. CE 852/2004 All. II cap. IV e cap. IX; D.P.R. 327/80",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CONTENITORI_ISOTERMICI_GUARNIZIONI_MOCA_SFIATO",
+            title: "Guarnizioni Ermetiche Sanificabili MOCA e Valvola di Sfiato Depressurizzazione",
+            question: "I portelloni sono dotati di guarnizioni siliconiche asportabili per la sanificazione a norma MOCA Reg. CE 1935/2004 e valvola di sfiato a membrana per consentire l'apertura agevole senza sforzi dovuti al sottovuoto termico?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004 All. II cap. V; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "CONTENITORI_ISOTERMICI_CHIUSURE_LEVA_ERGONOMIA",
+            title: "Chiusure a Leva Serrate e Maniglie Incassate per Movimentazione Manuale Sicura",
+            question: "I ganci di chiusura a leva in acciaio inox o poliammide garantiscono tenuta a prova di apertura accidentale durante il trasporto, e le maniglie di presa incassate sono dimensionate per la presa sicura di due operatori?",
+            normReference: "D.Lgs. 81/2008 Titolo VI e All. V p. 6; ISO 11228-1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "rampa_carico_alluminio",
+        name: "Rampa di Carico Pieghevole in Alluminio con Superficie Antiscivolo per Furgoni",
+        type: "Attrezzatura di Carico e Scarico Merci Pieghevole per Automezzi e Furgoni",
+        suggestedManufacturer: "Altec / WM System",
+        suggestedModel: "AOL Pieghevole 500-1000 kg / WM Light Plus",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "RAMPA_CARICO_PORTATA_CERTIFICATA_TARGHETTA",
+            title: "Targhetta di Marcatura con Portata Massima Certificata CE (500-1000 kg)",
+            question: "La rampa di carico in lega di alluminio presenta targhetta indelebile con indicazione del costruttore, modello, portata massima ammissibile (SWL) e anno di costruzione conforme alla Direttiva Macchine 2006/42/CE?",
+            normReference: "Direttiva Macchine 2006/42/CE All. I; D.Lgs. 81/2008 art. 71 c. 3 e All. V p. 1",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RAMPA_CARICO_BORDI_LATERALI_ANTI_USCITA",
+            title: "Bordi Laterali di Sicurezza Rialzati Anti-Uscita Ruote Roll-Container (UNI EN 1398)",
+            question: "La superficie di transito presenta bordi laterali rialzati continui (cordoli di ritegno h >= 50 mm) per prevenire lo svio accidentale e la caduta laterale delle ruote dei roll-container o carrelli durante il carico?",
+            normReference: "UNI EN 1398; D.Lgs. 81/2008 All. V p. 2 e All. VI",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RAMPA_CARICO_SUPERFICIE_MANDORLATA_ANTISCIVOLO",
+            title: "Superficie Mandorlata Forata con Coefficiente Antiscivolo per Condizioni Umide",
+            question: "Il piano di calpestio presenta bugnatura mandorlata o foratura estrusa con coefficiente d'attrito R12/R13 per scongiurare scivolamenti degli operatori in caso di pioggia o pavimentazione bagnata?",
+            normReference: "D.Lgs. 81/2008 All. IV p. 1.3 e All. V p. 2; DIN 51130",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RAMPA_CARICO_SISTEMA_PIEGHEVOLE_PISTONI_GAS",
+            title: "Dispositivo di Bloccaggio Meccanico a Bordo Furgone con Pistoni a Gas di Ausilio",
+            question: "Il meccanismo di chiusura pieghevole dispone di ganci di blocco meccanico antiribaltamento durante la marcia del furgone e pistoni ammortizzati a gas che riducono lo sforzo lombare di apertura/chiusura?",
+            normReference: "D.Lgs. 81/2008 Titolo VI e art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "roll_container_isotermico",
+        name: "Roll-Container Isotermico a Ruote per Movimentazione Pasti e Bevande",
+        type: "Contenitore Mobile Isotermico su Ruote per Logistica e Distribuzione Pasti",
+        suggestedManufacturer: "Melform / Olivo Cold Logistics",
+        suggestedModel: "Cargo Plast 720 / Roll Box 780",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "ROLL_ISOTERMICO_ISOLAMENTO_MONOBLOCCO_ATP",
+            title: "Scocca Coibentata Monoblocco Stampata in Rotazionale e Omologazione ATP",
+            question: "Il corpo del roll-container isotermico è privo di spaccature o infiltrazioni nella schiumatura isolante di poliuretano, provvisto di chiusura ermetica per mantenere le temperature di trasporto conformi ai limiti ATP?",
+            normReference: "Accordo ATP; Reg. CE 852/2004 All. II cap. IV; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "ROLL_ISOTERMICO_MANIGLIONI_SPINTA_ERGONOMIA",
+            title: "Maniglioni di Manovra Integrati Ergonomici per Prevenzione Sforzi Lombari (Titolo VI)",
+            question: "La struttura dispone di maniglie e punti di presa ergonomici posizionati ad altezza compresa tra 90 e 120 cm per consentire la movimentazione a spinta senza posture incongrue o sovraccarico biomeccanico del rachide?",
+            normReference: "D.Lgs. 81/2008 Titolo VI (art. 167-168) e All. XXXIII; ISO 11228-2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ROLL_ISOTERMICO_RUOTE_GOMMA_FRENO_PEDALE",
+            title: "Ruote in Gomma Elastica Antitraccia con Freno a Pedale Meccanico",
+            question: "Le ruote piroettanti e fisse sono integre, montate su cuscinetti scorrevoli esenti da blocchi e dotate di freno a pedale efficace per impedire movimenti non controllati su banchine o pavimentazioni in pendenza?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3 e All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // --- REPARTO 5: CENTRALE LAVAGGIO RIENTRO EVENTI (env-cat-lavaggio-rientro) ---
+      {
+        machineKey: "lavastoviglie_capotta_catering",
+        name: "Lavastoviglie Industriale a Capotta Passante con Cesto Stoviglie Noleggio",
+        type: "Lavastoviglie Industriale Passante a Capotta per Rientro Eventi e Stoviglie Noleggio",
+        suggestedManufacturer: "Winterhalter / Meiko",
+        suggestedModel: "PT-L Energy / M-iClean HM",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "LAVASTOVIGLIE_CAPOTTA_CONTROBILANCIATA_MICRO",
+            title: "Capotta Controbilanciata con Arresto Posizione e Microinterruttore di Finecorsa",
+            question: "Il gruppo capotta mobile è perfettamente controbilanciato con molle o tiranti di sostegno che ne impediscono la chiusura brusca accidentale ed è dotato di microinterruttore che disattiva immediatamente il ciclo di lavaggio all'apertura?",
+            normReference: "UNI EN 50416; CEI EN 60335-2-58; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVASTOVIGLIE_CAPOTTA_RISCIACQUO_82C_DIN10510",
+            title: "Risciacquo Igienico ad Alta Temperatura (>= 82°C) e Dosatori Peristaltici Automatici",
+            question: "Il boiler garantisce una temperatura di risciacquo finale non inferiore a +82°C certificata per la termosanificazione di piatti, posate e bicchieri da banqueting e dispone di dosatori automatici per detergente e brillantante?",
+            normReference: "DIN 10510 / DIN 10512; Reg. CE 852/2004 All. II cap. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVASTOVIGLIE_CAPOTTA_ANTIRIFLUSSO_UNI1717",
+            title: "Dispositivo Antiriflusso dell'Acqua con Interruzione d'Aria Tipo AA/AB (UNI EN 1717)",
+            question: "L'allacciamento alla rete idrica potabile è protetto da dispositivo di disconnessione idraulica antiriflusso conforme a UNI EN 1717 per impedire l'inquinamento della rete di acqua potabile con detergenti o acque reflue?",
+            normReference: "UNI EN 1717; D.Lgs. 18/2023; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "lavaoggetti_teglie_catering",
+        name: "Lavaoggetti Industriale per Teglie 60x40 e Bacinelle GN (Pot-Washer)",
+        type: "Lavaoggetti Industriale Frontale/Ghigliottina per Teglie 60x40 e Pentolame (Pot-Washer)",
+        suggestedManufacturer: "Winterhalter / Comenda",
+        suggestedModel: "UF-M / GE 655 RCD",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "LAVAOGGETTI_CATERING_CESTO_PROFONDO_GUIDE_INSERIMENTO",
+            title: "Cesto di Carico Rinforzato con Guide Scorrevoli per Teglie 60x40 e Pentolame Pesante",
+            question: "La camera di lavaggio presenta cesto rinforzato in tondino inox e guide telescopiche con arresto finecorsa per facilitare l'estrazione e il posizionamento senza ribaltamenti di pentolame ingombrante e bacinelle Gastronorm?",
+            normReference: "D.Lgs. 81/2008 Titolo VI e art. 71 c. 3; CEI EN 60335-2-58",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "LAVAOGGETTI_CATERING_MICRO_PORTA_BLOCCO_POMPA",
+            title: "Microinterruttore di Sicurezza su Porta a Ghigliottina o Ribalta con Blocco Pompa",
+            question: "L'apertura della porta o dello sportello frontale arresta tempestivamente le potenti pompe di lavaggio ad alta pressione per evitare getti di acqua calda bollente e detergente verso l'operatore?",
+            normReference: "CEI EN 60335-2-58; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVAOGGETTI_CATERING_VASCA_STAMPATA_ANGOLI_RAGGIATI",
+            title: "Vasca Stampata con Angoli Raggiati, Filtri Inox Multipli e Dosatori Automatici",
+            question: "La vasca di lavaggio è stampata con pareti lisce e angoli raggiati esenti da punti ciechi, munita di filtri estraibili a doppio stadio e dosatore temporizzato dei prodotti chimici per la tutela della cute dell'operatore?",
+            normReference: "Reg. CE 852/2004 All. II cap. V; D.Lgs. 81/2008 Titolo IX (Agenti Chimici)",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // --- REPARTO 6: IMPIANTI DA CAMPO & SICUREZZA MOBILE (env-cat-deposito-gpl e env-cat-ufficio-logistica) ---
+      {
+        machineKey: "quadro_elettrico_mobile",
+        name: "Quadro Elettrico Portatile da Cantiere/Evento per Allacciamenti Provvisori",
+        type: "Quadro Elettrico Portatile da Cantiere/Evento per Distribuzione e Allacciamenti Provvisori",
+        suggestedManufacturer: "Gewiss / Scame / Rosi",
+        suggestedModel: "Q-DIN 14 IP65 / Block 4 CEE / Serie Megalux",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "QUADRO_MOBILE_INVOLUCRO_ISOLANTE_IP65",
+            title: "Involucro Stagno in Gomma Butilica/Termoplastica con Grado di Protezione IP65",
+            question: "Il quadro portatile da distribuzione per esterni dispone di involucro in materiale isolante antiurto (gomma butilica o policarbonato autoestinguente) con grado di protezione certificato almeno IP65 contro pioggia, polvere e spruzzi d'acqua?",
+            normReference: "CEI EN 61439-4 (Quadri ASC); CEI 64-8 parte 7; D.Lgs. 81/2008 art. 80 e All. V p. 5",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "QUADRO_MOBILE_INTERRUTTORE_DIFFERENZIALE_30MA",
+            title: "Interruttore Generale Magnetotermico-Differenziale ad Alta Sensibilità (Idn <= 30 mA)",
+            question: "Il quadro è protetto a monte da un interruttore differenziale con soglia di intervento non superiore a 30 mA (tipo A o B, in base ai carichi elettronici) sottoposto a prova periodica mediante pulsante di test prima di ogni evento?",
+            normReference: "CEI 64-8 art. 412.5; D.Lgs. 81/2008 art. 80, 86 e All. V p. 5",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "QUADRO_MOBILE_PRESE_CEE_INTERBLOCCATE",
+            title: "Prese a Spina Industriali Normate CEE con Meccanismo di Interblocco Meccanico/Elettrico",
+            question: "Le prese di uscita (monofase 16A e trifase 16A/32A) sono conformi alle norme CEI EN 60309, provviste di coperchio a molla stagno e interblocco che impedisce l'inserimento o il disinserimento della spina sotto tensione?",
+            normReference: "CEI EN 60309-1/2; CEI EN 61439-4; D.Lgs. 81/2008 All. V p. 5",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "QUADRO_MOBILE_CONDUTTORE_TERRA_CONTINUITA",
+            title: "Morsetto di Equipotenzialità Esterna e Continuità del Conduttore di Protezione (PE)",
+            question: "È verificata la continuità metallica del conduttore di terra (PE) verso il dispersore locale dell'evento o la presa madre dell'impianto fisso prima di alimentare le attrezzature di cucina da campo?",
+            normReference: "CEI 64-8 parte 7; D.Lgs. 81/2008 art. 80 e 84",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "bombole_gpl_cucina_campo",
+        name: "Gruppo Bombole GPL con Regolatore di Pressione e Rampa per Cucina Mobile",
+        type: "Gruppo Impianto Bombole GPL con Regolatore e Rampa per Cotture Mobili da Campo",
+        suggestedManufacturer: "Cavagna Group / Reca / Kosan Gas",
+        suggestedModel: "Rampa Multibombola GPL con Invertitore Automatico e Valvola Eccesso Flusso",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "BOMBOLE_GPL_COLLARE_CATENELLE_ANTICADUTA",
+            title: "Collare Metallico di Protezione Valvola e Fissaggio Verticale con Catenelle Anticaduta",
+            question: "Le bombole GPL mobili sono posizionate esclusivamente in posizione verticale, all'aperto o in vano aerato, assicurate mediante catenelle o collari metallici antiribaltamento e con cappellotto/collare a protezione della valvola?",
+            normReference: "UNI 7131; D.Lgs. 81/2008 art. 71 c. 3, All. V p. 6 e All. IV p. 4; DM 03/09/2021",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BOMBOLE_GPL_REGOLATORE_ECCESSO_FLUSSO_UNI7131",
+            title: "Regolatore di Pressione Tarato con Dispositivo di Sicurezza per Eccesso di Flusso",
+            question: "Sulla rampa o sulle singole bombole è installato un regolatore di primo o secondo stadio a taratura fissa conforme a UNI EN 16129 provvisto di valvola di intercettazione termica o limitatore di eccesso di flusso in caso di tranciatura accidentale della tubazione?",
+            normReference: "UNI EN 16129; UNI 7131; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BOMBOLE_GPL_TUBI_FLESSIBILI_UNI7140_SCADENZA",
+            title: "Tubi Flessibili a Norma UNI 7140 con Scadenza non Superata e Fascette a Stringere Normate",
+            question: "I tubi flessibili in gomma per il collegamento bruciatori/rampa sono conformi a norma UNI 7140 (o metallici flessibili UNI EN 14800), con stampigliatura visibile della data di scadenza non oltrepassata (max 5 anni), privi di screpolature e serrati con fascette stringitubo normate?",
+            normReference: "UNI 7140; UNI 7131; D.Lgs. 81/2008 art. 71 c. 3 e All. V p. 6",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BOMBOLE_GPL_ESTINTORE_IDONEO_CLASSE_B_C",
+            title: "Disponibilità nelle Immediate Vicinanze di Estintore Portatile Omologato (Classe 34A 233B C)",
+            question: "In prossimità del gruppo bombole e della cucina mobile da campo è presente e prontamente accessibile almeno un estintore a polvere idoneo per fuochi di gas (classi A-B-C) con cartellino di revisione semestrale in corso di validità?",
+            normReference: "D.Lgs. 81/2008 art. 46, All. IV p. 4; D.M. 03/09/2021; UNI 9994-1",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+    ],
+  },
+
   // 2. RISTORAZIONE & ALIMENTARE
   {
     sectorKey: "ristorazione_alimentare",
@@ -4857,6 +5572,16 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
   const menseSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "mense_catering_collettiva");
   const menseMachines = menseSector ? menseSector.machines : [];
 
+  const isCateringEventiAteco = !!atecoCode && (
+    atecoCode.startsWith("56.21.00") ||
+    atecoCode.startsWith("56.21.0") ||
+    atecoCode.startsWith("56.21") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("562100") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("5621")
+  );
+  const catSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "catering_eventi_banqueting");
+  const catMachines = catSector ? catSector.machines : [];
+
   const isIperAteco = !!atecoCode && (
     atecoCode.startsWith("47.11.1") ||
     atecoCode.startsWith("47.11.10") ||
@@ -5129,6 +5854,90 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
         [
           "armadio_congelatore_campioni",
           "celle_frigorifere_walkin",
+        ].includes(m.machineKey)
+      );
+    }
+
+    // Reparti Catering per Eventi, Banqueting e Ricevimenti (56.21.00 / 56.21.0 / 56.21 / 562100 / 5621)
+    else if (
+      envId === "env-cat-cucina-centrale" ||
+      envId.includes("cat-cucina") ||
+      (isCateringEventiAteco && (envId === "env-cucina" || nameLower.includes("cucina") || nameLower.includes("cottura") || cat === "cucina"))
+    ) {
+      matchingMachines = catMachines.filter((m) =>
+        [
+          "forno_combinato_catering",
+          "abbattitore_temperatura_catering",
+          "brasiera_ribaltabile_catering",
+          "confezionatrice_sottovuoto_catering",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-cat-prep-fingerfood" ||
+      envId === "env-cat-diete-allergeni" ||
+      envId.includes("cat-prep") ||
+      envId.includes("cat-diete") ||
+      (isCateringEventiAteco && (nameLower.includes("fingerfood") || nameLower.includes("finger food") || nameLower.includes("diete") || nameLower.includes("allergeni") || (nameLower.includes("preparazione") && !nameLower.includes("cottura"))))
+    ) {
+      matchingMachines = catMachines.filter((m) =>
+        [
+          "affettatrice_gravita_catering",
+          "cutter_robot_catering",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-cat-banchina-carico" ||
+      envId === "env-cat-deposito-noleggio" ||
+      envId.includes("cat-banchina") ||
+      envId.includes("cat-deposito-noleggio") ||
+      envId.includes("cat-noleggio") ||
+      (isCateringEventiAteco && (nameLower.includes("banchina") || nameLower.includes("carico") || nameLower.includes("scarico") || nameLower.includes("furgon") || nameLower.includes("noleggio") || nameLower.includes("spedizion")))
+    ) {
+      matchingMachines = catMachines.filter((m) =>
+        [
+          "contenitori_isotermici_catering",
+          "rampa_carico_alluminio",
+          "roll_container_isotermico",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-cat-deposito-arredi" ||
+      envId.includes("cat-deposito-arredi") ||
+      envId.includes("cat-arredi") ||
+      (isCateringEventiAteco && !envId.includes("noleggio") && !nameLower.includes("noleggio") && (nameLower.includes("arredi") || nameLower.includes("banqueting") || nameLower.includes("open-bar") || nameLower.includes("open bar") || nameLower.includes("ricevimenti") || nameLower.includes("scaldavivande")))
+    ) {
+      matchingMachines = catMachines.filter((m) =>
+        [
+          "forno_rigeneratore_mobile",
+          "chafing_dish_scaldavivande",
+          "friggitrice_mobile_catering",
+          "fabbricatore_ghiaccio_catering",
+          "banco_bar_mobile_luminoso",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-cat-lavaggio-rientro" ||
+      envId.includes("cat-lavaggio") ||
+      (isCateringEventiAteco && (nameLower.includes("rientro") || (nameLower.includes("lavaggio") && !nameLower.includes("cucina"))))
+    ) {
+      matchingMachines = catMachines.filter((m) =>
+        [
+          "lavastoviglie_capotta_catering",
+          "lavaoggetti_teglie_catering",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-cat-deposito-gpl" ||
+      envId === "env-cat-ufficio-logistica" ||
+      envId.includes("cat-deposito-gpl") ||
+      envId.includes("cat-gpl") ||
+      envId.includes("cat-ufficio") ||
+      (isCateringEventiAteco && (nameLower.includes("gpl") || nameLower.includes("bombole") || (nameLower.includes("ufficio") && !nameLower.includes("cucina")) || nameLower.includes("logistica")))
+    ) {
+      matchingMachines = catMachines.filter((m) =>
+        [
+          "quadro_elettrico_mobile",
+          "bombole_gpl_cucina_campo",
         ].includes(m.machineKey)
       );
     } else if (
