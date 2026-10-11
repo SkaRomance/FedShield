@@ -1970,4 +1970,411 @@ assert.ok(
   "In modalità safety_only nessun item cucina catering deve avere domain haccp",
 );
 
+// ============================================================================
+// Test 19: getStandardEnvironmentsForAteco & conformità per Food Truck (56.10.42 / 56.10.4)
+// ============================================================================
+console.log("Test 19: getStandardEnvironmentsForAteco & conformità per Food Truck / Ristorazione Ambulante (56.10.42 / 56.10.4)");
+const ftEnvs1 = getStandardEnvironmentsForAteco("56.10.42");
+assert.equal(ftEnvs1.length, 12, "Il food truck / autonegozio deve avere esattamente 12 ambienti tipici");
+
+// Verifica varianti codice ATECO (56.10.4, 56.10.42, 561042, 56104)
+const ftEnvsVar1 = getStandardEnvironmentsForAteco("56.10.4");
+assert.equal(ftEnvsVar1.length, 12, "Anche prefisso 56.10.4 deve restituire i 12 ambienti food truck");
+const ftEnvsVar2 = getStandardEnvironmentsForAteco("561042");
+assert.equal(ftEnvsVar2.length, 12, "Anche codice non formattato 561042 deve restituire i 12 ambienti food truck");
+const ftEnvsVar3 = getStandardEnvironmentsForAteco("56104");
+assert.equal(ftEnvsVar3.length, 12, "Anche codice non formattato 56104 deve restituire i 12 ambienti food truck");
+
+// Verifica ID degli ambienti standard del Food Truck
+const expectedFtIds = [
+  "env-ft-vano-cottura",
+  "env-ft-banco-somministrazione",
+  "env-ft-vano-refrigerazione",
+  "env-ft-vano-bombole-gpl",
+  "env-ft-vano-generatore",
+  "env-ft-impianto-idrico",
+  "env-ft-cabina-guida",
+  "env-ft-deposito-rimessaggio",
+  "env-ft-area-carico-scarico",
+  "env-ft-magazzino-scorte",
+  "env-ft-laboratorio-base",
+  "env-ft-spogliatoi-sede",
+];
+
+for (const id of expectedFtIds) {
+  const envFound = ftEnvs1.find((e) => e.id === id);
+  assert.ok(envFound, `Ambiente con id ${id} deve essere presente nell'elenco Food Truck`);
+}
+
+// 1. Vano Operativo di Cottura & Piastre Food Truck
+const ftCucina = ftEnvs1.find((e) => e.id === "env-ft-vano-cottura")!;
+assert.equal(ftCucina.category, "production");
+assert.equal(ftCucina.surfaceSqM, 10);
+assert.equal(ftCucina.heightM, 2.2);
+assert.equal(ftCucina.volumeCuM, 22);
+assert.equal(ftCucina.occupantsCount, 2);
+assert.equal(ftCucina.windowSurfaceSqM, 2.5);
+assert.equal(ftCucina.features.forcedExhaustPresent, true);
+assert.equal(ftCucina.features.forcedExhaustType, "kitchen_hood");
+assert.equal(ftCucina.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(ftCucina.features.flooringCondition, "compliant_anti_slip");
+assert.equal(ftCucina.features.insectScreens, true);
+assert.equal(ftCucina.features.microclimateCompliant, true);
+const compCucinaFt = evaluateEnvironmentCompliance(ftCucina, "56.10.42");
+assert.equal(compCucinaFt.isHeightCompliant, true, "Altezza 2.20m deve essere a norma veicolare (deroga autonegozi speciali ≥ 2.00m)");
+assert.equal(compCucinaFt.isCubatureCompliant, true, "Cubatura 22/2 = 11 mc/op deve essere a norma (≥ 10 mc)");
+assert.ok(
+  compCucinaFt.summaryBadges.some((b) => b.text.includes("Vano cottura food truck a norma") && b.text.includes("cappa aspirazione inox")),
+  "Deve essere presente il badge vano cottura food truck a norma",
+);
+assert.ok(
+  compCucinaFt.summaryBadges.some((b) => b.text.includes("Lavamani con comando non manuale a ginocchio")),
+  "Deve essere presente il badge lavamani non manuale Reg. CE 852/04",
+);
+
+// 2. Banco di Somministrazione, Cassa & Vetrina Parafiato Clienti
+const ftBanco = ftEnvs1.find((e) => e.id === "env-ft-banco-somministrazione")!;
+assert.equal(ftBanco.category, "sales_office");
+assert.equal(ftBanco.surfaceSqM, 6);
+assert.equal(ftBanco.heightM, 2.2);
+assert.equal(ftBanco.volumeCuM, 13.2);
+assert.equal(ftBanco.occupantsCount, 2);
+assert.equal(ftBanco.windowSurfaceSqM, 3.0);
+assert.equal(ftBanco.features.emergencyLighting, true);
+const compBancoFt = evaluateEnvironmentCompliance(ftBanco, "56.10.42");
+assert.equal(compBancoFt.isHeightCompliant, true);
+assert.ok(
+  compBancoFt.summaryBadges.some((b) => b.text.includes("Portellone panoramico con pistoni a gas")),
+  "Deve essere presente il badge portellone panoramico con blocco meccanico anticaduta",
+);
+assert.ok(
+  compBancoFt.summaryBadges.some((b) => b.text.includes("Vetrina refrigerata parafiato curvo")),
+  "Deve essere presente il badge vetrina refrigerata parafiato igienico",
+);
+
+// 3. Vano Frigoriferi & Stoccaggio Deperibili a Bordo
+const ftFrigo = ftEnvs1.find((e) => e.id === "env-ft-vano-refrigerazione")!;
+assert.equal(ftFrigo.category, "storage");
+assert.equal(ftFrigo.surfaceSqM, 5);
+assert.equal(ftFrigo.heightM, 2.2);
+assert.equal(ftFrigo.volumeCuM, 11);
+assert.equal(ftFrigo.occupantsCount, 1);
+assert.equal(ftFrigo.windowSurfaceSqM, 0);
+assert.equal(ftFrigo.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(ftFrigo.features.flooringCondition, "compliant_anti_slip");
+assert.equal(ftFrigo.features.emergencyLighting, true);
+const compFrigoFt = evaluateEnvironmentCompliance(ftFrigo, "56.10.42");
+assert.equal(compFrigoFt.isHeightCompliant, true);
+
+// 4. Vano Tecnico Bombole GPL del Veicolo
+const ftGpl = ftEnvs1.find((e) => e.id === "env-ft-vano-bombole-gpl")!;
+assert.equal(ftGpl.category, "technical");
+assert.equal(ftGpl.surfaceSqM, 2);
+assert.equal(ftGpl.heightM, 1.2);
+assert.equal(ftGpl.volumeCuM, 2.4);
+assert.equal(ftGpl.occupantsCount, 1);
+assert.equal(ftGpl.features.emergencyLighting, true);
+assert.equal(ftGpl.features.gasLeakDetectorPresent, true);
+const compGplFt = evaluateEnvironmentCompliance(ftGpl, "56.10.42");
+assert.equal(compGplFt.isHeightCompliant, true);
+assert.ok(
+  compGplFt.summaryBadges.some((b) => b.text.includes("Vano bombole GPL stagno verso l'abitacolo")),
+  "Deve essere presente il badge vano bombole GPL stagno con aerazione a pavimento",
+);
+assert.ok(
+  compGplFt.summaryBadges.some((b) => b.text.includes("Rilevatore fughe gas 12V con elettrovalvola")),
+  "Deve essere presente il badge allarme gas 12V con elettrovalvola",
+);
+
+// 5. Vano Generatore Elettrico Ausiliario & Quadro Tecnico
+const ftGen = ftEnvs1.find((e) => e.id === "env-ft-vano-generatore")!;
+assert.equal(ftGen.category, "technical");
+assert.equal(ftGen.surfaceSqM, 3);
+assert.equal(ftGen.heightM, 1.2);
+assert.equal(ftGen.volumeCuM, 3.6);
+assert.equal(ftGen.occupantsCount, 1);
+assert.equal(ftGen.features.emergencyLighting, true);
+const compGenFt = evaluateEnvironmentCompliance(ftGen, "56.10.42");
+assert.equal(compGenFt.isHeightCompliant, true);
+assert.ok(
+  compGenFt.summaryBadges.some((b) => b.text.includes("Generatore ausiliario: scarico fumi canalizzato a tetto")),
+  "Deve essere presente il badge generatore ausiliario scarico fumi a tetto",
+);
+assert.ok(
+  compGenFt.summaryBadges.some((b) => b.text.includes("Quadro elettrico con salvavita differenziale 30 mA")),
+  "Deve essere presente il badge salvavita differenziale 30 mA",
+);
+
+// 6. Centrale Idrica Mobile (Serbatoi Acqua Potabile & Acque Grigie)
+const ftIdrico = ftEnvs1.find((e) => e.id === "env-ft-impianto-idrico")!;
+assert.equal(ftIdrico.category, "technical");
+assert.equal(ftIdrico.surfaceSqM, 2);
+assert.equal(ftIdrico.heightM, 1.2);
+assert.equal(ftIdrico.volumeCuM, 2.4);
+assert.equal(ftIdrico.occupantsCount, 1);
+assert.equal(ftIdrico.features.wallsCondition, "washable_sanitizable_2m");
+const compIdricoFt = evaluateEnvironmentCompliance(ftIdrico, "56.10.42");
+assert.equal(compIdricoFt.isHeightCompliant, true);
+assert.ok(
+  compIdricoFt.summaryBadges.some((b) => b.text.includes("Centrale idrica mobile: serbatoi acqua potabile")),
+  "Deve essere presente il badge serbatoi acqua potabile MOCA",
+);
+assert.ok(
+  compIdricoFt.summaryBadges.some((b) => b.text.includes("Serbatoio acque grigie con valvola saracinesca")),
+  "Deve essere presente il badge saracinesca acque grigie",
+);
+
+// 7. Cabina di Guida del Furgone / Autocarro Allestito
+const ftCabina = ftEnvs1.find((e) => e.id === "env-ft-cabina-guida")!;
+assert.equal(ftCabina.category, "sales_office");
+assert.equal(ftCabina.surfaceSqM, 5);
+assert.equal(ftCabina.heightM, 1.8);
+assert.equal(ftCabina.volumeCuM, 9);
+assert.equal(ftCabina.occupantsCount, 2);
+assert.equal(ftCabina.features.emergencyLighting, true);
+const compCabinaFt = evaluateEnvironmentCompliance(ftCabina, "56.10.42");
+assert.equal(compCabinaFt.isHeightCompliant, true);
+
+// 8. Hangar / Area Rimessaggio Coperto del Veicolo & Ricarica Notturna
+const ftRimessaggio = ftEnvs1.find((e) => e.id === "env-ft-deposito-rimessaggio")!;
+assert.equal(ftRimessaggio.category, "warehouse");
+assert.equal(ftRimessaggio.surfaceSqM, 50);
+assert.equal(ftRimessaggio.heightM, 4.0);
+assert.equal(ftRimessaggio.volumeCuM, 200);
+assert.equal(ftRimessaggio.occupantsCount, 2);
+assert.equal(ftRimessaggio.features.emergencyLighting, true);
+const compRimessaggioFt = evaluateEnvironmentCompliance(ftRimessaggio, "56.10.42");
+assert.equal(compRimessaggioFt.isHeightCompliant, true);
+
+// 9. Piazzale di Carico Merci, Rifornimento Acqua & Scarico Acque Grigie
+const ftCarico = ftEnvs1.find((e) => e.id === "env-ft-area-carico-scarico")!;
+assert.equal(ftCarico.category, "technical");
+assert.equal(ftCarico.surfaceSqM, 30);
+assert.equal(ftCarico.heightM, 4.0);
+assert.equal(ftCarico.volumeCuM, 120);
+assert.equal(ftCarico.occupantsCount, 2);
+assert.equal(ftCarico.features.flooringCondition, "compliant_anti_slip");
+const compCaricoFt = evaluateEnvironmentCompliance(ftCarico, "56.10.42");
+assert.equal(compCaricoFt.isHeightCompliant, true);
+
+// 10. Magazzino Secco & Packaging Monouso / MOCA di Sede
+const ftScorte = ftEnvs1.find((e) => e.id === "env-ft-magazzino-scorte")!;
+assert.equal(ftScorte.category, "warehouse");
+assert.equal(ftScorte.surfaceSqM, 25);
+assert.equal(ftScorte.heightM, 3.0);
+assert.equal(ftScorte.volumeCuM, 75);
+assert.equal(ftScorte.occupantsCount, 1);
+assert.equal(ftScorte.features.shelvingCertified, true);
+const compScorteFt = evaluateEnvironmentCompliance(ftScorte, "56.10.42");
+assert.equal(compScorteFt.isHeightCompliant, true);
+
+// 11. Laboratorio Base / Plonge di Sanificazione e Preparazione Linee
+const ftLab = ftEnvs1.find((e) => e.id === "env-ft-laboratorio-base")!;
+assert.equal(ftLab.category, "production");
+assert.equal(ftLab.surfaceSqM, 20);
+assert.equal(ftLab.heightM, 3.0);
+assert.equal(ftLab.volumeCuM, 60);
+assert.equal(ftLab.occupantsCount, 2);
+assert.equal(ftLab.features.forcedExhaustPresent, true);
+assert.equal(ftLab.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(ftLab.features.flooringCondition, "compliant_anti_slip");
+const compLabFt = evaluateEnvironmentCompliance(ftLab, "56.10.42");
+assert.equal(compLabFt.isHeightCompliant, true);
+
+// 12. Spogliatoio e Servizi Igienici Personale presso la Sede Operativa
+const ftSpogliatoi = ftEnvs1.find((e) => e.id === "env-ft-spogliatoi-sede")!;
+assert.equal(ftSpogliatoi.category, "changing_rooms");
+assert.equal(ftSpogliatoi.surfaceSqM, 15);
+assert.equal(ftSpogliatoi.heightM, 2.7);
+assert.equal(ftSpogliatoi.volumeCuM, 40.5);
+assert.equal(ftSpogliatoi.occupantsCount, 4);
+assert.equal(ftSpogliatoi.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(ftSpogliatoi.features.flooringCondition, "compliant_anti_slip");
+assert.equal(ftSpogliatoi.features.forcedExhaustPresent, true);
+assert.equal(ftSpogliatoi.features.forcedExhaustType, "blind_toilet_fan");
+const compSpogliatoiFt = evaluateEnvironmentCompliance(ftSpogliatoi, "56.10.42");
+assert.equal(compSpogliatoiFt.isHeightCompliant, true);
+
+// ============================================================================
+// Test 20: generateEnvironmentChecklistItems per locali Food Truck (ATECO 56.10.42)
+// ============================================================================
+console.log("Test 20: generateEnvironmentChecklistItems per locali Food Truck / Ristorazione Ambulante (ATECO 56.10.42)");
+
+// 1. Vano Cottura Food Truck
+const ftCucinaItems = generateEnvironmentChecklistItems(ftCucina, "56.10.42");
+assert.ok(
+  ftCucinaItems.some((it) => it.id.includes("cappa-aspirazione-labirinto-tetto") && it.domain === "both"),
+  "Vano cottura food truck deve verificare cappa aspirazione canalizzata a tetto con filtri labirinto (domain: both)",
+);
+assert.ok(
+  ftCucinaItems.some((it) => it.id.includes("paraspruzzi-blocco-grassi-friggitrice-piastra") && it.domain === "safety"),
+  "Vano cottura food truck deve verificare paraspruzzi e protezioni antiscottatura su friggitrice e fry-top (domain: safety)",
+);
+assert.ok(
+  ftCucinaItems.some((it) => it.id.includes("lavamani-ginocchio-acqua-calda-sapone") && it.domain === "haccp"),
+  "Vano cottura food truck deve verificare lavamani a ginocchio con acqua calda e dosatori a perdere (domain: haccp)",
+);
+assert.ok(
+  ftCucinaItems.some((it) => it.id.includes("pareti-inox-sanificabili-pavimento-antiscivolo") && it.domain === "both"),
+  "Vano cottura food truck deve verificare pareti inox AISI 304 e pavimento antiscivolo R11 (domain: both)",
+);
+
+// 2. Banco Somministrazione
+const ftBancoItems = generateEnvironmentChecklistItems(ftBanco, "56.10.42");
+assert.ok(
+  ftBancoItems.some((it) => it.id.includes("fermo-meccanico-portellone-laterale") && it.domain === "safety"),
+  "Banco somministrazione deve verificare fermo meccanico di sicurezza portellone laterale (domain: safety)",
+);
+assert.ok(
+  ftBancoItems.some((it) => it.id.includes("vetrina-parafiato-igienico-curvo") && it.domain === "haccp"),
+  "Banco somministrazione deve verificare vetrina refrigerata parafiato curvo antiaerosol (domain: haccp)",
+);
+assert.ok(
+  ftBancoItems.some((it) => it.id.includes("estintore-polvere-coperta-antifiamma-banco") && it.domain === "safety"),
+  "Banco somministrazione deve verificare estintore omologato classe F e coperta antifiamma (domain: safety)",
+);
+
+// 3. Vano Frigoriferi a Bordo
+const ftFrigoItems = generateEnvironmentChecklistItems(ftFrigo, "56.10.42");
+assert.ok(
+  ftFrigoItems.some((it) => it.id.includes("blocco-meccanico-apertura-frigo-curva") && it.domain === "safety"),
+  "Vano refrigerazione veicolo deve verificare blocco meccanico a scatto ante/cassetti in curva (domain: safety)",
+);
+assert.ok(
+  ftFrigoItems.some((it) => it.id.includes("registrazione-continua-temperature-haccp-frigo") && it.domain === "haccp"),
+  "Vano refrigerazione veicolo deve verificare registrazione continua temperature HACCP (domain: haccp)",
+);
+
+// 4. Vano Tecnico Bombole GPL
+const ftGplItems = generateEnvironmentChecklistItems(ftGpl, "56.10.42");
+assert.ok(
+  ftGplItems.some((it) => it.id.includes("tenuta-stagna-abitacolo-griglie-aerazione-pavimento") && it.domain === "safety"),
+  "Vano bombole GPL veicolo deve verificare isolamento ermetico da abitacolo e aerazione esterna a pavimento (domain: safety)",
+);
+assert.ok(
+  ftGplItems.some((it) => it.id.includes("catenelle-metalliche-anticaduta-bombole-gpl") && it.domain === "safety"),
+  "Vano bombole GPL veicolo deve verificare catenelle metalliche anticaduta (domain: safety)",
+);
+assert.ok(
+  ftGplItems.some((it) => it.id.includes("centralina-rilevatore-gas-12v-elettrovalvola-nc") && it.domain === "safety"),
+  "Vano bombole GPL veicolo deve verificare rilevatore fughe gas 12V con elettrovalvola esterna NC (domain: safety)",
+);
+assert.ok(
+  ftGplItems.some((it) => it.id.includes("scadenza-tubi-flessibili-uni-7140-crash-sensor") && it.domain === "safety"),
+  "Vano bombole GPL veicolo deve verificare data scadenza tubi UNI 7140 e crash-sensor (domain: safety)",
+);
+
+// 5. Vano Generatore Elettrico Ausiliario
+const ftGenItems = generateEnvironmentChecklistItems(ftGen, "56.10.42");
+assert.ok(
+  ftGenItems.some((it) => it.id.includes("scarico-fumi-tetto-generatore-ausiliario") && it.domain === "safety"),
+  "Vano generatore deve verificare evacuazione gas di scarico all'esterno a tetto senza infiltrazioni (domain: safety)",
+);
+assert.ok(
+  ftGenItems.some((it) => it.id.includes("salvavita-differenziale-30ma-quadro-veicolo") && it.domain === "safety"),
+  "Vano generatore deve verificare interruttore differenziale salvavita 30 mA (domain: safety)",
+);
+
+// 6. Centrale Idrica Mobile
+const ftIdricoItems = generateEnvironmentChecklistItems(ftIdrico, "56.10.42");
+assert.ok(
+  ftIdricoItems.some((it) => it.id.includes("certificazione-moca-serbatoio-pompa-acqua-potabile") && it.domain === "haccp"),
+  "Centrale idrica mobile deve verificare certificazione MOCA serbatoio acqua potabile e pompa autoclave (domain: haccp)",
+);
+assert.ok(
+  ftIdricoItems.some((it) => it.id.includes("boiler-acqua-calda-sanitaria-funzionamento") && it.domain === "haccp"),
+  "Centrale idrica mobile deve verificare funzionamento boiler elettrico acqua calda 45-50°C (domain: haccp)",
+);
+assert.ok(
+  ftIdricoItems.some((it) => it.id.includes("tenuta-serbatoio-acque-grigie-valvola-saracinesca") && it.domain === "both"),
+  "Centrale idrica mobile deve verificare tenuta serbatoio acque grigie con valvola saracinesca (domain: both)",
+);
+
+// 7. Cabina di Guida del Furgone
+const ftCabinaItems = generateEnvironmentChecklistItems(ftCabina, "56.10.42");
+assert.ok(
+  ftCabinaItems.some((it) => it.id.includes("paratia-divisoria-fissa-sicurezza-cucina") && it.domain === "safety"),
+  "Cabina guida deve verificare paratia divisoria fissa di sicurezza tra cabina e laboratorio cucina (domain: safety)",
+);
+assert.ok(
+  ftCabinaItems.some((it) => it.id.includes("estintore-veicolare-polvere-cabina") && it.domain === "safety"),
+  "Cabina guida deve verificare estintore veicolare omologato 2 kg (domain: safety)",
+);
+
+// 8. Hangar Rimessaggio Coperto
+const ftRimessaggioItems = generateEnvironmentChecklistItems(ftRimessaggio, "56.10.42");
+assert.ok(
+  ftRimessaggioItems.some((it) => it.id.includes("colonnina-ricarica-notturna-norma-cei") && it.domain === "safety"),
+  "Rimessaggio deve verificare colonnina allacciamento elettrico notturno a norma CEI per gruppi frigo (domain: safety)",
+);
+assert.ok(
+  ftRimessaggioItems.some((it) => it.id.includes("estintori-carrellati-rimessaggio-vie-fuga") && it.domain === "safety"),
+  "Rimessaggio deve verificare estintori carrellati e corsie di manovra libere (domain: safety)",
+);
+
+// 9. Piazzale di Carico/Scarico Merci & Acque
+const ftCaricoItems = generateEnvironmentChecklistItems(ftCarico, "56.10.42");
+assert.ok(
+  ftCaricoItems.some((it) => it.id.includes("pozzetto-scarico-acque-grigie-autorizzato") && it.domain === "both"),
+  "Piazzale carico/scarico deve verificare scarico acque grigie in pozzetto fognario autorizzato con divieto sversamento a terra (domain: both)",
+);
+assert.ok(
+  ftCaricoItems.some((it) => it.id.includes("rifornimento-acqua-potabile-canna-moca-antiriflusso") && it.domain === "both"),
+  "Piazzale carico/scarico deve verificare rifornimento acqua potabile con canna alimentare MOCA e valvola antiriflusso UNI EN 1717 (domain: both)",
+);
+
+// 10. Magazzino Secco & Packaging Monouso / MOCA di Sede
+const ftScorteItems = generateEnvironmentChecklistItems(ftScorte, "56.10.42");
+assert.ok(
+  ftScorteItems.some((it) => it.id.includes("conformita-moca-packaging-street-food") && it.domain === "haccp"),
+  "Magazzino scorte sede deve verificare conformità MOCA packaging monouso Reg. CE 1935/2004 (domain: haccp)",
+);
+assert.ok(
+  ftScorteItems.some((it) => it.id.includes("stoccaggio-rialzato-scaffali-scorte") && it.domain === "both"),
+  "Magazzino scorte sede deve verificare stoccaggio merci e packaging su scaffalature rialzate >= 15 cm (domain: both)",
+);
+
+// 11. Laboratorio Base / Plonge di Sede
+const ftLabItems = generateEnvironmentChecklistItems(ftLab, "56.10.42");
+assert.ok(
+  ftLabItems.some((it) => it.id.includes("plonge-sanificazione-attrezzature-rientro") && it.domain === "haccp"),
+  "Laboratorio base deve verificare plonge inox gigante per sanificazione attrezzature di rientro (domain: haccp)",
+);
+assert.ok(
+  ftLabItems.some((it) => it.id.includes("cappa-aspirazione-laboratorio-base") && it.domain === "both"),
+  "Laboratorio base deve verificare cappa aspirazione fumi e pareti lavabili (domain: both)",
+);
+
+// 12. Spogliatoi e Servizi Igienici Sede
+const ftSpogliatoiItems = generateEnvironmentChecklistItems(ftSpogliatoi, "56.10.42");
+assert.ok(
+  ftSpogliatoiItems.some((it) => it.id.includes("armadietti-doppio-scomparto-spogliatoio-sede") && it.domain === "safety"),
+  "Spogliatoio sede deve verificare armadietti doppio scomparto sporco/pulito (domain: safety)",
+);
+assert.ok(
+  ftSpogliatoiItems.some((it) => it.id.includes("lavamani-antibagno-sede") && it.domain === "haccp"),
+  "Servizi igienici sede devono verificare antibagno con lavamani a comando non manuale (domain: haccp)",
+);
+
+// Verifica del filtraggio checklistMode su vano cottura food truck
+const ftCucinaHaccpMode = filterEnvironmentItemsByChecklistMode(ftCucinaItems, "haccp_only");
+assert.ok(
+  ftCucinaHaccpMode.every((it) => it.domain === "haccp" || it.domain === "both"),
+  "In modalità haccp_only tutti gli item vano cottura food truck devono essere haccp o both",
+);
+assert.ok(
+  !ftCucinaHaccpMode.some((it) => it.domain === "safety"),
+  "In modalità haccp_only nessun item vano cottura food truck deve avere domain safety",
+);
+
+const ftCucinaSafetyMode = filterEnvironmentItemsByChecklistMode(ftCucinaItems, "safety_only");
+assert.ok(
+  ftCucinaSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item vano cottura food truck devono essere safety o both",
+);
+assert.ok(
+  !ftCucinaSafetyMode.some((it) => it.domain === "haccp"),
+  "In modalità safety_only nessun item vano cottura food truck deve avere domain haccp",
+);
+
 console.log("=== TUTTI I TEST Step2AmbientiDiLavoro SUPERATI CON SUCCESSO! ===");

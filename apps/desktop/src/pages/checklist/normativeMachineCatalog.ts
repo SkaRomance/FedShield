@@ -3118,6 +3118,715 @@ export const SECTOR_MACHINERY_CATALOGS: SectorMachineCatalog[] = [
     ],
   },
 
+  // 1-bis. FOOD TRUCK, STREET FOOD E RISTORAZIONE AMBULANTE ITINERANTE
+  // ATECO 56.10.42, 56.10.4 (Furgoni e autonegozi speciali allestiti per somministrazione itinerante, chioschi mobili, paninoteche ambulanti, rosticcerie mobili con laboratorio/rimessaggio di supporto)
+  {
+    sectorKey: "food_truck_street_food",
+    sectorLabel: "Food Truck, Street Food e Ristorazione Ambulante Itinerante",
+    atecoPrefixes: ["56.10.42", "56.10.4"],
+    machines: [
+      // --- REPARTO 1: COTTURA & FUMI VEICOLARI (env-ft-vano-cottura) ---
+      {
+        machineKey: "piastra_frytop_foodtruck",
+        name: "Piastra di Cottura Fry-Top a Gas / Elettrica da Furgone (Liscia/Rigata)",
+        type: "Apparecchiatura di Cottura Professionale a Piastra da Banco Veicolare",
+        suggestedManufacturer: "Giorik / Lotus / Angelo Po",
+        suggestedModel: "Giorik Unika 700 / Lotus FTV Veicolare / Angelo Po Gamma 700",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "PIASTRA_FT_PARASPRUZZI_ALTO",
+            title: "Paraspruzzi Perimetrale in Acciaio Inox Alto Anti-Schizzi Veicolare",
+            question: "La piastra è provvista di paraspruzzi perimetrale continuo su tre lati in acciaio inox ad alto profilo, saldato o sigillato a tenuta stagna, per prevenire la fuoriuscita e lo sgocciolamento di grassi bollenti durante la cottura e il beccheggio/rollio del veicolo?",
+            normReference: "UNI EN 203-1 punto 5.4; D.Lgs. 81/2008 All. V p. 2 e All. VI p. 1",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PIASTRA_FT_CASSETTO_GRASSI_BLOCCO_CURVA",
+            title: "Cassetto Raccogligrasso con Blocco Meccanico Antiribaltamento in Curva",
+            question: "Il cassetto raccogligrasso estraibile è dotato di perno o fermo meccanico di ritenuta anti-sfilamento accidentale per impedire il rovesciamento di liquidi oleosi incandescenti durante le manovre di marcia o inclinazione del furgone?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3 e All. V p. 6; UNI EN 203-1",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PIASTRA_FT_TERMOCOPPIA_SICUREZZA_GAS",
+            title: "Termocoppie di Sicurezza Fiamma su Tutti i Bruciatori a Gas",
+            question: "Ciascun bruciatore a gas è munito di termocoppia a risposta rapida e valvola elettromagnetica di sicurezza per l'interruzione istantanea del flusso di gas combustibile in caso di spegnimento accidentale provocato da correnti d'aria a portellone aperto?",
+            normReference: "UNI EN 203-1 punto 5.3; UNI 8723; D.Lgs. 81/2008 All. V p. 7",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PIASTRA_FT_ACCENSIONE_PIEZO_PROTETTA",
+            title: "Accensione Piezoelettrica Protetta e Manopole con Arresto di Sicurezza",
+            question: "Il sistema di accensione piezoelettrico o elettronico è stagno, protetto da infiltrazioni di unto, e le manopole di comando presentano scatto meccanico con pressione assiale per scongiurare aperture accidentali da urto con gomiti o corpi in spazi ristretti?",
+            normReference: "UNI EN 203-1 punto 5.2.2; CEI EN 60335-2-36; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "friggitrice_incasso_foodtruck",
+        name: "Friggitrice Professionale a Vasca con Coperchio Ermetico da Trasporto",
+        type: "Friggitrice Professionale a Vasca Singola o Doppia da Incasso Veicolare",
+        suggestedManufacturer: "Lotus / Fimar / Angelo Po",
+        suggestedModel: "Lotus F13-74ET / Fimar FT Mobile / Angelo Po FES700",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "FRIGGITRICE_FT_COPERCHIO_ERMETICO_GANCI_MARCIA",
+            title: "Coperchio Ermetico di Tenuta con Ganci a Scatto Anti-Fuoriuscita Olio da Viaggio",
+            question: "La vasca di frittura è munita di coperchio inox rinforzato con guarnizione a tenuta stagna e ganci a scatto perimetrali di sicurezza che bloccano saldamente la chiusura, impedendo schizzi e traboccamenti di olio durante il trasferimento stradale dell'autonegozio?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3, All. V p. 6; Reg. CE 852/2004 All. II cap. IV",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FRIGGITRICE_FT_TERMOSTATO_MASSIMA_230C_RIARMO",
+            title: "Termostato di Massima a Riarmo Manuale Limite < 230°C Contro Autocombustione Olio",
+            question: "È presente un termostato di sicurezza a soglia limite tarato a meno di 230°C, a riarmo esclusivamente manuale e indipendente dal regolatore di lavoro, per prevenire tempestivamente l'autocombustione dei grassi e oli vegetali (D.M. 03/09/2021)?",
+            normReference: "CEI EN 60335-2-37; UNI EN 203-1; D.M. 03/09/2021; D.Lgs. 81/2008 All. V p. 7",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FRIGGITRICE_FT_RUBINETTO_SCARICO_PROLUNGA_SICURA",
+            title: "Valvola di Scarico Frontale con Prolunga Sagomata e Sicura Meccanica",
+            question: "Il rubinetto frontale di scarico olio è dotato di levetta con sicura meccanica a doppio movimento contro aperture fortuite e dispone di prolunga rigida amovibile per il travaso guidato nei bidoni di recupero oli esausti senza rischi di ustione?",
+            normReference: "CEI EN 60335-2-37 p. 22; UNI EN 203-1; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FRIGGITRICE_FT_ZONA_FREDDA_AGGANCIO_CESTELLI",
+            title: "Vasca Inox Stampata con Zona Fredda e Supporto Sgocciolamento Cestelli Stabile",
+            question: "La vasca in acciaio inox AISI 304 presenta ampia zona fredda inferiore per la decantazione dei residui carbonizzati e staffe posteriori stabili per l'aggancio di sgocciolamento dei cestelli protette dalle oscillazioni del veicolo?",
+            normReference: "Reg. CE 852/2004 All. II cap. V; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+      {
+        machineKey: "cappa_aspirazione_foodtruck",
+        name: "Cappa Aspirazione Inox con Filtri a Labirinto e Camino a Tetto Veicolare",
+        type: "Impianto di Aspirazione Fumi e Vapori a Tetto per Autonegozio Speciale",
+        suggestedManufacturer: "Smoki / Camini & Cappe / Baraldi",
+        suggestedModel: "Smoki FoodTruck Inox / Camini & Cappe Aerodinamica Tetto / Baraldi Street",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "CAPPA_FT_FILTRI_LABIRINTO_INOX_LAVABILI",
+            title: "Filtri a Labirinto in Acciaio Inox Lavabili ed Estraibili con Vaschetta Grassi",
+            question: "La cappa è provvista di pacco filtri a labirinto rompigoccia in acciaio inox 18/10 estraibili, facilmente lavabili, inclinati verso canalina perimetrale di drenaggio con rubinetto o vaschetta di spurgo grassi per eliminare il pericolo d'incendio?",
+            normReference: "UNI EN 16282-2; D.Lgs. 81/2008 All. IV p. 1.9 e All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CAPPA_FT_SCARICO_TETTO_COMIGNOLO_AERODINAMICO",
+            title: "Scarico a Tetto con Comignolo Aerodinamico Antivento/Antipioggia Sigillato",
+            question: "Il camino di espulsione fumi sul tetto del furgone è provvisto di comignolo aerodinamico antivento/antipioggia stagno e flangia sagomata con guarnizioni poliuretaniche elastiche per prevenire infiltrazioni d'acqua meteorica durante la marcia stradale?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3; UNI EN 16282-3; Reg. CE 852/2004 All. II cap. I",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CAPPA_FT_MICROINTERRUTTORE_VENTILAZIONE_FORZATA",
+            title: "Elettroaspiratore Centrifugo con Microinterruttore Ventilazione Forzata",
+            question: "L'aspiratore cassonato a 230V/12V è provvisto di regolatore di velocità, microinterruttore di consenso/sicurezza o interblocco che garantisce adeguata portata di ricambio aria nel vano ristretto e spegnimento d'emergenza accessibile?",
+            normReference: "UNI EN 16282-4; CEI EN 60335-2-31; D.Lgs. 81/2008 All. IV p. 1.9",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CAPPA_FT_ILLUMINAZIONE_LED_STAGNA_IP65",
+            title: "Illuminazione a LED Integrata con Plafoniere Stagne IP65 da Alta Temperatura",
+            question: "I punti luce integrati nella cappa sul piano cottura sono realizzati con faretti o strip LED a tenuta stagna IP65, resistenti alle alte temperature e ai vapori d'olio, con vetro di protezione infrangibile per garantire corretta visibilità?",
+            normReference: "UNI EN 12464-1; CEI EN 60598-2-1; D.Lgs. 81/2008 All. IV p. 1.10",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+      {
+        machineKey: "affettatrice_compatta_blocco",
+        name: "Affettatrice a Gravità Compatta da Banco con Blocco Meccanico da Viaggio",
+        type: "Affettatrice Professionale a Gravità da Banco con Sistema di Ancoraggio Veicolare",
+        suggestedManufacturer: "Sirman / Berkel",
+        suggestedModel: "Sirman Palladio 250/300 / Berkel Essentia / Berkel Red Line 250",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "AFFETTATRICE_FT_ANELLO_FISSO_PARALAMA_360_UNI1974",
+            title: "Anello Fisso Paralama Continuo a 360° Conforme UNI EN 1974",
+            question: "La lama circolare è schermata da un anello fisso di protezione continuo a 360° conforme alla norma armonizzata UNI EN 1974, che protegge il tagliente anche a coprilama smontato per le operazioni di pulizia?",
+            normReference: "UNI EN 1974 punto 5.2.2; Direttiva Macchine 2006/42/CE All. I p. 1.3; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "AFFETTATRICE_FT_ANCORAGGIO_RAPIDO_VOLANTINI_BANCO",
+            title: "Sistema di Ancoraggio Rapido al Banco di Lavoro con Volantini Filettati Antiscivolo",
+            question: "L'affettatrice è fissata rigidamente al banco inox tramite volantini filettati passanti, staffe a morsa o tasselli antivibranti a sgancio rapido per impedirne tassativamente lo scivolamento, ribaltamento o caduta durante la marcia e le frenate del mezzo?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3 e All. V p. 2; UNI EN 1974",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "AFFETTATRICE_FT_BLOCCO_VELA_SPESSORE_ZERO_CARRO",
+            title: "Blocco Meccanico della Vela a Spessore Zero con Fermo Piatto Merci da Trasporto",
+            question: "Il dispositivo di regolazione fetta permette il blocco a spessore zero della vela con interblocco meccanico del piatto portamerce in posizione di riposo, evitando esposizioni accidentali del filo della lama durante il movimento del veicolo?",
+            normReference: "UNI EN 1974 punto 5.2.4; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "AFFETTATRICE_FT_PRESSAMERCE_PARAPOLSO_SICUREZZA",
+            title: "Pressamerce Ergonomico con Schermo Trasparente Parapolso e Protezione NVR",
+            question: "Il pressamerce è provvisto di schermo trasparente parapolso in plexiglass ad alta resistenza, impugnatura ergonomica sagomata e relè di minima tensione NVR a pulsanti stagni IP65 per impedire il riavvio spontaneo dopo cali di corrente?",
+            normReference: "UNI EN 1974 punto 5.2.3; CEI EN 60204-1; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // --- REPARTO 2: FREDDO & CONSERVAZIONE VEICOLARE (env-ft-vano-refrigerazione) ---
+      {
+        machineKey: "banco_frigo_orizzontale_veicolare",
+        name: "Banco Refrigerato Orizzontale a Cassetti con Chiusura a Scatto da Furgone",
+        type: "Tavolo Refrigerato Professionale Gastronorm con Cassettiere Meccaniche da Automezzo",
+        suggestedManufacturer: "Friulinox / Mercatus / Ilsa",
+        suggestedModel: "Friulinox Roll-In / Mercatus StreetFood GN 1/1 / Ilsa Horeca Van",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "BANCO_FRIGO_FT_CASSETTI_FERMO_MECCANICO_CURVA",
+            title: "Cassetti Inox Gastronorm con Fermo Meccanico Anti-Apertura in Curva",
+            question: "Tutti i cassetti telescopici inox per contenitori GN sono muniti di chiusure a scatto con fermo o blocco meccanico a leva per impedire tassativamente l'apertura accidentale dovuta alle forze centrifughe in curva o in caso di frenata brusca del veicolo?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3 e All. V p. 2; Reg. CE 852/2004 All. II cap. IX",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BANCO_FRIGO_FT_CONTROLLO_DIGITALE_ALLARME_HACCP",
+            title: "Controllo Digitale Temperatura con Allarme Visivo/Acustico HACCP (+2/+4°C)",
+            question: "La centralina frigorifera digitale è dotata di display ad alta visibilità con segnalazione allarmi sonori/visivi di superamento soglia critica (+2°C / +4°C) e registrazione dati conforme al manuale HACCP?",
+            normReference: "Reg. CE 852/2004 All. II cap. IX; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "BANCO_FRIGO_FT_CIRCUITO_ERMETICO_R290_UNI378",
+            title: "Circuito Frigorifero Ermetico Tropicalizzato Conforme UNI EN 378 con Gas R290",
+            question: "Il circuito refrigerante a gas ecologico naturale R290 è realizzato in esecuzione ermetica certificata UNI EN 378 classe tropicalizzata (funzionamento garantito fino a +43°C ambiente), con motocondensante protetta da griglia ventilata e supporti antivibranti?",
+            normReference: "UNI EN 378-1/2; CEI EN 60335-2-89; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BANCO_FRIGO_FT_GUARNIZIONI_MAGNETICHE_IGIENE",
+            title: "Guarnizioni Magnetiche Perimetrali Rimovibili ad Alta Tenuta Termica",
+            question: "Le guarnizioni magnetiche di battuta dei cassetti sono integre, morbide, prive di screpolature, facilmente estraibili a pressione per le operazioni di lavaggio e sanificazione profonda senza residui organici?",
+            normReference: "Reg. CE 852/2004 All. II cap. V; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+      {
+        machineKey: "armadio_freezer_veicolare",
+        name: "Armadio Congelatore Compatto a Bordo Furgone con Serratura Meccanica",
+        type: "Congelatore Verticale Compatto Bassa Temperatura da Bordo Veicolo",
+        suggestedManufacturer: "Liebherr / Ilsa",
+        suggestedModel: "Liebherr ProfiLine Veicolare / Ilsa Neos BT Mobile",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "FREEZER_FT_TEMPERATURA_COSTANTE_18C_ISOLAMENTO",
+            title: "Mantenimento Costante Temperatura <= -18°C con Coibentazione Rinforzata",
+            question: "Il congelatore garantisce il mantenimento costante della catena del freddo a temperatura <= -18°C per prodotti surgelati mediante schiumatura ad alta densità (spessore 70-80 mm) in grado di mantenere la temperatura anche durante brevi soste senza generatore?",
+            normReference: "Reg. CE 852/2004 All. II cap. IX; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FREEZER_FT_SERRATURA_MECCANICA_CHIAVE_TRASPORTO",
+            title: "Serratura Meccanica a Chiave per Blocco Porte Durante il Tragitto Stradale",
+            question: "La porta cieca dell'armadio congelatore è dotata di serratura meccanica frontale a chiave o gancio di ritenuta rinforzato per assicurare il blocco stagno dell'anta durante la circolazione stradale del veicolo?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3 e All. V p. 2; Reg. CE 852/2004 All. II cap. IV",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "FREEZER_FT_TELETERMOMETRO_ESTERNO_SOGLIA",
+            title: "Teletermometro Digitale Esterno con Allarme di Soglia Critica e Blackout",
+            question: "Sul cruscotto o sul pannello esterno del freezer è installato un teletermometro a lettura digitale continua provvisto di indicatore di massima temperatura raggiunta per rilevare tempestivamente eventuali anomalie o blackout notturni?",
+            normReference: "Reg. CE 852/2004 All. II cap. IX; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "FREEZER_FT_COMPRESSORE_SILENTBLOCK_ANTIVIBRAZIONE",
+            title: "Compressore Ermetico Montato su Silent-Block Antivibranti per Sollecitazioni Stradali",
+            question: "L'unità motocompressore è ancorata allo chassis tramite tamponi elastici silent-block rinforzati e tubazioni frigorifere flessibili a spira per assorbire buche stradali e vibrazioni del motore del furgone senza pericolo di microfessurazioni o rotture del circuito?",
+            normReference: "UNI EN 378-2; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // --- REPARTO 3: SOMMINISTRAZIONE & INTERFACCIA CLIENTI (env-ft-banco-somministrazione) ---
+      {
+        machineKey: "vetrina_refrigerata_parafiato",
+        name: "Vetrina Refrigerata da Banco Porta-Ingredienti con Parafiato Curvo",
+        type: "Espositore Refrigerato Statico da Banco per Ingredienti e Condimenti",
+        suggestedManufacturer: "Fimar / Mercatus",
+        suggestedModel: "Fimar VR / Mercatus Top Ingredienti Street Food",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "VETRINA_FT_CRISTALLO_CURVO_PARAFIATO_ASL",
+            title: "Cristallo Curvo Parafiato Igienico Antiaerosol a Norma ASL",
+            question: "La vetrina è dotata di schermo superiore e frontale in cristallo temperato curvo o plexiglass atossico ad altezza idonea a fungere da barriera parafiato totale contro aerosol, tosse e goccioline respiratorie del pubblico a norma igienico-sanitaria ASL?",
+            normReference: "Reg. CE 852/2004 All. II cap. III; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "VETRINA_FT_TEMPERATURA_CONTROLLATA_4C_INGREDIENTI",
+            title: "Temperatura Controllata +4°C per la Conservazione di Ingredienti Deperibili",
+            question: "La vasca refrigerata mantiene la temperatura tra +2°C e +4°C per la sosta e conservazione in sicurezza igienica di farciture deperibili (formaggi freschi, salse, salumi, vegetali cotti e crudi) con termostato digitale dedicato?",
+            normReference: "Reg. CE 852/2004 All. II cap. IX; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "VETRINA_FT_BACINELLE_INOX_MOCA_1935_2004",
+            title: "Bacinelle Gastronorm Inox con Marcatura MOCA Reg. CE 1935/2004",
+            question: "Tutte le vaschette portainredienti GN alloggiate nella vetrina sono in acciaio inox AISI 304 per contatto alimentare certificate MOCA a norma Reg. CE 1935/2004 e provviste di coperchi rimovibili per i momenti di inattività del servizio?",
+            normReference: "Reg. CE 1935/2004; D.Lgs. 29/2017; Reg. CE 852/2004 All. II cap. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "VETRINA_FT_STAFFA_ANCORAGGIO_BANCO_VEICOLARE",
+            title: "Staffaggio Meccanico di Fissaggio al Banco di Somministrazione del Veicolo",
+            question: "La vetrina è assicurata al piano del banco somministrazione con staffe di serraggio o squadrette imbullonate con guarnizioni in gomma per impedirne lo scostamento laterale o ribaltamento durante il moto del veicolo?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3 e All. V p. 2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "portellone_idraulico_banco",
+        name: "Portellone Laterale Panoramico con Pistoni a Gas e Blocco Meccanico Anticaduta",
+        type: "Portellone Basculante di Vendita per Autonegozio Speciale con Pistoni a Gas",
+        suggestedManufacturer: "Carrozzerie Speciali Allestimenti Food Truck",
+        suggestedModel: "Portellone Alluminio Coibentato con Pistoni Rinforzati a Gas e Fermo Meccanico",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "PORTELLONE_FT_PISTONI_GAS_BLOCCO_ANTICADUTA_VENTO",
+            title: "Pistoni a Gas Rinforzati e Perni di Fermo Meccanico Anticaduta da Raffiche di Vento",
+            question: "Il portellone laterale apribile è sostenuto da pistoni a gas maggiorati e dispone di perni o aste metalliche di fermo meccanico di sicurezza anticaduta da inserire in apertura per evitare la chiusura accidentale dovuta a improvvise raffiche di vento?",
+            normReference: "D.Lgs. 81/2008 All. IV p. 1.6 e All. V p. 2; Direttiva Macchine 2006/42/CE All. I",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PORTELLONE_FT_STRIP_LED_24V_ILLUMINAZIONE_CLIENTE",
+            title: "Strip LED Integrata a 24V con Diffusore Opale per Illuminazione Banco Cliente",
+            question: "Nel perimetro interno del portellone è integrata una barra a strip LED alimentata a bassa tensione di sicurezza SELV (12V/24V) con grado IP65, priva di abbagliamento verso il cliente e protetta da schiacciamento alla chiusura?",
+            normReference: "UNI EN 12464-1; CEI 64-8; D.Lgs. 81/2008 All. IV p. 1.10",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+          {
+            code: "PORTELLONE_FT_DOPPIO_BLOCCO_SERRATURA_MARCIA",
+            title: "Doppia Chiusura Meccanica e Sensore Spia Cruscotto Portellone Aperto",
+            question: "Il portellone è provvisto di chiavistelli meccanici a doppio punto di chiusura ermetica per la marcia stradale e di microinterruttore collegato a spia o cicalino in cabina guida che segnala il mancato bloccaggio del portellone prima della partenza?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3; Codice della Strada art. 54 e 164",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "PORTELLONE_FT_MENSOLA_APPOGGIO_CLIENTI_RIBALTABILE",
+            title: "Mensola Ribaltabile d'Appoggio Clienti con Bordi Arrotondati e Arresto di Fine Corsa",
+            question: "La mensola ribaltabile esterna d'appoggio per i clienti è in acciaio inox o alluminio con spigoli arrotondati antiurto, supporti a compasso con blocco di sicurezza e assenza di punti di cesoiamento per le dita durante l'apertura e chiusura?",
+            normReference: "UNI EN ISO 13854; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+      {
+        machineKey: "estintore_polvere_co2_foodtruck",
+        name: "Dotazione Antincendio Veicolare e di Cucina (Polvere 34A 233B + Idrico/Schiuma F)",
+        type: "Presidio Antincendio Portatile per Autonegozi e Cucine Itineranti",
+        suggestedManufacturer: "Anaf Fire Protection / Mozzanica / Mb Antincendio",
+        suggestedModel: "Set Estintore Idrico Classe F 6L + Estintore a Polvere 6kg 34A 233B C + Coperta Antifiamma",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "ESTINTORE_FT_OMOLOGATO_DM2021_CLASSE_F_OLI_GRASSI",
+            title: "Estintore Omologato D.M. 03/09/2021 Classe F per Oli e Grassi di Cottura",
+            question: "A bordo del vano cottura del food truck è presente un estintore idrico a base d'acqua con additivi estinguenti schiumogeni omologato conforme al D.M. 03/09/2021 per incendi di classe F (capacità minima 6 litri / classe 25F-40F), idoneo a spegnere fuochi di friggitrici e fry-top senza schizzi d'olio?",
+            normReference: "D.M. 03/09/2021; UNI EN 3-7; D.Lgs. 81/2008 art. 46 e All. IV p. 4",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ESTINTORE_FT_POLVERE_POLIVALENTE_34A_233B_C",
+            title: "Estintore a Polvere Polivalente (Classe 34A 233B C) per Motore, Generatore e GPL",
+            question: "È presente un estintore a polvere ABC con capacità estinguente non inferiore a 34A 233B C per la protezione del gruppo elettrogeno, vano motore del veicolo e impianto bombole gas GPL?",
+            normReference: "D.M. 03/09/2021; D.Lgs. 81/2008 art. 46; UNI 9994-1",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ESTINTORE_FT_COPERTA_ANTIFIAMMA_IGNIFUGA_EN1869",
+            title: "Coperta Antifiamma Ignifuga a Rilascio Rapido a Norma EN 1869 a Portata di Mano",
+            question: "È installata a parete o a paratia, a portata di mano del cuoco/operatore, una coperta antifiamma in fibra di vetro conforme a norma EN 1869 con tiranti a sgancio rapido per il tempestivo soffocamento di principi d'incendio su piastre, friggitrici o indumenti?",
+            normReference: "UNI EN 1869; D.Lgs. 81/2008 art. 46 e All. IV p. 4",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "ESTINTORE_FT_REVISIONE_SEMESTRALE_UNI9994_1",
+            title: "Manutenzione Periodica Semestrale con Cartellino Aggiornato UNI 9994-1",
+            question: "Tutti gli estintori a bordo recano il cartellino di manutenzione periodica con data dell'ultima verifica semestrale regolarmente punzonata entro i termini previsti dalla norma UNI 9994-1 e manometro di pressione con indice nell'area verde?",
+            normReference: "UNI 9994-1; D.M. 01/09/2021; D.Lgs. 81/2008 art. 71 c. 3 e art. 46",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // --- REPARTO 4: ENERGIA & IMPIANTO ELETTRICO MOBILE (env-ft-vano-generatore) ---
+      {
+        machineKey: "gruppo_elettrogeno_silenziato",
+        name: "Generatore di Corrente Ausiliario Silenziato Inverter a Bordo (4-8 kW)",
+        type: "Gruppo Elettrogeno Ausiliario a Benzina/Diesel Silenziato Inverter da Veicolo",
+        suggestedManufacturer: "Pramac / Honda / Genmac",
+        suggestedModel: "Pramac P3500i / Honda EU70is Inverter / Genmac Urban Silenziato",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "GENERATORE_FT_INSONORIZZAZIONE_SOTTO_65DBA",
+            title: "Motore 4 Tempi Super-Insonorizzato con Emissione Sonora < 65 dB(A)",
+            question: "Il gruppo elettrogeno a 4 tempi è alloggiato in vano insonorizzato o racchiuso in cofano silenziato con livello di potenza sonora inferiore a 65 dB(A) a 7 metri per contenere l'esposizione al rumore degli operatori e rispettare i regolamenti comunali di somministrazione?",
+            normReference: "D.Lgs. 81/2008 Titolo VIII Capo II (art. 187-198); Direttiva 2000/14/CE",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "GENERATORE_FT_SCARICO_GAS_CONVOGLIATO_TETTO_ESTERNO",
+            title: "Scarico Gas Combusti Convogliato a Tetto all'Esterno del Mezzo",
+            question: "La tubazione dei fumi di scarico del motore endotermico è realizzata in metallo a tenuta stagna, coibentata contro il calore da contatto, ed è convogliata all'esterno del furgone a tetto per escludere totalmente il pericolo di intossicazione da monossido di carbonio (CO) nel vano di lavoro?",
+            normReference: "D.Lgs. 81/2008 Titolo IX Capo I (art. 221-232), All. IV p. 1.9 e All. V p. 7",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "GENERATORE_FT_INTERRUTTORE_MAGNETOTERMICO_DIFFERENZIALE",
+            title: "Interruttore Magnetotermico-Differenziale Incorporato e Morsetto di Terra",
+            question: "Il generatore è munito di proprio interruttore magnetotermico-differenziale di bordo e di morsetto equipotenziale collegato al telaio del veicolo e/o al dispersore di terra portatile secondo la regola dell'arte CEI 64-8/7?",
+            normReference: "CEI 64-8 Sezione 717; CEI EN 60204-1; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "GENERATORE_FT_SERBATOIO_CARBURANTE_CHIUSURA_ANTISPANDIMENTO",
+            title: "Serbatoio Carburante con Tappo Ermetico e Vasca di Contenimento Antispandimento",
+            question: "Il serbatoio carburante è dotato di tappo a tenuta ermetica con sfiato controllato, valvola manuale di chiusura combustibile e vaschetta inferiore metallica di contenimento per scongiurare sversamenti di benzina/gasolio a caldo o durante la marcia?",
+            normReference: "D.Lgs. 81/2008 All. IV p. 4; D.M. 03/09/2021",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "quadro_elettrico_veicolare",
+        name: "Quadro Elettrico Generale di Bordo con Commutatore Rete/Gruppo e Salvavita",
+        type: "Quadro Elettrico Generale di Distribuzione Veicolare Conforme CEI 64-8 Sezione 717",
+        suggestedManufacturer: "Gewiss / Scame",
+        suggestedModel: "Gewiss Q-DIN Veicolare / Scame Omnia StreetFood 230V-400V",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "QUADRO_FT_DIFFERENZIALE_SALVAVITA_30MA",
+            title: "Interruttore Differenziale Generale Salvavita ad Alta Sensibilità (Idn <= 30 mA)",
+            question: "Il quadro generale veicolare è presidiato da un interruttore differenziale magnetotermico generale ad alta sensibilità con corrente differenziale nominale di intervento Idn non superiore a 30 mA per la protezione addizionale contro i contatti indiretti e diretti?",
+            normReference: "CEI 64-8 Sezione 717; D.Lgs. 81/2008 art. 80, 86 e All. V p. 5",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "QUADRO_FT_COMMUTATORE_RETE_GRUPPO_INTERBLOCCATO",
+            title: "Commutatore di Linea 'Rete Esterna / Gruppo Elettrogeno / Zero' Meccanicamente Interbloccato",
+            question: "È presente un commutatore rotativo a camme a tre posizioni con interblocco meccanico che impedisce la contemporanea alimentazione da rete pubblica esterna e da generatore di bordo, scongiurando pericolosi ritorni di tensione?",
+            normReference: "CEI 64-8; CEI EN 61439-1/2; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "QUADRO_FT_SEZIONATORI_LINEE_SEPARATE_TARATE",
+            title: "Sezionatori Magnetotermici Singoli per Cottura, Frigoriferi, Idrico e Luci",
+            question: "Ciascun circuito (vano cottura, linea refrigerazione continua, impianto autoclave idrico, illuminazione e prese di servizio) è protetto da un interruttore magnetotermico dedicato opportunamente calibrato e identificato con targhetta indelebile?",
+            normReference: "CEI EN 61439-1; CEI 64-8 Sezione 717; D.Lgs. 81/2008 All. V p. 5",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "QUADRO_FT_PRESA_CEE_ESTERNA_SPORTELLINO_MOLLA",
+            title: "Presa Industriale CEE da Esterno Veicolo con Sportellino a Molla Stagna IP67",
+            question: "L'allaccio alla rete esterna avviene tramite presa a spina industriale CEE (230V o 400V) a norma CEI EN 60309 montata a filo carrozzeria con sportellino a molla di chiusura stagna IP67 contro acqua e polvere durante il trasferimento stradale?",
+            normReference: "CEI EN 60309-1/2; CEI 64-8 Sezione 717; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // --- REPARTO 5: SICUREZZA IMPIANTO GAS GPL (env-ft-vano-bombole-gpl) ---
+      {
+        machineKey: "impianto_rilevazione_gas_gpl",
+        name: "Centralina Rilevatore Fughe Gas GPL a 12V con Elettrovalvola di Sicurezza",
+        type: "Sistema di Rilevazione Fughe Gas Combustibili e Intercettazione Automatica Veicolare",
+        suggestedManufacturer: "BEP Marine / CBE / Cavagna",
+        suggestedModel: "BEP Gas Detector 12V / CBE BGV / Cavagna Gas Safe System",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "RILEVATORE_FT_SENSORE_PAVIMENTO_GPL_CICALINO",
+            title: "Sensore Gas a Pavimento Tarato su GPL con Cicalino Acustico e LED",
+            question: "Il sensore di rilevamento fughe è installato a filo pavimento (in quanto il GPL ha densità relativa maggiore dell'aria e si accumula sul fondo) con taratura certificata, allarme visivo a LED e cicalino acustico ad elevata potenza sonora (> 85 dB)?",
+            normReference: "CEI EN 50194-2; UNI EN 1949; D.Lgs. 81/2008 art. 71 c. 3 e All. V p. 7",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RILEVATORE_FT_ELETTROVALVOLA_NC_RIARMO_MANUALE",
+            title: "Blocco Automatico Erogazione tramite Elettrovalvola NC a Riarmo Manuale all'Uscita Bombole",
+            question: "L'impianto è provvisto di elettrovalvola a 12V normalmente chiusa a riarmo esclusivamente manuale, posizionata all'uscita delle bombole nel vano esterno, asservita alla centralina per l'immediata intercettazione del gas in caso di fuga?",
+            normReference: "UNI EN 1949; UNI 7131; D.Lgs. 81/2008 All. V p. 7; D.M. 03/09/2021",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RILEVATORE_FT_PULSANTE_EMERGENZA_SGANCIO_RAPIDO",
+            title: "Pulsante Manuale di Sgancio d'Emergenza Gas Posizionato in Zona Libera",
+            question: "È presente un pulsante di sgancio manuale di emergenza gas a fungo di colore rosso, chiaramente segnalato da cartellonistica di sicurezza e posizionato in posizione prontamente accessibile vicino alla via d'uscita per togliere l'alimentazione all'elettrovalvola?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2 e All. IV p. 4; D.M. 03/09/2021",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RILEVATORE_FT_TEST_PERIODICO_EFFICIENZA_SENSORE",
+            title: "Pulsante di Test Periodico per la Verifica di Efficienza del Rilevatore e delle Valvole",
+            question: "Sulla centralina è presente tasto di collaudo e autodiagnosi per testare periodicamente l'integrità del circuito elettronico, del cicalino di allarme e dello scatto di chiusura dell'elettrovalvola a gas?",
+            normReference: "CEI EN 50194-2; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+      {
+        machineKey: "bombole_gpl_vano_ermetico",
+        name: "Coppia Bombole GPL con Rampa di Scambio Automatico e Riduttore Certificato",
+        type: "Gruppo Bombole Gas di Petrolio Liquefatto (GPL) Veicolare Conforme UNI EN 1949",
+        suggestedManufacturer: "Cavagna Group / Truma",
+        suggestedModel: "Cavagna Group DuoControl / Truma DuoControl CS con Crash Sensor",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "BOMBOLE_FT_CRASH_SENSOR_DUOCONTROL_UNI16129",
+            title: "Riduttore Certificato con Sensore d'Urto Crash-Sensor UNI EN 16129",
+            question: "La rampa di alimentazione monta riduttore di pressione certificato con valvola di sicurezza da sovrapressione e sensore d'urto meccanico (crash-sensor tipo Truma DuoControl CS / Cavagna) conforme a UNI EN 16129, che blocca istantaneamente l'erogazione del gas in caso di collisione o decelerazione violenta (3.5g)?",
+            normReference: "UNI EN 16129 All. D; UNI EN 1949 punto 5.2; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BOMBOLE_FT_VANO_ERMETICO_INTERNO_AERAZIONE_PAVIMENTO",
+            title: "Vano Bombole Ermetico Verso l'Abitacolo con Griglie di Sfogo a Pavimento verso l'Esterno",
+            question: "Il vano contenitore delle bombole è completamente sigillato e a tenuta di gas verso l'interno dell'autonegozio, ed è dotato sul fondo di feritoie libere di aerazione permanente aperte verso il suolo per l'evacuazione naturale del GPL?",
+            normReference: "UNI EN 1949 punto 5.1; UNI 7131; D.Lgs. 81/2008 All. IV p. 4 e All. V p. 7",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BOMBOLE_FT_CATENELLE_CINGHIE_ANTICADUTA_SOLIDE",
+            title: "Cinghie o Catenelle Metalliche di Ancoraggio Rigido Anticaduta per la Marcia",
+            question: "Ciascuna bombola è saldamente vincolata alla parete del vano mediante almeno due cinghie robuste o catenelle metalliche con tenditori a cricchetto per impedirne spostamenti, rotazioni o cadute durante il moto stradale?",
+            normReference: "UNI EN 1949 punto 5.1; D.Lgs. 81/2008 art. 71 c. 3 e All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BOMBOLE_FT_TUBI_FLESSIBILI_UNI7140_SCADENZA",
+            title: "Tubi Flessibili ad Alta Pressione a Norma UNI 7140 con Scadenza non Superata",
+            question: "I tubi flessibili di raccordo in gomma ad alta pressione sono conformi a norma UNI 7140 con raccordi metallici crimpati di fabbrica, integri senza tagli o screpolature, e con data di scadenza stampigliata non oltrepassata (massimo 5 anni di validità)?",
+            normReference: "UNI 7140; UNI EN 1949 punto 5.3; D.Lgs. 81/2008 art. 71 c. 3 e All. V p. 6",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // --- REPARTO 6: AUTONOMIA IDRICA & IGIENE MANI (env-ft-impianto-idrico) ---
+      {
+        machineKey: "autoclave_pompa_acqua_12v",
+        name: "Pompa Idrica Autoclave Autoadescante a Pressostato per Acqua Potabile",
+        type: "Pompa Autoadescante a Pressostato per Erogazione Acqua Potabile da Veicolo",
+        suggestedManufacturer: "Flojet / Shurflo / Jabsco",
+        suggestedModel: "Flojet Quad Plus / Shurflo Trail King 12V / Jabsco Par-Max",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "AUTOCLAVE_FT_MATERIALI_MOCA_1935_2004_DM174",
+            title: "Corpo Alimentare Atossico Certificato MOCA Reg. CE 1935/2004 e D.M. 174/2004",
+            question: "I corpi pompanti, raccordi, tubazioni e membrane a contatto con l'acqua potabile sono realizzati esclusivamente con materiali idonei certificati MOCA Reg. CE 1935/2004 e D.M. 174/2004 privi di cessione di sostanze nocive?",
+            normReference: "Reg. CE 1935/2004; D.M. 174/2004; Reg. CE 852/2004 All. II cap. VII",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "AUTOCLAVE_FT_PRESSOSTATO_AUTOMATICO_FUNZIONAMENTO_SECCO",
+            title: "Pressostato Automatico con Protezione Funzionamento a Secco e Bassa Tensione 12V",
+            question: "La pompa è controllata da pressostato automatico che si attiva all'apertura di qualsiasi rubinetto e si arresta alla chiusura, dotato di protezione termica e contro il funzionamento prolungato a secco in assenza d'acqua nel serbatoio?",
+            normReference: "CEI EN 60335-2-41; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "AUTOCLAVE_FT_FILTRO_ASPIRAZIONE_ISPEZIONABILE_LAVABILE",
+            title: "Filtro di Aspirazione Ispezionabile a Rete Inox Lavabile Anti-Impurità",
+            question: "A monte dell'autoclave è installato un filtro d'aspirazione trasparente con cartuccia a maglia inox estraibile e lavabile per trattenere sedimenti ed evitare ostruzioni del pressostato e delle valvole?",
+            normReference: "Reg. CE 852/2004 All. II cap. VII; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "AUTOCLAVE_FT_SERBATOI_ACQUE_CHIARE_GRIGIE_UGUALI",
+            title: "Serbatoi Acque Chiare e Acque Grigie di Pari Capacità con Sfiato e Valvola Scarico",
+            question: "Il veicolo è dotato di serbatoio per acqua potabile e serbatoio di recupero acque reflue (acque grigie) di capienza equivalente (minimo 50-100 litri) con sfiati protetti da rete anti-insetti e saracinesca di scarico a tenuta per smaltimento in piazzola attrezzata?",
+            normReference: "Reg. CE 852/2004 All. II cap. III e VII; D.Lgs. 152/2006 art. 101",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "boiler_elettrico_compatto",
+        name: "Boiler Elettrico Rapido Sottolavello per Acqua Calda Sanitaria",
+        type: "Scaldacqua Elettrico ad Accumulo Rapido Sottolavello per Automezzi",
+        suggestedManufacturer: "Truma / Ariston",
+        suggestedModel: "Truma Therme / Ariston Andris Lux Eco 10L / Elgena KB6",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "BOILER_FT_EROGAZIONE_ACQUA_45_50C_LAVAGGIO_MANI",
+            title: "Erogazione Rapida Acqua Calda Sanitaria a 45-50°C a Norma Igienico-Sanitaria ASL",
+            question: "Il boiler garantisce la costante disponibilità di acqua calda corrente a 45-50°C al lavello per consentire l'efficace sgrassaggio e la corretta igiene delle mani degli operatori secondo i requisiti dei regolamenti d'igiene ASL?",
+            normReference: "Reg. CE 852/2004 All. II cap. I e cap. VIII; D.Lgs. 81/2008 All. IV p. 1.13",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BOILER_FT_VALVOLA_SICUREZZA_SOVRAPRESSIONE_SCARICO_TERRA",
+            title: "Valvola di Sicurezza Sovrapressione Tarata con Scarico Diretto a Terra",
+            question: "Sull'impianto idraulico di adduzione è installata una valvola di sicurezza contro le sovrapressioni (tarata a 6 bar o secondo specifica costruttore) con tubo di sfogo canalizzato all'esterno o verso terra per prevenire scoppi o fessurazioni del boiler?",
+            normReference: "UNI EN 1487; CEI EN 60335-2-21; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BOILER_FT_TERMOSTATO_SICUREZZA_SURRISCALDAMENTO",
+            title: "Termostato di Sicurezza a Riarmo Meccanico Anti-Surriscaldamento a Secco",
+            question: "Il gruppo riscaldante è protetto da un termostato di limite termico che interrompe automaticamente l'alimentazione elettrica in caso di sovratemperatura o accensione accidentale in assenza d'acqua nel serbatoio?",
+            normReference: "CEI EN 60335-2-21; D.Lgs. 81/2008 art. 80 e All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BOILER_FT_ISOLAMENTO_ELETTRICO_IPX4_TERRA",
+            title: "Grado di Protezione Elettrica IPX4 e Collegamento al Conduttore di Terra",
+            question: "La custodia dello scaldacqua installato nel sottolavello possiede un grado di protezione dai liquidi non inferiore a IPX4 ed è regolarmente collegata al conduttore di protezione dell'impianto di terra generale del furgone?",
+            normReference: "CEI 64-8 Sezione 701 e 717; CEI EN 60335-2-21; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      {
+        machineKey: "lavello_inox_ginocchio_veicolare",
+        name: "Lavello Inox Compatto con Comando a Ginocchio e Dosatori Integrati",
+        type: "Lavamani Professionale Inox con Comando a Pedale/Ginocchio per Ambulanti",
+        suggestedManufacturer: "Bonomini / Inox Piave / Forcar",
+        suggestedModel: "Lavello Autonomo Inox con Comando a Ginocchio e Paraspruzzi",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "LAVELLO_FT_COMANDO_NON_MANUALE_GINOCCHIO",
+            title: "Comando di Erogazione Acqua a Ginocchio o Pedale non Manuale (Reg. CE 852/04)",
+            question: "Il lavello lavamani è azionato esclusivamente con comando a ginocchio temporizzato o pedale a pavimento senza alcun contatto manuale della rubinetteria da parte degli operatori addetti alla manipolazione alimenti?",
+            normReference: "Reg. CE 852/2004 All. II cap. I p. 4; D.Lgs. 81/2008 All. IV p. 1.13",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVELLO_FT_VASCA_INOX_PARASPRUZZI_ALIMENTARE",
+            title: "Vasca in Acciaio Inox AISI 304 con Paraspruzzi Posteriore e Laterale a Paratia",
+            question: "Il lavello è interamente realizzato in acciaio inox AISI 304 con superfici lisce, spigoli raccordati e alzatina paraspruzzi perimetrale a paratia per impedire schizzi d'acqua su alimenti esposti, taglieri o prese elettriche contigue?",
+            normReference: "Reg. CE 852/2004 All. II cap. V; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "LAVELLO_FT_DISPENSATORI_SAPONE_CARTA_FISSATI",
+            title: "Distributori di Sapone Igienizzante e Carta a Perdere Fissati Rigidemente a Parete",
+            question: "In prossimità del lavello sono installati e fissati stabilmente alla parete del furgone un dosatore di sapone liquido antibatterico e un dispenser di asciugamani monouso in carta a perdere con cestino rifiuti azionabile a pedale?",
+            normReference: "Reg. CE 852/2004 All. II cap. I p. 4; D.Lgs. 81/2008 All. IV p. 1.13",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LAVELLO_FT_SCARICO_DIRETTO_SERBATOIO_ACQUE_GRIGIE",
+            title: "Sifone Anti-Odore e Scarico Canalizzato a Tenuta nel Serbatoio Reflui",
+            question: "La piletta di scarico è collegata a sifone anti-odore ispezionabile con tubazione flessibile spiralata a tenuta stagna che convoglia direttamente i reflui nel serbatoio delle acque grigie senza perdite o esalazioni moleste nell'abitacolo?",
+            normReference: "Reg. CE 852/2004 All. II cap. III; D.Lgs. 81/2008 All. IV p. 1.13",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+    ],
+  },
+
   // 2. RISTORAZIONE & ALIMENTARE
   {
     sectorKey: "ristorazione_alimentare",
@@ -5582,6 +6291,15 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
   const catSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "catering_eventi_banqueting");
   const catMachines = catSector ? catSector.machines : [];
 
+  const isFoodTruckAteco = !!atecoCode && (
+    atecoCode.startsWith("56.10.42") ||
+    atecoCode.startsWith("56.10.4") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("561042") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("56104")
+  );
+  const ftSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "food_truck_street_food");
+  const ftMachines = ftSector ? ftSector.machines : [];
+
   const isIperAteco = !!atecoCode && (
     atecoCode.startsWith("47.11.1") ||
     atecoCode.startsWith("47.11.10") ||
@@ -5938,6 +6656,131 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
         [
           "quadro_elettrico_mobile",
           "bombole_gpl_cucina_campo",
+        ].includes(m.machineKey)
+      );
+    }
+
+    // Reparti Food Truck, Cibo di Strada e Ristorazione Ambulante Itinerante (56.10.42 / 56.10.4 / 561042 / 56104)
+    else if (
+      envId === "env-ft-vano-cottura" ||
+      envId.includes("ft-vano-cottura") ||
+      envId.includes("ft-cottura") ||
+      (isFoodTruckAteco && (envId === "env-cottura" || nameLower.includes("cottura") || nameLower.includes("piastr") || (nameLower.includes("vano") && nameLower.includes("cottura")) || (nameLower.includes("cucina") && !nameLower.includes("sede"))))
+    ) {
+      matchingMachines = ftMachines.filter((m) =>
+        [
+          "piastra_frytop_foodtruck",
+          "friggitrice_incasso_foodtruck",
+          "cappa_aspirazione_foodtruck",
+          "affettatrice_compatta_blocco",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-ft-vano-refrigerazione" ||
+      envId.includes("ft-vano-refrigerazione") ||
+      envId.includes("ft-refrigerazione") ||
+      (isFoodTruckAteco && (nameLower.includes("refrigerazione") || nameLower.includes("freddo") || (nameLower.includes("vano") && (nameLower.includes("frigo") || nameLower.includes("freezer")))))
+    ) {
+      matchingMachines = ftMachines.filter((m) =>
+        [
+          "banco_frigo_orizzontale_veicolare",
+          "armadio_freezer_veicolare",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-ft-banco-somministrazione" ||
+      envId.includes("ft-banco-somministrazione") ||
+      envId.includes("ft-somministrazione") ||
+      (isFoodTruckAteco && (nameLower.includes("somministrazione") || nameLower.includes("banco") || nameLower.includes("portellone") || cat === "sales_office" || cat === "public"))
+    ) {
+      matchingMachines = ftMachines.filter((m) =>
+        [
+          "vetrina_refrigerata_parafiato",
+          "portellone_idraulico_banco",
+          "estintore_polvere_co2_foodtruck",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-ft-vano-generatore" ||
+      envId.includes("ft-vano-generatore") ||
+      envId.includes("ft-generatore") ||
+      (isFoodTruckAteco && (nameLower.includes("generatore") || nameLower.includes("corrente") || nameLower.includes("elettric") || nameLower.includes("energia")))
+    ) {
+      matchingMachines = ftMachines.filter((m) =>
+        [
+          "gruppo_elettrogeno_silenziato",
+          "quadro_elettrico_veicolare",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-ft-vano-bombole-gpl" ||
+      envId.includes("ft-vano-bombole-gpl") ||
+      envId.includes("ft-bombole") ||
+      envId.includes("ft-gpl") ||
+      (isFoodTruckAteco && (nameLower.includes("gpl") || nameLower.includes("bombole") || nameLower.includes("gas")))
+    ) {
+      matchingMachines = ftMachines.filter((m) =>
+        [
+          "impianto_rilevazione_gas_gpl",
+          "bombole_gpl_vano_ermetico",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-ft-impianto-idrico" ||
+      envId.includes("ft-impianto-idrico") ||
+      envId.includes("ft-idrico") ||
+      (isFoodTruckAteco && (nameLower.includes("idrico") || nameLower.includes("acqua") || nameLower.includes("lavello") || nameLower.includes("lavamani") || nameLower.includes("boiler") || nameLower.includes("autoclave")))
+    ) {
+      matchingMachines = ftMachines.filter((m) =>
+        [
+          "autoclave_pompa_acqua_12v",
+          "boiler_elettrico_compatto",
+          "lavello_inox_ginocchio_veicolare",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-ft-cabina-guida" ||
+      envId.includes("ft-cabina-guida") ||
+      envId.includes("ft-cabina") ||
+      (isFoodTruckAteco && (nameLower.includes("cabina") || nameLower.includes("guida") || nameLower.includes("autocarro") || nameLower.includes("furgone")))
+    ) {
+      matchingMachines = ftMachines.filter((m) =>
+        [
+          "estintore_polvere_co2_foodtruck",
+          "quadro_elettrico_veicolare",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-ft-deposito-rimessaggio" ||
+      envId === "env-ft-area-carico-scarico" ||
+      envId === "env-ft-magazzino-scorte" ||
+      envId.includes("ft-deposito-rimessaggio") ||
+      envId.includes("ft-rimessaggio") ||
+      envId.includes("ft-carico-scarico") ||
+      envId.includes("ft-magazzino") ||
+      (isFoodTruckAteco && (nameLower.includes("rimessaggio") || nameLower.includes("carico") || nameLower.includes("scarico") || nameLower.includes("scorte") || cat === "warehouse"))
+    ) {
+      matchingMachines = ftMachines.filter((m) =>
+        [
+          "gruppo_elettrogeno_silenziato",
+          "bombole_gpl_vano_ermetico",
+          "banco_frigo_orizzontale_veicolare",
+          "armadio_freezer_veicolare",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-ft-laboratorio-base" ||
+      envId === "env-ft-spogliatoi-sede" ||
+      envId.includes("ft-laboratorio") ||
+      envId.includes("ft-spogliatoi") ||
+      (isFoodTruckAteco && (nameLower.includes("laboratorio") || nameLower.includes("spogliato") || cat === "services"))
+    ) {
+      matchingMachines = ftMachines.filter((m) =>
+        [
+          "piastra_frytop_foodtruck",
+          "affettatrice_compatta_blocco",
+          "cappa_aspirazione_foodtruck",
+          "lavello_inox_ginocchio_veicolare",
         ].includes(m.machineKey)
       );
     } else if (

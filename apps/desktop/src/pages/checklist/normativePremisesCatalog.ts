@@ -2005,6 +2005,256 @@ export function getStandardEnvironmentsForAteco(atecoCode?: string): WorkEnviron
     ];
   }
 
+  // 0-septies. Food Truck / Cibo di Strada e Ristorazione Ambulante (56.10.42, 56.10.4, 561042, 56104 - Furgoni e autonegozi speciali allestiti per somministrazione itinerante, chioschi mobili, paninoteche ambulanti, rosticcerie mobili con laboratorio/rimessaggio di sede)
+  if (
+    ateco.startsWith("561042") ||
+    ateco.startsWith("56104")
+  ) {
+    return [
+      {
+        id: "env-ft-vano-cottura",
+        key: "ft_vano_cottura_piastre",
+        name: "Vano Operativo di Cottura & Piastre Food Truck",
+        icon: "🍳",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 10,
+        heightM: 2.2,
+        volumeCuM: 22,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 2.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          forcedExhaustType: "kitchen_hood",
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-ft-banco-somministrazione",
+        key: "ft_banco_somministrazione_cassa_parafiato",
+        name: "Banco di Somministrazione, Cassa & Vetrina Parafiato Clienti",
+        icon: "🍔",
+        category: "sales_office",
+        isDefault: true,
+        surfaceSqM: 6,
+        heightM: 2.2,
+        volumeCuM: 13.2,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 3.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("sales_office"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-ft-vano-refrigerazione",
+        key: "ft_vano_frigo_stoccaggio_deperibili_bordo",
+        name: "Vano Frigoriferi & Stoccaggio Deperibili a Bordo (Positivo/Negativo)",
+        icon: "❄️",
+        category: "storage",
+        isDefault: true,
+        surfaceSqM: 5,
+        heightM: 2.2,
+        volumeCuM: 11,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("storage"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-ft-vano-bombole-gpl",
+        key: "ft_vano_tecnico_bombole_gpl_veicolo",
+        name: "Vano Tecnico Bombole GPL del Veicolo (Isolato ed Areato Esterno)",
+        icon: "🛢️",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 2,
+        heightM: 1.2,
+        volumeCuM: 2.4,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          emergencyLighting: true,
+          gasLeakDetectorPresent: true,
+        },
+      },
+      {
+        id: "env-ft-vano-generatore",
+        key: "ft_vano_generatore_elettrico_ausiliario",
+        name: "Vano Generatore Elettrico Ausiliario & Quadro Tecnico",
+        icon: "⚡",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 3,
+        heightM: 1.2,
+        volumeCuM: 3.6,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-ft-impianto-idrico",
+        key: "ft_centrale_idrica_mobile_serbatoi",
+        name: "Centrale Idrica Mobile (Serbatoi Acqua Potabile & Acque Grigie)",
+        icon: "💧",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 2,
+        heightM: 1.2,
+        volumeCuM: 2.4,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          wallsCondition: "washable_sanitizable_2m",
+        },
+      },
+      {
+        id: "env-ft-cabina-guida",
+        key: "ft_cabina_guida_furgone_autocarro",
+        name: "Cabina di Guida del Furgone / Autocarro Allestito",
+        icon: "🚚",
+        category: "sales_office",
+        isDefault: true,
+        surfaceSqM: 5,
+        heightM: 1.8,
+        volumeCuM: 9,
+        occupantsCount: 2,
+        emergencyExitsCount: 2,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("sales_office"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-ft-deposito-rimessaggio",
+        key: "ft_area_rimessaggio_coperto_ricarica",
+        name: "Hangar / Area Rimessaggio Coperto del Veicolo & Ricarica Notturna",
+        icon: "🏢",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 50,
+        heightM: 4.0,
+        volumeCuM: 200,
+        occupantsCount: 2,
+        emergencyExitsCount: 2,
+        windowSurfaceSqM: 4.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-ft-area-carico-scarico",
+        key: "ft_piazzale_carico_scarico_acque",
+        name: "Piazzale di Carico Merci, Rifornimento Acqua & Scarico Acque Grigie",
+        icon: "🚰",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 30,
+        heightM: 4.0,
+        volumeCuM: 120,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-ft-magazzino-scorte",
+        key: "ft_magazzino_secco_packaging_moca_sede",
+        name: "Magazzino Secco & Packaging Monouso / MOCA di Sede",
+        icon: "📦",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 25,
+        heightM: 3.0,
+        volumeCuM: 75,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          shelvingCertified: true,
+        },
+      },
+      {
+        id: "env-ft-laboratorio-base",
+        key: "ft_laboratorio_base_plonge_preparazione",
+        name: "Laboratorio Base / Plonge di Sanificazione e Preparazione Linee",
+        icon: "🧼",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 20,
+        heightM: 3.0,
+        volumeCuM: 60,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-ft-spogliatoi-sede",
+        key: "ft_spogliatoio_servizi_personale_sede",
+        name: "Spogliatoio e Servizi Igienici Personale presso la Sede Operativa",
+        icon: "🚻",
+        category: "changing_rooms",
+        isDefault: true,
+        surfaceSqM: 15,
+        heightM: 2.7,
+        volumeCuM: 40.5,
+        occupantsCount: 4,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 1.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("changing_rooms"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          forcedExhaustPresent: true,
+          forcedExhaustType: "blind_toilet_fan",
+        },
+      },
+    ];
+  }
+
   // 1. Ristorazione, HoReCa, Somministrazione alimenti (56.x, 10.x, 11.x, 47.11, 47.2, 55.1)
   if (
     ateco.startsWith("56") ||
@@ -2838,7 +3088,21 @@ export function evaluateEnvironmentCompliance(
 
   // 1. Altezza minima richiesta per legge (All. IV D.Lgs. 81/08 p.to 1.2)
   let minHeightRequired = 2.7;
-  if (env.category === "production" || env.category === "warehouse" || env.category === "storage") {
+  if (
+    env.id === "env-ft-vano-cottura" ||
+    env.id === "env-ft-banco-somministrazione" ||
+    env.id === "env-ft-vano-refrigerazione"
+  ) {
+    minHeightRequired = 2.0; // Deroga per autonegozi speciali e veicoli allestiti con ventilazione forzata certificata
+  } else if (env.id === "env-ft-cabina-guida") {
+    minHeightRequired = 1.8; // Cabina di guida veicolare omologata
+  } else if (
+    env.id === "env-ft-vano-bombole-gpl" ||
+    env.id === "env-ft-vano-generatore" ||
+    env.id === "env-ft-impianto-idrico"
+  ) {
+    minHeightRequired = 1.2; // Vani tecnici veicolari ispezionabili
+  } else if (env.category === "production" || env.category === "warehouse" || env.category === "storage") {
     minHeightRequired = 3.0; // 3,00 m per locali industriali, stoccaggio e lavorazioni
   } else if (env.category === "services" || env.category === "changing_rooms" || env.category === "technical") {
     minHeightRequired = 2.4; // 2,40 m per bagni, spogliatoi e disimpegni
@@ -3459,6 +3723,94 @@ export function evaluateEnvironmentCompliance(
     summaryBadges.push({
       text: "🧼 Centrale lavaggio rientro: marcia in avanti per stoviglie sporche da eventi contro contaminazioni incrociate",
       status: "info",
+    });
+  }
+
+  // 11. Regole ad hoc per Food Truck e Ristorazione Ambulante (56.10.42 / 56.10.4)
+  // a) Vano Operativo di Cottura & Piastre Food Truck
+  const isFoodTruckCooking =
+    env.id === "env-ft-vano-cottura" ||
+    env.key === "ft_vano_cottura_piastre" ||
+    (env.id.includes("ft-vano-cottura") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("56104") ?? false));
+  if (isFoodTruckCooking) {
+    if (height >= 2.0) {
+      summaryBadges.push({
+        text: "🍳 Vano cottura food truck a norma: altezza veicolare ≥ 2,00m con cappa aspirazione inox",
+        status: "success",
+      });
+    } else {
+      summaryBadges.push({
+        text: "🍳 Vano cottura con altezza veicolare insufficiente (< 2,00m): necessaria conformità ASL autonegozi",
+        status: "warning",
+      });
+    }
+    summaryBadges.push({
+      text: "🚿 Lavamani con comando non manuale a ginocchio e acqua calda sanitaria (Reg. CE 852/04)",
+      status: "info",
+    });
+  }
+
+  // b) Banco di Somministrazione, Cassa & Vetrina Parafiato Clienti
+  const isFoodTruckCounter =
+    env.id === "env-ft-banco-somministrazione" ||
+    env.key === "ft_banco_somministrazione_cassa_parafiato" ||
+    (env.id.includes("ft-banco") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("56104") ?? false));
+  if (isFoodTruckCounter) {
+    summaryBadges.push({
+      text: "🚪 Portellone panoramico con pistoni a gas e perno di fermo meccanico anticaduta",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🛡️ Vetrina refrigerata parafiato curvo igienico antiaerosol per protezione alimenti",
+      status: "success",
+    });
+  }
+
+  // c) Vano Tecnico Bombole GPL del Veicolo
+  const isFoodTruckGpl =
+    env.id === "env-ft-vano-bombole-gpl" ||
+    env.key === "ft_vano_tecnico_bombole_gpl_veicolo" ||
+    (env.id.includes("ft-vano-bombole") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("56104") ?? false));
+  if (isFoodTruckGpl) {
+    summaryBadges.push({
+      text: "🛢️ Vano bombole GPL stagno verso l'abitacolo con griglie di aerazione permanente a pavimento all'esterno",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "⚡ Rilevatore fughe gas 12V con elettrovalvola esterna NC, catenelle anticaduta e crash-sensor",
+      status: "danger",
+    });
+  }
+
+  // d) Vano Generatore Elettrico Ausiliario & Quadro Tecnico
+  const isFoodTruckGen =
+    env.id === "env-ft-vano-generatore" ||
+    env.key === "ft_vano_generatore_elettrico_ausiliario" ||
+    (env.id.includes("ft-vano-generatore") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("56104") ?? false));
+  if (isFoodTruckGen) {
+    summaryBadges.push({
+      text: "⚡ Generatore ausiliario: scarico fumi canalizzato a tetto all'esterno & insonorizzazione",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🔌 Quadro elettrico con salvavita differenziale 30 mA & presa CEE esterna per allaccio rete",
+      status: "success",
+    });
+  }
+
+  // e) Centrale Idrica Mobile (Serbatoi Acqua Potabile & Acque Grigie)
+  const isFoodTruckWater =
+    env.id === "env-ft-impianto-idrico" ||
+    env.key === "ft_centrale_idrica_mobile_serbatoi" ||
+    (env.id.includes("ft-impianto-idrico") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("56104") ?? false));
+  if (isFoodTruckWater) {
+    summaryBadges.push({
+      text: "💧 Centrale idrica mobile: serbatoi acqua potabile e pompa autoclave a pressostato conformi MOCA",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🚰 Serbatoio acque grigie con valvola saracinesca per smaltimento reflui autorizzato",
+      status: "warning",
     });
   }
 
@@ -5981,6 +6333,496 @@ export function generateEnvironmentChecklistItems(
       categoryTag: "igiene",
       suggestedNonConformity:
         "Mancata registrazione della tracciabilità lotti per i banchetti o schede allergeni non trasmesse/conservate per gli eventi serviti.",
+    });
+  }
+
+  // ============================================================================
+  // 15. Requisiti Specifici Food Truck & Ristorazione Ambulante (ATECO 56.10.42 / 56.10.4)
+  // ============================================================================
+
+  // a) Vano Operativo di Cottura & Piastre Food Truck
+  if (env.id === "env-ft-vano-cottura" || env.id.includes("ft-vano-cottura")) {
+    items.push({
+      id: `${env.id}-cappa-aspirazione-labirinto-tetto`,
+      area: env.name,
+      title: "Cappa Aspirazione a Tetto con Filtri a Labirinto Inox e Comignolo Antivento (UNI EN 16282)",
+      question:
+        "Il vano cottura del food truck è provvisto di cappa aspirante in acciaio inox posizionata sopra piastre e friggitrice, dotata di filtri a labirinto antigrasso asportabili e scarico fumi canalizzato a tetto con comignolo antivento idoneo?",
+      normReference: "Reg. CE 852/2004 All. II Cap. III e D.Lgs. 81/2008 Allegato IV punto 1.9",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Cappa aspirazione priva di scarico a tetto o filtri antigrasso intasati/assenti nel vano cottura del food truck.",
+    });
+
+    items.push({
+      id: `${env.id}-paraspruzzi-blocco-grassi-friggitrice-piastra`,
+      area: env.name,
+      title: "Paraspruzzi Inox e Protezioni Antiscottatura su Friggitrice e Fry-Top",
+      question:
+        "La friggitrice e le piastre fry-top sono equipaggiate con paraspruzzi perimetrali in acciaio inox, coperchio di chiusura da trasporto, termostato di sicurezza a riarmo e dispositivi per prevenire schizzi d'olio bollente durante il lavoro e le manovre?",
+      normReference: "D.Lgs. 81/2008 art. 71, Allegato V e VI",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Friggitrice o piastra fry-top prive di paraspruzzi o con termostato di sicurezza bypassato a bordo veicolo.",
+    });
+
+    items.push({
+      id: `${env.id}-lavamani-ginocchio-acqua-calda-sapone`,
+      area: env.name,
+      title: "Lavamani a Comando non Manuale a Ginocchio con Acqua Calda Sanitaria e Dosatori a Perdere",
+      question:
+        "Nel vano cottura è presente un lavello lavamani dedicato con comando a ginocchio/pedale, alimentato con acqua calda e fredda miscelata, distributore di sapone liquido e carta monouso a perdere con cestino a pedale?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo III punto 2",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Lavamani a bordo privo di comando non manuale, erogatore d'acqua calda non funzionante o assenza di salviette a perdere.",
+    });
+
+    items.push({
+      id: `${env.id}-pareti-inox-sanificabili-pavimento-antiscivolo`,
+      area: env.name,
+      title: "Rivestimento Pareti in Acciaio Inox AISI 304 Lavabili e Pavimento Antiscivolo R11",
+      question:
+        "Le pareti del vano cottura sono rivestite in acciaio inox AISI 304 satinato lavabile e sanificabile fino al soffitto (o almeno 2m) e la pavimentazione del furgone è impermeabile, antiscivolo (R11) e raccordata con sgusce perimetrali per il drenaggio?",
+      normReference: "Reg. CE 852/2004 Allegato II Cap. II e D.Lgs. 81/2008 Allegato IV punto 1.3",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "pavimenti_pareti",
+      suggestedNonConformity:
+        "Pareti del vano cottura non sanificabili o pavimento del food truck sdrucciolevole privo di sgusce di pulizia.",
+    });
+  }
+
+  // b) Banco di Somministrazione, Cassa & Vetrina Parafiato Clienti
+  if (env.id === "env-ft-banco-somministrazione" || env.id.includes("ft-banco-somministrazione")) {
+    items.push({
+      id: `${env.id}-fermo-meccanico-portellone-laterale`,
+      area: env.name,
+      title: "Fermo Meccanico di Sicurezza Portellone Panoramico Anti-Chiusura Accidentale",
+      question:
+        "Il portellone laterale ribaltabile ad apertura verso l'alto è provvisto, oltre ai pistoni a gas di sollevamento, di un perno o asta di fermo meccanico di sicurezza per impedirne la chiusura accidentale dovuta a raffiche di vento o cedimento idraulico?",
+      normReference: "D.Lgs. 81/2008 Allegato V punto 1.3 e Allegato IV punto 1.6",
+      defaultSeverity: 5,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Portellone laterale del food truck sprovvisto di blocco meccanico anticaduta o con pistoni a gas usurati.",
+    });
+
+    items.push({
+      id: `${env.id}-vetrina-parafiato-igienico-curvo`,
+      area: env.name,
+      title: "Vetrina Refrigerata Parafiato Curvo Igienico Antiaerosol per Protezione Alimenti",
+      question:
+        "Il banco di somministrazione al pubblico è dotato di vetrina espositiva refrigerata (+4°C) provvista di schermo parafiato in cristallo o policarbonato trasparente curvo per proteggere gli alimenti esposti da goccioline aerosol e contaminazioni dei clienti?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo III punto 1 e Allegato II Capitolo IX",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Alimenti pronti esposti al pubblico senza idoneo schermo parafiato o vetrina refrigerata non funzionante.",
+    });
+
+    items.push({
+      id: `${env.id}-estintore-polvere-coperta-antifiamma-banco`,
+      area: env.name,
+      title: "Estintore Omologato 34A 233B + Classe F e Coperta Antifiamma a Portata Immediata",
+      question:
+        "Presso il banco di somministrazione/cottura è posizionato un estintore a polvere omologato (o polivalente con classe F per fuochi da olio/grassi vegetali) con revisione valida e una coperta antifiamma a pronto prelievo?",
+      normReference: "D.M. 03/09/2021, D.Lgs. 81/2008 art. 46 e D.M. 10/03/1998",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Assenza di estintore idoneo classe F o coperta antifiamma ad accesso immediato presso la postazione food truck.",
+    });
+  }
+
+  // c) Vano Frigoriferi & Stoccaggio Deperibili a Bordo (Positivo/Negativo)
+  if (env.id === "env-ft-vano-refrigerazione" || env.id.includes("ft-vano-refrigerazione")) {
+    items.push({
+      id: `${env.id}-blocco-meccanico-apertura-frigo-curva`,
+      area: env.name,
+      title: "Blocco Meccanico a Scatto e Chiavistelli Anti-Apertura Ante/Cassetti Frigo in Curva",
+      question:
+        "Tutti i banchi frigo, cassetti e armadi freezer a bordo del veicolo sono equipaggiati con chiusure di sicurezza a scatto o chiavistelli meccanici di blocco per impedire l'apertura accidentale durante il trasporto e la marcia su strada?",
+      normReference: "D.Lgs. 81/2008 Allegato V e Codice della Strada art. 164",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Cassetti o ante frigorifere del furgone prive di fermo meccanico da viaggio con rischio caduta merci durante la guida.",
+    });
+
+    items.push({
+      id: `${env.id}-registrazione-continua-temperature-haccp-frigo`,
+      area: env.name,
+      title: "Monitoraggio e Registrazione Continua Temperature HACCP (Carni/Latticini +2/+4°C, Freezer -18°C)",
+      question:
+        "I frigoriferi e i congelatori a bordo dispongono di teletermometri o data-logger a display visibile con controllo e registrazione quotidiana delle temperature (0/+4°C per carni e formaggi, ≤-18°C per surgelati) sia durante la somministrazione che nel trasporto?",
+      normReference: "Reg. CE 852/2004 All. II Cap. IX e Reg. CE 37/2005",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Mancata rilevazione delle temperature frigorifere a bordo o display termometrico guasto con rischio rottura della catena del freddo.",
+    });
+  }
+
+  // d) Vano Tecnico Bombole GPL del Veicolo (Isolato ed Areato Esterno)
+  if (env.id === "env-ft-vano-bombole-gpl" || env.id.includes("ft-vano-bombole-gpl")) {
+    items.push({
+      id: `${env.id}-tenuta-stagna-abitacolo-griglie-aerazione-pavimento`,
+      area: env.name,
+      title: "Isolamento Ermetico verso l'Abitacolo e Griglie di Aerazione Permanente a Pavimento verso l'Esterno",
+      question:
+        "Il vano contenente le bombole GPL è a tenuta stagna rispetto al vano abitacolo/cucina, accessibile solo dall'esterno (o con portello a guarnizione ermetica), e dotato di aperture permanenti di ventilazione naturale a filo pavimento verso l'esterno?",
+      normReference: "Norma UNI 7131, UNI EN 1949 e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 5,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Vano bombole GPL non isolato ermeticamente dall'abitacolo o privo di feritoie di sfiato a pavimento verso l'esterno.",
+    });
+
+    items.push({
+      id: `${env.id}-catenelle-metalliche-anticaduta-bombole-gpl`,
+      area: env.name,
+      title: "Fissaggio Bombole GPL con Doppie Catenelle Metalliche o Cinghie Anticaduta Certificate",
+      question:
+        "Le bombole di GPL sono saldamente ancorate alla struttura del veicolo in posizione rigorosamente verticale mediante doppie catenelle metalliche o staffe a sgancio rapido conformi, impedendone qualsiasi movimento durante il tragitto?",
+      normReference: "Norma UNI EN 1949, UNI 7131 e D.Lgs. 81/2008 Allegato IV punto 1",
+      defaultSeverity: 5,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Bombole GPL non ancorate in verticale o prive di staffe/catenelle metalliche di sicurezza nel veicolo.",
+    });
+
+    items.push({
+      id: `${env.id}-centralina-rilevatore-gas-12v-elettrovalvola-nc`,
+      area: env.name,
+      title: "Centralina Rilevatore Fughe Gas a 12V con Elettrovalvola Esterna Normalmente Chiusa",
+      question:
+        "È installato un sistema di rilevazione fughe GPL funzionante a 12V collegato a un'elettrovalvola di sicurezza esterna normalmente chiusa con riarmo manuale, tarata per intercettare ed interrompere istantaneamente il flusso di gas in caso di perdita?",
+      normReference: "Norma CEI EN 50194, UNI EN 1949 e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 5,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Rilevatore fughe GPL assente o non collegato a elettrovalvola automatica di intercettazione gas sul circuito.",
+    });
+
+    items.push({
+      id: `${env.id}-scadenza-tubi-flessibili-uni-7140-crash-sensor`,
+      area: env.name,
+      title: "Tubi Flessibili a Norma UNI 7140 in Scadenza e Regolatore di Pressione con Crash-Sensor",
+      question:
+        "I tubi flessibili di raccordo in gomma per GPL sono a norma UNI 7140 (o metallici UNI EN 14800) con data di scadenza (max 5 anni) non superata, e il riduttore di pressione è provvisto di valvola di sicurezza da impatto (crash-sensor) per il blocco del gas?",
+      normReference: "Norma UNI 7140, UNI EN 1949 e D.Lgs. 81/2008 Allegato V",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Tubi flessibili GPL con data di scadenza superata o regolatore di pressione sprovvisto di crash-sensor.",
+    });
+  }
+
+  // e) Vano Generatore Elettrico Ausiliario & Quadro Tecnico
+  if (env.id === "env-ft-vano-generatore" || env.id.includes("ft-vano-generatore")) {
+    items.push({
+      id: `${env.id}-scarico-fumi-tetto-generatore-ausiliario`,
+      area: env.name,
+      title: "Evacuazione Fumi di Scarico all'Esterno a Tetto senza Rientri nell'Abitacolo",
+      question:
+        "Il tubo di scarico dei gas di combustione del generatore a motore endotermico è coibentato termicamente, convogliato all'esterno oltre la sagoma del tetto con silenziatore e comignolo, senza rischio di infiltrazione di monossido di carbonio (CO) nel laboratorio?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.9 e punto 2.1",
+      defaultSeverity: 5,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Scarico del generatore non canalizzato all'esterno con potenziale accumulo di gas di scarico/CO nel food truck.",
+    });
+
+    items.push({
+      id: `${env.id}-salvavita-differenziale-30ma-quadro-veicolo`,
+      area: env.name,
+      title: "Efficienza Interruttore Differenziale Salvavita da 30 mA e Quadro Generale di Bordo",
+      question:
+        "Il quadro elettrico principale a valle del generatore e della presa di terra esterna è equipaggiato con interruttore magnetotermico differenziale ad alta sensibilità (≤ 30 mA) verificato periodicamente con tasto di prova 'T'?",
+      normReference: "Norma CEI 64-8/7 sez. 717, D.Lgs. 81/2008 art. 80 e 84",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Differenziale salvavita non funzionante o quadro elettrico veicolare privo di protezione differenziale da 30 mA.",
+    });
+  }
+
+  // f) Centrale Idrica Mobile (Serbatoi Acqua Potabile & Acque Grigie)
+  if (env.id === "env-ft-impianto-idrico" || env.id.includes("ft-impianto-idrico")) {
+    items.push({
+      id: `${env.id}-certificazione-moca-serbatoio-pompa-acqua-potabile`,
+      area: env.name,
+      title: "Certificazione Atossica MOCA Serbatoio Acqua Potabile e Pompa Autoclave (Reg. CE 1935/2004)",
+      question:
+        "Il serbatoio dell'acqua potabile (almeno 100 litri) e la pompa autoclave sono realizzati con materiali per contatto alimentare conformi al Reg. CE 1935/2004 (MOCA), con programma periodico di sanificazione e disinfezione con prodotti a base di cloro registrato?",
+      normReference: "Reg. CE 852/2004 All. II Cap. VII e Reg. CE 1935/2004 (MOCA)",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Serbatoio acqua privo di idoneità MOCA per uso potabile o assenza di piano di sanificazione periodica antilegionella/antibiocoltura.",
+    });
+
+    items.push({
+      id: `${env.id}-boiler-acqua-calda-sanitaria-funzionamento`,
+      area: env.name,
+      title: "Efficienza Boiler Elettrico Acqua Calda Sanitaria (45-50°C)",
+      question:
+        "Il boiler elettrico compatto dedicato alla produzione di acqua calda per il lavamani e il lavello di servizio è perfettamente funzionante, collegato idraulicamente e garantisce l'erogazione costante a 45-50°C per un corretto lavaggio igienico delle mani?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo III punto 2",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Mancata erogazione di acqua calda sanitaria dal boiler di bordo durante le fasi di preparazione e somministrazione.",
+    });
+
+    items.push({
+      id: `${env.id}-tenuta-serbatoio-acque-grigie-valvola-saracinesca`,
+      area: env.name,
+      title: "Tenuta Ermetica Serbatoio Acque Grigie di Recupero con Valvola Saracinesca Carrabile",
+      question:
+        "Il serbatoio di recupero delle acque reflue/grigie di lavaggio ha capienza almeno pari al serbatoio di carico, è provvisto di sfiato con filtro antiodore e saracinesca stagna di chiusura priva di perdite o gocciolamenti a terra durante la sosta e il transito?",
+      normReference: "Reg. CE 852/2004 Allegato II Cap. III e D.Lgs. 152/2006 art. 101",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Serbatoio acque grigie con valvola di scarico trafilante o perdite di liquami reflui sul suolo pubblico.",
+    });
+  }
+
+  // g) Cabina di Guida del Furgone / Autocarro Allestito
+  if (env.id === "env-ft-cabina-guida" || env.id.includes("ft-cabina-guida")) {
+    items.push({
+      id: `${env.id}-paratia-divisoria-fissa-sicurezza-cucina`,
+      area: env.name,
+      title: "Paratia Divisoria Fissa di Sicurezza tra Cabina di Guida e Laboratorio Posteriore",
+      question:
+        "Tra i sedili della cabina di guida e il laboratorio/cucina posteriore è installata una paratia divisoria rigida di sicurezza anti-intrusione omologata a protezione dell'autista da spostamento merci, utensili o schizzi in caso di brusca frenata?",
+      normReference: "D.Lgs. 81/2008 art. 71 e Codice della Strada art. 164",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Paratia divisoria tra cabina di guida e vano cucina assente o priva di fissaggio strutturale conforme.",
+    });
+
+    items.push({
+      id: `${env.id}-estintore-veicolare-polvere-cabina`,
+      area: env.name,
+      title: "Presenza di Estintore Veicolare Omologato da 2 kg in Cabina di Guida",
+      question:
+        "Nella cabina di guida del veicolo è alloggiato con staffa a sgancio rapido un estintore a polvere omologato da 2 kg con manometro in pressione e revisione semestrale in corso di validità?",
+      normReference: "D.M. 03/09/2021, D.Lgs. 81/2008 art. 46 e Codice della Strada",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Estintore in cabina di guida assente, non fissato saldamente o con revisione periodica scaduta.",
+    });
+  }
+
+  // h) Hangar / Area Rimessaggio Coperto del Veicolo & Ricarica Notturna
+  if (env.id === "env-ft-deposito-rimessaggio" || env.id.includes("ft-deposito-rimessaggio")) {
+    items.push({
+      id: `${env.id}-colonnina-ricarica-notturna-norma-cei`,
+      area: env.name,
+      title: "Colonnina di Allacciamento Elettrico Notturno a Norma CEI per Gruppi Frigo a Bordo",
+      question:
+        "L'area coperta di rimessaggio dispone di presa industriale CEE stagna a norma CEI con linea dedicata e salvavita differenziale per consentire il mantenimento sotto tensione dei frigoriferi del veicolo a motore spento durante la notte?",
+      normReference: "Norma CEI 64-8 e D.Lgs. 81/2008 Titolo III Capo III",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "microclima_luce",
+      suggestedNonConformity:
+        "Allaccio elettrico notturno per il furgone realizzato con prolunghe precarie o sprovvisto di presa industriale protetta.",
+    });
+
+    items.push({
+      id: `${env.id}-estintori-carrellati-rimessaggio-vie-fuga`,
+      area: env.name,
+      title: "Dotazione Antincendio con Estintori Carrellati e Corsie di Manovra Libere nell'Hangar",
+      question:
+        "Nell'hangar di rimessaggio dei mezzi le vie di manovra e le uscite carrabili sono tenute costantemente sgombre da ostacoli ed è presente almeno un estintore carrellato o portatile 34A 233B adeguatamente segnalato?",
+      normReference: "D.M. 03/09/2021 e D.Lgs. 81/2008 Allegato IV punto 1.4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Vie di transito del rimessaggio ostruite o presidi antincendio non segnalati e inaccessibili.",
+    });
+  }
+
+  // i) Piazzale di Carico Merci, Rifornimento Acqua & Scarico Acque Grigie
+  if (env.id === "env-ft-area-carico-scarico" || env.id.includes("ft-area-carico-scarico")) {
+    items.push({
+      id: `${env.id}-pozzetto-scarico-acque-grigie-autorizzato`,
+      area: env.name,
+      title: "Scarico Acque Grigie Esclusivamente in Pozzetto Fognario Autorizzato (Divieto Sversamento a Terra)",
+      question:
+        "Lo svuotamento del serbatoio delle acque grigie avviene esclusivamente tramite raccordi stagni in apposito pozzetto fognario carrabile autorizzato presso la sede o camper service autorizzati, con divieto assoluto di sversamento su pubblica via o caditoie stradali?",
+      normReference: "D.Lgs. 152/2006 art. 101, art. 137 e Reg. CE 852/2004 Allegato II Cap. III",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Scaricamento delle acque grigie in tombini stradali di acque bianche o sul suolo in violazione del D.Lgs. 152/2006.",
+    });
+
+    items.push({
+      id: `${env.id}-rifornimento-acqua-potabile-canna-moca-antiriflusso`,
+      area: env.name,
+      title: "Punto Rifornimento Acqua Potabile con Canna Alimentare MOCA e Valvola Antiriflusso UNI EN 1717",
+      question:
+        "Il punto di carico dell'acqua potabile per il furgone è provvisto di rubinetto con valvola di non ritorno antiriflusso conforme UNI EN 1717 e tubazione flessibile alimentare sanificata e dotata di raccordi protetti da tappi antipolvere?",
+      normReference: "Norma UNI EN 1717, D.Lgs. 18/2023 (acque potabili) e Reg. CE 852/2004",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Canna di rifornimento acqua non per alimenti o priva di protezione antiriflusso contro inquinamento della rete idrica.",
+    });
+  }
+
+  // j) Magazzino Secco & Packaging Monouso / MOCA di Sede
+  if (env.id === "env-ft-magazzino-scorte" || env.id.includes("ft-magazzino-scorte")) {
+    items.push({
+      id: `${env.id}-conformita-moca-packaging-street-food`,
+      area: env.name,
+      title: "Dichiarazioni di Conformità MOCA Packaging Monouso (Reg. CE 1935/2004 e Reg. UE 10/2011)",
+      question:
+        "Tutti i materiali monouso a contatto con alimenti (vaschette da asporto, coni fritti, bicchieri, posate e carte oleate) dispongono della dichiarazione di conformità MOCA del fabbricante conservata agli atti e sono stoccati al riparo da polvere e umidità?",
+      normReference: "Reg. CE 1935/2004, Reg. UE 10/2011 e D.Lgs. 29/2017",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Packaging monouso per street food privo di dichiarazione di conformità MOCA o stoccato in ambienti polverosi.",
+    });
+
+    items.push({
+      id: `${env.id}-stoccaggio-rialzato-scaffali-scorte`,
+      area: env.name,
+      title: "Stoccaggio Merci e Packaging su Scaffalature Rialzate ≥ 15 cm da Terra",
+      question:
+        "Tutte le scatole di imballaggi, bibite e alimenti non deperibili sono collocate su scaffalature metalliche o pedane sollevate di almeno 15 cm dal pavimento per consentire la pulizia e il monitoraggio da infestanti?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo I punto 2 e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Cartoni di packaging o alimenti appoggiati direttamente sul pavimento del magazzino scorte.",
+    });
+  }
+
+  // k) Laboratorio Base / Plonge di Sanificazione e Preparazione Linee
+  if (env.id === "env-ft-laboratorio-base" || env.id.includes("ft-laboratorio-base")) {
+    items.push({
+      id: `${env.id}-plonge-sanificazione-attrezzature-rientro`,
+      area: env.name,
+      title: "Vasca Lavello Inox Gigante per Sanificazione Attrezzature e Piastre di Rientro dal Servizio",
+      question:
+        "Il laboratorio di base dispone di un lavello plonge di dimensioni adeguate in acciaio inox per il lavaggio e la sanificazione approfondita di teglie, piastre fry-top smontabili e attrezzature al rientro dall'evento itinerante?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo II punto 2",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Assenza di vasca di lavaggio adatta alla sanificazione delle attrezzature voluminose di rientro dal food truck.",
+    });
+
+    items.push({
+      id: `${env.id}-cappa-aspirazione-laboratorio-base`,
+      area: env.name,
+      title: "Cappa di Aspirazione Fumi ed Impianto di Ricambio d'Aria nel Laboratorio Base",
+      question:
+        "Il laboratorio di preparazione linee è equipaggiato con cappa d'aspirazione fumi e vapori canalizzata all'esterno, pareti con rivestimento impermeabile e lavabile fino a 2 metri e pavimento antiscivolo con canalina di scolo?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.3 e 1.9, Reg. CE 852/2004 All. II Cap. II",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Laboratorio base privo di aspirazione fumi o con pareti degradate non sanificabili.",
+    });
+  }
+
+  // l) Spogliatoio e Servizi Igienici Personale presso la Sede Operativa
+  if (env.id === "env-ft-spogliatoi-sede" || env.id.includes("ft-spogliatoi-sede")) {
+    items.push({
+      id: `${env.id}-armadietti-doppio-scomparto-spogliatoio-sede`,
+      area: env.name,
+      title: "Armadietti Individuali a Doppio Scomparto Sporco/Pulito per Personale Food Truck",
+      question:
+        "Lo spogliatoio della sede dispone di armadietti metallici individuali lavabili a doppio scomparto per la separazione netta tra abiti civili e divise da lavoro/cucina intrise di grassi o fumi?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.12 e Reg. CE 852/2004 Allegato II Cap. I",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Spogliatoio privo di armadietti a doppio scomparto per il personale di cucina e vendita del food truck.",
+    });
+
+    items.push({
+      id: `${env.id}-lavamani-antibagno-sede`,
+      area: env.name,
+      title: "Servizi Igienici con Antibagno e Lavamani a Comando non Manuale nella Sede",
+      question:
+        "I servizi igienici della sede sono preceduti da idoneo antibagno provvisto di lavamani ad azionamento non manuale (a ginocchio, pedale o fotocellula), sapone liquido antibatterico e asciugamani a perdere?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo I punto 3 e 4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Wc senza antibagno o lavamani con rubinetto a vite manuale nei servizi igienici della sede.",
     });
   }
 

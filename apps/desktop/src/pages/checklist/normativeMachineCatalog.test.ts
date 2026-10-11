@@ -1444,4 +1444,261 @@ for (const code of ["56.21.0", "56.21", "562100", "5621"]) {
   assert.ok(fallbackRes.every((m) => m.sourceReason === "ateco"));
 }
 
+// ============================================================================
+// TEST ATECO 56.10.42 — FOOD TRUCK, STREET FOOD E RISTORAZIONE AMBULANTE
+// ============================================================================
+console.log("\n=== INIZIO TEST normativeMachineCatalog (ATECO 56.10.42 Food Truck / Street Food) ===");
+
+// -------------------------------------------------------------
+// Test 27: Priorità e risoluzione catalogo ATECO Food Truck
+// -------------------------------------------------------------
+console.log("Test 27: Verifica priorità catalogo ATECO per Food Truck e Ristorazione Ambulante (56.10.42 / 56.10.4 / 561042 / 56104)");
+const catalogFtExact = getSectorMachineCatalogForAteco("56.10.42");
+assert.equal(catalogFtExact.sectorKey, "food_truck_street_food", "ATECO 56.10.42 deve restituire food_truck_street_food");
+assert.ok(catalogFtExact.sectorLabel.includes("Food Truck"), "L'etichetta del catalogo deve includere Food Truck");
+assert.ok(catalogFtExact.sectorLabel.includes("Street Food"), "L'etichetta del catalogo deve includere Street Food");
+assert.ok(catalogFtExact.sectorLabel.includes("Ristorazione Ambulante"), "L'etichetta del catalogo deve includere Ristorazione Ambulante");
+
+for (const variant of ["56.10.4", "561042", "56104"]) {
+  const ftVar = getSectorMachineCatalogForAteco(variant);
+  assert.equal(ftVar.sectorKey, "food_truck_street_food", `Variante '${variant}' deve restituire food_truck_street_food`);
+}
+
+// Verifica posizionamento: food_truck_street_food segue catering_eventi_banqueting e precede ristorazione_alimentare
+const catIdxFt = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "catering_eventi_banqueting");
+const ftIdx = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "food_truck_street_food");
+const ristGenIdxFt = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ristorazione_alimentare");
+assert.ok(catIdxFt !== -1, "Settore catering_eventi_banqueting deve esistere");
+assert.ok(ftIdx !== -1, "Settore food_truck_street_food deve esistere");
+assert.ok(ristGenIdxFt !== -1, "Settore generico ristorazione_alimentare deve esistere");
+assert.equal(ftIdx, catIdxFt + 1, "food_truck_street_food deve seguire immediatamente catering_eventi_banqueting");
+assert.ok(ftIdx < ristGenIdxFt, "food_truck_street_food deve precedere ristorazione_alimentare nel catalogo");
+
+// -------------------------------------------------------------
+// Test 28: Verifica completezza delle 16 macchine per Food Truck
+// -------------------------------------------------------------
+console.log("Test 28: Verifica completezza delle 16 attrezzature professionali con modelli reali e controlli normativi dedicati");
+assert.equal(catalogFtExact.machines.length, 16, "Il catalogo Food Truck deve contenere esattamente 16 macchine");
+
+const expectedFtMachineKeys = [
+  // Reparto 1: Cottura & Fumi Veicolari (4)
+  "piastra_frytop_foodtruck",
+  "friggitrice_incasso_foodtruck",
+  "cappa_aspirazione_foodtruck",
+  "affettatrice_compatta_blocco",
+  // Reparto 2: Freddo & Conservazione Veicolare (2)
+  "banco_frigo_orizzontale_veicolare",
+  "armadio_freezer_veicolare",
+  // Reparto 3: Somministrazione & Interfaccia Clienti (3)
+  "vetrina_refrigerata_parafiato",
+  "portellone_idraulico_banco",
+  "estintore_polvere_co2_foodtruck",
+  // Reparto 4: Energia & Impianto Elettrico Mobile (2)
+  "gruppo_elettrogeno_silenziato",
+  "quadro_elettrico_veicolare",
+  // Reparto 5: Sicurezza Impianto Gas GPL (2)
+  "impianto_rilevazione_gas_gpl",
+  "bombole_gpl_vano_ermetico",
+  // Reparto 6: Autonomia Idrica & Igiene Mani (3)
+  "autoclave_pompa_acqua_12v",
+  "boiler_elettrico_compatto",
+  "lavello_inox_ginocchio_veicolare",
+];
+
+for (const key of expectedFtMachineKeys) {
+  const found = catalogFtExact.machines.find((m) => m.machineKey === key);
+  assert.ok(found, `Macchina ${key} deve essere presente nel catalogo Food Truck`);
+  assert.ok(found.name.length > 5, `Nome macchina ${key} deve essere esaustivo`);
+  assert.ok(found.type.length > 5, `Tipologia macchina ${key} deve essere specificata`);
+  assert.ok(found.suggestedManufacturer.length > 0, `Produttore suggerito per ${key} deve essere presente`);
+  assert.ok(found.suggestedModel.length > 0, `Modello suggerito per ${key} deve essere presente`);
+  assert.ok(found.safetyChecks.length >= 3, `Macchina ${key} deve avere almeno 3 controlli di sicurezza`);
+  assert.ok(found.training, `Macchina ${key} deve avere un corso di formazione/addestramento associato`);
+}
+
+// Verifiche puntuali su modelli reali e controlli normativi specifici (UNI EN 1974, crash-sensor UNI EN 16129, MOCA 1935/2004, D.M. 03/09/2021 classe F, salvavita 30 mA, UNI 7140):
+const piastraFt = catalogFtExact.machines.find((m) => m.machineKey === "piastra_frytop_foodtruck")!;
+assert.ok(piastraFt.suggestedManufacturer.includes("Giorik") || piastraFt.suggestedManufacturer.includes("Lotus") || piastraFt.suggestedManufacturer.includes("Angelo Po"), "Giorik, Lotus o Angelo Po");
+assert.ok(piastraFt.safetyChecks.some((c) => c.code === "PIASTRA_FT_PARASPRUZZI_ALTO"), "Paraspruzzi perimetrale inox alto");
+assert.ok(piastraFt.safetyChecks.some((c) => c.code === "PIASTRA_FT_CASSETTO_GRASSI_BLOCCO_CURVA"), "Cassetto grassi con blocco curva");
+assert.ok(piastraFt.safetyChecks.some((c) => c.code === "PIASTRA_FT_TERMOCOPPIA_SICUREZZA_GAS"), "Termocoppia sicurezza gas");
+
+const friggitriceFt = catalogFtExact.machines.find((m) => m.machineKey === "friggitrice_incasso_foodtruck")!;
+assert.ok(friggitriceFt.suggestedManufacturer.includes("Lotus") || friggitriceFt.suggestedManufacturer.includes("Fimar") || friggitriceFt.suggestedManufacturer.includes("Angelo Po"), "Lotus, Fimar o Angelo Po");
+assert.ok(friggitriceFt.safetyChecks.some((c) => c.code === "FRIGGITRICE_FT_COPERCHIO_ERMETICO_GANCI_MARCIA"), "Coperchio ermetico con ganci marcia");
+assert.ok(friggitriceFt.safetyChecks.some((c) => c.code === "FRIGGITRICE_FT_TERMOSTATO_MASSIMA_230C_RIARMO" && c.normReference.includes("03/09/2021")), "Termostato < 230°C contro autocombustione D.M. 03/09/2021");
+assert.ok(friggitriceFt.safetyChecks.some((c) => c.code === "FRIGGITRICE_FT_RUBINETTO_SCARICO_PROLUNGA_SICURA"), "Valvola scarico con prolunga e sicura");
+
+const cappaFt = catalogFtExact.machines.find((m) => m.machineKey === "cappa_aspirazione_foodtruck")!;
+assert.ok(cappaFt.suggestedManufacturer.includes("Smoki") || cappaFt.suggestedManufacturer.includes("Camini & Cappe") || cappaFt.suggestedManufacturer.includes("Baraldi"), "Smoki, Camini & Cappe o Baraldi");
+assert.ok(cappaFt.safetyChecks.some((c) => c.code === "CAPPA_FT_FILTRI_LABIRINTO_INOX_LAVABILI"), "Filtri labirinto inox");
+assert.ok(cappaFt.safetyChecks.some((c) => c.code === "CAPPA_FT_SCARICO_TETTO_COMIGNOLO_AERODINAMICO"), "Scarico a tetto con comignolo aerodinamico");
+assert.ok(cappaFt.safetyChecks.some((c) => c.code === "CAPPA_FT_MICROINTERRUTTORE_VENTILAZIONE_FORZATA"), "Microinterruttore ventilazione forzata");
+
+const affettatriceFt = catalogFtExact.machines.find((m) => m.machineKey === "affettatrice_compatta_blocco")!;
+assert.ok(affettatriceFt.suggestedManufacturer.includes("Sirman") || affettatriceFt.suggestedManufacturer.includes("Berkel"), "Sirman o Berkel");
+assert.ok(affettatriceFt.safetyChecks.some((c) => c.code === "AFFETTATRICE_FT_ANELLO_FISSO_PARALAMA_360_UNI1974" && c.normReference.includes("UNI EN 1974")), "Anello fisso paralama continuo 360° UNI EN 1974");
+assert.ok(affettatriceFt.safetyChecks.some((c) => c.code === "AFFETTATRICE_FT_ANCORAGGIO_RAPIDO_VOLANTINI_BANCO"), "Ancoraggio rapido al banco con volantini");
+assert.ok(affettatriceFt.safetyChecks.some((c) => c.code === "AFFETTATRICE_FT_BLOCCO_VELA_SPESSORE_ZERO_CARRO"), "Blocco vela spessore zero");
+
+const bancoFrigoFt = catalogFtExact.machines.find((m) => m.machineKey === "banco_frigo_orizzontale_veicolare")!;
+assert.ok(bancoFrigoFt.suggestedManufacturer.includes("Friulinox") || bancoFrigoFt.suggestedManufacturer.includes("Mercatus") || bancoFrigoFt.suggestedManufacturer.includes("Ilsa"), "Friulinox, Mercatus o Ilsa");
+assert.ok(bancoFrigoFt.safetyChecks.some((c) => c.code === "BANCO_FRIGO_FT_CASSETTI_FERMO_MECCANICO_CURVA"), "Cassetti con fermo meccanico anti-apertura in curva");
+assert.ok(bancoFrigoFt.safetyChecks.some((c) => c.code === "BANCO_FRIGO_FT_CIRCUITO_ERMETICO_R290_UNI378" && c.normReference.includes("UNI EN 378")), "Circuito ermetico UNI EN 378 gas R290");
+
+const freezerFt = catalogFtExact.machines.find((m) => m.machineKey === "armadio_freezer_veicolare")!;
+assert.ok(freezerFt.suggestedManufacturer.includes("Liebherr") || freezerFt.suggestedManufacturer.includes("Ilsa"), "Liebherr o Ilsa");
+assert.ok(freezerFt.safetyChecks.some((c) => c.code === "FREEZER_FT_TEMPERATURA_COSTANTE_18C_ISOLAMENTO"), "Temperatura costante <= -18°C");
+assert.ok(freezerFt.safetyChecks.some((c) => c.code === "FREEZER_FT_SERRATURA_MECCANICA_CHIAVE_TRASPORTO"), "Serratura meccanica a chiave");
+
+const vetrinaFt = catalogFtExact.machines.find((m) => m.machineKey === "vetrina_refrigerata_parafiato")!;
+assert.ok(vetrinaFt.suggestedManufacturer.includes("Fimar") || vetrinaFt.suggestedManufacturer.includes("Mercatus"), "Fimar o Mercatus");
+assert.ok(vetrinaFt.safetyChecks.some((c) => c.code === "VETRINA_FT_CRISTALLO_CURVO_PARAFIATO_ASL"), "Cristallo curvo parafiato igienico ASL");
+assert.ok(vetrinaFt.safetyChecks.some((c) => c.code === "VETRINA_FT_BACINELLE_INOX_MOCA_1935_2004" && c.normReference.includes("1935/2004")), "Bacinelle inox con conformità MOCA 1935/2004");
+
+const portelloneFt = catalogFtExact.machines.find((m) => m.machineKey === "portellone_idraulico_banco")!;
+assert.ok(portelloneFt.safetyChecks.some((c) => c.code === "PORTELLONE_FT_PISTONI_GAS_BLOCCO_ANTICADUTA_VENTO"), "Pistoni gas e blocco meccanico anticaduta da vento");
+assert.ok(portelloneFt.safetyChecks.some((c) => c.code === "PORTELLONE_FT_STRIP_LED_24V_ILLUMINAZIONE_CLIENTE"), "Strip LED 24V");
+
+const estintoreFt = catalogFtExact.machines.find((m) => m.machineKey === "estintore_polvere_co2_foodtruck")!;
+assert.ok(estintoreFt.suggestedManufacturer.includes("Anaf") || estintoreFt.suggestedManufacturer.includes("Mozzanica") || estintoreFt.suggestedManufacturer.includes("Mb"), "Anaf, Mozzanica o Mb");
+assert.ok(estintoreFt.safetyChecks.some((c) => c.code === "ESTINTORE_FT_OMOLOGATO_DM2021_CLASSE_F_OLI_GRASSI" && c.normReference.includes("03/09/2021")), "Estintore omologato D.M. 03/09/2021 classe F per oli e grassi");
+assert.ok(estintoreFt.safetyChecks.some((c) => c.code === "ESTINTORE_FT_COPERTA_ANTIFIAMMA_IGNIFUGA_EN1869"), "Coperta antifiamma EN 1869");
+
+const generatoreFt = catalogFtExact.machines.find((m) => m.machineKey === "gruppo_elettrogeno_silenziato")!;
+assert.ok(generatoreFt.suggestedManufacturer.includes("Pramac") || generatoreFt.suggestedManufacturer.includes("Honda") || generatoreFt.suggestedManufacturer.includes("Genmac"), "Pramac, Honda o Genmac");
+assert.ok(generatoreFt.safetyChecks.some((c) => c.code === "GENERATORE_FT_INSONORIZZAZIONE_SOTTO_65DBA"), "Silenziato < 65 dBA");
+assert.ok(generatoreFt.safetyChecks.some((c) => c.code === "GENERATORE_FT_SCARICO_GAS_CONVOGLIATO_TETTO_ESTERNO"), "Scarico gas a tetto esterno");
+
+const quadroFt = catalogFtExact.machines.find((m) => m.machineKey === "quadro_elettrico_veicolare")!;
+assert.ok(quadroFt.suggestedManufacturer.includes("Gewiss") || quadroFt.suggestedManufacturer.includes("Scame"), "Gewiss o Scame");
+assert.ok(quadroFt.safetyChecks.some((c) => c.code === "QUADRO_FT_DIFFERENZIALE_SALVAVITA_30MA" && c.question.includes("30 mA")), "Differenziale salvavita 30 mA");
+assert.ok(quadroFt.safetyChecks.some((c) => c.code === "QUADRO_FT_COMMUTATORE_RETE_GRUPPO_INTERBLOCCATO"), "Commutatore rete/gruppo interbloccato");
+
+const rilevatoreGasFt = catalogFtExact.machines.find((m) => m.machineKey === "impianto_rilevazione_gas_gpl")!;
+assert.ok(rilevatoreGasFt.suggestedManufacturer.includes("BEP") || rilevatoreGasFt.suggestedManufacturer.includes("CBE") || rilevatoreGasFt.suggestedManufacturer.includes("Cavagna"), "BEP, CBE o Cavagna");
+assert.ok(rilevatoreGasFt.safetyChecks.some((c) => c.code === "RILEVATORE_FT_SENSORE_PAVIMENTO_GPL_CICALINO"), "Sensore a pavimento GPL con cicalino");
+assert.ok(rilevatoreGasFt.safetyChecks.some((c) => c.code === "RILEVATORE_FT_ELETTROVALVOLA_NC_RIARMO_MANUALE"), "Elettrovalvola NC a riarmo manuale all'uscita bombole");
+
+const bomboleFt = catalogFtExact.machines.find((m) => m.machineKey === "bombole_gpl_vano_ermetico")!;
+assert.ok(bomboleFt.suggestedManufacturer.includes("Cavagna") || bomboleFt.suggestedManufacturer.includes("Truma"), "Cavagna o Truma");
+assert.ok(bomboleFt.safetyChecks.some((c) => c.code === "BOMBOLE_FT_CRASH_SENSOR_DUOCONTROL_UNI16129" && c.normReference.includes("UNI EN 16129")), "Sensore crash-sensor DuoControl UNI EN 16129");
+assert.ok(bomboleFt.safetyChecks.some((c) => c.code === "BOMBOLE_FT_TUBI_FLESSIBILI_UNI7140_SCADENZA" && c.normReference.includes("UNI 7140")), "Tubi flessibili UNI 7140 con data di scadenza");
+assert.ok(bomboleFt.safetyChecks.some((c) => c.code === "BOMBOLE_FT_VANO_ERMETICO_INTERNO_AERAZIONE_PAVIMENTO"), "Vano bombole ermetico e aerato a pavimento");
+
+const autoclaveFt = catalogFtExact.machines.find((m) => m.machineKey === "autoclave_pompa_acqua_12v")!;
+assert.ok(autoclaveFt.suggestedManufacturer.includes("Flojet") || autoclaveFt.suggestedManufacturer.includes("Shurflo") || autoclaveFt.suggestedManufacturer.includes("Jabsco"), "Flojet, Shurflo o Jabsco");
+assert.ok(autoclaveFt.safetyChecks.some((c) => c.code === "AUTOCLAVE_FT_MATERIALI_MOCA_1935_2004_DM174" && c.normReference.includes("1935/2004")), "Idoneità al contatto alimentare MOCA Reg. CE 1935/2004");
+
+const boilerFt = catalogFtExact.machines.find((m) => m.machineKey === "boiler_elettrico_compatto")!;
+assert.ok(boilerFt.suggestedManufacturer.includes("Truma") || boilerFt.suggestedManufacturer.includes("Ariston"), "Truma o Ariston");
+assert.ok(boilerFt.safetyChecks.some((c) => c.code === "BOILER_FT_EROGAZIONE_ACQUA_45_50C_LAVAGGIO_MANI"), "Erogazione acqua 45-50°C per igiene mani");
+assert.ok(boilerFt.safetyChecks.some((c) => c.code === "BOILER_FT_VALVOLA_SICUREZZA_SOVRAPRESSIONE_SCARICO_TERRA"), "Valvola sicurezza con scarico a terra");
+
+const lavelloFt = catalogFtExact.machines.find((m) => m.machineKey === "lavello_inox_ginocchio_veicolare")!;
+assert.ok(lavelloFt.suggestedManufacturer.includes("Bonomini") || lavelloFt.suggestedManufacturer.includes("Inox Piave") || lavelloFt.suggestedManufacturer.includes("Forcar"), "Bonomini, Inox Piave o Forcar");
+assert.ok(lavelloFt.safetyChecks.some((c) => c.code === "LAVELLO_FT_COMANDO_NON_MANUALE_GINOCCHIO" && c.normReference.includes("852/2004")), "Comando a ginocchio non manuale Reg. CE 852/2004");
+assert.ok(lavelloFt.safetyChecks.some((c) => c.code === "LAVELLO_FT_DISPENSATORI_SAPONE_CARTA_FISSATI"), "Distributori sapone e carta fissati");
+
+// -------------------------------------------------------------
+// Test 29: Associazione 1-a-1 ambienti Step 2 Food Truck (env-ft-*) -> Step 4 Macchine
+// -------------------------------------------------------------
+console.log("Test 29: Verifica associazione ambienti Step 2 Food Truck (env-ft-*) -> Step 4 Macchine");
+const ftEnvironments = [
+  { id: "env-ft-vano-cottura", name: "Vano Cottura e Piastre da Furgone", category: "cucina" },
+  { id: "env-ft-vano-refrigerazione", name: "Vano Refrigerazione e Conservazione Veicolare", category: "magazzino_merci" },
+  { id: "env-ft-banco-somministrazione", name: "Banco Somministrazione e Interfaccia Clienti", category: "sales_office" },
+  { id: "env-ft-vano-generatore", name: "Vano Gruppo Elettrogeno Ausiliario", category: "tecnici_esterno" },
+  { id: "env-ft-vano-bombole-gpl", name: "Vano Ermetico Bombole GPL", category: "tecnici_esterno" },
+  { id: "env-ft-impianto-idrico", name: "Impianto Idrico Autonomo e Igiene Mani", category: "laboratorio_cucina" },
+];
+
+const suggestedWithFtEnvs = getSuggestedMachinesForEnvironmentsAndAteco(ftEnvironments, "56.10.42");
+assert.equal(suggestedWithFtEnvs.length, 16, "Tutte le 16 macchine devono essere raccomandate e collegate ai 6 ambienti veicolari censiti");
+
+// Verifica 1-a-1 per ciascun ambiente:
+const cotturaFtMachines = suggestedWithFtEnvs.filter((m) => m.targetEnvironmentId === "env-ft-vano-cottura");
+assert.equal(cotturaFtMachines.length, 4, "env-ft-vano-cottura deve associare 4 attrezzature di cottura e taglio");
+assert.ok(cotturaFtMachines.some((m) => m.machineKey === "piastra_frytop_foodtruck"));
+assert.ok(cotturaFtMachines.some((m) => m.machineKey === "friggitrice_incasso_foodtruck"));
+assert.ok(cotturaFtMachines.some((m) => m.machineKey === "cappa_aspirazione_foodtruck"));
+assert.ok(cotturaFtMachines.some((m) => m.machineKey === "affettatrice_compatta_blocco"));
+
+const refrMachines = suggestedWithFtEnvs.filter((m) => m.targetEnvironmentId === "env-ft-vano-refrigerazione");
+assert.equal(refrMachines.length, 2, "env-ft-vano-refrigerazione deve associare 2 attrezzature del freddo");
+assert.ok(refrMachines.some((m) => m.machineKey === "banco_frigo_orizzontale_veicolare"));
+assert.ok(refrMachines.some((m) => m.machineKey === "armadio_freezer_veicolare"));
+
+const somministrazioneMachines = suggestedWithFtEnvs.filter((m) => m.targetEnvironmentId === "env-ft-banco-somministrazione");
+assert.equal(somministrazioneMachines.length, 3, "env-ft-banco-somministrazione deve associare vetrina, portellone ed estintore");
+assert.ok(somministrazioneMachines.some((m) => m.machineKey === "vetrina_refrigerata_parafiato"));
+assert.ok(somministrazioneMachines.some((m) => m.machineKey === "portellone_idraulico_banco"));
+assert.ok(somministrazioneMachines.some((m) => m.machineKey === "estintore_polvere_co2_foodtruck"));
+
+const generatoreMachines = suggestedWithFtEnvs.filter((m) => m.targetEnvironmentId === "env-ft-vano-generatore");
+assert.equal(generatoreMachines.length, 2, "env-ft-vano-generatore deve associare generatore e quadro elettrico");
+assert.ok(generatoreMachines.some((m) => m.machineKey === "gruppo_elettrogeno_silenziato"));
+assert.ok(generatoreMachines.some((m) => m.machineKey === "quadro_elettrico_veicolare"));
+
+const bomboleMachines = suggestedWithFtEnvs.filter((m) => m.targetEnvironmentId === "env-ft-vano-bombole-gpl");
+assert.equal(bomboleMachines.length, 2, "env-ft-vano-bombole-gpl deve associare rilevatore gas e gruppo bombole");
+assert.ok(bomboleMachines.some((m) => m.machineKey === "impianto_rilevazione_gas_gpl"));
+assert.ok(bomboleMachines.some((m) => m.machineKey === "bombole_gpl_vano_ermetico"));
+
+const idricoMachines = suggestedWithFtEnvs.filter((m) => m.targetEnvironmentId === "env-ft-impianto-idrico");
+assert.equal(idricoMachines.length, 3, "env-ft-impianto-idrico deve associare pompa autoclave, boiler e lavello");
+assert.ok(idricoMachines.some((m) => m.machineKey === "autoclave_pompa_acqua_12v"));
+assert.ok(idricoMachines.some((m) => m.machineKey === "boiler_elettrico_compatto"));
+assert.ok(idricoMachines.some((m) => m.machineKey === "lavello_inox_ginocchio_veicolare"));
+
+// Verifica anche supporto per ambienti ausiliari / di rimessaggio e sede
+const cabinaTest = getSuggestedMachinesForEnvironmentsAndAteco(
+  [{ id: "env-ft-cabina-guida", name: "Cabina di Guida Furgone Speciale", category: "offices" }],
+  "56.10.42",
+);
+const cabinaLinked = cabinaTest.filter((m) => m.targetEnvironmentId === "env-ft-cabina-guida");
+assert.equal(cabinaLinked.length, 2, "env-ft-cabina-guida deve associare estintore e quadro elettrico");
+assert.ok(cabinaLinked.some((m) => m.machineKey === "estintore_polvere_co2_foodtruck"));
+assert.ok(cabinaLinked.some((m) => m.machineKey === "quadro_elettrico_veicolare"));
+
+const rimessaggioTest = getSuggestedMachinesForEnvironmentsAndAteco(
+  [{ id: "env-ft-deposito-rimessaggio", name: "Rimessaggio Notturno e Deposito Veicoli", category: "warehouse" }],
+  "56.10.42",
+);
+const rimessaggioLinked = rimessaggioTest.filter((m) => m.targetEnvironmentId === "env-ft-deposito-rimessaggio");
+assert.equal(rimessaggioLinked.length, 4, "env-ft-deposito-rimessaggio deve associare 4 macchine");
+assert.ok(rimessaggioLinked.some((m) => m.machineKey === "gruppo_elettrogeno_silenziato"));
+assert.ok(rimessaggioLinked.some((m) => m.machineKey === "bombole_gpl_vano_ermetico"));
+assert.ok(rimessaggioLinked.some((m) => m.machineKey === "banco_frigo_orizzontale_veicolare"));
+assert.ok(rimessaggioLinked.some((m) => m.machineKey === "armadio_freezer_veicolare"));
+
+const laboratorioSedeTest = getSuggestedMachinesForEnvironmentsAndAteco(
+  [{ id: "env-ft-laboratorio-base", name: "Laboratorio Base Cucina e Stoccaggio Sede", category: "production" }],
+  "56.10.42",
+);
+const laboratorioLinked = laboratorioSedeTest.filter((m) => m.targetEnvironmentId === "env-ft-laboratorio-base");
+assert.equal(laboratorioLinked.length, 4, "env-ft-laboratorio-base deve associare 4 macchine di base");
+assert.ok(laboratorioLinked.some((m) => m.machineKey === "piastra_frytop_foodtruck"));
+assert.ok(laboratorioLinked.some((m) => m.machineKey === "affettatrice_compatta_blocco"));
+assert.ok(laboratorioLinked.some((m) => m.machineKey === "cappa_aspirazione_foodtruck"));
+assert.ok(laboratorioLinked.some((m) => m.machineKey === "lavello_inox_ginocchio_veicolare"));
+
+// -------------------------------------------------------------
+// Test 30: Risoluzione solo su codice ATECO senza locali censiti (Food Truck)
+// -------------------------------------------------------------
+console.log("Test 30: Integrazione automatica macchine per ATECO 56.10.42 senza ambienti preventivi");
+const suggestedFtOnlyAteco = getSuggestedMachinesForEnvironmentsAndAteco([], "56.10.42");
+assert.equal(suggestedFtOnlyAteco.length, 16, "Devono essere suggerite tutte le 16 macchine del food truck");
+assert.ok(
+  suggestedFtOnlyAteco.every((m) => m.sourceReason === "ateco"),
+  "Tutte le macchine devono avere sourceReason === 'ateco' se nessun locale è stato specificato",
+);
+
+// Verifica fallback automatico identico per varianti di codice ATECO ("56.10.4", "561042", "56104")
+for (const code of ["56.10.4", "561042", "56104"]) {
+  const fallbackRes = getSuggestedMachinesForEnvironmentsAndAteco([], code);
+  assert.equal(fallbackRes.length, 16, `ATECO variant '${code}' deve restituire tutte le 16 macchine`);
+  assert.ok(fallbackRes.every((m) => m.sourceReason === "ateco"));
+}
+
 console.log("=== TUTTI I TEST normativeMachineCatalog SUPERATI CON SUCCESSO! ===");
