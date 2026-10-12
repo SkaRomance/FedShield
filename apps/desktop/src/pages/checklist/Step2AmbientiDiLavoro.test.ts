@@ -3803,4 +3803,571 @@ assert.ok(
   "In modalità safety_only nessun item office colazioni hotel deve avere domain haccp",
 );
 
+// ============================================================================
+// 11. Test B&B, Affittacamere, Case Vacanze, Guest House ATECO 55.20.51 (o 55.20.5 / 55.20 / 55.2 / 552051 / 55205 / 5520 / 552)
+// ============================================================================
+console.log("Test 27: getStandardEnvironmentsForAteco & conformità per B&B / Affittacamere (55.20.51 / 55.20.5 / 55.20 / 55.2 / 552051)");
+
+const bnbEnvs = getStandardEnvironmentsForAteco("55.20.51");
+assert.equal(bnbEnvs.length, 12, "Il B&B / Affittacamere deve avere esattamente 12 ambienti standard");
+
+// Verifica varianti codice ATECO (55.20.5, 55.20, 55.2, 552051, 55205, 5520, 552)
+const bnbEnvsVar1 = getStandardEnvironmentsForAteco("55.20.5");
+assert.equal(bnbEnvsVar1.length, 12, "Anche prefisso 55.20.5 deve restituire 12 ambienti B&B");
+const bnbEnvsVar2 = getStandardEnvironmentsForAteco("55.20");
+assert.equal(bnbEnvsVar2.length, 12, "Anche prefisso 55.20 deve restituire 12 ambienti B&B");
+const bnbEnvsVar3 = getStandardEnvironmentsForAteco("55.2");
+assert.equal(bnbEnvsVar3.length, 12, "Anche prefisso 55.2 deve restituire 12 ambienti B&B");
+const bnbEnvsVar4 = getStandardEnvironmentsForAteco("552051");
+assert.equal(bnbEnvsVar4.length, 12, "Anche codice numerico 552051 deve restituire 12 ambienti B&B");
+const bnbEnvsVar5 = getStandardEnvironmentsForAteco("55205");
+assert.equal(bnbEnvsVar5.length, 12, "Anche codice numerico 55205 deve restituire 12 ambienti B&B");
+const bnbEnvsVar6 = getStandardEnvironmentsForAteco("5520");
+assert.equal(bnbEnvsVar6.length, 12, "Anche codice numerico 5520 deve restituire 12 ambienti B&B");
+const bnbEnvsVar7 = getStandardEnvironmentsForAteco("552");
+assert.equal(bnbEnvsVar7.length, 12, "Anche codice numerico 552 deve restituire 12 ambienti B&B");
+
+// Verifica ID dei 12 ambienti standard B&B
+const expectedBnbIds = [
+  "env-bnb-ingresso-reception",
+  "env-bnb-camere-ospiti",
+  "env-bnb-bagni-privati",
+  "env-bnb-sala-colazioni",
+  "env-bnb-kitchenette-office",
+  "env-bnb-guardaroba-biancheria",
+  "env-bnb-lavanderia-office",
+  "env-bnb-centrale-termica-boiler",
+  "env-bnb-terrazzo-balconi",
+  "env-bnb-scale-disimpegni",
+  "env-bnb-ripostiglio-housekeeping",
+  "env-bnb-area-rifiuti-differenziata",
+];
+
+for (const id of expectedBnbIds) {
+  assert.ok(
+    bnbEnvs.some((e) => e.id === id),
+    `Ambiente ${id} deve essere presente nella lista standard B&B per 55.20.51`,
+  );
+}
+
+// 1. Ingresso Principale & Reception / Desk Accoglienza
+const bnbReception = bnbEnvs.find((e) => e.id === "env-bnb-ingresso-reception")!;
+assert.equal(bnbReception.category, "sales_office");
+assert.equal(bnbReception.surfaceSqM, 25);
+assert.equal(bnbReception.heightM, 2.8);
+assert.equal(bnbReception.volumeCuM, 70);
+assert.equal(bnbReception.occupantsCount, 4);
+assert.equal(bnbReception.windowSurfaceSqM, 3.0);
+assert.equal(bnbReception.features.emergencyLighting, true);
+assert.equal(bnbReception.features.antiShatterGlass, true);
+const compBnbReception = evaluateEnvironmentCompliance(bnbReception, "55.20.51");
+assert.equal(compBnbReception.isHeightCompliant, true);
+assert.equal(compBnbReception.isCubatureCompliant, true);
+assert.ok(
+  compBnbReception.summaryBadges.some((b) => b.text.includes("13A 89B") && b.text.includes("D.M. 03/09/2021")),
+  "Reception B&B deve includere badge estintore 13A 89B D.M. 03/09/2021",
+);
+assert.ok(
+  compBnbReception.summaryBadges.some((b) => b.text.includes("Planimetria di esodo bilingue")),
+  "Reception B&B deve includere badge planimetria bilingue",
+);
+assert.ok(
+  compBnbReception.summaryBadges.some((b) => b.text.includes("lampade autoalimentate")),
+  "Reception B&B deve includere badge illuminazione di emergenza autoalimentata",
+);
+
+// 2. Camere da Letto Ospiti (Standard, Superior & Accessibile Disabili)
+const bnbCamere = bnbEnvs.find((e) => e.id === "env-bnb-camere-ospiti")!;
+assert.equal(bnbCamere.category, "public");
+assert.equal(bnbCamere.surfaceSqM, 120);
+assert.equal(bnbCamere.heightM, 2.7);
+assert.equal(bnbCamere.volumeCuM, 324);
+assert.equal(bnbCamere.occupantsCount, 12);
+assert.equal(bnbCamere.windowSurfaceSqM, 18.0);
+assert.equal(bnbCamere.features.emergencyLighting, true);
+const compBnbCamere = evaluateEnvironmentCompliance(bnbCamere, "55.20.51");
+assert.equal(compBnbCamere.isHeightCompliant, true);
+assert.equal(compBnbCamere.isCubatureCompliant, true);
+assert.equal(compBnbCamere.cpiActivityAlert, null, "Camere B&B con 12 posti letto (≤25) non devono essere assoggettate ad Attività 66 CPI");
+assert.ok(
+  compBnbCamere.summaryBadges.some((b) => b.text.includes("UNI EN 14604")),
+  "Camere B&B devono includere badge rilevatori di fumo autonomi UNI EN 14604",
+);
+assert.ok(
+  compBnbCamere.summaryBadges.some((b) => b.text.includes("aeroilluminante ≥ 1/8")),
+  "Camere B&B devono includere badge aerazione naturale 1/8",
+);
+assert.ok(
+  compBnbCamere.summaryBadges.some((b) => b.text.includes("D.Lgs. 81/08 Titolo VI")),
+  "Camere B&B devono includere badge ergonomia rifacimento letti Titolo VI",
+);
+
+// 3. Servizi Igienici Privati & Bagno Disabili (D.P.R. 503/96)
+const bnbBagni = bnbEnvs.find((e) => e.id === "env-bnb-bagni-privati")!;
+assert.equal(bnbBagni.category, "services");
+assert.equal(bnbBagni.surfaceSqM, 24);
+assert.equal(bnbBagni.heightM, 2.4);
+assert.equal(bnbBagni.volumeCuM, 57.6);
+assert.equal(bnbBagni.occupantsCount, 2);
+assert.equal(bnbBagni.windowSurfaceSqM, 3.0);
+assert.equal(bnbBagni.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(bnbBagni.features.flooringCondition, "compliant_anti_slip");
+assert.equal(bnbBagni.features.forcedExhaustPresent, true);
+assert.equal(bnbBagni.features.forcedExhaustType, "blind_toilet_fan");
+const compBnbBagni = evaluateEnvironmentCompliance(bnbBagni, "55.20.51");
+assert.equal(compBnbBagni.isHeightCompliant, true);
+assert.equal(compBnbBagni.isCubatureCompliant, true);
+assert.ok(
+  compBnbBagni.summaryBadges.some((b) => b.text.includes("D.P.R. 503/96") && b.text.includes("tirante allarme a campanello")),
+  "Bagni B&B devono includere badge bagno accessibile D.P.R. 503/96 con tirante allarme",
+);
+assert.ok(
+  compBnbBagni.summaryBadges.some((b) => b.text.includes("Legionella")),
+  "Bagni B&B devono includere badge prevenzione Legionella soffioni doccia",
+);
+
+// 4. Area Colazioni, Zona Living & Tavoli Ospiti
+const bnbSalaColazioni = bnbEnvs.find((e) => e.id === "env-bnb-sala-colazioni")!;
+assert.equal(bnbSalaColazioni.category, "public");
+assert.equal(bnbSalaColazioni.surfaceSqM, 35);
+assert.equal(bnbSalaColazioni.heightM, 2.8);
+assert.equal(bnbSalaColazioni.volumeCuM, 98);
+assert.equal(bnbSalaColazioni.occupantsCount, 16);
+assert.equal(bnbSalaColazioni.windowSurfaceSqM, 5.0);
+assert.equal(bnbSalaColazioni.features.emergencyLighting, true);
+const compBnbSalaColazioni = evaluateEnvironmentCompliance(bnbSalaColazioni, "55.20.51");
+assert.equal(compBnbSalaColazioni.isHeightCompliant, true);
+assert.ok(
+  compBnbSalaColazioni.summaryBadges.some((b) => b.text.includes("MOCA") && b.text.includes("Reg. CE 1935/2004")),
+  "Sala colazioni B&B deve includere badge buffet parafiato MOCA",
+);
+assert.ok(
+  compBnbSalaColazioni.summaryBadges.some((b) => b.text.includes("Vie di esodo libere")),
+  "Sala colazioni B&B deve includere badge vie di esodo libere ed estintore",
+);
+
+// 5. Kitchenette / Angolo Cottura, Scaldavivande & Office Colazioni
+const bnbKitchenette = bnbEnvs.find((e) => e.id === "env-bnb-kitchenette-office")!;
+assert.equal(bnbKitchenette.category, "production");
+assert.equal(bnbKitchenette.surfaceSqM, 12);
+assert.equal(bnbKitchenette.heightM, 2.7);
+assert.equal(bnbKitchenette.volumeCuM, 32.4);
+assert.equal(bnbKitchenette.occupantsCount, 2);
+assert.equal(bnbKitchenette.windowSurfaceSqM, 2.0);
+assert.equal(bnbKitchenette.features.forcedExhaustPresent, true);
+assert.equal(bnbKitchenette.features.forcedExhaustType, "kitchen_hood");
+assert.equal(bnbKitchenette.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(bnbKitchenette.features.flooringCondition, "compliant_anti_slip");
+assert.equal(bnbKitchenette.features.insectScreens, true);
+const compBnbKitchenette = evaluateEnvironmentCompliance(bnbKitchenette, "55.20.51");
+assert.equal(compBnbKitchenette.isHeightCompliant, true);
+assert.equal(compBnbKitchenette.isCubatureCompliant, true);
+assert.ok(
+  compBnbKitchenette.summaryBadges.some((b) => b.text.includes("termocoppia/induzione") && b.text.includes("cappa")),
+  "Kitchenette B&B deve includere badge piano cottura a norma e cappa",
+);
+assert.ok(
+  compBnbKitchenette.summaryBadges.some((b) => b.text.includes("+4°C") && b.text.includes("HACCP")),
+  "Kitchenette B&B deve includere badge frigorifero +4°C HACCP",
+);
+
+// 6. Ripostiglio Guardaroba, Biancheria Pulita & Kit Cortesia
+const bnbGuardaroba = bnbEnvs.find((e) => e.id === "env-bnb-guardaroba-biancheria")!;
+assert.equal(bnbGuardaroba.category, "warehouse");
+assert.equal(bnbGuardaroba.surfaceSqM, 10);
+assert.equal(bnbGuardaroba.heightM, 2.6);
+assert.equal(bnbGuardaroba.volumeCuM, 26);
+assert.equal(bnbGuardaroba.occupantsCount, 1);
+assert.equal(bnbGuardaroba.windowSurfaceSqM, 1.0);
+assert.equal(bnbGuardaroba.features.shelvingCertified, true);
+const compBnbGuardaroba = evaluateEnvironmentCompliance(bnbGuardaroba, "55.20.51");
+assert.equal(compBnbGuardaroba.isHeightCompliant, true);
+assert.equal(compBnbGuardaroba.isCubatureCompliant, true);
+assert.ok(
+  compBnbGuardaroba.summaryBadges.some((b) => b.text.includes("15 cm")),
+  "Guardaroba B&B deve includere badge stoccaggio biancheria sollevata ≥ 15 cm",
+);
+
+// 7. Locale Lavanderia Interna, Stireria & Deposito Detergenti
+const bnbLavanderia = bnbEnvs.find((e) => e.id === "env-bnb-lavanderia-office")!;
+assert.equal(bnbLavanderia.category, "production");
+assert.equal(bnbLavanderia.surfaceSqM, 12);
+assert.equal(bnbLavanderia.heightM, 2.6);
+assert.equal(bnbLavanderia.volumeCuM, 31.2);
+assert.equal(bnbLavanderia.occupantsCount, 1);
+assert.equal(bnbLavanderia.windowSurfaceSqM, 1.5);
+assert.equal(bnbLavanderia.features.forcedExhaustPresent, true);
+assert.equal(bnbLavanderia.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(bnbLavanderia.features.flooringCondition, "compliant_anti_slip");
+const compBnbLavanderia = evaluateEnvironmentCompliance(bnbLavanderia, "55.20.51");
+assert.equal(compBnbLavanderia.isHeightCompliant, true);
+assert.equal(compBnbLavanderia.isCubatureCompliant, true);
+assert.ok(
+  compBnbLavanderia.summaryBadges.some((b) => b.text.includes("ciclo vapore igienizzante")),
+  "Lavanderia B&B deve includere badge lavatrice ciclo vapore igienizzante",
+);
+assert.ok(
+  compBnbLavanderia.summaryBadges.some((b) => b.text.includes("schede di sicurezza SDS")),
+  "Lavanderia B&B deve includere badge armadietto detergenti SDS",
+);
+
+// 8. Vano Caldaia Murale & Boiler ACS
+const bnbCaldaia = bnbEnvs.find((e) => e.id === "env-bnb-centrale-termica-boiler")!;
+assert.equal(bnbCaldaia.category, "technical");
+assert.equal(bnbCaldaia.surfaceSqM, 6);
+assert.equal(bnbCaldaia.heightM, 2.5);
+assert.equal(bnbCaldaia.volumeCuM, 15);
+assert.equal(bnbCaldaia.occupantsCount, 1);
+assert.equal(bnbCaldaia.windowSurfaceSqM, 0);
+assert.equal(bnbCaldaia.features.emergencyLighting, true);
+assert.equal(bnbCaldaia.features.gasLeakDetectorPresent, true);
+const compBnbCaldaia = evaluateEnvironmentCompliance(bnbCaldaia, "55.20.51");
+assert.equal(compBnbCaldaia.isHeightCompliant, true);
+assert.equal(compBnbCaldaia.isCubatureCompliant, true);
+assert.equal(compBnbCaldaia.cpiActivityAlert, null, "Caldaia murale B&B (<116 kW) non deve essere assoggettata ad Attività 74 CPI");
+assert.ok(
+  compBnbCaldaia.summaryBadges.some((b) => b.text.includes("55-60°C") && b.text.includes("Legionella")),
+  "Centrale termica B&B deve includere badge temperatura ACS 55-60°C anti-legionella",
+);
+assert.ok(
+  compBnbCaldaia.summaryBadges.some((b) => b.text.includes("D.M. 37/08")),
+  "Centrale termica B&B deve includere badge caldaia a condensazione a norma D.M. 37/08",
+);
+assert.ok(
+  compBnbCaldaia.summaryBadges.some((b) => b.text.includes("gas metano")),
+  "Centrale termica B&B deve includere badge rilevatore gas metano",
+);
+
+// 9. Terrazzo, Balconi & Spazi all'Aperto
+const bnbTerrazzo = bnbEnvs.find((e) => e.id === "env-bnb-terrazzo-balconi")!;
+assert.equal(bnbTerrazzo.category, "public");
+assert.equal(bnbTerrazzo.surfaceSqM, 25);
+assert.equal(bnbTerrazzo.heightM, 2.8);
+assert.equal(bnbTerrazzo.volumeCuM, 70);
+assert.equal(bnbTerrazzo.occupantsCount, 8);
+assert.equal(bnbTerrazzo.windowSurfaceSqM, 0);
+assert.equal(bnbTerrazzo.features.emergencyLighting, true);
+const compBnbTerrazzo = evaluateEnvironmentCompliance(bnbTerrazzo, "55.20.51");
+assert.equal(compBnbTerrazzo.isHeightCompliant, true);
+assert.ok(
+  compBnbTerrazzo.summaryBadges.some((b) => b.text.includes("1,00 m")),
+  "Terrazzo B&B deve includere badge parapetti h ≥ 1,00 m insuperabili",
+);
+assert.ok(
+  compBnbTerrazzo.summaryBadges.some((b) => b.text.includes("R11")),
+  "Terrazzo B&B deve includere badge pavimentazione antiscivolo R11",
+);
+
+// 10. Vano Scale, Corridoi di Distribuzione & Disimpegni Piani
+const bnbScale = bnbEnvs.find((e) => e.id === "env-bnb-scale-disimpegni")!;
+assert.equal(bnbScale.category, "public");
+assert.equal(bnbScale.surfaceSqM, 25);
+assert.equal(bnbScale.heightM, 2.7);
+assert.equal(bnbScale.volumeCuM, 67.5);
+assert.equal(bnbScale.occupantsCount, 2);
+assert.equal(bnbScale.windowSurfaceSqM, 3.0);
+assert.equal(bnbScale.features.emergencyLighting, true);
+const compBnbScale = evaluateEnvironmentCompliance(bnbScale, "55.20.51");
+assert.equal(compBnbScale.isHeightCompliant, true);
+assert.equal(compBnbScale.isCubatureCompliant, true);
+assert.ok(
+  compBnbScale.summaryBadges.some((b) => b.text.includes("antisdrucciolo") && b.text.includes("corrimano continuo")),
+  "Scale B&B devono includere badge gradini antisdrucciolo e corrimano continuo",
+);
+assert.ok(
+  compBnbScale.summaryBadges.some((b) => b.text.includes("autonomia ≥ 1h")),
+  "Scale B&B devono includere badge lampade di emergenza a led autonomia 1h",
+);
+
+// 11. Armadio / Ripostiglio Attrezzature Pulizie & Carrello Piani
+const bnbHousekeeping = bnbEnvs.find((e) => e.id === "env-bnb-ripostiglio-housekeeping")!;
+assert.equal(bnbHousekeeping.category, "storage");
+assert.equal(bnbHousekeeping.surfaceSqM, 6);
+assert.equal(bnbHousekeeping.heightM, 2.4);
+assert.equal(bnbHousekeeping.volumeCuM, 14.4);
+assert.equal(bnbHousekeeping.occupantsCount, 1);
+assert.equal(bnbHousekeeping.windowSurfaceSqM, 0);
+assert.equal(bnbHousekeeping.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(bnbHousekeeping.features.flooringCondition, "compliant_anti_slip");
+const compBnbHousekeeping = evaluateEnvironmentCompliance(bnbHousekeeping, "55.20.51");
+assert.equal(compBnbHousekeeping.isHeightCompliant, true);
+assert.equal(compBnbHousekeeping.isCubatureCompliant, true);
+assert.ok(
+  compBnbHousekeeping.summaryBadges.some((b) => b.text.includes("HEPA") && b.text.includes("DPI")),
+  "Ripostiglio pulizie B&B deve includere badge aspirapolvere HEPA e armadio DPI",
+);
+
+// 12. Zona Raccolta Differenziata Rifiuti & Stoccaggio Imballaggi
+const bnbRifiuti = bnbEnvs.find((e) => e.id === "env-bnb-area-rifiuti-differenziata")!;
+assert.equal(bnbRifiuti.category, "technical");
+assert.equal(bnbRifiuti.surfaceSqM, 8);
+assert.equal(bnbRifiuti.heightM, 2.4);
+assert.equal(bnbRifiuti.volumeCuM, 19.2);
+assert.equal(bnbRifiuti.occupantsCount, 1);
+assert.equal(bnbRifiuti.windowSurfaceSqM, 0);
+assert.equal(bnbRifiuti.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(bnbRifiuti.features.flooringCondition, "compliant_anti_slip");
+const compBnbRifiuti = evaluateEnvironmentCompliance(bnbRifiuti, "55.20.51");
+assert.equal(compBnbRifiuti.isHeightCompliant, true);
+assert.equal(compBnbRifiuti.isCubatureCompliant, true);
+assert.ok(
+  compBnbRifiuti.summaryBadges.some((b) => b.text.includes("pedale") && b.text.includes("superficie lavabile")),
+  "Area rifiuti B&B deve includere badge bidoni ermetici a pedale e superficie lavabile",
+);
+
+// ============================================================================
+// Test 28: generateEnvironmentChecklistItems per locali B&B / Affittacamere (ATECO 55.20.51)
+// ============================================================================
+console.log("Test 28: generateEnvironmentChecklistItems per locali B&B / Affittacamere (ATECO 55.20.51)");
+
+// 1. Ingresso e Reception
+const bnbReceptionItems = generateEnvironmentChecklistItems(bnbReception, "55.20.51");
+assert.ok(
+  bnbReceptionItems.some(
+    (it) => it.id.includes("estintore-13a-89b-dm-03-09-2021-minicodice") && it.domain === "safety",
+  ),
+  "Reception B&B deve verificare estintore 13A 89B a norma D.M. 03/09/2021 (domain: safety)",
+);
+assert.ok(
+  bnbReceptionItems.some(
+    (it) => it.id.includes("planimetria-esodo-bilingue-numeri-soccorso") && it.domain === "safety",
+  ),
+  "Reception B&B deve verificare planimetria bilingue con numeri emergenza 112 (domain: safety)",
+);
+assert.ok(
+  bnbReceptionItems.some(
+    (it) => it.id.includes("serratura-antipanico-smart-lock-illuminazione-emergenza") && it.domain === "safety",
+  ),
+  "Reception B&B deve verificare serratura antipanico/smart lock e illuminazione emergenza (domain: safety)",
+);
+
+// 2. Camere Ospiti
+const bnbCamereItems = generateEnvironmentChecklistItems(bnbCamere, "55.20.51");
+assert.ok(
+  bnbCamereItems.some(
+    (it) => it.id.includes("rilevatori-ottici-autonomi-fumo-uni-en-14604") && it.domain === "safety",
+  ),
+  "Camere B&B devono verificare rilevatori autonomi fumo UNI EN 14604 (domain: safety)",
+);
+assert.ok(
+  bnbCamereItems.some(
+    (it) => it.id.includes("aerazione-naturale-rapporto-aeroilluminante-finestre") && it.domain === "safety",
+  ),
+  "Camere B&B devono verificare rapporto aeroilluminante naturale 1/8 D.M. 05/07/1975 (domain: safety)",
+);
+assert.ok(
+  bnbCamereItems.some(
+    (it) => it.id.includes("ergonomia-rifacimento-letti-prevenzione-dms-housekeeping") && it.domain === "safety",
+  ),
+  "Camere B&B devono verificare ergonomia arredi e rifacimento letti D.Lgs. 81/08 Titolo VI (domain: safety)",
+);
+assert.ok(
+  bnbCamereItems.some(
+    (it) => it.id.includes("planimetria-fuga-retro-porta-istruzioni-emergenza") && it.domain === "safety",
+  ),
+  "Camere B&B devono verificare planimetria fuga sul retro della porta (domain: safety)",
+);
+
+// 3. Bagni Privati & Bagno Disabili
+const bnbBagniItems = generateEnvironmentChecklistItems(bnbBagni, "55.20.51");
+assert.ok(
+  bnbBagniItems.some(
+    (it) => it.id.includes("bagno-disabili-tirante-campanello-maniglioni-dpr-503-96") && it.domain === "both",
+  ),
+  "Bagno disabili B&B deve verificare tirante allarme campanello e maniglioni D.P.R. 503/96 (domain: both)",
+);
+assert.ok(
+  bnbBagniItems.some(
+    (it) => it.id.includes("prevenzione-legionella-soffioni-doccia-anticalcare-flussaggio") && it.domain === "both",
+  ),
+  "Bagni B&B devono verificare prevenzione legionella soffioni doccia Accordo 07/05/2015 e D.Lgs. 18/2023 (domain: both)",
+);
+assert.ok(
+  bnbBagniItems.some(
+    (it) => it.id.includes("pavimentazione-antiscivolo-aerazione-forzata-temporizzata") && it.domain === "safety",
+  ),
+  "Bagni B&B devono verificare pavimento antiscivolo e aerazione forzata temporizzata (domain: safety)",
+);
+
+// 4. Area Colazioni & Living
+const bnbSalaColazioniItems = generateEnvironmentChecklistItems(bnbSalaColazioni, "55.20.51");
+assert.ok(
+  bnbSalaColazioniItems.some(
+    (it) => it.id.includes("buffet-parafiato-moca-reg-ce-1935-2004-igiene") && it.domain === "haccp",
+  ),
+  "Sala colazioni B&B deve verificare buffet parafiato MOCA Reg. CE 1935/2004 (domain: haccp)",
+);
+assert.ok(
+  bnbSalaColazioniItems.some(
+    (it) => it.id.includes("cartello-allergeni-prodotti-colazione-reg-ue-1169-2011") && it.domain === "both",
+  ),
+  "Sala colazioni B&B deve verificare cartello allergeni Reg. UE 1169/2011 (domain: both)",
+);
+assert.ok(
+  bnbSalaColazioniItems.some(
+    (it) => it.id.includes("vie-esodo-sala-sgombre-estintore-adiacente") && it.domain === "safety",
+  ),
+  "Sala colazioni B&B deve verificare vie di esodo libere ed estintore adiacente (domain: safety)",
+);
+
+// 5. Kitchenette / Angolo Cottura & Office
+const bnbKitchenetteItems = generateEnvironmentChecklistItems(bnbKitchenette, "55.20.51");
+assert.ok(
+  bnbKitchenetteItems.some(
+    (it) => it.id.includes("cappa-aspirazione-canna-fumaria-pareti-lavabili") && it.domain === "both",
+  ),
+  "Kitchenette B&B deve verificare cappa aspirante e pareti lavabili Reg. CE 852/2004 (domain: both)",
+);
+assert.ok(
+  bnbKitchenetteItems.some(
+    (it) => it.id.includes("frigorifero-termometro-lettura-esterna-4c-haccp") && it.domain === "haccp",
+  ),
+  "Kitchenette B&B deve verificare frigorifero a +4°C con monitoraggio HACCP (domain: haccp)",
+);
+assert.ok(
+  bnbKitchenetteItems.some(
+    (it) => it.id.includes("piano-cottura-sicurezza-termocoppia-induzione-dm-37-08") && it.domain === "safety",
+  ),
+  "Kitchenette B&B deve verificare piano cottura con termocoppia/induzione D.M. 37/08 (domain: safety)",
+);
+assert.ok(
+  bnbKitchenetteItems.some(
+    (it) => it.id.includes("lavastoviglie-ciclo-termico-igienizzante-stoviglie-moca") && it.domain === "both",
+  ),
+  "Kitchenette B&B deve verificare lavastoviglie igienizzante e stoviglie MOCA (domain: both)",
+);
+
+// 6. Ripostiglio Guardaroba Biancheria
+const bnbGuardarobaItems = generateEnvironmentChecklistItems(bnbGuardaroba, "55.20.51");
+assert.ok(
+  bnbGuardarobaItems.some(
+    (it) => it.id.includes("stoccaggio-biancheria-pulita-armadi-chiusi-sollevati-15cm") && it.domain === "both",
+  ),
+  "Guardaroba B&B deve verificare stoccaggio biancheria sollevata 15 cm da terra (domain: both)",
+);
+assert.ok(
+  bnbGuardarobaItems.some(
+    (it) => it.id.includes("scaffalature-stabili-fissaggio-parete-antiribaltamento") && it.domain === "safety",
+  ),
+  "Guardaroba B&B deve verificare stabilità scaffalature e staffaggio antiribaltamento D.Lgs. 81/08 (domain: safety)",
+);
+
+// 7. Lavanderia e Stireria
+const bnbLavanderiaItems = generateEnvironmentChecklistItems(bnbLavanderia, "55.20.51");
+assert.ok(
+  bnbLavanderiaItems.some(
+    (it) => it.id.includes("armadietto-chiuso-detergenti-sds-etichettatura-clp") && it.domain === "safety",
+  ),
+  "Lavanderia B&B deve verificare armadietto chiuso per detergenti con SDS Titolo IX (domain: safety)",
+);
+assert.ok(
+  bnbLavanderiaItems.some(
+    (it) => it.id.includes("sicurezza-elettrica-lavatrice-asciugatrice-ferro-stiro") && it.domain === "safety",
+  ),
+  "Lavanderia B&B deve verificare sicurezza elettrica elettrodomestici D.M. 37/08 (domain: safety)",
+);
+
+// 8. Centrale Termica & Boiler ACS
+const bnbCaldaiaItems = generateEnvironmentChecklistItems(bnbCaldaia, "55.20.51");
+assert.ok(
+  bnbCaldaiaItems.some(
+    (it) => it.id.includes("temperatura-accumulo-boiler-acs-55-60c-legionella") && it.domain === "both",
+  ),
+  "Centrale termica B&B deve verificare boiler ACS ≥ 55-60°C contro Legionella Accordo 07/05/2015 (domain: both)",
+);
+assert.ok(
+  bnbCaldaiaItems.some(
+    (it) => it.id.includes("caldaia-condensazione-libretto-impianto-scarico-fumi-dm-37-08") && it.domain === "safety",
+  ),
+  "Centrale termica B&B deve verificare caldaia a condensazione, libretto impianto e scarico fumi D.M. 37/08 (domain: safety)",
+);
+assert.ok(
+  bnbCaldaiaItems.some(
+    (it) => it.id.includes("rilevatore-gas-valvola-sicurezza-scarico-convogliato") && it.domain === "safety",
+  ),
+  "Centrale termica B&B deve verificare rilevatore fughe gas e valvola di sicurezza convogliata (domain: safety)",
+);
+
+// 9. Terrazzo e Balconi
+const bnbTerrazzoItems = generateEnvironmentChecklistItems(bnbTerrazzo, "55.20.51");
+assert.ok(
+  bnbTerrazzoItems.some(
+    (it) => it.id.includes("parapetti-ringhiere-altezza-100cm-inscalabili") && it.domain === "safety",
+  ),
+  "Terrazzo B&B deve verificare parapetti h ≥ 1,00 m inscalabili D.M. 236/89 (domain: safety)",
+);
+assert.ok(
+  bnbTerrazzoItems.some(
+    (it) => it.id.includes("pavimentazione-esterna-antiscivolo-r11-illuminazione") && it.domain === "safety",
+  ),
+  "Terrazzo B&B deve verificare pavimentazione esterna antiscivolo R11 (domain: safety)",
+);
+
+// 10. Scale e Disimpegni
+const bnbScaleItems = generateEnvironmentChecklistItems(bnbScale, "55.20.51");
+assert.ok(
+  bnbScaleItems.some(
+    (it) => it.id.includes("gradini-antisdrucciolo-corrimano-continuo-vie-esodo") && it.domain === "safety",
+  ),
+  "Scale B&B devono verificare gradini antisdrucciolo e corrimano continuo D.Lgs. 81/08 All. IV (domain: safety)",
+);
+assert.ok(
+  bnbScaleItems.some(
+    (it) => it.id.includes("luci-emergenza-led-autonomia-1h-accensione-automatica") && it.domain === "safety",
+  ),
+  "Scale B&B devono verificare illuminazione emergenza led autonomia 1h UNI EN 1838 (domain: safety)",
+);
+
+// 11. Ripostiglio Housekeeping
+const bnbHousekeepingItems = generateEnvironmentChecklistItems(bnbHousekeeping, "55.20.51");
+assert.ok(
+  bnbHousekeepingItems.some(
+    (it) => it.id.includes("attrezzature-pulizia-aspirapolvere-hepa-mop-separati") && it.domain === "both",
+  ),
+  "Ripostiglio housekeeping B&B deve verificare aspirapolvere HEPA e mop separati per ambienti (domain: both)",
+);
+assert.ok(
+  bnbHousekeepingItems.some(
+    (it) => it.id.includes("dotazione-dpi-operatori-pulizie-guanti-mascherine") && it.domain === "safety",
+  ),
+  "Ripostiglio housekeeping B&B deve verificare dotazione DPI per addetti pulizie D.Lgs. 81/08 art. 77 (domain: safety)",
+);
+
+// 12. Area Rifiuti Differenziata
+const bnbRifiutiItems = generateEnvironmentChecklistItems(bnbRifiuti, "55.20.51");
+assert.ok(
+  bnbRifiutiItems.some(
+    (it) => it.id.includes("bidoni-raccolta-differenziata-coperchio-pedale-ermetici") && it.domain === "both",
+  ),
+  "Area rifiuti B&B deve verificare bidoni differenziata con coperchio a pedale ermetico (domain: both)",
+);
+assert.ok(
+  bnbRifiutiItems.some(
+    (it) => it.id.includes("pavimentazione-lavabile-pulizia-periodica-lotta-infestanti") && it.domain === "both",
+  ),
+  "Area rifiuti B&B deve verificare pavimentazione lavabile e protezione infestanti Reg. CE 852/2004 (domain: both)",
+);
+
+// Verifica del filtraggio checklistMode su kitchenette B&B
+const bnbKitchenetteHaccpMode = filterEnvironmentItemsByChecklistMode(bnbKitchenetteItems, "haccp_only");
+assert.ok(
+  bnbKitchenetteHaccpMode.every((it) => it.domain === "haccp" || it.domain === "both"),
+  "In modalità haccp_only tutti gli item kitchenette B&B devono essere haccp o both",
+);
+assert.ok(
+  !bnbKitchenetteHaccpMode.some((it) => it.domain === "safety"),
+  "In modalità haccp_only nessun item kitchenette B&B deve avere domain safety",
+);
+
+const bnbKitchenetteSafetyMode = filterEnvironmentItemsByChecklistMode(bnbKitchenetteItems, "safety_only");
+assert.ok(
+  bnbKitchenetteSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item kitchenette B&B devono essere safety o both",
+);
+assert.ok(
+  !bnbKitchenetteSafetyMode.some((it) => it.domain === "haccp"),
+  "In modalità safety_only nessun item kitchenette B&B deve avere domain haccp",
+);
+
 console.log("=== TUTTI I TEST Step2AmbientiDiLavoro SUPERATI CON SUCCESSO! ===");
+

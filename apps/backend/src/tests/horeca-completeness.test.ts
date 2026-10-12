@@ -356,7 +356,96 @@ async function run() {
     `Expected at least 5 hotel-specific document requirements for inspection, found ${hotelSpecificDocs.length}`,
   );
 
-  console.log("HoReCa completeness test passed (including Hotel ATECO variants and inspection integration)");
+  // Verifica varianti ATECO e query testuali per B&B / Affittacamere (55.20.51, 55.20.5, 55.20, 55.2, 552051, 55205, 5520, BEB_AFFITTACAMERE, AFFITTACAMERE, B&B, BNB, GUESTHOUSE)
+  const bnbVariants = [
+    "55.20.51",
+    "55.20.5",
+    "55.20",
+    "55.2",
+    "552051",
+    "55205",
+    "5520",
+    "BEB_AFFITTACAMERE",
+    "AFFITTACAMERE",
+    "B&B",
+    "BNB",
+    "GUESTHOUSE",
+  ];
+  for (const variant of bnbVariants) {
+    const templatesRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(templatesRes.statusCode, 200, `Templates request failed for B&B variant ${variant}`);
+    const templates = templatesRes.json() as Array<{ id: string; name: string }>;
+    const specificTemplates = templates.filter(
+      (t) => t.name.includes("B&B") || t.name.includes("Affittacamere"),
+    );
+    assert.equal(
+      specificTemplates.length,
+      2,
+      `Expected 2 specific templates for B&B variant ${variant}, found ${specificTemplates.length}`,
+    );
+
+    const docsRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/document-templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(docsRes.statusCode, 200, `Document templates request failed for B&B variant ${variant}`);
+    const docs = docsRes.json() as DocumentTemplateLite[];
+    const bnbDocs = docs.filter((d) => d.macroGroup === "BEB_AFFITTACAMERE");
+    assert.ok(
+      bnbDocs.length >= 14,
+      `Expected at least 14 B&B docs for variant ${variant}, found ${bnbDocs.length}`,
+    );
+  }
+
+  // Verifica integrazione ispezioni per azienda B&B con ATECO variante (552051)
+  const bnbCompany = await app.prisma.company.upsert({
+    where: { id: "test-bnb-integration-company" },
+    update: { atecoCode: "552051" },
+    create: {
+      id: "test-bnb-integration-company",
+      name: "B&B Bellavista FedShield",
+      vatNumber: "IT99887766555",
+      atecoCode: "552051",
+      legalAddress: "Via dei Colli 5, Firenze",
+    },
+  });
+
+  const bnbInspection = await app.inject({
+    method: "POST",
+    url: "/api/inspections",
+    headers,
+    payload: {
+      companyId: bnbCompany.id,
+      title: "Ispezione B&B Test",
+    },
+  });
+  assert.equal(bnbInspection.statusCode, 201);
+  const bnbInspectionId = bnbInspection.json().id as string;
+
+  const bnbInspectionDocsRes = await app.inject({
+    method: "GET",
+    url: `/api/inspections/${bnbInspectionId}/documents/requirements`,
+    headers,
+  });
+  assert.equal(bnbInspectionDocsRes.statusCode, 200);
+  const bnbInspectionDocs = bnbInspectionDocsRes.json() as Array<{ name: string; documentTemplateId: string }>;
+  const bnbSpecificDocs = bnbInspectionDocs.filter(
+    (d) =>
+      d.name.toLowerCase().includes("b&b") ||
+      d.name.toLowerCase().includes("affittacamere") ||
+      d.name.toLowerCase().includes("extra-alberghier"),
+  );
+  assert.ok(
+    bnbSpecificDocs.length >= 5,
+    `Expected at least 5 B&B-specific document requirements for inspection, found ${bnbSpecificDocs.length}`,
+  );
+
+  console.log("HoReCa completeness test passed (including Hotel and B&B ATECO variants and inspection integration)");
   await app.close();
 }
 

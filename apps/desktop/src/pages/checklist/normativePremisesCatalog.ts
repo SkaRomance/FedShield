@@ -2778,6 +2778,262 @@ export function getStandardEnvironmentsForAteco(atecoCode?: string): WorkEnviron
     ];
   }
 
+  // 0-undecies. B&B, Affittacamere, Case Vacanze, Guest House e Room Rental (55.20.51, 55.20.5, 55.20, 55.2, 552051, 55205, 5520, 552)
+  if (
+    ateco.startsWith("552051") ||
+    ateco.startsWith("55205") ||
+    ateco.startsWith("5520") ||
+    ateco.startsWith("552") ||
+    ateco.startsWith("55.20.51") ||
+    ateco.startsWith("55.20.5") ||
+    ateco.startsWith("55.20") ||
+    ateco.startsWith("55.2")
+  ) {
+    return [
+      {
+        id: "env-bnb-ingresso-reception",
+        key: "bnb_ingresso_reception_checkin",
+        name: "Ingresso Principale, Check-in / Desk Accoglienza & Zona Comune",
+        icon: "🔑",
+        category: "sales_office",
+        isDefault: true,
+        surfaceSqM: 25,
+        heightM: 2.8,
+        volumeCuM: 70,
+        occupantsCount: 4,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 3.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("sales_office"),
+          emergencyLighting: true,
+          antiShatterGlass: true,
+        },
+      },
+      {
+        id: "env-bnb-camere-ospiti",
+        key: "bnb_camere_ospiti_camere_disabili",
+        name: "Camere da Letto Ospiti (Standard, Superior & Camera Accessibile Disabili)",
+        icon: "🛏️",
+        category: "public",
+        isDefault: true,
+        surfaceSqM: 120,
+        heightM: 2.7,
+        volumeCuM: 324,
+        occupantsCount: 12,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 18.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("public"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-bnb-bagni-privati",
+        key: "bnb_bagni_privati_camere_disabili",
+        name: "Servizi Igienici Privati Camere & Bagno Disabili (D.P.R. 503/96)",
+        icon: "🚿",
+        category: "services",
+        isDefault: true,
+        surfaceSqM: 24,
+        heightM: 2.4,
+        volumeCuM: 57.6,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 3.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("services"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          forcedExhaustPresent: true,
+          forcedExhaustType: "blind_toilet_fan",
+        },
+      },
+      {
+        id: "env-bnb-sala-colazioni",
+        key: "bnb_area_colazioni_living_ospiti",
+        name: "Area Colazioni, Zona Living & Tavoli Ospiti",
+        icon: "☕",
+        category: "public",
+        isDefault: true,
+        surfaceSqM: 35,
+        heightM: 2.8,
+        volumeCuM: 98,
+        occupantsCount: 16,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 5.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("public"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-bnb-kitchenette-office",
+        key: "bnb_kitchenette_angolo_cottura_office",
+        name: "Kitchenette / Angolo Cottura, Scaldavivande & Office Colazioni",
+        icon: "🍳",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 12,
+        heightM: 2.7,
+        volumeCuM: 32.4,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          forcedExhaustType: "kitchen_hood",
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+        },
+      },
+      {
+        id: "env-bnb-guardaroba-biancheria",
+        key: "bnb_ripostiglio_guardaroba_biancheria_kit",
+        name: "Ripostiglio Guardaroba, Biancheria Pulita & Kit Cortesia",
+        icon: "📦",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 10,
+        heightM: 2.6,
+        volumeCuM: 26,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 1.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          shelvingCertified: true,
+        },
+      },
+      {
+        id: "env-bnb-lavanderia-office",
+        key: "bnb_locale_lavanderia_stireria_detergenti",
+        name: "Locale Lavanderia Interna, Stireria & Deposito Detergenti",
+        icon: "🧺",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 12,
+        heightM: 2.6,
+        volumeCuM: 31.2,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 1.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-bnb-centrale-termica-boiler",
+        key: "bnb_vano_caldaia_condensazione_boiler_acs",
+        name: "Vano Caldaia Murale a Condensazione & Accumulo ACS (Boiler)",
+        icon: "⚙️",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 6,
+        heightM: 2.5,
+        volumeCuM: 15,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          emergencyLighting: true,
+          gasLeakDetectorPresent: true,
+        },
+      },
+      {
+        id: "env-bnb-terrazzo-balconi",
+        key: "bnb_terrazzo_balconi_spazi_aperti",
+        name: "Terrazzo, Balconi & Spazi di Sosta all'Aperto",
+        icon: "☀️",
+        category: "public",
+        isDefault: true,
+        surfaceSqM: 25,
+        heightM: 2.8,
+        volumeCuM: 70,
+        occupantsCount: 8,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("public"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-bnb-scale-disimpegni",
+        key: "bnb_vano_scale_corridoi_disimpegni",
+        name: "Vano Scale, Corridoi di Distribuzione & Disimpegni Piani",
+        icon: "🪜",
+        category: "public",
+        isDefault: true,
+        surfaceSqM: 25,
+        heightM: 2.7,
+        volumeCuM: 67.5,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 3.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("public"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-bnb-ripostiglio-housekeeping",
+        key: "bnb_ripostiglio_attrezzature_pulizie_carrello",
+        name: "Armadio / Ripostiglio Attrezzature Pulizie & Carrello Piani",
+        icon: "🧹",
+        category: "storage",
+        isDefault: true,
+        surfaceSqM: 6,
+        heightM: 2.4,
+        volumeCuM: 14.4,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("storage"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-bnb-area-rifiuti-differenziata",
+        key: "bnb_area_raccolta_differenziata_rifiuti",
+        name: "Zona Raccolta Differenziata Rifiuti & Stoccaggio Imballaggi",
+        icon: "🗑️",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 8,
+        heightM: 2.4,
+        volumeCuM: 19.2,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+    ];
+  }
+
   // 0-decies. Hotel, Albergo, Resort e Strutture Ricettive Turistiche (55.10.00, 55.10.0, 55.10, 55.1, 551000, 55100, 5510, 551)
   if (
     ateco.startsWith("551000") ||
@@ -3905,6 +4161,20 @@ export function evaluateEnvironmentCompliance(
     env.key.includes("hotel_guardaroba")
   ) {
     minHeightRequired = 2.7; // 2,70 m per guardaroba e magazzini biancheria ai piani alberghieri
+  } else if (
+    env.id === "env-bnb-kitchenette-office" ||
+    env.key.includes("bnb_kitchenette")
+  ) {
+    minHeightRequired = 2.7; // 2,70 m per kitchenette residenziale B&B (D.M. 05/07/1975)
+  } else if (
+    env.id === "env-bnb-guardaroba-biancheria" ||
+    env.id === "env-bnb-ripostiglio-housekeeping" ||
+    env.id === "env-bnb-lavanderia-office" ||
+    env.key.includes("bnb_guardaroba") ||
+    env.key.includes("bnb_ripostiglio") ||
+    env.key.includes("bnb_lavanderia")
+  ) {
+    minHeightRequired = 2.4; // 2,40 m per vani accessori, lavanderie, ripostigli e guardaroba B&B (D.M. 05/07/1975)
   } else if (env.category === "production" || env.category === "warehouse" || env.category === "storage") {
     minHeightRequired = 3.0; // 3,00 m per locali industriali, stoccaggio e lavorazioni
   } else if (env.category === "services" || env.category === "changing_rooms" || env.category === "technical") {
@@ -5239,6 +5509,209 @@ export function evaluateEnvironmentCompliance(
     summaryBadges.push({
       text: "📦 Compattatore cartone/plastica a norma UNI EN 16500 & separazione frazione umida",
       status: "success",
+    });
+  }
+
+  // ========================================================================
+  // REGOLE AD HOC B&B, AFFITTACAMERE, CASE VACANZE & GUEST HOUSE (55.20.51 / 55.20)
+  // ========================================================================
+  // 1. Ingresso e Reception
+  const isBnbReception =
+    env.id === "env-bnb-ingresso-reception" ||
+    env.key === "bnb_ingresso_reception_checkin" ||
+    (env.id.includes("bnb-ingresso-reception") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isBnbReception) {
+    summaryBadges.push({
+      text: "🔑 Estintore omologato 13A 89B a norma D.M. 03/09/2021 (Mini-Codice Antincendio)",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🗺️ Planimetria di esodo bilingue con numeri di emergenza & serratura antipanico o smart lock",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "💡 Illuminazione di emergenza con lampade autoalimentate sui percorsi di esodo",
+      status: "info",
+    });
+  }
+
+  // 2. Camere Ospiti
+  const isBnbCamere =
+    env.id === "env-bnb-camere-ospiti" ||
+    env.key === "bnb_camere_ospiti_camere_disabili" ||
+    (env.id.includes("bnb-camere-ospiti") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isBnbCamere) {
+    summaryBadges.push({
+      text: "🚨 Rilevatori ottici autonomi di fumo conformi a norma UNI EN 14604 in ogni camera",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🪟 Aerazione naturale diretta con rapporto aeroilluminante ≥ 1/8 superficie & finestre apribili",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🛏️ Letti ergonomici per prevenzione disturbi muscolo-scheletrici addetti rifacimento camere (D.Lgs. 81/08 Titolo VI)",
+      status: "info",
+    });
+  }
+
+  // 3. Bagni Privati & Bagno Disabili
+  const isBnbBagni =
+    env.id === "env-bnb-bagni-privati" ||
+    env.key === "bnb_bagni_privati_camere_disabili" ||
+    (env.id.includes("bnb-bagni-privati") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isBnbBagni) {
+    summaryBadges.push({
+      text: "♿ Bagno accessibile D.P.R. 503/96 & D.M. 236/89 con tirante allarme a campanello e maniglioni",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🚿 Soffioni doccia ispezionabili e disincrostati periodicamente contro il rischio Legionella",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "💨 Aerazione forzata meccanica temporizzata per servizi igienici privi di finestra",
+      status: "info",
+    });
+  }
+
+  // 4. Area Colazioni & Living
+  const isBnbSalaColazioni =
+    env.id === "env-bnb-sala-colazioni" ||
+    env.key === "bnb_area_colazioni_living_ospiti" ||
+    (env.id.includes("bnb-sala-colazioni") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isBnbSalaColazioni) {
+    summaryBadges.push({
+      text: "☕ Buffet con campane e alzatine parafiato MOCA a norma Reg. CE 1935/2004",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🚪 Vie di esodo libere (larghezza 0,90-1,20 m) verso l'uscita & estintore portatile adiacente",
+      status: "success",
+    });
+  }
+
+  // 5. Kitchenette / Angolo Cottura & Office
+  const isBnbKitchenette =
+    env.id === "env-bnb-kitchenette-office" ||
+    env.key === "bnb_kitchenette_angolo_cottura_office" ||
+    (env.id.includes("bnb-kitchenette-office") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isBnbKitchenette) {
+    summaryBadges.push({
+      text: "🍳 Piano cottura con termocoppia/induzione, cappa aspirante a tetto & lavello inox",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "❄️ Frigorifero con termometro a lettura esterna mantenuto a +4°C (Reg. CE 852/2004 HACCP)",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🍽️ Stoviglie e superfici conformi MOCA Reg. CE 1935/2004 & lavastoviglie con ciclo igienizzante",
+      status: "info",
+    });
+  }
+
+  // 6. Centrale Termica & Boiler ACS
+  const isBnbCentraleTermica =
+    env.id === "env-bnb-centrale-termica-boiler" ||
+    env.key === "bnb_vano_caldaia_condensazione_boiler_acs" ||
+    (env.id.includes("bnb-centrale-termica-boiler") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isBnbCentraleTermica) {
+    summaryBadges.push({
+      text: "💧 Boiler ACS mantenuto a ≥ 55-60°C contro la proliferazione di Legionella (Accordo 07/05/2015)",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "⚙️ Caldaia a condensazione con libretto d'impianto, scarico a tetto D.M. 37/08 & valvola di sicurezza convogliata",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "⚠️ Rilevatore fughe di gas metano con allarme acustico e visivo",
+      status: "warning",
+    });
+  }
+
+  // 7. Terrazzo e Balconi
+  const isBnbTerrazzo =
+    env.id === "env-bnb-terrazzo-balconi" ||
+    env.key === "bnb_terrazzo_balconi_spazi_aperti" ||
+    (env.id.includes("bnb-terrazzo-balconi") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isBnbTerrazzo) {
+    summaryBadges.push({
+      text: "☀️ Parapetti e ringhiere a norma h ≥ 1,00 m insuperabili privi di elementi orizzontali scalabili",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🚶 Pavimentazione esterna antiscivolo classe R11 resistente agli agenti atmosferici",
+      status: "info",
+    });
+  }
+
+  // 8. Ripostiglio Guardaroba Biancheria
+  const isBnbGuardaroba =
+    env.id === "env-bnb-guardaroba-biancheria" ||
+    env.key === "bnb_ripostiglio_guardaroba_biancheria_kit" ||
+    (env.id.includes("bnb-guardaroba-biancheria") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isBnbGuardaroba) {
+    summaryBadges.push({
+      text: "📦 Armadi e scaffali rialzati ≥ 15 cm per stoccaggio biancheria pulita sigillata e kit cortesia",
+      status: "info",
+    });
+  }
+
+  // 9. Lavanderia e Stireria
+  const isBnbLavanderia =
+    env.id === "env-bnb-lavanderia-office" ||
+    env.key === "bnb_locale_lavanderia_stireria_detergenti" ||
+    (env.id.includes("bnb-lavanderia-office") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isBnbLavanderia) {
+    summaryBadges.push({
+      text: "🧺 Lavatrice/asciugatrice classe A ciclo vapore igienizzante & asse stiro con poggiaferro termoisolante",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🧪 Armadietto chiuso a chiave per detergenti e sostanze chimiche con schede di sicurezza SDS",
+      status: "warning",
+    });
+  }
+
+  // 10. Scale e Disimpegni
+  const isBnbScale =
+    env.id === "env-bnb-scale-disimpegni" ||
+    env.key === "bnb_vano_scale_corridoi_disimpegni" ||
+    (env.id.includes("bnb-scale-disimpegni") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isBnbScale) {
+    summaryBadges.push({
+      text: "🪜 Gradini con profilo antisdrucciolo, corrimano continuo a norma e vie di esodo sgombre",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "💡 Lampade di emergenza a led con autonomia ≥ 1h ad accensione automatica in blackout",
+      status: "info",
+    });
+  }
+
+  // 11. Ripostiglio Housekeeping
+  const isBnbHousekeeping =
+    env.id === "env-bnb-ripostiglio-housekeeping" ||
+    env.key === "bnb_ripostiglio_attrezzature_pulizie_carrello" ||
+    (env.id.includes("bnb-ripostiglio-housekeeping") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isBnbHousekeeping) {
+    summaryBadges.push({
+      text: "🧹 Stoccaggio carrello piani, aspirapolvere con filtro HEPA & armadio DPI operatori pulizia",
+      status: "info",
+    });
+  }
+
+  // 12. Area Rifiuti Differenziata
+  const isBnbRifiuti =
+    env.id === "env-bnb-area-rifiuti-differenziata" ||
+    env.key === "bnb_area_raccolta_differenziata_rifiuti" ||
+    (env.id.includes("bnb-area-rifiuti-differenziata") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isBnbRifiuti) {
+    summaryBadges.push({
+      text: "🗑️ Bidoni ermetici con comando a pedale per raccolta differenziata & superficie lavabile",
+      status: "info",
     });
   }
 
@@ -9781,6 +10254,529 @@ export function generateEnvironmentChecklistItems(
       categoryTag: "arredi_scaffali",
       suggestedNonConformity:
         "Compattatore di rifiuti con interblocco di sicurezza dello sportello manomesso o privo di istruzioni di emergenza e DPI obbligatori per l'uso.",
+    });
+  }
+
+  // ========================================================================
+  // REQUISITI SPECIFICI B&B, AFFITTACAMERE, CASE VACANZE & GUEST HOUSE (ATECO 55.20.51 / 55.20 / 55.2)
+  // ========================================================================
+
+  // a) Ingresso Principale, Check-in / Desk Accoglienza & Zona Comune
+  if (env.id === "env-bnb-ingresso-reception" || env.id.includes("bnb-ingresso-reception")) {
+    items.push({
+      id: `${env.id}-estintore-13a-89b-dm-03-09-2021-minicodice`,
+      area: env.name,
+      title: "Estintore Portatile Omologato 13A 89B (D.M. 03/09/2021) e Presidio Antincendio",
+      question:
+        "L'ingresso principale / reception dispone di almeno un estintore portatile omologato di capacità estinguente non inferiore a 13A 89B a norma del D.M. 03/09/2021 (Mini-Codice Antincendio), installato a parete a un'altezza compresa tra 1,10 e 1,50 m con cartellino di revisione semestrale valido?",
+      normReference:
+        "D.M. 03/09/2021 (Criteri generali di progettazione, realizzazione ed esercizio della sicurezza antincendio per luoghi di lavoro a basso rischio) e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Estintore portatile assente all'ingresso/reception, ostruito da mobilio o privo del controllo periodico semestrale da parte di ditta abilitata a norma UNI 9994-1.",
+    });
+
+    items.push({
+      id: `${env.id}-planimetria-esodo-bilingue-numeri-soccorso`,
+      area: env.name,
+      title: "Planimetria di Esodo Bilingue, Numeri di Emergenza e Istruzioni Evacuazione",
+      question:
+        "È chiaramente esposta nell'area di accoglienza/ingresso la planimetria orientata di emergenza ed esodo bilingue (italiano/inglese) con indicazione del punto di raccolta, percorsi di fuga e numeri di soccorso (112 NUE)?",
+      normReference: "D.M. 03/09/2021, D.M. 02/09/2021 e D.Lgs. 81/2008 Allegato IV punto 1.4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Assenza di planimetria di esodo bilingue o cartellonistica di sicurezza non conforme, con rischio di mancato orientamento degli ospiti stranieri in caso di emergenza.",
+    });
+
+    items.push({
+      id: `${env.id}-serratura-antipanico-smart-lock-illuminazione-emergenza`,
+      area: env.name,
+      title: "Porta d'Accesso con Apertura Facile dall'Interno (Smart Lock / Antipanico) e Illuminazione Emergenza",
+      question:
+        "La porta d'ingresso della struttura è apribile dall'interno senza l'uso di chiavi in qualunque momento (serratura antipanico o smart lock con sblocco meccanico immediato) ed è presente lampada di emergenza autoalimentata?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.4.2 e D.M. 03/09/2021",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Porta principale chiusa a chiave dall'interno durante le ore notturne senza meccanismo di sgancio rapido per l'esodo di emergenza.",
+    });
+  }
+
+  // b) Camere da Letto Ospiti (Standard, Superior & Camera Accessibile Disabili)
+  if (env.id === "env-bnb-camere-ospiti" || env.id.includes("bnb-camere-ospiti")) {
+    items.push({
+      id: `${env.id}-rilevatori-ottici-autonomi-fumo-uni-en-14604`,
+      area: env.name,
+      title: "Rilevatori Ottici Autonomi di Fumo a Norma UNI EN 14604 in Ciascuna Camera",
+      question:
+        "Tutte le camere da letto ospiti sono provviste di rilevatori ottici autonomi di fumo conformi alla norma UNI EN 14604 alimentati a batteria a lunga durata (10 anni) con pulsante di test e segnale acustico di allarme?",
+      normReference: "Norma UNI EN 14604, D.M. 03/09/2021 e Legge Regionale Ricettività Extra-Alberghiera",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Mancanza di dispositivi autonomi di rivelazione fumo nelle camere ospiti o batterie scariche senza verifiche periodiche di funzionamento.",
+    });
+
+    items.push({
+      id: `${env.id}-aerazione-naturale-rapporto-aeroilluminante-finestre`,
+      area: env.name,
+      title: "Rapporto Aeroilluminante Naturale Diretto (≥ 1/8) e Finestre Apribili in Sicurezza",
+      question:
+        "Le camere da letto garantiscono un rapporto aeroilluminante naturale non inferiore a 1/8 della superficie di calpestio (D.M. 05/07/1975) con serramenti apribili in sicurezza privi di rischio caduta verso l'esterno?",
+      normReference: "D.M. 05/07/1975 art. 5 e D.Lgs. 81/2008 Allegato IV punto 1.3",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "finestre",
+      suggestedNonConformity:
+        "Finestre delle camere bloccate o con superficie apribile inferiore a 1/8, comportante insufficiente ricambio d'aria naturale o rischio di accumulo di umidità.",
+    });
+
+    items.push({
+      id: `${env.id}-ergonomia-rifacimento-letti-prevenzione-dms-housekeeping`,
+      area: env.name,
+      title: "Ergonomia Arredi e Prevenzione Sovraccarico Biomeccanico Addetti Pulizie (D.Lgs. 81/08 Titolo VI)",
+      question:
+        "I letti e gli arredi delle camere consentono spazi di manovra laterali adeguati per le operazioni di pulizia e rifacimento letto, prevenendo posture incongrue e flessioni ripetute del rachide da parte del personale (D.Lgs. 81/08 Titolo VI)?",
+      normReference: "D.Lgs. 81/2008 Titolo VI e Allegato XXXIII (Movimentazione Manuale dei Carichi e Sovraccarico Biomeccanico)",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Letti incassati senza spazio di accesso laterale o materassi sprovvisti di maniglie di presa ergonomiche, che costringono l'operatore a torsioni e sovraccarico lombare continuo.",
+    });
+
+    items.push({
+      id: `${env.id}-planimetria-fuga-retro-porta-istruzioni-emergenza`,
+      area: env.name,
+      title: "Istruzioni di Sicurezza e Planimetria di Fuga sul Retro della Porta di Ciascuna Camera",
+      question:
+        "Sul retro della porta d'accesso di ciascuna camera è presente il cartello con la planimetria orientata di fuga indicante la posizione della camera, l'uscita più vicina e le norme di comportamento in caso di incendio?",
+      normReference: "D.M. 03/09/2021 e D.Lgs. 81/2008 Allegato IV punto 1.4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Mancanza del prospetto di evacuazione dietro le porte delle camere o planimetria non orientata rispetto alla reale collocazione della stanza.",
+    });
+  }
+
+  // c) Servizi Igienici Privati Camere & Bagno Disabili (D.P.R. 503/96)
+  if (env.id === "env-bnb-bagni-privati" || env.id.includes("bnb-bagni-privati")) {
+    items.push({
+      id: `${env.id}-bagno-disabili-tirante-campanello-maniglioni-dpr-503-96`,
+      area: env.name,
+      title: "Bagno Accessibile Disabili con Tirante Allarme a Campanello e Maniglioni (D.P.R. 503/96 - D.M. 236/89)",
+      question:
+        "Il bagno per ospiti a ridotta capacità motoria è dotato di campanello d'allarme a tirante azionabile anche da terra con suoneria e luce ottica all'esterno, wc accessibile con doccetta, maniglioni di sostegno orizzontali e doccia a filo pavimento?",
+      normReference: "D.P.R. 503/1996, D.M. 236/1989 art. 8.1.6 e Legge 104/1992",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Tirante a fune di allarme assente o con corda tagliata non raggiungibile da terra in caso di caduta dell'ospite, o maniglioni di sostegno non ancorati solidamente.",
+    });
+
+    items.push({
+      id: `${env.id}-prevenzione-legionella-soffioni-doccia-anticalcare-flussaggio`,
+      area: env.name,
+      title: "Prevenzione Rischio Legionellosi: Soffioni Doccia Ispezionabili, Decalcificazione e Flussaggio",
+      question:
+        "I soffioni delle docce, i flessibili e i rompigetto dei rubinetti sono smontabili ed ispezionabili, sottoposti a decalcificazione periodica e a flussaggio preventivo ad alta temperatura prima dell'arrivo di nuovi ospiti (Accordo 07/05/2015 e D.Lgs. 18/2023)?",
+      normReference:
+        "Linee Guida Nazionali per la Prevenzione della Legionellosi (Accordo Stato-Regioni 07/05/2015) e D.Lgs. 18/2023",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Soffioni doccia ostruiti da incrostazioni calcaree o biofilm batterico e mancato flussaggio dei terminali idrici nelle camere non occupate da oltre una settimana.",
+    });
+
+    items.push({
+      id: `${env.id}-pavimentazione-antiscivolo-aerazione-forzata-temporizzata`,
+      area: env.name,
+      title: "Pavimentazione Antiscivolo e Aerazione Meccanica Forzata Temporizzata per Bagni Ciechi",
+      question:
+        "La pavimentazione dei servizi igienici garantisce caratteristiche antisdrucciolo a piedi bagnati, e negli eventuali bagni ciechi è presente elettroaspiratore temporizzato con espulsione diretta verso l'esterno a norma del D.M. 05/07/1975?",
+      normReference: "D.M. 05/07/1975 art. 7 e D.Lgs. 81/2008 Allegato IV punto 1.3",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "pavimenti_pareti",
+      suggestedNonConformity:
+        "Aspiratore del bagno cieco non funzionante con ristagno prolungato di vapore e condense, o piatto doccia scivoloso privo di trattamento o tappetino antiscivolo.",
+    });
+  }
+
+  // d) Area Colazioni, Zona Living & Tavoli Ospiti
+  if (env.id === "env-bnb-sala-colazioni" || env.id.includes("bnb-sala-colazioni")) {
+    items.push({
+      id: `${env.id}-buffet-parafiato-moca-reg-ce-1935-2004-igiene`,
+      area: env.name,
+      title: "Esposizione Alimenti Buffet con Protezioni Parafiato MOCA (Reg. CE 1935/2004 e Reg. CE 852/2004)",
+      question:
+        "I prodotti alimentari sfusi esposti al buffet della colazione (dolci, pane, frutta, cereali) sono protetti da campane, vetrine o alzatine parafiato conformi alla disciplina dei materiali a contatto con alimenti MOCA (Reg. CE 1935/2004)?",
+      normReference: "Reg. CE 1935/2004, Reg. CE 852/2004 Allegato II Capitolo V e D.Lgs. 29/2017",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Alimenti da forno o affettati lasciati aperti sul tavolo colazioni senza alcuna protezione da polvere, tosse o manipolazione diretta da parte dei clienti.",
+    });
+
+    items.push({
+      id: `${env.id}-cartello-allergeni-prodotti-colazione-reg-ue-1169-2011`,
+      area: env.name,
+      title: "Informativa Allergeni Scritta e Chiaramente Visibile sul Buffet (Reg. UE 1169/2011)",
+      question:
+        "È presente sul tavolo delle colazioni un'informativa scritta ben visibile e dettagliata contenente l'elenco dei 14 allergeni alimentari presenti nei singoli cibi e bevande somministrati, a norma del Reg. UE 1169/2011 e D.Lgs. 231/2017?",
+      normReference: "Regolamento UE 1169/2011 art. 44 e D.Lgs. 231/2017 art. 19",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Assenza del cartello o registro degli allergeni per i prodotti somministrati a colazione, con grave rischio anafilattico per soggetti allergici o intolleranti.",
+    });
+
+    items.push({
+      id: `${env.id}-vie-esodo-sala-sgombre-estintore-adiacente`,
+      area: env.name,
+      title: "Vie di Fuga Libere (0,90-1,20 m) e Presidio Estintore Portatile Adiacente alla Sala",
+      question:
+        "I passaggi tra i tavoli e le porte di uscita della sala colazioni/living garantiscono percorsi di esodo sgombri con larghezza minima di almeno 0,90-1,20 m e la presenza di un estintore portatile prontamente utilizzabile?",
+      normReference: "D.M. 03/09/2021 e D.Lgs. 81/2008 Allegato IV punto 1.4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Percorsi di transito della sala ostruiti da sedie supplementari, bagagli o mobili con larghezza utile ridotta al di sotto delle dimensioni di sicurezza.",
+    });
+  }
+
+  // e) Kitchenette / Angolo Cottura, Scaldavivande & Office Colazioni
+  if (env.id === "env-bnb-kitchenette-office" || env.id.includes("bnb-kitchenette-office")) {
+    items.push({
+      id: `${env.id}-cappa-aspirazione-canna-fumaria-pareti-lavabili`,
+      area: env.name,
+      title: "Cappa d'Aspirazione Fumi canalizzata/filtrante e Pareti Lavabili fino a 2 Metri",
+      question:
+        "Il punto cottura dell'angolo colazioni è provvisto di cappa d'aspirazione fumi e vapori efficiente con filtri puliti, e le pareti circostanti sono rivestite con materiale liscio, impermeabile e disinfettabile fino a 2 metri di altezza (Reg. CE 852/2004)?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitoli I e II e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Piano cottura privo di cappa aspirante o con filtri saturi di grasso, oppure pareti della kitchenette tinteggiate a tempera assorbente soggetta a muffe.",
+    });
+
+    items.push({
+      id: `${env.id}-frigorifero-termometro-lettura-esterna-4c-haccp`,
+      area: env.name,
+      title: "Frigorifero per Alimenti Colazione a +4°C con Termometro e Monitoraggio HACCP",
+      question:
+        "Il frigorifero destinato alla conservazione di latte, yogurt, burro, formaggi e prodotti deperibili è dotato di termometro di precisione a lettura esterna mantenuto costantemente a temperatura ≤ +4°C con monitoraggio giornaliero?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo IX e Linee Guida HACCP",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Frigorifero alimenti colazione privo di termometro di controllo o con temperatura riscontrata superiore a +8°C con rischio proliferazione batterica.",
+    });
+
+    items.push({
+      id: `${env.id}-piano-cottura-sicurezza-termocoppia-induzione-dm-37-08`,
+      area: env.name,
+      title: "Piano Cottura a Gas con Termocoppia di Sicurezza o Induzione (D.M. 37/08 e UNI 7129)",
+      question:
+        "Il piano cottura a gas dispone di valvole di sicurezza a termocoppia su tutti i fuochi per blocco automatico del gas in caso di spegnimento fiamma, o in alternativa piano a induzione magnetica con blocco tasti bambini e conformità D.M. 37/08?",
+      normReference: "D.M. 37/2008, Norma UNI 7129 e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Fornello a gas vetusto privo di dispositivo di sicurezza termocoppia o tubo flessibile del gas scaduto con rischio perdita gas ed esplosione.",
+    });
+
+    items.push({
+      id: `${env.id}-lavastoviglie-ciclo-termico-igienizzante-stoviglie-moca`,
+      area: env.name,
+      title: "Lavastoviglie con Ciclo Igienizzante ad Alta Temperatura e Stoviglie MOCA",
+      question:
+        "Le stoviglie, tazze, bicchieri e posate utilizzate per la colazione vengono sanificate tramite lavastoviglie con ciclo igienizzante ad alta temperatura (risciacquo ≥ 65-70°C) e sono riposte al riparo da polvere e contaminanti?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo V e Reg. CE 1935/2004",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Lavaggio manuale approssimativo delle tazzine con acqua tiepida senza sanificazione o stoviglie scheggiate mantenute in uso.",
+    });
+  }
+
+  // f) Ripostiglio Guardaroba, Biancheria Pulita & Kit Cortesia
+  if (env.id === "env-bnb-guardaroba-biancheria" || env.id.includes("bnb-guardaroba-biancheria")) {
+    items.push({
+      id: `${env.id}-stoccaggio-biancheria-pulita-armadi-chiusi-sollevati-15cm`,
+      area: env.name,
+      title: "Stoccaggio Biancheria Pulita in Armadi Chiusi o Sollevati ≥ 15 cm da Terra",
+      question:
+        "La biancheria pulita (lenzuola, federe, asciugamani sigillati) e i kit di cortesia sono stoccati in armadi chiusi o su scaffalature lisce sollevate almeno 15 cm dal pavimento in ambiente asciutto, aerato e sanificato?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo I e D.Lgs. 81/2008 Allegato IV punto 1.1",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Biancheria da letto pulita appoggiata direttamente a terra o su ripiani polverosi esposti ad umidità o infestanti.",
+    });
+
+    items.push({
+      id: `${env.id}-scaffalature-stabili-fissaggio-parete-antiribaltamento`,
+      area: env.name,
+      title: "Stabilità Scaffalature e Fissaggio Antiribaltamento (D.Lgs. 81/08 All. IV)",
+      question:
+        "Le scaffalature del ripostiglio biancheria sono stabili, integre, provviste di staffaggio antiribaltamento a parete e con carichi distribuiti in modo uniforme (materiali più pesanti sui ripiani inferiori)?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.1 e Titolo I",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Scaffali metallici instabili, non ancorati a parete o sovraccaricati sui ripiani alti con rischio di collasso addosso all'operatore.",
+    });
+  }
+
+  // g) Locale Lavanderia Interna, Stireria & Deposito Detergenti
+  if (env.id === "env-bnb-lavanderia-office" || env.id.includes("bnb-lavanderia-office")) {
+    items.push({
+      id: `${env.id}-armadietto-chiuso-detergenti-sds-etichettatura-clp`,
+      area: env.name,
+      title: "Armadietto Chiuso per Prodotti Chimici Detergenti con Schede di Sicurezza SDS (CLP)",
+      question:
+        "I prodotti detergenti, disinfettanti e anticalcare utilizzati per il bucato e le pulizie sono conservati in armadietto chiuso con chiave, nelle confezioni originali etichettate a norma Reg. CE 1272/2008 (CLP) con SDS aggiornate?",
+      normReference: "D.Lgs. 81/2008 Titolo IX (Sostanze Pericolose), art. 227 e Regolamento CE 1272/2008",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Detergenti chimici travasati in bottiglie anonime prive di etichetta o conservati a giorno senza armadietto chiuso con rischio intossicazione o ustioni chimiche.",
+    });
+
+    items.push({
+      id: `${env.id}-sicurezza-elettrica-lavatrice-asciugatrice-ferro-stiro`,
+      area: env.name,
+      title: "Sicurezza Elettrica Elettrodomestici Lavanderia e Postazione Stiro Ergonomica",
+      question:
+        "La lavatrice, l'asciugatrice e il ferro da stiro a vapore sono collegati a prese conformi CEI dotate di messa a terra, il ferro poggia su supporto termoisolante stabile e il cavo elettrico è privo di spellature o danneggiamenti?",
+      normReference: "D.Lgs. 81/2008 Titolo III Capo III (Impianti e Apparecchi Elettrici) e D.M. 37/2008",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Uso di adattatori multipli o prolunghe volanti per alimentare contemporaneamente lavatrice ed asciugatrice con rischio surriscaldamento ed incendio.",
+    });
+  }
+
+  // h) Vano Caldaia Murale a Condensazione & Accumulo ACS (Boiler)
+  if (env.id === "env-bnb-centrale-termica-boiler" || env.id.includes("bnb-centrale-termica-boiler")) {
+    items.push({
+      id: `${env.id}-temperatura-accumulo-boiler-acs-55-60c-legionella`,
+      area: env.name,
+      title: "Temperatura Accumulo ACS nel Boiler ≥ 55-60°C per Prevenzione Legionellosi",
+      question:
+        "Il boiler/accumulatore di acqua calda sanitaria (ACS) è tarato e mantenuto costantemente a una temperatura non inferiore a 55-60°C al fine di inibire la proliferazione batterica di Legionella pneumophila (Accordo 07/05/2015 e D.Lgs. 18/2023)?",
+      normReference:
+        "Accordo Stato-Regioni 07/05/2015 (Linee Guida Legionellosi) e D.Lgs. 18/2023 (Qualità delle acque destinate al consumo umano)",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Temperatura del bollitore ACS impostata a valori inferiori a 50°C per risparmio energetico, creando condizioni ottimali per la moltiplicazione di Legionella nella rete idrica.",
+    });
+
+    items.push({
+      id: `${env.id}-caldaia-condensazione-libretto-impianto-scarico-fumi-dm-37-08`,
+      area: env.name,
+      title: "Caldaia a Condensazione a Norma D.M. 37/08, Scarico Fumi a Tetto e Libretto d'Impianto",
+      question:
+        "La caldaia murale dispone di Dichiarazione di Conformità D.M. 37/08, libretto di impianto termico di climatizzazione con rapporti di efficienza energetica periodici e canna fumaria con scarico fumi certificato a tetto?",
+      normReference: "D.M. 37/2008, D.P.R. 74/2013 e Norma UNI 7129",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Caldaia priva di libretto d'impianto aggiornato o con manutenzione annuale omessa e scarico condensa non convogliato a norma.",
+    });
+
+    items.push({
+      id: `${env.id}-rilevatore-gas-valvola-sicurezza-scarico-convogliato`,
+      area: env.name,
+      title: "Rilevatore Fughe Gas Combustibile e Valvola di Sicurezza Sovrapressione con Scarico Convogliato",
+      question:
+        "Nel locale caldaia è installato un rilevatore di fughe di gas metano/GPL con segnalazione di allarme, e la valvola di sicurezza di sovrapressione del circuito idraulico presenta scarico convogliato per evitare allagamenti e getti di vapore?",
+      normReference: "Norma UNI 7129, D.M. 37/2008 e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Assenza di rilevatore di gas in vano chiuso o valvola di sicurezza del boiler con scarico libero a parete con rischio ustioni in caso di apertura accidentale.",
+    });
+  }
+
+  // i) Terrazzo, Balconi & Spazi di Sosta all'Aperto
+  if (env.id === "env-bnb-terrazzo-balconi" || env.id.includes("bnb-terrazzo-balconi")) {
+    items.push({
+      id: `${env.id}-parapetti-ringhiere-altezza-100cm-inscalabili`,
+      area: env.name,
+      title: "Parapetti e Ringhiere di Protezione a Norma (Altezza ≥ 1,00 m, Inscalabili)",
+      question:
+        "I balconi e i terrazzi accessibili agli ospiti presentano parapetti o ringhiere di protezione con altezza minima non inferiore a 1,00 m dal piano di calpestio, privi di fessure con luce superiore a 10 cm e privi di traverse orizzontali scalabili da bambini?",
+      normReference: "D.M. 236/1989 punto 8.1.8 e D.Lgs. 81/2008 Allegato IV punto 1.4",
+      defaultSeverity: 5,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Ringhiera del balcone con altezza inferiore a 1,00 m o con elementi orizzontali che consentono la facile arrampicata, con grave pericolo di precipitazione nel vuoto.",
+    });
+
+    items.push({
+      id: `${env.id}-pavimentazione-esterna-antiscivolo-r11-illuminazione`,
+      area: env.name,
+      title: "Pavimentazione Esterna Antiscivolo (R11) e Illuminazione Notturna di Sicurezza",
+      question:
+        "La pavimentazione degli spazi esterni garantisce adeguate caratteristiche antiscivolo anche in presenza di bagnato (classe R11) ed è presente illuminazione artificiale per prevenire inciampi e cadute nelle ore serali/notturne?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.3 e D.M. 236/1989",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "pavimenti_pareti",
+      suggestedNonConformity:
+        "Pavimentazione del terrazzo scivolosa o fessurata con presenza di muschio o priva di illuminazione notturna sui gradini di accesso.",
+    });
+  }
+
+  // j) Vano Scale, Corridoi di Distribuzione & Disimpegni Piani
+  if (env.id === "env-bnb-scale-disimpegni" || env.id.includes("bnb-scale-disimpegni")) {
+    items.push({
+      id: `${env.id}-gradini-antisdrucciolo-corrimano-continuo-vie-esodo`,
+      area: env.name,
+      title: "Scale Interne con Gradini Antisdrucciolo, Corrimano Continuo e Percorsi Liberi",
+      question:
+        "Le scale di collegamento ai piani presentano gradini a pianta regolare con profilo o striscia antisdrucciolo, corrimano continuo a norma posizionato ad altezza compresa tra 0,90 e 1,00 m e percorsi di transito liberi da qualsiasi ingombro?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.7 e D.M. 236/1989 punto 8.1.10",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "pavimenti_pareti",
+      suggestedNonConformity:
+        "Gradini scivolosi privi di paraspigolo antisdrucciolo, corrimano assente o interrotto, o deposito di valigie/scatoloni sulle rampe con ostacolo all'esodo.",
+    });
+
+    items.push({
+      id: `${env.id}-luci-emergenza-led-autonomia-1h-accensione-automatica`,
+      area: env.name,
+      title: "Illuminazione di Emergenza a LED con Autonomia ≥ 1 Ora lungo le Scale e i Disimpegni",
+      question:
+        "Lungo le scale e i corridoi di distribuzione sono installate lampade di emergenza a led autoalimentate con autonomia non inferiore a 60 minuti, ad accensione automatica immediata in caso di interruzione dell'energia elettrica?",
+      normReference: "Norma UNI EN 1838, D.M. 03/09/2021 e D.Lgs. 81/2008 Allegato IV punto 1.4",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Lampade di emergenza con batterie esauste non funzionanti al test di disconnessione della corrente elettrica con rischio panico e cadute al buio.",
+    });
+  }
+
+  // k) Armadio / Ripostiglio Attrezzature Pulizie & Carrello Piani
+  if (env.id === "env-bnb-ripostiglio-housekeeping" || env.id.includes("bnb-ripostiglio-housekeeping")) {
+    items.push({
+      id: `${env.id}-attrezzature-pulizia-aspirapolvere-hepa-mop-separati`,
+      area: env.name,
+      title: "Attrezzature di Pulizia Housekeeping, Aspirapolvere con Filtro HEPA e Mop Distinti",
+      question:
+        "Le attrezzature per le pulizie (aspirapolvere dotato di filtro HEPA per trattenere polveri e allergeni, carrello pulizie, mop e panni in microfibra) sono pulite, igienizzate e differenziate per colore (rosso bagni, blu camere) per prevenire contaminazioni crociate?",
+      normReference: "D.Lgs. 81/2008 Titolo X (Agenti Biologici) e Reg. CE 852/2004 Allegato II Capitolo I",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Uso indiscriminato dello stesso straccio o mop sia per la sanificazione dei servizi igienici che per i pavimenti delle camere da letto con cross-contaminazione microbica.",
+    });
+
+    items.push({
+      id: `${env.id}-dotazione-dpi-operatori-pulizie-guanti-mascherine`,
+      area: env.name,
+      title: "Dispositivi di Protezione Individuale (DPI) per il Personale di Pulizia e Housekeeping",
+      question:
+        "È presente in apposito armadietto pulito una scorta adeguata di DPI per gli addetti alle pulizie (guanti monouso in nitrile/gomma a protezione chimica e biologica, mascherine protettive, calzature antiscivolo a norma EN ISO 20347)?",
+      normReference: "D.Lgs. 81/2008 Titolo III Capo II (Uso dei DPI) artt. 75, 77 e 78",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Addetti alle pulizie operanti privi di guanti protettivi adatti al contatto con candeggina/disinfettanti o privi di calzature chiuse antiscivolo.",
+    });
+  }
+
+  // l) Zona Raccolta Differenziata Rifiuti & Stoccaggio Imballaggi
+  if (env.id === "env-bnb-area-rifiuti-differenziata" || env.id.includes("bnb-area-rifiuti-differenziata")) {
+    items.push({
+      id: `${env.id}-bidoni-raccolta-differenziata-coperchio-pedale-ermetici`,
+      area: env.name,
+      title: "Contenitori Raccolta Differenziata con Coperchio a Pedale e Chiusura Ermetica",
+      question:
+        "I contenitori per la raccolta differenziata dei rifiuti (frazione organica, plastica/metallo, carta, vetro, secco residuo) sono in materiale plastico rigido lavabile, dotati di coperchio a tenuta e azionamento a pedale per evitare il contatto manuale?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo VI e D.Lgs. 152/2006 art. 188",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Bidoni dell'umido sprovvisti di coperchio o con pedale rotto che costringe all'apertura manuale, con rischio contaminazione e sviluppo di odori molesti.",
+    });
+
+    items.push({
+      id: `${env.id}-pavimentazione-lavabile-pulizia-periodica-lotta-infestanti`,
+      area: env.name,
+      title: "Pavimentazione Lavabile, Igiene del Locale Rifiuti e Protezione da Infestanti",
+      question:
+        "L'area destinata alla sosta dei rifiuti presenta pavimento e pareti lavabili, è mantenuta costantemente pulita e disinfettata ed è protetta contro l'intrusione di animali e parassiti (Reg. CE 852/2004)?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo VI e Regolamento Locale di Igiene",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "pavimenti_pareti",
+      suggestedNonConformity:
+        "Area rifiuti con pavimentazione sporca da colature di liquidi organici, residui accumulati all'esterno dei contenitori e presenza di formiche o roditori.",
     });
   }
 

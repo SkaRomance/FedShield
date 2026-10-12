@@ -2174,15 +2174,18 @@ for (const variant of ["55.10.00", "55.10.0", "55.10", "55.1", "551000", "55100"
   assert.equal(hotelVar.sectorKey, "hotel_strutture_ricettive", `Variante '${variant}' deve restituire hotel_strutture_ricettive`);
 }
 
-// Posizionamento: subito dopo bar_caffetteria e prima di ristorazione_alimentare
+// Posizionamento: subito dopo bar_caffetteria e prima di bnb_affittacamere e ristorazione_alimentare
 const barIdxHotel = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "bar_caffetteria");
 const hotelIdx = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "hotel_strutture_ricettive");
+const bnbIdxHotel = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "bnb_affittacamere");
 const ristGenIdxHotel = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ristorazione_alimentare");
 assert.ok(barIdxHotel !== -1, "Settore bar_caffetteria deve esistere");
 assert.ok(hotelIdx !== -1, "Settore hotel_strutture_ricettive deve esistere");
+assert.ok(bnbIdxHotel !== -1, "Settore bnb_affittacamere deve esistere");
 assert.ok(ristGenIdxHotel !== -1, "Settore generic ristorazione_alimentare deve esistere");
 assert.equal(hotelIdx, barIdxHotel + 1, "hotel_strutture_ricettive deve seguire immediatamente bar_caffetteria");
-assert.equal(hotelIdx + 1, ristGenIdxHotel, "hotel_strutture_ricettive deve precedere immediatamente ristorazione_alimentare nel catalogo");
+assert.equal(hotelIdx + 1, bnbIdxHotel, "hotel_strutture_ricettive deve precedere immediatamente bnb_affittacamere nel catalogo");
+assert.equal(bnbIdxHotel + 1, ristGenIdxHotel, "bnb_affittacamere deve precedere immediatamente ristorazione_alimentare nel catalogo");
 
 // -------------------------------------------------------------
 // Test 40: Verifica completezza delle 16 macchine professionali per Hotel con modelli reali, corsi e controlli tecnici
@@ -2421,6 +2424,272 @@ for (const code of ["55.10.00", "55.10.0", "55.10", "55.1", "551000", "55100", "
   assert.ok(fallbackHotelRes.every((m) => m.sourceReason === "ateco"), `Tutte le macchine con ATECO variant '${code}' devono avere sourceReason === 'ateco'`);
 }
 
+// -------------------------------------------------------------
+// === INIZIO TEST normativeMachineCatalog (ATECO 55.20.51 Bed & Breakfast e Affittacamere) ===
+// -------------------------------------------------------------
+console.log("\n=== INIZIO TEST normativeMachineCatalog (ATECO 55.20.51 B&B, Affittacamere e Guest House) ===");
+
+// -------------------------------------------------------------
+// Test 43: Priorità e risoluzione catalogo ATECO per B&B, Affittacamere e Guest House (55.20.51 / 55.20.5 / 55.20 / 55.2)
+// -------------------------------------------------------------
+console.log("Test 43: Verifica priorità catalogo ATECO per B&B, Affittacamere, Guest House e Room Rental (55.20.51 / 55.20 / 55.2)");
+const catalogBnbExact = getSectorMachineCatalogForAteco("55.20.51");
+assert.equal(catalogBnbExact.sectorKey, "bnb_affittacamere", "ATECO 55.20.51 deve restituire bnb_affittacamere");
+assert.ok(catalogBnbExact.sectorLabel.includes("Bed & Breakfast"), "L'etichetta del catalogo deve includere Bed & Breakfast");
+assert.ok(catalogBnbExact.sectorLabel.includes("Affittacamere"), "L'etichetta del catalogo deve includere Affittacamere");
+
+for (const variant of ["55.20.51", "55.20.5", "55.20", "55.2", "552051", "55205", "5520", "552"]) {
+  const bnbVar = getSectorMachineCatalogForAteco(variant);
+  assert.equal(bnbVar.sectorKey, "bnb_affittacamere", `Variante '${variant}' deve restituire bnb_affittacamere`);
+}
+
+// Posizionamento: subito dopo hotel_strutture_ricettive e prima di ristorazione_alimentare
+const hotelIdxBnb = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "hotel_strutture_ricettive");
+const bnbIdxCheck = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "bnb_affittacamere");
+const ristGenIdxBnb = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ristorazione_alimentare");
+assert.ok(hotelIdxBnb !== -1, "Settore hotel_strutture_ricettive deve esistere");
+assert.ok(bnbIdxCheck !== -1, "Settore bnb_affittacamere deve esistere");
+assert.ok(ristGenIdxBnb !== -1, "Settore generic ristorazione_alimentare deve esistere");
+assert.equal(bnbIdxCheck, hotelIdxBnb + 1, "bnb_affittacamere deve seguire immediatamente hotel_strutture_ricettive");
+assert.equal(bnbIdxCheck + 1, ristGenIdxBnb, "bnb_affittacamere deve precedere immediatamente ristorazione_alimentare");
+
+// -------------------------------------------------------------
+// Test 44: Verifica completezza delle 16 macchine professionali per B&B con modelli reali, verifiche e corsi
+// -------------------------------------------------------------
+console.log("Test 44: Verifica completezza delle 16 macchine professionali per B&B con modelli reali, corsi e verifiche tecniche");
+assert.equal(catalogBnbExact.machines.length, 16, "Il catalogo B&B deve contenere esattamente 16 macchine");
+
+const expectedBnbMachineKeys = [
+  "macchina_caffe_capsule_grani_bnb",
+  "bollitore_tostapane_buffet_bnb",
+  "vetrina_refrigerata_snack_bnb",
+  "spremiagrumi_centrifuga_compatta",
+  "lavastoviglie_termodisinfezione_bnb",
+  "forno_microonde_grill_bnb",
+  "lavatrice_vapore_igienizzante_bnb",
+  "asciugatrice_pompa_calore_bnb",
+  "ferro_generatore_vapore_caldaia",
+  "aspirapolvere_filtro_hepa_bnb",
+  "generatore_ozono_sanificazione_bnb",
+  "lavasciuga_pavimenti_compatta_bnb",
+  "caldaia_murale_condensazione_acs",
+  "centralina_rilevazione_fumi_bnb",
+  "serrature_elettroniche_smartlock",
+  "carrello_housekeeping_compatto_bnb",
+];
+
+for (const key of expectedBnbMachineKeys) {
+  const found = catalogBnbExact.machines.find((m) => m.machineKey === key);
+  assert.ok(found, `Macchina ${key} deve essere presente nel catalogo B&B / Affittacamere`);
+  assert.ok(found.name.length > 5, `Nome macchina ${key} deve essere esaustivo`);
+  assert.ok(found.type.length > 5, `Tipologia macchina ${key} deve essere specificata`);
+  assert.ok(found.suggestedManufacturer.length > 0, `Produttore suggerito per ${key} deve essere presente`);
+  assert.ok(found.suggestedModel.length > 0, `Modello suggerito per ${key} deve essere presente`);
+  assert.equal(found.isSubjectToInailCheck, false, `Macchina ${key} in B&B non è soggetta a verifiche periodiche INAIL All. VII`);
+  assert.ok(found.safetyChecks.length >= 3, `Macchina ${key} deve avere almeno 3 controlli di sicurezza`);
+  assert.ok(found.training, `Macchina ${key} deve avere un corso di formazione/addestramento associato`);
+}
+
+// Verifiche puntuali su modelli reali e controlli tecnici specifici per ciascuna delle 16 macchine:
+// 1. Macchina Caffè Capsule / Grani da Buffet
+const caffeBnb = catalogBnbExact.machines.find((m) => m.machineKey === "macchina_caffe_capsule_grani_bnb")!;
+assert.ok(caffeBnb.suggestedManufacturer.includes("De Longhi") || caffeBnb.suggestedManufacturer.includes("Saeco") || caffeBnb.suggestedManufacturer.includes("Jura"), "De Longhi, Saeco o Jura");
+assert.ok(caffeBnb.suggestedModel.includes("Magnifica S") || caffeBnb.suggestedModel.includes("Royal") || caffeBnb.suggestedModel.includes("Jura E8"), "Magnifica S, Royal o Jura E8");
+assert.ok(caffeBnb.safetyChecks.some((c) => c.code === "BNB_CAFFE_LANCIA_VAPORE_LAVAGGIO_TERMICO" && c.title.includes("Lancia Vapore")), "Lancia vapore con lavaggio termico");
+assert.ok(caffeBnb.safetyChecks.some((c) => c.code === "BNB_CAFFE_SERBATOIO_MOCA_SANIFICABILE" && c.normReference.includes("1935/2004")), "Serbatoio conforme MOCA 1935/2004");
+assert.equal(caffeBnb.training.courseCode, "FORMAZ_HACCP_COLAZIONI_BNB", "Corso HACCP colazioni B&B");
+
+// 2. Set Elettrico Buffet: Bollitore e Tostapane
+const bollitoreBnb = catalogBnbExact.machines.find((m) => m.machineKey === "bollitore_tostapane_buffet_bnb")!;
+assert.ok(bollitoreBnb.suggestedManufacturer.includes("Smeg") || bollitoreBnb.suggestedManufacturer.includes("Sirman") || bollitoreBnb.suggestedManufacturer.includes("Dualit"), "Smeg, Sirman o Dualit");
+assert.ok(bollitoreBnb.suggestedModel.includes("Dualit Classic") || bollitoreBnb.suggestedModel.includes("Sirman") || bollitoreBnb.suggestedModel.includes("KLF03"), "Dualit Classic, Sirman o KLF03");
+assert.ok(bollitoreBnb.safetyChecks.some((c) => c.code === "BNB_BOLLITORE_SPEGNIMENTO_AUTO_SECCO" && c.question.includes("secco")), "Spegnimento automatico e protezione funzionamento a secco");
+assert.ok(bollitoreBnb.safetyChecks.some((c) => c.code === "BNB_TOSTAPANE_CASSETTO_BRICIOLE_ESTRAIBILE" && c.normReference.includes("02/09/2021")), "Cassetto raccoglibriciole estraibile prevenzione incendi");
+
+// 3. Mini-Vetrina Refrigerata da Banco (+4°C)
+const vetrinaBnb = catalogBnbExact.machines.find((m) => m.machineKey === "vetrina_refrigerata_snack_bnb")!;
+assert.ok(vetrinaBnb.suggestedManufacturer.includes("Liebherr") || vetrinaBnb.suggestedManufacturer.includes("Polar") || vetrinaBnb.suggestedManufacturer.includes("Forcar"), "Liebherr, Polar o Forcar");
+assert.ok(vetrinaBnb.safetyChecks.some((c) => c.code === "BNB_VETRINA_TERMOSTATO_DIGITALE_DISPLAY_HACCP" && c.question.includes("HACCP")), "Termostato digitale con display HACCP");
+assert.ok(vetrinaBnb.safetyChecks.some((c) => c.code === "BNB_VETRINA_DOPPIO_VETRO_TEMPERATO_SICUREZZA" && c.normReference.includes("12150")), "Doppio vetro temperato UNI EN 12150");
+
+// 4. Spremiagrumi Elettrico Compatto da Buffet
+const spremiBnb = catalogBnbExact.machines.find((m) => m.machineKey === "spremiagrumi_centrifuga_compatta")!;
+assert.ok(spremiBnb.suggestedManufacturer.includes("Ceado") || spremiBnb.suggestedManufacturer.includes("Santos") || spremiBnb.suggestedManufacturer.includes("Sirman"), "Ceado, Santos o Sirman");
+assert.ok(spremiBnb.suggestedModel.includes("S98") || spremiBnb.suggestedModel.includes("Santos 11") || spremiBnb.suggestedModel.includes("Apollo"), "S98, Santos 11 o Apollo");
+assert.ok(spremiBnb.safetyChecks.some((c) => c.code === "BNB_SPREMIAGRUMI_MICROINTERRUTTORE_LEVA_UNI12852" && c.normReference.includes("UNI EN 12852")), "Microinterruttore leva UNI EN 12852");
+assert.ok(spremiBnb.safetyChecks.some((c) => c.code === "BNB_SPREMIAGRUMI_COMPONENTI_INOX_MOCA_SMONTABILI" && c.normReference.includes("1935/2004")), "Parti a contatto MOCA 1935/2004");
+
+// 5. Lavastoviglie con Ciclo Igienizzante (75-80°C)
+const lavaBnb = catalogBnbExact.machines.find((m) => m.machineKey === "lavastoviglie_termodisinfezione_bnb")!;
+assert.ok(lavaBnb.suggestedManufacturer.includes("Miele") || lavaBnb.suggestedManufacturer.includes("Electrolux") || lavaBnb.suggestedManufacturer.includes("Krupps"), "Miele, Electrolux o Krupps");
+assert.ok(lavaBnb.safetyChecks.some((c) => c.code === "BNB_LAVASTOVIGLIE_RISCIACQUO_ALTA_TEMP_DIN10512" && c.normReference.includes("DIN 10512")), "Risciacquo alta temperatura DIN 10512");
+assert.ok(lavaBnb.safetyChecks.some((c) => c.code === "BNB_LAVASTOVIGLIE_ACQUASTOP_ANTIALAGAMENTO" && c.title.includes("Acquastop")), "Sensore Acquastop antiallagamento");
+
+// 6. Forno a Microonde Professionale Combinato con Grill
+const microondeBnb = catalogBnbExact.machines.find((m) => m.machineKey === "forno_microonde_grill_bnb")!;
+assert.ok(microondeBnb.suggestedManufacturer.includes("Panasonic") || microondeBnb.suggestedManufacturer.includes("Samsung") || microondeBnb.suggestedManufacturer.includes("Sirman"), "Panasonic, Samsung o Sirman");
+assert.ok(microondeBnb.suggestedModel.includes("NE-1027") || microondeBnb.suggestedModel.includes("CM1089") || microondeBnb.suggestedModel.includes("Panasonic"), "NE-1027 o CM1089");
+assert.ok(microondeBnb.safetyChecks.some((c) => c.code === "BNB_MICROONDE_DOPPIO_INTERBLOCCO_PORTA"), "Doppio interblocco porta");
+assert.ok(microondeBnb.safetyChecks.some((c) => c.code === "BNB_MICROONDE_CAMERA_INOX_SENZA_PIATTO_GIREVOLE" && c.question.includes("piatto girevole")), "Camera inox senza piatto girevole per igiene");
+
+// 7. Lavatrice Professionale a Carica Frontale con Programma Vapore Igienizzante
+const lavatriceBnb = catalogBnbExact.machines.find((m) => m.machineKey === "lavatrice_vapore_igienizzante_bnb")!;
+assert.ok(lavatriceBnb.suggestedManufacturer.includes("Miele") || lavatriceBnb.suggestedManufacturer.includes("LG") || lavatriceBnb.suggestedManufacturer.includes("Electrolux"), "Miele, LG o Electrolux");
+assert.ok(lavatriceBnb.suggestedModel.includes("PWM 300") || lavatriceBnb.suggestedModel.includes("Giant C+") || lavatriceBnb.suggestedModel.includes("MyPRO"), "PWM 300, Giant C+ o MyPRO");
+assert.ok(lavatriceBnb.safetyChecks.some((c) => c.code === "BNB_LAVATRICE_BLOCCO_ELETTROMAGNETICO_OBLO" && c.normReference.includes("ISO 10472-2")), "Blocco oblò UNI EN ISO 10472-2");
+assert.ok(lavatriceBnb.safetyChecks.some((c) => c.code === "BNB_LAVATRICE_CICLO_TERMICO_VAPORE_60_90C"), "Ciclo termico 60°/90°C vapore igienizzante");
+assert.equal(lavatriceBnb.training.courseCode, "FORMAZ_HOUSEKEEPING_BNB", "Corso housekeeping B&B");
+
+// 8. Asciugatrice a Pompa di Calore con Filtro Lanugine
+const asciugatriceBnb = catalogBnbExact.machines.find((m) => m.machineKey === "asciugatrice_pompa_calore_bnb")!;
+assert.ok(asciugatriceBnb.suggestedManufacturer.includes("Miele") || asciugatriceBnb.suggestedManufacturer.includes("Bosch") || asciugatriceBnb.suggestedManufacturer.includes("LG"), "Miele, Bosch o LG");
+assert.ok(asciugatriceBnb.safetyChecks.some((c) => c.code === "BNB_ASCIUGATRICE_DOPPIO_FILTRO_LANUGINE_ALLARME" && c.title.includes("Allarme Visivo Intasamento")), "Doppio filtro lanugine allarme intasamento");
+assert.ok(asciugatriceBnb.safetyChecks.some((c) => c.code === "BNB_ASCIUGATRICE_SENSORE_UMIDITA_RESIDUA"), "Sensore umidità residua");
+
+// 9. Asse da Stiro Aspirante con Generatore di Vapore a Caldaia
+const stiroBnb = catalogBnbExact.machines.find((m) => m.machineKey === "ferro_generatore_vapore_caldaia")!;
+assert.ok(stiroBnb.suggestedManufacturer.includes("Battistella") || stiroBnb.suggestedManufacturer.includes("Lelit") || stiroBnb.suggestedManufacturer.includes("Bieffe"), "Battistella, Lelit o Bieffe");
+assert.ok(stiroBnb.safetyChecks.some((c) => c.code === "BNB_STIRO_CALDAIA_PED_PRESSOSTATO_VALVOLA" && c.normReference.includes("PED")), "Caldaia certificata PED e valvola sicurezza");
+assert.ok(stiroBnb.safetyChecks.some((c) => c.code === "BNB_STIRO_FERRO_PARAVAPORE_PIASTRA_ISOLATA" && c.question.includes("paravapore")), "Schermo paravapore salvamani");
+
+// 10. Aspirapolvere con Filtro HEPA H13
+const aspirapolvereBnb = catalogBnbExact.machines.find((m) => m.machineKey === "aspirapolvere_filtro_hepa_bnb")!;
+assert.ok(aspirapolvereBnb.suggestedManufacturer.includes("Lindhaus") || aspirapolvereBnb.suggestedManufacturer.includes("Kärcher") || aspirapolvereBnb.suggestedManufacturer.includes("Numatic"), "Lindhaus, Kärcher o Numatic");
+assert.ok(aspirapolvereBnb.safetyChecks.some((c) => c.code === "BNB_ASPIRAPOLVERE_FILTRO_HEPA_H13_ALLERGENI" && c.normReference.includes("UNI EN 1822")), "Filtro HEPA H13 UNI EN 1822");
+assert.ok(aspirapolvereBnb.safetyChecks.some((c) => c.code === "BNB_ASPIRAPOLVERE_BASSO_LIVELLO_SONORO_65DB" && c.question.includes("65 dB")), "Rumorosità < 65 dB(A)");
+
+// 11. Generatore di Ozono Compatto per Camere
+const ozonoBnb = catalogBnbExact.machines.find((m) => m.machineKey === "generatore_ozono_sanificazione_bnb")!;
+assert.ok(ozonoBnb.suggestedManufacturer.includes("Sanity System") || ozonoBnb.suggestedManufacturer.includes("Caleffi") || ozonoBnb.suggestedManufacturer.includes("Ozonosan"), "Sanity System, Caleffi o Ozonosan");
+assert.ok(ozonoBnb.safetyChecks.some((c) => c.code === "BNB_OZONO_TIMER_PROGRAMMABILE_RICONVERSIONE" && c.question.includes("riconversione")), "Riconversione catalitica ozono in ossigeno");
+assert.ok(ozonoBnb.safetyChecks.some((c) => c.code === "BNB_OZONO_PROTOCOLLO_DIVIETO_ACCESSO_SEGNALATICA" && c.normReference.includes("227")), "Divieto accesso D.Lgs. 81/08 art. 227");
+
+// 12. Lavasciuga Pavimenti Compatta Verticale a Rulli
+const lavasciugaBnb = catalogBnbExact.machines.find((m) => m.machineKey === "lavasciuga_pavimenti_compatta_bnb")!;
+assert.ok(lavasciugaBnb.suggestedManufacturer.includes("Kärcher") || lavasciugaBnb.suggestedManufacturer.includes("Lindhaus") || lavasciugaBnb.suggestedManufacturer.includes("Fimap"), "Kärcher, Lindhaus o Fimap");
+assert.ok(lavasciugaBnb.safetyChecks.some((c) => c.code === "BNB_LAVASCIUGA_ASCIUGATURA_IMMEDIATA_ANTISCIVOLO" && c.normReference.includes("Allegato IV")), "Asciugatura immediata antiscivolo All. IV");
+assert.ok(lavasciugaBnb.safetyChecks.some((c) => c.code === "BNB_LAVASCIUGA_IMPUGNATURA_ERGONOMICA_UOMO_PRESENTE" && c.question.includes("uomo presente")), "Impugnatura uomo presente");
+
+// 13. Caldaia Murale a Condensazione con Accumulo ACS Anti-Legionella
+const caldaiaBnb = catalogBnbExact.machines.find((m) => m.machineKey === "caldaia_murale_condensazione_acs")!;
+assert.ok(caldaiaBnb.suggestedManufacturer.includes("Viessmann") || caldaiaBnb.suggestedManufacturer.includes("Vaillant") || caldaiaBnb.suggestedManufacturer.includes("Bosch"), "Viessmann, Vaillant o Bosch");
+assert.ok(caldaiaBnb.safetyChecks.some((c) => c.code === "BNB_CALDAIA_CAMERA_STAGNA_TIPO_C_FUMI_TETTO" && c.normReference.includes("37/2008")), "Camera stagna tipo C D.M. 37/08");
+assert.ok(caldaiaBnb.safetyChecks.some((c) => c.code === "BNB_CALDAIA_SHOCK_TERMICO_ANTI_LEGIONELLA_65C" && c.question.includes("65°C")), "Shock termico anti-legionella a 65°C");
+
+// 14. Centralina Rilevazione Fumi e Incendi Wireless
+const fumiBnb = catalogBnbExact.machines.find((m) => m.machineKey === "centralina_rilevazione_fumi_bnb")!;
+assert.ok(fumiBnb.suggestedManufacturer.includes("Inim") || fumiBnb.suggestedManufacturer.includes("Comelit") || fumiBnb.suggestedManufacturer.includes("Ajax"), "Inim, Comelit o Ajax");
+assert.ok(fumiBnb.safetyChecks.some((c) => c.code === "BNB_ANTINCENDIO_SENSORI_FUMO_OTTICI_EN14604_EN54" && c.normReference.includes("UNI EN 14604")), "Rilevatori ottici UNI EN 14604 / EN 54");
+assert.ok(fumiBnb.safetyChecks.some((c) => c.code === "BNB_ANTINCENDIO_CENTRALE_BATTERIA_TAMPONE_GSM" && c.question.includes("tampone")), "Batteria tampone di continuità");
+assert.equal(fumiBnb.training.courseCode, "FORMAZ_ANTINCENDIO_L1", "Corso antincendio livello 1");
+
+// 15. Sistema di Controllo Accessi Elettronico / Smart Lock
+const smartlockBnb = catalogBnbExact.machines.find((m) => m.machineKey === "serrature_elettroniche_smartlock")!;
+assert.ok(smartlockBnb.suggestedManufacturer.includes("VingCard") || smartlockBnb.suggestedManufacturer.includes("Nuki") || smartlockBnb.suggestedManufacturer.includes("Yale"), "VingCard, Nuki o Yale");
+assert.ok(smartlockBnb.safetyChecks.some((c) => c.code === "BNB_SMARTLOCK_SBLOCCO_ANTIPANICO_MECCANICO_EN179" && c.normReference.includes("UNI EN 179")), "Sblocco antipanico meccanico UNI EN 179");
+assert.ok(smartlockBnb.safetyChecks.some((c) => c.code === "BNB_SMARTLOCK_ALIMENTAZIONE_BATTERIA_AVVISO_SCARICA" && c.question.includes("batteria")), "Avviso batteria scarica e soccorso meccanico");
+
+// 16. Carrello Ergonomico Housekeeping
+const carrelloBnb = catalogBnbExact.machines.find((m) => m.machineKey === "carrello_housekeeping_compatto_bnb")!;
+assert.ok(carrelloBnb.suggestedManufacturer.includes("TTS") || carrelloBnb.suggestedManufacturer.includes("Filmop") || carrelloBnb.suggestedManufacturer.includes("IPC"), "TTS, Filmop o IPC");
+assert.ok(carrelloBnb.safetyChecks.some((c) => c.code === "BNB_CARRELLO_SEPARAZIONE_BIANCHERIA_SPORCO_PULITO"), "Separazione biancheria sporca e pulita");
+assert.ok(carrelloBnb.safetyChecks.some((c) => c.code === "BNB_CARRELLO_VANO_CHIMICI_CHIUSO_A_CHIAVE" && c.question.includes("chiave")), "Scomparto chiuso con chiave per detergenti");
+
+// -------------------------------------------------------------
+// Test 45: Associazione 1-a-1 ambienti Step 2 B&B (env-bnb-*) -> Step 4 Macchine
+// -------------------------------------------------------------
+console.log("Test 45: Verifica associazione ambienti Step 2 B&B (env-bnb-*) -> Step 4 Macchine");
+const bnbEnvironments = [
+  { id: "env-bnb-ingresso-reception", name: "Ingresso, Reception e Check-in B&B", category: "reception" },
+  { id: "env-bnb-camere-ospiti", name: "Camere Ospiti e Suite", category: "rooms" },
+  { id: "env-bnb-bagni-privati", name: "Bagni Privati delle Camere", category: "bathrooms" },
+  { id: "env-bnb-sala-colazioni", name: "Sala Colazioni e Buffet Ospiti", category: "dining" },
+  { id: "env-bnb-kitchenette-office", name: "Kitchenette e Office Preparazione Colazioni", category: "kitchen" },
+  { id: "env-bnb-lavanderia-office", name: "Lavanderia e Stireria Interna B&B", category: "laundry" },
+  { id: "env-bnb-centrale-termica-boiler", name: "Centrale Termica Murale e Bollitore ACS", category: "boiler_room" },
+  { id: "env-bnb-ripostiglio-housekeeping", name: "Ripostiglio Housekeeping e Biancheria Piani", category: "storage" },
+  { id: "env-bnb-scale-disimpegni", name: "Scale Interne e Corridoi Disimpegni", category: "common" },
+];
+
+const suggestedWithBnbEnvs = getSuggestedMachinesForEnvironmentsAndAteco(bnbEnvironments, "55.20.51");
+
+// 1. Ingresso / Reception -> 2 macchine (centralina_rilevazione_fumi_bnb, serrature_elettroniche_smartlock)
+const receptionBnbMachines = suggestedWithBnbEnvs.filter((m) => m.targetEnvironmentId === "env-bnb-ingresso-reception");
+assert.equal(receptionBnbMachines.length, 2, "env-bnb-ingresso-reception deve associare 2 macchine");
+assert.ok(receptionBnbMachines.some((m) => m.machineKey === "centralina_rilevazione_fumi_bnb"), "centralina_rilevazione_fumi_bnb in reception");
+assert.ok(receptionBnbMachines.some((m) => m.machineKey === "serrature_elettroniche_smartlock"), "serrature_elettroniche_smartlock in reception");
+
+// 2. Camere Ospiti -> 3 macchine (aspirapolvere_filtro_hepa_bnb, generatore_ozono_sanificazione_bnb, serrature_elettroniche_smartlock)
+const camereBnbMachines = suggestedWithBnbEnvs.filter((m) => m.targetEnvironmentId === "env-bnb-camere-ospiti");
+assert.equal(camereBnbMachines.length, 3, "env-bnb-camere-ospiti deve associare 3 macchine");
+assert.ok(camereBnbMachines.some((m) => m.machineKey === "aspirapolvere_filtro_hepa_bnb"), "aspirapolvere_filtro_hepa_bnb in camere");
+assert.ok(camereBnbMachines.some((m) => m.machineKey === "generatore_ozono_sanificazione_bnb"), "generatore_ozono_sanificazione_bnb in camere");
+assert.ok(camereBnbMachines.some((m) => m.machineKey === "serrature_elettroniche_smartlock"), "serrature_elettroniche_smartlock in camere");
+
+// 3. Bagni Privati -> 3 macchine (aspirapolvere_filtro_hepa_bnb, generatore_ozono_sanificazione_bnb, serrature_elettroniche_smartlock)
+const bagniBnbMachines = suggestedWithBnbEnvs.filter((m) => m.targetEnvironmentId === "env-bnb-bagni-privati");
+assert.equal(bagniBnbMachines.length, 3, "env-bnb-bagni-privati deve associare 3 macchine");
+assert.ok(bagniBnbMachines.some((m) => m.machineKey === "aspirapolvere_filtro_hepa_bnb"), "aspirapolvere in bagni");
+assert.ok(bagniBnbMachines.some((m) => m.machineKey === "generatore_ozono_sanificazione_bnb"), "ozono in bagni");
+assert.ok(bagniBnbMachines.some((m) => m.machineKey === "serrature_elettroniche_smartlock"), "smartlock in bagni");
+
+// 4. Sala Colazioni -> 4 macchine (macchina_caffe_capsule_grani_bnb, bollitore_tostapane_buffet_bnb, vetrina_refrigerata_snack_bnb, spremiagrumi_centrifuga_compatta)
+const salaBnbMachines = suggestedWithBnbEnvs.filter((m) => m.targetEnvironmentId === "env-bnb-sala-colazioni");
+assert.equal(salaBnbMachines.length, 4, "env-bnb-sala-colazioni deve associare 4 macchine");
+assert.ok(salaBnbMachines.some((m) => m.machineKey === "macchina_caffe_capsule_grani_bnb"), "macchina caffe in sala colazioni");
+assert.ok(salaBnbMachines.some((m) => m.machineKey === "bollitore_tostapane_buffet_bnb"), "bollitore tostapane in sala colazioni");
+assert.ok(salaBnbMachines.some((m) => m.machineKey === "vetrina_refrigerata_snack_bnb"), "vetrina refrigerata in sala colazioni");
+assert.ok(salaBnbMachines.some((m) => m.machineKey === "spremiagrumi_centrifuga_compatta"), "spremiagrumi in sala colazioni");
+
+// 5. Kitchenette / Office -> 2 macchine (lavastoviglie_termodisinfezione_bnb, forno_microonde_grill_bnb)
+const kitchenBnbMachines = suggestedWithBnbEnvs.filter((m) => m.targetEnvironmentId === "env-bnb-kitchenette-office");
+assert.equal(kitchenBnbMachines.length, 2, "env-bnb-kitchenette-office deve associare 2 macchine");
+assert.ok(kitchenBnbMachines.some((m) => m.machineKey === "lavastoviglie_termodisinfezione_bnb"), "lavastoviglie in kitchenette");
+assert.ok(kitchenBnbMachines.some((m) => m.machineKey === "forno_microonde_grill_bnb"), "microonde in kitchenette");
+
+// 6. Lavanderia / Office -> 3 macchine (lavatrice_vapore_igienizzante_bnb, asciugatrice_pompa_calore_bnb, ferro_generatore_vapore_caldaia)
+const lavanderiaBnbMachines = suggestedWithBnbEnvs.filter((m) => m.targetEnvironmentId === "env-bnb-lavanderia-office");
+assert.equal(lavanderiaBnbMachines.length, 3, "env-bnb-lavanderia-office deve associare 3 macchine");
+assert.ok(lavanderiaBnbMachines.some((m) => m.machineKey === "lavatrice_vapore_igienizzante_bnb"), "lavatrice in lavanderia");
+assert.ok(lavanderiaBnbMachines.some((m) => m.machineKey === "asciugatrice_pompa_calore_bnb"), "asciugatrice in lavanderia");
+assert.ok(lavanderiaBnbMachines.some((m) => m.machineKey === "ferro_generatore_vapore_caldaia"), "ferro caldaia in lavanderia");
+
+// 7. Centrale Termica Boiler -> 1 macchina (caldaia_murale_condensazione_acs)
+const caldaiaBnbMachines = suggestedWithBnbEnvs.filter((m) => m.targetEnvironmentId === "env-bnb-centrale-termica-boiler");
+assert.equal(caldaiaBnbMachines.length, 1, "env-bnb-centrale-termica-boiler deve associare 1 macchina");
+assert.ok(caldaiaBnbMachines.some((m) => m.machineKey === "caldaia_murale_condensazione_acs"), "caldaia murale in centrale termica boiler");
+
+// 8. Ripostiglio Housekeeping -> 2 macchine (carrello_housekeeping_compatto_bnb, lavasciuga_pavimenti_compatta_bnb)
+const ripostiglioBnbMachines = suggestedWithBnbEnvs.filter((m) => m.targetEnvironmentId === "env-bnb-ripostiglio-housekeeping");
+assert.equal(ripostiglioBnbMachines.length, 2, "env-bnb-ripostiglio-housekeeping deve associare 2 macchine");
+assert.ok(ripostiglioBnbMachines.some((m) => m.machineKey === "carrello_housekeeping_compatto_bnb"), "carrello housekeeping in ripostiglio");
+assert.ok(ripostiglioBnbMachines.some((m) => m.machineKey === "lavasciuga_pavimenti_compatta_bnb"), "lavasciuga in ripostiglio");
+
+// 9. Scale e Disimpegni -> 2 macchine (carrello_housekeeping_compatto_bnb, lavasciuga_pavimenti_compatta_bnb)
+const scaleBnbMachines = suggestedWithBnbEnvs.filter((m) => m.targetEnvironmentId === "env-bnb-scale-disimpegni");
+assert.equal(scaleBnbMachines.length, 2, "env-bnb-scale-disimpegni deve associare 2 macchine");
+assert.ok(scaleBnbMachines.some((m) => m.machineKey === "carrello_housekeeping_compatto_bnb"), "carrello housekeeping in scale disimpegni");
+assert.ok(scaleBnbMachines.some((m) => m.machineKey === "lavasciuga_pavimenti_compatta_bnb"), "lavasciuga in scale disimpegni");
+
+// -------------------------------------------------------------
+// Test 46: Risoluzione solo su codice ATECO senza locali censiti (B&B e Affittacamere 55.20.51)
+// -------------------------------------------------------------
+console.log("Test 46: Integrazione automatica macchine per ATECO 55.20.51 senza ambienti preventivi");
+const suggestedBnbOnlyAteco = getSuggestedMachinesForEnvironmentsAndAteco([], "55.20.51");
+assert.equal(suggestedBnbOnlyAteco.length, 16, "Devono essere suggerite tutte le 16 macchine del B&B");
+assert.ok(
+  suggestedBnbOnlyAteco.every((m) => m.sourceReason === "ateco"),
+  "Tutte le macchine devono avere sourceReason === 'ateco' se nessun locale è stato specificato",
+);
+
+// Verifica fallback automatico identico per tutte le varianti di codice ATECO ("55.20.51", "55.20.5", "55.20", "55.2", "552051", "55205", "5520", "552")
+for (const code of ["55.20.51", "55.20.5", "55.20", "55.2", "552051", "55205", "5520", "552"]) {
+  const fallbackBnbRes = getSuggestedMachinesForEnvironmentsAndAteco([], code);
+  assert.equal(fallbackBnbRes.length, 16, `ATECO variant '${code}' deve restituire tutte le 16 macchine del B&B`);
+  assert.ok(fallbackBnbRes.every((m) => m.sourceReason === "ateco"), `Tutte le macchine con ATECO variant '${code}' devono avere sourceReason === 'ateco'`);
+}
+
 console.log("=== TUTTI I TEST normativeMachineCatalog SUPERATI CON SUCCESSO! ===");
+
 
 

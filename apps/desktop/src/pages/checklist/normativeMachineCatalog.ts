@@ -234,6 +234,33 @@ export const TRAINING_REQUIREMENTS_LIBRARY: Record<string, MachineTrainingRequir
     requiresPatentinoAccordoSR: false,
     targetRoleDescription: "Personale di sala colazioni, camerieri, addetti al buffet e commis di sala",
   },
+  housekeeping_bnb: {
+    courseCode: "FORMAZ_HOUSEKEEPING_BNB",
+    courseTitle: "Addetto Housekeeping, Rifacimento Camere e Pulizia B&B / Affittacamere",
+    normReference: "D.Lgs. 81/2008 art. 71/73, Titolo VI MMC ISO 11228, Titolo IX Chimico",
+    minHours: 4,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Addetto Housekeeping, Rifacimento Camere e Pulizia B&B / Affittacamere (D.Lgs. 81/08 art. 71/73, Titolo VI MMC ISO 11228, Titolo IX Chimico - 4h)",
+  },
+  haccp_colazioni_extra_alberghiere: {
+    courseCode: "FORMAZ_HACCP_COLAZIONI_BNB",
+    courseTitle: "Operatore Addetto alla Somministrazione Colazioni Extra-Alberghiere",
+    normReference: "Reg. CE 852/2004, D.Lgs. 81/2008 art. 71/73",
+    minHours: 4,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Operatore Addetto alla Somministrazione Colazioni Extra-Alberghiere (Reg. CE 852/2004, D.Lgs. 81/08 art. 71/73 - 4h)",
+  },
+  antincendio_livello_1: {
+    courseCode: "FORMAZ_ANTINCENDIO_L1",
+    courseTitle: "Addetto Antincendio in Attività a Livello 1",
+    normReference: "D.M. 02/09/2021",
+    minHours: 4,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Addetto Antincendio in Attività a Livello 1 (D.M. 02/09/2021 - 4h)",
+  },
 };
 
 // -------------------------------------------------------------
@@ -6023,6 +6050,734 @@ export const SECTOR_MACHINERY_CATALOGS: SectorMachineCatalog[] = [
     ],
   },
 
+  // ATECO 55.20.51, 55.20.5, 55.20, 55.2 (Bed & Breakfast, Affittacamere per brevi soggiorni, Guest House, Case Vacanze e Room Rental)
+  {
+    sectorKey: "bnb_affittacamere",
+    sectorLabel: "Bed & Breakfast, Affittacamere, Guest House e Room Rental",
+    atecoPrefixes: ["55.20.51", "55.20.5", "55.20", "55.2"],
+    machines: [
+      // 1. MACCHINA AUTOMATICA PER CAFFÈ ESPRESSO E CAPPUCCINO DA BUFFET (env-bnb-sala-colazioni)
+      {
+        machineKey: "macchina_caffe_capsule_grani_bnb",
+        name: "Macchina Automatica per Caffè Espresso e Cappuccino da Buffet",
+        type: "Macchina Espresso Automatica Professionale a Grani/Capsule con Cappuccinatore",
+        suggestedManufacturer: "De Longhi / Saeco / Jura",
+        suggestedModel: "De Longhi Magnifica S / Saeco Royal OTC / Jura E8",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.haccp_colazioni_extra_alberghiere,
+        safetyChecks: [
+          {
+            code: "BNB_CAFFE_LANCIA_VAPORE_LAVAGGIO_TERMICO",
+            title: "Lancia Vapore/Cappuccinatore con Ciclo Lavaggio Termico Automatico e Protezione Scottature",
+            question: "La lancia vapore e il circuito cappuccinatore automatico sono dotati di guaina termoisolata antiscottatura (cool-touch) e di programma automatico di risciacquo termico a vapore dopo ogni erogazione per prevenire contaminazioni batteriche da residui di latte?",
+            normReference: "Reg. CE 852/2004 All. II Cap. V; D.Lgs. 81/2008 All. V p. 6; CEI EN 60335-2-75",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_CAFFE_SERBATOIO_MOCA_SANIFICABILE",
+            title: "Serbatoio Acqua Estraibile Sanificabile Conforme MOCA Reg. CE 1935/2004",
+            question: "Il serbatoio dell'acqua e i componenti a contatto con gli alimenti sono realizzati in materiali conformi MOCA (Reg. CE 1935/2004), facilmente estraibili per la sanificazione giornaliera e protetti contro il ristagno e la formazione di biofilm?",
+            normReference: "Reg. CE 1935/2004; D.Lgs. 29/2017; Reg. CE 852/2004",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_CAFFE_TERMOSTATO_SICUREZZA_SOVRAPRESSIONE",
+            title: "Termostato di Sicurezza a Riarmo e Valvola di Sovrapressione Idraulica",
+            question: "La caldaia interna è dotata di termostato di sicurezza a riarmo per prevenire il surriscaldamento a secco e di valvola di sovrapressione conforme alla Direttiva PED per evitare sovrapressioni accidentali nel circuito idraulico?",
+            normReference: "D.Lgs. 26/2016 (PED); CEI EN 60335-2-75; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_CAFFE_MESSA_A_TERRA_INTERRUTTORE_IPX1",
+            title: "Messa a Terra di Protezione e Interruttore Bipolare con Grado IPX1",
+            question: "L'apparecchio è collegato a presa con conduttore di protezione di terra efficiente, cavo integro privo di giunzioni e interruttore generale bipolare protetto dall'ingresso di gocce o schizzi d'acqua (grado minimo IPX1)?",
+            normReference: "CEI 64-8; CEI EN 60335-1; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 2. SET ELETTRICO BUFFET: BOLLITORE ACQUA RAPIDO E TOSTAPANE A PINZE/NASTRO (env-bnb-sala-colazioni)
+      {
+        machineKey: "bollitore_tostapane_buffet_bnb",
+        name: "Set Elettrico Buffet: Bollitore Acqua Rapido e Tostapane a Pinze/Nastro",
+        type: "Apparecchiature Elettriche da Banco per Buffet Colazioni (Bollitore e Tostapane)",
+        suggestedManufacturer: "Smeg / Sirman / Dualit",
+        suggestedModel: "Dualit Classic 4 fette / Sirman Tostapane / Smeg KLF03",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.haccp_colazioni_extra_alberghiere,
+        safetyChecks: [
+          {
+            code: "BNB_BOLLITORE_SPEGNIMENTO_AUTO_SECCO",
+            title: "Spegnimento Automatico a Ebollizione e Protezione Funzionamento a Secco",
+            question: "Il bollitore rapido in acciaio inox è provvisto di sistema di spegnimento automatico al raggiungimento dell'ebollizione (100°C) e di termostato di blocco di sicurezza contro l'accensione accidentale a secco privo d'acqua?",
+            normReference: "CEI EN 60335-2-15; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_TOSTAPANE_CASSETTO_BRICIOLE_ESTRAIBILE",
+            title: "Cassetto Raccoglibriciole Estraibile per Prevenzione Innesco Fumi e Incendi",
+            question: "Il tostapane è provvisto di vassoio/cassetto inferiore raccoglibriciole estraibile per la pulizia quotidiana, al fine di evitare accumuli carboniosi soggetti a surriscaldamento, fumi tossici e innesco di principi d'incendio?",
+            normReference: "D.M. 02/09/2021; D.Lgs. 81/2008 art. 46; CEI EN 60335-2-48",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_BUFFET_ISOLAMENTO_TERMICO_COOL_TOUCH",
+            title: "Pareti Esterne Termoisolate Cool-Touch e Pinze con Impugnature Fredde",
+            question: "Gli apparecchi presentano carter esterni con isolamento termico a pareti fredde (cool-touch) e pinze con manici in materiale atermico per prevenire scottature e ustioni accidentali durante l'uso da parte degli ospiti o del personale?",
+            normReference: "UNI EN ISO 13732-1; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_SET_BUFFET_CONFORMITA_MOCA_ALIMENTARE",
+            title: "Certificazione Idoneità al Contatto Alimentare MOCA Reg. CE 1935/2004",
+            question: "Tutti i componenti a contatto con pane e acqua (caraffa inox, resistenze, pinze e griglie tostapane) dispongono di dichiarazione di conformità MOCA (Reg. CE 1935/2004 e D.M. 21/03/1973) per assenza di cessione di metalli pesanti o sostanze nocive?",
+            normReference: "Reg. CE 1935/2004; D.M. 21/03/1973; D.Lgs. 29/2017",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 3. MINI-VETRINA REFRIGERATA DA BANCO O FRIGOBAR ESPOSITORE PER COLAZIONI (+4°C) (env-bnb-sala-colazioni)
+      {
+        machineKey: "vetrina_refrigerata_snack_bnb",
+        name: "Mini-Vetrina Refrigerata da Banco o Frigobar Espositore per Colazioni (+4°C)",
+        type: "Vetrina Espositiva Refrigerata Positiva da Banco (+2°C / +8°C)",
+        suggestedManufacturer: "Liebherr / Polar / Forcar",
+        suggestedModel: "Liebherr FKv 503 / Polar C-Series 68L / Forcar VGP",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.haccp_colazioni_extra_alberghiere,
+        safetyChecks: [
+          {
+            code: "BNB_VETRINA_TERMOSTATO_DIGITALE_DISPLAY_HACCP",
+            title: "Termostato Digitale con Display di Temperatura Visibile e Allarme HACCP (+4°C)",
+            question: "La mini-vetrina dispone di display digitale esterno per la lettura costante della temperatura interna (+2°C / +4°C) per la verifica della catena del freddo di yogurt, latte e formaggi come prescritto dal manuale HACCP?",
+            normReference: "Reg. CE 852/2004 All. II Cap. IX; D.Lgs. 193/2007",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_VETRINA_DOPPIO_VETRO_TEMPERATO_SICUREZZA",
+            title: "Porta a Doppio Vetro Temperato di Sicurezza con Guarnizione Magnetica",
+            question: "La porta vetrata è realizzata in vetro temperato di sicurezza contro urti accidentali e frammentazione pericolosa, dotata di guarnizione magnetica perimetrale integra a perfetta tenuta termica?",
+            normReference: "UNI EN 12150; D.Lgs. 81/2008 All. IV p. 1.3; All. V p. 2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_VETRINA_GAS_ECOLOGICO_R600A_R290",
+            title: "Circuito Frigorifero Ermetico con Gas Naturale Ecologico R600a/R290",
+            question: "Il circuito sigillato utilizza gas refrigerante naturale ecologico a bassissimo impatto GWP (R600a isobutano o R290 propano) con etichettatura di sicurezza e carter protettivo del motocompressore privo di accumuli di polvere?",
+            normReference: "Reg. UE 517/2014; CEI EN 60335-2-89; D.Lgs. 81/2008 Titolo XI",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_VETRINA_SBRINAMENTO_AUTOMATICO_CONDENSA",
+            title: "Sbrinamento Automatico con Evaporazione Condensa senza Ristagno Batterico",
+            question: "Il sistema prevede ciclo di sbrinamento automatico con vaschetta di raccolta e smaltimento condensa priva di ristagni idrici caldi favorevoli a muffe e colonizzazione microbica?",
+            normReference: "Reg. CE 852/2004 All. II Cap. V; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 4. SPREMIAGRUMI ELETTRICO PROFESSIONALE COMPATTO DA BUFFET (env-bnb-sala-colazioni)
+      {
+        machineKey: "spremiagrumi_centrifuga_compatta",
+        name: "Spremiagrumi Elettrico Professionale Compatto da Buffet",
+        type: "Spremiagrumi Elettrico Professionale a Leva da Banco",
+        suggestedManufacturer: "Ceado / Santos / Sirman",
+        suggestedModel: "Ceado S98 / Santos 11 / Sirman Apollo Lever",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.haccp_colazioni_extra_alberghiere,
+        safetyChecks: [
+          {
+            code: "BNB_SPREMIAGRUMI_MICROINTERRUTTORE_LEVA_UNI12852",
+            title: "Microinterruttore di Sicurezza su Leva Pressore Conforme UNI EN 12852",
+            question: "La leva pressore è asservita a microinterruttore di sicurezza elettromeccanico che arresta la rotazione della pigna conica all'apertura o al sollevamento della leva, impedendo il contatto accidentale delle dita con organi in moto?",
+            normReference: "UNI EN 12852:2010; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_SPREMIAGRUMI_COMPONENTI_INOX_MOCA_SMONTABILI",
+            title: "Vasca Raccoglisucco, Pigna e Filtro in Acciaio Inox MOCA Estraibili",
+            question: "Tutti i componenti a contatto con agrumi e succhi (vaschetta, pigna, filtro setaccio) sono in acciaio inox o resine MOCA (Reg. CE 1935/2004), smontabili manualmente senza attrezzi per il lavaggio giornaliero?",
+            normReference: "Reg. CE 1935/2004; UNI EN 1672-2; D.Lgs. 29/2017",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_SPREMIAGRUMI_STABILITA_BASAMENTO_VENTOSE",
+            title: "Basamento Stabile Pesante con Piedini a Ventosa Antiscivolo",
+            question: "Il corpo macchina dispone di basamento metallico zavorrato con piedini in gomma a ventosa per evitare spostamenti, scivolamenti o ribaltamenti accidentali sul banco buffet durante la pressione della leva?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3; All. V p. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_SPREMIAGRUMI_PROTEZIONE_TERMICA_MOTORE",
+            title: "Protezione Termica Salvamotore Contro Surriscaldamento da Blocco",
+            question: "Il motore elettrico a servizio continuo è dotato di sonda termica salvamotore con arresto automatico contro il surriscaldamento in caso di forzatura meccanica o blocco del cono?",
+            normReference: "CEI EN 60335-2-64; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 5. LAVASTOVIGLIE CON CICLO IGIENIZZANTE AD ALTA TEMPERATURA (75-80°C) (env-bnb-kitchenette-office)
+      {
+        machineKey: "lavastoviglie_termodisinfezione_bnb",
+        name: "Lavastoviglie con Ciclo Igienizzante ad Alta Temperatura (75-80°C)",
+        type: "Lavastoviglie Sottobanco Professionale con Termodisinfezione HACCP",
+        suggestedManufacturer: "Miele Professional / Electrolux Professional / Krupps",
+        suggestedModel: "Miele Professional PFD 101 U / Electrolux Profline / Krupps K540E",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.haccp_colazioni_extra_alberghiere,
+        safetyChecks: [
+          {
+            code: "BNB_LAVASTOVIGLIE_RISCIACQUO_ALTA_TEMP_DIN10512",
+            title: "Ciclo Igienizzante con Risciacquo ad Alta Temperatura (>= 75-80°C) DIN 10512",
+            question: "La lavastoviglie garantisce un ciclo termico con boiler di risciacquo ad alta temperatura a non meno di 75-80°C conforme alla norma DIN 10512 per la completa termodisinfezione e distruzione della flora microbica su piatti, tazze e posate?",
+            normReference: "DIN 10512; Reg. CE 852/2004; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_LAVASTOVIGLIE_ACQUASTOP_ANTIALAGAMENTO",
+            title: "Sensore Antiallagamento Acquastop con Doppia Elettrovalvola di Blocco",
+            question: "Il tubo di carico e la base dell'apparecchio sono equipaggiati con dispositivo di sicurezza antiallagamento Acquastop e vasca inferiore con galleggiante di blocco immediato dell'afflusso idrico in caso di perdite?",
+            normReference: "CEI EN 61770; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_LAVASTOVIGLIE_MICROINTERRUTTORE_PORTA_BLOCCO",
+            title: "Microinterruttore di Sicurezza Porta con Arresto Immediato Getti Caldi",
+            question: "La porta anteriore è provvista di microinterruttore di sicurezza che interrompe istantaneamente il funzionamento della pompa di lavaggio e dei getti ad alta temperatura in caso di apertura accidentale durante il ciclo?",
+            normReference: "UNI EN 1717; CEI EN 60335-2-58; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_LAVASTOVIGLIE_FILTRO_MICROFORATO_VASCA_INOX",
+            title: "Filtro Vasca Microforato in Acciaio Inox e Dosatori Automatici Detergente",
+            question: "La vasca di lavaggio è dotata di triplo filtro microforato inox per trattenere frammenti solidi e dosatori peristaltici automatici per detergente e brillantante con tubazioni chimicamente resistenti?",
+            normReference: "Reg. CE 852/2004; D.Lgs. 81/2008 Titolo IX",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 6. FORNO A MICROONDE PROFESSIONALE COMBINATO CON GRILL PER RISCALDO PASTI (env-bnb-kitchenette-office)
+      {
+        machineKey: "forno_microonde_grill_bnb",
+        name: "Forno a Microonde Professionale Combinato con Grill per Riscaldo Pasti",
+        type: "Forno a Microonde Professionale ad Uso Commerciale Intenso a Fondo Fisso Ceramico",
+        suggestedManufacturer: "Panasonic / Samsung Commercial / Sirman",
+        suggestedModel: "Panasonic NE-1027 / Samsung Commercial CM1089 / Sirman Panasonic",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.haccp_colazioni_extra_alberghiere,
+        safetyChecks: [
+          {
+            code: "BNB_MICROONDE_DOPPIO_INTERBLOCCO_PORTA",
+            title: "Doppio Interblocco di Sicurezza Porta Contro Emissioni Microonde Accidentali",
+            question: "La porta è equipaggiata con doppio interblocco meccanico ed elettrico ridondante che disattiva istantaneamente il magnetron all'apertura, garantendo assenza di fughe di radiazione elettromagnetica a radiofrequenza (< 5 mW/cm²)?",
+            normReference: "CEI EN 60335-2-90; D.Lgs. 81/2008 Titolo VIII Capo IV (Campi Elettromagnetici)",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_MICROONDE_CAMERA_INOX_SENZA_PIATTO_GIREVOLE",
+            title: "Camera Interna Inox Priva di Piatto Girevole a Fondo Fisso Ceramico",
+            question: "La camera interna di riscaldo è realizzata in acciaio inox liscio priva di piatto girevole, con piano inferiore in ceramica sigillata per impedire l'infiltrazione di liquidi e facilitare la disinfezione HACCP?",
+            normReference: "Reg. CE 852/2004; UNI EN 1672-2; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_MICROONDE_FILTRI_ARIA_FERMO_TERMICO",
+            title: "Feritoie di Ventilazione e Filtri Aria Puliti con Termostato di Sovratemperatura",
+            question: "Le feritoie di ventilazione e i filtri di aspirazione aria del circuito di raffreddamento magnetron sono mantenuti costantemente sgombri e puliti con termostato di protezione contro i surriscaldamenti anomali?",
+            normReference: "CEI EN 60335-2-90; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_MICROONDE_GUARNIZIONI_PORTA_INTEGRE",
+            title: "Guarnizioni Porta Integre e Assenza di Deformazioni o Fughe Elettromagnetiche",
+            question: "Le guarnizioni perimetrali di tenuta della porta e la rete metallica dello schermo frontale sono perfettamente integre, prive di fessurazioni, sporco indurito o bruciature che possano compromettere la schermatura?",
+            normReference: "CEI EN 60335-2-90; D.Lgs. 81/2008 art. 71 c. 4",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 7. LAVATRICE PROFESSIONALE A CARICA FRONTALE CON PROGRAMMA VAPORE IGIENIZZANTE (8-11 KG) (env-bnb-lavanderia-office)
+      {
+        machineKey: "lavatrice_vapore_igienizzante_bnb",
+        name: "Lavatrice Professionale a Carica Frontale con Programma Vapore Igienizzante (8-11 kg)",
+        type: "Lavatrice Professionale a Carica Frontale con Ciclo Termico Vapore Sanificante",
+        suggestedManufacturer: "Miele Professional / LG Commercial / Electrolux Professional",
+        suggestedModel: "Miele Professional PWM 300 / LG Commercial Giant C+ / Electrolux MyPRO",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.housekeeping_bnb,
+        safetyChecks: [
+          {
+            code: "BNB_LAVATRICE_BLOCCO_ELETTROMAGNETICO_OBLO",
+            title: "Blocco di Sicurezza Elettromagnetico dell'Oblò a Cestello in Movimento",
+            question: "L'oblò di carico è provvisto di elettroserratura con blocco di sicurezza che impedisce l'apertura manuale durante tutte le fasi del ciclo e fino all'arresto completo del cestello e allo scarico dell'acqua bollente?",
+            normReference: "UNI EN ISO 10472-2; CEI EN 60335-2-7; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_LAVATRICE_CICLO_TERMICO_VAPORE_60_90C",
+            title: "Ciclo Termico Certificato a 60°/90°C con Programma Vapore Igienizzante",
+            question: "La macchina è provvista di programmi con mantenimento termico prolungato a 60°/90°C o vapore igienizzante per garantire l'eliminazione di agenti biologici, acari e batteri da lenzuola, tovaglie e asciugamani degli ospiti?",
+            normReference: "D.Lgs. 81/2008 Titolo X (Agenti Biologici); Linee Guida Sanificazione Tessili",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_LAVATRICE_CONTROLLO_SBILANCIAMENTO_CARICO",
+            title: "Controllo Elettronico Sbilanciamento Carico con Sensori 3D in Centrifuga",
+            question: "È presente un sistema elettronico di rilevamento dello sbilanciamento del carico in centrifuga con riduzione automatica dei giri o ridistribuzione per prevenire vibrazioni pericolose e spostamenti fisici dell'apparecchio?",
+            normReference: "CEI EN 60335-2-7; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_LAVATRICE_ACQUASTOP_SCARICO_CONVOGLIATO",
+            title: "Tubo di Carico con Valvola Acquastop e Scarico Convogliato a Tenuta",
+            question: "Il flessibile di alimentazione idrica è protetto con valvola Acquastop e lo scarico delle acque calde saponose è raccordato a tenuta alla rete fognaria per prevenire allagamenti e scivolamenti nell'ambiente lavanderia?",
+            normReference: "D.Lgs. 81/2008 All. IV p. 1.3; art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 8. ASCIUGATRICE A POMPA DI CALORE AD ALTA EFFICIENZA CON FILTRO LANUGINE (8-10 KG) (env-bnb-lavanderia-office)
+      {
+        machineKey: "asciugatrice_pompa_calore_bnb",
+        name: "Asciugatrice a Pompa di Calore ad Alta Efficienza con Filtro Lanugine (8-10 kg)",
+        type: "Asciugatrice a Pompa di Calore Professionale per Strutture Ricettive",
+        suggestedManufacturer: "Miele Professional / Bosch Commercial / LG Commercial",
+        suggestedModel: "Miele Professional PDR 300 / Bosch Commercial Serie 8 / LG Commercial Titan",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.housekeeping_bnb,
+        safetyChecks: [
+          {
+            code: "BNB_ASCIUGATRICE_DOPPIO_FILTRO_LANUGINE_ALLARME",
+            title: "Doppio Filtro Lanugine con Allarme Visivo Intasamento Prevenzione Incendi",
+            question: "L'essiccatore è dotato di doppio filtro estraibile per la lanugine tessile e di sensore con allarme acustico/visivo di pulizia per prevenire il surriscaldamento interno e il pericolo di innesco incendio da fibre secche?",
+            normReference: "D.M. 02/09/2021; UNI EN ISO 10472-4; D.Lgs. 81/2008 art. 46",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_ASCIUGATRICE_SENSORE_UMIDITA_RESIDUA",
+            title: "Sensore Elettronico di Umidità Residua e Ciclo di Raffreddamento Antipiega",
+            question: "La macchina dispone di controllo elettronico dell'asciugatura con sensori di umidità residua che arrestano il riscaldamento a tempo debito, completando il ciclo con fase di raffreddamento a freddo per evitare shock termici ai tessuti?",
+            normReference: "CEI EN 60335-2-11; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_ASCIUGATRICE_INTERBLOCCO_PORTELLO_CARICO",
+            title: "Interblocco di Sicurezza all'Apertura Portello con Arresto Immediato Tamburo",
+            question: "L'apertura dello sportello frontale durante il funzionamento arresta istantaneamente la rotazione del tamburo e la ventilazione forzata entro 2 secondi per la protezione fisica dell'operatore?",
+            normReference: "UNI EN ISO 10472-4; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_ASCIUGATRICE_SCARICO_CONDENSA_O_VASCHETTA",
+            title: "Canalizzazione Scarico Condensa a Tenuta o Serbatoio con Galleggiante di Pieno",
+            question: "La condensa prodotta dalla pompa di calore è smaltita mediante tubazione a scarico continuo oppure raccolta in vaschetta con microinterruttore di arresto a serbatoio pieno per prevenire fuoriuscite sul pavimento?",
+            normReference: "D.Lgs. 81/2008 All. IV p. 1.3",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 9. ASSE DA STIRO PROFESSIONALE ASPIRANTE/RISCALDATO CON GENERATORE DI VAPORE A CALDAIA (env-bnb-lavanderia-office)
+      {
+        machineKey: "ferro_generatore_vapore_caldaia",
+        name: "Asse da Stiro Professionale Aspirante/Riscaldato con Generatore di Vapore a Caldaia",
+        type: "Sistema Stirante Professionale con Caldaia a Vapore e Piano Aspirante/Riscaldato",
+        suggestedManufacturer: "Battistella / Lelit / Bieffe",
+        suggestedModel: "Battistella Vaporino / Lelit PS25 / Bieffe",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.housekeeping_bnb,
+        safetyChecks: [
+          {
+            code: "BNB_STIRO_CALDAIA_PED_PRESSOSTATO_VALVOLA",
+            title: "Caldaia Rame/Inox Certificata PED con Pressostato e Valvola di Sicurezza a Riarmo",
+            question: "Il generatore di vapore a caldaia è costruito in rame/inox con certificazione PED (D.Lgs. 26/2016), dotato di pressostato di lavoro e valvola di sicurezza meccanica a riarmo contro sovrapressioni accidentali?",
+            normReference: "D.Lgs. 26/2016 (PED); CEI EN 60335-2-3; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_STIRO_TAPPO_SICUREZZA_ANTI_SVITAMENTO",
+            title: "Tappo Caldaia di Sicurezza con Valvola di Sfiato Depressurizzazione a Caldo",
+            question: "Il tappo di riempimento della caldaia è di tipo conico di sicurezza con valvola di sfiato interna che impedisce lo svitamento o l'espulsione improvvisa di getti di vapore bollente fintanto che permane pressione interna?",
+            normReference: "CEI EN 60335-2-3; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_STIRO_FERRO_PARAVAPORE_PIASTRA_ISOLATA",
+            title: "Ferro da Stiro Industriale con Impugnatura in Sughero e Schermo Paravapore Salvamani",
+            question: "Il ferro da stiro presenta impugnatura anatomica in sughero termoisolante, piastra in alluminio pressofuso con resistenze corazzate, schermo paravapore salvamani e appoggiagetto in silicone termoresistente ignifugo?",
+            normReference: "UNI EN ISO 13732-1; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_STIRO_PIANO_ASPIRANTE_RISCALDATO_PEDALE",
+            title: "Asse Aspirante/Riscaldato con Comando a Pedale Bassa Tensione e Termostato",
+            question: "Il tavolo da stiro dispone di piano riscaldato regolabile termostaticamente, aspirazione fumi/vapore azionata da pedaliera ergonomica e telaio robusto con blocco di sicurezza contro la chiusura accidentale dell'asse?",
+            normReference: "D.Lgs. 81/2008 Titolo VI (MMC ed Ergonomia); CEI 64-8",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 10. ASPIRAPOLVERE / BATTITAPPETO SILENZIOSO CON FILTRO HEPA H13 PER CAMERE (env-bnb-camere-ospiti, env-bnb-bagni-privati)
+      {
+        machineKey: "aspirapolvere_filtro_hepa_bnb",
+        name: "Aspirapolvere / Battitappeto Silenzioso con Filtro HEPA H13 per Camere",
+        type: "Aspirapolvere Professionale per Camere e Moquette ad Alta Filtrazione HEPA H13",
+        suggestedManufacturer: "Lindhaus / Kärcher / Numatic",
+        suggestedModel: "Lindhaus Valzer / Kärcher T 12/1 / Numatic Henry",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.housekeeping_bnb,
+        safetyChecks: [
+          {
+            code: "BNB_ASPIRAPOLVERE_FILTRO_HEPA_H13_ALLERGENI",
+            title: "Filtro Assoluto HEPA H13 Certificato UNI EN 1822 per Trattenimento Allergeni e Polveri",
+            question: "L'aspirapolvere è equipaggiato con stadio di filtrazione finale HEPA H13 conforme a UNI EN 1822 con efficienza di ritenzione >= 99,95% per pollini, acari della polvere e polveri sottili nelle camere ospiti?",
+            normReference: "UNI EN 1822; D.Lgs. 81/2008 Titolo IX (Agenti Chimici) e Titolo X",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_ASPIRAPOLVERE_BASSO_LIVELLO_SONORO_65DB",
+            title: "Bassa Emissione Acustica (< 65 dB(A)) a Tutela dell'Operatore e Degli Ospiti",
+            question: "La rumorosità dell'apparecchio durante l'uso continuativo è inferiore a 65 dB(A) a norma D.Lgs. 81/08 Titolo VIII Capo II per prevenire affaticamento uditivo dell'operatore e disturbo nelle aree ricettive?",
+            normReference: "D.Lgs. 81/2008 Titolo VIII Capo II (Rumore); UNI EN ISO 4871",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_ASPIRAPOLVERE_CAVO_ALTA_VISIBILITA_GANCIO",
+            title: "Cavo Elettrico ad Alta Visibilità con Gancio Salvastrappo e Doppio Isolamento",
+            question: "Il cavo flessibile di alimentazione è di colore ad alta visibilità per prevenire inciampi nei corridoi/camere, integro e munito di attacco pressacavo antistrappo e doppio isolamento elettrico di Classe II?",
+            normReference: "CEI 64-8; CEI EN 60335-2-69; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_ASPIRAPOLVERE_SACCO_SIGILLATO_SOVRATEMP",
+            title: "Sacco Microfibra a Chiusura Ermetica e Protezione Termica Sovratemperatura Motore",
+            question: "Il sacco di raccolta polveri è in microfibra multistrato con chiusura a collare ermetico autosigillante per lo smaltimento senza dispersione di polveri e il motore è protetto da termostato salvavita da intasamento?",
+            normReference: "D.Lgs. 81/2008 art. 71; CEI EN 60335-2-69",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 11. GENERATORE DI OZONO COMPATTO PER SANIFICAZIONE E BONIFICA CAMERE OSPITI (env-bnb-camere-ospiti, env-bnb-bagni-privati)
+      {
+        machineKey: "generatore_ozono_sanificazione_bnb",
+        name: "Generatore di Ozono Compatto per Sanificazione e Bonifica Camere Ospiti",
+        type: "Generatore Portatile di Ozono O3 per Disinfezione e Bonifica Ambienti Chiusi",
+        suggestedManufacturer: "Sanity System / Caleffi / Ozonosan",
+        suggestedModel: "Sanity System Sany Med / Caleffi / Ozonosan",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.housekeeping_bnb,
+        safetyChecks: [
+          {
+            code: "BNB_OZONO_TIMER_PROGRAMMABILE_RICONVERSIONE",
+            title: "Timer Digitale Programmabile e Riconversione Catalitica dell'Ozono in Ossigeno",
+            question: "L'apparecchio è provvisto di timer digitale volumetrico con blocco tasti e di filtro/sistema catalitico per la rapida riconversione dell'ozono residuo in ossigeno molecolare (O2) al termine del ciclo di disinfezione?",
+            normReference: "Ministero Salute Prot. 24482/1996; D.Lgs. 81/2008 Titolo IX; CEI EN 60335-2-65",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_OZONO_PROTOCOLLO_DIVIETO_ACCESSO_SEGNALATICA",
+            title: "Protocollo di Sicurezza con Divieto di Accesso a Persone e Cartello Monitore",
+            question: "È rigorosamente applicata la procedura operativa che vieta la presenza di persone o animali nella camera durante l'erogazione, con posizionamento di apposito cartello monitore di pericolo chimico all'esterno della porta chiusa?",
+            normReference: "D.Lgs. 81/2008 art. 227 (Rischio Chimico) e Allegato XXIV; Circolare Min. Salute 22/05/2020",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_OZONO_PROCEDURA_AERAZIONE_LOCALE_POST_CICLO",
+            title: "Procedura Obbligatoria di Aerazione Naturale dei Locali al Termine del Ciclo",
+            question: "Al termine del ciclo di trattamento viene effettuata l'aerazione forzata o naturale dei locali aprendo finestre e balconi per almeno 20-30 minuti prima di consentire l'accesso al personale o ai nuovi ospiti?",
+            normReference: "Rapporto ISS COVID-19 n. 56/2020; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_OZONO_MARCATURA_CE_MANUALE_LINEE_GUIDA",
+            title: "Marcatura CE e Manuale Operativo con Tempi Volumetrici in Funzione dei m³",
+            question: "Il dispositivo è dotato di regolare marcatura CE, manuale d'istruzioni d'uso in lingua italiana recante tempi di emissione in funzione della cubatura in m³ della stanza e registro delle sanificazioni?",
+            normReference: "D.Lgs. 17/2010; D.Lgs. 81/2008 art. 70 e art. 71 c. 4",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 12. LAVASCIUGA PAVIMENTI COMPATTA VERTICALE A RULLI PER SPAZI STRETTI (env-bnb-ripostiglio-housekeeping, env-bnb-scale-disimpegni)
+      {
+        machineKey: "lavasciuga_pavimenti_compatta_bnb",
+        name: "Lavasciuga Pavimenti Compatta Verticale a Rulli per Spazi Stretti",
+        type: "Lavasciuga Pavimenti Verticale Manovrabile Compatta ad Azione Rapida",
+        suggestedManufacturer: "Kärcher / Lindhaus / Fimap",
+        suggestedModel: "Kärcher BR 30/4 C / Lindhaus LW30 / Fimap Genie",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.housekeeping_bnb,
+        safetyChecks: [
+          {
+            code: "BNB_LAVASCIUGA_ASCIUGATURA_IMMEDIATA_ANTISCIVOLO",
+            title: "Asciugatura Immediata del Pavimento per Prevenzione Cadute e Scivolamenti All. IV",
+            question: "Il doppio tergipavimento con aspirazione ad alta depressione asciuga completamente la superficie lavata in un unico passaggio, prevenendo il rischio di scivolamento e caduta degli ospiti e degli addetti ai sensi del D.Lgs. 81/08?",
+            normReference: "D.Lgs. 81/2008 Allegato IV punto 1.3.2; art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_LAVASCIUGA_SERBATOI_ESTRAIBILI_IGIENICI",
+            title: "Serbatoi Acqua Pulita e Sporca Separati, Estraibili e Sanificabili",
+            question: "I serbatoi dell'acqua pulita/soluzione detergente e dell'acqua reflua recuperata sono fisicamente separati, rimovibili senza attrezzi con maniglia di trasporto e sanificabili per evitare proliferazioni batteriche?",
+            normReference: "D.Lgs. 81/2008 Titolo X; Reg. CE 852/2004",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_LAVASCIUGA_IMPUGNATURA_ERGONOMICA_UOMO_PRESENTE",
+            title: "Impugnatura Ergonomica Regolabile con Dispositivo Uomo Presente",
+            question: "Il timone di guida presenta comandi intuitivi con leva di consenso ad azione mantenuta (uomo presente) che interrompe l'azionamento dei rulli e l'erogazione dell'acqua al rilascio dell'impugnatura?",
+            normReference: "UNI EN ISO 11228-2; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_LAVASCIUGA_SPAZZOLE_RULLI_SGANCIO_RAPIDO",
+            title: "Rulli Spazzola a Sgancio Rapido senza Attrezzi e Grado di Protezione IPX4",
+            question: "I rulli spazzolanti sono rimovibili a scatto per la disinfezione periodica e l'apparato elettrico è certificato con grado di protezione minimo IPX4 contro gli spruzzi d'acqua durante il funzionamento?",
+            normReference: "CEI EN 60335-2-72; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 13. CALDAIA MURALE A CONDENSAZIONE CON ACCUMULO ACS ANTI-LEGIONELLA (env-bnb-centrale-termica-boiler)
+      {
+        machineKey: "caldaia_murale_condensazione_acs",
+        name: "Caldaia Murale a Condensazione con Accumulo ACS Anti-Legionella",
+        type: "Generatore Termico Murale a Condensazione a Gas con Bollitore Sanitario Integrato",
+        suggestedManufacturer: "Viessmann / Vaillant / Bosch",
+        suggestedModel: "Viessmann Vitodens 100-W / Vaillant ecoTEC plus / Bosch",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.antincendio_livello_1,
+        safetyChecks: [
+          {
+            code: "BNB_CALDAIA_CAMERA_STAGNA_TIPO_C_FUMI_TETTO",
+            title: "Camera Stagna a Tiraggio Forzato Tipo C con Scarico Fumi a Tetto a Norma D.M. 37/08",
+            question: "Il generatore è a camera stagna a tiraggio forzato di Tipo C con condotto coassiale di evacuazione fumi certificato a tetto secondo UNI 7129 e provvisto di Dichiarazione di Conformità D.M. 37/2008?",
+            normReference: "D.M. 37/2008 art. 7; UNI 7129:2015; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_CALDAIA_SHOCK_TERMICO_ANTI_LEGIONELLA_65C",
+            title: "Funzione Automatica Termica Settimanale Shock Anti-Legionella a 65°C su Bollitore",
+            question: "La centralina elettronica della caldaia/bollitore è programmata per eseguire periodicamente (settimanalmente) un ciclo termico automatico di disinfezione dell'acqua calda sanitaria portando la temperatura ad almeno 65°C per prevenire la proliferazione di Legionella pneumophila?",
+            normReference: "Linee Guida Nazionali Legionellosi (Accordo SR 07/05/2015); D.Lgs. 81/2008 Titolo X; D.Lgs. 18/2023",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_CALDAIA_MANOMETRO_PRESSOSTATO_BLOCCO_ACQUA",
+            title: "Manometro Idraulico e Pressostato di Blocco Minima/Massima Pressione Acqua",
+            question: "Il circuito idraulico è dotato di manometro con indicazione di pressione visibile e pressostato di blocco bruciatore in caso di pressione insufficiente (< 0,8 bar) o sovrapressione con valvola di sicurezza a 3 bar convogliata?",
+            normReference: "UNI EN 15502; D.Lgs. 81/2008 All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_CALDAIA_VALVOLA_INTERCETTAZIONE_GAS_LIBRETTO",
+            title: "Rubinetto di Intercettazione Rapida Gas e Libretto Impianto con Bollino Termico",
+            question: "A monte della caldaia è installata una valvola a sfera di intercettazione manuale del gas accessibile e l'impianto dispone di Libretto di Impianto termico aggiornato con controlli periodici di efficienza energetica e bollino regionale?",
+            normReference: "D.P.R. 74/2013; D.M. 10/02/2014; D.Lgs. 81/2008 art. 71 c. 8",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 14. SISTEMA DI RIVELAZIONE INCENDI E FUMI CON SENSORI OTTICI WIRELESS E SIRENA (env-bnb-ingresso-reception)
+      {
+        machineKey: "centralina_rilevazione_fumi_bnb",
+        name: "Sistema di Rivelazione Incendi e Fumi con Sensori Ottici Wireless e Sirena",
+        type: "Centrale Wireless di Rivelazione Incendi con Rivelatori Ottici di Fumo e Sirena",
+        suggestedManufacturer: "Inim / Comelit / Ajax",
+        suggestedModel: "Inim Previdia Micro / Comelit / Ajax Hub 2 Plus",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.antincendio_livello_1,
+        safetyChecks: [
+          {
+            code: "BNB_ANTINCENDIO_SENSORI_FUMO_OTTICI_EN14604_EN54",
+            title: "Rilevatori Ottici di Fumo Certificati UNI EN 14604 / EN 54 con Sirena Integrata",
+            question: "Tutte le camere per gli ospiti, i corridoi e le aree comuni sono presidiati da rivelatori ottici puntiformi di fumo certificati secondo UNI EN 14604 o UNI EN 54-7 con avvisatore acustico integrato per allarme tempestivo?",
+            normReference: "UNI EN 14604; UNI EN 54-7; D.M. 02/09/2021; D.M. 09/04/1994 e D.M. 14/07/2015",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_ANTINCENDIO_CENTRALE_BATTERIA_TAMPONE_GSM",
+            title: "Centrale di Supervisione con Batteria Tampone di Continuità e Notifica Remota",
+            question: "La centrale di gestione allarmi è provvista di alimentatore certificato con batteria tampone di continuità (almeno 24 ore di autonomia in assenza di rete elettrica) e combinatore telefonico/GSM/IP per notifica tempestiva al titolare?",
+            normReference: "UNI 9795; UNI EN 54-4; D.Lgs. 81/2008 art. 46",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_ANTINCENDIO_SIRENA_ALLARME_POTENTE_OTTICO",
+            title: "Sirena Interna ad Alta Potenza (> 85 dB(A)) con Segnalatore Ottico Lampeggiante",
+            question: "La struttura è dotata di segnalatori sonori (almeno 85 dB(A) a 3 metri e 75 dB(A) a letto) abbinati a lampeggianti visivi per garantire l'immediato risveglio e allertamento degli ospiti in caso di principio d'incendio?",
+            normReference: "UNI EN 54-3; UNI EN 54-23; D.M. 02/09/2021",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_ANTINCENDIO_REGISTRO_CONTROLLI_SEMESTRALE",
+            title: "Verifica Periodica Semestrale e Registro dei Controlli Antincendio UNI 11224",
+            question: "L'impianto e i rivelatori sono sottoposti a controllo visivo mensile e a verifica di efficienza con generatore di fumo aerosol semestrale da tecnico qualificato con annotazione sul Registro Antincendio?",
+            normReference: "UNI 11224; D.M. 02/09/2021 Allegato I; D.Lgs. 81/2008 art. 46 c. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 15. SISTEMA DI CONTROLLO ACCESSI ELETTRONICO / SMART LOCK PER CAMERE E PORTONE (env-bnb-ingresso-reception, env-bnb-camere-ospiti, env-bnb-bagni-privati)
+      {
+        machineKey: "serrature_elettroniche_smartlock",
+        name: "Sistema di Controllo Accessi Elettronico / Smart Lock per Camere e Portone",
+        type: "Serrature Elettroniche Intelligenti con Controllo Accessi e Sblocco Antipanico",
+        suggestedManufacturer: "VingCard / Nuki / Yale",
+        suggestedModel: "VingCard Essence / Nuki Smart Lock Pro / Yale Linus",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "BNB_SMARTLOCK_SBLOCCO_ANTIPANICO_MECCANICO_EN179",
+            title: "Sblocco Antipanico Meccanico dall'Interno con Maniglia a Spinta Libera UNI EN 179",
+            question: "Tutte le serrature delle camere e delle vie d'uscita consentono lo sblocco immediato a spinta libera della maniglia dall'interno in qualsiasi circostanza senza necessità di chiave o alimentazione elettrica (conformità UNI EN 179) per l'evacuazione rapida?",
+            normReference: "UNI EN 179; D.M. 02/09/2021; D.Lgs. 81/2008 Allegato IV punto 1.5 (Vie di Evacuazione)",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_SMARTLOCK_ALIMENTAZIONE_BATTERIA_AVVISO_SCARICA",
+            title: "Alimentazione Autonoma a Batteria con Preavviso Scarica e Chiave Fisica di Soccorso",
+            question: "I dispositivi sono dotati di segnalazione acustica/visiva preventiva di batteria in esaurimento e di sistema fisico di emergenza (chiave di soccorso meccanica o contatto 9V esterno) per prevenire il blocco accidentale degli ospiti nella camera?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3; CEI EN 60335-1",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_SMARTLOCK_COMPATIBILITA_PORTE_REI_TAGLIAFUOCO",
+            title: "Certificazione di Resistenza Meccanica e Compatibilità Porte Tagliafuoco REI",
+            question: "I corpi serratura installati su porte REI preservano la resistenza al fuoco della porta certificata secondo UNI EN 1634-1 e non indeboliscono le caratteristiche antincendio e di tenuta ai fumi freddi del serramento?",
+            normReference: "UNI EN 1634-1; UNI EN 12209; D.M. 02/09/2021",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_SMARTLOCK_CRITTOGRAFIA_E_SICUREZZA_DATI",
+            title: "Crittografia Sicura delle Comunicazioni (AES 128/256 bit) e Revoca Istantanea Codici",
+            question: "Il protocollo di trasmissione wireless (Bluetooth/RFID/WiFi) utilizza crittografia avanzata (AES 128/256 bit) con chiavi temporizzate e revoca istantanea dei codici per impedire intrusioni e manomissioni non autorizzate?",
+            normReference: "D.Lgs. 196/2003 e Reg. UE 2016/679 (GDPR); D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 16. CARRELLO ERGONOMICO COMPATTO PER RIASSETTO CAMERE E PRODOTTI PULIZIA (env-bnb-ripostiglio-housekeeping, env-bnb-scale-disimpegni)
+      {
+        machineKey: "carrello_housekeeping_compatto_bnb",
+        name: "Carrello Ergonomico Compatto per Riassetto Camere e Prodotti Pulizia",
+        type: "Carrello Modulare Ergonomico Compatto per Housekeeping e Riassetto Piani",
+        suggestedManufacturer: "TTS / Filmop / IPC",
+        suggestedModel: "TTS Magic Hotel 700 / Filmop Morgan / IPC Brix",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.housekeeping_bnb,
+        safetyChecks: [
+          {
+            code: "BNB_CARRELLO_SEPARAZIONE_BIANCHERIA_SPORCO_PULITO",
+            title: "Separazione Fisica Ermetica tra Vani Biancheria Pulita e Sacco Sporco",
+            question: "Il carrello è configurato con sacco portabiancheria sporca lavabile/impermeabile fisicamente separato e isolato dai vani contenenti lenzuola, tovaglie e spugne pulite per prevenire cross-contamination biologica?",
+            normReference: "D.Lgs. 81/2008 Titolo X (Agenti Biologici); Linee Guida Sanificazione",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_CARRELLO_VANO_CHIMICI_CHIUSO_A_CHIAVE",
+            title: "Scomparto di Sicurezza Chiuso con Chiave per Detergenti e Prodotti Chimici Concentrati",
+            question: "I prodotti chimici di pulizia, disinfettanti concentrati e decalcificanti sono alloggiati in cassetto o scomparto provvisto di chiusura con serratura a chiave per impedire l'accesso o l'ingestione accidentale da parte degli ospiti o bambini?",
+            normReference: "D.Lgs. 81/2008 Titolo IX (Agenti Chimici); Reg. CE 1272/2008 (CLP)",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_CARRELLO_RUOTE_PIROETTANTI_FRENO_STAZIONAMENTO",
+            title: "Ruote Piroettanti Antitraccia con Freno di Stazionamento a Pedale",
+            question: "Le ruote piroettanti in tecnopolimero o gomma antitraccia (diametro >= 125 mm) sono provviste di freno di stazionamento a pedale perfettamente efficiente per bloccare stabilmente il carrello sui pianerottoli e lungo le pendenze?",
+            normReference: "UNI EN ISO 11228-2; D.Lgs. 81/2008 All. V p. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BNB_CARRELLO_ERGONOMIA_SPINTA_TRAINO_ISO11228",
+            title: "Struttura Ergonomica Leggera in Tecnopolimero Conforme UNI ISO 11228-2",
+            question: "L'altezza e l'inclinazione delle maniglie di spinta sono posizionate ad altezza corretta per l'operatore (tra 90 e 105 cm) e la struttura leggera in tecnopolimero limita lo sforzo iniziale e di traino al di sotto dei valori limite ISO 11228-2?",
+            normReference: "UNI ISO 11228-2; D.Lgs. 81/2008 Titolo VI (Movimentazione Manuale dei Carichi)",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+    ],
+  },
+
   // 2. RISTORAZIONE & ALIMENTARE
   {
     sectorKey: "ristorazione_alimentare",
@@ -8549,6 +9304,19 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
   const hotelSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "hotel_strutture_ricettive");
   const hotelMachines = hotelSector ? hotelSector.machines : [];
 
+  const isBnbAteco = !!atecoCode && (
+    atecoCode.startsWith("55.20.51") ||
+    atecoCode.startsWith("55.20.5") ||
+    atecoCode.startsWith("55.20") ||
+    atecoCode.startsWith("55.2") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("552051") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("55205") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("5520") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("552")
+  );
+  const bnbSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "bnb_affittacamere");
+  const bnbMachines = bnbSector ? bnbSector.machines : [];
+
   // 1. MACCHINE SUGGERITE IN BASE AI LOCALI CENSITI NELLO STEP 2
   for (const env of environments) {
     const envId = (env.id || "").toLowerCase();
@@ -9300,6 +10068,87 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
     ) {
       matchingMachines = hotelMachines.filter((m) =>
         ["ascensore_passeggeri_hotel", "montacarichi_servizio_piani"].includes(m.machineKey)
+      );
+    }
+
+    // Reparti Bed & Breakfast, Affittacamere, Guest House e Room Rental (55.20.51 / 55.20.5 / 55.20 / 55.2)
+    else if (
+      envId === "env-bnb-ingresso-reception" ||
+      envId.includes("bnb-ingresso-reception") ||
+      envId.includes("bnb-reception") ||
+      (isBnbAteco && (nameLower.includes("reception") || nameLower.includes("ingresso") || nameLower.includes("check-in") || cat === "reception"))
+    ) {
+      matchingMachines = bnbMachines.filter((m) =>
+        ["centralina_rilevazione_fumi_bnb", "serrature_elettroniche_smartlock"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-bnb-camere-ospiti" ||
+      envId === "env-bnb-bagni-privati" ||
+      envId.includes("bnb-camere-ospiti") ||
+      envId.includes("bnb-camere") ||
+      envId.includes("bnb-bagni-privati") ||
+      envId.includes("bnb-bagni") ||
+      (isBnbAteco && (nameLower.includes("camera") || nameLower.includes("camere") || nameLower.includes("bagno") || nameLower.includes("bagni") || cat === "rooms" || cat === "bathrooms"))
+    ) {
+      matchingMachines = bnbMachines.filter((m) =>
+        ["aspirapolvere_filtro_hepa_bnb", "generatore_ozono_sanificazione_bnb", "serrature_elettroniche_smartlock"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-bnb-sala-colazioni" ||
+      envId.includes("bnb-sala-colazioni") ||
+      (isBnbAteco && (nameLower.includes("sala colazioni") || nameLower.includes("buffet colazioni") || nameLower.includes("sala buffet")))
+    ) {
+      matchingMachines = bnbMachines.filter((m) =>
+        [
+          "macchina_caffe_capsule_grani_bnb",
+          "bollitore_tostapane_buffet_bnb",
+          "vetrina_refrigerata_snack_bnb",
+          "spremiagrumi_centrifuga_compatta",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-bnb-kitchenette-office" ||
+      envId.includes("bnb-kitchenette-office") ||
+      envId.includes("bnb-kitchenette") ||
+      (isBnbAteco && (nameLower.includes("kitchenette") || nameLower.includes("angolo cottura") || nameLower.includes("cucinotto") || nameLower.includes("office")))
+    ) {
+      matchingMachines = bnbMachines.filter((m) =>
+        ["lavastoviglie_termodisinfezione_bnb", "forno_microonde_grill_bnb"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-bnb-lavanderia-office" ||
+      envId.includes("bnb-lavanderia-office") ||
+      envId.includes("bnb-lavanderia") ||
+      (isBnbAteco && (nameLower.includes("lavanderia") || nameLower.includes("stireria") || cat === "laundry"))
+    ) {
+      matchingMachines = bnbMachines.filter((m) =>
+        [
+          "lavatrice_vapore_igienizzante_bnb",
+          "asciugatrice_pompa_calore_bnb",
+          "ferro_generatore_vapore_caldaia",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-bnb-centrale-termica-boiler" ||
+      envId.includes("bnb-centrale-termica-boiler") ||
+      envId.includes("bnb-centrale-termica") ||
+      envId.includes("bnb-boiler") ||
+      (isBnbAteco && (nameLower.includes("caldaia") || nameLower.includes("boiler") || nameLower.includes("termica") || cat === "boiler_room"))
+    ) {
+      matchingMachines = bnbMachines.filter((m) =>
+        ["caldaia_murale_condensazione_acs"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-bnb-ripostiglio-housekeeping" ||
+      envId === "env-bnb-scale-disimpegni" ||
+      envId.includes("bnb-ripostiglio-housekeeping") ||
+      envId.includes("bnb-ripostiglio") ||
+      envId.includes("bnb-scale-disimpegni") ||
+      envId.includes("bnb-scale") ||
+      (isBnbAteco && (nameLower.includes("housekeeping") || nameLower.includes("ripostiglio") || nameLower.includes("scale") || nameLower.includes("disimpegno") || nameLower.includes("corridoio")))
+    ) {
+      matchingMachines = bnbMachines.filter((m) =>
+        ["carrello_housekeeping_compatto_bnb", "lavasciuga_pavimenti_compatta_bnb"].includes(m.machineKey)
       );
     } else if (
       envId === "env-super-magazzino" ||

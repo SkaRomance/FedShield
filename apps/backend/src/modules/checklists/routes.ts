@@ -24,10 +24,13 @@ function buildAtecoVariants(atecoCode?: string | null) {
   if (digits.length >= 2) {
     const d2 = digits.slice(0, 2);
     variants.add(d2);
+    if (digits.length === 3) {
+      variants.add(`${d2}.${digits.slice(2, 3)}`);
+    }
     if (digits.length >= 4) {
       const d4 = `${d2}.${digits.slice(2, 4)}`;
       variants.add(d4);
-      if (digits.length >= 6) {
+      if (digits.length >= 5) {
         variants.add(`${d4}.${digits.slice(4, 6)}`);
       }
     }
@@ -43,12 +46,21 @@ function buildAtecoVariants(atecoCode?: string | null) {
     variants.add("ALLOGGIO");
   }
 
+  const upper = normalized.toUpperCase();
+
   // Hotel / Alberghi (55.10.00, 55.10, 55.1, 551000, 5510, 551)
+  const isHotelText =
+    upper === "HOTEL" ||
+    upper === "ALBERGO" ||
+    upper === "ALBERGHI" ||
+    upper === "RESORT";
+
   if (
     normalized.startsWith("55.10") ||
     normalized.startsWith("55.1") ||
     digits.startsWith("5510") ||
-    digits === "551"
+    digits === "551" ||
+    isHotelText
   ) {
     variants.add("55.10.00");
     variants.add("55.10");
@@ -58,17 +70,55 @@ function buildAtecoVariants(atecoCode?: string | null) {
     variants.add("HOTEL");
     variants.add("ALBERGO");
     variants.add("ALBERGHI");
+    variants.add("STRUTTURE_RICETTIVE");
+    variants.add("HORECA");
+    variants.add("HO.RE.CA");
+    variants.add("RICETTIVITA");
+    variants.add("RICETTIVITÀ");
   }
 
-  // B&B e Affittacamere (55.20.51, 55.20.5, 552051)
-  if (normalized.startsWith("55.20.5") || digits.startsWith("55205")) {
+  // B&B e Affittacamere (55.20.51, 55.20.5, 55.20, 55.2, 552051, 55205, 5520, 552)
+  const isBnbCode =
+    normalized.startsWith("55.20.5") ||
+    digits.startsWith("55205") ||
+    normalized === "55.20" ||
+    normalized === "55.2" ||
+    digits === "5520" ||
+    digits === "552";
+
+  const isBnbText =
+    upper === "BEB_AFFITTACAMERE" ||
+    upper === "AFFITTACAMERE" ||
+    upper === "B&B" ||
+    upper === "B & B" ||
+    upper === "BNB" ||
+    upper === "GUESTHOUSE" ||
+    upper === "BED AND BREAKFAST" ||
+    upper === "BED & BREAKFAST" ||
+    upper === "BED_AND_BREAKFAST" ||
+    upper === "EXTRA ALBERGHIERO" ||
+    upper === "EXTRA_ALBERGHIERO" ||
+    upper === "EXTRAALBERGHIERO";
+
+  if (isBnbCode || isBnbText) {
     variants.add("55.20.51");
     variants.add("55.20.5");
     variants.add("55.20");
+    variants.add("55.2");
     variants.add("552051");
+    variants.add("55205");
+    variants.add("5520");
     variants.add("BEB_AFFITTACAMERE");
     variants.add("AFFITTACAMERE");
     variants.add("B&B");
+    variants.add("BNB");
+    variants.add("GUESTHOUSE");
+    variants.add("STRUTTURE_RICETTIVE");
+    variants.add("HORECA");
+    variants.add("HO.RE.CA");
+    variants.add("RICETTIVITA");
+    variants.add("RICETTIVITÀ");
+    variants.add("ALLOGGIO");
   }
 
   // Ostelli e Residence (55.20.20, 55.20.2, 552020)
@@ -138,7 +188,6 @@ function buildAtecoVariants(atecoCode?: string | null) {
   }
 
   // Ricerca testuale diretta per nome macrosettore
-  const upper = normalized.toUpperCase();
   if (upper === "HOTEL" || upper === "ALBERGO" || upper === "ALBERGHI") {
     variants.add("55.10.00");
     variants.add("55.10");
@@ -149,15 +198,33 @@ function buildAtecoVariants(atecoCode?: string | null) {
     variants.add("HO.RE.CA");
     variants.add("HORECA");
     variants.add("RICETTIVITA");
+    variants.add("STRUTTURE_RICETTIVE");
   }
-  if (upper === "HORECA" || upper === "HO.RE.CA" || upper === "RICETTIVITA" || upper === "RICETTIVITÀ") {
+  if (
+    upper === "HORECA" ||
+    upper === "HO.RE.CA" ||
+    upper === "RICETTIVITA" ||
+    upper === "RICETTIVITÀ" ||
+    upper === "STRUTTURE_RICETTIVE" ||
+    upper === "STRUTTURE RICETTIVE" ||
+    upper === "ALLOGGIO"
+  ) {
     variants.add("HO.RE.CA");
     variants.add("HORECA");
     variants.add("RICETTIVITA");
     variants.add("RICETTIVITÀ");
+    variants.add("STRUTTURE_RICETTIVE");
+    variants.add("ALLOGGIO");
     variants.add("HOTEL");
     variants.add("55.10.00");
     variants.add("55.10");
+    variants.add("BEB_AFFITTACAMERE");
+    variants.add("AFFITTACAMERE");
+    variants.add("B&B");
+    variants.add("BNB");
+    variants.add("GUESTHOUSE");
+    variants.add("55.20.51");
+    variants.add("55.20");
   }
 
   if (parts[0] === "47" && !normalized.startsWith("47.11")) {
