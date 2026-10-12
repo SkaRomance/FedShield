@@ -6293,7 +6293,60 @@ export async function seedHoreca() {
       [/hotel/gi, "ostello/residence"],
       [/struttura ricettiva/gi, "struttura ostello/residence"],
     ],
-  );
+  ).map((item) => {
+    if (item.orderIndex === 7) {
+      return {
+        ...item,
+        question:
+          "Presidi antincendio, estintori, idranti e impianti di spegnimento presenti e conformi alla regola tecnica DM 09/04/1994 con manutenzione periodica documentata?",
+        normReference: "DM 09/04/1994, D.M. 03/09/2021",
+      };
+    }
+    if (item.orderIndex === 8) {
+      return {
+        ...item,
+        question:
+          "Piano emergenza incendio, compartimentazioni REI e vie di esodo aggiornati e conformi al DM 09/04/1994 e D.M. 03/09/2021 per ostelli e alloggi turistici?",
+        normReference: "DM 09/04/1994, D.M. 03/09/2021",
+      };
+    }
+    if (item.orderIndex === 13) {
+      return {
+        ...item,
+        question:
+          "Cucine comuni per ospiti e office colazioni con frigoriferi efficienti, piani di lavoro sanificabili e attrezzature idonee all'uso promiscuo?",
+        normReference: "Reg. CE 852/2004, D.Lgs. 81/2008",
+      };
+    }
+    if (item.orderIndex === 16) {
+      return {
+        ...item,
+        area: "Accessibilità PMR",
+        question:
+          "Accessibilità disabili e PMR con eliminazione delle barriere architettoniche conforme al DPR 503/96 (rampe, percorsi segnalati e servizi igienici accessibili)?",
+        normReference: "DPR 503/96, Legge 13/1989",
+      };
+    }
+    if (item.orderIndex === 23) {
+      return {
+        ...item,
+        question:
+          "Piano prevenzione legionella e valutazione del rischio negli impianti idrico-sanitari conforme al D.Lgs. 18/2023 con campionamenti e trattamenti documentati?",
+        normReference: "D.Lgs. 18/2023, Linee Guida Legionellosi",
+      };
+    }
+    if (item.orderIndex === 24) {
+      return {
+        ...item,
+        area: "Sicurezza dormitori",
+        question:
+          "Sicurezza dormitori con letti a castello e letti alti conformi alla norma tecnica UNI EN 747 (sponde anticaduta, barriere di protezione e scale stabili)?",
+        normReference: "UNI EN 747-1/2, D.Lgs. 206/2005",
+      };
+    }
+    return item;
+  });
+
   const hostelResidenceProcedureItems = remapChecklistItems(
     hotelProcedureItems,
     hostelResidenceProceduresTemplate.id,
@@ -6301,7 +6354,41 @@ export async function seedHoreca() {
       [/hotel/gi, "ostello/residence"],
       [/struttura ricettiva/gi, "struttura ostello/residence"],
     ],
-  );
+  ).map((item) => {
+    if (item.orderIndex === 1) {
+      return {
+        ...item,
+        question:
+          "Manuale HACCP e piano di autocontrollo per aree colazioni, bar interno e gestione igienica delle cucine comuni per ospiti (Reg. CE 852/2004)?",
+        normReference: "Reg. CE 852/2004",
+      };
+    }
+    if (item.orderIndex === 2) {
+      return {
+        ...item,
+        question:
+          "Cucine comuni e autocontrollo HACCP con analisi pericoli, regole igieniche d'uso promiscuo, etichettatura alimenti e registrazione pulizie?",
+        normReference: "Reg. CE 852/2004",
+      };
+    }
+    if (item.orderIndex === 13) {
+      return {
+        ...item,
+        question:
+          "Procedure operative di prevenzione legionella (flussaggi periodici, shock termico e disinfezione impianti) conformi al D.Lgs. 18/2023 documentate?",
+        normReference: "D.Lgs. 18/2023",
+      };
+    }
+    if (item.orderIndex === 19) {
+      return {
+        ...item,
+        question:
+          "Formazione addetti antincendio ed esercitazioni emergenza conformi al DM 09/04/1994 e D.M. 02/09/2021 per strutture ricettive/ostelli?",
+        normReference: "DM 09/04/1994, D.M. 02/09/2021",
+      };
+    }
+    return item;
+  });
 
   const campingVillagePremisesItems = remapChecklistItems(hotelPremisesItems, campingVillagePremisesTemplate.id, [
     [/hotel/gi, "campeggio/villaggio turistico"],

@@ -2174,17 +2174,20 @@ for (const variant of ["55.10.00", "55.10.0", "55.10", "55.1", "551000", "55100"
   assert.equal(hotelVar.sectorKey, "hotel_strutture_ricettive", `Variante '${variant}' deve restituire hotel_strutture_ricettive`);
 }
 
-// Posizionamento: subito dopo bar_caffetteria e prima di bnb_affittacamere e ristorazione_alimentare
+// Posizionamento: subito dopo bar_caffetteria e prima di ostello_residence e bnb_affittacamere
 const barIdxHotel = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "bar_caffetteria");
 const hotelIdx = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "hotel_strutture_ricettive");
+const ostelloIdxHotel = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ostello_residence");
 const bnbIdxHotel = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "bnb_affittacamere");
 const ristGenIdxHotel = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ristorazione_alimentare");
 assert.ok(barIdxHotel !== -1, "Settore bar_caffetteria deve esistere");
 assert.ok(hotelIdx !== -1, "Settore hotel_strutture_ricettive deve esistere");
+assert.ok(ostelloIdxHotel !== -1, "Settore ostello_residence deve esistere");
 assert.ok(bnbIdxHotel !== -1, "Settore bnb_affittacamere deve esistere");
 assert.ok(ristGenIdxHotel !== -1, "Settore generic ristorazione_alimentare deve esistere");
 assert.equal(hotelIdx, barIdxHotel + 1, "hotel_strutture_ricettive deve seguire immediatamente bar_caffetteria");
-assert.equal(hotelIdx + 1, bnbIdxHotel, "hotel_strutture_ricettive deve precedere immediatamente bnb_affittacamere nel catalogo");
+assert.equal(hotelIdx + 1, ostelloIdxHotel, "hotel_strutture_ricettive deve precedere immediatamente ostello_residence nel catalogo");
+assert.equal(ostelloIdxHotel + 1, bnbIdxHotel, "ostello_residence deve precedere immediatamente bnb_affittacamere nel catalogo");
 assert.equal(bnbIdxHotel + 1, ristGenIdxHotel, "bnb_affittacamere deve precedere immediatamente ristorazione_alimentare nel catalogo");
 
 // -------------------------------------------------------------
@@ -2443,14 +2446,17 @@ for (const variant of ["55.20.51", "55.20.5", "55.20", "55.2", "552051", "55205"
   assert.equal(bnbVar.sectorKey, "bnb_affittacamere", `Variante '${variant}' deve restituire bnb_affittacamere`);
 }
 
-// Posizionamento: subito dopo hotel_strutture_ricettive e prima di ristorazione_alimentare
+// Posizionamento: subito dopo ostello_residence e prima di ristorazione_alimentare
 const hotelIdxBnb = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "hotel_strutture_ricettive");
+const ostelloIdxBnb = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ostello_residence");
 const bnbIdxCheck = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "bnb_affittacamere");
 const ristGenIdxBnb = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ristorazione_alimentare");
 assert.ok(hotelIdxBnb !== -1, "Settore hotel_strutture_ricettive deve esistere");
+assert.ok(ostelloIdxBnb !== -1, "Settore ostello_residence deve esistere");
 assert.ok(bnbIdxCheck !== -1, "Settore bnb_affittacamere deve esistere");
 assert.ok(ristGenIdxBnb !== -1, "Settore generic ristorazione_alimentare deve esistere");
-assert.equal(bnbIdxCheck, hotelIdxBnb + 1, "bnb_affittacamere deve seguire immediatamente hotel_strutture_ricettive");
+assert.equal(ostelloIdxBnb, hotelIdxBnb + 1, "ostello_residence deve seguire immediatamente hotel_strutture_ricettive");
+assert.equal(bnbIdxCheck, ostelloIdxBnb + 1, "bnb_affittacamere deve seguire immediatamente ostello_residence");
 assert.equal(bnbIdxCheck + 1, ristGenIdxBnb, "bnb_affittacamere deve precedere immediatamente ristorazione_alimentare");
 
 // -------------------------------------------------------------
@@ -2687,6 +2693,196 @@ for (const code of ["55.20.51", "55.20.5", "55.20", "55.2", "552051", "55205", "
   const fallbackBnbRes = getSuggestedMachinesForEnvironmentsAndAteco([], code);
   assert.equal(fallbackBnbRes.length, 16, `ATECO variant '${code}' deve restituire tutte le 16 macchine del B&B`);
   assert.ok(fallbackBnbRes.every((m) => m.sourceReason === "ateco"), `Tutte le macchine con ATECO variant '${code}' devono avere sourceReason === 'ateco'`);
+}
+
+console.log("\n=== INIZIO TEST normativeMachineCatalog (ATECO 55.20.20 Ostelli, Residence e Case per Ferie) ===");
+
+// -------------------------------------------------------------
+// Test 47: Verifica priorità catalogo ATECO per Ostello / Residence (55.20.20 / 55.20.2 / 552020 / 55202)
+// -------------------------------------------------------------
+console.log("Test 47: Verifica priorità catalogo ATECO per Ostelli e Residence (55.20.20 / 55.20.2 / 552020 / 55202)");
+const catalogHostelExact = getSectorMachineCatalogForAteco("55.20.20");
+assert.equal(catalogHostelExact.sectorKey, "ostello_residence", "ATECO 55.20.20 deve restituire ostello_residence");
+assert.ok(catalogHostelExact.sectorLabel.includes("Ostelli"), "L'etichetta del catalogo deve includere 'Ostelli'");
+
+const catalogHostelPrefix = getSectorMachineCatalogForAteco("55.20.2");
+assert.equal(catalogHostelPrefix.sectorKey, "ostello_residence", "ATECO 55.20.2 deve restituire ostello_residence");
+
+const catalogHostelDigits = getSectorMachineCatalogForAteco("552020");
+assert.equal(catalogHostelDigits.sectorKey, "ostello_residence", "ATECO 552020 senza punti deve restituire ostello_residence");
+
+const catalogHostelDigits5 = getSectorMachineCatalogForAteco("55202");
+assert.equal(catalogHostelDigits5.sectorKey, "ostello_residence", "ATECO 55202 senza punti deve restituire ostello_residence");
+
+// Verifica posizionamento: ostello_residence deve seguire hotel_strutture_ricettive e precedere bnb_affittacamere
+const hotelIndex = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "hotel_strutture_ricettive");
+const hostelIndex = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ostello_residence");
+const bnbIndex = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "bnb_affittacamere");
+assert.ok(hotelIndex !== -1, "Settore hotel_strutture_ricettive deve esistere nel catalogo");
+assert.ok(hostelIndex !== -1, "Settore ostello_residence deve esistere nel catalogo");
+assert.ok(bnbIndex !== -1, "Settore bnb_affittacamere deve esistere nel catalogo");
+assert.equal(hostelIndex, hotelIndex + 1, "ostello_residence deve seguire immediatamente hotel_strutture_ricettive");
+assert.equal(bnbIndex, hostelIndex + 1, "bnb_affittacamere deve seguire immediatamente ostello_residence");
+
+// -------------------------------------------------------------
+// Test 48: Verifica completezza delle 16 macchine professionali per ostello con modelli reali, corsi e verifiche tecniche
+// -------------------------------------------------------------
+console.log("Test 48: Verifica completezza delle 16 macchine professionali con verifiche, corsi e modelli reali");
+assert.equal(catalogHostelExact.machines.length, 16, "Il catalogo Ostello e Residence deve contenere esattamente 16 macchine");
+
+const expectedHostelMachineKeys = [
+  "piano_induzione_comunitario_ostello",
+  "forno_microonde_inox_comunitario",
+  "frigorifero_multiposto_ospiti",
+  "lavastoviglie_ciclo_breve_ostello",
+  "distributore_snack_bevande_h24",
+  "distributore_caffe_bevande_calde",
+  "lavatrice_selfservice_gettone",
+  "asciugatrice_selfservice_gettone",
+  "ferro_stiro_aspirante_comunitario",
+  "lockers_elettronici_bagagli",
+  "aspirapolvere_battitappeto_hepa",
+  "lavasciuga_pavimenti_compatta_ostello",
+  "caldaia_centrale_acs_legionella",
+  "centrale_antincendio_indirizzata_ostello",
+  "porte_tagliafuoco_chiudiporta_ostello",
+  "carrello_housekeeping_multitasche",
+];
+
+for (const key of expectedHostelMachineKeys) {
+  const found = catalogHostelExact.machines.find((m) => m.machineKey === key);
+  assert.ok(found, `Attrezzatura con key '${key}' deve essere presente nel catalogo ostello_residence`);
+  assert.ok(found.name.length > 5, `Nome attrezzatura '${key}' deve essere descrittivo`);
+  assert.ok(found.suggestedManufacturer.length > 2, `Produttore suggerito presente per '${key}'`);
+  assert.ok(found.suggestedModel.length > 1, `Modello suggerito presente per '${key}'`);
+  assert.ok(found.safetyChecks.length >= 3, `L'attrezzatura '${key}' deve avere almeno 3 controlli di sicurezza specifici`);
+  assert.ok(found.training, `L'attrezzatura '${key}' deve avere una formazione definita`);
+}
+
+// Verifica requisiti specifici di formazione e sicurezza
+const aspirapolvereHostel = catalogHostelExact.machines.find((m) => m.machineKey === "aspirapolvere_battitappeto_hepa")!;
+assert.equal(aspirapolvereHostel.training.courseCode, "FORMAZ_HOUSEKEEPING_OSTELLO", "Aspirapolvere richiede corso housekeeping ostello");
+assert.equal(aspirapolvereHostel.training.minHours, 4, "Corso housekeeping ostello è di 4 ore");
+
+const carrelloHostel = catalogHostelExact.machines.find((m) => m.machineKey === "carrello_housekeeping_multitasche")!;
+assert.equal(carrelloHostel.training.courseCode, "FORMAZ_HOUSEKEEPING_OSTELLO", "Carrello richiede corso housekeeping ostello");
+
+const antincendioHostel = catalogHostelExact.machines.find((m) => m.machineKey === "centrale_antincendio_indirizzata_ostello")!;
+assert.equal(antincendioHostel.training.courseCode, "FORMAZ_ANTINCENDIO_L2", "Centrale antincendio richiede corso antincendio livello 2");
+assert.equal(antincendioHostel.training.minHours, 8, "Corso antincendio livello 2 è di 8 ore");
+
+const porteTagliafuocoHostel = catalogHostelExact.machines.find((m) => m.machineKey === "porte_tagliafuoco_chiudiporta_ostello")!;
+assert.equal(porteTagliafuocoHostel.training.courseCode, "FORMAZ_ANTINCENDIO_L2", "Porte tagliafuoco collegate a formazione antincendio livello 2");
+
+// -------------------------------------------------------------
+// Test 49: Verifica associazione ambienti Step 2 Ostello (env-ost-*) -> Step 4 Macchine
+// -------------------------------------------------------------
+console.log("Test 49: Verifica associazione ambienti Step 2 Ostello (env-ost-*) -> Step 4 Macchine");
+const hostelEnvironments = [
+  { id: "env-ost-reception-lounge", name: "Reception, Lounge e Area Comune", category: "reception" },
+  { id: "env-ost-dormitori-camerate", name: "Dormitori Condivisi e Camerate con Letti a Castello", category: "rooms" },
+  { id: "env-ost-camere-private", name: "Camere Private e Familiari", category: "rooms" },
+  { id: "env-ost-servizi-igienici-comuni", name: "Servizi Igienici e Docce Comuni di Piano", category: "bathrooms" },
+  { id: "env-ost-cucina-condivisa", name: "Cucina Condivisa per Ospiti", category: "kitchen" },
+  { id: "env-ost-dispensa-frigo-ospiti", name: "Dispensa e Zona Frigoriferi Ospiti", category: "storage" },
+  { id: "env-ost-lavanderia-self", name: "Lavanderia Self-Service per Ospiti", category: "laundry" },
+  { id: "env-ost-deposito-housekeeping", name: "Deposito Housekeeping e Materiali Pulizia", category: "storage" },
+  { id: "env-ost-area-rifiuti", name: "Area Raccolta Differenziata Rifiuti", category: "waste" },
+  { id: "env-ost-deposito-bagagli", name: "Deposito Bagagli Automatizzato / Lockers", category: "storage" },
+  { id: "env-ost-centrale-termica-acs", name: "Centrale Termica e Accumulo ACS", category: "boiler_room" },
+  { id: "env-ost-corridoi-scale-esodo", name: "Corridoi, Scale e Vie di Esodo", category: "common" },
+];
+
+const suggestedWithHostelEnvs = getSuggestedMachinesForEnvironmentsAndAteco(hostelEnvironments, "55.20.20");
+
+// 1. Reception / Lounge -> 3 macchine (distributore_snack_bevande_h24, distributore_caffe_bevande_calde, centrale_antincendio_indirizzata_ostello)
+const receptionHostel = suggestedWithHostelEnvs.filter((m) => m.targetEnvironmentId === "env-ost-reception-lounge");
+assert.equal(receptionHostel.length, 3, "env-ost-reception-lounge deve associare 3 macchine");
+assert.ok(receptionHostel.some((m) => m.machineKey === "distributore_snack_bevande_h24"), "distributore_snack_bevande_h24 in reception");
+assert.ok(receptionHostel.some((m) => m.machineKey === "distributore_caffe_bevande_calde"), "distributore_caffe_bevande_calde in reception");
+assert.ok(receptionHostel.some((m) => m.machineKey === "centrale_antincendio_indirizzata_ostello"), "centrale_antincendio_indirizzata_ostello in reception");
+
+// 2. Dormitori / Camerate -> 2 macchine (aspirapolvere_battitappeto_hepa, centrale_antincendio_indirizzata_ostello)
+const dormitoriHostel = suggestedWithHostelEnvs.filter((m) => m.targetEnvironmentId === "env-ost-dormitori-camerate");
+assert.equal(dormitoriHostel.length, 2, "env-ost-dormitori-camerate deve associare 2 macchine");
+assert.ok(dormitoriHostel.some((m) => m.machineKey === "aspirapolvere_battitappeto_hepa"), "aspirapolvere in dormitori");
+assert.ok(dormitoriHostel.some((m) => m.machineKey === "centrale_antincendio_indirizzata_ostello"), "antincendio in dormitori");
+
+// 3. Camere Private -> 2 macchine (aspirapolvere_battitappeto_hepa, centrale_antincendio_indirizzata_ostello)
+const camerePrivateHostel = suggestedWithHostelEnvs.filter((m) => m.targetEnvironmentId === "env-ost-camere-private");
+assert.equal(camerePrivateHostel.length, 2, "env-ost-camere-private deve associare 2 macchine");
+assert.ok(camerePrivateHostel.some((m) => m.machineKey === "aspirapolvere_battitappeto_hepa"), "aspirapolvere in camere private");
+assert.ok(camerePrivateHostel.some((m) => m.machineKey === "centrale_antincendio_indirizzata_ostello"), "antincendio in camere private");
+
+// 4. Servizi Igienici Comuni -> 1 macchina (carrello_housekeeping_multitasche)
+const bagniHostel = suggestedWithHostelEnvs.filter((m) => m.targetEnvironmentId === "env-ost-servizi-igienici-comuni");
+assert.equal(bagniHostel.length, 1, "env-ost-servizi-igienici-comuni deve associare 1 macchina");
+assert.ok(bagniHostel.some((m) => m.machineKey === "carrello_housekeeping_multitasche"), "carrello in bagni comuni");
+
+// 5. Cucina Condivisa -> 3 macchine (piano_induzione_comunitario_ostello, forno_microonde_inox_comunitario, lavastoviglie_ciclo_breve_ostello)
+const cucinaHostel = suggestedWithHostelEnvs.filter((m) => m.targetEnvironmentId === "env-ost-cucina-condivisa");
+assert.equal(cucinaHostel.length, 3, "env-ost-cucina-condivisa deve associare 3 macchine");
+assert.ok(cucinaHostel.some((m) => m.machineKey === "piano_induzione_comunitario_ostello"), "piano induzione in cucina");
+assert.ok(cucinaHostel.some((m) => m.machineKey === "forno_microonde_inox_comunitario"), "microonde in cucina");
+assert.ok(cucinaHostel.some((m) => m.machineKey === "lavastoviglie_ciclo_breve_ostello"), "lavastoviglie in cucina");
+
+// 6. Dispensa Frigo Ospiti -> 1 macchina (frigorifero_multiposto_ospiti)
+const dispensaHostel = suggestedWithHostelEnvs.filter((m) => m.targetEnvironmentId === "env-ost-dispensa-frigo-ospiti");
+assert.equal(dispensaHostel.length, 1, "env-ost-dispensa-frigo-ospiti deve associare 1 macchina");
+assert.ok(dispensaHostel.some((m) => m.machineKey === "frigorifero_multiposto_ospiti"), "frigo multiposto in dispensa");
+
+// 7. Lavanderia Self -> 3 macchine (lavatrice_selfservice_gettone, asciugatrice_selfservice_gettone, ferro_stiro_aspirante_comunitario)
+const lavanderiaHostel = suggestedWithHostelEnvs.filter((m) => m.targetEnvironmentId === "env-ost-lavanderia-self");
+assert.equal(lavanderiaHostel.length, 3, "env-ost-lavanderia-self deve associare 3 macchine");
+assert.ok(lavanderiaHostel.some((m) => m.machineKey === "lavatrice_selfservice_gettone"), "lavatrice in lavanderia self");
+assert.ok(lavanderiaHostel.some((m) => m.machineKey === "asciugatrice_selfservice_gettone"), "asciugatrice in lavanderia self");
+assert.ok(lavanderiaHostel.some((m) => m.machineKey === "ferro_stiro_aspirante_comunitario"), "ferro stiro in lavanderia self");
+
+// 8. Deposito Housekeeping -> 2 macchine (carrello_housekeeping_multitasche, lavasciuga_pavimenti_compatta_ostello)
+const depositoHousekeepingHostel = suggestedWithHostelEnvs.filter((m) => m.targetEnvironmentId === "env-ost-deposito-housekeeping");
+assert.equal(depositoHousekeepingHostel.length, 2, "env-ost-deposito-housekeeping deve associare 2 macchine");
+assert.ok(depositoHousekeepingHostel.some((m) => m.machineKey === "carrello_housekeeping_multitasche"), "carrello in deposito housekeeping");
+assert.ok(depositoHousekeepingHostel.some((m) => m.machineKey === "lavasciuga_pavimenti_compatta_ostello"), "lavasciuga in deposito housekeeping");
+
+// 9. Area Rifiuti -> 2 macchine (carrello_housekeeping_multitasche, lavasciuga_pavimenti_compatta_ostello)
+const areaRifiutiHostel = suggestedWithHostelEnvs.filter((m) => m.targetEnvironmentId === "env-ost-area-rifiuti");
+assert.equal(areaRifiutiHostel.length, 2, "env-ost-area-rifiuti deve associare 2 macchine");
+assert.ok(areaRifiutiHostel.some((m) => m.machineKey === "carrello_housekeeping_multitasche"), "carrello in area rifiuti");
+assert.ok(areaRifiutiHostel.some((m) => m.machineKey === "lavasciuga_pavimenti_compatta_ostello"), "lavasciuga in area rifiuti");
+
+// 10. Deposito Bagagli -> 1 macchina (lockers_elettronici_bagagli)
+const depositoBagagliHostel = suggestedWithHostelEnvs.filter((m) => m.targetEnvironmentId === "env-ost-deposito-bagagli");
+assert.equal(depositoBagagliHostel.length, 1, "env-ost-deposito-bagagli deve associare 1 macchina");
+assert.ok(depositoBagagliHostel.some((m) => m.machineKey === "lockers_elettronici_bagagli"), "lockers in deposito bagagli");
+
+// 11. Centrale Termica ACS -> 1 macchina (caldaia_centrale_acs_legionella)
+const centraleTermicaHostel = suggestedWithHostelEnvs.filter((m) => m.targetEnvironmentId === "env-ost-centrale-termica-acs");
+assert.equal(centraleTermicaHostel.length, 1, "env-ost-centrale-termica-acs deve associare 1 macchina");
+assert.ok(centraleTermicaHostel.some((m) => m.machineKey === "caldaia_centrale_acs_legionella"), "caldaia in centrale termica");
+
+// 12. Corridoi e Scale d'Esodo -> 3 macchine (centrale_antincendio_indirizzata_ostello, porte_tagliafuoco_chiudiporta_ostello, lavasciuga_pavimenti_compatta_ostello)
+const corridoiHostel = suggestedWithHostelEnvs.filter((m) => m.targetEnvironmentId === "env-ost-corridoi-scale-esodo");
+assert.equal(corridoiHostel.length, 3, "env-ost-corridoi-scale-esodo deve associare 3 macchine");
+assert.ok(corridoiHostel.some((m) => m.machineKey === "centrale_antincendio_indirizzata_ostello"), "antincendio in corridoi scale");
+assert.ok(corridoiHostel.some((m) => m.machineKey === "porte_tagliafuoco_chiudiporta_ostello"), "porte tagliafuoco in corridoi scale");
+assert.ok(corridoiHostel.some((m) => m.machineKey === "lavasciuga_pavimenti_compatta_ostello"), "lavasciuga in corridoi scale");
+
+// -------------------------------------------------------------
+// Test 50: Integrazione automatica macchine per ATECO 55.20.20 senza ambienti preventivi
+// -------------------------------------------------------------
+console.log("Test 50: Integrazione automatica macchine per ATECO 55.20.20 senza ambienti preventivi");
+const suggestedHostelOnlyAteco = getSuggestedMachinesForEnvironmentsAndAteco([], "55.20.20");
+assert.equal(suggestedHostelOnlyAteco.length, 16, "Devono essere suggerite tutte le 16 macchine dell'ostello");
+assert.ok(
+  suggestedHostelOnlyAteco.every((m) => m.sourceReason === "ateco"),
+  "Tutte le macchine devono avere sourceReason === 'ateco' se nessun locale è stato specificato",
+);
+
+// Verifica fallback automatico identico per tutte le varianti di codice ATECO ("55.20.20", "55.20.2", "552020", "55202")
+for (const code of ["55.20.20", "55.20.2", "552020", "55202"]) {
+  const fallbackHostelRes = getSuggestedMachinesForEnvironmentsAndAteco([], code);
+  assert.equal(fallbackHostelRes.length, 16, `ATECO variant '${code}' deve restituire tutte le 16 macchine dell'ostello`);
+  assert.ok(fallbackHostelRes.every((m) => m.sourceReason === "ateco"), `Tutte le macchine con ATECO variant '${code}' devono avere sourceReason === 'ateco'`);
 }
 
 console.log("=== TUTTI I TEST normativeMachineCatalog SUPERATI CON SUCCESSO! ===");

@@ -261,6 +261,24 @@ export const TRAINING_REQUIREMENTS_LIBRARY: Record<string, MachineTrainingRequir
     requiresPatentinoAccordoSR: false,
     targetRoleDescription: "Addetto Antincendio in Attività a Livello 1 (D.M. 02/09/2021 - 4h)",
   },
+  housekeeping_ostello: {
+    courseCode: "FORMAZ_HOUSEKEEPING_OSTELLO",
+    courseTitle: "Addetto Housekeeping, Riassetto Dormitori e Igiene Ambienti Comunitari",
+    normReference: "D.Lgs. 81/2008 art. 71/73, Titolo VI MMC (ISO 11228) e Titolo IX Chimico",
+    minHours: 4,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Addetti al riassetto dormitori, rifacimento letti a castello, igienizzazione e sanificazione ambienti comunitari (4h)",
+  },
+  antincendio_livello_2: {
+    courseCode: "FORMAZ_ANTINCENDIO_L2",
+    courseTitle: "Addetto Antincendio in Attività a Livello 2 (Strutture Ricettive Turistiche > 25 posti letto)",
+    normReference: "D.M. 02/09/2021; D.Lgs. 81/2008 art. 37 c. 9, art. 43; D.M. 09/04/1994",
+    minHours: 8,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Addetti alla squadra antincendio ed evacuazione in strutture ricettive turistico-alberghiere con oltre 25 posti letto (8h)",
+  },
 };
 
 // -------------------------------------------------------------
@@ -6050,6 +6068,734 @@ export const SECTOR_MACHINERY_CATALOGS: SectorMachineCatalog[] = [
     ],
   },
 
+  // ATECO 55.20.20, 55.20.2 (Ostelli della Gioventù, Residence Turistici, Case per Ferie e Alloggi Comunitari)
+  {
+    sectorKey: "ostello_residence",
+    sectorLabel: "Ostelli della Gioventù, Residence Turistici, Case per Ferie e Alloggi Comunitari",
+    atecoPrefixes: ["55.20.20", "55.20.2"],
+    machines: [
+      // 1. PIANO DI COTTURA A INDUZIONE MULTI-ZONA PER CUCINA CONDIVISA (env-ost-cucina-condivisa)
+      {
+        machineKey: "piano_induzione_comunitario_ostello",
+        name: "Piano di Cottura a Induzione Professionale Multi-Zona per Cucina Ospiti",
+        type: "Piano Cottura Professionale a Induzione da Incasso / Appoggio per Uso Comunitario",
+        suggestedManufacturer: "Electrolux Professional / Foster Commercial / Miele Pro",
+        suggestedModel: "Electrolux Libero Point Induzione / Foster Modular Quadro 4 Zone",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "OST_INDUZIONE_SENSORE_PRESENZA_PENTOLE",
+            title: "Sensore di Presenza Pentole e Spegnimento Automatico Istantaneo a Vuoto",
+            question: "Il piano a induzione è dotato di sensore elettronico di riconoscimento pentole con interruzione istantanea del campo elettromagnetico non appena il recipiente viene rimosso, azzerando il rischio di surriscaldamento a vuoto?",
+            normReference: "CEI EN 60335-2-36 punto 22; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_INDUZIONE_BLOCCO_COMANDI_OSPITI",
+            title: "Blocco Comandi di Sicurezza (Child Lock / Guest Protection)",
+            question: "È presente e funzionante il sistema di blocco della tastiera touch contro accensioni accidentali, manomissioni da parte di minori o uso improprio non sorvegliato nella cucina condivisa?",
+            normReference: "CEI EN 60335-2-36 punto 20; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_INDUZIONE_VETROCERAMICA_INTEGRITA_MOCA",
+            title: "Integrità Superficie in Vetroceramica e Conformità MOCA",
+            question: "Il piano superiore in vetroceramica è privo di crepe, scheggiature o fessurazioni da shock termico che possano esporre le bobine elettriche a infiltrazioni di liquidi, ed è idoneo al contatto alimentare MOCA?",
+            normReference: "Reg. CE 1935/2004; CEI EN 60335-2-36 punto 19; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_INDUZIONE_SPIA_CALORE_RESIDUO",
+            title: "Indicatori Luminosi di Calore Residuo per Ciascuna Zona",
+            question: "Ciascuna zona di cottura presenta spia luminosa ad alta visibilità di calore residuo (H / Hot) attiva finché la temperatura della vetroceramica non scende sotto i 50°C per prevenire ustioni da contatto?",
+            normReference: "CEI EN 60335-2-36 punto 7.12; D.Lgs. 81/2008 All. V p. 7",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 2. FORNO A MICROONDE PROFESSIONALE INOX COMUNITARIO (env-ost-cucina-condivisa)
+      {
+        machineKey: "forno_microonde_inox_comunitario",
+        name: "Forno a Microonde Professionale con Camera in Acciaio Inox Liscia",
+        type: "Forno a Microonde Professionale Heavy Duty Senza Piatto Girevole per Aree Comuni",
+        suggestedManufacturer: "Panasonic / Samsung Commercial / Sirman",
+        suggestedModel: "Panasonic NE-1037 / Samsung Commercial CM1089 / Sirman Panasonic Pro",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "OST_MICROONDE_SCHERMATURA_DISPERSIONI",
+            title: "Schermatura e Tenuta Contro Dispersioni di Radiazioni Elettromagnetiche",
+            question: "Lo sportello e la guarnizione perimetrale sono integri e garantiscono una dispersione di microonde rigorosamente inferiore al limite di sicurezza di 5 mW/cm² a 5 cm dalla superficie?",
+            normReference: "CEI EN 60335-2-90 punto 32; D.Lgs. 81/2008 Titolo VIII Capo IV (CEM art. 206-212)",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_MICROONDE_DOPPIO_INTERBLOCCO_PORTELLO",
+            title: "Doppio Microinterruttore di Sicurezza su Apertura Sportello",
+            question: "Il forno è dotato di doppio circuito di interblocco ridondante che spegne istantaneamente il magnetron all'apertura dello sportello, impedendo l'emissione di microonde a vano aperto?",
+            normReference: "CEI EN 60335-2-90 punto 22.103; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_MICROONDE_FONDO_CERAMICO_PULIZIA",
+            title: "Fondo Fisso Ceramico Sigillato e Pulizia Igienico-Sanitaria MOCA",
+            question: "La camera interna in acciaio inox e il fondo fisso in ceramica sono esenti da incrostazioni carbonizzate, ruggine o residui organici, consentendo sanificazione e prevenendo archi elettrici?",
+            normReference: "Reg. CE 852/2004 All. II Cap. V; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "OST_MICROONDE_PRESA_TERRA_CAVO",
+            title: "Continuità del Conduttore di Protezione PE e Cavo di Alimentazione",
+            question: "Il conduttore di terra PE della scocca metallica inox è efficiente e il cavo di alimentazione è integro, protetto da scarico trazione e privo di surriscaldamenti anomali?",
+            normReference: "CEI 64-8; D.Lgs. 81/2008 Titolo III Capo III (art. 80-87)",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 3. FRIGORIFERO PROFESSIONALE MULTIPOSTO CON SCOMPARTI PER OSPITI (env-ost-dispensa-frigo-ospiti)
+      {
+        machineKey: "frigorifero_multiposto_ospiti",
+        name: "Frigorifero Professionale Ventilato con Scomparti Chiusi per Ospiti (+2/+4°C)",
+        type: "Armadio Frigorifero Positivo a Scomparti / Lockers Refrigerati per Comunità",
+        suggestedManufacturer: "Liebherr ProfiLine / Friulinox / Polar C-Series",
+        suggestedModel: "Liebherr ProfiLine GKPv 6570 / Friulinox CombiBox / Polar Multi-Door 600L",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "OST_FRIGO_TELETERMOMETRO_HACCP",
+            title: "Teletermometro Digitale Esterno con Allarme Temperatura HACCP",
+            question: "Il frigorifero presenta display digitale esterno tarato per la verifica immediata della temperatura di conservazione (+2°C / +4°C) con registrazione o allarmi per sovratemperatura?",
+            normReference: "Reg. CE 852/2004 All. II Cap. IX; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_FRIGO_BOX_SEPARATI_MOCA",
+            title: "Scomparti Chiusi Numerati MOCA Contro Contaminazioni Crociate",
+            question: "Gli scomparti o cestelli assegnati ai singoli ospiti sono numerati, realizzati in materiale plastico alimentare certificato MOCA, lavabili e separati per prevenire contaminazioni crociate?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004 All. II; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "OST_FRIGO_SBRINAMENTO_EVAPORATORE",
+            title: "Sistema di Sbrinamento Automatico ed Evaporazione Condensa",
+            question: "Il ciclo di sbrinamento automatico e la vaschetta di evaporazione condensa sono perfettamente operativi, prevenendo formazioni di ghiaccio e gocciolamenti sui pavimenti?",
+            normReference: "D.Lgs. 81/2008 All. IV p. 1.3.2; Reg. CE 852/2004",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_FRIGO_GAS_REFRIGERANTE_ECOLOGICO",
+            title: "Sicurezza Circuito Gas Refrigerante Ecologico R600a/R290",
+            question: "Il circuito refrigerante a gas naturale (R600a/R290) è a tenuta stagna certificata, privo di perdite e collocato in ambiente sufficientemente areato conforme alla norma tecnica?",
+            normReference: "UNI EN 378-1/2; D.Lgs. 81/2008 All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 4. LAVASTOVIGLIE PROFESSIONALE CON CICLO RAPIDO E TERMODISINFEZIONE (env-ost-cucina-condivisa)
+      {
+        machineKey: "lavastoviglie_ciclo_breve_ostello",
+        name: "Lavastoviglie Professionale da Incasso con Ciclo Rapido e Disinfezione Termica",
+        type: "Lavastoviglie Professionale Sottobanco con Termodisinfezione DIN 10512 per Uso Comunitario",
+        suggestedManufacturer: "Miele Professional / Electrolux Master / Krupps",
+        suggestedModel: "Miele Professional PFD 104 U / Electrolux Master E30 / Krupps K540E",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "OST_LAVASTOVIGLIE_TERMODISINFEZIONE_DIN",
+            title: "Termodisinfezione Risciacquo ad Alta Temperatura (>= 75-80°C)",
+            question: "Il boiler di risciacquo garantisce una temperatura finale certificata di almeno 80°C conforme alla norma DIN 10512 e ai principi HACCP per l'abbattimento della carica batterica su stoviglie comuni?",
+            normReference: "DIN 10512; Reg. CE 852/2004; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_LAVASTOVIGLIE_ACQUASTOP_ANTIALLEGAMENTO",
+            title: "Sistema Antiallagamento Acquastop con Doppia Elettrovalvola",
+            question: "Il tubo di carico è dotato di valvola di sicurezza Acquastop e sensore a galleggiante nella vasca inferiore per l'interruzione immediata dell'erogazione idrica in caso di rottura o perdita?",
+            normReference: "UNI EN 61770; D.Lgs. 81/2008 All. IV p. 1.3.2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_LAVASTOVIGLIE_MICROINTERRUTTORE_PORTA",
+            title: "Microinterruttore di Blocco Pompa all'Apertura dello Sportello",
+            question: "L'apertura dello sportello durante il ciclo di lavaggio arresta istantaneamente la pompa di lavaggio e le giranti, evitando spruzzi di acqua ad alta temperatura e detergenti caustici verso l'operatore?",
+            normReference: "CEI EN 60335-2-58 punto 20; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_LAVASTOVIGLIE_DISCONNESSIONE_IDRICA",
+            title: "Disconnessione Idrica Anti-Ritorno e Dosatori Detergenti Protetti",
+            question: "L'allacciamento idrico presenta dispositivo anti-riflusso conforme UNI EN 1717 (Break Tank / valvola ritegno) e le cannucce di pescaggio detersivo/brillantante sono protette da contatto accidentale?",
+            normReference: "UNI EN 1717; D.Lgs. 81/2008 Titolo IX (art. 223-228)",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 5. DISTRIBUTORE AUTOMATICO H24 REFRIGERATO SNACK E BEVANDE (env-ost-reception-lounge)
+      {
+        machineKey: "distributore_snack_bevande_h24",
+        name: "Distributore Automatico H24 Refrigerato per Snack e Bevande a Moneta/App",
+        type: "Distributore Automatico Vending Blindato Refrigerato (+3°C) a Spirali",
+        suggestedManufacturer: "Necta / Fas International / Sanden Vendo",
+        suggestedModel: "Necta Festival Classic / Fas Fast 900 / Sanden Vendo G-Drink Design",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "OST_VENDING_SNACK_BARRIERA_MANI",
+            title: "Sportello Ritiro Prodotti con Paratia Meccanica Anti-Intrusione Mani",
+            question: "Il vano inferiore di ritiro è munito di saracinesca o bandella basculante anti-intrusione conforme a UNI EN 60335-2-75 che impedisce l'accesso alle parti meccaniche e spirali motorizzate interne?",
+            normReference: "UNI EN 60335-2-75 punto 20; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_VENDING_SNACK_ANCORAGGIO_PARETE",
+            title: "Staffe di Ancoraggio Meccanico a Parete / Pavimento Antiribaltamento",
+            question: "Il distributore è saldamente ancorato a parete o fissato a terra con staffe metalliche per prevenire il ribaltamento accidentale o provocato da tentativi di scuotimento da parte degli utenti?",
+            normReference: "UNI EN 60335-2-75 punto 19; D.Lgs. 81/2008 All. IV p. 1.1 e art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_VENDING_SNACK_VETRO_STRATIFICATO",
+            title: "Vetrata Frontale in Vetro di Sicurezza Antisfondamento / Stratificato",
+            question: "La vetrina espositiva frontale è realizzata in vetro temperato o stratificato di sicurezza conforme alle norme antinfortunistiche, integra e priva di fessurazioni da impatto?",
+            normReference: "UNI EN 12600; D.Lgs. 81/2008 All. IV p. 1.3.6",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_VENDING_SNACK_TEMPERATURA_REFRIGERAZIONE",
+            title: "Controllo Catena del Freddo (+3°C) e Blocco Vendita per Sovratemperatura",
+            question: "La centralina frigorifera mantiene la temperatura interna a +3°C per i prodotti deperibili ed è provvista di blocco automatico della vendita in caso di interruzione prolungata della catena del freddo?",
+            normReference: "Reg. CE 852/2004 All. II Cap. IX; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 6. DISTRIBUTORE AUTOMATICO DI CAFFÈ ESPRESSO E BEVANDE CALDE (env-ost-reception-lounge)
+      {
+        machineKey: "distributore_caffe_bevande_calde",
+        name: "Distributore Automatico di Caffè Espresso e Bevande Calde a Moneta/App",
+        type: "Distributore Automatico Vending per Bevande Calde con Macinatore e Caldaia a Pressione",
+        suggestedManufacturer: "Necta / Bianchi Vending / Rheavendors",
+        suggestedModel: "Necta Canto Touch / Bianchi Vending Festa / Rheavendors Cino Grande",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "OST_VENDING_CAFFE_CALDAIA_PED_SICUREZZA",
+            title: "Caldaia a Pressione Certificata PED con Valvola di Sovrapressione e Termostato Limitatore",
+            question: "La caldaia interna per l'acqua calda e vapore è certificata PED D.Lgs. 26/2016 ed è munita di valvola di sicurezza per sovrapressione a scarico controllato e termostato di blocco a riarmo manuale?",
+            normReference: "D.Lgs. 26/2016 (Direttiva PED); D.Lgs. 81/2008 art. 71 c. 3 e All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_VENDING_CAFFE_BREAK_TANK_ANTI_REFLUSSO",
+            title: "Dispositivo Break Tank con Disconnessione Idrica Anti-Reflusso UNI EN 1717",
+            question: "Il raccordo alla rete idrica potabile è provvisto di serbatoio con battente d'aria a caduta (Break Tank) che rende fisicamente impossibile il riflusso di acqua della caldaia nella rete acquedottistica?",
+            normReference: "UNI EN 1717; D.Lgs. 18/2023 (Acque Potabili); D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_VENDING_CAFFE_EROGATORI_MOCA_IGIENE",
+            title: "Condotti di Erogazione e Miscelatori Sanificabili Conformi MOCA",
+            question: "I cannotti di scarico, le fruste di miscelazione dei solubili e i beccucci di erogazione sono realizzati in polimeri certificati per contatto alimentare MOCA e vengono regolarmente igienizzati contro muffe e biofilm?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004 All. II Cap. V",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "OST_VENDING_CAFFE_VASCHETTA_TROPPAPIENO",
+            title: "Sensore a Galleggiante Antiallagamento su Vaschetta Scarico Liquidi",
+            question: "La vaschetta raccogligocce di fondo è collegata a microinterruttore a galleggiante che blocca l'erogazione di bevande al raggiungimento del livello massimo, evitando sversamenti sui pavimenti?",
+            normReference: "CEI EN 60335-2-75; D.Lgs. 81/2008 All. IV p. 1.3.2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 7. LAVATRICE SELF-SERVICE A GETTONI / APP (env-ost-lavanderia-self)
+      {
+        machineKey: "lavatrice_selfservice_gettone",
+        name: "Lavatrice Professionale a Carica Frontale con Gettoniera / Pagamento App (8-11 kg)",
+        type: "Lavatrice Supercentrifugante Professionale a Gettoni / Cassa Centralizzata per Lavanderia Self-Service",
+        suggestedManufacturer: "Primus / Speed Queen / Miele Professional",
+        suggestedModel: "Primus RX80 Vended / Speed Queen SC020 / Miele Professional PWM 508 Vended",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "OST_LAVATRICE_BLOCCO_OBBLO_RITARDATO",
+            title: "Interblocco Elettromagnetico Temporizzato su Chiusura Oblò",
+            question: "L'oblò di carico è provvisto di elettroserratura di sicurezza conforme a UNI EN ISO 10472-2 che impedisce l'apertura manuale finché il cestello è in rotazione e l'acqua calda supera i 50°C?",
+            normReference: "UNI EN ISO 10472-2 punto 5.2; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_LAVATRICE_FISSAGGIO_ANTIVIBRANTE",
+            title: "Ancoraggio Strutturale a Pavimento e Sensore Sbilanciamento Carico",
+            question: "La macchina è saldamente imbullonata su basamento solido con tamponi antivibranti ed è provvista di sensore di sbilanciamento (out-of-balance) che riduce i giri o arresta la centrifuga se il carico non è distribuito?",
+            normReference: "UNI EN ISO 10472-2 punto 5.3; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_LAVATRICE_SCARICO_FILTRO_ISPEZIONE",
+            title: "Filtro Pompa di Scarico con Vano Ispezionabile da Personale Incaricato",
+            question: "Il vano inferiore contenente il filtro della pompa di scarico e lo sblocco manuale d'emergenza è protetto da sportellino con chiave per impedire accessi non autorizzati da parte dell'utenza comune?",
+            normReference: "UNI EN ISO 10472-2; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "OST_LAVATRICE_COLLEGAMENTO_EQUIPOTENZIALE",
+            title: "Protezione Differenziale Dedicata e Collegamento Equipotenziale in Ambiente Umido",
+            question: "La linea di alimentazione in lavanderia è asservita a interruttore differenziale ad alta sensibilità (Idn <= 30 mA Tipo A/F) e il corpo macchina è connesso al circuito equipotenziale supplementare?",
+            normReference: "CEI 64-8 Sezione 7; D.Lgs. 81/2008 art. 80 e 84",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 8. ASCIUGATRICE INDUSTRIALE A GETTONI (env-ost-lavanderia-self)
+      {
+        machineKey: "asciugatrice_selfservice_gettone",
+        name: "Asciugatrice Industriale a Carica Frontale a Gettoni con Doppio Filtro Lanugine (8-10 kg)",
+        type: "Essiccatore Rotativo Professionale Vended a Gettoni per Lavanderia Comunitaria",
+        suggestedManufacturer: "Speed Queen / Miele Professional / Girbau",
+        suggestedModel: "Speed Queen SD025 Vended / Miele Professional PDR 508 HP / Girbau ED260",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "OST_ASCIUGATRICE_DOPPIO_FILTRO_LANUGINE",
+            title: "Doppio Filtro Lanugine Estraibile e Manutenzione Antincendio Periodica",
+            question: "L'asciugatrice è munita di filtro lanugine estraibile a maglia fitta, pulito regolarmente per evitare l'accumulo di cascami tessili combustibili a contatto con le resistenze o la pompa di calore?",
+            normReference: "UNI EN ISO 10472-4 punto 5.5; D.M. 02/09/2021; D.Lgs. 81/2008 art. 46",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_ASCIUGATRICE_TERMOSTATO_MAX_RIARMO",
+            title: "Termostato di Sicurezza di Massima Temperatura a Riarmo Manuale",
+            question: "È installato a valle della batteria riscaldante un limitatore termico ridondante a riarmo manuale che toglie tensione alle resistenze in caso di sovratemperatura anomala o blocco del ventilatore?",
+            normReference: "UNI EN ISO 10472-4 punto 5.2.2; D.Lgs. 81/2008 All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_ASCIUGATRICE_INTERBLOCCO_PORTELLO",
+            title: "Arresto Istantaneo del Cestello e del Riscaldamento all'Apertura Sportello",
+            question: "Il microinterruttore di sicurezza sullo sportello interrompe istantaneamente la rotazione del tamburo e disattiva la fonte di calore non appena l'utente apre il vano, escludendo rischi di trascinamento e ustione?",
+            normReference: "UNI EN ISO 10472-4 punto 5.1; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_ASCIUGATRICE_CONDOTTO_ESALAZIONE_ARIA",
+            title: "Canalizzazione di Scarico Aria Umida a Parete Esterna Priva di Ostruzioni",
+            question: "Il canale di espulsione dell'aria esausta è realizzato in metallo rigido incombustibile, convogliato all'esterno senza curve strozzate e privo di depositi infiammabili di lanugine?",
+            normReference: "D.M. 03/09/2021; D.M. 02/09/2021; D.Lgs. 81/2008 All. IV p. 1.9",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 9. ASSE DA STIRO PROFESSIONALE CON FERRO A CALDAIA (env-ost-lavanderia-self)
+      {
+        machineKey: "ferro_stiro_aspirante_comunitario",
+        name: "Asse da Stiro Professionale Aspirante/Riscaldato con Ferro a Vapore Caldaia",
+        type: "Postazione da Stiro Professionale per Ospiti con Caldaia a Pressione Separata",
+        suggestedManufacturer: "Battistella / Bieffe / Lelit",
+        suggestedModel: "Battistella Vaporino Maxi / Bieffe Farfalla / Lelit PS25 Comunitario",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "OST_STIRO_CALDAIA_PED_VALVOLA_SICUREZZA",
+            title: "Caldaia Inox Certificata PED con Valvola di Sovrapressione e Termostato Limitatore",
+            question: "Il generatore di vapore a pressione in acciaio inox è conforme alla Direttiva PED D.Lgs. 26/2016 ed è munito di valvola di sicurezza tarata per sovrapressione e pressostato di lavoro efficiente?",
+            normReference: "D.Lgs. 26/2016 (PED); D.Lgs. 81/2008 art. 71 c. 3 e All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_STIRO_TAPPO_SFIATO_ANTI_APERTURA",
+            title: "Tappo di Sicurezza a Sfiato Graduale Anti-Apertura Sotto Pressione",
+            question: "Il tappo di riempimento della caldaia è di tipo con sfiato controllato o valvola meccanica che impedisce lo svitamento rapido e lo schizzo di acqua bollente e vapore se la caldaia è in pressione?",
+            normReference: "CEI EN 60335-2-3 punto 22.101; D.Lgs. 81/2008 All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_STIRO_FERRO_PARAVAPORE_SALVAMANI",
+            title: "Impugnatura Ferro con Paravapore Salvamani e Tappetino Poggiaferro Siliconico",
+            question: "Il ferro da stiro presenta schermo protettivo paravapore sull'impugnatura in sughero per proteggere la mano dal flusso di vapore, e appoggio su tappetino termoresistente in silicone ignifugo?",
+            normReference: "CEI EN 60335-2-3 punto 19; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "OST_STIRO_TIMER_SPEGNIMENTO_AUTOMATICO",
+            title: "Timer o Dispositivo di Spegnimento Automatico per Inattività",
+            question: "La postazione di stiro per ospiti è dotata di spegnimento automatico temporizzato (auto-off dopo 15-30 minuti di non utilizzo) per eliminare rischi di incendio in caso di abbandono?",
+            normReference: "D.M. 02/09/2021; D.Lgs. 81/2008 art. 46 e art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 10. BATTERIA DI ARMADIETTI LOCKERS ELETTRONICI (env-ost-deposito-bagagli)
+      {
+        machineKey: "lockers_elettronici_bagagli",
+        name: "Batteria di Armadietti Lockers Elettronici Automatizzati per Bagagli",
+        type: "Batteria di Scomparti Portabagagli Modulari in Lamiera con Serratura Elettronica Automatizzata",
+        suggestedManufacturer: "Keba / WIB Machines / Polieco",
+        suggestedModel: "Keba KePol Locker / WIB Smart Locker Hotel / Polieco Modular Locker",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "OST_LOCKERS_FISSAGGIO_PARETE_ANTIRIBALTAMENTO",
+            title: "Ancoraggio a Parete e a Pavimento Strutturale Antiribaltamento",
+            question: "La colonna modulare di armadietti bagagli è saldamente ancorata a parete con tasselli strutturali o a pavimento per escludere qualsiasi ribaltamento in caso di carico sbilanciato o spinta?",
+            normReference: "UNI EN 14073-2 punto 5.1; D.Lgs. 81/2008 All. IV p. 1.1 e art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_LOCKERS_SBLOCCO_EMERGENZA_BLACKOUT",
+            title: "Sistema Meccanico Master di Sblocco Manuale d'Emergenza in Blackout",
+            question: "In caso di interruzione prolungata dell'alimentazione elettrica o guasto del software, il responsabile della struttura dispone di chiave fisica master per l'apertura manuale istantanea degli scomparti?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3; All. V p. 2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_LOCKERS_BORDI_ANTITAGLIO_ARROTONDATI",
+            title: "Bordi della Lamiera Raccordati, Privi di Sbavature e Spigoli Vivi Taglienti",
+            question: "Tutti gli sportelli, le cerniere e gli angoli dei singoli vani presentano finiture ribattute o guarnizioni di protezione per impedire tagli o pizzicamento delle dita dell'utente durante l'accesso?",
+            normReference: "UNI EN 14073-2 punto 5.2; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "OST_LOCKERS_CIRCUITO_BASSA_TENSIONE",
+            title: "Alimentazione Elettronica a Bassissima Tensione di Sicurezza (SELV)",
+            question: "I moduli di controllo degli attuatori delle serrature operano a bassissima tensione di sicurezza (SELV 12V/24V DC), escludendo qualsiasi rischio di contatto con tensioni pericolose?",
+            normReference: "CEI 64-8; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 11. ASPIRAPOLVERE PROFESSIONALE AD ALTA FILTRAZIONE HEPA (env-ost-dormitori-camerate, env-ost-camere-private)
+      {
+        machineKey: "aspirapolvere_battitappeto_hepa",
+        name: "Aspirapolvere Professionale ad Alta Filtrazione HEPA H13 per Dormitori",
+        type: "Aspirapolvere a Traino Silenziato con Filtro Assoluto HEPA H13 per Ambienti Collettivi",
+        suggestedManufacturer: "Kärcher / Lindhaus / Taski",
+        suggestedModel: "Kärcher T 12/1 eco!efficiency / Lindhaus Valzer 5 HEPA / Taski Aero 8 Plus",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.housekeeping_ostello,
+        safetyChecks: [
+          {
+            code: "OST_ASPIRAPOLVERE_FILTRO_HEPA_H13",
+            title: "Filtro Assoluto HEPA H13 Certificato UNI EN 1822 Contro Acari e Allergeni",
+            question: "L'aspirapolvere è dotato di cartuccia filtrante HEPA classe H13 certificata con efficienza >= 99,95% integra e manutenuta, che blocca polveri fini, acari e microrganismi espulsi nei dormitori?",
+            normReference: "UNI EN 1822; D.Lgs. 81/2008 Titolo X (Rischio Biologico) e art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "OST_ASPIRAPOLVERE_CAVO_FLUORESCENTE_ANTINCIAMPO",
+            title: "Cavo di Alimentazione Giallo Fluorescente ad Alta Visibilità Antinciampo",
+            question: "Il cavo elettrico è ad alta visibilità (giallo/arancione fluorescente), integro lungo tutta la guaina senza nastrature, con passacavo antirottura su spina e corpo macchina?",
+            normReference: "CEI EN 60335-2-69; D.Lgs. 81/2008 All. IV p. 1.3.2 e art. 80",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_ASPIRAPOLVERE_LIVELLO_RUMORE_ERGONOMIA",
+            title: "Emissione Sonora Contenuta (< 62 dB(A)) e Tubo Telescopico Ergonomico",
+            question: "Il motore a basso impatto acustico emette una pressione sonora < 62 dB(A) e il tubo di aspirazione è regolabile in altezza per garantire la corretta postura degli operatori housekeeping?",
+            normReference: "UNI EN ISO 11226; D.Lgs. 81/2008 Titolo VIII Capo II (Rumore) e Titolo VI (MMC)",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "OST_ASPIRAPOLVERE_DOPPIO_ISOLAMENTO_CLASSE_II",
+            title: "Costruzione a Doppio Isolamento (Classe II) Senza Conduttore di Terra",
+            question: "L'apparecchio è a doppio isolamento elettrico conforme a CEI EN 60335-1, con marchio CE e marcatura di classe II leggibile, protetto contro infiltrazioni di polvere e umidità?",
+            normReference: "CEI EN 60335-1 punto 7; D.Lgs. 81/2008 Titolo III Capo III",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 12. LAVASCIUGA PAVIMENTI COMPATTA UOMO A TERRA A BATTERIA (env-ost-corridoi-scale-esodo, env-ost-deposito-housekeeping, env-ost-area-rifiuti)
+      {
+        machineKey: "lavasciuga_pavimenti_compatta_ostello",
+        name: "Lavasciuga Pavimenti Uomo a Terra a Batteria per Corridoi e Aree Comuni",
+        type: "Lavasciuga Pavimenti Uomo a Terra a Batteria agli Ioni di Litio per Piccoli/Medi Spazi",
+        suggestedManufacturer: "Comac / Kärcher / Fimap",
+        suggestedModel: "Comac Vispa 35 B / Kärcher BD 30/4 C Bp Pack / Fimap Genie B",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.housekeeping_ostello,
+        safetyChecks: [
+          {
+            code: "OST_LAVASCIUGA_ASCIUGATURA_IMMEDIATA",
+            title: "Asciugatura Istantanea Pavimento con Tergipavimento Parabolico Anti-Scivolamento",
+            question: "La lama tergipavimento in para/poliuretano raccoglie completamente l'acqua lasciando la superficie immediatamente asciutta e calpestabile, eliminando il rischio scivolamento nei corridoi comuni?",
+            normReference: "D.Lgs. 81/2008 All. IV p. 1.3.2; CEI EN 60335-2-72",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_LAVASCIUGA_DISPOSITIVO_UOMO_PRESENTE",
+            title: "Impugnatura di Comando con Dispositivo 'Uomo Presente' ad Arresto Istantaneo",
+            question: "Il rilascio della leva di marcia sulla barra di guida disattiva immediatamente il motore spazzola e l'avanzamento, arrestando la macchina in sicurezza per proteggere terzi?",
+            normReference: "CEI EN 60335-2-72 punto 20.103; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_LAVASCIUGA_BATTERIA_LITIO_CARICA",
+            title: "Pacco Batterie al Litio Certificato e Ricarica in Area Ventilata",
+            question: "La batteria sigillata al litio è dotata di circuito di protezione BMS integrato contro sovraccarichi/surriscaldamento e la stazione di ricarica è ubicata in locale asciutto e privo di combustibili?",
+            normReference: "CEI EN 62133; D.Lgs. 81/2008 art. 80 e All. IV p. 1.11",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_LAVASCIUGA_SERBATOI_ESTRAIBILI_IGIENE",
+            title: "Serbatoi Acqua Pulita e Recupero Completamente Ispezionabili e Sanificabili",
+            question: "I serbatoi in polietilene antiurto sono facilmente estraibili, dotati di tubo di scarico flessibile e sanificati regolarmente per prevenire formazione di odori sgradevoli e cariche batteriche?",
+            normReference: "D.Lgs. 81/2008 Titolo X e art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 13. CENTRALE TERMICA A CONDENSAZIONE CON ACCUMULO ACS E SHOCK ANTI-LEGIONELLA (env-ost-centrale-termica-acs)
+      {
+        machineKey: "caldaia_centrale_acs_legionella",
+        name: "Centrale Termica a Condensazione con Accumulo ACS e Shock Termico Anti-Legionella",
+        type: "Centrale Termica Murale/Basamento ad Alta Efficienza con Accumulo ACS e Ciclo Anti-Legionella Programmabile",
+        suggestedManufacturer: "Viessmann / Vaillant / Atag",
+        suggestedModel: "Viessmann Vitodens 200-W con Bollitore Vitocell / Vaillant ecoTEC plus VHR / Atag Q-Series",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.centrali_termiche_clima,
+        safetyChecks: [
+          {
+            code: "OST_CALDAIA_CICLO_SHOCK_LEGIONELLA",
+            title: "Programma Elettronico Automatico di Shock Termico Anti-Legionella (65°C)",
+            question: "La centralina gestisce a cadenza periodica programmata il ciclo termico ad almeno 65°C per l'intero volume del bollitore e della rete di ricircolo ACS, per la disinfezione termica anti-legionella?",
+            normReference: "Linee Guida per la Prevenzione ed il Controllo della Legionellosi (Accordo SR 07/05/2015); D.Lgs. 81/2008 Titolo X",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_CALDAIA_VALVOLA_SICUREZZA_VASO",
+            title: "Valvola di Sicurezza Pressione e Vaso di Espansione Tarati e Raccordati a Scarico",
+            question: "Il circuito idraulico è provvisto di valvola di sovrapressione (tarata a 3 bar) con scarico convogliato a vista e vaso di espansione a membrana con precarica verificata annualmente?",
+            normReference: "D.M. 01/12/1975; Raccolta R INAIL; D.Lgs. 81/2008 All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_CALDAIA_ELETTROVALVOLA_GAS_ESTERNA",
+            title: "Elettrovalvola di Intercettazione Rapida Gas Metano Esterna a Riarmo Manuale",
+            question: "Sulla tubazione di adduzione gas all'esterno del locale è installata elettrovalvola NA/NC asservita a sensore fughe gas o pulsante d'emergenza esterno a riarmo manuale?",
+            normReference: "D.M. 08/11/2019 (Impianti termici alimentati a gas); UNI 7129 / UNI 11528; D.Lgs. 81/2008 art. 46",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_CALDAIA_LIBRETTO_IMPIANTO_FUMI",
+            title: "Libretto di Impianto Termico, Rapporto Efficienza Energetica e Scarico Fumi a Tetto",
+            question: "Il libretto di impianto è aggiornato con le verifiche biennali dei fumi, tiraggio camino a norma UNI 10845 e manutenzione ordinaria registrata su catasto termico regionale?",
+            normReference: "D.P.R. 74/2013; D.Lgs. 152/2006 Parte V; D.Lgs. 81/2008 art. 71 c. 8",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 14. CENTRALE DI RIVELAZIONE INCENDI E FUMI INDIRIZZATA CON EVAC (env-ost-reception-lounge, env-ost-dormitori-camerate, env-ost-camere-private, env-ost-corridoi-scale-esodo)
+      {
+        machineKey: "centrale_antincendio_indirizzata_ostello",
+        name: "Centrale di Rivelazione Incendi e Fumi Indirizzata con Diffusori EVAC",
+        type: "Impianto di Rivelazione Fumi Ottica e Allarme Vocale EVAC per Strutture Ricettive",
+        suggestedManufacturer: "Notifier / Inim Electronics / Siemens Cerberus",
+        suggestedModel: "Notifier AM-2000 / Inim SmartLight / Siemens Cerberus FIT",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.antincendio_livello_2,
+        safetyChecks: [
+          {
+            code: "OST_ANTINCENDIO_CENTRALE_INDIRIZZATA",
+            title: "Rivelazione Fumi Ottica Indirizzata in Tutti i Dormitori, Camere e Vie di Fuga",
+            question: "Tutti i vani notte, corridoi e locali tecnici sono coperti da sensori ottici di fumo indirizzati che identificano univocamente la stanza d'origine del principio d'incendio sul pannello centrale?",
+            normReference: "UNI 9795; D.M. 09/04/1994 e D.M. 03/09/2021; D.Lgs. 81/2008 art. 46",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_ANTINCENDIO_DIFFUSORI_EVAC_VOCALI",
+            title: "Diffusori Acustici con Messaggi Vocali Multilingue di Evacuazione Guidata EVAC",
+            question: "L'impianto EVAC conforme a UNI EN 54-16/24 diffonde chiaramente allarmi sonori e messaggi vocali preregistrati in italiano e inglese comprensibili in tutti i dormitori e parti comuni?",
+            normReference: "UNI EN 54-16; UNI ISO 7240-19; D.Lgs. 81/2008 art. 43 e 46",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_ANTINCENDIO_BATTERIE_TAMPONE_24H",
+            title: "Gruppo Batterie Tampone di Emergenza con Autonomia Minima 24h + 30 min Allarme",
+            question: "L'alimentatore ausiliario è equipaggiato con accumulatori al piombo sigillati in grado di mantenere operativo il sistema per almeno 24 ore in assenza di rete e garantire 30 minuti di allarme generale?",
+            normReference: "UNI EN 54-4; CEI 20-105; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_ANTINCENDIO_MANUTENZIONE_SEMESTRALE_11224",
+            title: "Registro Antincendio e Manutenzione Semestrale Certificata ex UNI 11224",
+            question: "L'impianto è sottoposto a sorveglianza periodica con prove semestrali di sgancio e attivazione sensori eseguite da ditta abilitata e annotate sul registro antincendio aziendale?",
+            normReference: "UNI 11224; D.M. 01/09/2021 (Decreto Controlli); D.Lgs. 81/2008 art. 46",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 15. PORTE TAGLIAFUOCO EI 30 / EI 60 CON CHIUDIPORTA E MANIGLIONI ANTIPANICO (env-ost-corridoi-scale-esodo)
+      {
+        machineKey: "porte_tagliafuoco_chiudiporta_ostello",
+        name: "Porte Tagliafuoco EI 30 / EI 60 con Maniglione Antipanico e Chiudiporta Idraulico",
+        type: "Porte Metalliche Tagliafuoco per Compartimentazione Piani, Dormitori e Uscite di Sicurezza",
+        suggestedManufacturer: "Dierre / Ninz / Novoferm",
+        suggestedModel: "Ninz Proget EI 60 / Dierre New Idra EI 30/60 / Novoferm NovoPorta Premio",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.antincendio_livello_2,
+        safetyChecks: [
+          {
+            code: "OST_TAGLIAFUOCO_CHIEUDIPORTA_IDRAULICO",
+            title: "Chiudiporta Idraulico Conforme UNI EN 1154 con Completo Accostamento all'Arresto",
+            question: "Ciascuna porta tagliafuoco di compartimentazione è dotata di dispositivo di autochiusura (chiudiporta) conforme a UNI EN 1154 perfettamente regolato, che garantisce l'accostamento e lo scatto dello scrocco?",
+            normReference: "UNI EN 1154; D.M. 01/09/2021; D.Lgs. 81/2008 All. IV p. 1.5 e art. 46",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_TAGLIAFUOCO_MANIGLIONE_ANTIPANICO",
+            title: "Maniglioni Antipanico Conforme UNI EN 1125 su Tutte le Uscite di Piano e Scale",
+            question: "Le porte situate lungo le vie di fuga e le uscite di sicurezza verso scale d'esodo si aprono nel verso dell'esodo mediante semplice pressione su maniglione antipanico conforme a UNI EN 1125?",
+            normReference: "UNI EN 1125; D.M. 03/09/2021; D.Lgs. 81/2008 All. IV p. 1.5.5",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_TAGLIAFUOCO_GUARNIZIONI_TERMOESPANDENTI",
+            title: "Integrità Guarnizioni Termoespandenti Perimetrali Tagliafumo",
+            question: "Le guarnizioni termoespandenti perimetrali sul telaio e sull'anta sono integre, continue, non verniciate né staccate, garantendo la tenuta ai fumi freddi e caldi in caso di incendio?",
+            normReference: "UNI EN 1634-1; UNI 11473-1; D.Lgs. 81/2008 art. 46",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_TAGLIAFUOCO_LIBERTA_INGOMBRO_CUNEO",
+            title: "Divieto Assoluto di Bloccare le Ante con Cunei o Fermi Meccanici Impropri",
+            question: "Le ante delle porte REI non sono mai bloccate aperte mediante cunei, fermaporta artigianali o arredi che ne impediscano l'immediata chiusura tagliafuoco e tagliafumo in caso di fumo o allarme?",
+            normReference: "D.M. 01/09/2021; D.M. 02/09/2021; D.Lgs. 81/2008 All. IV p. 1.5",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 16. CARRELLO HOUSEKEEPING MULTITASCHE PROFESSIONALE (env-ost-servizi-igienici-comuni, env-ost-deposito-housekeeping, env-ost-area-rifiuti)
+      {
+        machineKey: "carrello_housekeeping_multitasche",
+        name: "Carrello Housekeeping Professionale per Biancheria Dormitori e Igiene",
+        type: "Carrello Professionale per Servizio Piani con Moduli Chiusi a Chiave e Supporti Ergonomici",
+        suggestedManufacturer: "TTS Cleaning / Filmop / IPC Brix",
+        suggestedModel: "TTS Magic Hotel 800 / Filmop Morgan Hotel / IPC Brix Green Care",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.housekeeping_ostello,
+        safetyChecks: [
+          {
+            code: "OST_CARRELLO_SEPARAZIONE_BIANCHERIA",
+            title: "Netta Separazione Fisica tra Biancheria Sporca e Pulita Contro Contaminazioni",
+            question: "Il carrello prevede sacchi portabiancheria separati e chiusi con coperchio per la biancheria usata e vani sigillati per la biancheria pulita, prevenendo qualsiasi contaminazione crociata nei dormitori?",
+            normReference: "Reg. CE 852/2004; D.Lgs. 81/2008 Titolo X (Agenti Biologici) e art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "OST_CARRELLO_VANO_CHIMICO_CHIAVE",
+            title: "Scomparto Portadetergenti e Disinfettanti Chiuso a Chiave Contro Usi Indebiti",
+            question: "I flaconi di detergenti professionali concentrati e prodotti igienizzanti sono alloggiati in cassetto chiuso con serratura a chiave per impedire accessi non autorizzati o ingestioni accidentali da parte degli ospiti?",
+            normReference: "D.Lgs. 81/2008 Titolo IX Capo I (art. 223-228 Agenti Chimici); Reg. CE 1272/2008 (CLP)",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_CARRELLO_RUOTE_FRENO_STAZIONAMENTO",
+            title: "Ruote Piroettanti Antitraccia con Freno di Stazionamento a Pedale",
+            question: "Il carrello è dotato di ruote gommate ad alta scorrevolezza con freno di stazionamento a pedale perfettamente efficiente su entrambe le ruote anteriori per bloccarlo in pendenza o lungo i corridoi?",
+            normReference: "UNI EN ISO 11228-2 (Spinta e Traino); D.Lgs. 81/2008 Titolo VI e All. V p. 2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "OST_CARRELLO_MANIGLIONE_ERGONOMICO_MMC",
+            title: "Maniglione di Spinta ad Altezza Ergonomica (ISO 11228-2)",
+            question: "Il maniglione di spinta è situato a quota ergonomica (tra 90 e 105 cm da terra) con impugnatura anatomica che rispetta le forze limite di spinta e traino previste dalle norme per la prevenzione dei disturbi muscolo-scheletrici?",
+            normReference: "UNI EN ISO 11228-2; D.Lgs. 81/2008 art. 167-168 e All. XXXIII",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+    ],
+  },
+
   // ATECO 55.20.51, 55.20.5, 55.20, 55.2 (Bed & Breakfast, Affittacamere per brevi soggiorni, Guest House, Case Vacanze e Room Rental)
   {
     sectorKey: "bnb_affittacamere",
@@ -9304,7 +10050,16 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
   const hotelSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "hotel_strutture_ricettive");
   const hotelMachines = hotelSector ? hotelSector.machines : [];
 
-  const isBnbAteco = !!atecoCode && (
+  const isHostelAteco = !!atecoCode && (
+    atecoCode.startsWith("55.20.20") ||
+    atecoCode.startsWith("55.20.2") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("552020") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("55202")
+  );
+  const hostelSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "ostello_residence");
+  const hostelMachines = hostelSector ? hostelSector.machines : [];
+
+  const isBnbAteco = !isHostelAteco && !!atecoCode && (
     atecoCode.startsWith("55.20.51") ||
     atecoCode.startsWith("55.20.5") ||
     atecoCode.startsWith("55.20") ||
@@ -10024,7 +10779,7 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
     } else if (
       envId === "env-hotel-deposito-housekeeping" ||
       envId.includes("hotel-deposito-housekeeping") ||
-      envId.includes("deposito-housekeeping") ||
+      (envId.includes("deposito-housekeeping") && !envId.includes("ost-") && !isHostelAteco) ||
       (isHotelAteco && (nameLower.includes("housekeeping") || nameLower.includes("riassetto") || nameLower.includes("deposito piani") || nameLower.includes("governante")))
     ) {
       matchingMachines = hotelMachines.filter((m) =>
@@ -10068,6 +10823,135 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
     ) {
       matchingMachines = hotelMachines.filter((m) =>
         ["ascensore_passeggeri_hotel", "montacarichi_servizio_piani"].includes(m.machineKey)
+      );
+    }
+
+    // Reparti Ostelli della Gioventù, Residence Turistici, Case per Ferie e Alloggi Comunitari (55.20.20 / 55.20.2 / 552020 / 55202)
+    else if (
+      envId === "env-ost-reception-lounge" ||
+      envId.includes("ost-reception-lounge") ||
+      envId.includes("ost-reception") ||
+      (isHostelAteco && (nameLower.includes("reception") || nameLower.includes("lounge") || nameLower.includes("portineria") || cat === "reception"))
+    ) {
+      matchingMachines = hostelMachines.filter((m) =>
+        [
+          "distributore_snack_bevande_h24",
+          "distributore_caffe_bevande_calde",
+          "centrale_antincendio_indirizzata_ostello",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-ost-dormitori-camerate" ||
+      envId === "env-ost-camere-private" ||
+      envId.includes("ost-dormitori") ||
+      envId.includes("ost-camerate") ||
+      envId.includes("ost-camere-private") ||
+      (isHostelAteco && (nameLower.includes("dormitori") || nameLower.includes("camerat") || nameLower.includes("camera") || nameLower.includes("camere") || cat === "rooms"))
+    ) {
+      matchingMachines = hostelMachines.filter((m) =>
+        [
+          "aspirapolvere_battitappeto_hepa",
+          "centrale_antincendio_indirizzata_ostello",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-ost-servizi-igienici-comuni" ||
+      envId.includes("ost-servizi-igienici") ||
+      envId.includes("ost-bagni") ||
+      (isHostelAteco && (nameLower.includes("igienici") || nameLower.includes("bagni") || nameLower.includes("docce") || nameLower.includes("wc") || cat === "bathrooms"))
+    ) {
+      matchingMachines = hostelMachines.filter((m) =>
+        [
+          "carrello_housekeeping_multitasche",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-ost-cucina-condivisa" ||
+      envId.includes("ost-cucina-condivisa") ||
+      envId.includes("ost-cucina") ||
+      (isHostelAteco && (nameLower.includes("cucina") || nameLower.includes("cottura") || cat === "kitchen"))
+    ) {
+      matchingMachines = hostelMachines.filter((m) =>
+        [
+          "piano_induzione_comunitario_ostello",
+          "forno_microonde_inox_comunitario",
+          "lavastoviglie_ciclo_breve_ostello",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-ost-dispensa-frigo-ospiti" ||
+      envId.includes("ost-dispensa-frigo") ||
+      envId.includes("ost-frigo-ospiti") ||
+      (isHostelAteco && (nameLower.includes("dispensa") || nameLower.includes("frigo ospiti") || (nameLower.includes("frigo") && !nameLower.includes("bar"))))
+    ) {
+      matchingMachines = hostelMachines.filter((m) =>
+        [
+          "frigorifero_multiposto_ospiti",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-ost-lavanderia-self" ||
+      envId.includes("ost-lavanderia-self") ||
+      envId.includes("ost-lavanderia") ||
+      (isHostelAteco && (nameLower.includes("lavanderia") || nameLower.includes("self") || cat === "laundry"))
+    ) {
+      matchingMachines = hostelMachines.filter((m) =>
+        [
+          "lavatrice_selfservice_gettone",
+          "asciugatrice_selfservice_gettone",
+          "ferro_stiro_aspirante_comunitario",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-ost-deposito-housekeeping" ||
+      envId === "env-ost-area-rifiuti" ||
+      envId.includes("ost-deposito-housekeeping") ||
+      envId.includes("ost-area-rifiuti") ||
+      envId.includes("ost-rifiuti") ||
+      (isHostelAteco && (nameLower.includes("housekeeping") || nameLower.includes("riassetto") || nameLower.includes("pulizi") || nameLower.includes("rifiuti") || nameLower.includes("immondiz") || cat === "waste"))
+    ) {
+      matchingMachines = hostelMachines.filter((m) =>
+        [
+          "carrello_housekeeping_multitasche",
+          "lavasciuga_pavimenti_compatta_ostello",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-ost-deposito-bagagli" ||
+      envId.includes("ost-deposito-bagagli") ||
+      envId.includes("ost-lockers") ||
+      (isHostelAteco && (nameLower.includes("bagagli") || nameLower.includes("lockers") || nameLower.includes("locker")))
+    ) {
+      matchingMachines = hostelMachines.filter((m) =>
+        [
+          "lockers_elettronici_bagagli",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-ost-centrale-termica-acs" ||
+      envId.includes("ost-centrale-termica-acs") ||
+      envId.includes("ost-centrale-termica") ||
+      envId.includes("ost-acs") ||
+      (isHostelAteco && (nameLower.includes("centrale termica") || nameLower.includes("caldaia") || nameLower.includes("boiler") || nameLower.includes("acs") || cat === "boiler_room"))
+    ) {
+      matchingMachines = hostelMachines.filter((m) =>
+        [
+          "caldaia_centrale_acs_legionella",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-ost-corridoi-scale-esodo" ||
+      envId.includes("ost-corridoi-scale-esodo") ||
+      envId.includes("ost-corridoi") ||
+      envId.includes("ost-scale") ||
+      (isHostelAteco && (nameLower.includes("corridoi") || nameLower.includes("scale") || nameLower.includes("esodo") || nameLower.includes("disimpegni") || cat === "common" || cat === "hallway"))
+    ) {
+      matchingMachines = hostelMachines.filter((m) =>
+        [
+          "centrale_antincendio_indirizzata_ostello",
+          "porte_tagliafuoco_chiudiporta_ostello",
+          "lavasciuga_pavimenti_compatta_ostello",
+        ].includes(m.machineKey)
       );
     }
 

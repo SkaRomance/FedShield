@@ -313,15 +313,41 @@ function buildAtecoVariants(atecoCode?: string | null) {
     variants.add("ALLOGGIO");
   }
 
-  // Ostelli e Residence (55.20.20, 55.20.2, 552020)
-  if (normalized.startsWith("55.20.2") || digits.startsWith("55202")) {
+  // Ostelli e Residence (55.20.20, 55.20.2, 552020, 55202)
+  const isOstelloCode =
+    normalized.startsWith("55.20.2") ||
+    digits.startsWith("55202");
+
+  const isOstelloText =
+    upper === "OSTELLI_RESIDENCE" ||
+    upper === "OSTELLO_RESIDENCE" ||
+    upper === "OSTELLI" ||
+    upper === "OSTELLO" ||
+    upper === "RESIDENCE" ||
+    upper === "HOSTEL" ||
+    upper === "CASE_PER_FERIE" ||
+    upper === "CASE PER FERIE" ||
+    upper === "STUDENTATO" ||
+    upper === "ALLOGGI_STUDENTI" ||
+    upper === "ALLOGGI STUDENTI";
+
+  if (isOstelloCode || isOstelloText) {
     variants.add("55.20.20");
     variants.add("55.20.2");
     variants.add("55.20");
     variants.add("552020");
+    variants.add("55202");
     variants.add("OSTELLI_RESIDENCE");
+    variants.add("OSTELLO_RESIDENCE");
     variants.add("RESIDENCE");
     variants.add("OSTELLI");
+    variants.add("OSTELLO");
+    variants.add("STRUTTURE_RICETTIVE");
+    variants.add("HORECA");
+    variants.add("HO.RE.CA");
+    variants.add("RICETTIVITA");
+    variants.add("RICETTIVITÀ");
+    variants.add("ALLOGGIO");
   }
 
   // Campeggi e Villaggi turistici (55.30.00, 55.30, 55.3, 553000)
@@ -417,6 +443,15 @@ function buildAtecoVariants(atecoCode?: string | null) {
     variants.add("GUESTHOUSE");
     variants.add("55.20.51");
     variants.add("55.20");
+    variants.add("OSTELLI_RESIDENCE");
+    variants.add("OSTELLO_RESIDENCE");
+    variants.add("OSTELLI");
+    variants.add("OSTELLO");
+    variants.add("RESIDENCE");
+    variants.add("55.20.20");
+    variants.add("55.20.2");
+    variants.add("552020");
+    variants.add("55202");
   }
 
   if (parts[0] === "47" && !normalized.startsWith("47.11")) {

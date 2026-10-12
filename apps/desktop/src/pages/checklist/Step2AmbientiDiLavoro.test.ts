@@ -4369,5 +4369,576 @@ assert.ok(
   "In modalità safety_only nessun item kitchenette B&B deve avere domain haccp",
 );
 
+// ============================================================================
+// 12. Test Ostello, Residence, Case per Ferie, Alloggi per Studenti e Turisti
+// ATECO 55.20.20 (o 55.20.2 / 552020 / 55202)
+// ============================================================================
+console.log("Test 29: getStandardEnvironmentsForAteco & conformità per Ostello / Residence (55.20.20 / 55.20.2 / 552020 / 55202)");
+
+const ostEnvs = getStandardEnvironmentsForAteco("55.20.20");
+assert.equal(ostEnvs.length, 12, "L'Ostello / Residence deve avere esattamente 12 ambienti standard");
+
+// Verifica varianti codice ATECO (55.20.2, 552020, 55202)
+const ostEnvsVar1 = getStandardEnvironmentsForAteco("55.20.2");
+assert.equal(ostEnvsVar1.length, 12, "Anche prefisso 55.20.2 deve restituire 12 ambienti Ostello");
+const ostEnvsVar2 = getStandardEnvironmentsForAteco("552020");
+assert.equal(ostEnvsVar2.length, 12, "Anche codice numerico 552020 deve restituire 12 ambienti Ostello");
+const ostEnvsVar3 = getStandardEnvironmentsForAteco("55202");
+assert.equal(ostEnvsVar3.length, 12, "Anche codice numerico 55202 deve restituire 12 ambienti Ostello");
+
+// Verifica ID dei 12 ambienti standard Ostello / Residence
+const expectedOstIds = [
+  "env-ost-reception-lounge",
+  "env-ost-dormitori-camerate",
+  "env-ost-camere-private",
+  "env-ost-servizi-igienici-comuni",
+  "env-ost-cucina-condivisa",
+  "env-ost-dispensa-frigo-ospiti",
+  "env-ost-lavanderia-self",
+  "env-ost-deposito-housekeeping",
+  "env-ost-deposito-bagagli",
+  "env-ost-centrale-termica-acs",
+  "env-ost-corridoi-scale-esodo",
+  "env-ost-area-rifiuti",
+];
+
+for (const id of expectedOstIds) {
+  assert.ok(
+    ostEnvs.some((e) => e.id === id),
+    `Ambiente ${id} deve essere presente nella lista standard Ostello per 55.20.20`,
+  );
+}
+
+// 1. Reception, Desk Accoglienza H24 & Lounge Sociale
+const ostReception = ostEnvs.find((e) => e.id === "env-ost-reception-lounge")!;
+assert.equal(ostReception.category, "sales_office");
+assert.equal(ostReception.surfaceSqM, 60);
+assert.equal(ostReception.heightM, 3.0);
+assert.equal(ostReception.volumeCuM, 180);
+assert.equal(ostReception.occupantsCount, 3);
+assert.equal(ostReception.windowSurfaceSqM, 8.0);
+assert.equal(ostReception.features.emergencyLighting, true);
+const compOstReception = evaluateEnvironmentCompliance(ostReception, "55.20.20");
+assert.equal(compOstReception.isHeightCompliant, true);
+assert.equal(compOstReception.isCubatureCompliant, true);
+assert.ok(
+  compOstReception.summaryBadges.some((b) => b.text.includes("VDT ergonomica") && b.text.includes("30 mA")),
+  "Reception Ostello deve includere badge VDT ergonomica e differenziale 30 mA",
+);
+assert.ok(
+  compOstReception.summaryBadges.some((b) => b.text.includes("34A 233B") && b.text.toLowerCase().includes("planimetria di esodo bilingue")),
+  "Reception Ostello deve includere badge estintore 34A 233B e planimetria bilingue",
+);
+
+// 2. Dormitori Comuni & Camerate a Letti a Castello
+const ostDormitori = ostEnvs.find((e) => e.id === "env-ost-dormitori-camerate")!;
+assert.equal(ostDormitori.category, "production");
+assert.equal(ostDormitori.surfaceSqM, 80);
+assert.equal(ostDormitori.heightM, 2.7);
+assert.equal(ostDormitori.volumeCuM, 216);
+assert.equal(ostDormitori.occupantsCount, 16);
+assert.equal(ostDormitori.windowSurfaceSqM, 10.0);
+assert.equal(ostDormitori.features.emergencyLighting, true);
+const compOstDormitori = evaluateEnvironmentCompliance(ostDormitori, "55.20.20");
+assert.equal(compOstDormitori.isHeightCompliant, true);
+assert.equal(compOstDormitori.isCubatureCompliant, true);
+assert.ok(
+  compOstDormitori.summaryBadges.some((b) => b.text.includes("UNI EN 747") && b.text.includes("spondine anticaduta")),
+  "Dormitori Ostello devono verificare letti a castello UNI EN 747 con spondine anticaduta",
+);
+assert.ok(
+  compOstDormitori.summaryBadges.some((b) => b.text.includes("UNI EN 54")),
+  "Dormitori Ostello devono verificare rilevatori fumo indirizzati UNI EN 54",
+);
+assert.ok(
+  compOstDormitori.summaryBadges.some((b) => b.text.includes("Armadietti metallici individuali")),
+  "Dormitori Ostello devono verificare armadietti metallici individuali",
+);
+
+// 3. Camere Private / Monolocali Residence con Bagno Esclusivo
+const ostCamerePrivate = ostEnvs.find((e) => e.id === "env-ost-camere-private")!;
+assert.equal(ostCamerePrivate.category, "production");
+assert.equal(ostCamerePrivate.surfaceSqM, 50);
+assert.equal(ostCamerePrivate.heightM, 2.7);
+assert.equal(ostCamerePrivate.volumeCuM, 135);
+assert.equal(ostCamerePrivate.occupantsCount, 6);
+assert.equal(ostCamerePrivate.windowSurfaceSqM, 6.0);
+assert.equal(ostCamerePrivate.features.emergencyLighting, true);
+const compOstCamere = evaluateEnvironmentCompliance(ostCamerePrivate, "55.20.20");
+assert.equal(compOstCamere.isHeightCompliant, true);
+assert.equal(compOstCamere.isCubatureCompliant, true);
+assert.ok(
+  compOstCamere.summaryBadges.some((b) => b.text.includes("D.P.R. 503/96") && b.text.includes("D.M. 236/89")),
+  "Camere private Ostello devono verificare accessibilità disabili PMR",
+);
+assert.ok(
+  compOstCamere.summaryBadges.some((b) => b.text.includes("Porte tagliafuoco EI 30")),
+  "Camere private Ostello devono verificare porte EI 30 con chiudiporta",
+);
+
+// 4. Blocco Servizi Igienici & Docce Multiple Comuni
+const ostServiziIgienici = ostEnvs.find((e) => e.id === "env-ost-servizi-igienici-comuni")!;
+assert.equal(ostServiziIgienici.category, "services");
+assert.equal(ostServiziIgienici.surfaceSqM, 45);
+assert.equal(ostServiziIgienici.heightM, 2.4);
+assert.equal(ostServiziIgienici.volumeCuM, 108);
+assert.equal(ostServiziIgienici.occupantsCount, 6);
+assert.equal(ostServiziIgienici.windowSurfaceSqM, 4.5);
+assert.equal(ostServiziIgienici.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(ostServiziIgienici.features.flooringCondition, "compliant_anti_slip");
+assert.equal(ostServiziIgienici.features.forcedExhaustPresent, true);
+assert.equal(ostServiziIgienici.features.forcedExhaustType, "blind_toilet_fan");
+const compOstBagni = evaluateEnvironmentCompliance(ostServiziIgienici, "55.20.20");
+assert.equal(compOstBagni.isHeightCompliant, true);
+assert.ok(
+  compOstBagni.summaryBadges.some((b) => b.text.includes("R11") && b.text.includes("canaline sifonate")),
+  "Bagni comuni Ostello devono verificare piatto doccia R11 e canaline sifonate",
+);
+assert.ok(
+  compOstBagni.summaryBadges.some((b) => b.text.includes("Legionella") && b.text.includes("D.Lgs. 18/2023")),
+  "Bagni comuni Ostello devono verificare prevenzione legionella soffioni doccia D.Lgs. 18/2023",
+);
+
+// 5. Cucina Comune Condivisa per Ospiti (Self-Catering) & Zona Pranzo
+const ostCucina = ostEnvs.find((e) => e.id === "env-ost-cucina-condivisa")!;
+assert.equal(ostCucina.category, "production");
+assert.equal(ostCucina.surfaceSqM, 40);
+assert.equal(ostCucina.heightM, 3.0);
+assert.equal(ostCucina.volumeCuM, 120);
+assert.equal(ostCucina.occupantsCount, 8);
+assert.equal(ostCucina.windowSurfaceSqM, 5.0);
+assert.equal(ostCucina.features.forcedExhaustPresent, true);
+assert.equal(ostCucina.features.forcedExhaustType, "kitchen_hood");
+assert.equal(ostCucina.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(ostCucina.features.flooringCondition, "compliant_anti_slip");
+assert.equal(ostCucina.features.insectScreens, true);
+assert.equal(ostCucina.features.microclimateCompliant, true);
+const compOstCucina = evaluateEnvironmentCompliance(ostCucina, "55.20.20");
+assert.equal(compOstCucina.isHeightCompliant, true);
+assert.ok(
+  compOstCucina.summaryBadges.some((b) => b.text.includes("induzione") && b.text.includes("filtri labirinto inox")),
+  "Cucina Ostello deve verificare induzione e cappa con filtri labirinto inox",
+);
+assert.ok(
+  compOstCucina.summaryBadges.some((b) => b.text.includes("classe F") && b.text.includes("coperta antifiamma")),
+  "Cucina Ostello deve verificare estintore classe F e coperta antifiamma",
+);
+
+// 6. Dispensa Comune & Frigoriferi Condivisi per Ospiti
+const ostDispensaFrigo = ostEnvs.find((e) => e.id === "env-ost-dispensa-frigo-ospiti")!;
+assert.equal(ostDispensaFrigo.category, "storage");
+assert.equal(ostDispensaFrigo.surfaceSqM, 20);
+assert.equal(ostDispensaFrigo.heightM, 2.6);
+assert.equal(ostDispensaFrigo.volumeCuM, 52);
+assert.equal(ostDispensaFrigo.occupantsCount, 2);
+assert.equal(ostDispensaFrigo.windowSurfaceSqM, 2.0);
+assert.equal(ostDispensaFrigo.features.emergencyLighting, true);
+assert.equal(ostDispensaFrigo.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(ostDispensaFrigo.features.flooringCondition, "compliant_anti_slip");
+const compOstDispensa = evaluateEnvironmentCompliance(ostDispensaFrigo, "55.20.20");
+assert.equal(compOstDispensa.isHeightCompliant, true);
+assert.ok(
+  compOstDispensa.summaryBadges.some((b) => b.text.includes("Frigoriferi ventilati") && b.text.includes("HACCP")),
+  "Dispensa Ostello deve verificare frigoriferi ventilati con teletermometri HACCP",
+);
+assert.ok(
+  compOstDispensa.summaryBadges.some((b) => b.text.includes("etichettatura alimenti")),
+  "Dispensa Ostello deve verificare etichettatura per nome e check-out alimenti",
+);
+
+// 7. Lavanderia Self-Service per Ospiti a Gettoni/App & Locale Stireria
+const ostLavanderia = ostEnvs.find((e) => e.id === "env-ost-lavanderia-self")!;
+assert.equal(ostLavanderia.category, "services");
+assert.equal(ostLavanderia.surfaceSqM, 25);
+assert.equal(ostLavanderia.heightM, 2.5);
+assert.equal(ostLavanderia.volumeCuM, 62.5);
+assert.equal(ostLavanderia.occupantsCount, 3);
+assert.equal(ostLavanderia.windowSurfaceSqM, 2.5);
+assert.equal(ostLavanderia.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(ostLavanderia.features.flooringCondition, "compliant_anti_slip");
+assert.equal(ostLavanderia.features.forcedExhaustPresent, true);
+const compOstLavanderia = evaluateEnvironmentCompliance(ostLavanderia, "55.20.20");
+assert.equal(compOstLavanderia.isHeightCompliant, true);
+assert.ok(
+  compOstLavanderia.summaryBadges.some((b) => b.text.includes("UNI EN ISO 10472") && b.text.includes("blocco oblò")),
+  "Lavanderia Ostello deve verificare blocco oblò UNI EN ISO 10472",
+);
+assert.ok(
+  compOstLavanderia.summaryBadges.some((b) => b.text.includes("filtri lanugine") && b.text.includes("D.M. 02/09/2021")),
+  "Lavanderia Ostello deve verificare pulizia filtri lanugine essiccatori D.M. 02/09/2021",
+);
+
+// 8. Guardaroba Biancheria, Deposito Housekeeping & Prodotti Pulizia
+const ostHousekeeping = ostEnvs.find((e) => e.id === "env-ost-deposito-housekeeping")!;
+assert.equal(ostHousekeeping.category, "warehouse");
+assert.equal(ostHousekeeping.surfaceSqM, 20);
+assert.equal(ostHousekeeping.heightM, 2.5);
+assert.equal(ostHousekeeping.volumeCuM, 50);
+assert.equal(ostHousekeeping.occupantsCount, 2);
+assert.equal(ostHousekeeping.windowSurfaceSqM, 2.0);
+assert.equal(ostHousekeeping.features.shelvingCertified, true);
+const compOstHousekeeping = evaluateEnvironmentCompliance(ostHousekeeping, "55.20.20");
+assert.equal(compOstHousekeeping.isHeightCompliant, true);
+assert.ok(
+  compOstHousekeeping.summaryBadges.some((b) => b.text.includes("15 cm")),
+  "Housekeeping Ostello deve verificare scaffalature rialzate 15 cm per biancheria pulita",
+);
+assert.ok(
+  compOstHousekeeping.summaryBadges.some((b) => b.text.includes("detergenti concentrati") && b.text.includes("Titolo IX")),
+  "Housekeeping Ostello deve verificare armadio chiuso a chiave per detergenti con SDS",
+);
+
+// 9. Locale Deposito Bagagli Ospiti Custodito & Lockers Elettronici
+const ostDepositoBagagli = ostEnvs.find((e) => e.id === "env-ost-deposito-bagagli")!;
+assert.equal(ostDepositoBagagli.category, "storage");
+assert.equal(ostDepositoBagagli.surfaceSqM, 20);
+assert.equal(ostDepositoBagagli.heightM, 2.7);
+assert.equal(ostDepositoBagagli.volumeCuM, 54);
+assert.equal(ostDepositoBagagli.occupantsCount, 2);
+assert.equal(ostDepositoBagagli.windowSurfaceSqM, 0);
+assert.equal(ostDepositoBagagli.features.emergencyLighting, true);
+const compOstBagagli = evaluateEnvironmentCompliance(ostDepositoBagagli, "55.20.20");
+assert.equal(compOstBagagli.isHeightCompliant, true);
+assert.ok(
+  compOstBagagli.summaryBadges.some((b) => b.text.includes("Lockers automatizzati") && b.text.includes("bordo anticaduta")),
+  "Deposito bagagli Ostello deve verificare lockers e scaffali con bordo anticaduta",
+);
+
+// 10. Centrale Termica / Impianto Riscaldamento & Produzione ACS Anti-Legionella
+const ostCentraleTermica = ostEnvs.find((e) => e.id === "env-ost-centrale-termica-acs")!;
+assert.equal(ostCentraleTermica.category, "technical");
+assert.equal(ostCentraleTermica.surfaceSqM, 18);
+assert.equal(ostCentraleTermica.heightM, 2.6);
+assert.equal(ostCentraleTermica.volumeCuM, 46.8);
+assert.equal(ostCentraleTermica.occupantsCount, 1);
+assert.equal(ostCentraleTermica.windowSurfaceSqM, 0);
+assert.equal(ostCentraleTermica.features.emergencyLighting, true);
+const compOstTermica = evaluateEnvironmentCompliance(ostCentraleTermica, "55.20.20");
+assert.equal(compOstTermica.isHeightCompliant, true);
+assert.ok(
+  compOstTermica.summaryBadges.some((b) => b.text.includes("60°C") && b.text.includes("50°C")),
+  "Centrale termica Ostello deve verificare temperatura ACS ≥ 60°C e ricircolo ≥ 50°C",
+);
+assert.ok(
+  compOstTermica.summaryBadges.some((b) => b.text.includes("Registro aziendale Legionella")),
+  "Centrale termica Ostello deve verificare Registro Legionella e campionamenti",
+);
+assert.ok(
+  compOstTermica.summaryBadges.some((b) => b.text.includes("INAIL") && b.text.includes("PED")),
+  "Centrale termica Ostello deve verificare valvole INAIL e vasi PED",
+);
+
+// 11. Corridoi ai Piani, Vano Scale Antincendio & Uscite di Emergenza
+const ostCorridoiScale = ostEnvs.find((e) => e.id === "env-ost-corridoi-scale-esodo")!;
+assert.equal(ostCorridoiScale.category, "services");
+assert.equal(ostCorridoiScale.surfaceSqM, 90);
+assert.equal(ostCorridoiScale.heightM, 2.7);
+assert.equal(ostCorridoiScale.volumeCuM, 243);
+assert.equal(ostCorridoiScale.occupantsCount, 15);
+assert.equal(ostCorridoiScale.windowSurfaceSqM, 8.0);
+assert.equal(ostCorridoiScale.features.emergencyLighting, true);
+const compOstCorridoi = evaluateEnvironmentCompliance(ostCorridoiScale, "55.20.20");
+assert.equal(compOstCorridoi.isHeightCompliant, true);
+assert.ok(
+  compOstCorridoi.summaryBadges.some((b) => b.text.includes("1,20 m") && b.text.includes("UNI EN 1125")),
+  "Corridoi Ostello devono verificare vie di fuga sgombre ≥ 1,20 m e maniglioni antipanico",
+);
+assert.ok(
+  compOstCorridoi.summaryBadges.some((b) => b.text.includes("Porte tagliafuoco EI 30 / EI 60") && b.text.includes("chiudiporta idraulico")),
+  "Scale Ostello devono verificare porte tagliafuoco EI con chiudiporta D.M. 09/04/1994",
+);
+assert.ok(
+  compOstCorridoi.summaryBadges.some((b) => b.text.includes("5 lux")),
+  "Scale Ostello devono verificare illuminazione emergenza ≥ 5 lux",
+);
+
+// 12. Locale / Area Esterna Differenziata & Compattatore Rifiuti
+const ostAreaRifiuti = ostEnvs.find((e) => e.id === "env-ost-area-rifiuti")!;
+assert.equal(ostAreaRifiuti.category, "technical");
+assert.equal(ostAreaRifiuti.surfaceSqM, 15);
+assert.equal(ostAreaRifiuti.heightM, 2.4);
+assert.equal(ostAreaRifiuti.volumeCuM, 36);
+assert.equal(ostAreaRifiuti.occupantsCount, 1);
+assert.equal(ostAreaRifiuti.windowSurfaceSqM, 0);
+assert.equal(ostAreaRifiuti.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(ostAreaRifiuti.features.flooringCondition, "compliant_anti_slip");
+const compOstRifiuti = evaluateEnvironmentCompliance(ostAreaRifiuti, "55.20.20");
+assert.equal(compOstRifiuti.isHeightCompliant, true);
+assert.ok(
+  compOstRifiuti.summaryBadges.some((b) => b.text.includes("Bidoni carrellati a tenuta") && b.text.includes("compattatore")),
+  "Area rifiuti Ostello deve verificare bidoni carrellati ermetici e compattatore",
+);
+assert.ok(
+  compOstRifiuti.summaryBadges.some((b) => b.text.includes("griglia sifonata") && b.text.includes("derattizzazione")),
+  "Area rifiuti Ostello deve verificare pavimentazione lavabile con griglia sifonata e derattizzazione",
+);
+
+// ============================================================================
+// Test 30: generateEnvironmentChecklistItems per locali Ostello / Residence (ATECO 55.20.20)
+// ============================================================================
+console.log("Test 30: generateEnvironmentChecklistItems per locali Ostello / Residence (ATECO 55.20.20)");
+
+// 1. Reception, Desk Accoglienza H24 & Lounge Sociale
+const ostReceptionItems = generateEnvironmentChecklistItems(ostReception, "55.20.20");
+assert.ok(
+  ostReceptionItems.some(
+    (it) => it.id.includes("postazione-vdt-ergonomica-quadro-differenziale-30ma") && it.domain === "safety",
+  ),
+  "Reception Ostello deve verificare postazione VDT ergonomica e differenziale 30 mA (domain: safety)",
+);
+assert.ok(
+  ostReceptionItems.some(
+    (it) => it.id.includes("estintore-34a-233b-planimetria-esodo-bilingue-112") && it.domain === "safety",
+  ),
+  "Reception Ostello deve verificare estintore 34A 233B e planimetria bilingue 112 (domain: safety)",
+);
+assert.ok(
+  ostReceptionItems.some(
+    (it) => it.id.includes("videosorveglianza-privacy-cassette-sicurezza-gdpr") && it.domain === "safety",
+  ),
+  "Reception Ostello deve verificare videosorveglianza GDPR e cassette sicurezza (domain: safety)",
+);
+
+// 2. Dormitori Comuni & Camerate a Letti a Castello
+const ostDormitoriItems = generateEnvironmentChecklistItems(ostDormitori, "55.20.20");
+assert.ok(
+  ostDormitoriItems.some(
+    (it) => it.id.includes("letti-castello-spondine-scalette-uni-en-747") && it.domain === "safety",
+  ),
+  "Dormitori Ostello devono verificare letti a castello UNI EN 747 con spondine e scalette (domain: safety)",
+);
+assert.ok(
+  ostDormitoriItems.some(
+    (it) => it.id.includes("rilevatori-ottici-fumo-indirizzati-uni-en-54") && it.domain === "safety",
+  ),
+  "Dormitori Ostello devono verificare rilevatori fumo indirizzati UNI EN 54 (domain: safety)",
+);
+assert.ok(
+  ostDormitoriItems.some(
+    (it) => it.id.includes("planimetria-esodo-bilingue-retro-porta-istruzioni") && it.domain === "safety",
+  ),
+  "Dormitori Ostello devono verificare planimetria di esodo bilingue su retro porta (domain: safety)",
+);
+assert.ok(
+  ostDormitoriItems.some(
+    (it) => it.id.includes("armadietti-individuali-serratura-prese-protette") && it.domain === "both",
+  ),
+  "Dormitori Ostello devono verificare armadietti individuali con serratura e prese protette (domain: both)",
+);
+
+// 3. Camere Private / Monolocali Residence con Bagno Esclusivo
+const ostCamerePrivateItems = generateEnvironmentChecklistItems(ostCamerePrivate, "55.20.20");
+assert.ok(
+  ostCamerePrivateItems.some(
+    (it) => it.id.includes("camere-disabili-pmr-porte-manovra-dpr-503-96") && it.domain === "both",
+  ),
+  "Camere private Ostello devono verificare accessibilità disabili PMR D.P.R. 503/96 (domain: both)",
+);
+assert.ok(
+  ostCamerePrivateItems.some(
+    (it) => it.id.includes("campanello-allarme-tirante-bagno-privato-soccorso") && it.domain === "safety",
+  ),
+  "Camere private Ostello devono verificare campanello a tirante nel bagno (domain: safety)",
+);
+assert.ok(
+  ostCamerePrivateItems.some(
+    (it) => it.id.includes("porte-tagliafuoco-ei30-chiudiporta-dm-09-04-1994") && it.domain === "safety",
+  ),
+  "Camere private Ostello devono verificare porte tagliafuoco EI 30 con chiudiporta (domain: safety)",
+);
+
+// 4. Blocco Servizi Igienici & Docce Multiple Comuni
+const ostServiziIgieniciItems = generateEnvironmentChecklistItems(ostServiziIgienici, "55.20.20");
+assert.ok(
+  ostServiziIgieniciItems.some(
+    (it) => it.id.includes("disinfezione-soffioni-doccia-legionella-dlgs-18-2023") && it.domain === "both",
+  ),
+  "Bagni comuni Ostello devono verificare disinfezione soffioni e prevenzione legionella D.Lgs. 18/2023 (domain: both)",
+);
+assert.ok(
+  ostServiziIgieniciItems.some(
+    (it) => it.id.includes("piatti-doccia-pavimento-antiscivolo-r11-canaline-sifonate") && it.domain === "safety",
+  ),
+  "Bagni comuni Ostello devono verificare pavimentazione antiscivolo R11 e canaline sifonate (domain: safety)",
+);
+assert.ok(
+  ostServiziIgieniciItems.some(
+    (it) => it.id.includes("tirante-allarme-bagno-disabili-pmr-suoneria-esterna") && it.domain === "safety",
+  ),
+  "Bagni comuni Ostello devono verificare tirante allarme bagno disabili PMR con suoneria (domain: safety)",
+);
+assert.ok(
+  ostServiziIgieniciItems.some(
+    (it) => it.id.includes("antibagno-lavamani-sapone-asciugamani-aria-carta") && it.domain === "both",
+  ),
+  "Bagni comuni Ostello devono verificare antibagno con lavamani e asciugamani igienici (domain: both)",
+);
+
+// 5. Cucina Comune Condivisa per Ospiti (Self-Catering) & Zona Pranzo
+const ostCucinaItems = generateEnvironmentChecklistItems(ostCucina, "55.20.20");
+assert.ok(
+  ostCucinaItems.some(
+    (it) => it.id.includes("cappa-aspirazione-filtri-labirinto-inox-manutenzione") && it.domain === "both",
+  ),
+  "Cucina Ostello deve verificare cappa aspirante con filtri labirinto inox (domain: both)",
+);
+assert.ok(
+  ostCucinaItems.some(
+    (it) => it.id.includes("piani-induzione-spegnimento-automatico-sicurezza") && it.domain === "safety",
+  ),
+  "Cucina Ostello deve verificare piani a induzione con autospegnimento (domain: safety)",
+);
+assert.ok(
+  ostCucinaItems.some(
+    (it) => it.id.includes("estintore-classe-f-coperta-antifiamma-immediata") && it.domain === "safety",
+  ),
+  "Cucina Ostello deve verificare estintore classe F e coperta antifiamma (domain: safety)",
+);
+assert.ok(
+  ostCucinaItems.some(
+    (it) => it.id.includes("igienizzazione-superfici-moca-reg-ce-1935-2004") && it.domain === "haccp",
+  ),
+  "Cucina Ostello deve verificare sanificazione giornaliera superfici MOCA Reg. CE 1935/2004 (domain: haccp)",
+);
+
+// 6. Dispensa Comune & Frigoriferi Condivisi per Ospiti
+const ostDispensaItems = generateEnvironmentChecklistItems(ostDispensaFrigo, "55.20.20");
+assert.ok(
+  ostDispensaItems.some(
+    (it) => it.id.includes("etichettatura-alimenti-ospiti-procedura-haccp-scaduti") && it.domain === "haccp",
+  ),
+  "Dispensa Ostello deve verificare etichettatura per nome/check-out e smaltimento settimanale (domain: haccp)",
+);
+assert.ok(
+  ostDispensaItems.some(
+    (it) => it.id.includes("teletermometri-digitali-frigoriferi-temperatura-haccp") && it.domain === "haccp",
+  ),
+  "Dispensa Ostello deve verificare teletermometri frigoriferi +2/+4°C (domain: haccp)",
+);
+
+// 7. Lavanderia Self-Service per Ospiti a Gettoni/App & Locale Stireria
+const ostLavanderiaItems = generateEnvironmentChecklistItems(ostLavanderia, "55.20.20");
+assert.ok(
+  ostLavanderiaItems.some(
+    (it) => it.id.includes("blocco-oblo-interblocco-sicurezza-uni-en-iso-10472") && it.domain === "safety",
+  ),
+  "Lavanderia Ostello deve verificare interblocco sicurezza oblò UNI EN ISO 10472 (domain: safety)",
+);
+assert.ok(
+  ostLavanderiaItems.some(
+    (it) => it.id.includes("pulizia-filtri-lanugine-asciugatrici-prevenzione-incendi") && it.domain === "safety",
+  ),
+  "Lavanderia Ostello deve verificare pulizia filtri lanugine essiccatori D.M. 02/09/2021 (domain: safety)",
+);
+
+// 8. Guardaroba Biancheria, Deposito Housekeeping & Prodotti Pulizia
+const ostHousekeepingItems = generateEnvironmentChecklistItems(ostHousekeeping, "55.20.20");
+assert.ok(
+  ostHousekeepingItems.some(
+    (it) => it.id.includes("stoccaggio-biancheria-pulita-scaffali-sollevati-15cm") && it.domain === "both",
+  ),
+  "Housekeeping Ostello deve verificare stoccaggio biancheria sollevata 15 cm da terra (domain: both)",
+);
+assert.ok(
+  ostHousekeepingItems.some(
+    (it) => it.id.includes("armadio-detergenti-concentrati-sds-clp-titolo-ix") && it.domain === "safety",
+  ),
+  "Housekeeping Ostello deve verificare armadio chiuso a chiave per detergenti con SDS Titolo IX (domain: safety)",
+);
+
+// 9. Locale Deposito Bagagli Ospiti Custodito & Lockers Elettronici
+const ostDepositoBagagliItems = generateEnvironmentChecklistItems(ostDepositoBagagli, "55.20.20");
+assert.ok(
+  ostDepositoBagagliItems.some(
+    (it) => it.id.includes("lockers-bagagli-ancoraggio-parete-bordo-anticaduta") && it.domain === "safety",
+  ),
+  "Deposito bagagli Ostello deve verificare lockers e scaffali con bordo anticaduta e ancoraggio (domain: safety)",
+);
+
+// 10. Centrale Termica / Impianto Riscaldamento & Produzione ACS Anti-Legionella
+const ostCentraleTermicaItems = generateEnvironmentChecklistItems(ostCentraleTermica, "55.20.20");
+assert.ok(
+  ostCentraleTermicaItems.some(
+    (it) => it.id.includes("shock-termico-periodico-acs-65c-ricircolo-50c") && it.domain === "both",
+  ),
+  "Centrale termica Ostello deve verificare shock termico ACS a 65°C e ricircolo a 50°C (domain: both)",
+);
+assert.ok(
+  ostCentraleTermicaItems.some(
+    (it) => it.id.includes("registro-legionella-campionamenti-semestrali-valutazione") && it.domain === "both",
+  ),
+  "Centrale termica Ostello deve verificare Registro Legionella e campionamenti semestrali (domain: both)",
+);
+assert.ok(
+  ostCentraleTermicaItems.some(
+    (it) => it.id.includes("valvole-sicurezza-inail-vasi-ped-generatore-termico") && it.domain === "safety",
+  ),
+  "Centrale termica Ostello deve verificare valvole sicurezza INAIL e vasi PED (domain: safety)",
+);
+
+// 11. Corridoi ai Piani, Vano Scale Antincendio & Uscite di Emergenza
+const ostCorridoiScaleItems = generateEnvironmentChecklistItems(ostCorridoiScale, "55.20.20");
+assert.ok(
+  ostCorridoiScaleItems.some(
+    (it) => it.id.includes("porte-tagliafuoco-ei-chiudiporta-idraulico-dm-09-04-1994") && it.domain === "safety",
+  ),
+  "Corridoi Ostello devono verificare porte tagliafuoco EI 30/60 con chiudiporta idraulico (domain: safety)",
+);
+assert.ok(
+  ostCorridoiScaleItems.some(
+    (it) => it.id.includes("maniglioni-antipanico-uni-en-1125-vie-esodo-sgombre-120cm") && it.domain === "safety",
+  ),
+  "Corridoi Ostello devono verificare maniglioni antipanico UNI EN 1125 e vie di fuga sgombre ≥ 1,20 m (domain: safety)",
+);
+assert.ok(
+  ostCorridoiScaleItems.some(
+    (it) => it.id.includes("illuminazione-emergenza-5lux-allarme-ottico-acustico") && it.domain === "safety",
+  ),
+  "Corridoi Ostello devono verificare illuminazione di emergenza ≥ 5 lux e allarme evacuazione (domain: safety)",
+);
+
+// 12. Locale / Area Esterna Differenziata & Compattatore Rifiuti
+const ostAreaRifiutiItems = generateEnvironmentChecklistItems(ostAreaRifiuti, "55.20.20");
+assert.ok(
+  ostAreaRifiutiItems.some(
+    (it) => it.id.includes("bidoni-differenziata-carrellati-tenuta-coperchio-compattatore") && it.domain === "both",
+  ),
+  "Area rifiuti Ostello deve verificare bidoni carrellati a tenuta e compattatore (domain: both)",
+);
+assert.ok(
+  ostAreaRifiutiItems.some(
+    (it) => it.id.includes("pavimento-lavabile-pendenza-griglia-sifonata-derattizzazione") && it.domain === "both",
+  ),
+  "Area rifiuti Ostello deve verificare pavimentazione lavabile con griglia sifonata e derattizzazione (domain: both)",
+);
+
+// Verifica del filtraggio checklistMode su cucina e dormitori Ostello
+const ostCucinaHaccpMode = filterEnvironmentItemsByChecklistMode(ostCucinaItems, "haccp_only");
+assert.ok(
+  ostCucinaHaccpMode.every((it) => it.domain === "haccp" || it.domain === "both"),
+  "In modalità haccp_only tutti gli item cucina Ostello devono essere haccp o both",
+);
+assert.ok(
+  !ostCucinaHaccpMode.some((it) => it.domain === "safety"),
+  "In modalità haccp_only nessun item cucina Ostello deve avere domain safety",
+);
+
+const ostCucinaSafetyMode = filterEnvironmentItemsByChecklistMode(ostCucinaItems, "safety_only");
+assert.ok(
+  ostCucinaSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item cucina Ostello devono essere safety o both",
+);
+assert.ok(
+  !ostCucinaSafetyMode.some((it) => it.domain === "haccp"),
+  "In modalità safety_only nessun item cucina Ostello deve avere domain haccp",
+);
+
+const ostDormitoriSafetyMode = filterEnvironmentItemsByChecklistMode(ostDormitoriItems, "safety_only");
+assert.ok(
+  ostDormitoriSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item dormitori Ostello devono essere safety o both",
+);
+
 console.log("=== TUTTI I TEST Step2AmbientiDiLavoro SUPERATI CON SUCCESSO! ===");
+
 

@@ -445,7 +445,179 @@ async function run() {
     `Expected at least 5 B&B-specific document requirements for inspection, found ${bnbSpecificDocs.length}`,
   );
 
-  console.log("HoReCa completeness test passed (including Hotel and B&B ATECO variants and inspection integration)");
+  // Verifica varianti ATECO e query testuali per Ostelli / Residence (55.20.20, 55.20.2, 552020, 55202, OSTELLI_RESIDENCE, OSTELLO_RESIDENCE, OSTELLI, OSTELLO, RESIDENCE)
+  const hostelVariants = [
+    "55.20.20",
+    "55.20.2",
+    "552020",
+    "55202",
+    "OSTELLI_RESIDENCE",
+    "OSTELLO_RESIDENCE",
+    "OSTELLI",
+    "OSTELLO",
+    "RESIDENCE",
+  ];
+  for (const variant of hostelVariants) {
+    const templatesRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(templatesRes.statusCode, 200, `Templates request failed for hostel variant ${variant}`);
+    const templates = templatesRes.json() as Array<{ id: string; name: string }>;
+    const specificTemplates = templates.filter(
+      (t) => t.name.includes("Ostelli") || t.name.includes("Residence") || t.name.includes("Ostello"),
+    );
+    assert.equal(
+      specificTemplates.length,
+      2,
+      `Expected 2 specific templates for hostel variant ${variant}, found ${specificTemplates.length}`,
+    );
+
+    const docsRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/document-templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(docsRes.statusCode, 200, `Document templates request failed for hostel variant ${variant}`);
+    const docs = docsRes.json() as DocumentTemplateLite[];
+    const hostelDocs = docs.filter(
+      (d) => d.macroGroup === "OSTELLI_RESIDENCE" || d.macroGroup === "OSTELLO_RESIDENCE",
+    );
+    assert.ok(
+      hostelDocs.length >= 14,
+      `Expected at least 14 hostel docs for variant ${variant}, found ${hostelDocs.length}`,
+    );
+  }
+
+  // Verifica generazione template e requisiti normativi specifici per Ostelli / Residence su 55.20.20 e dotless 552020:
+  // - Antincendio DM 09/04/1994
+  // - Sicurezza dormitori UNI EN 747
+  // - Prevenzione legionella D.Lgs. 18/2023
+  // - Accessibilità disabili PMR DPR 503/96
+  // - Cucine comuni e autocontrollo HACCP
+  const hostelCodesToVerify = ["55.20.20", "552020"];
+  for (const ateco of hostelCodesToVerify) {
+    const tRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/templates?atecoCode=${encodeURIComponent(ateco)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(tRes.statusCode, 200);
+    const tmpls = tRes.json() as Array<{ id: string; name: string }>;
+    const hostelTmpls = tmpls.filter(
+      (t) => t.name.includes("Ostelli") || t.name.includes("Residence") || t.name.includes("Ostello"),
+    );
+    assert.equal(hostelTmpls.length, 2, `Expected 2 templates for ${ateco}`);
+
+    let allItemsText = "";
+    for (const t of hostelTmpls) {
+      const itemsRes = await app.inject({
+        method: "GET",
+        url: `/api/checklists/templates/${t.id}/items?checklistMode=unified`,
+        headers,
+      });
+      assert.equal(itemsRes.statusCode, 200);
+      const items = itemsRes.json().items as Array<{
+        question: string;
+        area: string;
+        normReference?: string | null;
+        orderIndex: number;
+        defaultSeverity: number;
+      }>;
+      assert.equal(items.length, 25, `Expected 25 items for template ${t.id} under ${ateco}`);
+      for (const item of items) {
+        assert.ok(item.defaultSeverity >= 1 && item.defaultSeverity <= 4, `Invalid severity in item ${item.orderIndex}`);
+      }
+
+      const combined = items
+        .map((i) => `${i.area} ${i.question} ${i.normReference ?? ""}`.toLowerCase())
+        .join(" | ");
+      allItemsText += ` | ${combined}`;
+    }
+
+    // 1. Antincendio DM 09/04/1994
+    assert.ok(
+      allItemsText.includes("antincendio") &&
+        (allItemsText.includes("dm 09/04/1994") || allItemsText.includes("09/04/1994")),
+      `Missing norm requirement "antincendio DM 09/04/1994" for ${ateco}`,
+    );
+
+    // 2. Sicurezza dormitori UNI EN 747
+    assert.ok(
+      allItemsText.includes("dormitori") &&
+        (allItemsText.includes("uni en 747") || allItemsText.includes("747")),
+      `Missing norm requirement "sicurezza dormitori UNI EN 747" for ${ateco}`,
+    );
+
+    // 3. Prevenzione legionella D.Lgs. 18/2023
+    assert.ok(
+      allItemsText.includes("legionella") &&
+        (allItemsText.includes("18/2023") || allItemsText.includes("d.lgs. 18/2023")),
+      `Missing norm requirement "prevenzione legionella D.Lgs. 18/2023" for ${ateco}`,
+    );
+
+    // 4. Accessibilità disabili PMR DPR 503/96
+    assert.ok(
+      (allItemsText.includes("disabili") || allItemsText.includes("pmr") || allItemsText.includes("barriere")) &&
+        (allItemsText.includes("dpr 503/96") || allItemsText.includes("503/96")),
+      `Missing norm requirement "accessibilità disabili PMR DPR 503/96" for ${ateco}`,
+    );
+
+    // 5. Cucine comuni e autocontrollo HACCP
+    assert.ok(
+      allItemsText.includes("cucine comuni") &&
+        (allItemsText.includes("autocontrollo") || allItemsText.includes("haccp")),
+      `Missing norm requirement "cucine comuni e autocontrollo HACCP" for ${ateco}`,
+    );
+  }
+
+  // Verifica integrazione ispezioni per azienda Ostello / Residence con ATECO variante dotless (552020)
+  const hostelCompany = await app.prisma.company.upsert({
+    where: { id: "test-hostel-integration-company" },
+    update: { atecoCode: "552020" },
+    create: {
+      id: "test-hostel-integration-company",
+      name: "Ostello della Gioventù FedShield",
+      vatNumber: "IT99887766556",
+      atecoCode: "552020",
+      legalAddress: "Via dei Mille 1, Bologna",
+    },
+  });
+
+  const hostelInspection = await app.inject({
+    method: "POST",
+    url: "/api/inspections",
+    headers,
+    payload: {
+      companyId: hostelCompany.id,
+      title: "Ispezione Ostello Test",
+    },
+  });
+  assert.equal(hostelInspection.statusCode, 201);
+  const hostelInspectionId = hostelInspection.json().id as string;
+
+  const hostelInspectionDocsRes = await app.inject({
+    method: "GET",
+    url: `/api/inspections/${hostelInspectionId}/documents/requirements`,
+    headers,
+  });
+  assert.equal(hostelInspectionDocsRes.statusCode, 200);
+  const hostelInspectionDocs = hostelInspectionDocsRes.json() as Array<{ name: string; documentTemplateId: string }>;
+  const hostelSpecificDocs = hostelInspectionDocs.filter(
+    (d) =>
+      d.name.toLowerCase().includes("ostello") ||
+      d.name.toLowerCase().includes("residence") ||
+      d.name.toLowerCase().includes("struttura ostello/residence") ||
+      d.name.toLowerCase().includes("colazioni") ||
+      d.name.toLowerCase().includes("antincendio"),
+  );
+  assert.ok(
+    hostelSpecificDocs.length >= 5,
+    `Expected at least 5 hostel-specific document requirements for inspection, found ${hostelSpecificDocs.length}`,
+  );
+
+  console.log("HoReCa completeness test passed (including Hotel, B&B and Ostelli/Residence ATECO variants and inspection integration)");
   await app.close();
 }
 
