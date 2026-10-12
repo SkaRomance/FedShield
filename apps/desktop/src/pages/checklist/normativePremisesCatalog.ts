@@ -2778,6 +2778,261 @@ export function getStandardEnvironmentsForAteco(atecoCode?: string): WorkEnviron
     ];
   }
 
+  // 0-undecies-ter. Aree di Campeggio, Villaggi Turistici, Camping Village e Allestimenti per Camper/Caravan (55.30.00, 55.30.0, 55.30, 55.3, 553000, 55300, 5530, 553)
+  const cleanAteco = ateco.replace(/[^0-9]/g, "");
+  if (
+    cleanAteco.startsWith("553000") ||
+    cleanAteco.startsWith("55300") ||
+    cleanAteco.startsWith("5530") ||
+    cleanAteco.startsWith("553") ||
+    ateco.startsWith("55.30.00") ||
+    ateco.startsWith("55.30.0") ||
+    ateco.startsWith("55.30") ||
+    ateco.startsWith("55.3")
+  ) {
+    return [
+      {
+        id: "env-cmp-reception-direzione",
+        key: "cmp_reception_checkin_uffici_direzione",
+        name: "Reception Principale, Check-in Ospiti & Uffici Direzione",
+        icon: "🏢",
+        category: "sales_office",
+        isDefault: true,
+        surfaceSqM: 80,
+        heightM: 3.0,
+        volumeCuM: 240,
+        occupantsCount: 4,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 10.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("sales_office"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-cmp-piazzole-tende-camper",
+        key: "cmp_area_piazzole_tende_camper_viabilita",
+        name: "Area Piazzole Campeggio (Tende, Roulotte, Camper) & Viabilità Interna",
+        icon: "⛺",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 5000,
+        heightM: 3.0,
+        volumeCuM: 15000,
+        occupantsCount: 200,
+        emergencyExitsCount: 2,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-cmp-bungalow-mobilhome",
+        key: "cmp_villaggio_case_mobili_maxicaravan_bungalow",
+        name: "Villaggio Case Mobili, Maxi Caravan & Bungalow Turistici",
+        icon: "🏡",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 2000,
+        heightM: 2.5,
+        volumeCuM: 5000,
+        occupantsCount: 100,
+        emergencyExitsCount: 2,
+        windowSurfaceSqM: 200.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-cmp-blocchi-servizi-docce",
+        key: "cmp_blocchi_servizi_igienici_docce_pmr",
+        name: "Blocchi Servizi Igienici Centralizzati & Docce Calde (con Servizi Disabili PMR)",
+        icon: "🚿",
+        category: "services",
+        isDefault: true,
+        surfaceSqM: 120,
+        heightM: 2.7,
+        volumeCuM: 324,
+        occupantsCount: 10,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 12.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("services"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          forcedExhaustPresent: true,
+          forcedExhaustType: "blind_toilet_fan",
+        },
+      },
+      {
+        id: "env-cmp-camper-service-scarico",
+        key: "cmp_area_camper_service_scarico_reflui_acqua_potabile",
+        name: "Area Camper Service (Scarico Reflui Igienici & Rifornimento Acqua Potabile)",
+        icon: "🚐",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 60,
+        heightM: 3.0,
+        volumeCuM: 180,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-cmp-piscina-solarium",
+        key: "cmp_parco_piscine_vasca_bambini_solarium",
+        name: "Parco Piscine, Vasca Bambini & Area Solarium (UNI 10637)",
+        icon: "🏊",
+        category: "services",
+        isDefault: true,
+        surfaceSqM: 800,
+        heightM: 3.0,
+        volumeCuM: 2400,
+        occupantsCount: 80,
+        emergencyExitsCount: 2,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("services"),
+          flooringCondition: "compliant_anti_slip",
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-cmp-locale-tecnico-cloro",
+        key: "cmp_locale_tecnico_trattamento_acque_cloro_ph",
+        name: "Locale Tecnico Trattamento Acque Piscina & Deposito Prodotti Chimici (Cloro/pH)",
+        icon: "🧪",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 25,
+        heightM: 2.6,
+        volumeCuM: 65,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-cmp-ristorante-minimarket",
+        key: "cmp_ristorante_pizzeria_bar_minimarket",
+        name: "Ristorante, Pizzeria, Bar & Minimarket del Villaggio",
+        icon: "🍽️",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 250,
+        heightM: 3.2,
+        volumeCuM: 800,
+        occupantsCount: 8,
+        emergencyExitsCount: 2,
+        windowSurfaceSqM: 25.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          forcedExhaustType: "kitchen_hood",
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-cmp-lavanderia-self",
+        key: "cmp_lavanderia_self_service_campeggiatori_stireria",
+        name: "Locale Lavanderia Self-Service per Campeggiatori & Stireria",
+        icon: "🧺",
+        category: "services",
+        isDefault: true,
+        surfaceSqM: 30,
+        heightM: 2.6,
+        volumeCuM: 78,
+        occupantsCount: 3,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 3.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("services"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          forcedExhaustPresent: true,
+        },
+      },
+      {
+        id: "env-cmp-centrale-idrica-antincendio",
+        key: "cmp_centrale_idrica_pompaggio_antincendio_acs",
+        name: "Centrale Idrica, Gruppo di Pompaggio Antincendio & Serbatoi ACS",
+        icon: "🚰",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 35,
+        heightM: 3.0,
+        volumeCuM: 105,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-cmp-officina-manutenzione",
+        key: "cmp_officina_manutenzione_rimessaggio_mezzi_trattorini",
+        name: "Officina Manutenzione, Rimessaggio Mezzi di Servizio & Trattorini",
+        icon: "🚜",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 60,
+        heightM: 3.5,
+        volumeCuM: 210,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 6.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-cmp-isola-ecologica-rifiuti",
+        key: "cmp_isola_ecologica_centrale_compattatore_differenziata",
+        name: "Isola Ecologica Centrale Rifiuti & Compattatore Differenziata",
+        icon: "♻️",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 80,
+        heightM: 3.0,
+        volumeCuM: 240,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+    ];
+  }
+
   // 0-undecies-bis. Ostello, Residence, Case per Ferie, Alloggi per Studenti e Turisti (55.20.20, 55.20.2, 552020, 55202)
   if (
     ateco.startsWith("552020") ||
@@ -4443,6 +4698,11 @@ export function evaluateEnvironmentCompliance(
     env.key.includes("ost_deposito")
   ) {
     minHeightRequired = 2.4; // 2,40 m per dispense, depositi bagagli e guardaroba ostello (D.M. 05/07/1975)
+  } else if (
+    env.id === "env-cmp-bungalow-mobilhome" ||
+    env.key.includes("cmp_villaggio_case_mobili")
+  ) {
+    minHeightRequired = 2.5; // 2,50 m per bungalow turistici e case mobili prefabbricate (D.M. 05/07/1975 e norme regionali)
   } else if (env.category === "production" || env.category === "warehouse" || env.category === "storage") {
     minHeightRequired = 3.0; // 3,00 m per locali industriali, stoccaggio e lavorazioni
   } else if (env.category === "services" || env.category === "changing_rooms" || env.category === "technical") {
@@ -4615,6 +4875,22 @@ export function evaluateEnvironmentCompliance(
         "Struttura ricettiva alberghiera con capacità ricettiva superiore a 25 posti letto: soggetta a controllo di prevenzione incendi secondo D.M. 09/04/1994, D.M. 14/07/2015 o D.M. 09/08/2016 (RTV V.5).",
     };
     summaryBadges.push({ text: "🔥 Soggetto a CPI (Attività 66 - Albergo >25 posti letto)", status: "danger" });
+  }
+
+  // Attività 66: Campeggi, villaggi turistici e allestimenti per camper/caravan (D.M. 28/02/2014 e D.P.R. 151/2011 Attività 66)
+  if (
+    env.id === "env-cmp-piazzole-tende-camper" ||
+    env.key.includes("cmp_area_piazzole") ||
+    env.id === "env-cmp-bungalow-mobilhome" ||
+    env.key.includes("cmp_villaggio_case_mobili")
+  ) {
+    cpiActivityAlert = {
+      code: "Attività 66 (D.P.R. 151/2011)",
+      title: "Campeggio / Villaggio Turistico - Attività 66 CPI VVF (D.M. 28/02/2014)",
+      description:
+        "Campeggio e villaggio turistico all'aperto soggetto a controllo di prevenzione incendi secondo la regola tecnica D.M. 28/02/2014 e D.P.R. 151/2011 Attività 66.",
+    };
+    summaryBadges.push({ text: "🔥 Soggetto a CPI (Attività 66 - Campeggi e Villaggi Turistici D.M. 28/02/2014)", status: "danger" });
   }
 
   // Attività 74: Impianti per la produzione di calore / Centrale termica con potenza > 116 kW (D.M. 08/11/2019 e D.P.R. 151/2011)
@@ -6202,6 +6478,246 @@ export function evaluateEnvironmentCompliance(
     });
     summaryBadges.push({
       text: "🚿 Zona lavabile con pendenza verso griglia sifonata & derattizzazione perimetrale",
+      status: "info",
+    });
+  }
+
+  // ========================================================================
+  // REGOLE AD HOC CAMPEGGI, VILLAGGI TURISTICI, CAMPING VILLAGE (55.30.00 / 55.30 / 55.3)
+  // ========================================================================
+
+  // 1. Reception Principale, Check-in Ospiti & Uffici Direzione
+  const isCmpReception =
+    env.id === "env-cmp-reception-direzione" ||
+    env.key === "cmp_reception_checkin_uffici_direzione" ||
+    (env.id.includes("cmp-reception") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isCmpReception) {
+    summaryBadges.push({
+      text: "🏢 Postazione VDT ergonomica D.Lgs. 81/08 Titolo VII, quadro elettrico differenziale 30 mA & sgancio d'emergenza",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🧯 Estintore 34A 233B, planimetria generale campeggio bilingue con vie di fuga all'aperto & diffusione sonora",
+      status: "info",
+    });
+  }
+
+  // 2. Area Piazzole Campeggio (Tende, Roulotte, Camper) & Viabilità Interna
+  const isCmpPiazzole =
+    env.id === "env-cmp-piazzole-tende-camper" ||
+    env.key === "cmp_area_piazzole_tende_camper_viabilita" ||
+    (env.id.includes("cmp-piazzole") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isCmpPiazzole) {
+    summaryBadges.push({
+      text: "⛺ Viabilità carrabile mezzi soccorso VVF larghezza ≥ 3,50 m (D.M. 28/02/2014) & distanziamento piazzole ≥ 3 m",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "⚡ Colonnine elettriche CEI 64-8 sez. 708 con differenziale 30 mA individuale per presa 16A",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🚒 Rete idranti all'aperto UNI 45/70 ogni 50 m & illuminazione percorsi di emergenza",
+      status: "info",
+    });
+  }
+
+  // 3. Villaggio Case Mobili, Maxi Caravan & Bungalow Turistici
+  const isCmpBungalow =
+    env.id === "env-cmp-bungalow-mobilhome" ||
+    env.key === "cmp_villaggio_case_mobili_maxicaravan_bungalow" ||
+    (env.id.includes("cmp-bungalow") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isCmpBungalow) {
+    summaryBadges.push({
+      text: "🏡 Rilevatori ottici di fumo autonomi UNI EN 14604 & estintori a polvere distribuiti all'esterno",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🔥 Bombole GPL all'esterno aerate con riduttore e catenelle anticaduta & tubi flessibili UNI 7140 a norma",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "🚶 Percorsi pedonali illuminati ≥ 5 lux & distanziamento antincendio tra unità abitative",
+      status: "info",
+    });
+  }
+
+  // 4. Blocchi Servizi Igienici Centralizzati & Docce Calde (con Servizi Disabili PMR)
+  const isCmpBlocchiServizi =
+    env.id === "env-cmp-blocchi-servizi-docce" ||
+    env.key === "cmp_blocchi_servizi_igienici_docce_pmr" ||
+    (env.id.includes("cmp-blocchi-servizi") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isCmpBlocchiServizi) {
+    summaryBadges.push({
+      text: "🚿 Box docce con piatto antiscivolo R11, canaline sifonate & ricambio d'aria forzato",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "💧 Protocollo prevenzione Legionella D.Lgs. 18/2023 con disinfezione e decalcificazione periodica soffioni",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "♿ Servizi igienici accessibili PMR D.P.R. 503/96 con tirante soccorso & lavelli stoviglie/lavapanni separati",
+      status: "info",
+    });
+  }
+
+  // 5. Area Camper Service (Scarico Reflui Igienici & Rifornimento Acqua Potabile)
+  const isCmpCamperService =
+    env.id === "env-cmp-camper-service-scarico" ||
+    env.key === "cmp_area_camper_service_scarico_reflui_acqua_potabile" ||
+    (env.id.includes("cmp-camper-service") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isCmpCamperService) {
+    summaryBadges.push({
+      text: "🚐 Separazione netta scarico reflui igienici e rifornimento acqua potabile con disconnettore UNI EN 1717",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🚰 Colonna svuotamento wc a cassetta con acqua non potabile per risciacquo & punto acqua potabile segnalato a distanza",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "🧼 Griglia carrabile acque grigie/nere autopulente & pavimentazione lavabile antiscivolo",
+      status: "info",
+    });
+  }
+
+  // 6. Parco Piscine, Vasca Bambini & Area Solarium (UNI 10637)
+  const isCmpPiscina =
+    env.id === "env-cmp-piscina-solarium" ||
+    env.key === "cmp_parco_piscine_vasca_bambini_solarium" ||
+    (env.id.includes("cmp-piscina") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isCmpPiscina) {
+    summaryBadges.push({
+      text: "🏊 Pavimentazione solarium bagnata antiscivolo DIN 51097 classe C & vaschetta lavapiedi disinfettante",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🛟 Torretta bagnino con salvagente anulare con sagola galleggiante & defibrillatore DAE in teca riscaldata",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "📋 Cartellonistica profondità vasca, regolamento balneazione & controllo parametri cloro/pH UNI 10637",
+      status: "info",
+    });
+  }
+
+  // 7. Locale Tecnico Trattamento Acque Piscina & Deposito Prodotti Chimici (Cloro/pH)
+  const isCmpLocaleCloro =
+    env.id === "env-cmp-locale-tecnico-cloro" ||
+    env.key === "cmp_locale_tecnico_trattamento_acque_cloro_ph" ||
+    (env.id.includes("cmp-locale-tecnico-cloro") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isCmpLocaleCloro) {
+    summaryBadges.push({
+      text: "🧪 Vasche di contenimento sversamenti chimici per fusti ipoclorito di sodio/acido solforico (D.Lgs. 81/08 Titolo IX)",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "🚿 Doccia di emergenza e lavaocchi conforme UNI EN 15154 & DPI respiratori/visiere",
+      status: "danger",
+    });
+    summaryBadges.push({
+      text: "💨 Ventilazione forzata permanente antideflagrante & pompe dosatrici/filtri a sabbia a tenuta",
+      status: "info",
+    });
+  }
+
+  // 8. Ristorante, Pizzeria, Bar & Minimarket del Villaggio
+  const isCmpRistorante =
+    env.id === "env-cmp-ristorante-minimarket" ||
+    env.key === "cmp_ristorante_pizzeria_bar_minimarket" ||
+    (env.id.includes("cmp-ristorante") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isCmpRistorante) {
+    summaryBadges.push({
+      text: "🍽️ Cappa aspirazione con filtri labirinto inox & impianto automatico spegnimento Ansul R-102",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "❄️ Celle frigorifere e banchi refrigerati HACCP con monitoraggio continuo temperature & banco MOCA",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🚪 Uscite di sicurezza con maniglioni antipanico UNI EN 1125 ≥ 1,20 m & zanzariere antintrusione",
+      status: "info",
+    });
+  }
+
+  // 9. Locale Lavanderia Self-Service per Campeggiatori & Stireria
+  const isCmpLavanderia =
+    env.id === "env-cmp-lavanderia-self" ||
+    env.key === "cmp_lavanderia_self_service_campeggiatori_stireria" ||
+    (env.id.includes("cmp-lavanderia-self") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isCmpLavanderia) {
+    summaryBadges.push({
+      text: "🧺 Lavatrici/asciugatrici con blocco oblò di sicurezza UNI EN ISO 10472 & pavimento antiscivolo",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🔥 Pulizia quotidiana filtri lanugine essiccatori contro inneschi termici (D.M. 02/09/2021)",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "💨 Evacuazione forzata vapori caldi & differenziale 30 mA su prese elettriche industriali",
+      status: "info",
+    });
+  }
+
+  // 10. Centrale Idrica, Gruppo di Pompaggio Antincendio & Serbatoi ACS
+  const isCmpCentraleIdrica =
+    env.id === "env-cmp-centrale-idrica-antincendio" ||
+    env.key === "cmp_centrale_idrica_pompaggio_antincendio_acs" ||
+    (env.id.includes("cmp-centrale-idrica") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isCmpCentraleIdrica) {
+    summaryBadges.push({
+      text: "🚰 Gruppo di pompaggio antincendio UNI EN 12845 con motopompa diesel e riserva idrica dedicata",
+      status: "danger",
+    });
+    summaryBadges.push({
+      text: "💧 Caldaie/serbatoi accumulo ACS a temperatura costante ≥ 60°C per prevenzione Legionella D.Lgs. 18/2023",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "🔌 Autoclave acqua potabile con valvole di non ritorno e quadro elettrico stagno IP55",
+      status: "info",
+    });
+  }
+
+  // 11. Officina Manutenzione, Rimessaggio Mezzi di Servizio & Trattorini
+  const isCmpOfficina =
+    env.id === "env-cmp-officina-manutenzione" ||
+    env.key === "cmp_officina_manutenzione_rimessaggio_mezzi_trattorini" ||
+    (env.id.includes("cmp-officina") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isCmpOfficina) {
+    summaryBadges.push({
+      text: "🚜 Area ricarica batterie golf-cart e trattorini con ventilazione forzata antideflagrante anti-idrogeno",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "🔥 Armadio tagliafuoco certificato REI 90 / EN 14470 per stoccaggio benzine tosaerba e lubrificanti",
+      status: "danger",
+    });
+    summaryBadges.push({
+      text: "⚙️ Banco morsa con schermi protettivi, mola con carter e kit assorbente per sversamenti idrocarburi",
+      status: "info",
+    });
+  }
+
+  // 12. Isola Ecologica Centrale Rifiuti & Compattatore Differenziata
+  const isCmpIsolaEcologica =
+    env.id === "env-cmp-isola-ecologica-rifiuti" ||
+    env.key === "cmp_isola_ecologica_centrale_compattatore_differenziata" ||
+    (env.id.includes("cmp-isola-ecologica") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("55") ?? false));
+  if (isCmpIsolaEcologica) {
+    summaryBadges.push({
+      text: "♻️ Cassonetti differenziata carrellati con coperchio ermetico & derattizzazione perimetrale protetta",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "⚠️ Compattatore scarti cartone/plastica a norma UNI EN 16500 con arresto d'emergenza e recinzione",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "🛢️ Fusto a tenuta con bacino di contenimento per oli minerali esausti officina & griglia sifonata",
       status: "info",
     });
   }
@@ -11807,6 +12323,511 @@ export function generateEnvironmentChecklistItems(
       categoryTag: "pavimenti_pareti",
       suggestedNonConformity:
         "Pavimentazione dell'area ecologica fessurata con pozze di percolato maleodorante prive di drenaggio o assenza di trappole derattizzazione.",
+    });
+  }
+
+  // ========================================================================
+  // REQUISITI SPECIFICI CAMPEGGI, VILLAGGI TURISTICI, CAMPING VILLAGE (ATECO 55.30.00 / 55.30 / 55.3)
+  // ========================================================================
+
+  // a) Reception Principale, Check-in Ospiti & Uffici Direzione
+  if (env.id === "env-cmp-reception-direzione" || env.id.includes("cmp-reception-direzione")) {
+    items.push({
+      id: `${env.id}-postazione-vdt-quadro-differenziale-30ma`,
+      area: env.name,
+      title: "Postazione Reception VDT Ergonomica e Quadro Elettrico con Sgancio Generale d'Emergenza",
+      question:
+        "La postazione di reception/check-in è dotata di seduta ergonomica regolabile a norma D.Lgs. 81/08 Titolo VII, illuminazione non abbagliante e il quadro elettrico d'area è provvisto di interruttore differenziale coordinato da 30 mA e pulsante di sgancio generale d'emergenza?",
+      normReference: "D.Lgs. 81/2008 Titolo VII, D.M. 37/2008 e CEI 64-8",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "impianti",
+      suggestedNonConformity:
+        "Sedia operatore reception priva di regolazioni ergonomiche o quadro elettrico privo di differenziale provato regolarmente.",
+    });
+
+    items.push({
+      id: `${env.id}-estintore-34a-233b-planimetria-esodo-bilingue`,
+      area: env.name,
+      title: "Presidio Antincendio Estintore 34A 233B e Planimetria Generale Campeggio Bilingue con Vie di Fuga all'Aperto",
+      question:
+        "Nell'ufficio reception/check-in è installato un estintore portatile omologato di capacità almeno 34A 233B regolarmente revisionato e una planimetria generale del campeggio/villaggio esposta, bilingue, con indicazione chiara delle vie di fuga all'aperto, viali tagliafuoco e punti di raccolta?",
+      normReference: "D.M. 28/02/2014, D.M. 03/09/2021 e D.Lgs. 81/2008 art. 43",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Assenza di planimetria generale per orientamento delle vie di esodo all'aperto del camping o estintore con cartellino di revisione scaduto.",
+    });
+
+    items.push({
+      id: `${env.id}-sistema-diffusione-sonora-evacuazione`,
+      area: env.name,
+      title: "Sistema di Diffusione Sonora per Allarme ed Evacuazione Generale del Campeggio",
+      question:
+        "La direzione/reception dispone di una centrale di diffusione sonora d'emergenza (EVAC o altoparlanti a tromba perimetrali) in grado di trasmettere comunicazioni vocali e allarmi di evacuazione all'aperto udibili su tutte le piazzole e aree comuni?",
+      normReference: "D.M. 28/02/2014 Titolo II e UNI ISO 7240-19",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "impianti",
+      suggestedNonConformity:
+        "Impianto di diffusione sonora emergenza non funzionante o privo di alimentazione di riserva a batteria.",
+    });
+  }
+
+  // b) Area Piazzole Campeggio (Tende, Roulotte, Camper) & Viabilità Interna
+  if (env.id === "env-cmp-piazzole-tende-camper" || env.id.includes("cmp-piazzole-tende-camper")) {
+    items.push({
+      id: `${env.id}-colonnine-elettriche-differenziale-30ma-cei-64-8`,
+      area: env.name,
+      title: "Colonnine Elettriche a Norma CEI 64-8 Sezione 708 con Differenziale 30 mA Individuale",
+      question:
+        "Ciascuna colonnina di erogazione energia elettrica per le piazzole è conforme alla norma CEI 64-8 Sez. 708, con involucro grado di protezione almeno IP44, prese a norma CEE 16A provviste ciascuna di protezione differenziale magnetotermica individuale coordinata da 30 mA?",
+      normReference: "CEI 64-8 Sezione 708 (Impianti elettrici nei campeggi e allestimenti per caravan) e D.Lgs. 81/08 art. 80",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "impianti",
+      suggestedNonConformity:
+        "Prese elettriche di alimentazione camper/tende prive di differenziale 30 mA singolo per presa, colonnine rotte con grado IP compromesso o cavi volanti danneggiati.",
+    });
+
+    items.push({
+      id: `${env.id}-viabilita-soccorsi-vvf-larghezza-350m`,
+      area: env.name,
+      title: "Viabilità Interna Carrabile per Mezzi di Soccorso VVF con Larghezza Libera ≥ 3,50 m",
+      question:
+        "La viabilità principale del campeggio mantiene costantemente una larghezza utile di transito di almeno 3,50 m, con altezza libera da rami o cavi di almeno 4,00 m, raggio di curvatura idoneo e corsie prive di tende, rimorchi o autovetture che impediscano l'accesso e la manovra delle autobotti dei Vigili del Fuoco?",
+      normReference: "D.M. 28/02/2014 Sezione II punto 4 (Accessibilità e viabilità interna campeggi)",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Viali interni ostruiti da veicoli in sosta o tiranti di tende che riducono il passaggio utile dei mezzi dei Vigili del Fuoco a meno di 3,50 m.",
+    });
+
+    items.push({
+      id: `${env.id}-rete-idranti-uni-45-70-ogni-50m-distanziamento`,
+      area: env.name,
+      title: "Rete Idranti Antincendio UNI 45/70 Dislocati ogni 50 m e Distanziamento tra Piazzole ≥ 3 m",
+      question:
+        "Lungo l'area piazzole è dislocata una rete idrica antincendio con idranti soprasuolo o cassette UNI 45/70 posti a distanza reciproca non superiore a 50 m, regolarmente verificati, e tra le installazioni (tende, roulotte, camper) è rispettata la distanza di sicurezza minima di 3 metri per evitare propagazione d'incendio?",
+      normReference: "D.M. 28/02/2014 Sezione II e UNI 10779",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Idranti privi di manichetta o lancia, cassette rotte o piazzole con tende a contatto reciproco inferiore a 3 m.",
+    });
+  }
+
+  // c) Villaggio Case Mobili, Maxi Caravan & Bungalow Turistici
+  if (env.id === "env-cmp-bungalow-mobilhome" || env.id.includes("cmp-bungalow-mobilhome")) {
+    items.push({
+      id: `${env.id}-rilevatori-fumo-autonomi-uni-en-14604`,
+      area: env.name,
+      title: "Rilevatori Ottici di Fumo Autonomi a Norma UNI EN 14604 in Ciascun Alloggio Prefabbricato",
+      question:
+        "In ogni bungalow e casa mobile è installato almeno un dispositivo autonomo di allarme fumo certificato secondo UNI EN 14604, con test periodico semestrale di funzionalità e sostituzione tempestiva delle batterie di back-up?",
+      normReference: "UNI EN 14604, D.M. 28/02/2014 e D.Lgs. 81/2008 art. 64",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Dispositivi di rilevazione fumo assenti, disattivati dagli ospiti o con batteria scarica privi del registro di controllo periodico.",
+    });
+
+    items.push({
+      id: `${env.id}-bombole-gpl-catenelle-flessibili-uni-7140`,
+      area: env.name,
+      title: "Alloggiamento Bombole GPL Esterne Protette con Catenelle Anticaduta e Tubi Flessibili UNI 7140 a Norma",
+      question:
+        "Le bombole GPL a servizio delle unità abitative sono collocate esclusivamente all'esterno in vano aerato protetto dall'insolazione diretta, ancorate con catenella metallica anticaduta, provviste di regolatore di pressione e collegate mediante tubo flessibile per gas conforme a UNI 7140 entro la data di scadenza stampigliata?",
+      normReference: "UNI 7131, UNI 7140, D.M. 28/02/2014 e D.Lgs. 81/2008 Titolo II",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "impianti",
+      suggestedNonConformity:
+        "Bombole GPL stoccate all'interno del bungalow, prive di catenella di ancoraggio o collegate con tubi gas screpolati o con data di validità scaduta.",
+    });
+
+    items.push({
+      id: `${env.id}-estintori-polvere-distribuiti-percorsi-illuminati`,
+      area: env.name,
+      title: "Estintori a Polvere Distribuiti nel Comparto Villaggio e Percorsi Pedonali Illuminati ≥ 5 Lux",
+      question:
+        "L'area del villaggio case mobili dispone di estintori a polvere polivalenti protetti in apposite teche esterne a distanza non superiore a 30 metri da ciascuna unità e i percorsi pedonali sono dotati di illuminazione notturna e di sicurezza pari ad almeno 5 lux?",
+      normReference: "D.M. 28/02/2014 Sezione II e UNI EN 1838",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "antincendio",
+      suggestedNonConformity:
+        "Mancanza di estintori nel raggio di 30 m dai manufatti turistici prefabbricati o viali pedonali privi di illuminazione minima nelle ore notturne.",
+    });
+  }
+
+  // d) Blocchi Servizi Igienici Centralizzati & Docce Calde (con Servizi Disabili PMR)
+  if (env.id === "env-cmp-blocchi-servizi-docce" || env.id.includes("cmp-blocchi-servizi-docce")) {
+    items.push({
+      id: `${env.id}-protocollo-legionella-soffioni-docce-dlgs-18-2023`,
+      area: env.name,
+      title: "Protocollo di Prevenzione Legionella D.Lgs. 18/2023 con Disinfezione e Decalcificazione Periodica dei Soffioni",
+      question:
+        "È attuato un registro documentato di valutazione del rischio Legionellosi ai sensi del D.Lgs. 18/2023 e Linee Guida Nazionali 2015, comprendente flussaggio settimanale delle docce inusitate, shock termico o chimico periodico, smontaggio, pulizia e decalcificazione trimestrale dei soffioni doccia con disinfettante cloro-attivo?",
+      normReference: "D.Lgs. 18/2023 (Acque destinate al consumo umano) e Linee Guida Nazionali per la prevenzione e il controllo della Legionellosi 07/05/2015",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Assenza del piano di campionamento e autocontrollo Legionella, o soffioni doccia intasati da calcare e biofilm privi di sanificazione periodica registrata.",
+    });
+
+    items.push({
+      id: `${env.id}-box-docce-antiscivolo-r11-canaline-sifonate`,
+      area: env.name,
+      title: "Box Docce con Piatto Antiscivolo R11, Canaline Sifonate e Antibagno con Carta a Perdere",
+      question:
+        "I vani doccia presentano pavimentazione a superficie antisdrucciolo con coefficiente R11 / DIN 51097 Classe B o superiore, canaline grigliate sifonate a pavimento per evitare ristagni d'acqua saponata e i servizi igienici dispongono di antibagno con dispenser di sapone liquido e asciugamani a perdere?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punti 1.3 e 1.13, Reg. CE 852/2004 Allegato II",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "pavimenti_pareti",
+      suggestedNonConformity:
+        "Piatti doccia scivolosi con ristagno persistente di acqua saponata privi di pendenza, o lavamani del blocco privi di asciugamani monouso e sapone.",
+    });
+
+    items.push({
+      id: `${env.id}-bagno-disabili-pmr-tirante-soccorso-dlgs-503-96`,
+      area: env.name,
+      title: "Servizi Igienici e Docce Accessibili PMR con Tirante di Allarme a Norma D.P.R. 503/96 e D.M. 236/89",
+      question:
+        "Il blocco servizi igienici comprende almeno una cabina wc e doccia fruibile da persone a ridotta mobilità (PMR), dotata di porta scorrevole o apribile verso l'esterno, maniglioni di sostegno orizzontali e verticali a norma, piatto doccia a filo pavimento privo di dislivelli e tirante di chiamata di soccorso collegato a segnalatore ottico-acustico esterno?",
+      normReference: "D.P.R. 503/1996 art. 7, D.M. 236/1989 art. 8.1.6 e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Mancanza del tirante di soccorso nel bagno disabili o tirante arrotolato in alto non raggiungibile da una persona caduta al suolo.",
+    });
+  }
+
+  // e) Area Camper Service (Scarico Reflui Igienici & Rifornimento Acqua Potabile)
+  if (env.id === "env-cmp-camper-service-scarico" || env.id.includes("cmp-camper-service-scarico")) {
+    items.push({
+      id: `${env.id}-separazione-reflui-acqua-potabile-disconnettore-uni-en-1717`,
+      area: env.name,
+      title: "Separazione Netta Scarico Reflui Igienici e Rifornimento Acqua Potabile con Disconnettore UNI EN 1717",
+      question:
+        "È garantita una distanza di sicurezza e separazione fisica tra la colonna di scarico e risciacquo dei wc a cassetta e il rubinetto di rifornimento acqua potabile per i serbatoi dei camper, con divieto assoluto di promiscuità e presenza di valvola antiriflusso/disconnettore a norma UNI EN 1717 sull'erogazione potabile?",
+      normReference: "UNI EN 1717 (Protezione dall'inquinamento dell'acqua potabile), D.Lgs. 18/2023 e Regolamento Regionale Campeggi",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Punto di rifornimento acqua potabile contiguo al punto scarico liquami senza cartellonistica differenziata o privo di valvola antiriflusso contro contaminazioni crociate.",
+    });
+
+    items.push({
+      id: `${env.id}-griglia-carrabile-autopulente-scarico-acque-grigie`,
+      area: env.name,
+      title: "Griglia Carrabile di Scarico Acque Grigie/Nere con Pendenza, Sifone e Igiene della Piazzola",
+      question:
+        "La piattaforma carrabile di scarico per autocaravan presenta pendenza confluente verso caditoia grigliata carrabile autopulente e sifonata, con superficie in calcestruzzo/piastrelle lavabile mediante idrante di risciacquo e priva di ristagni di reflui o esalazioni maleodoranti?",
+      normReference: "D.Lgs. 152/2006 art. 101 e D.Lgs. 81/2008 Allegato IV punto 1.3",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "pavimenti_pareti",
+      suggestedNonConformity:
+        "Caditoia carrabile di scarico ostruita con ristagno a vista di liquami o assenza di punto idrico dedicato al lavaggio della pedana dopo lo scarico.",
+    });
+  }
+
+  // f) Parco Piscine, Vasca Bambini & Area Solarium (UNI 10637)
+  if (env.id === "env-cmp-piscina-solarium" || env.id.includes("cmp-piscina-solarium")) {
+    items.push({
+      id: `${env.id}-controllo-giornaliero-cloro-ph-uni-10637`,
+      area: env.name,
+      title: "Controllo Giornaliero Parametri Acqua Vasca (Cloro Libero 0,7-1,5 ppm e pH 6,5-7,5) a Norma UNI 10637",
+      question:
+        "I parametri chimico-fisici dell'acqua delle vasche (cloro libero attivo compreso tra 0,7 e 1,5 mg/l, pH tra 6,5 e 7,5, torbidità e temperatura) sono verificati e annotati sul registro di vasca almeno 3 volte al giorno dal responsabile dell'impianto a norma UNI 10637 e Accordo Stato-Regioni 16/01/2003?",
+      normReference: "Accordo Stato-Regioni 16/01/2003 (Disciplina delle piscine), UNI 10637:2016 e D.Lgs. 81/2008",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Mancanza delle registrazioni analitiche quotidiane di cloro e pH sul registro di autocontrollo piscina o valori di cloro fuori dai limiti di sicurezza balneare.",
+    });
+
+    items.push({
+      id: `${env.id}-torretta-bagnino-salvagente-anulare-sagola`,
+      area: env.name,
+      title: "Presenza Assistente Bagnanti con Postazione Sopraelevata e Salvagente Anulare con Sagola Galleggiante",
+      question:
+        "Negli orari di apertura della piscina è garantito il servizio di salvamento con bagnino provvisto di regolare brevetto, torretta di avvistamento sopraelevata, salvagente anulare omologato munito di sagola galleggiante di almeno 25 m e asta periscopica da soccorso?",
+      normReference: "Accordo Stato-Regioni 16/01/2003, Ordinanza Balneare Regionale e D.Lgs. 81/2008 art. 43",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "antincendio",
+      suggestedNonConformity:
+        "Vasca in esercizio senza assistente bagnanti presente o salvagente privo di sagola di lancio conforme.",
+    });
+
+    items.push({
+      id: `${env.id}-dae-defibrillatore-teca-riscaldata-pavimento-classe-c`,
+      area: env.name,
+      title: "Defibrillatore DAE Operativo in Teca Riscaldata e Pavimentazione Bordo Vasca Antiscivolo Classe C",
+      question:
+        "Nell'area piscina è presente un defibrillatore semiautomatico (DAE) operativo in teca segnalata con cartellino di controllo carica/elettrodi, e la pavimentazione del piano vasca e solarium è certificata antisdrucciolo a piedi nudi bagnati secondo DIN 51097 classe C / UNI EN 13451?",
+      normReference: "Legge 116/2021 (Disposizioni su DAE), DIN 51097 Classe C e UNI EN 13451",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "pavimenti_pareti",
+      suggestedNonConformity:
+        "Defibrillatore con piastre scadute o batteria scarica, oppure bordo vasca scivoloso con piastrelle lisce causa di cadute a terra.",
+    });
+  }
+
+  // g) Locale Tecnico Trattamento Acque Piscina & Deposito Prodotti Chimici (Cloro/pH)
+  if (env.id === "env-cmp-locale-tecnico-cloro" || env.id.includes("cmp-locale-tecnico-cloro")) {
+    items.push({
+      id: `${env.id}-vasche-contenimento-fusti-cloro-acido`,
+      area: env.name,
+      title: "Bacini di Contenimento Stagni per Fusti di Cloro e Acido e Segregazione Chimica Incompatibili",
+      question:
+        "I contenitori di ipoclorito di sodio e acido solforico/cloridrico per la regolazione del pH sono alloggiati su distinti bacini di contenimento stagni anticorrosione (capacità pari al 100% del fusto o 33% del totale stoccato) rigorosamente separati per evitare qualsiasi reazione esotermica e sviluppo di gas cloro tossico?",
+      normReference: "D.Lgs. 81/2008 Titolo IX (Sostanze pericolose), D.Lgs. 152/2006 art. 239 e UNI 10637",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "impianti",
+      suggestedNonConformity:
+        "Fusti di acido e cloro stoccati a contatto senza bacino di contenimento con rischio immediato di reazione chimica letale per sviluppo di gas cloro.",
+    });
+
+    items.push({
+      id: `${env.id}-doccia-emergenza-lavaocchi-uni-en-15154`,
+      area: env.name,
+      title: "Doccia di Emergenza e Lavaocchi Funzionante Conforme a UNI EN 15154",
+      question:
+        "All'ingresso del locale tecnico o nelle immediate vicinanze del punto di dosaggio chimico è installata una doccia di decontaminazione d'emergenza con lavaocchi a comando a pedale/leva rapida conforme a UNI EN 15154, collegata alla rete idrica e collaudata mensilmente?",
+      normReference: "UNI EN 15154-1/2 (Docce di sicurezza e lavaocchi) e D.Lgs. 81/2008 art. 225",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "impianti",
+      suggestedNonConformity:
+        "Doccia d'emergenza o lavaocchi non funzionanti, privi di alimentazione idrica o ostruiti da bancali di sale e taniche.",
+    });
+
+    items.push({
+      id: `${env.id}-ventilazione-forzata-dpi-respiratori-visiere`,
+      area: env.name,
+      title: "Ventilazione Forzata Antideflagrante e DPI per Rischio Chimico (Maschere con Filtro B, Visiere e Guanti)",
+      question:
+        "Il locale presenta ventilazione forzata con ripresa in basso per gas pesanti, e all'esterno del locale in armadio dedicato sono disponibili DPI idonei per gli addetti (maschera facciale con filtro per gas acidi/cloro tipo B, guanti in nitrile/neoprene a manichetta lunga, grembiule e visiera protettiva conforme a EN 166)?",
+      normReference: "D.Lgs. 81/2008 Titolo IX art. 226 e Allegato VIII, Reg. UE 2016/425",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "microclima",
+      suggestedNonConformity:
+        "Locale chimico cieco privo di aspirazione forzata o addetti che manipolano prodotti chimici per piscina senza maschera con filtro specifico e visiera.",
+    });
+  }
+
+  // h) Ristorante, Pizzeria, Bar & Minimarket del Villaggio
+  if (env.id === "env-cmp-ristorante-minimarket" || env.id.includes("cmp-ristorante-minimarket")) {
+    items.push({
+      id: `${env.id}-cappa-filtri-labirinto-spegnimento-ansul`,
+      area: env.name,
+      title: "Cappa di Aspirazione Cucina con Filtri a Labirinto Inox e Impianto Automatico di Spegnimento Ansul",
+      question:
+        "Il blocco cottura della cucina del ristorante/minimarket è sovrastato da cappa aspirante dotata di filtri antigrasso a labirinto in acciaio inox regolarmente sgrassati e impianto fisso di estinzione automatica ad umido tipo Ansul R-102 a protezione di fuochi e friggitrici?",
+      normReference: "D.M. 03/09/2021, UNI EN 16282 e D.Lgs. 81/2008 Allegato IV punto 1.9",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Filtri della cappa intrisi di grasso infiammabile o impianto di spegnimento a polvere/chimico umido privo di manutenzione semestrale.",
+    });
+
+    items.push({
+      id: `${env.id}-celle-frigo-haccp-temperature-moca`,
+      area: env.name,
+      title: "Celle Frigorifere HACCP con Registrazione Temperature e Banchi Alimenti Conformi MOCA",
+      question:
+        "Le celle frigorifere, i banchi frigo e gli espositori del market e della ristorazione mantengono le temperature previste da scheda tecnica (+0/+4°C carni e latticini, -18°C surgelati) con monitoraggio quotidiano registrato su schede HACCP, e le superfici a contatto con gli alimenti sono certificate MOCA?",
+      normReference: "Reg. CE 852/2004, Reg. CE 1935/2004 (MOCA) e D.Lgs. 193/2007",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Termometro cella frigorifera guasto o assenza di registrazione delle temperature degli alimenti deperibili sul piano HACCP.",
+    });
+
+    items.push({
+      id: `${env.id}-vie-fuga-antipanico-zanzariere`,
+      area: env.name,
+      title: "Uscite di Sicurezza con Maniglioni Antipanico UNI EN 1125 e Zanzariere a Maglia Fine Apribili per la Pulizia",
+      question:
+        "Le vie di fuga e le uscite verso l'esterno della sala e dei locali di vendita hanno larghezza utile ≥ 1,20 m con maniglioni antipanico certificati UNI EN 1125 mantenuti costantemente sgombri, e tutte le finestre dei laboratori alimentari sono dotate di zanzariere antintrusione integre e lavabili?",
+      normReference: "UNI EN 1125, D.M. 03/09/2021, Reg. CE 852/2004 e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Porte di sicurezza bloccate da tavoli o casse d'acqua, o zanzariere della cucina lacerate che consentono l'accesso a mosche e insetti.",
+    });
+  }
+
+  // i) Locale Lavanderia Self-Service per Campeggiatori & Stireria
+  if (env.id === "env-cmp-lavanderia-self" || env.id.includes("cmp-lavanderia-self")) {
+    items.push({
+      id: `${env.id}-blocco-oblo-uni-en-iso-10472-pavimento-antiscivolo`,
+      area: env.name,
+      title: "Lavatrici e Asciugatrici a Gettoni con Blocco di Sicurezza Oblò UNI EN ISO 10472 e Pavimento Antiscivolo",
+      question:
+        "Le lavatrici e asciugatrici ad uso dei campeggiatori sono conformi alla norma UNI EN ISO 10472, con dispositivo elettromeccanico di blocco porta/oblò durante la rotazione del cesto, pulsante di arresto d'emergenza generale d'area e pavimentazione asciutta con canaletta di scolo a prova di scivolamento?",
+      normReference: "UNI EN ISO 10472 (Requisiti di sicurezza per macchine lavanderia industriale) e D.Lgs. 81/2008 art. 70",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "impianti",
+      suggestedNonConformity:
+        "Asciugatrice con apertura porta possibile con cesto ad alta velocità in rotazione o perdite di acqua a pavimento non canalizzate.",
+    });
+
+    items.push({
+      id: `${env.id}-pulizia-giornaliera-filtri-lanugine-antincendio`,
+      area: env.name,
+      title: "Pulizia Giornaliera Filtri Lanugine degli Essiccatori contro il Rischio di Innesco Termico",
+      question:
+        "I filtri per la raccolta della lanugine e cascami tessili di tutte le asciugatrici a tamburo rotante sono ispezionati e puliti quotidianamente per evitare surriscaldamenti anomali delle resistenze e pericolo d'incendio da accumulo di materiale combustibile?",
+      normReference: "D.M. 02/09/2021 (Gestione sicurezza antincendio), D.M. 03/09/2021 e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Filtri lanugine delle asciugatrici intasati da strati spessi di peluria tessile con pericolo evidente di autocombustione termica.",
+    });
+  }
+
+  // j) Centrale Idrica, Gruppo di Pompaggio Antincendio & Serbatoi ACS
+  if (env.id === "env-cmp-centrale-idrica-antincendio" || env.id.includes("cmp-centrale-idrica-antincendio")) {
+    items.push({
+      id: `${env.id}-prova-settimanale-motopompa-diesel-uni-en-12845`,
+      area: env.name,
+      title: "Prova Periodica di Avviamento Automatico Motopompa Diesel Antincendio UNI EN 12845 e Riserva Gasolio",
+      question:
+        "Il gruppo di pompaggio antincendio UNI EN 12845 con motopompa diesel e pompa elettrica pilota è provvisto di serbatoio gasolio con autonomia certificata, viene sottoposto a prova settimanale di avviamento automatico con registrazione su apposito registro e la riserva idrica è a livello costante?",
+      normReference: "UNI EN 12845:2020 (Sistemi fissi antincendio - Pompe) e D.M. 28/02/2014 Titolo II punto 6",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Gruppo motopompa antincendio con batteria di avviamento scarica, serbatoio gasolio vuoto o assenza delle prove settimanali registrate.",
+    });
+
+    items.push({
+      id: `${env.id}-temperatura-accumulo-acs-60-gradi-anti-legionella`,
+      area: env.name,
+      title: "Mantenimento Temperatura Serbatoi Accumulo ACS a ≥ 60°C per Bonifica Termica Anti-Legionella",
+      question:
+        "I bollitori e serbatoi di accumulo dell'acqua calda sanitaria (ACS) destinata ai blocchi docce e servizi mantengono una temperatura interna non inferiore a 60°C con ricircolo costante a non meno di 50°C per prevenire la proliferazione batterica da Legionella pneumophila a norma D.Lgs. 18/2023?",
+      normReference: "D.Lgs. 18/2023 e Linee Guida Nazionali per la prevenzione e il controllo della Legionellosi 07/05/2015",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Temperatura di accumulo ACS impostata al di sotto dei 50°C nei bollitori centralizzati con grave rischio di proliferazione del batterio della Legionella.",
+    });
+  }
+
+  // k) Officina Manutenzione, Rimessaggio Mezzi di Servizio & Trattorini
+  if (env.id === "env-cmp-officina-manutenzione" || env.id.includes("cmp-officina-manutenzione")) {
+    items.push({
+      id: `${env.id}-areazione-ricarica-batterie-golf-cart-anti-idrogeno`,
+      area: env.name,
+      title: "Ventilazione Permanente Area Ricarica Batterie Golf-Cart e Trattorini contro Esplosione da Idrogeno",
+      question:
+        "La zona dedicata alla ricarica degli accumulatori al piombo di golf-cart, navette e trattorini del villaggio è provvista di idonea ventilazione naturale o forzata antideflagrante a norma CEI EN 62485-3 per prevenire la formazione di atmosfere esplosive dovute allo sviluppo di idrogeno (ATEX)?",
+      normReference: "CEI EN 62485-3 (Requisiti di sicurezza per batterie secondarie), D.Lgs. 81/2008 Titolo XI (Atmosfere esplosive)",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "impianti",
+      suggestedNonConformity:
+        "Locale chiuso e non ventilato con golf-cart in carica sotto tensione con odore acre di acido e rischio innesco/esplosione da idrogeno.",
+    });
+
+    items.push({
+      id: `${env.id}-armadio-tagliafuoco-carburanti-decespugliatori`,
+      area: env.name,
+      title: "Armadio di Sicurezza Tagliafuoco Certificato REI 90 / EN 14470 per Deposito Benzina e Miscele",
+      question:
+        "I carburanti infiammabili (benzina, miscela a due tempi, lubrificanti per tosaerba e motoseghe) sono stoccati in un armadio di sicurezza tagliafuoco conforme a UNI EN 14470-1 (resistenza al fuoco minima 90 minuti), dotato di bacino di contenimento interno a tenuta e condotto di sfiato verso l'esterno?",
+      normReference: "UNI EN 14470-1, D.M. 03/09/2021 e D.Lgs. 81/2008 Titolo IX",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Taniche di benzina e miscela per il verde lasciate a terra in taniche di plastica non omologate aperte a contatto con attrezzi elettrici.",
+    });
+  }
+
+  // l) Isola Ecologica Centrale Rifiuti & Compattatore Differenziata
+  if (env.id === "env-cmp-isola-ecologica-rifiuti" || env.id.includes("cmp-isola-ecologica-rifiuti")) {
+    items.push({
+      id: `${env.id}-compattatore-cartoni-arresto-emergenza-uni-en-16500`,
+      area: env.name,
+      title: "Compattatore Rifiuti con Marcatura CE, Recinzione di Sicurezza e Arresto d'Emergenza UNI EN 16500",
+      question:
+        "Il compattatore o pressa per cartone e imballaggi plastici è marcato CE conforme a UNI EN 16500, dotato di pulsante a fungo di arresto d'emergenza funzionante, dispositivo di interblocco che arresta il piatto di compressione all'apertura dello sportello e area perimetrale delimitata contro l'accesso di persone non addette?",
+      normReference: "Direttiva Macchine 2006/42/CE, UNI EN 16500 e D.Lgs. 81/2008 Titolo III",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Compattatore con microinterruttore di sicurezza manomesso o privo di fungo di emergenza accessibile per l'operatore.",
+    });
+
+    items.push({
+      id: `${env.id}-cassonetti-coperchio-chiuso-derattizzazione-oli-esausti`,
+      area: env.name,
+      title: "Cassonetti con Coperchio a Tenuta, Stoccaggio Oli Minerali Esausti e Piano Derattizzazione",
+      question:
+        "Tutti i cassonetti della raccolta differenziata sono mantenuti chiusi e provvisti di coperchio a tenuta, l'eventuale fusto per oli minerali esausti dell'officina è posizionato su idoneo bacino di contenimento e la piazzola ecologica è dotata di erogatori sigillati di esca rodenticida numerati per la derattizzazione continua?",
+      normReference: "Reg. CE 852/2004, D.Lgs. 152/2006 (Codice Ambientale) e D.Lgs. 81/2008",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Cassonetti con coperchi rotti con fuoriuscita di percolato e attrattiva per gabbiani e ratti, o fusti olio motore sversati sul terreno privi di bacino.",
     });
   }
 

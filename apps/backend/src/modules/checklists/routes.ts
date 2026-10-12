@@ -158,16 +158,43 @@ function buildAtecoVariants(atecoCode?: string | null) {
     variants.add("ALLOGGIO");
   }
 
-  // Campeggi e Villaggi turistici (55.30.00, 55.30, 55.3, 553000)
-  if (normalized.startsWith("55.3") || digits.startsWith("553")) {
+  // Campeggi e Villaggi turistici (55.30.00, 55.30.0, 55.30, 55.3, 553000, 55300, 5530, 553)
+  const isCampingText =
+    upper === "CAMPEGGIO_VILLAGGIO" ||
+    upper === "CAMPEGGI_VILLAGGI" ||
+    upper === "CAMPEGGIO" ||
+    upper === "CAMPEGGI" ||
+    upper === "CAMPING" ||
+    upper === "CAMPING_VILLAGE" ||
+    upper === "CAMPING VILLAGE" ||
+    upper === "VILLAGGIO_TURISTICO" ||
+    upper === "VILLAGGI_TURISTICI" ||
+    upper === "VILLAGGIO TURISTICO" ||
+    upper === "VILLAGGI TURISTICI";
+
+  if (normalized.startsWith("55.3") || digits.startsWith("553") || isCampingText) {
     variants.add("55.30.00");
+    variants.add("55.30.0");
     variants.add("55.30");
     variants.add("55.3");
     variants.add("553000");
+    variants.add("55300");
     variants.add("5530");
+    variants.add("553");
+    variants.add("CAMPEGGIO_VILLAGGIO");
     variants.add("CAMPEGGI_VILLAGGI");
+    variants.add("CAMPEGGIO");
     variants.add("CAMPEGGI");
+    variants.add("CAMPING");
+    variants.add("CAMPING_VILLAGE");
+    variants.add("VILLAGGIO_TURISTICO");
     variants.add("VILLAGGI_TURISTICI");
+    variants.add("STRUTTURE_RICETTIVE");
+    variants.add("HORECA");
+    variants.add("HO.RE.CA");
+    variants.add("RICETTIVITA");
+    variants.add("RICETTIVITÀ");
+    variants.add("ALLOGGIO");
   }
 
   // Divisione ATECO 56 (Ristorazione e somministrazione alimenti / HoReCa)
@@ -260,6 +287,15 @@ function buildAtecoVariants(atecoCode?: string | null) {
     variants.add("55.20.2");
     variants.add("552020");
     variants.add("55202");
+    variants.add("55.30.00");
+    variants.add("55.30");
+    variants.add("553000");
+    variants.add("CAMPEGGIO_VILLAGGIO");
+    variants.add("CAMPEGGI_VILLAGGI");
+    variants.add("CAMPEGGIO");
+    variants.add("CAMPING");
+    variants.add("VILLAGGIO_TURISTICO");
+    variants.add("VILLAGGI_TURISTICI");
   }
 
   if (parts[0] === "47" && !normalized.startsWith("47.11")) {

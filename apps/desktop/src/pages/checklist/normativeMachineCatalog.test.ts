@@ -2179,16 +2179,19 @@ const barIdxHotel = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "
 const hotelIdx = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "hotel_strutture_ricettive");
 const ostelloIdxHotel = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ostello_residence");
 const bnbIdxHotel = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "bnb_affittacamere");
+const campingIdxHotel = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "campeggio_villaggio");
 const ristGenIdxHotel = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ristorazione_alimentare");
 assert.ok(barIdxHotel !== -1, "Settore bar_caffetteria deve esistere");
 assert.ok(hotelIdx !== -1, "Settore hotel_strutture_ricettive deve esistere");
 assert.ok(ostelloIdxHotel !== -1, "Settore ostello_residence deve esistere");
 assert.ok(bnbIdxHotel !== -1, "Settore bnb_affittacamere deve esistere");
+assert.ok(campingIdxHotel !== -1, "Settore campeggio_villaggio deve esistere");
 assert.ok(ristGenIdxHotel !== -1, "Settore generic ristorazione_alimentare deve esistere");
 assert.equal(hotelIdx, barIdxHotel + 1, "hotel_strutture_ricettive deve seguire immediatamente bar_caffetteria");
 assert.equal(hotelIdx + 1, ostelloIdxHotel, "hotel_strutture_ricettive deve precedere immediatamente ostello_residence nel catalogo");
 assert.equal(ostelloIdxHotel + 1, bnbIdxHotel, "ostello_residence deve precedere immediatamente bnb_affittacamere nel catalogo");
-assert.equal(bnbIdxHotel + 1, ristGenIdxHotel, "bnb_affittacamere deve precedere immediatamente ristorazione_alimentare nel catalogo");
+assert.equal(bnbIdxHotel + 1, campingIdxHotel, "bnb_affittacamere deve precedere immediatamente campeggio_villaggio nel catalogo");
+assert.equal(campingIdxHotel + 1, ristGenIdxHotel, "campeggio_villaggio deve precedere immediatamente ristorazione_alimentare nel catalogo");
 
 // -------------------------------------------------------------
 // Test 40: Verifica completezza delle 16 macchine professionali per Hotel con modelli reali, corsi e controlli tecnici
@@ -2446,18 +2449,21 @@ for (const variant of ["55.20.51", "55.20.5", "55.20", "55.2", "552051", "55205"
   assert.equal(bnbVar.sectorKey, "bnb_affittacamere", `Variante '${variant}' deve restituire bnb_affittacamere`);
 }
 
-// Posizionamento: subito dopo ostello_residence e prima di ristorazione_alimentare
+// Posizionamento: subito dopo ostello_residence e prima di campeggio_villaggio / ristorazione_alimentare
 const hotelIdxBnb = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "hotel_strutture_ricettive");
 const ostelloIdxBnb = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ostello_residence");
 const bnbIdxCheck = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "bnb_affittacamere");
+const campingIdxBnb = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "campeggio_villaggio");
 const ristGenIdxBnb = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ristorazione_alimentare");
 assert.ok(hotelIdxBnb !== -1, "Settore hotel_strutture_ricettive deve esistere");
 assert.ok(ostelloIdxBnb !== -1, "Settore ostello_residence deve esistere");
 assert.ok(bnbIdxCheck !== -1, "Settore bnb_affittacamere deve esistere");
+assert.ok(campingIdxBnb !== -1, "Settore campeggio_villaggio deve esistere");
 assert.ok(ristGenIdxBnb !== -1, "Settore generic ristorazione_alimentare deve esistere");
 assert.equal(ostelloIdxBnb, hotelIdxBnb + 1, "ostello_residence deve seguire immediatamente hotel_strutture_ricettive");
 assert.equal(bnbIdxCheck, ostelloIdxBnb + 1, "bnb_affittacamere deve seguire immediatamente ostello_residence");
-assert.equal(bnbIdxCheck + 1, ristGenIdxBnb, "bnb_affittacamere deve precedere immediatamente ristorazione_alimentare");
+assert.equal(bnbIdxCheck + 1, campingIdxBnb, "bnb_affittacamere deve precedere immediatamente campeggio_villaggio");
+assert.equal(campingIdxBnb + 1, ristGenIdxBnb, "campeggio_villaggio deve precedere immediatamente ristorazione_alimentare");
 
 // -------------------------------------------------------------
 // Test 44: Verifica completezza delle 16 macchine professionali per B&B con modelli reali, verifiche e corsi
@@ -2885,7 +2891,230 @@ for (const code of ["55.20.20", "55.20.2", "552020", "55202"]) {
   assert.ok(fallbackHostelRes.every((m) => m.sourceReason === "ateco"), `Tutte le macchine con ATECO variant '${code}' devono avere sourceReason === 'ateco'`);
 }
 
+console.log("\n=== INIZIO TEST normativeMachineCatalog (ATECO 55.30.00 Campeggi, Villaggi Turistici e Camping Village) ===");
+
+// -------------------------------------------------------------
+// Test 51: Verifica priorità catalogo ATECO per Campeggi e Villaggi Turistici (55.30.00 / 55.30.0 / 55.30 / 55.3)
+// -------------------------------------------------------------
+console.log("Test 51: Verifica priorità catalogo ATECO per Campeggi e Villaggi Turistici (55.30.00 / 55.30.0 / 55.30 / 55.3)");
+const catalogCampingExact = getSectorMachineCatalogForAteco("55.30.00");
+assert.equal(catalogCampingExact.sectorKey, "campeggio_villaggio", "ATECO 55.30.00 deve restituire campeggio_villaggio");
+assert.ok(catalogCampingExact.sectorLabel.includes("Campeggi"), "L'etichetta del catalogo deve includere 'Campeggi'");
+
+const catalogCampingPrefix4 = getSectorMachineCatalogForAteco("55.30.0");
+assert.equal(catalogCampingPrefix4.sectorKey, "campeggio_villaggio", "ATECO 55.30.0 deve restituire campeggio_villaggio");
+
+const catalogCampingPrefix = getSectorMachineCatalogForAteco("55.30");
+assert.equal(catalogCampingPrefix.sectorKey, "campeggio_villaggio", "ATECO 55.30 deve restituire campeggio_villaggio");
+
+const catalogCampingShort = getSectorMachineCatalogForAteco("55.3");
+assert.equal(catalogCampingShort.sectorKey, "campeggio_villaggio", "ATECO 55.3 deve restituire campeggio_villaggio");
+
+const catalogCampingDigits6 = getSectorMachineCatalogForAteco("553000");
+assert.equal(catalogCampingDigits6.sectorKey, "campeggio_villaggio", "ATECO 553000 senza punti deve restituire campeggio_villaggio");
+
+const catalogCampingDigits5 = getSectorMachineCatalogForAteco("55300");
+assert.equal(catalogCampingDigits5.sectorKey, "campeggio_villaggio", "ATECO 55300 senza punti deve restituire campeggio_villaggio");
+
+const catalogCampingDigits4 = getSectorMachineCatalogForAteco("5530");
+assert.equal(catalogCampingDigits4.sectorKey, "campeggio_villaggio", "ATECO 5530 senza punti deve restituire campeggio_villaggio");
+
+const catalogCampingDigits3 = getSectorMachineCatalogForAteco("553");
+assert.equal(catalogCampingDigits3.sectorKey, "campeggio_villaggio", "ATECO 553 senza punti deve restituire campeggio_villaggio");
+
+// Verifica posizionamento: campeggio_villaggio deve seguire bnb_affittacamere e precedere ristorazione_alimentare
+const hostelIdxCamp = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ostello_residence");
+const bnbIdxCamp = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "bnb_affittacamere");
+const campIdx = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "campeggio_villaggio");
+const ristGenIdxCamp = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ristorazione_alimentare");
+assert.ok(hostelIdxCamp !== -1, "Settore ostello_residence deve esistere");
+assert.ok(bnbIdxCamp !== -1, "Settore bnb_affittacamere deve esistere");
+assert.ok(campIdx !== -1, "Settore campeggio_villaggio deve esistere");
+assert.ok(ristGenIdxCamp !== -1, "Settore generic ristorazione_alimentare deve esistere");
+assert.equal(campIdx, bnbIdxCamp + 1, "campeggio_villaggio deve seguire immediatamente bnb_affittacamere nel catalogo");
+assert.equal(campIdx + 1, ristGenIdxCamp, "campeggio_villaggio deve precedere immediatamente ristorazione_alimentare nel catalogo");
+
+// -------------------------------------------------------------
+// Test 52: Verifica completezza delle 16 macchine professionali per campeggio con modelli reali, corsi e verifiche tecniche
+// -------------------------------------------------------------
+console.log("Test 52: Verifica completezza delle 16 macchine professionali con verifiche, corsi e modelli reali");
+assert.equal(catalogCampingExact.machines.length, 16, "Il catalogo Campeggi e Villaggi Turistici deve contenere esattamente 16 macchine");
+
+const expectedCampingMachineKeys = [
+  "colonnina_elettrica_campeggio",
+  "camper_service_autopulente",
+  "impianto_dosaggio_cloro_piscina",
+  "robot_pulitore_piscina_industriale",
+  "gruppo_pompe_antincendio_uni12845",
+  "gruppo_elettrogeno_emergenza_campeggio",
+  "sistema_diffusione_sonora_evac_campeggio",
+  "golf_cart_elettrico_navetta",
+  "trattorino_tosaerba_sfalcio",
+  "decespugliatore_motosega_potatura",
+  "compattatore_rifiuti_differenziata",
+  "caldaia_centrale_acs_campeggio",
+  "lavatrice_industriale_campeggio",
+  "asciugatrice_industriale_campeggio",
+  "forno_pizze_ristorante_campeggio",
+  "defibrillatore_dae_colonnina",
+];
+
+for (const key of expectedCampingMachineKeys) {
+  const found = catalogCampingExact.machines.find((m) => m.machineKey === key);
+  assert.ok(found, `Attrezzatura con key '${key}' deve essere presente nel catalogo campeggio_villaggio`);
+  assert.ok(found.name.length > 5, `Nome attrezzatura '${key}' deve essere descrittivo`);
+  assert.ok(found.suggestedManufacturer.length > 2, `Produttore suggerito presente per '${key}'`);
+  assert.ok(found.suggestedModel.length > 1, `Modello suggerito presente per '${key}'`);
+  assert.ok(found.safetyChecks.length >= 4, `L'attrezzatura '${key}' deve avere almeno 4 controlli di sicurezza specifici`);
+  assert.ok(found.training, `L'attrezzatura '${key}' deve avere un requisito formativo definito`);
+}
+
+// 1. Controllo corsi specifici richiesti per il campeggio
+const robotPiscina = catalogCampingExact.machines.find((m) => m.machineKey === "robot_pulitore_piscina_industriale")!;
+assert.equal(robotPiscina.training.courseCode, "FORMAZ_BAGNINO_PISCINE_VILLAGGIO", "Robot piscina collegato a corso bagnino piscine villaggio");
+assert.equal(robotPiscina.training.frequencyYears, 3, "Corso bagnino piscine ha validità 3 anni");
+
+const trattorinoVerde = catalogCampingExact.machines.find((m) => m.machineKey === "trattorino_tosaerba_sfalcio")!;
+assert.equal(trattorinoVerde.training.courseCode, "FORMAZ_MANUTENTORE_VERDE_MOTOSEGA", "Trattorino tosaerba collegato a corso manutentore verde motosega");
+assert.equal(trattorinoVerde.training.minHours, 8, "Corso verde e motosega è di 8 ore");
+
+const motosegaVerde = catalogCampingExact.machines.find((m) => m.machineKey === "decespugliatore_motosega_potatura")!;
+assert.equal(motosegaVerde.training.courseCode, "FORMAZ_MANUTENTORE_VERDE_MOTOSEGA", "Decespugliatore e motosega collegati a corso verde motosega");
+
+const pompeAntincendio = catalogCampingExact.machines.find((m) => m.machineKey === "gruppo_pompe_antincendio_uni12845")!;
+assert.equal(pompeAntincendio.training.courseCode, "FORMAZ_ANTINCENDIO_L3", "Gruppo pompe antincendio collegato a corso antincendio livello 3");
+assert.equal(pompeAntincendio.training.minHours, 16, "Corso antincendio livello 3 è di 16 ore con prova VVF");
+
+const evacCamp = catalogCampingExact.machines.find((m) => m.machineKey === "sistema_diffusione_sonora_evac_campeggio")!;
+assert.equal(evacCamp.training.courseCode, "FORMAZ_ANTINCENDIO_L3", "Sistema EVAC outdoor collegato ad antincendio livello 3");
+
+// 2. Controllo verifiche normative tecniche e modelli
+const colonnina = catalogCampingExact.machines.find((m) => m.machineKey === "colonnina_elettrica_campeggio")!;
+assert.ok(colonnina.safetyChecks.some((c) => c.normReference.includes("CEI 64-8 sez. 708")), "Colonnina deve citare CEI 64-8 sez. 708");
+assert.ok(colonnina.safetyChecks.some((c) => c.code === "CMP_COLONNINA_DIFF_INDIVIDUALE_30MA"), "Colonnina deve avere differenziale 30 mA individuale");
+
+const camperService = catalogCampingExact.machines.find((m) => m.machineKey === "camper_service_autopulente")!;
+assert.ok(camperService.safetyChecks.some((c) => c.normReference.includes("UNI EN 1717")), "Camper service deve citare disconnettore UNI EN 1717");
+assert.ok(camperService.safetyChecks.some((c) => c.code === "CMP_CAMPER_TRAMOGGIA_LAVAGGIO_FOTOCELLULA"), "Camper service con lavaggio a fotocellula");
+
+const cloroPiscina = catalogCampingExact.machines.find((m) => m.machineKey === "impianto_dosaggio_cloro_piscina")!;
+assert.ok(cloroPiscina.safetyChecks.some((c) => c.normReference.includes("UNI 10637")), "Impianto cloro deve citare UNI 10637");
+assert.ok(cloroPiscina.safetyChecks.some((c) => c.code === "CMP_CLORO_BLOCCO_POMPE_FLUSSO_ZERO"), "Impianto cloro con blocco pompe su flusso zero");
+
+const generatoreCamp = catalogCampingExact.machines.find((m) => m.machineKey === "gruppo_elettrogeno_emergenza_campeggio")!;
+assert.ok(generatoreCamp.safetyChecks.some((c) => c.normReference.includes("D.M. 13/07/2011")), "Generatore emergenza deve citare D.M. 13/07/2011");
+assert.ok(generatoreCamp.safetyChecks.some((c) => c.code === "CMP_GENERATORE_VASCA_CONTENIMENTO_110"), "Generatore con vasca al 110%");
+
+// -------------------------------------------------------------
+// Test 53: Verifica associazione ambienti Step 2 Campeggio (env-cmp-*) -> Step 4 Macchine
+// -------------------------------------------------------------
+console.log("Test 53: Verifica associazione ambienti Step 2 Campeggio (env-cmp-*) -> Step 4 Macchine");
+const campingEnvironments = [
+  { id: "env-cmp-reception-direzione", name: "Reception, Portineria e Direzione Villaggio", category: "reception" },
+  { id: "env-cmp-piazzole-tende-camper", name: "Area Piazzole Tende, Roulotte e Camper", category: "camping_pitches" },
+  { id: "env-cmp-camper-service-scarico", name: "Camper Service e Scarico Liquami", category: "waste" },
+  { id: "env-cmp-piscina-solarium", name: "Parco Piscine e Solarium", category: "swimming_pool" },
+  { id: "env-cmp-locale-tecnico-cloro", name: "Locale Tecnico Trattamento Acque e Dosaggio Cloro", category: "technical_room" },
+  { id: "env-cmp-ristorante-minimarket", name: "Ristorante, Pizzeria e Minimarket del Villaggio", category: "restaurant" },
+  { id: "env-cmp-lavanderia-self", name: "Lavanderia Self-Service Ospiti", category: "laundry" },
+  { id: "env-cmp-centrale-idrica-antincendio", name: "Centrale Idrica Antincendio e Termica", category: "boiler_room" },
+  { id: "env-cmp-officina-manutenzione", name: "Officina Manutenzione e Ricovero Attrezzature Verde", category: "maintenance" },
+  { id: "env-cmp-isola-ecologica-rifiuti", name: "Isola Ecologica e Raccolta Differenziata", category: "waste" },
+  { id: "env-cmp-bungalow-mobilhome", name: "Area Bungalow e Mobilhome", category: "bungalows" },
+  { id: "env-cmp-blocchi-servizi-docce", name: "Blocchi Servizi Igienici e Docce Calde", category: "bathrooms" },
+];
+
+const suggestedWithCampingEnvs = getSuggestedMachinesForEnvironmentsAndAteco(campingEnvironments, "55.30.00");
+
+// 1. Reception -> 2 macchine (sistema_diffusione_sonora_evac_campeggio, defibrillatore_dae_colonnina)
+const receptionCamp = suggestedWithCampingEnvs.filter((m) => m.targetEnvironmentId === "env-cmp-reception-direzione");
+assert.equal(receptionCamp.length, 2, "env-cmp-reception-direzione deve associare 2 macchine");
+assert.ok(receptionCamp.some((m) => m.machineKey === "sistema_diffusione_sonora_evac_campeggio"), "EVAC in reception");
+assert.ok(receptionCamp.some((m) => m.machineKey === "defibrillatore_dae_colonnina"), "DAE in reception");
+
+// 2. Piazzole -> 2 macchine (colonnina_elettrica_campeggio, gruppo_pompe_antincendio_uni12845)
+const piazzoleCamp = suggestedWithCampingEnvs.filter((m) => m.targetEnvironmentId === "env-cmp-piazzole-tende-camper");
+assert.equal(piazzoleCamp.length, 2, "env-cmp-piazzole-tende-camper deve associare 2 macchine");
+assert.ok(piazzoleCamp.some((m) => m.machineKey === "colonnina_elettrica_campeggio"), "colonnina elettrica in piazzole");
+assert.ok(piazzoleCamp.some((m) => m.machineKey === "gruppo_pompe_antincendio_uni12845"), "pompe antincendio in piazzole");
+
+// 3. Camper Service -> 1 macchina (camper_service_autopulente)
+const camperServiceCamp = suggestedWithCampingEnvs.filter((m) => m.targetEnvironmentId === "env-cmp-camper-service-scarico");
+assert.equal(camperServiceCamp.length, 1, "env-cmp-camper-service-scarico deve associare 1 macchina");
+assert.ok(camperServiceCamp.some((m) => m.machineKey === "camper_service_autopulente"), "camper service in piazzola scarico");
+
+// 4. Piscina Solarium -> 2 macchine (robot_pulitore_piscina_industriale, defibrillatore_dae_colonnina)
+const piscinaCamp = suggestedWithCampingEnvs.filter((m) => m.targetEnvironmentId === "env-cmp-piscina-solarium");
+assert.equal(piscinaCamp.length, 2, "env-cmp-piscina-solarium deve associare 2 macchine");
+assert.ok(piscinaCamp.some((m) => m.machineKey === "robot_pulitore_piscina_industriale"), "robot pulitore in piscina");
+assert.ok(piscinaCamp.some((m) => m.machineKey === "defibrillatore_dae_colonnina"), "DAE in piscina");
+
+// 5. Locale Tecnico Cloro -> 1 macchina (impianto_dosaggio_cloro_piscina)
+const cloroCamp = suggestedWithCampingEnvs.filter((m) => m.targetEnvironmentId === "env-cmp-locale-tecnico-cloro");
+assert.equal(cloroCamp.length, 1, "env-cmp-locale-tecnico-cloro deve associare 1 macchina");
+assert.ok(cloroCamp.some((m) => m.machineKey === "impianto_dosaggio_cloro_piscina"), "centralina cloro in locale tecnico");
+
+// 6. Ristorante Minimarket -> 1 macchina (forno_pizze_ristorante_campeggio)
+const ristoranteCamp = suggestedWithCampingEnvs.filter((m) => m.targetEnvironmentId === "env-cmp-ristorante-minimarket");
+assert.equal(ristoranteCamp.length, 1, "env-cmp-ristorante-minimarket deve associare 1 macchina");
+assert.ok(ristoranteCamp.some((m) => m.machineKey === "forno_pizze_ristorante_campeggio"), "forno pizze in ristorante");
+
+// 7. Lavanderia Self -> 2 macchine (lavatrice_industriale_campeggio, asciugatrice_industriale_campeggio)
+const lavanderiaCamp = suggestedWithCampingEnvs.filter((m) => m.targetEnvironmentId === "env-cmp-lavanderia-self");
+assert.equal(lavanderiaCamp.length, 2, "env-cmp-lavanderia-self deve associare 2 macchine");
+assert.ok(lavanderiaCamp.some((m) => m.machineKey === "lavatrice_industriale_campeggio"), "lavatrice in lavanderia");
+assert.ok(lavanderiaCamp.some((m) => m.machineKey === "asciugatrice_industriale_campeggio"), "asciugatrice in lavanderia");
+
+// 8. Centrale Idrica Antincendio -> 2 macchine (gruppo_pompe_antincendio_uni12845, caldaia_centrale_acs_campeggio)
+const centraleCamp = suggestedWithCampingEnvs.filter((m) => m.targetEnvironmentId === "env-cmp-centrale-idrica-antincendio");
+assert.equal(centraleCamp.length, 2, "env-cmp-centrale-idrica-antincendio deve associare 2 macchine");
+assert.ok(centraleCamp.some((m) => m.machineKey === "gruppo_pompe_antincendio_uni12845"), "pompe antincendio in centrale idrica");
+assert.ok(centraleCamp.some((m) => m.machineKey === "caldaia_centrale_acs_campeggio"), "caldaia in centrale idrica");
+
+// 9. Officina Manutenzione -> 3 macchine (golf_cart_elettrico_navetta, trattorino_tosaerba_sfalcio, decespugliatore_motosega_potatura)
+const officinaCamp = suggestedWithCampingEnvs.filter((m) => m.targetEnvironmentId === "env-cmp-officina-manutenzione");
+assert.equal(officinaCamp.length, 3, "env-cmp-officina-manutenzione deve associare 3 macchine");
+assert.ok(officinaCamp.some((m) => m.machineKey === "golf_cart_elettrico_navetta"), "golf cart in officina");
+assert.ok(officinaCamp.some((m) => m.machineKey === "trattorino_tosaerba_sfalcio"), "trattorino tosaerba in officina");
+assert.ok(officinaCamp.some((m) => m.machineKey === "decespugliatore_motosega_potatura"), "motosega e decespugliatore in officina");
+
+// 10. Isola Ecologica -> 1 macchina (compattatore_rifiuti_differenziata)
+const isolaCamp = suggestedWithCampingEnvs.filter((m) => m.targetEnvironmentId === "env-cmp-isola-ecologica-rifiuti");
+assert.equal(isolaCamp.length, 1, "env-cmp-isola-ecologica-rifiuti deve associare 1 macchina");
+assert.ok(isolaCamp.some((m) => m.machineKey === "compattatore_rifiuti_differenziata"), "compattatore in isola ecologica");
+
+// 11. Bungalow Mobilhome -> 2 macchine (colonnina_elettrica_campeggio, caldaia_centrale_acs_campeggio)
+const bungalowCamp = suggestedWithCampingEnvs.filter((m) => m.targetEnvironmentId === "env-cmp-bungalow-mobilhome");
+assert.equal(bungalowCamp.length, 2, "env-cmp-bungalow-mobilhome deve associare 2 macchine");
+assert.ok(bungalowCamp.some((m) => m.machineKey === "colonnina_elettrica_campeggio"), "colonnina in bungalow");
+assert.ok(bungalowCamp.some((m) => m.machineKey === "caldaia_centrale_acs_campeggio"), "caldaia acs in bungalow");
+
+// 12. Blocchi Servizi Docce -> 2 macchine (caldaia_centrale_acs_campeggio, gruppo_pompe_antincendio_uni12845)
+const serviziCamp = suggestedWithCampingEnvs.filter((m) => m.targetEnvironmentId === "env-cmp-blocchi-servizi-docce");
+assert.equal(serviziCamp.length, 2, "env-cmp-blocchi-servizi-docce deve associare 2 macchine");
+assert.ok(serviziCamp.some((m) => m.machineKey === "caldaia_centrale_acs_campeggio"), "caldaia in blocchi servizi");
+assert.ok(serviziCamp.some((m) => m.machineKey === "gruppo_pompe_antincendio_uni12845"), "pompe antincendio in blocchi servizi");
+
+// -------------------------------------------------------------
+// Test 54: Integrazione automatica macchine per ATECO 55.30.00 senza ambienti preventivi
+// -------------------------------------------------------------
+console.log("Test 54: Integrazione automatica macchine per ATECO 55.30.00 senza ambienti preventivi");
+const suggestedCampingOnlyAteco = getSuggestedMachinesForEnvironmentsAndAteco([], "55.30.00");
+assert.equal(suggestedCampingOnlyAteco.length, 16, "Devono essere suggerite tutte le 16 macchine del campeggio");
+assert.ok(
+  suggestedCampingOnlyAteco.every((m) => m.sourceReason === "ateco"),
+  "Tutte le macchine devono avere sourceReason === 'ateco' se nessun locale è stato specificato",
+);
+
+// Verifica fallback automatico identico per tutte le varianti di codice ATECO ("55.30.00", "55.30.0", "55.30", "55.3", "553000", "55300", "5530", "553")
+for (const code of ["55.30.00", "55.30.0", "55.30", "55.3", "553000", "55300", "5530", "553"]) {
+  const fallbackCampingRes = getSuggestedMachinesForEnvironmentsAndAteco([], code);
+  assert.equal(fallbackCampingRes.length, 16, `ATECO variant '${code}' deve restituire tutte le 16 macchine del campeggio`);
+  assert.ok(fallbackCampingRes.every((m) => m.sourceReason === "ateco"), `Tutte le macchine con ATECO variant '${code}' devono avere sourceReason === 'ateco'`);
+}
+
 console.log("=== TUTTI I TEST normativeMachineCatalog SUPERATI CON SUCCESSO! ===");
+
 
 
 

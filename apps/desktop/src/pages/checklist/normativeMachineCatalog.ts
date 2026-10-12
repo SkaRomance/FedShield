@@ -279,6 +279,33 @@ export const TRAINING_REQUIREMENTS_LIBRARY: Record<string, MachineTrainingRequir
     requiresPatentinoAccordoSR: false,
     targetRoleDescription: "Addetti alla squadra antincendio ed evacuazione in strutture ricettive turistico-alberghiere con oltre 25 posti letto (8h)",
   },
+  bagnino_piscine_villaggio: {
+    courseCode: "FORMAZ_BAGNINO_PISCINE_VILLAGGIO",
+    courseTitle: "Assistente Bagnanti per Piscine e Parchi Acquatici di Strutture Ricettive",
+    normReference: "Accordo Stato-Regioni 16/01/2003; UNI 10637; D.Lgs. 81/2008 art. 37 e 43; Brevetto FIN/SNS/FISA",
+    minHours: 20,
+    frequencyYears: 3,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Assistenti bagnanti e personale addetto alla sorveglianza vasche e soccorso in piscine e parchi acquatici di strutture ricettive all'aperto (validità 3 anni)",
+  },
+  manutentore_verde_motosega: {
+    courseCode: "FORMAZ_MANUTENTORE_VERDE_MOTOSEGA",
+    courseTitle: "Operatore Manutenzione del Verde, Uso Decespugliatore e Motosega",
+    normReference: "D.Lgs. 81/2008 art. 71 c. 7 e art. 73 c. 4; Accordo Stato-Regioni 22/02/2012 e s.m.i.",
+    minHours: 8,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Operatori addetti alla manutenzione del verde, sfalcio e potatura con motosega e decespugliatore (8h, validità 5 anni)",
+  },
+  antincendio_livello_3: {
+    courseCode: "FORMAZ_ANTINCENDIO_L3",
+    courseTitle: "Addetto Antincendio in Attività a Livello 3 (Campeggi e Villaggi Turistici > 400 persone)",
+    normReference: "D.M. 02/09/2021; D.M. 28/02/2014; D.Lgs. 81/2008 art. 37 c. 9, art. 43 (con idoneità tecnica VVF)",
+    minHours: 16,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Addetti alla squadra antincendio ed emergenza in campeggi e villaggi turistici con oltre 400 persone con idoneità tecnica VVF (16h, validità 5 anni)",
+  },
 };
 
 // -------------------------------------------------------------
@@ -7524,6 +7551,734 @@ export const SECTOR_MACHINERY_CATALOGS: SectorMachineCatalog[] = [
     ],
   },
 
+  // ATECO 55.30.00, 55.30.0, 55.30, 55.3 (Aree di campeggio, Villaggi turistici, Camping village e Allestimenti per camper/caravan)
+  {
+    sectorKey: "campeggio_villaggio",
+    sectorLabel: "Campeggi, Villaggi Turistici, Camping Village e Strutture Ricettive all'Aperto",
+    atecoPrefixes: ["55.30.00", "55.30.0", "55.30", "55.3"],
+    machines: [
+      // 1. TORRETTA / COLONNINA DI EROGAZIONE ELETTRICA E IDRICA PER PIAZZOLE (env-cmp-piazzole-tende-camper)
+      {
+        machineKey: "colonnina_elettrica_campeggio",
+        name: "Torretta / Colonnina di Erogazione Elettrica e Idrica per Piazzole (4 Prese CEE)",
+        type: "Colonnina di Distribuzione Energia Elettrica e Acqua Potabile per Piazzole Camping",
+        suggestedManufacturer: "Gewiss / Scame / Rosi",
+        suggestedModel: "Gewiss Series 68 Q-DIN Campeggio / Scame Parre Camping IP67 / Rosi RS9100",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "CMP_COLONNINA_DIFF_INDIVIDUALE_30MA",
+            title: "Protezione Differenziale Magnetotermica Individuale 30 mA per Singola Presa",
+            question: "Ogni presa a spina CEE 16A 2P+T è protetta da un interruttore magnetotermico differenziale individuale con Idn <= 30 mA tipo A per prevenire dispersioni e interruzioni a cascata sulle piazzole adiacenti?",
+            normReference: "CEI 64-8 sez. 708.530.1; D.Lgs. 81/2008 art. 80-86 e All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_COLONNINA_GRADO_PROTEZIONE_IP67",
+            title: "Involucro Stagno con Grado di Protezione IP67 Antipioggia, Polvere e Urti IK08",
+            question: "L'involucro esterno e le prese a spina garantiscono un grado di protezione minimo IP67 con portelle a molla integre, resistenti all'irraggiamento solare UV e a impatti meccanici accidentali IK08?",
+            normReference: "CEI 64-8 sez. 708.512.2; CEI EN 60529; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_COLONNINA_SEPARAZIONE_ACQUA_LUCE",
+            title: "Separazione Fisica Netta tra Vano Elettrico e Prese Idriche",
+            question: "I rubinetti di prelievo acqua sono alloggiati in un compartimento fisicamente separato e isolato dal vano elettrico, con drenaggio anticondensa e scarico gravitazionale indipendente?",
+            normReference: "CEI 64-8 sez. 708.55; D.Lgs. 81/2008 All. IV p. 2; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_COLONNINA_RUBINETTO_ANTIGELO_RITEGNO",
+            title: "Rubinetto Acqua con Valvola di Ritegno Anti-Riflusso e Scarico Antigelo",
+            question: "I punti di erogazione idrica per uso potabile sono provvisti di valvola di ritegno (disconnettore UNI EN 1717) per impedire ritorni di acque inquinate e valvola di svuotamento per gelo invernale?",
+            normReference: "UNI EN 1717; D.Lgs. 18/2023; D.Lgs. 81/2008 art. 71 c. 4",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 2. STAZIONE ECOLOGICA CAMPER SERVICE AUTOPULENTE (env-cmp-camper-service-scarico)
+      {
+        machineKey: "camper_service_autopulente",
+        name: "Stazione Ecologica Camper Service Autopulente per Scarico Acque Grigie e Nere",
+        type: "Piattaforma Meccanizzata Autopulente di Scarico Liquami per Autocaravan con Griglia Carrabile",
+        suggestedManufacturer: "WC Wash / Euroservice / Camperclean",
+        suggestedModel: "WC Wash Compact Inox Autopulente / Euroservice CS-500 / Camperclean Station D-01",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "CMP_CAMPER_TRAMOGGIA_LAVAGGIO_FOTOCELLULA",
+            title: "Tramoggia Inox a Pavimento con Getto di Lavaggio Automatico a Fotocellula",
+            question: "La tramoggia di scarico a filo pavimento in acciaio inox è dotata di ugelli perimetrali di lavaggio automatico comandati da fotocellula o temporizzatore per sanificare la griglia dopo lo scarico?",
+            normReference: "D.Lgs. 81/2008 All. IV p. 1; D.Lgs. 152/2006 art. 101; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_CAMPER_DISCONNETTORE_IDRICO_UNI1717",
+            title: "Disconnettore Idraulico di Separazione Acqua di Lavaggio UNI EN 1717",
+            question: "La colonnina per il lavaggio delle cassette WC è alimentata da un circuito con disconnettore idraulico a zona di pressione ridotta non modificabile (UNI EN 1717) separato nettamente dall'acqua potabile?",
+            normReference: "UNI EN 1717; D.Lgs. 18/2023; D.Lgs. 81/2008 Titolo X (Rischio Biologico)",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_CAMPER_COLONNA_CASSETTE_ASPIRAZIONE",
+            title: "Colonna di Svuotamento WC a Cassetta con Sportello Anti-Schizzo e Aspirazione",
+            question: "La bocchetta per lo svuotamento delle cassette chimiche estraibili presenta sportello basculante a molla anti-schizzo e conformazione anti-odore per proteggere l'operatore e gli utenti da contaminazioni?",
+            normReference: "D.Lgs. 81/2008 Titolo IX e Titolo X (Agenti Biologici e Chimici); art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_CAMPER_PAVIMENTAZIONE_ANTISCIVOLO",
+            title: "Griglia Carrabile Inox e Pavimentazione con Trattamento Antisdrucciolo R11",
+            question: "La piattaforma carrabile presenta pendenze idonee allo smaltimento verso la tramoggia centrale e pavimentazione antiscivolo classe R11 per prevenire scivolamenti su bagnato e schiuma?",
+            normReference: "DIN 51130; D.Lgs. 81/2008 All. IV p. 1.3.2; art. 64",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 3. CENTRALINA AUTOMATICA DI DOSAGGIO E CONTROLLO CLORO/PH PER PISCINE (env-cmp-locale-tecnico-cloro)
+      {
+        machineKey: "impianto_dosaggio_cloro_piscina",
+        name: "Centralina Automatica di Dosaggio e Controllo Cloro/pH per Piscine",
+        type: "Impianto Elettrochimico di Misura Parametri e Dosaggio Pompe Peristaltiche / Elettromagnetiche",
+        suggestedManufacturer: "ProMinent / Grundfos / AstralPool",
+        suggestedModel: "ProMinent DULCOMARIN 3 / Grundfos Oxiperm Pro / AstralPool Control Basic Next",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.trattamento_acque_legionella,
+        safetyChecks: [
+          {
+            code: "CMP_CLORO_BLOCCO_POMPE_FLUSSO_ZERO",
+            title: "Interblocco Automatico di Blocco Pompe Dosatrici su Flusso Zero (Flussostato)",
+            question: "La centralina è interbloccata con un flussostato di sicurezza che arresta immediatamente l'iniezione di ipoclorito di sodio e acido solforico/riduttore pH in assenza di circolazione d'acqua per evitare formazione di gas cloro tossico?",
+            normReference: "UNI 10637 p. 5.3; D.Lgs. 81/2008 art. 71 c. 3; Titolo IX Agenti Chimici",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_CLORO_BACINI_CONTENIMENTO_CHIMICO",
+            title: "Vasche di Contenimento Rigide Anticorrosione per Fusti Cloro e Acido",
+            question: "I fusti di ipoclorito e di riduttore pH sono posizionati su bacini di contenimento in polietilene antiacido separati tra loro, con capacità minima pari al volume totale del contenitore per impedire miscelazioni accidentali?",
+            normReference: "D.Lgs. 81/2008 Titolo IX Agenti Chimici art. 224; D.Lgs. 152/2006; Accordo SR 16/01/2003",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_CLORO_DOCCIA_LAVAOCCHI_EMERGENZA",
+            title: "Doccia di Emergenza e Presidio Lavaocchi UNI EN 15154 Immediatamente Accessibile",
+            question: "Nel locale tecnico dosaggio prodotti chimici è presente e costantemente alimentato a pressione un presidio lavaocchi d'emergenza con comando a pedale/leva rapida conforme alla norma UNI EN 15154?",
+            normReference: "UNI EN 15154-1/2; D.Lgs. 81/2008 All. IV p. 2.1; art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_CLORO_ALLARMI_OVERDOSAGGIO_REDOX",
+            title: "Allarmi di Sovradosaggio, Soglie Min/Max Redox e Sensore Fuga Gas",
+            question: "Il sistema dispone di allarme ottico-acustico di superamento soglia massima cloro/redox e tempo massimo di iniezione (time-out pompa), con arresto dosaggio e segnalazione remota?",
+            normReference: "UNI 10637; D.Lgs. 81/2008 art. 71 c. 8; D.Lgs. 81/2008 Titolo IX",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 4. ROBOT ELETTRICO PROFESSIONALE PULITORE PER VASCHE PISCINA VILLAGGIO (env-cmp-piscina-solarium)
+      {
+        machineKey: "robot_pulitore_piscina_industriale",
+        name: "Robot Elettrico Professionale Pulitore per Vasche Piscina Villaggio",
+        type: "Pulitore Subacqueo Automatico ad Alimentazione a Bassissima Tensione di Sicurezza SELV",
+        suggestedManufacturer: "Maytronics / Zodiac / Hayward",
+        suggestedModel: "Maytronics Dolphin Wave 100 / Zodiac Vortex Pro Commercial / Hayward TigerShark Commercial",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.bagnino_piscine_villaggio,
+        safetyChecks: [
+          {
+            code: "CMP_ROBOT_ALIMENTAZIONE_SELV_TENSIONE",
+            title: "Alimentatore di Sicurezza a Bassissima Tensione SELV (< 30V DC) a Distanza di Sicurezza",
+            question: "Il robot è alimentato esclusivamente tramite trasformatore a doppio isolamento SELV a bassissima tensione conforme CEI EN 60335-2-41, posizionato a distanza minima di almeno 3,5 metri dal bordo vasca?",
+            normReference: "CEI EN 60335-2-41 punto 22; CEI 64-8 sez. 702; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_ROBOT_INTERDIZIONE_BAGNO_FUNZIONAMENTO",
+            title: "Divieto Assoluto di Balneazione ed Interdizione Vasca Durante la Pulizia",
+            question: "È rigorosamente vietata e segnalata l'immersione di bagnanti durante il funzionamento del robot, programmando i cicli di pulizia esclusivamente a impianto chiuso o vasca interdetta?",
+            normReference: "Accordo Stato-Regioni 16/01/2003; UNI 10637; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_ROBOT_CAVO_GALLEGGIANTE_ANTINODO",
+            title: "Integrità Guaina Cavo Galleggiante con Snodo Swivel Anti-Attorcigliamento",
+            question: "Il cavo galleggiante è integro, privo di giunzioni nastrate, abrasioni o tagli, e provvisto di snodo girevole Swivel per impedire nodi e tensioni anomale sul cablaggio?",
+            normReference: "CEI EN 60335-2-41; CEI 64-8 sez. 702; D.Lgs. 81/2008 art. 71 c. 4",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_ROBOT_CARRELLO_TRASPORTO_ERGONOMICO",
+            title: "Carrello di Trasporto Ergonomico Dedicato (Prevenzione Sovraccarico Biomeccanico)",
+            question: "La movimentazione del robot a secco e del relativo cavo avviene mediante carrello di trasporto ergonomico su ruote per azzerare rischi di movimentazione manuale dei carichi su pavimentazione bagnata?",
+            normReference: "UNI EN ISO 11228-1; D.Lgs. 81/2008 Titolo VI; art. 168",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 5. GRUPPO DI PRESSURIZZAZIONE ANTINCENDIO UNI EN 12845 CON MOTOPOMPA DIESEL (env-cmp-centrale-idrica-antincendio)
+      {
+        machineKey: "gruppo_pompe_antincendio_uni12845",
+        name: "Gruppo di Pressurizzazione Antincendio a Norma UNI EN 12845 con Motopompa Diesel",
+        type: "Centrale Idrica Antincendio di Pressurizzazione Idranti e Sprinkler con Motopompa di Riserva",
+        suggestedManufacturer: "Wilo / Lowara / Grundfos",
+        suggestedModel: "Wilo SiFire Easy / Lowara GHV Fire / Grundfos Hydro EN 12845",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.antincendio_livello_3,
+        safetyChecks: [
+          {
+            code: "CMP_ANTINCENDIO_MOTOPOMPA_DIESEL_BATTERIE",
+            title: "Avviamento Automatico Motopompa Diesel con Doppie Batterie Indipendenti",
+            question: "La motopompa diesel ausiliaria è equipaggiata con due pacchi batterie di avviamento indipendenti con caricabatterie automatico e quadro di commutazione conforme a UNI EN 12845 punto 10.7?",
+            normReference: "UNI EN 12845 punto 10.7; D.M. 02/09/2021; D.Lgs. 81/2008 art. 46",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_ANTINCENDIO_BACINO_GASOLIO_SERBATOIO",
+            title: "Serbatoio Combustibile con Bacino di Contenimento e Valvola di Intercettazione",
+            question: "Il serbatoio gasolio della motopompa dispone di bacino metallico di contenimento sversamenti al 100% e valvola a strappo tagliafuoco azionabile dall'esterno del locale?",
+            normReference: "UNI EN 12845 punto 10.9; D.M. 13/07/2011; D.Lgs. 81/2008 All. IV p. 4",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_ANTINCENDIO_QUADRO_ALLARMI_REMOTI",
+            title: "Quadro Elettrico UNI EN 12845 con Segnalazione Allarmi Ottico-Acustici in Portineria",
+            question: "Il quadro comandi pompe trasmette gli stati operativi (pompa in marcia, anomalia alimentazione, mancato avviamento, bassa pressione) al presidio della reception con segnalatori ottico-acustici continui?",
+            normReference: "UNI EN 12845 punto 10.8; D.M. 28/02/2014; D.Lgs. 81/2008 art. 43",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_ANTINCENDIO_PROVA_SETTIMANALE_AVVIO",
+            title: "Avvio Settimanale di Prova e Compilazione Registro Controlli Antincendio",
+            question: "Viene eseguita settimanalmente la prova di avviamento automatico e manuale della motopompa diesel e dell'elettropompa con relativa annotazione sul registro dei controlli antincendio?",
+            normReference: "UNI EN 12845 punto 20; D.M. 02/09/2021 All. I; D.Lgs. 81/2008 art. 64 c. 1 lett. c",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 6. GRUPPO ELETTROGENO DIESEL SILENZIATO DI EMERGENZA (env-cmp-centrale-idrica-antincendio)
+      {
+        machineKey: "gruppo_elettrogeno_emergenza_campeggio",
+        name: "Gruppo Elettrogeno Diesel Silenziato di Emergenza per Continuità Villaggio (60-150 kVA)",
+        type: "Generatore Diesel Cabinato Insonorizzato per Continuità Emergenza Strutture Turistiche",
+        suggestedManufacturer: "Pramac / Bruno / Caterpillar",
+        suggestedModel: "Pramac GSW110 / Bruno Silent GS / Caterpillar C4.4 Silenced",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.gruppi_elettrogeni,
+        safetyChecks: [
+          {
+            code: "CMP_GENERATORE_VASCA_CONTENIMENTO_110",
+            title: "Vasca di Raccolta Gasolio Integrata al 110% Conforme D.M. 13/07/2011",
+            question: "Il gruppo elettrogeno è dotato di basamento a vasca di raccolta combustibile a tenuta stagna con capacità pari ad almeno il 110% del serbatoio gasolio conforme al D.M. 13/07/2011 per la prevenzione incendi e sversamenti?",
+            normReference: "D.M. 13/07/2011 art. 4; D.Lgs. 152/2006; D.Lgs. 81/2008 art. 46",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_GENERATORE_SGANCIO_EMERGENZA_ESTERNO",
+            title: "Pulsante di Arresto di Emergenza a Fungo Esterno al Vano Tecnico (IP65)",
+            question: "È installato all'esterno della cabina o del locale generatore un pulsante di sgancio d'emergenza a fungo con riarmo manuale che interrompe istantaneamente motore e circuito carburante?",
+            normReference: "CEI 64-8 sez. 536; D.M. 13/07/2011; D.Lgs. 81/2008 All. V p. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_GENERATORE_QUADRO_ATS_INTERBLOCCO",
+            title: "Quadro Automatico di Scambio Rete/Gruppo ATS con Interblocco Meccanico",
+            question: "Il quadro automatico di commutazione rete/gruppo è provvisto di interblocco elettrico e meccanico certificato per evitare qualsiasi immissione accidentale in controfase sulla rete pubblica?",
+            normReference: "CEI EN 60947-6-1; CEI 64-8; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_GENERATORE_VERIFICA_SOTTO_CARICO",
+            title: "Prova Periodica di Avviamento a Vuoto e Inserzione Carichi di Emergenza",
+            question: "Viene eseguito mensilmente l'avviamento di prova del gruppo con verifica del funzionamento sotto carico dei servizi di sicurezza (pompe antincendio, illuminazione di emergenza, EVAC)?",
+            normReference: "CEI 64-8/7; D.M. 02/09/2021; D.Lgs. 81/2008 art. 71 c. 11",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 7. SISTEMA DI DIFFUSIONE SONORA EVAC OUTDOOR (env-cmp-reception-direzione)
+      {
+        machineKey: "sistema_diffusione_sonora_evac_campeggio",
+        name: "Sistema di Diffusione Sonora di Emergenza ed Evacuezione All'Aperto (EVAC Outdoor)",
+        type: "Impianto EVAC di Evacuazione Vocale e Allarme Esterno con Diffusori IP66 e Centrale Certificata",
+        suggestedManufacturer: "Bose / RCF / Paso",
+        suggestedModel: "RCF DXT 3000 Outdoor / Paso PAW 4500 Campeggi / Bosch Praesensa Voice Alarm",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.antincendio_livello_3,
+        safetyChecks: [
+          {
+            code: "CMP_EVAC_DIFFUSORI_TROMBA_IP66",
+            title: "Diffusori Acustici a Tromba IP66 ad Elevata Udibilità in Tutte le Piazzole",
+            question: "I diffusori sonori dislocati nell'area campeggio presentano grado di protezione IP66, resistenza a salsedine e intemperie e garantiscono un livello di pressione sonora di allarme > 65 dB in ogni piazzola?",
+            normReference: "UNI EN 54-24; UNI ISO 7240-19; D.M. 28/02/2014; D.Lgs. 81/2008 art. 43",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_EVAC_MESSAGGI_MULTILINGUE_AUTOMATICI",
+            title: "Messaggi Vocali Pre-Registrati di Evacuazione Multilingue Prioritari",
+            question: "La centrale di trasmissione vocale è programmata con messaggi preregistrati in italiano, inglese, tedesco e francese con priorità assoluta su qualsiasi altra diffusione audio?",
+            normReference: "UNI EN 54-16; D.M. 28/02/2014 Titolo II; D.Lgs. 81/2008 art. 43 e 46",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_EVAC_ALIMENTAZIONE_RISERVA_24H",
+            title: "Alimentazione di Riserva con Batterie Tampone Autonomia Minima 24h + 30 min",
+            question: "L'impianto EVAC è alimentato da gruppo soccorritore certificato UNI EN 54-4 in grado di garantire il funzionamento a riposo per almeno 24 ore più 30 minuti continui in stato di allarme vocale?",
+            normReference: "UNI EN 54-4; CEI EN 60849; D.Lgs. 81/2008 art. 46",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_EVAC_LINEE_RESISTENTI_AL_FUOCO",
+            title: "Linee di Distribuzione con Cavi Resistenti al Fuoco CEI 20-36 e Isolatori di Tronco",
+            question: "Le linee degli altoparlanti sono realizzate con cavi a prova di fuoco schermati e provviste di isolatori di linea per impedire che il guasto o l'incendio in un settore comprometta il resto del villaggio?",
+            normReference: "CEI 20-36; CEI EN 50200; D.Lgs. 81/2008 art. 46; UNI ISO 7240-19",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 8. VEICOLO ELETTRICO UTILITARIO / GOLF CART NAVETTA (env-cmp-officina-manutenzione)
+      {
+        machineKey: "golf_cart_elettrico_navetta",
+        name: "Veicolo Elettrico Utilitario / Golf Cart Navetta per Manutenzione e Ospiti",
+        type: "Veicolo Elettrico a Batteria per Circolazione Interna di Servizio, Trasporto Bagagli e Manutenzione",
+        suggestedManufacturer: "Club Car / Yamaha / Melex",
+        suggestedModel: "Club Car Carryall 500 / Yamaha Drive2 Fleet AC / Melex 391 Utility",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "CMP_GOLFCART_FRENO_STAZIONAMENTO_AUTO",
+            title: "Freno di Stazionamento Elettromeccanico Automatico all'Arresto",
+            question: "Il veicolo elettrico è provvisto di sistema frenante di stazionamento ad inserimento automatico all'arresto per impedire partenze accidentali o slittamenti sulle pendenze dei vialetti?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2.1; UNI EN ISO 3691-1; art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_GOLFCART_AVVISATORE_RETROMARCIA",
+            title: "Avvisatore Acustico di Retromarcia e Fari a LED ad Alta Luminosità",
+            question: "Il mezzo è dotato di cicalino acustico di sicurezza automatico in retromarcia e fari anteriori/posteriori a LED per garantire la massima visibilità nelle ore notturne tra le tende e i camper?",
+            normReference: "D.Lgs. 81/2008 All. VI p. 1.8; D.Lgs. 81/2008 art. 71 c. 4",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_GOLFCART_LIMITATORE_VELOCITA",
+            title: "Limitatore Elettronico di Velocità Massima per Aree Pedonali (< 15 km/h)",
+            question: "La centralina motore ha la velocità massima bloccata elettronicamente sotto i 15 km/h per prevenire rischi di investimento dei pedoni e bambini che circolano nei vialetti interni?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 3; D.Lgs. 81/2008 All. VI p. 1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_GOLFCART_RICARICA_AERAZIONE_IDROGENO",
+            title: "Locale Ricarica Batterie Aerato con Presa CEE Interbloccata",
+            question: "La ricarica dei pacchi batteria avviene in area o locale provvisto di ventilazione naturale o forzata anti-accumulo idrogeno e presa a spina CEE interbloccata protetta da differenziale dedicato?",
+            normReference: "CEI EN 62485-3; CEI 64-8; D.Lgs. 81/2008 art. 80 e All. IV p. 1",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 9. TRATTORINO TAGLIAERBA PROFESSIONALE PER SFALCIO E PREVENZIONE INCENDI (env-cmp-officina-manutenzione)
+      {
+        machineKey: "trattorino_tosaerba_sfalcio",
+        name: "Trattorino Tagliaerba Professionale per Sfalcio Aree Verdi e Prevenzione Incendi",
+        type: "Macchina Semovente Uomo a Bordo per Cura Prati, Sfalcio Ampie Superfici e Fasce Tagliafuoco",
+        suggestedManufacturer: "John Deere / Kubota / Husqvarna",
+        suggestedModel: "John Deere X350R / Kubota GR1600-II Diesel / Husqvarna TC 242T",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.manutentore_verde_motosega,
+        safetyChecks: [
+          {
+            code: "CMP_TOSAERBA_TELAIO_ROPS_CINTURA",
+            title: "Telaio di Protezione Antiribaltamento ROPS Omologato e Cintura di Sicurezza",
+            question: "Il trattorino è provvisto di struttura di protezione contro il ribaltamento (archetto ROPS omologato) e cintura di sicurezza addominale obbligatoria per il conducente?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2.4 e All. VI p. 2; ISO 5395-3; art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_TOSAERBA_SENSORE_UOMO_PRESENTE",
+            title: "Microinterruttore di Sicurezza Sedile con Arresto Immediato Lame entro 3s",
+            question: "È installato e perfettamente funzionante il sensore di presenza operatore sul sedile che spegne il motore e arresta la rotazione delle lame di taglio entro 3 secondi se il conducente si alza?",
+            normReference: "UNI EN ISO 5395-1/3; D.Lgs. 81/2008 All. V p. 6; art. 71 c. 4",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_TOSAERBA_DEFLETTORE_PARASASSI",
+            title: "Carter di Protezione Piatto di Taglio e Deflettore Scarico Parasassi",
+            question: "Il piatto di taglio è equipaggiato con carter metallici fissi e deflettore mobile con molla di richiamo per intercettare l'espulsione violenta di sassi o detriti verso terzi?",
+            normReference: "UNI EN ISO 5395-2; D.Lgs. 81/2008 All. V p. 6.1; art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_TOSAERBA_FRENO_LAME_FRIZIONE",
+            title: "Frizione Elettromagnetica Inserimento Lame con Freno Incorporato",
+            question: "L'innesto delle lame avviene tramite frizione elettromagnetica con freno meccanico integrato che blocca le lame indipendentemente dal motore durante il trasferimento su viali?",
+            normReference: "UNI EN ISO 5395-3; D.Lgs. 81/2008 All. V p. 2; art. 71 c. 4",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 10. SET DECESPUGLIATORE PROFESSIONALE E MOTOSEGA DA POTATURA (env-cmp-officina-manutenzione)
+      {
+        machineKey: "decespugliatore_motosega_potatura",
+        name: "Set Decespugliatore Professionale e Motosega da Potatura Alberi e Sottobosco",
+        type: "Attrezzature Portatili con Motore a Scoppio/Batteria per Pulizia Sottobosco e Potatura Rami",
+        suggestedManufacturer: "Stihl / Husqvarna",
+        suggestedModel: "Stihl FS 460 C-EM Decespugliatore & MS 201 TC-M Motosega / Husqvarna 545RXT & T540 XP III",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.manutentore_verde_motosega,
+        safetyChecks: [
+          {
+            code: "CMP_VERDE_FRENO_CATENA_INERZIALE",
+            title: "Freno Catena Inerziale Automatico sulla Motosega (QuickStop)",
+            question: "La motosega è provvista di freno catena ad attivazione inerziale e manuale sul paramano sinistro che arresta istantaneamente la catena in caso di contraccolpo (kickback)?",
+            normReference: "UNI EN ISO 11681-1; D.Lgs. 81/2008 All. V p. 6; art. 71 c. 4",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_VERDE_PARASASSI_DECESPUGLIATORE",
+            title: "Carter Parasassi Omologato con Lama Trancia-Filo su Decespugliatore",
+            question: "Il decespugliatore monta la protezione parasassi specifica per la testina in uso (a filo o disco metallico) completa di lametta di taglio filo integro per evitare lanci di corpi contundenti?",
+            normReference: "UNI EN ISO 11806-1; D.Lgs. 81/2008 All. V p. 6; art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_VERDE_ACCELERATORE_DOPPIA_SICURA",
+            title: "Leva Comando Acceleratore con Blocco di Sicurezza sull'Impugnatura",
+            question: "Le impugnature antivibranti di entrambi gli attrezzi presentano leva di accelerazione con blocco di sicurezza che impedisce azionamenti accidentali dell'organo di taglio a riposo?",
+            normReference: "UNI EN ISO 11681-1; UNI EN ISO 11806-1; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_VERDE_DPI_OBBLIGATORI_ANTITAGLIO",
+            title: "Dotazione Obbligatoria DPI di III Categoria Antitaglio, Elmetto con Visiera e Cuffie",
+            question: "L'operatore indossa obbligatoriamente pantaloni antitaglio classe 1/2, scarponi forestali antitaglio, guanti antivibrazione/antitaglio ed elmetto con visiera a rete e cuffie antirumore?",
+            normReference: "D.Lgs. 81/2008 art. 75-79 e All. VIII; D.Lgs. 81/2008 Titolo VIII Capo II (Rumore)",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 11. PRESSA COMPATTATRICE ELETTROIDRAULICA PER RIFIUTI E IMBALLAGGI (env-cmp-isola-ecologica-rifiuti)
+      {
+        machineKey: "compattatore_rifiuti_differenziata",
+        name: "Pressa Compattatrice Elettroidraulica per Cartoni e Plastica Riciclabile",
+        type: "Pressa Verticale Elettroidraulica per Riduzione Volume Imballaggi e Rifiuti Riciclabili",
+        suggestedManufacturer: "Bramidan / Strautmann / HSM",
+        suggestedModel: "Bramidan B4 / Strautmann BalePress 4 / HSM V-Press 605",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "CMP_COMPATTATORE_INTERBLOCCO_SPORTELLO",
+            title: "Microinterruttore di Sicurezza su Sportello di Carico Rifiuti",
+            question: "L'avvio e la discesa del piatto pressante sono rigidamente subordinati alla chiusura ermetica dello sportello di carico controllato da interblocco di sicurezza conforme a UNI EN 16500?",
+            normReference: "UNI EN 16500 punto 5.2; D.Lgs. 81/2008 All. V p. 6; art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_COMPATTATORE_ARRESTO_EMERGENZA_FUNGO",
+            title: "Pulsante di Arresto di Emergenza a Fungo a Riarmo Manuale",
+            question: "Sul pannello di comando è installato un pulsante d'arresto di emergenza a fungo rosso ben visibile che arresta istantaneamente il circuito idraulico in qualunque fase del ciclo?",
+            normReference: "UNI EN ISO 13850; UNI EN 16500; D.Lgs. 81/2008 All. V p. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_COMPATTATORE_ESPULSIONE_BIMANUALE",
+            title: "Espulsione Semiautomatica Balla con Comando a Due Mani ad Azione Mantenuta",
+            question: "Il ribaltamento e l'espulsione della balla pressata sono azionabili solo tramite comando bimanuale ad azione mantenuta situato a distanza di sicurezza per prevenire schiacciamenti dell'operatore?",
+            normReference: "UNI EN 16500 punto 5.3; D.Lgs. 81/2008 All. V p. 2; art. 71 c. 4",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_COMPATTATORE_VALVOLA_MASSIMA_PRESSIONE",
+            title: "Valvola di Massima Pressione Oleodinamica e Controllo Raccordi",
+            question: "Il circuito idraulico è dotato di valvola limitatrice di pressione tarata e piombata, e le tubazioni flessibili sono integre e protette contro schizzi di fluido ad alta pressione?",
+            normReference: "UNI EN ISO 4413; D.Lgs. 81/2008 art. 71 c. 4; All. V p. 2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 12. CENTRALE TERMICA MURALE O MODULARE PER DOCCE AD ALTO FLUSSO (env-cmp-centrale-idrica-antincendio)
+      {
+        machineKey: "caldaia_centrale_acs_campeggio",
+        name: "Centrale Termica Murale o Modulare per Docce ad Alto Flusso con Shock Anti-Legionella",
+        type: "Centrale Termica a Cascata per Produzione Acqua Calda Sanitaria Massiva Blocchi Docce",
+        suggestedManufacturer: "Viessmann / Ferroli / Daikin",
+        suggestedModel: "Viessmann Vitodens 200-W Cascade / Ferroli Force W 80-150 / Daikin Altherma 3 Flex Cascade",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.centrali_termiche_clima,
+        safetyChecks: [
+          {
+            code: "CMP_CALDAIA_SHOCK_TERMICO_LEGIONELLA",
+            title: "Ciclo Programmato di Disinfezione Termica Settimanale Anti-Legionella (> 65°C)",
+            question: "La centralina dell'accumulo ACS esegue automaticamente con cadenza programmata il trattamento termico anti-legionella innalzando la temperatura a 65°C per almeno un'ora con valvole termostatiche antiscottatura a valle?",
+            normReference: "Accordo Stato-Regioni 07/05/2015; D.Lgs. 81/2008 Titolo X; D.Lgs. 18/2023",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_CALDAIA_VALVOLE_SICUREZZA_INAIL",
+            title: "Valvole di Sicurezza Omologate INAIL e Vasi d'Espansione Certificati PED",
+            question: "La centrale è provvista di valvole di sicurezza omologate con scarico a vista convogliato, termostato di blocco combustibile a riarmo manuale e vasi d'espansione conformi alla Raccolta R INAIL?",
+            normReference: "Raccolta R INAIL; D.Lgs. 26/2016 (PED); D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_CALDAIA_TERMOSTATO_BLOCCO_COMBUSTIBILE",
+            title: "Pressostato di Minima e Termostato Limitatore con Intercettazione Elettrovalvola Gas",
+            question: "In caso di sovratemperatura o mancanza d'acqua l'elettrovalvola esterna intercetta istantaneamente l'adduzione combustibile con blocco a riarmo esclusivamente manuale?",
+            normReference: "UNI EN 12953; Raccolta R INAIL; D.Lgs. 81/2008 All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_CALDAIA_VENTILAZIONE_LOCALE_GAS",
+            title: "Aperture di Aerazione Naturale Permanente Conforme D.M. 08/11/2019",
+            question: "Il locale centrale termica presenta aperture di aerazione permanente verso l'esterno calcolate secondo le regole tecniche di prevenzione incendi per impianti oltre 35 kW?",
+            normReference: "D.M. 08/11/2019; D.Lgs. 81/2008 All. IV p. 1.8; D.Lgs. 81/2008 art. 46",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 13. LAVATRICE INDUSTRIALE A GETTONI PER LAVANDERIA SELF (env-cmp-lavanderia-self)
+      {
+        machineKey: "lavatrice_industriale_campeggio",
+        name: "Lavatrice Professionale Industriale a Carica Frontale a Gettoni (11-14 kg)",
+        type: "Lavatrice Supercentrifugante Professionale a Gettoniera per Uso Comunitario Turisti",
+        suggestedManufacturer: "Miele Professional / Primus / Speed Queen",
+        suggestedModel: "Miele Professional PWM 909 / Primus RX105 Smart / Speed Queen SC105 Quantum Gold",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "CMP_LAVATRICE_BLOCCO_OPLO_RITARDATO",
+            title: "Dispositivo Elettromeccanico di Blocco Oblò Ritardato UNI EN ISO 10472-2",
+            question: "L'oblò di carico è dotato di elettroserratura con blocco ritardato che impedisce l'apertura finché il cesto è in rotazione (tempo d'arresto < 2s) o la temperatura interna supera 50°C?",
+            normReference: "UNI EN ISO 10472-2 punto 5.2; D.Lgs. 81/2008 All. V p. 6; art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_LAVATRICE_ARRESTO_EMERGENZA_OSPITI",
+            title: "Pulsante d'Arresto Rapido Accessibile all'Utente della Lavanderia Self",
+            question: "Nel locale lavanderia self-service è presente un pulsante di sgancio generale di emergenza ben segnalato accessibile agli ospiti per disalimentare le apparecchiature in caso di anomalie?",
+            normReference: "UNI EN ISO 13850; D.Lgs. 81/2008 All. V p. 3; art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_LAVATRICE_SENSORE_SBILANCIAMENTO",
+            title: "Sensore Elettronico di Anti-Sbilanciamento del Carico in Centrifuga",
+            question: "La macchina dispone di controllo elettronico delle oscillazioni che blocca la centrifuga ad alta velocità qualora la biancheria sia mal distribuita prevenendo sollecitazioni strutturali pericolose?",
+            normReference: "UNI EN ISO 10472-2; D.Lgs. 81/2008 art. 71 c. 4; All. V p. 2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_LAVATRICE_ANCORAGGIO_ANTIVIBRANTE",
+            title: "Ancoraggio Strutturale a Pavimento con Tiranti e Dima Antivibrante",
+            question: "La lavatrice è ancorata rigidamente al basamento in calcestruzzo mediante tiranti e piastra antivibrante per evitare spostamenti fisici incontrollati durante le fasi di lavaggio e centrifuga?",
+            normReference: "D.Lgs. 81/2008 All. V p. 1.2; UNI EN ISO 10472-2; art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 14. ASCIUGATRICE INDUSTRIALE A GETTONI CON DOPPIO FILTRO (env-cmp-lavanderia-self)
+      {
+        machineKey: "asciugatrice_industriale_campeggio",
+        name: "Asciugatrice Industriale a Carica Frontale a Gettoni con Doppio Filtro Lanugine (11-14 kg)",
+        type: "Essiccatore Rotativo Professionale Ventilato con Gettoniera e Filtro Antincendio",
+        suggestedManufacturer: "Miele Professional / Speed Queen / Girbau",
+        suggestedModel: "Miele Professional PDR 914 / Speed Queen ST030 Commercial / Girbau ED260 Ecomiser",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "CMP_ASCIUGATRICE_DOPPIO_FILTRO_LANUGINE",
+            title: "Doppio Filtro Lanugine Estraibile con Monitoraggio Flusso Aria (Anti-Innesco)",
+            question: "L'essiccatore è provvisto di doppio cassetto filtro lanugine facilmente ispezionabile e sensore di depressione aria che arresta il riscaldamento in caso di intasamento per prevenire incendi?",
+            normReference: "UNI EN ISO 10472-4 punto 5.3; D.M. 02/09/2021; D.Lgs. 81/2008 All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_ASCIUGATRICE_TERMOSTATO_MAX_RIARMO",
+            title: "Termostato Limitatore di Sovratemperatura a Riarmo Manuale",
+            question: "Il circuito di riscaldamento (elettrico o gas) è protetto da un termostato di massima a riarmo manuale che toglie immediatamente tensione se la temperatura interna dell'aria supera i limiti critici?",
+            normReference: "UNI EN ISO 10472-4 punto 5.5; D.Lgs. 81/2008 All. V p. 7; art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_ASCIUGATRICE_CONDOTTO_SCARICO_METALLO",
+            title: "Condotto di Evacuazione Vapori Metallico Indipendente Verso l'Esterno",
+            question: "L'aria umida e calda è convogliata all'esterno tramite tubazione rigida metallica dedicata in acciaio/alluminio priva di strozzature e provvista di terminale anti-intrusione all'aperto?",
+            normReference: "D.M. 08/11/2019; D.Lgs. 81/2008 All. IV p. 2; D.M. 02/09/2021",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_ASCIUGATRICE_INTERBLOCCO_PORTELLO",
+            title: "Microinterruttore Sportello con Spegnimento Immediato Rotazione e Riscaldamento",
+            question: "L'apertura dell'oblò durante il funzionamento provoca l'immediato arresto della rotazione del tamburo e la disattivazione istantanea delle resistenze o della fiamma gas?",
+            normReference: "UNI EN ISO 10472-4; D.Lgs. 81/2008 All. V p. 6; art. 71 c. 3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 15. FORNO PROFESSIONALE PER PIZZERIA DEL VILLAGGIO (env-cmp-ristorante-minimarket)
+      {
+        machineKey: "forno_pizze_ristorante_campeggio",
+        name: "Forno Professionale Elettrico/Gas per Pizzeria del Villaggio Turistico",
+        type: "Forno Professionale Statico a Doppia Camera con Piani Refrattari, Cappa e Isolamento",
+        suggestedManufacturer: "Moretti Forni / Cuppone / OEM",
+        suggestedModel: "Moretti Forni Serie S 120 / Cuppone Giotto Touch / OEM Domitor 6+6",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "CMP_FORNO_VETRO_VENTILATO_ANTIUSTIONE",
+            title: "Porta con Vetro Isolante Ventilato e Maniglia Atermica Anti-Ustione",
+            question: "Gli sportelli di cottura sono dotati di doppio vetro temperato con intercapedine ventilata e maniglie in materiale atermico isolante per prevenire ustioni da contatto termico agli operatori?",
+            normReference: "UNI EN 203-1; D.Lgs. 81/2008 All. V p. 7; art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_FORNO_VALVOLA_GAS_TERMOCOPPIA",
+            title: "Valvola di Sicurezza con Termocoppia di Rilevazione Fiamma (Modelli a Gas)",
+            question: "Nei modelli alimentati a gas/GPL ciascun bruciatore è protetto da valvola di sicurezza a termocoppia che blocca l'erogazione in caso di spegnimento accidentale della fiamma?",
+            normReference: "UNI EN 203-1 punto 5.3; D.M. 08/11/2019; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_FORNO_CAPPA_ASPIRAZIONE_TETTO",
+            title: "Cappa d'Aspirazione Fumi e Calore Canalizzata a Tetto con Filtri Inox",
+            question: "Il forno è sormontato da cappa aspirante in acciaio inox con filtri antigrasso a labirinto canalizzata con canna fumaria autonoma a tetto conforme alle normative igieniche e antincendio?",
+            normReference: "D.M. 08/11/2019; D.Lgs. 81/2008 All. IV p. 2.1; Reg. CE 852/2004",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_FORNO_PIANO_REFRATTARIO_MOCA",
+            title: "Pietre Refrattarie di Cottura Certificate per Contatto Alimentare MOCA",
+            question: "I piani di cottura in pietra refrattaria sono certificati per contatto con alimenti MOCA, privi di crepe, scheggiature o residui chimici nocivi secondo il Reg. CE 1935/2004?",
+            normReference: "Reg. CE 1935/2004; D.M. 21/03/1973; D.Lgs. 81/2008 art. 71 c. 3",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 16. DEFIBRILLATORE SEMIAUTOMATICO DAE IN TECA RISCALDATA (env-cmp-reception-direzione)
+      {
+        machineKey: "defibrillatore_dae_colonnina",
+        name: "Defibrillatore Semiautomatico Esterno (DAE) in Teca Riscaldata per Aree Aperte",
+        type: "Dispositivo Medico Elettromedicale Semiautomatico per Soccorso Cardiorespiratorio con Teca Climatizzata",
+        suggestedManufacturer: "Philips / Zoll / DefiSign",
+        suggestedModel: "Philips HeartStart FRx Outdoor / Zoll AED Plus Outdoor / DefiSign Life AED Teca Aivia 200 Riscaldata",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.antincendio_evac,
+        safetyChecks: [
+          {
+            code: "CMP_DAE_TECA_CLIMATIZZATA_IP54",
+            title: "Teca Esterna Protetta IP54 Climatizzata Anti-Gelo e Anti-Surriscaldamento",
+            question: "Il defibrillatore è alloggiato in una teca outdoor con grado di protezione minimo IP54 dotata di riscaldatore termostatico automatico per garantire l'efficienza della batteria e del gel piastre?",
+            normReference: "Legge 116/2021; CEI EN 60529; D.M. 24/04/2013; D.Lgs. 81/2008 art. 45",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_DAE_ALLARME_APERTURA_CHIAMATA_112",
+            title: "Allarme Sonoro all'Apertura e Combinatore GSM di Soccorso 112",
+            question: "L'apertura dello sportello della teca attiva una sirena acustica ad alta intensità per allertare il personale della reception/bagnini e un combinatore telefonico automatico verso il soccorso 112?",
+            normReference: "Legge 116/2021 art. 4; D.M. 24/04/2013; D.Lgs. 81/2008 art. 43 e 45",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "CMP_DAE_VERIFICA_PERIODICA_SCADENZE",
+            title: "Verifica Mensile Stato di Carica Batteria e Scadenza Elettrodi Monouso",
+            question: "Viene effettuato il controllo mensile visivo della spia di autotest operativo (OK verde) e registrata la data di scadenza delle piastre per adulti e pediatriche sul registro delle emergenze?",
+            normReference: "D.M. 24/04/2013 All. E; D.Lgs. 81/2008 art. 45; Legge 116/2021",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "CMP_DAE_SEGNALETICA_ILCOR_RIFLETTE",
+            title: "Cartellonistica Internazionale ILCOR ad Alta Visibilità e Riflettanza",
+            question: "La postazione DAE è chiaramente individuabile mediante segnaletica standard ILCOR verde con cuore e fulmine visibile dai viali centrali, piscina e reception?",
+            normReference: "D.Lgs. 81/2008 Titolo V All. XXV; Legge 116/2021; Raccomandazioni ILCOR",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+    ],
+  },
+
   // 2. RISTORAZIONE & ALIMENTARE
   {
     sectorKey: "ristorazione_alimentare",
@@ -10072,6 +10827,19 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
   const bnbSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "bnb_affittacamere");
   const bnbMachines = bnbSector ? bnbSector.machines : [];
 
+  const isCampingAteco = !!atecoCode && (
+    atecoCode.startsWith("55.30.00") ||
+    atecoCode.startsWith("55.30.0") ||
+    atecoCode.startsWith("55.30") ||
+    atecoCode.startsWith("55.3") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("553000") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("55300") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("5530") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("553")
+  );
+  const campingSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "campeggio_villaggio");
+  const campingMachines = campingSector ? campingSector.machines : [];
+
   // 1. MACCHINE SUGGERITE IN BASE AI LOCALI CENSITI NELLO STEP 2
   for (const env of environments) {
     const envId = (env.id || "").toLowerCase();
@@ -11033,6 +11801,123 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
     ) {
       matchingMachines = bnbMachines.filter((m) =>
         ["carrello_housekeeping_compatto_bnb", "lavasciuga_pavimenti_compatta_bnb"].includes(m.machineKey)
+      );
+    }
+
+    // Reparti Campeggi, Villaggi Turistici, Camping Village e Strutture all'Aperto (55.30.00 / 55.30.0 / 55.30 / 55.3)
+    else if (
+      envId === "env-cmp-reception-direzione" ||
+      envId.includes("cmp-reception") ||
+      (isCampingAteco && (nameLower.includes("reception") || nameLower.includes("direzione") || nameLower.includes("accoglienza") || cat === "reception"))
+    ) {
+      matchingMachines = campingMachines.filter((m) =>
+        ["sistema_diffusione_sonora_evac_campeggio", "defibrillatore_dae_colonnina"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-cmp-piazzole-tende-camper" ||
+      envId.includes("cmp-piazzole") ||
+      (isCampingAteco && (nameLower.includes("piazzol") || nameLower.includes("tende") || (nameLower.includes("camper") && !nameLower.includes("service") && !nameLower.includes("scarico")) || cat === "camping_pitches"))
+    ) {
+      matchingMachines = campingMachines.filter((m) =>
+        ["colonnina_elettrica_campeggio", "gruppo_pompe_antincendio_uni12845"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-cmp-camper-service-scarico" ||
+      envId.includes("cmp-camper-service") ||
+      envId.includes("camper-service") ||
+      (isCampingAteco && (nameLower.includes("camper service") || (nameLower.includes("scarico") && nameLower.includes("camper")) || nameLower.includes("acque grigie") || nameLower.includes("acque nere")))
+    ) {
+      matchingMachines = campingMachines.filter((m) =>
+        ["camper_service_autopulente"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-cmp-piscina-solarium" ||
+      envId.includes("cmp-piscina") ||
+      (isCampingAteco && !nameLower.includes("cloro") && (nameLower.includes("piscina") || nameLower.includes("solarium") || nameLower.includes("vasca") || cat === "swimming_pool"))
+    ) {
+      matchingMachines = campingMachines.filter((m) =>
+        ["robot_pulitore_piscina_industriale", "defibrillatore_dae_colonnina"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-cmp-locale-tecnico-cloro" ||
+      envId.includes("cmp-locale-tecnico-cloro") ||
+      envId.includes("cmp-cloro") ||
+      (isCampingAteco && (nameLower.includes("tecnico cloro") || nameLower.includes("dosaggio cloro") || (nameLower.includes("cloro") && nameLower.includes("locale"))))
+    ) {
+      matchingMachines = campingMachines.filter((m) =>
+        ["impianto_dosaggio_cloro_piscina"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-cmp-ristorante-minimarket" ||
+      envId.includes("cmp-ristorante") ||
+      envId.includes("cmp-minimarket") ||
+      (isCampingAteco && (nameLower.includes("ristorante") || nameLower.includes("minimarket") || nameLower.includes("pizzeria") || cat === "restaurant" || cat === "kitchen"))
+    ) {
+      matchingMachines = campingMachines.filter((m) =>
+        ["forno_pizze_ristorante_campeggio"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-cmp-lavanderia-self" ||
+      envId.includes("cmp-lavanderia") ||
+      (isCampingAteco && (nameLower.includes("lavanderia") || cat === "laundry"))
+    ) {
+      matchingMachines = campingMachines.filter((m) =>
+        ["lavatrice_industriale_campeggio", "asciugatrice_industriale_campeggio"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-cmp-centrale-idrica-antincendio" ||
+      envId.includes("cmp-centrale-idrica") ||
+      (isCampingAteco && (nameLower.includes("idrica") || nameLower.includes("antincendio") || nameLower.includes("pompe antincendio") || (nameLower.includes("centrale") && !nameLower.includes("cloro")) || cat === "boiler_room"))
+    ) {
+      matchingMachines = campingMachines.filter((m) =>
+        ["gruppo_pompe_antincendio_uni12845", "caldaia_centrale_acs_campeggio"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-cmp-vano-gruppo-elettrogeno" ||
+      envId.includes("cmp-vano-gruppo-elettrogeno") ||
+      (isCampingAteco && (nameLower.includes("gruppo elettrogeno") || nameLower.includes("elettrogeno") || nameLower.includes("generatore diesel")))
+    ) {
+      matchingMachines = campingMachines.filter((m) =>
+        ["gruppo_elettrogeno_emergenza_campeggio"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-cmp-officina-manutenzione" ||
+      envId.includes("cmp-officina") ||
+      (isCampingAteco && (nameLower.includes("officina") || nameLower.includes("manutenzione") || nameLower.includes("deposito attrezzi") || cat === "maintenance" || cat === "workshop"))
+    ) {
+      matchingMachines = campingMachines.filter((m) =>
+        [
+          "golf_cart_elettrico_navetta",
+          "trattorino_tosaerba_sfalcio",
+          "decespugliatore_motosega_potatura",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-cmp-isola-ecologica-rifiuti" ||
+      envId.includes("cmp-isola-ecologica") ||
+      envId.includes("cmp-rifiuti") ||
+      (isCampingAteco && (nameLower.includes("ecologica") || nameLower.includes("rifiuti") || nameLower.includes("differenziata") || cat === "waste"))
+    ) {
+      matchingMachines = campingMachines.filter((m) =>
+        ["compattatore_rifiuti_differenziata"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-cmp-bungalow-mobilhome" ||
+      envId.includes("cmp-bungalow") ||
+      envId.includes("cmp-mobilhome") ||
+      (isCampingAteco && (nameLower.includes("bungalow") || nameLower.includes("mobilhome") || nameLower.includes("mobil-home") || nameLower.includes("chalet") || cat === "bungalows" || cat === "lodging"))
+    ) {
+      matchingMachines = campingMachines.filter((m) =>
+        ["colonnina_elettrica_campeggio", "caldaia_centrale_acs_campeggio"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-cmp-blocchi-servizi-docce" ||
+      envId.includes("cmp-blocchi-servizi") ||
+      envId.includes("cmp-docce") ||
+      (isCampingAteco && (nameLower.includes("blocchi servizi") || nameLower.includes("servizi igienici") || nameLower.includes("docce") || cat === "bathrooms"))
+    ) {
+      matchingMachines = campingMachines.filter((m) =>
+        ["caldaia_centrale_acs_campeggio", "gruppo_pompe_antincendio_uni12845"].includes(m.machineKey)
       );
     } else if (
       envId === "env-super-magazzino" ||

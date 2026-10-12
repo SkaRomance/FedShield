@@ -617,7 +617,193 @@ async function run() {
     `Expected at least 5 hostel-specific document requirements for inspection, found ${hostelSpecificDocs.length}`,
   );
 
-  console.log("HoReCa completeness test passed (including Hotel, B&B and Ostelli/Residence ATECO variants and inspection integration)");
+  // Verifica varianti ATECO e query testuali per Campeggi e Villaggi turistici (55.30.00, 55.30.0, 55.30, 55.3, 553000, 55300, 5530, 553, CAMPEGGIO_VILLAGGIO, CAMPEGGI_VILLAGGI, CAMPEGGIO, CAMPEGGI, CAMPING, CAMPING_VILLAGE, VILLAGGIO_TURISTICO, VILLAGGI_TURISTICI)
+  const campingVariants = [
+    "55.30.00",
+    "55.30.0",
+    "55.30",
+    "55.3",
+    "553000",
+    "55300",
+    "5530",
+    "553",
+    "CAMPEGGIO_VILLAGGIO",
+    "CAMPEGGI_VILLAGGI",
+    "CAMPEGGIO",
+    "CAMPEGGI",
+    "CAMPING",
+    "CAMPING_VILLAGE",
+    "VILLAGGIO_TURISTICO",
+    "VILLAGGI_TURISTICI",
+  ];
+  for (const variant of campingVariants) {
+    const templatesRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(templatesRes.statusCode, 200, `Templates request failed for camping variant ${variant}`);
+    const templates = templatesRes.json() as Array<{ id: string; name: string }>;
+    const specificTemplates = templates.filter(
+      (t) => t.name.includes("Campeggi") || t.name.includes("Villaggi") || t.name.includes("Camping"),
+    );
+    assert.equal(
+      specificTemplates.length,
+      2,
+      `Expected 2 specific templates for camping variant ${variant}, found ${specificTemplates.length}`,
+    );
+
+    const docsRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/document-templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(docsRes.statusCode, 200, `Document templates request failed for camping variant ${variant}`);
+    const docs = docsRes.json() as DocumentTemplateLite[];
+    const campingDocs = docs.filter(
+      (d) =>
+        d.macroGroup === "CAMPEGGI_VILLAGGI" ||
+        d.macroGroup === "CAMPEGGIO_VILLAGGIO" ||
+        d.macroGroup === "CAMPEGGI",
+    );
+    assert.ok(
+      campingDocs.length >= 14,
+      `Expected at least 14 camping docs for variant ${variant}, found ${campingDocs.length}`,
+    );
+  }
+
+  // Verifica generazione template e requisiti normativi specifici per Campeggio / Villaggio turistico su 55.30.00 e dotless 553000:
+  // - Antincendio DM 28/02/2014 per campeggi
+  // - Colonnine elettriche piazzole CEI 64-8 sez. 708
+  // - Legionella reti idriche campeggio D.Lgs. 18/2023 per blocchi docce distribuiti
+  // - Piscine e sicurezza bagnanti UNI 10637
+  // - Camper service e scarico reflui
+  const campingCodesToVerify = ["55.30.00", "553000"];
+  for (const ateco of campingCodesToVerify) {
+    const tRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/templates?atecoCode=${encodeURIComponent(ateco)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(tRes.statusCode, 200);
+    const tmpls = tRes.json() as Array<{ id: string; name: string }>;
+    const campingTmpls = tmpls.filter(
+      (t) => t.name.includes("Campeggi") || t.name.includes("Villaggi") || t.name.includes("Camping"),
+    );
+    assert.equal(campingTmpls.length, 2, `Expected 2 templates for ${ateco}`);
+
+    let allItemsText = "";
+    for (const t of campingTmpls) {
+      const itemsRes = await app.inject({
+        method: "GET",
+        url: `/api/checklists/templates/${t.id}/items?checklistMode=unified`,
+        headers,
+      });
+      assert.equal(itemsRes.statusCode, 200);
+      const items = itemsRes.json().items as Array<{
+        question: string;
+        area: string;
+        normReference?: string | null;
+        orderIndex: number;
+        defaultSeverity: number;
+      }>;
+      assert.equal(items.length, 25, `Expected 25 items for template ${t.id} under ${ateco}`);
+      for (const item of items) {
+        assert.ok(item.defaultSeverity >= 1 && item.defaultSeverity <= 4, `Invalid severity in item ${item.orderIndex}`);
+      }
+
+      const combined = items
+        .map((i) => `${i.area} ${i.question} ${i.normReference ?? ""}`.toLowerCase())
+        .join(" | ");
+      allItemsText += ` | ${combined}`;
+    }
+
+    // 1. Antincendio DM 28/02/2014 per campeggi
+    assert.ok(
+      allItemsText.includes("antincendio") &&
+        (allItemsText.includes("dm 28/02/2014") || allItemsText.includes("28/02/2014")),
+      `Missing norm requirement "antincendio DM 28/02/2014" for ${ateco}`,
+    );
+
+    // 2. Colonnine elettriche piazzole CEI 64-8 sez. 708
+    assert.ok(
+      allItemsText.includes("colonnine elettriche") &&
+        allItemsText.includes("piazzole") &&
+        (allItemsText.includes("cei 64-8") || allItemsText.includes("64-8")) &&
+        (allItemsText.includes("708") || allItemsText.includes("sez. 708")),
+      `Missing norm requirement "colonnine elettriche piazzole CEI 64-8 sez. 708" for ${ateco}`,
+    );
+
+    // 3. Legionella reti idriche campeggio D.Lgs. 18/2023 per blocchi docce distribuiti
+    assert.ok(
+      allItemsText.includes("legionella") &&
+        (allItemsText.includes("reti idriche") || allItemsText.includes("docce") || allItemsText.includes("campeggio")) &&
+        (allItemsText.includes("18/2023") || allItemsText.includes("d.lgs. 18/2023")),
+      `Missing norm requirement "Legionella reti idriche campeggio D.Lgs. 18/2023" for ${ateco}`,
+    );
+
+    // 4. Piscine e sicurezza bagnanti UNI 10637
+    assert.ok(
+      allItemsText.includes("piscine") &&
+        (allItemsText.includes("sicurezza bagnanti") || allItemsText.includes("bagnanti") || allItemsText.includes("bagnini")) &&
+        (allItemsText.includes("uni 10637") || allItemsText.includes("10637")),
+      `Missing norm requirement "piscine e sicurezza bagnanti UNI 10637" for ${ateco}`,
+    );
+
+    // 5. Camper service e scarico reflui
+    assert.ok(
+      allItemsText.includes("camper service") &&
+        (allItemsText.includes("scarico reflui") || allItemsText.includes("reflui")),
+      `Missing norm requirement "camper service e scarico reflui" for ${ateco}`,
+    );
+  }
+
+  // Verifica integrazione ispezioni per azienda Campeggio / Villaggio turistico con ATECO variante dotless (553000)
+  const campingCompany = await app.prisma.company.upsert({
+    where: { id: "test-camping-integration-company" },
+    update: { atecoCode: "553000" },
+    create: {
+      id: "test-camping-integration-company",
+      name: "Camping Village Bella Vista FedShield",
+      vatNumber: "IT99887766557",
+      atecoCode: "553000",
+      legalAddress: "Via del Mare 50, Rimini",
+    },
+  });
+
+  const campingInspection = await app.inject({
+    method: "POST",
+    url: "/api/inspections",
+    headers,
+    payload: {
+      companyId: campingCompany.id,
+      title: "Ispezione Camping Village Test",
+    },
+  });
+  assert.equal(campingInspection.statusCode, 201);
+  const campingInspectionId = campingInspection.json().id as string;
+
+  const campingInspectionDocsRes = await app.inject({
+    method: "GET",
+    url: `/api/inspections/${campingInspectionId}/documents/requirements`,
+    headers,
+  });
+  assert.equal(campingInspectionDocsRes.statusCode, 200);
+  const campingInspectionDocs = campingInspectionDocsRes.json() as Array<{ name: string; documentTemplateId: string }>;
+  const campingSpecificDocs = campingInspectionDocs.filter(
+    (d) =>
+      d.name.toLowerCase().includes("campeggio") ||
+      d.name.toLowerCase().includes("villaggio") ||
+      d.name.toLowerCase().includes("open-air") ||
+      d.name.toLowerCase().includes("antincendio") ||
+      d.name.toLowerCase().includes("legionella"),
+  );
+  assert.ok(
+    campingSpecificDocs.length >= 5,
+    `Expected at least 5 camping-specific document requirements for inspection, found ${campingSpecificDocs.length}`,
+  );
+
+  console.log("HoReCa completeness test passed (including Hotel, B&B, Ostelli/Residence and Campeggi/Villaggi turistici ATECO variants and inspection integration)");
   await app.close();
 }
 

@@ -6390,14 +6390,99 @@ export async function seedHoreca() {
     return item;
   });
 
-  const campingVillagePremisesItems = remapChecklistItems(hotelPremisesItems, campingVillagePremisesTemplate.id, [
-    [/hotel/gi, "campeggio/villaggio turistico"],
-    [/struttura ricettiva/gi, "struttura open-air"],
-  ]);
-  const campingVillageProcedureItems = remapChecklistItems(hotelProcedureItems, campingVillageProceduresTemplate.id, [
-    [/hotel/gi, "campeggio/villaggio turistico"],
-    [/struttura ricettiva/gi, "struttura open-air"],
-  ]);
+  const campingVillagePremisesItems = remapChecklistItems(
+    hotelPremisesItems,
+    campingVillagePremisesTemplate.id,
+    [
+      [/hotel/gi, "campeggio/villaggio turistico"],
+      [/struttura ricettiva/gi, "struttura open-air"],
+    ],
+  ).map((item) => {
+    if (item.orderIndex === 4) {
+      return {
+        ...item,
+        area: "Impianti elettrici",
+        question:
+          "Colonnine elettriche piazzole conformi alla norma CEI 64-8 sez. 708 con prese interbloccate IP44/IP67, differenziali dedicati e verifiche periodiche?",
+        normReference: "CEI 64-8 sez. 708, D.Lgs. 81/2008",
+      };
+    }
+    if (item.orderIndex === 7) {
+      return {
+        ...item,
+        area: "Sicurezza antincendio",
+        question:
+          "Presidi antincendio, idranti UNI 45/70, estintori e viabilità per mezzi VVF conformi alla regola tecnica DM 28/02/2014 per campeggi e villaggi turistici?",
+        normReference: "DM 28/02/2014, D.M. 03/09/2021",
+      };
+    }
+    if (item.orderIndex === 8) {
+      return {
+        ...item,
+        area: "Sicurezza antincendio",
+        question:
+          "Piano di emergenza ed evacuazione antincendio aggiornato al DM 28/02/2014 con planimetrie piazzole, punti di raccolta e sistema di allarme ottico-acustico?",
+        normReference: "DM 28/02/2014",
+      };
+    }
+    if (item.orderIndex === 12) {
+      return {
+        ...item,
+        area: "Piscine",
+        question:
+          "Piscine e sicurezza bagnanti conformi alla norma tecnica UNI 10637 con ricircolo/filtrazione, vaschette lavapiedi e presidio bagnini attivo?",
+        normReference: "UNI 10637, Accordo Stato-Regioni 16/01/2003",
+      };
+    }
+    if (item.orderIndex === 17) {
+      return {
+        ...item,
+        area: "Camper service",
+        question:
+          "Area camper service e scarico reflui per camper/caravan con pozzetto sifonato autopulente, fontanella acqua potabile separata e smaltimento a norma?",
+        normReference: "D.Lgs. 152/2006, LR Turismo all'aria aperta",
+      };
+    }
+    if (item.orderIndex === 23) {
+      return {
+        ...item,
+        area: "Legionella",
+        question:
+          "Piano prevenzione Legionella reti idriche campeggio e blocchi docce distribuiti conforme al D.Lgs. 18/2023 con valutazione del rischio e campionamenti periodici?",
+        normReference: "D.Lgs. 18/2023, Linee Guida Legionellosi",
+      };
+    }
+    return item;
+  });
+
+  const campingVillageProcedureItems = remapChecklistItems(
+    hotelProcedureItems,
+    campingVillageProceduresTemplate.id,
+    [
+      [/hotel/gi, "campeggio/villaggio turistico"],
+      [/struttura ricettiva/gi, "struttura open-air"],
+    ],
+  ).map((item) => {
+    if (item.orderIndex === 18) {
+      return {
+        ...item,
+        area: "Emergenze",
+        question:
+          "Procedure emergenza e piano antincendio conformi al DM 28/02/2014 per campeggi note a tutto il personale con esercitazioni periodiche registrate?",
+        normReference: "DM 28/02/2014, D.M. 02/09/2021",
+      };
+    }
+    if (item.orderIndex === 21) {
+      return {
+        ...item,
+        area: "Legionella",
+        question:
+          "Procedure operative di prevenzione Legionella per reti idriche campeggio e blocchi docce conformi al D.Lgs. 18/2023 con flussaggi, shock termici e registri?",
+        normReference: "D.Lgs. 18/2023",
+      };
+    }
+    return item;
+  });
 
   const beachClubPremisesItems = remapChecklistItems(barPremisesItems, beachClubPremisesTemplate.id, [
     [/bar/gi, "stabilimento balneare"],

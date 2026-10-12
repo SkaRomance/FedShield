@@ -4939,6 +4939,586 @@ assert.ok(
   "In modalità safety_only tutti gli item dormitori Ostello devono essere safety o both",
 );
 
+// ============================================================================
+// 13. Test Campeggi, Villaggi Turistici, Camping Village e Allestimenti Camper
+// ATECO 55.30.00 (o 55.30.0 / 55.30 / 55.3 / 553000 / 55300 / 5530 / 553)
+// ============================================================================
+console.log("Test 31: getStandardEnvironmentsForAteco & conformità per Campeggi, Camping Village (55.30.00 / 55.30.0 / 55.30 / 55.3 / 553000)");
+
+const cmpEnvs = getStandardEnvironmentsForAteco("55.30.00");
+assert.equal(cmpEnvs.length, 12, "Il Campeggio / Villaggio Turistico deve avere esattamente 12 ambienti standard");
+
+// Verifica varianti codice ATECO (55.30.0, 55.30, 55.3, 553000, 55300, 5530, 553)
+const cmpEnvsVar1 = getStandardEnvironmentsForAteco("55.30.0");
+assert.equal(cmpEnvsVar1.length, 12, "Anche prefisso 55.30.0 deve restituire 12 ambienti Campeggio");
+const cmpEnvsVar2 = getStandardEnvironmentsForAteco("55.30");
+assert.equal(cmpEnvsVar2.length, 12, "Anche prefisso 55.30 deve restituire 12 ambienti Campeggio");
+const cmpEnvsVar3 = getStandardEnvironmentsForAteco("55.3");
+assert.equal(cmpEnvsVar3.length, 12, "Anche prefisso 55.3 deve restituire 12 ambienti Campeggio");
+const cmpEnvsVar4 = getStandardEnvironmentsForAteco("553000");
+assert.equal(cmpEnvsVar4.length, 12, "Anche codice numerico 553000 deve restituire 12 ambienti Campeggio");
+const cmpEnvsVar5 = getStandardEnvironmentsForAteco("55300");
+assert.equal(cmpEnvsVar5.length, 12, "Anche codice numerico 55300 deve restituire 12 ambienti Campeggio");
+const cmpEnvsVar6 = getStandardEnvironmentsForAteco("5530");
+assert.equal(cmpEnvsVar6.length, 12, "Anche codice numerico 5530 deve restituire 12 ambienti Campeggio");
+const cmpEnvsVar7 = getStandardEnvironmentsForAteco("553");
+assert.equal(cmpEnvsVar7.length, 12, "Anche codice numerico 553 deve restituire 12 ambienti Campeggio");
+
+// Verifica ID dei 12 ambienti standard Campeggio / Villaggio Turistico
+const expectedCmpIds = [
+  "env-cmp-reception-direzione",
+  "env-cmp-piazzole-tende-camper",
+  "env-cmp-bungalow-mobilhome",
+  "env-cmp-blocchi-servizi-docce",
+  "env-cmp-camper-service-scarico",
+  "env-cmp-piscina-solarium",
+  "env-cmp-locale-tecnico-cloro",
+  "env-cmp-ristorante-minimarket",
+  "env-cmp-lavanderia-self",
+  "env-cmp-centrale-idrica-antincendio",
+  "env-cmp-officina-manutenzione",
+  "env-cmp-isola-ecologica-rifiuti",
+];
+
+for (const id of expectedCmpIds) {
+  assert.ok(
+    cmpEnvs.some((e) => e.id === id),
+    `Ambiente ${id} deve essere presente nella lista standard Campeggio per 55.30.00`,
+  );
+}
+
+// 1. Reception Principale, Check-in Ospiti & Uffici Direzione
+const cmpReception = cmpEnvs.find((e) => e.id === "env-cmp-reception-direzione")!;
+assert.equal(cmpReception.category, "sales_office");
+assert.equal(cmpReception.surfaceSqM, 80);
+assert.equal(cmpReception.heightM, 3.0);
+assert.equal(cmpReception.volumeCuM, 240);
+assert.equal(cmpReception.occupantsCount, 4);
+assert.equal(cmpReception.windowSurfaceSqM, 10.0);
+assert.equal(cmpReception.features.emergencyLighting, true);
+const compCmpReception = evaluateEnvironmentCompliance(cmpReception, "55.30.00");
+assert.equal(compCmpReception.isHeightCompliant, true);
+assert.equal(compCmpReception.isCubatureCompliant, true);
+assert.ok(
+  compCmpReception.summaryBadges.some((b) => b.text.includes("VDT ergonomica") && b.text.includes("30 mA")),
+  "Reception Campeggio deve includere badge VDT ergonomica e differenziale 30 mA",
+);
+assert.ok(
+  compCmpReception.summaryBadges.some((b) => b.text.includes("34A 233B") && b.text.toLowerCase().includes("planimetria")),
+  "Reception Campeggio deve includere badge estintore 34A 233B e planimetria bilingue",
+);
+
+// 2. Area Piazzole Campeggio & Viabilità Interna
+const cmpPiazzole = cmpEnvs.find((e) => e.id === "env-cmp-piazzole-tende-camper")!;
+assert.equal(cmpPiazzole.category, "production");
+assert.equal(cmpPiazzole.surfaceSqM, 5000);
+assert.equal(cmpPiazzole.heightM, 3.0);
+assert.equal(cmpPiazzole.volumeCuM, 15000);
+assert.equal(cmpPiazzole.occupantsCount, 200);
+assert.equal(cmpPiazzole.features.emergencyLighting, true);
+const compCmpPiazzole = evaluateEnvironmentCompliance(cmpPiazzole, "55.30.00");
+assert.equal(compCmpPiazzole.isHeightCompliant, true);
+assert.equal(compCmpPiazzole.isCubatureCompliant, true);
+assert.ok(compCmpPiazzole.cpiActivityAlert !== null, "Piazzole campeggio devono essere assoggettate ad Attività 66 CPI");
+assert.equal(compCmpPiazzole.cpiActivityAlert?.code, "Attività 66 (D.P.R. 151/2011)");
+assert.ok(
+  compCmpPiazzole.summaryBadges.some((b) => b.text.includes("3,50 m") && b.text.includes("D.M. 28/02/2014")),
+  "Piazzole Campeggio devono verificare viabilità soccorsi VVF >= 3,50 m D.M. 28/02/2014",
+);
+assert.ok(
+  compCmpPiazzole.summaryBadges.some((b) => b.text.includes("CEI 64-8 sez. 708") && b.text.includes("30 mA")),
+  "Piazzole Campeggio devono verificare colonnine elettriche CEI 64-8 sez. 708",
+);
+assert.ok(
+  compCmpPiazzole.summaryBadges.some((b) => b.text.includes("UNI 45/70 ogni 50 m")),
+  "Piazzole Campeggio devono verificare idranti UNI 45/70 ogni 50 m",
+);
+
+// 3. Villaggio Case Mobili, Maxi Caravan & Bungalow Turistici
+const cmpBungalow = cmpEnvs.find((e) => e.id === "env-cmp-bungalow-mobilhome")!;
+assert.equal(cmpBungalow.category, "production");
+assert.equal(cmpBungalow.surfaceSqM, 2000);
+assert.equal(cmpBungalow.heightM, 2.5);
+assert.equal(cmpBungalow.volumeCuM, 5000);
+assert.equal(cmpBungalow.occupantsCount, 100);
+assert.equal(cmpBungalow.windowSurfaceSqM, 200.0);
+assert.equal(cmpBungalow.features.emergencyLighting, true);
+const compCmpBungalow = evaluateEnvironmentCompliance(cmpBungalow, "55.30.00");
+assert.equal(compCmpBungalow.isHeightCompliant, true);
+assert.equal(compCmpBungalow.isCubatureCompliant, true);
+assert.ok(compCmpBungalow.cpiActivityAlert !== null, "Villaggio bungalow deve essere assoggettato ad Attività 66 CPI");
+assert.ok(
+  compCmpBungalow.summaryBadges.some((b) => b.text.includes("UNI EN 14604")),
+  "Bungalow Campeggio devono verificare rilevatori di fumo autonomi UNI EN 14604",
+);
+assert.ok(
+  compCmpBungalow.summaryBadges.some((b) => b.text.includes("GPL") && b.text.includes("catenelle")),
+  "Bungalow Campeggio devono verificare bombole GPL esterne con catenelle",
+);
+
+// 4. Blocchi Servizi Igienici Centralizzati & Docce Calde (con Servizi Disabili PMR)
+const cmpBlocchiServizi = cmpEnvs.find((e) => e.id === "env-cmp-blocchi-servizi-docce")!;
+assert.equal(cmpBlocchiServizi.category, "services");
+assert.equal(cmpBlocchiServizi.surfaceSqM, 120);
+assert.equal(cmpBlocchiServizi.heightM, 2.7);
+assert.equal(cmpBlocchiServizi.volumeCuM, 324);
+assert.equal(cmpBlocchiServizi.occupantsCount, 10);
+assert.equal(cmpBlocchiServizi.windowSurfaceSqM, 12.0);
+assert.equal(cmpBlocchiServizi.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(cmpBlocchiServizi.features.flooringCondition, "compliant_anti_slip");
+assert.equal(cmpBlocchiServizi.features.forcedExhaustPresent, true);
+assert.equal(cmpBlocchiServizi.features.forcedExhaustType, "blind_toilet_fan");
+const compCmpBlocchiServizi = evaluateEnvironmentCompliance(cmpBlocchiServizi, "55.30.00");
+assert.equal(compCmpBlocchiServizi.isHeightCompliant, true);
+assert.equal(compCmpBlocchiServizi.isCubatureCompliant, true);
+assert.ok(
+  compCmpBlocchiServizi.summaryBadges.some((b) => b.text.includes("R11") && b.text.includes("canaline sifonate")),
+  "Blocchi servizi docce devono verificare piatto antiscivolo R11 e canaline sifonate",
+);
+assert.ok(
+  compCmpBlocchiServizi.summaryBadges.some((b) => b.text.includes("Legionella D.Lgs. 18/2023")),
+  "Blocchi servizi docce devono verificare protocollo Legionella D.Lgs. 18/2023",
+);
+assert.ok(
+  compCmpBlocchiServizi.summaryBadges.some((b) => b.text.includes("PMR D.P.R. 503/96")),
+  "Blocchi servizi docce devono verificare accessibilità PMR D.P.R. 503/96",
+);
+
+// 5. Area Camper Service (Scarico Reflui Igienici & Rifornimento Acqua Potabile)
+const cmpCamperService = cmpEnvs.find((e) => e.id === "env-cmp-camper-service-scarico")!;
+assert.equal(cmpCamperService.category, "technical");
+assert.equal(cmpCamperService.surfaceSqM, 60);
+assert.equal(cmpCamperService.heightM, 3.0);
+assert.equal(cmpCamperService.volumeCuM, 180);
+assert.equal(cmpCamperService.occupantsCount, 2);
+assert.equal(cmpCamperService.features.flooringCondition, "compliant_anti_slip");
+const compCmpCamperService = evaluateEnvironmentCompliance(cmpCamperService, "55.30.00");
+assert.equal(compCmpCamperService.isHeightCompliant, true);
+assert.equal(compCmpCamperService.isCubatureCompliant, true);
+assert.ok(
+  compCmpCamperService.summaryBadges.some((b) => b.text.includes("UNI EN 1717")),
+  "Camper Service deve verificare disconnettore UNI EN 1717 e separazione reflui",
+);
+assert.ok(
+  compCmpCamperService.summaryBadges.some((b) => b.text.includes("Griglia carrabile")),
+  "Camper Service deve verificare griglia carrabile autopulente",
+);
+
+// 6. Parco Piscine, Vasca Bambini & Area Solarium (UNI 10637)
+const cmpPiscina = cmpEnvs.find((e) => e.id === "env-cmp-piscina-solarium")!;
+assert.equal(cmpPiscina.category, "services");
+assert.equal(cmpPiscina.surfaceSqM, 800);
+assert.equal(cmpPiscina.heightM, 3.0);
+assert.equal(cmpPiscina.volumeCuM, 2400);
+assert.equal(cmpPiscina.occupantsCount, 80);
+assert.equal(cmpPiscina.features.flooringCondition, "compliant_anti_slip");
+assert.equal(cmpPiscina.features.emergencyLighting, true);
+const compCmpPiscina = evaluateEnvironmentCompliance(cmpPiscina, "55.30.00");
+assert.equal(compCmpPiscina.isHeightCompliant, true);
+assert.equal(compCmpPiscina.isCubatureCompliant, true);
+assert.ok(
+  compCmpPiscina.summaryBadges.some((b) => b.text.includes("DIN 51097 classe C")),
+  "Piscina solarium deve verificare pavimentazione antiscivolo bagnata DIN 51097 classe C",
+);
+assert.ok(
+  compCmpPiscina.summaryBadges.some((b) => b.text.includes("bagnino") && b.text.includes("DAE")),
+  "Piscina solarium deve verificare torretta bagnino con salvagente e DAE",
+);
+assert.ok(
+  compCmpPiscina.summaryBadges.some((b) => b.text.includes("cloro/pH UNI 10637")),
+  "Piscina solarium deve verificare controllo cloro/pH UNI 10637",
+);
+
+// 7. Locale Tecnico Trattamento Acque Piscina & Deposito Prodotti Chimici (Cloro/pH)
+const cmpLocaleCloro = cmpEnvs.find((e) => e.id === "env-cmp-locale-tecnico-cloro")!;
+assert.equal(cmpLocaleCloro.category, "technical");
+assert.equal(cmpLocaleCloro.surfaceSqM, 25);
+assert.equal(cmpLocaleCloro.heightM, 2.6);
+assert.equal(cmpLocaleCloro.volumeCuM, 65);
+assert.equal(cmpLocaleCloro.occupantsCount, 1);
+assert.equal(cmpLocaleCloro.features.emergencyLighting, true);
+const compCmpLocaleCloro = evaluateEnvironmentCompliance(cmpLocaleCloro, "55.30.00");
+assert.equal(compCmpLocaleCloro.isHeightCompliant, true);
+assert.equal(compCmpLocaleCloro.isCubatureCompliant, true);
+assert.ok(
+  compCmpLocaleCloro.summaryBadges.some((b) => b.text.includes("Vasche di contenimento") && b.text.includes("ipoclorito")),
+  "Locale cloro deve verificare vasche di contenimento chimico",
+);
+assert.ok(
+  compCmpLocaleCloro.summaryBadges.some((b) => b.text.includes("UNI EN 15154")),
+  "Locale cloro deve verificare doccia di emergenza e lavaocchi UNI EN 15154",
+);
+assert.ok(
+  compCmpLocaleCloro.summaryBadges.some((b) => b.text.includes("Ventilazione forzata permanente antideflagrante")),
+  "Locale cloro deve verificare ventilazione forzata antideflagrante",
+);
+
+// 8. Ristorante, Pizzeria, Bar & Minimarket del Villaggio
+const cmpRistorante = cmpEnvs.find((e) => e.id === "env-cmp-ristorante-minimarket")!;
+assert.equal(cmpRistorante.category, "production");
+assert.equal(cmpRistorante.surfaceSqM, 250);
+assert.equal(cmpRistorante.heightM, 3.2);
+assert.equal(cmpRistorante.volumeCuM, 800);
+assert.equal(cmpRistorante.occupantsCount, 8);
+assert.equal(cmpRistorante.windowSurfaceSqM, 25.0);
+assert.equal(cmpRistorante.features.forcedExhaustPresent, true);
+assert.equal(cmpRistorante.features.forcedExhaustType, "kitchen_hood");
+assert.equal(cmpRistorante.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(cmpRistorante.features.flooringCondition, "compliant_anti_slip");
+assert.equal(cmpRistorante.features.insectScreens, true);
+assert.equal(cmpRistorante.features.microclimateCompliant, true);
+const compCmpRistorante = evaluateEnvironmentCompliance(cmpRistorante, "55.30.00");
+assert.equal(compCmpRistorante.isHeightCompliant, true);
+assert.equal(compCmpRistorante.isCubatureCompliant, true);
+assert.ok(
+  compCmpRistorante.summaryBadges.some((b) => b.text.includes("Ansul R-102")),
+  "Ristorante Campeggio deve verificare impianto automatico spegnimento cappe Ansul R-102",
+);
+assert.ok(
+  compCmpRistorante.summaryBadges.some((b) => b.text.includes("HACCP") && b.text.includes("MOCA")),
+  "Ristorante Campeggio deve verificare celle frigo HACCP e banchi MOCA",
+);
+
+// 9. Locale Lavanderia Self-Service per Campeggiatori & Stireria
+const cmpLavanderia = cmpEnvs.find((e) => e.id === "env-cmp-lavanderia-self")!;
+assert.equal(cmpLavanderia.category, "services");
+assert.equal(cmpLavanderia.surfaceSqM, 30);
+assert.equal(cmpLavanderia.heightM, 2.6);
+assert.equal(cmpLavanderia.volumeCuM, 78);
+assert.equal(cmpLavanderia.occupantsCount, 3);
+assert.equal(cmpLavanderia.windowSurfaceSqM, 3.0);
+assert.equal(cmpLavanderia.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(cmpLavanderia.features.flooringCondition, "compliant_anti_slip");
+assert.equal(cmpLavanderia.features.forcedExhaustPresent, true);
+const compCmpLavanderia = evaluateEnvironmentCompliance(cmpLavanderia, "55.30.00");
+assert.equal(compCmpLavanderia.isHeightCompliant, true);
+assert.equal(compCmpLavanderia.isCubatureCompliant, true);
+assert.ok(
+  compCmpLavanderia.summaryBadges.some((b) => b.text.includes("UNI EN ISO 10472")),
+  "Lavanderia Campeggio deve verificare blocco oblò di sicurezza UNI EN ISO 10472",
+);
+assert.ok(
+  compCmpLavanderia.summaryBadges.some((b) => b.text.includes("filtri lanugine essiccatori")),
+  "Lavanderia Campeggio deve verificare pulizia quotidiana filtri lanugine",
+);
+
+// 10. Centrale Idrica, Gruppo di Pompaggio Antincendio & Serbatoi ACS
+const cmpCentraleIdrica = cmpEnvs.find((e) => e.id === "env-cmp-centrale-idrica-antincendio")!;
+assert.equal(cmpCentraleIdrica.category, "technical");
+assert.equal(cmpCentraleIdrica.surfaceSqM, 35);
+assert.equal(cmpCentraleIdrica.heightM, 3.0);
+assert.equal(cmpCentraleIdrica.volumeCuM, 105);
+assert.equal(cmpCentraleIdrica.occupantsCount, 1);
+assert.equal(cmpCentraleIdrica.features.emergencyLighting, true);
+const compCmpCentraleIdrica = evaluateEnvironmentCompliance(cmpCentraleIdrica, "55.30.00");
+assert.equal(compCmpCentraleIdrica.isHeightCompliant, true);
+assert.equal(compCmpCentraleIdrica.isCubatureCompliant, true);
+assert.ok(
+  compCmpCentraleIdrica.summaryBadges.some((b) => b.text.includes("UNI EN 12845") && b.text.includes("motopompa diesel")),
+  "Centrale Idrica Campeggio deve verificare gruppo pompaggio antincendio UNI EN 12845 con motopompa diesel",
+);
+assert.ok(
+  compCmpCentraleIdrica.summaryBadges.some((b) => b.text.includes("ACS a temperatura costante ≥ 60°C")),
+  "Centrale Idrica Campeggio deve verificare mantenimento temperatura ACS >= 60°C anti-legionella",
+);
+
+// 11. Officina Manutenzione, Rimessaggio Mezzi di Servizio & Trattorini
+const cmpOfficina = cmpEnvs.find((e) => e.id === "env-cmp-officina-manutenzione")!;
+assert.equal(cmpOfficina.category, "warehouse");
+assert.equal(cmpOfficina.surfaceSqM, 60);
+assert.equal(cmpOfficina.heightM, 3.5);
+assert.equal(cmpOfficina.volumeCuM, 210);
+assert.equal(cmpOfficina.occupantsCount, 2);
+assert.equal(cmpOfficina.windowSurfaceSqM, 6.0);
+assert.equal(cmpOfficina.features.emergencyLighting, true);
+const compCmpOfficina = evaluateEnvironmentCompliance(cmpOfficina, "55.30.00");
+assert.equal(compCmpOfficina.isHeightCompliant, true);
+assert.equal(compCmpOfficina.isCubatureCompliant, true);
+assert.ok(
+  compCmpOfficina.summaryBadges.some((b) => b.text.includes("golf-cart") && b.text.includes("anti-idrogeno")),
+  "Officina Campeggio deve verificare ricarica batterie golf-cart ventilata anti-idrogeno",
+);
+assert.ok(
+  compCmpOfficina.summaryBadges.some((b) => b.text.includes("REI 90 / EN 14470")),
+  "Officina Campeggio deve verificare armadio tagliafuoco per benzine e carburanti",
+);
+
+// 12. Isola Ecologica Centrale Rifiuti & Compattatore Differenziata
+const cmpIsolaEcologica = cmpEnvs.find((e) => e.id === "env-cmp-isola-ecologica-rifiuti")!;
+assert.equal(cmpIsolaEcologica.category, "technical");
+assert.equal(cmpIsolaEcologica.surfaceSqM, 80);
+assert.equal(cmpIsolaEcologica.heightM, 3.0);
+assert.equal(cmpIsolaEcologica.volumeCuM, 240);
+assert.equal(cmpIsolaEcologica.occupantsCount, 2);
+assert.equal(cmpIsolaEcologica.features.flooringCondition, "compliant_anti_slip");
+const compCmpIsolaEcologica = evaluateEnvironmentCompliance(cmpIsolaEcologica, "55.30.00");
+assert.equal(compCmpIsolaEcologica.isHeightCompliant, true);
+assert.equal(compCmpIsolaEcologica.isCubatureCompliant, true);
+assert.ok(
+  compCmpIsolaEcologica.summaryBadges.some((b) => b.text.includes("differenziata carrellati con coperchio")),
+  "Isola ecologica Campeggio deve verificare cassonetti con coperchio ermetico",
+);
+assert.ok(
+  compCmpIsolaEcologica.summaryBadges.some((b) => b.text.includes("UNI EN 16500")),
+  "Isola ecologica Campeggio deve verificare compattatore UNI EN 16500 con arresto d'emergenza",
+);
+
+
+// ============================================================================
+// Test 32: generateEnvironmentChecklistItems per locali Campeggio (ATECO 55.30.00)
+// ============================================================================
+console.log("Test 32: generateEnvironmentChecklistItems per locali Campeggio (ATECO 55.30.00)");
+
+// 1. Reception Principale & Uffici Direzione
+const cmpReceptionItems = generateEnvironmentChecklistItems(cmpReception, "55.30.00");
+assert.ok(
+  cmpReceptionItems.some(
+    (it) => it.id.includes("postazione-vdt-quadro-differenziale-30ma") && it.domain === "safety",
+  ),
+  "Reception Campeggio deve verificare postazione VDT ergonomica e differenziale 30 mA (domain: safety)",
+);
+assert.ok(
+  cmpReceptionItems.some(
+    (it) => it.id.includes("estintore-34a-233b-planimetria-esodo-bilingue") && it.domain === "safety",
+  ),
+  "Reception Campeggio deve verificare estintore 34A 233B e planimetria bilingue (domain: safety)",
+);
+assert.ok(
+  cmpReceptionItems.some(
+    (it) => it.id.includes("sistema-diffusione-sonora-evacuazione") && it.domain === "safety",
+  ),
+  "Reception Campeggio deve verificare sistema diffusione sonora emergenza all'aperto (domain: safety)",
+);
+
+// 2. Area Piazzole Campeggio (Tende, Roulotte, Camper) & Viabilità Interna
+const cmpPiazzoleItems = generateEnvironmentChecklistItems(cmpPiazzole, "55.30.00");
+assert.ok(
+  cmpPiazzoleItems.some(
+    (it) => it.id.includes("colonnine-elettriche-differenziale-30ma-cei-64-8") && it.domain === "safety",
+  ),
+  "Piazzole Campeggio devono verificare colonnine con differenziale 30 mA CEI 64-8 sez. 708 (domain: safety)",
+);
+assert.ok(
+  cmpPiazzoleItems.some(
+    (it) => it.id.includes("viabilita-soccorsi-vvf-larghezza-350m") && it.domain === "safety",
+  ),
+  "Piazzole Campeggio devono verificare viabilità VVF >= 3,50 m D.M. 28/02/2014 (domain: safety)",
+);
+assert.ok(
+  cmpPiazzoleItems.some(
+    (it) => it.id.includes("rete-idranti-uni-45-70-ogni-50m-distanziamento") && it.domain === "safety",
+  ),
+  "Piazzole Campeggio devono verificare idranti UNI 45/70 ogni 50 m e distanziamento >= 3 m (domain: safety)",
+);
+
+// 3. Villaggio Case Mobili, Maxi Caravan & Bungalow Turistici
+const cmpBungalowItems = generateEnvironmentChecklistItems(cmpBungalow, "55.30.00");
+assert.ok(
+  cmpBungalowItems.some(
+    (it) => it.id.includes("rilevatori-fumo-autonomi-uni-en-14604") && it.domain === "safety",
+  ),
+  "Bungalow Campeggio devono verificare rilevatori fumo autonomi UNI EN 14604 (domain: safety)",
+);
+assert.ok(
+  cmpBungalowItems.some(
+    (it) => it.id.includes("bombole-gpl-catenelle-flessibili-uni-7140") && it.domain === "safety",
+  ),
+  "Bungalow Campeggio devono verificare bombole GPL esterne e flessibili UNI 7140 (domain: safety)",
+);
+assert.ok(
+  cmpBungalowItems.some(
+    (it) => it.id.includes("estintori-polvere-distribuiti-percorsi-illuminati") && it.domain === "safety",
+  ),
+  "Bungalow Campeggio devono verificare estintori a polvere distribuiti e illuminazione >= 5 lux (domain: safety)",
+);
+
+// 4. Blocchi Servizi Igienici Centralizzati & Docce Calde (con Servizi Disabili PMR)
+const cmpBlocchiServiziItems = generateEnvironmentChecklistItems(cmpBlocchiServizi, "55.30.00");
+assert.ok(
+  cmpBlocchiServiziItems.some(
+    (it) => it.id.includes("protocollo-legionella-soffioni-docce-dlgs-18-2023") && it.domain === "both",
+  ),
+  "Blocchi docce Campeggio devono verificare protocollo Legionella D.Lgs. 18/2023 su soffioni (domain: both)",
+);
+assert.ok(
+  cmpBlocchiServiziItems.some(
+    (it) => it.id.includes("box-docce-antiscivolo-r11-canaline-sifonate") && it.domain === "both",
+  ),
+  "Blocchi docce Campeggio devono verificare piatti doccia R11 e antibagno con carta a perdere (domain: both)",
+);
+assert.ok(
+  cmpBlocchiServiziItems.some(
+    (it) => it.id.includes("bagno-disabili-pmr-tirante-soccorso-dlgs-503-96") && it.domain === "safety",
+  ),
+  "Blocchi docce Campeggio devono verificare tirante allarme bagno disabili PMR (domain: safety)",
+);
+
+// 5. Area Camper Service (Scarico Reflui Igienici & Rifornimento Acqua Potabile)
+const cmpCamperServiceItems = generateEnvironmentChecklistItems(cmpCamperService, "55.30.00");
+assert.ok(
+  cmpCamperServiceItems.some(
+    (it) => it.id.includes("separazione-reflui-acqua-potabile-disconnettore-uni-en-1717") && it.domain === "both",
+  ),
+  "Camper service deve verificare divieto contatto reflui/potabile e disconnettore UNI EN 1717 (domain: both)",
+);
+assert.ok(
+  cmpCamperServiceItems.some(
+    (it) => it.id.includes("griglia-carrabile-autopulente-scarico-acque-grigie") && it.domain === "both",
+  ),
+  "Camper service deve verificare pulizia griglia carrabile autopulente (domain: both)",
+);
+
+// 6. Parco Piscine, Vasca Bambini & Area Solarium (UNI 10637)
+const cmpPiscinaItems = generateEnvironmentChecklistItems(cmpPiscina, "55.30.00");
+assert.ok(
+  cmpPiscinaItems.some(
+    (it) => it.id.includes("controllo-giornaliero-cloro-ph-uni-10637") && it.domain === "both",
+  ),
+  "Piscina Campeggio deve verificare controllo giornaliero cloro libero e pH a norma UNI 10637 (domain: both)",
+);
+assert.ok(
+  cmpPiscinaItems.some(
+    (it) => it.id.includes("torretta-bagnino-salvagente-anulare-sagola") && it.domain === "safety",
+  ),
+  "Piscina Campeggio deve verificare bagnino con torretta, salvagente anulare e sagola (domain: safety)",
+);
+assert.ok(
+  cmpPiscinaItems.some(
+    (it) => it.id.includes("dae-defibrillatore-teca-riscaldata-pavimento-classe-c") && it.domain === "safety",
+  ),
+  "Piscina Campeggio deve verificare DAE operativo e pavimento classe C (domain: safety)",
+);
+
+// 7. Locale Tecnico Trattamento Acque Piscina & Deposito Prodotti Chimici (Cloro/pH)
+const cmpLocaleCloroItems = generateEnvironmentChecklistItems(cmpLocaleCloro, "55.30.00");
+assert.ok(
+  cmpLocaleCloroItems.some(
+    (it) => it.id.includes("vasche-contenimento-fusti-cloro-acido") && it.domain === "safety",
+  ),
+  "Locale cloro deve verificare tenuta stagna vasche di contenimento fusti (domain: safety)",
+);
+assert.ok(
+  cmpLocaleCloroItems.some(
+    (it) => it.id.includes("doccia-emergenza-lavaocchi-uni-en-15154") && it.domain === "safety",
+  ),
+  "Locale cloro deve verificare doccia di emergenza e lavaocchi UNI EN 15154 (domain: safety)",
+);
+assert.ok(
+  cmpLocaleCloroItems.some(
+    (it) => it.id.includes("ventilazione-forzata-dpi-respiratori-visiere") && it.domain === "safety",
+  ),
+  "Locale cloro deve verificare ventilazione forzata e DPI chimici (domain: safety)",
+);
+
+// 8. Ristorante, Pizzeria, Bar & Minimarket del Villaggio
+const cmpRistoranteItems = generateEnvironmentChecklistItems(cmpRistorante, "55.30.00");
+assert.ok(
+  cmpRistoranteItems.some(
+    (it) => it.id.includes("cappa-filtri-labirinto-spegnimento-ansul") && it.domain === "both",
+  ),
+  "Ristorante Campeggio deve verificare cappa aspirazione con filtri labirinto e spegnimento Ansul (domain: both)",
+);
+assert.ok(
+  cmpRistoranteItems.some(
+    (it) => it.id.includes("celle-frigo-haccp-temperature-moca") && it.domain === "haccp",
+  ),
+  "Ristorante Campeggio deve verificare celle frigorifere HACCP e banchi MOCA (domain: haccp)",
+);
+assert.ok(
+  cmpRistoranteItems.some(
+    (it) => it.id.includes("vie-fuga-antipanico-zanzariere") && it.domain === "safety",
+  ),
+  "Ristorante Campeggio deve verificare vie di fuga antipanico e zanzariere (domain: safety)",
+);
+
+// 9. Locale Lavanderia Self-Service per Campeggiatori & Stireria
+const cmpLavanderiaItems = generateEnvironmentChecklistItems(cmpLavanderia, "55.30.00");
+assert.ok(
+  cmpLavanderiaItems.some(
+    (it) => it.id.includes("blocco-oblo-uni-en-iso-10472-pavimento-antiscivolo") && it.domain === "safety",
+  ),
+  "Lavanderia Campeggio deve verificare blocco oblò UNI EN ISO 10472 e pavimento antiscivolo (domain: safety)",
+);
+assert.ok(
+  cmpLavanderiaItems.some(
+    (it) => it.id.includes("pulizia-giornaliera-filtri-lanugine-antincendio") && it.domain === "safety",
+  ),
+  "Lavanderia Campeggio deve verificare pulizia filtri lanugine essiccatori (domain: safety)",
+);
+
+// 10. Centrale Idrica, Gruppo di Pompaggio Antincendio & Serbatoi ACS
+const cmpCentraleIdricaItems = generateEnvironmentChecklistItems(cmpCentraleIdrica, "55.30.00");
+assert.ok(
+  cmpCentraleIdricaItems.some(
+    (it) => it.id.includes("prova-settimanale-motopompa-diesel-uni-en-12845") && it.domain === "safety",
+  ),
+  "Centrale Idrica deve verificare prova settimanale motopompa diesel UNI EN 12845 con livello gasolio (domain: safety)",
+);
+assert.ok(
+  cmpCentraleIdricaItems.some(
+    (it) => it.id.includes("temperatura-accumulo-acs-60-gradi-anti-legionella") && it.domain === "both",
+  ),
+  "Centrale Idrica deve verificare temperatura accumulo ACS >= 60°C anti-legionella (domain: both)",
+);
+
+// 11. Officina Manutenzione, Rimessaggio Mezzi di Servizio & Trattorini
+const cmpOfficinaItems = generateEnvironmentChecklistItems(cmpOfficina, "55.30.00");
+assert.ok(
+  cmpOfficinaItems.some(
+    (it) => it.id.includes("areazione-ricarica-batterie-golf-cart-anti-idrogeno") && it.domain === "safety",
+  ),
+  "Officina Campeggio deve verificare aerazione ricarica batterie golf-cart anti-idrogeno (domain: safety)",
+);
+assert.ok(
+  cmpOfficinaItems.some(
+    (it) => it.id.includes("armadio-tagliafuoco-carburanti-decespugliatori") && it.domain === "safety",
+  ),
+  "Officina Campeggio deve verificare armadio tagliafuoco benzine e miscele tosaerba (domain: safety)",
+);
+
+// 12. Isola Ecologica Centrale Rifiuti & Compattatore Differenziata
+const cmpIsolaEcologicaItems = generateEnvironmentChecklistItems(cmpIsolaEcologica, "55.30.00");
+assert.ok(
+  cmpIsolaEcologicaItems.some(
+    (it) => it.id.includes("compattatore-cartoni-arresto-emergenza-uni-en-16500") && it.domain === "safety",
+  ),
+  "Isola Ecologica Campeggio deve verificare compattatore con arresto emergenza UNI EN 16500 (domain: safety)",
+);
+assert.ok(
+  cmpIsolaEcologicaItems.some(
+    (it) => it.id.includes("cassonetti-coperchio-chiuso-derattizzazione-oli-esausti") && it.domain === "both",
+  ),
+  "Isola Ecologica Campeggio deve verificare cassonetti chiusi e piano derattizzazione (domain: both)",
+);
+
+// Verifica del filtraggio checklistMode su ristorante e blocchi docce Campeggio
+const cmpRistoranteHaccpMode = filterEnvironmentItemsByChecklistMode(cmpRistoranteItems, "haccp_only");
+assert.ok(
+  cmpRistoranteHaccpMode.every((it) => it.domain === "haccp" || it.domain === "both"),
+  "In modalità haccp_only tutti gli item ristorante Campeggio devono essere haccp o both",
+);
+assert.ok(
+  !cmpRistoranteHaccpMode.some((it) => it.domain === "safety"),
+  "In modalità haccp_only nessun item ristorante Campeggio deve avere domain safety",
+);
+
+const cmpRistoranteSafetyMode = filterEnvironmentItemsByChecklistMode(cmpRistoranteItems, "safety_only");
+assert.ok(
+  cmpRistoranteSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item ristorante Campeggio devono essere safety o both",
+);
+assert.ok(
+  !cmpRistoranteSafetyMode.some((it) => it.domain === "haccp"),
+  "In modalità safety_only nessun item ristorante Campeggio deve avere domain haccp",
+);
+
+const cmpPiazzoleSafetyMode = filterEnvironmentItemsByChecklistMode(cmpPiazzoleItems, "safety_only");
+assert.ok(
+  cmpPiazzoleSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item piazzole Campeggio devono essere safety o both",
+);
+
 console.log("=== TUTTI I TEST Step2AmbientiDiLavoro SUPERATI CON SUCCESSO! ===");
+
 
 
