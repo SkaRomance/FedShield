@@ -420,12 +420,51 @@ function buildAtecoVariants(atecoCode?: string | null) {
     variants.add("BAR");
   }
 
-  // Settori HoReCa collegati a somministrazione / tempo libero
-  if (normalized.startsWith("93.29.2") || digits.startsWith("93292")) {
+  // Stabilimenti balneari / Lidi / Beach club (93.29.20, 93.29.2, 93.29, 93.2, 932920, 93292, 9329, 932)
+  const isBeachClubText =
+    upper === "STABILIMENTO_BALNEARE" ||
+    upper === "STABILIMENTI_BALNEARI" ||
+    upper === "STABILIMENTO BALNEARE" ||
+    upper === "STABILIMENTI BALNEARI" ||
+    upper === "LIDO" ||
+    upper === "LIDI" ||
+    upper === "BEACH_CLUB" ||
+    upper === "BEACH CLUB" ||
+    upper === "BEACHCLUB" ||
+    upper === "BALNEARE" ||
+    upper === "BALNEARI" ||
+    upper === "STRUTTURE_BALNEARI" ||
+    upper === "STRUTTURA_BALNEARE" ||
+    upper === "STRUTTURE BALNEARI" ||
+    upper === "STRUTTURA BALNEARE";
+
+  const isBeachClubCode =
+    normalized.startsWith("93.29.2") ||
+    digits.startsWith("93292") ||
+    normalized === "93.29" ||
+    digits === "9329" ||
+    normalized === "93.2" ||
+    digits === "932";
+
+  if (isBeachClubCode || isBeachClubText) {
+    variants.add("93.29.20");
+    variants.add("93.29.2");
+    variants.add("93.29");
+    variants.add("93.2");
+    variants.add("932920");
+    variants.add("93292");
+    variants.add("9329");
+    variants.add("932");
+    variants.add("STABILIMENTO_BALNEARE");
     variants.add("STABILIMENTI_BALNEARI");
-    variants.add("HO.RE.CA");
+    variants.add("LIDO");
+    variants.add("BEACH_CLUB");
+    variants.add("BALNEARE");
+    variants.add("STRUTTURE_BALNEARI");
     variants.add("HORECA");
+    variants.add("HO.RE.CA");
   }
+
   if (normalized.startsWith("93.29.1") || digits.startsWith("93291")) {
     variants.add("LOCALI_SERALI");
     variants.add("HO.RE.CA");
@@ -488,6 +527,14 @@ function buildAtecoVariants(atecoCode?: string | null) {
     variants.add("CAMPING");
     variants.add("VILLAGGIO_TURISTICO");
     variants.add("VILLAGGI_TURISTICI");
+    variants.add("STABILIMENTI_BALNEARI");
+    variants.add("STABILIMENTO_BALNEARE");
+    variants.add("BEACH_CLUB");
+    variants.add("LIDO");
+    variants.add("BALNEARE");
+    variants.add("STRUTTURE_BALNEARI");
+    variants.add("93.29.20");
+    variants.add("932920");
   }
 
   if (parts[0] === "47" && !normalized.startsWith("47.11")) {

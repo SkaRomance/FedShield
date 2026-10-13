@@ -5518,6 +5518,481 @@ assert.ok(
   "In modalità safety_only tutti gli item piazzole Campeggio devono essere safety o both",
 );
 
+// ============================================================================
+// Test 33: getStandardEnvironmentsForAteco & conformità per Stabilimenti Balneari, Lidi, Beach Club (93.29.20 / 93.29.2 / 93.29 / 93.2 / 932920)
+// ============================================================================
+console.log("Test 33: getStandardEnvironmentsForAteco & conformità per Stabilimenti Balneari, Lidi (93.29.20 / 93.29.2 / 93.29 / 93.2 / 932920)");
+
+const balnEnvs = getStandardEnvironmentsForAteco("93.29.20");
+assert.equal(balnEnvs.length, 12, "Lo Stabilimento Balneare / Lido deve avere esattamente 12 ambienti standard");
+
+// Verifica varianti codice ATECO (93.29.2, 93.29, 93.2, 932920, 93292, 9329, 932)
+const balnEnvsVar1 = getStandardEnvironmentsForAteco("93.29.2");
+assert.equal(balnEnvsVar1.length, 12, "Anche prefisso 93.29.2 deve restituire 12 ambienti Stabilimento Balneare");
+const balnEnvsVar2 = getStandardEnvironmentsForAteco("93.29");
+assert.equal(balnEnvsVar2.length, 12, "Anche prefisso 93.29 deve restituire 12 ambienti Stabilimento Balneare");
+const balnEnvsVar3 = getStandardEnvironmentsForAteco("93.2");
+assert.equal(balnEnvsVar3.length, 12, "Anche prefisso 93.2 deve restituire 12 ambienti Stabilimento Balneare");
+const balnEnvsVar4 = getStandardEnvironmentsForAteco("932920");
+assert.equal(balnEnvsVar4.length, 12, "Anche codice numerico 932920 deve restituire 12 ambienti Stabilimento Balneare");
+const balnEnvsVar5 = getStandardEnvironmentsForAteco("93292");
+assert.equal(balnEnvsVar5.length, 12, "Anche codice numerico 93292 deve restituire 12 ambienti Stabilimento Balneare");
+const balnEnvsVar6 = getStandardEnvironmentsForAteco("9329");
+assert.equal(balnEnvsVar6.length, 12, "Anche codice numerico 9329 deve restituire 12 ambienti Stabilimento Balneare");
+const balnEnvsVar7 = getStandardEnvironmentsForAteco("932");
+assert.equal(balnEnvsVar7.length, 12, "Anche codice numerico 932 deve restituire 12 ambienti Stabilimento Balneare");
+
+// Verifica ID dei 12 ambienti standard Stabilimento Balneare
+const expectedBalnIds = [
+  "env-baln-reception-cassa",
+  "env-baln-arenile-ombrelloni",
+  "env-baln-postazione-salvataggio",
+  "env-baln-infermeria-primo-soccorso",
+  "env-baln-cabine-spogliatoi",
+  "env-baln-blocchi-servizi-docce",
+  "env-baln-chiosco-bar",
+  "env-baln-ristorante-cucina",
+  "env-baln-celle-frigo-dispensa",
+  "env-baln-centrale-idrica-solare",
+  "env-baln-rimessaggio-puliscispiaggia",
+  "env-baln-isola-ecologica-spiaggia",
+];
+
+for (const id of expectedBalnIds) {
+  assert.ok(
+    balnEnvs.some((e) => e.id === id),
+    `Ambiente ${id} deve essere presente nella lista standard Stabilimento Balneare per 93.29.20`,
+  );
+}
+
+// 1. Reception Stabilimento, Cassa & Direzione Lido
+const balnReception = balnEnvs.find((e) => e.id === "env-baln-reception-cassa")!;
+assert.equal(balnReception.category, "sales_office");
+assert.equal(balnReception.surfaceSqM, 30);
+assert.equal(balnReception.heightM, 3.0);
+assert.equal(balnReception.volumeCuM, 90);
+assert.equal(balnReception.occupantsCount, 2);
+const balnReceptionComp = evaluateEnvironmentCompliance(balnReception, "93.29.20");
+assert.ok(balnReceptionComp.isHeightCompliant, "Reception Lido deve avere altezza conforme (3.00 m >= 2.70 m)");
+assert.ok(balnReceptionComp.isCubatureCompliant, "Reception Lido deve avere cubatura conforme (45 mc/op >= 10 mc)");
+assert.ok(
+  balnReceptionComp.summaryBadges.some((b) => b.text.includes("Postazione VDT ergonomica")),
+  "Reception Lido deve avere badge postazione VDT",
+);
+
+// 2. Arenile Attrezzato (File Ombrelloni, Lettini & Passerelle Accessibili PMR)
+const balnArenile = balnEnvs.find((e) => e.id === "env-baln-arenile-ombrelloni")!;
+assert.equal(balnArenile.category, "production");
+assert.equal(balnArenile.surfaceSqM, 6000);
+assert.equal(balnArenile.heightM, 3.0);
+assert.equal(balnArenile.volumeCuM, 18000);
+assert.equal(balnArenile.occupantsCount, 300);
+const balnArenileComp = evaluateEnvironmentCompliance(balnArenile, "93.29.20");
+assert.ok(balnArenileComp.isHeightCompliant, "Arenile deve avere altezza conforme");
+assert.ok(balnArenileComp.isCubatureCompliant, "Arenile deve avere cubatura conforme (60 mc/op >= 10 mc)");
+assert.ok(
+  balnArenileComp.summaryBadges.some((b) => b.text.includes("Passerella disabili PMR")),
+  "Arenile deve avere badge passerella PMR fino alla battigia e sedia JOB",
+);
+
+// 3. Torretta di Avvistamento Bagnino & Fronte Mare Salvataggio
+const balnSalvataggio = balnEnvs.find((e) => e.id === "env-baln-postazione-salvataggio")!;
+assert.equal(balnSalvataggio.category, "production");
+assert.equal(balnSalvataggio.surfaceSqM, 20);
+assert.equal(balnSalvataggio.heightM, 3.0);
+assert.equal(balnSalvataggio.volumeCuM, 60);
+assert.equal(balnSalvataggio.occupantsCount, 2);
+const balnSalvataggioComp = evaluateEnvironmentCompliance(balnSalvataggio, "93.29.20");
+assert.ok(balnSalvataggioComp.isHeightCompliant, "Torretta Salvataggio deve avere altezza conforme");
+assert.ok(
+  balnSalvataggioComp.summaryBadges.some((b) => b.text.includes("Pattino di salvataggio")),
+  "Torretta Salvataggio deve avere badge pattino rosso a remi e cima 25m",
+);
+
+// 4. Locale Infermeria di Spiaggia & Postazione Primo Soccorso DAE
+const balnInfermeria = balnEnvs.find((e) => e.id === "env-baln-infermeria-primo-soccorso")!;
+assert.equal(balnInfermeria.category, "services");
+assert.equal(balnInfermeria.surfaceSqM, 15);
+assert.equal(balnInfermeria.heightM, 2.7);
+assert.equal(balnInfermeria.volumeCuM, 40.5);
+assert.equal(balnInfermeria.occupantsCount, 1);
+const balnInfermeriaComp = evaluateEnvironmentCompliance(balnInfermeria, "93.29.20");
+assert.ok(balnInfermeriaComp.isHeightCompliant, "Infermeria deve avere altezza conforme");
+assert.ok(
+  balnInfermeriaComp.summaryBadges.some((b) => b.text.includes("Defibrillatore DAE")),
+  "Infermeria deve avere badge DAE in teca climatica antisalsedine",
+);
+
+// 5. Batteria Cabine Spogliatoi Ospiti & Deposito Giochi Spiaggia
+const balnCabine = balnEnvs.find((e) => e.id === "env-baln-cabine-spogliatoi")!;
+assert.equal(balnCabine.category, "services");
+assert.equal(balnCabine.surfaceSqM, 80);
+assert.equal(balnCabine.heightM, 2.4);
+assert.equal(balnCabine.volumeCuM, 192);
+assert.equal(balnCabine.occupantsCount, 4);
+const balnCabineComp = evaluateEnvironmentCompliance(balnCabine, "93.29.20");
+assert.ok(balnCabineComp.isHeightCompliant, "Cabine spogliatoio devono avere altezza conforme (2.40 m)");
+assert.ok(
+  balnCabineComp.summaryBadges.some((b) => b.text.includes("Cabina spogliatoio disabili PMR")),
+  "Cabine spogliatoio devono avere badge PMR accessibile",
+);
+
+// 6. Blocco Servizi Igienici & Docce Esterne/Calde (con PMR D.P.R. 503/96)
+const balnDocce = balnEnvs.find((e) => e.id === "env-baln-blocchi-servizi-docce")!;
+assert.equal(balnDocce.category, "services");
+assert.equal(balnDocce.surfaceSqM, 60);
+assert.equal(balnDocce.heightM, 2.6);
+assert.equal(balnDocce.volumeCuM, 156);
+assert.equal(balnDocce.occupantsCount, 6);
+const balnDocceComp = evaluateEnvironmentCompliance(balnDocce, "93.29.20");
+assert.ok(balnDocceComp.isHeightCompliant, "Docce e bagni devono avere altezza conforme (2.60 m >= 2.40 m)");
+assert.ok(
+  balnDocceComp.summaryBadges.some((b) => b.text.includes("anti-legionella D.Lgs. 18/2023")),
+  "Docce lido devono avere badge prevenzione legionella D.Lgs. 18/2023",
+);
+
+// 7. Chiosco Bar sulla Spiaggia & Banco Caffetteria / Gelati
+const balnBar = balnEnvs.find((e) => e.id === "env-baln-chiosco-bar")!;
+assert.equal(balnBar.category, "production");
+assert.equal(balnBar.surfaceSqM, 40);
+assert.equal(balnBar.heightM, 3.0);
+assert.equal(balnBar.volumeCuM, 120);
+assert.equal(balnBar.occupantsCount, 3);
+const balnBarComp = evaluateEnvironmentCompliance(balnBar, "93.29.20");
+assert.ok(balnBarComp.isHeightCompliant, "Chiosco Bar deve avere altezza conforme");
+assert.ok(
+  balnBarComp.summaryBadges.some((b) => b.text.includes("Banco bar inox MOCA")),
+  "Chiosco Bar deve avere badge inox protetto da sabbia",
+);
+
+// 8. Cucina Ristorante del Lido & Preparazione Pesce / Primi
+const balnCucina = balnEnvs.find((e) => e.id === "env-baln-ristorante-cucina")!;
+assert.equal(balnCucina.category, "production");
+assert.equal(balnCucina.surfaceSqM, 50);
+assert.equal(balnCucina.heightM, 3.2);
+assert.equal(balnCucina.volumeCuM, 160);
+assert.equal(balnCucina.occupantsCount, 4);
+const balnCucinaComp = evaluateEnvironmentCompliance(balnCucina, "93.29.20");
+assert.ok(balnCucinaComp.isHeightCompliant, "Cucina lido deve avere altezza conforme (3.20 m >= 3.00 m)");
+assert.ok(
+  balnCucinaComp.summaryBadges.some((b) => b.text.includes("spegnimento Ansul R-102")),
+  "Cucina lido deve avere badge spegnimento Ansul",
+);
+
+// 9. Celle Frigorifere Deperibili (Pesce Fresco +0/+2°C, Surgelati & Bevande)
+const balnCelle = balnEnvs.find((e) => e.id === "env-baln-celle-frigo-dispensa")!;
+assert.equal(balnCelle.category, "storage");
+assert.equal(balnCelle.surfaceSqM, 25);
+assert.equal(balnCelle.heightM, 2.6);
+assert.equal(balnCelle.volumeCuM, 65);
+assert.equal(balnCelle.occupantsCount, 1);
+const balnCelleComp = evaluateEnvironmentCompliance(balnCelle, "93.29.20");
+assert.ok(balnCelleComp.isHeightCompliant, "Celle frigo deperibili devono avere altezza conforme (2.60 m >= 2.40 m)");
+assert.ok(
+  balnCelleComp.summaryBadges.some((b) => b.text.includes("Cella pesce fresco")),
+  "Celle frigo deperibili devono avere badge pesce fresco +0/+2°C",
+);
+
+// 10. Centrale Idrica, Impianto Solare Termico & Accumulo Docce Anti-Legionella
+const balnCentraleIdrica = balnEnvs.find((e) => e.id === "env-baln-centrale-idrica-solare")!;
+assert.equal(balnCentraleIdrica.category, "technical");
+assert.equal(balnCentraleIdrica.surfaceSqM, 20);
+assert.equal(balnCentraleIdrica.heightM, 2.6);
+assert.equal(balnCentraleIdrica.volumeCuM, 52);
+assert.equal(balnCentraleIdrica.occupantsCount, 1);
+const balnCentraleIdricaComp = evaluateEnvironmentCompliance(balnCentraleIdrica, "93.29.20");
+assert.ok(balnCentraleIdricaComp.isHeightCompliant, "Centrale Idrica deve avere altezza conforme");
+assert.ok(
+  balnCentraleIdricaComp.summaryBadges.some((b) => b.text.includes("accumulo ACS ≥ 60°C")),
+  "Centrale Idrica deve avere badge accumulo ACS >= 60°C anti-legionella",
+);
+
+// 11. Rimessaggio Mezzi Spiaggia, Attrezzature Nautiche & Puliscispiaggia
+const balnRimessaggio = balnEnvs.find((e) => e.id === "env-baln-rimessaggio-puliscispiaggia")!;
+assert.equal(balnRimessaggio.category, "warehouse");
+assert.equal(balnRimessaggio.surfaceSqM, 70);
+assert.equal(balnRimessaggio.heightM, 3.5);
+assert.equal(balnRimessaggio.volumeCuM, 245);
+assert.equal(balnRimessaggio.occupantsCount, 2);
+const balnRimessaggioComp = evaluateEnvironmentCompliance(balnRimessaggio, "93.29.20");
+assert.ok(balnRimessaggioComp.isHeightCompliant, "Rimessaggio deve avere altezza conforme");
+assert.ok(
+  balnRimessaggioComp.summaryBadges.some((b) => b.text.includes("Macchina puliscispiaggia")),
+  "Rimessaggio deve avere badge organi protetti All. V",
+);
+assert.ok(
+  balnRimessaggioComp.summaryBadges.some((b) => b.text.includes("Divieto transito mezzi meccanici su arenile")),
+  "Rimessaggio deve avere badge divieto transito con bagnanti",
+);
+
+// 12. Isola Ecologica Arenile & Stoccaggio Differenziata Rifiuti Spiaggia
+const balnIsolaEcologica = balnEnvs.find((e) => e.id === "env-baln-isola-ecologica-spiaggia")!;
+assert.equal(balnIsolaEcologica.category, "technical");
+assert.equal(balnIsolaEcologica.surfaceSqM, 40);
+assert.equal(balnIsolaEcologica.heightM, 3.0);
+assert.equal(balnIsolaEcologica.volumeCuM, 120);
+assert.equal(balnIsolaEcologica.occupantsCount, 1);
+const balnIsolaEcologicaComp = evaluateEnvironmentCompliance(balnIsolaEcologica, "93.29.20");
+assert.ok(balnIsolaEcologicaComp.isHeightCompliant, "Isola ecologica deve avere altezza conforme");
+assert.ok(
+  balnIsolaEcologicaComp.summaryBadges.some((b) => b.text.includes("Cassonetti differenziata pesanti")),
+  "Isola ecologica deve avere badge cassonetti a prova di vento e gabbiani",
+);
+
+// ============================================================================
+// Test 34: generateEnvironmentChecklistItems per locali Stabilimento Balneare (ATECO 93.29.20)
+// ============================================================================
+console.log("Test 34: generateEnvironmentChecklistItems per locali Stabilimento Balneare (ATECO 93.29.20)");
+
+// 1. Reception Stabilimento Lido
+const balnReceptionItems = generateEnvironmentChecklistItems(balnReception, "93.29.20");
+assert.ok(
+  balnReceptionItems.some(
+    (it) => it.id.includes("postazione-vdt-quadro-differenziale-30ma-estintore") && it.domain === "safety",
+  ),
+  "Reception Lido deve verificare postazione VDT, differenziale 30 mA ed estintore (domain: safety)",
+);
+assert.ok(
+  balnReceptionItems.some(
+    (it) => it.id.includes("planimetria-spiaggia-bilingue-centralina-meteo") && it.domain === "safety",
+  ),
+  "Reception Lido deve verificare planimetria bilingue e centralina meteo (domain: safety)",
+);
+
+// 2. Arenile Attrezzato
+const balnArenileItems = generateEnvironmentChecklistItems(balnArenile, "93.29.20");
+assert.ok(
+  balnArenileItems.some(
+    (it) => it.id.includes("passerella-disabili-pmr-battigia-dpr-503-96") && it.domain === "safety",
+  ),
+  "Arenile deve verificare passerella PMR fino alla battigia D.P.R. 503/96 (domain: safety)",
+);
+assert.ok(
+  balnArenileItems.some(
+    (it) => it.id.includes("sedia-anfibia-job-disabili") && it.domain === "safety",
+  ),
+  "Arenile deve verificare sedia anfibia JOB disabili (domain: safety)",
+);
+assert.ok(
+  balnArenileItems.some(
+    (it) => it.id.includes("distanziamento-ombrelloni-corridoi-sicurezza") && it.domain === "both",
+  ),
+  "Arenile deve verificare distanziamento file ombrelloni e corridoi soccorsi (domain: both)",
+);
+
+// 3. Torretta di Avvistamento Bagnino & Salvataggio
+const balnSalvataggioItems = generateEnvironmentChecklistItems(balnSalvataggio, "93.29.20");
+assert.ok(
+  balnSalvataggioItems.some(
+    (it) => it.id.includes("torretta-avvistamento-bagnino-abilitato-mip") && it.domain === "safety",
+  ),
+  "Torretta Salvataggio deve verificare bagnino abilitato MIP/FIN in orario balneazione (domain: safety)",
+);
+assert.ok(
+  balnSalvataggioItems.some(
+    (it) => it.id.includes("pattino-salvataggio-salvagente-cima-25m-rullo") && it.domain === "safety",
+  ),
+  "Torretta Salvataggio deve verificare pattino rosso, rullo 200m e salvagente cima 25m (domain: safety)",
+);
+assert.ok(
+  balnSalvataggioItems.some(
+    (it) => it.id.includes("albero-segnali-bandiere-meteo-megafono") && it.domain === "safety",
+  ),
+  "Torretta Salvataggio deve verificare albero bandiere di segnalazione e megafono (domain: safety)",
+);
+
+// 4. Infermeria Spiaggia DAE
+const balnInfermeriaItems = generateEnvironmentChecklistItems(balnInfermeria, "93.29.20");
+assert.ok(
+  balnInfermeriaItems.some(
+    (it) => it.id.includes("dae-teca-climatica-antisalsedine-autotest") && it.domain === "safety",
+  ),
+  "Infermeria deve verificare DAE con autotest verde in teca antisalsedine (domain: safety)",
+);
+assert.ok(
+  balnInfermeriaItems.some(
+    (it) => it.id.includes("bombola-ossigeno-flussimetro-pallone-ambu") && it.domain === "safety",
+  ),
+  "Infermeria deve verificare bombola O2 con flussimetro e pallone AMBU (domain: safety)",
+);
+assert.ok(
+  balnInfermeriaItems.some(
+    (it) => it.id.includes("cassetta-pronto-soccorso-allegato-1-farmaci") && it.domain === "safety",
+  ),
+  "Infermeria deve verificare cassetta pronto soccorso All. 1 (domain: safety)",
+);
+
+// 5. Cabine Spogliatoi Ospiti
+const balnCabineItems = generateEnvironmentChecklistItems(balnCabine, "93.29.20");
+assert.ok(
+  balnCabineItems.some(
+    (it) => it.id.includes("cabine-pareti-lavabili-aerazione-pulizia") && it.domain === "both",
+  ),
+  "Cabine spogliatoio devono verificare pareti lavabili e aerazione (domain: both)",
+);
+assert.ok(
+  balnCabineItems.some(
+    (it) => it.id.includes("cabina-disabili-pmr-porta-scorrevole-maniglioni") && it.domain === "safety",
+  ),
+  "Cabine spogliatoio devono verificare cabina PMR con porta scorrevole e maniglioni (domain: safety)",
+);
+
+// 6. Blocco Servizi Igienici & Docce Esterne/Calde
+const balnDocceItems = generateEnvironmentChecklistItems(balnDocce, "93.29.20");
+assert.ok(
+  balnDocceItems.some(
+    (it) => it.id.includes("protocollo-legionella-soffioni-docce-dlgs-18-2023") && it.domain === "both",
+  ),
+  "Docce lido devono verificare protocollo anti-legionella soffioni D.Lgs. 18/2023 (domain: both)",
+);
+assert.ok(
+  balnDocceItems.some(
+    (it) => it.id.includes("piatti-doccia-antiscivolo-r11-lavapiedi") && it.domain === "safety",
+  ),
+  "Docce lido devono verificare piatti antiscivolo R11 e lavapiedi (domain: safety)",
+);
+assert.ok(
+  balnDocceItems.some(
+    (it) => it.id.includes("bagno-disabili-pmr-tirante-allarme") && it.domain === "safety",
+  ),
+  "Servizi lido devono verificare tirante allarme bagno disabili PMR (domain: safety)",
+);
+
+// 7. Chiosco Bar sulla Spiaggia
+const balnBarItems = generateEnvironmentChecklistItems(balnBar, "93.29.20");
+assert.ok(
+  balnBarItems.some(
+    (it) => it.id.includes("banco-bar-inox-protezione-sabbia-salsedine") && it.domain === "haccp",
+  ),
+  "Chiosco Bar deve verificare banco inox protetto da sabbia e fabbricatore ghiaccio (domain: haccp)",
+);
+assert.ok(
+  balnBarItems.some(
+    (it) => it.id.includes("vetrina-gelati-termometro-macchina-caffe-inail") && it.domain === "both",
+  ),
+  "Chiosco Bar deve verificare vetrina gelati a -18°C e macchina caffè INAIL (domain: both)",
+);
+assert.ok(
+  balnBarItems.some(
+    (it) => it.id.includes("lavastoviglie-bicchieri-risciacquo-82-gradi") && it.domain === "haccp",
+  ),
+  "Chiosco Bar deve verificare lavabicchieri con risciacquo >= 82°C (domain: haccp)",
+);
+
+// 8. Cucina Ristorante del Lido
+const balnCucinaItems = generateEnvironmentChecklistItems(balnCucina, "93.29.20");
+assert.ok(
+  balnCucinaItems.some(
+    (it) => it.id.includes("cappa-aspirante-filtri-inox-spegnimento-ansul") && it.domain === "both",
+  ),
+  "Cucina Lido deve verificare cappa con impianto spegnimento Ansul (domain: both)",
+);
+assert.ok(
+  balnCucinaItems.some(
+    (it) => it.id.includes("stoccaggio-pesce-fresco-ghiaccio-scolo-separato") && it.domain === "haccp",
+  ),
+  "Cucina Lido deve verificare pesce fresco su ghiaccio a scolo separato (domain: haccp)",
+);
+assert.ok(
+  balnCucinaItems.some(
+    (it) => it.id.includes("pavimentazione-antiscivolo-r12-lavamani-non-manuale") && it.domain === "both",
+  ),
+  "Cucina Lido deve verificare pavimento antiscivolo R12 e lavamani a pedale (domain: both)",
+);
+
+// 9. Celle Frigorifere Deperibili
+const balnCelleItems = generateEnvironmentChecklistItems(balnCelle, "93.29.20");
+assert.ok(
+  balnCelleItems.some(
+    (it) => it.id.includes("allarme-uomo-intrappolato-24v-uni-en-378") && it.domain === "safety",
+  ),
+  "Celle Frigo devono verificare allarme uomo intrappolato a 24V UNI EN 378 (domain: safety)",
+);
+assert.ok(
+  balnCelleItems.some(
+    (it) => it.id.includes("teletermometri-registrazione-continua-haccp-pesce") && it.domain === "haccp",
+  ),
+  "Celle Frigo devono verificare teletermometri continui HACCP (domain: haccp)",
+);
+
+// 10. Centrale Idrica & Solare Termico
+const balnCentraleIdricaItems = generateEnvironmentChecklistItems(balnCentraleIdrica, "93.29.20");
+assert.ok(
+  balnCentraleIdricaItems.some(
+    (it) => it.id.includes("temperatura-accumulo-acs-60-gradi-solare-termico") && it.domain === "both",
+  ),
+  "Centrale Idrica deve verificare temperatura accumulo ACS >= 60°C anti-legionella (domain: both)",
+);
+assert.ok(
+  balnCentraleIdricaItems.some(
+    (it) => it.id.includes("dosatore-clorazione-acque-registro-manutenzione-filtri") && it.domain === "both",
+  ),
+  "Centrale Idrica deve verificare dosatore clorazione e registro filtri (domain: both)",
+);
+
+// 11. Rimessaggio Puliscispiaggia & Mezzi Nautici
+const balnRimessaggioItems = generateEnvironmentChecklistItems(balnRimessaggio, "93.29.20");
+assert.ok(
+  balnRimessaggioItems.some(
+    (it) => it.id.includes("carter-protezione-macchina-puliscispiaggia-all-v") && it.domain === "safety",
+  ),
+  "Rimessaggio deve verificare carter organi rotanti puliscispiaggia All. V (domain: safety)",
+);
+assert.ok(
+  balnRimessaggioItems.some(
+    (it) => it.id.includes("divieto-transito-mezzi-arenile-bagnanti") && it.domain === "safety",
+  ),
+  "Rimessaggio deve verificare divieto transito mezzi su arenile con bagnanti (domain: safety)",
+);
+assert.ok(
+  balnRimessaggioItems.some(
+    (it) => it.id.includes("armadio-tagliafuoco-carburanti-lubrificanti") && it.domain === "safety",
+  ),
+  "Rimessaggio deve verificare armadio tagliafuoco carburanti benzina REI 90 (domain: safety)",
+);
+
+// 12. Isola Ecologica Arenile
+const balnIsolaEcologicaItems = generateEnvironmentChecklistItems(balnIsolaEcologica, "93.29.20");
+assert.ok(
+  balnIsolaEcologicaItems.some(
+    (it) => it.id.includes("cassonetti-differenziata-ermetici-antivento-gabbiani") && it.domain === "both",
+  ),
+  "Isola Ecologica deve verificare cassonetti ermetici zavorrati a prova di vento e gabbiani (domain: both)",
+);
+assert.ok(
+  balnIsolaEcologicaItems.some(
+    (it) => it.id.includes("pulizia-compattatore-derattizzazione-perimetrale") && it.domain === "both",
+  ),
+  "Isola Ecologica deve verificare pulizia compattatore e piano derattizzazione (domain: both)",
+);
+
+// Verifica del filtraggio checklistMode su cucina e bar Lido
+const balnCucinaHaccpMode = filterEnvironmentItemsByChecklistMode(balnCucinaItems, "haccp_only");
+assert.ok(
+  balnCucinaHaccpMode.every((it) => it.domain === "haccp" || it.domain === "both"),
+  "In modalità haccp_only tutti gli item cucina Lido devono essere haccp o both",
+);
+assert.ok(
+  !balnCucinaHaccpMode.some((it) => it.domain === "safety"),
+  "In modalità haccp_only nessun item cucina Lido deve avere domain safety",
+);
+
+const balnCucinaSafetyMode = filterEnvironmentItemsByChecklistMode(balnCucinaItems, "safety_only");
+assert.ok(
+  balnCucinaSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item cucina Lido devono essere safety o both",
+);
+assert.ok(
+  !balnCucinaSafetyMode.some((it) => it.domain === "haccp"),
+  "In modalità safety_only nessun item cucina Lido deve avere domain haccp",
+);
+
+const balnArenileSafetyMode = filterEnvironmentItemsByChecklistMode(balnArenileItems, "safety_only");
+assert.ok(
+  balnArenileSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item arenile Lido devono essere safety o both",
+);
+
 console.log("=== TUTTI I TEST Step2AmbientiDiLavoro SUPERATI CON SUCCESSO! ===");
 
 

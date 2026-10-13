@@ -6486,10 +6486,105 @@ export async function seedHoreca() {
 
   const beachClubPremisesItems = remapChecklistItems(barPremisesItems, beachClubPremisesTemplate.id, [
     [/bar/gi, "stabilimento balneare"],
-  ]);
+  ]).map((item) => {
+    if (item.orderIndex === 3) {
+      return {
+        ...item,
+        area: "Arenile e Accessibilità PMR",
+        question:
+          "Accessibilità PMR dell'arenile garantita con passerelle a norma fino alla battigia, servizi igienici dedicati e disponibilità sedia JOB per l'accesso in acqua ai sensi della Legge 104/1992 e Ordinanza Balneare?",
+        normReference: "Legge 104/1992, Ordinanza Balneare Capitaneria di Porto, D.P.R. 503/1996",
+        domain: ComplianceDomain.safety,
+      };
+    }
+    if (item.orderIndex === 6) {
+      return {
+        ...item,
+        area: "Docce e Prevenzione Legionella",
+        question:
+          "Docce esterne e punti acqua dell'arenile allacciati a rete idrica con piano prevenzione Legionella conforme al D.Lgs. 18/2023, flussaggi periodici e sanificazione dei soffioni esposti a calore solare?",
+        normReference: "D.Lgs. 18/2023, Linee Guida per la prevenzione e il controllo della legionellosi",
+        domain: ComplianceDomain.both,
+      };
+    }
+    if (item.orderIndex === 8) {
+      return {
+        ...item,
+        area: "Sicurezza balneare ed Emergenze",
+        question:
+          "Postazione torretta di salvataggio allestita sull'arenile con dotazioni di soccorso (salvagente anulare, cima, rullo, binocolo e natante di salvataggio) conformi all'ordinanza balneare della Capitaneria di Porto e vie di esodo arenile sgombre?",
+        normReference: "Ordinanza Balneare Capitaneria di Porto, Codice della Navigazione",
+        domain: ComplianceDomain.safety,
+      };
+    }
+    if (item.orderIndex === 9) {
+      return {
+        ...item,
+        area: "DAE e Primo Soccorso",
+        question:
+          "Defibrillatore semiautomatico DAE presente, verificato e segnalato ai sensi della Legge 116/2021, integrato con locale o armadietto di primo soccorso e presidi sanitari prescritti dall'ordinanza balneare?",
+        normReference: "Legge 116/2021, D.M. 18/03/2011, Ordinanza Balneare Capitaneria di Porto",
+        domain: ComplianceDomain.safety,
+      };
+    }
+    if (item.orderIndex === 25) {
+      return {
+        ...item,
+        area: "Mezzi Arenile e Puliscispiaggia",
+        question:
+          "Macchine puliscispiaggia, trattori e mezzi operativi con marcatura CE, protezioni d'uso, segnalatore acustico retromarcia, piano di circolazione sicuro e divieto assoluto di manovra tra i bagnanti ai sensi del D.Lgs. 81/2008?",
+        normReference: "D.Lgs. 81/2008 art. 70-71, Ordinanza Balneare Capitaneria di Porto",
+        domain: ComplianceDomain.safety,
+      };
+    }
+    return item;
+  });
+
   const beachClubProcedureItems = remapChecklistItems(barProcedureItems, beachClubProceduresTemplate.id, [
     [/bar/gi, "stabilimento balneare"],
-  ]);
+  ]).map((item) => {
+    if (item.orderIndex === 12) {
+      return {
+        ...item,
+        area: "Igiene Alimenti e Pesce Fresco",
+        question:
+          "Procedure HACCP per somministrazione, ristorante e chiosco bar sul mare applicate con rigorosa igiene alimenti e pesce fresco, verifica tracciabilità e abbattimento preventivo per prodotti ittici destinati al consumo crudo?",
+        normReference: "Reg. CE 852/2004, Reg. CE 853/2004 Sez. VIII, Ordinanza Balneare",
+        domain: ComplianceDomain.haccp,
+      };
+    }
+    if (item.orderIndex === 17) {
+      return {
+        ...item,
+        area: "Servizio Salvataggio e Bagnino MIP",
+        question:
+          "Servizio di salvataggio attivo con presenza continuativa di bagnino / assistente bagnanti abilitato con brevetto MIP (Ministero Infrastrutture e Trasporti) in corso di validità negli orari prescritti dall'ordinanza balneare della Capitaneria di Porto?",
+        normReference: "Ordinanza Balneare Capitaneria di Porto, Circolari MIT Soccorso Balneare, D.Lgs. 81/2008",
+        domain: ComplianceDomain.safety,
+      };
+    }
+    if (item.orderIndex === 18) {
+      return {
+        ...item,
+        area: "Ordinanza Balneare ed Emergenze",
+        question:
+          "Esposizione obbligatoria dell'ordinanza balneare della Capitaneria di Porto in bacheca visibile a bagnanti e personale, con applicazione rigorosa delle bandiere di segnalazione stato del mare e procedure di emergenza arenile?",
+        normReference: "Ordinanza Balneare Capitaneria di Porto, Codice della Navigazione",
+        domain: ComplianceDomain.both,
+      };
+    }
+    if (item.orderIndex === 21) {
+      return {
+        ...item,
+        area: "Legionella Docce Esterne",
+        question:
+          "Procedure operative di prevenzione Legionella per docce esterne e impianti idrici arenile conformi al D.Lgs. 18/2023 con registrazione di flussaggi frequenti, shock termici/chimici e disinfezione periodica dei terminali esposti a calore?",
+        normReference: "D.Lgs. 18/2023, Linee Guida Legionellosi",
+        domain: ComplianceDomain.both,
+      };
+    }
+    return item;
+  });
 
   const nightlifePremisesItems = remapChecklistItems(barPremisesItems, nightlifePremisesTemplate.id, [
     [/bar/gi, "locale serale/discoteca"],
@@ -8346,6 +8441,54 @@ export async function seedHoreca() {
     ...remapDocumentsForCategory("BAR", "STABILIMENTI_BALNEARI", "93.29.20", [
       [/bar/gi, "stabilimento balneare"],
     ]),
+    {
+      name: "Piano di emergenza, salvamento e assistenza bagnanti conforme a Ordinanza Balneare Capitaneria di Porto",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.safety,
+      atecoCode: "93.29.20",
+      macroGroup: "STABILIMENTI_BALNEARI",
+    },
+    {
+      name: "Registro verifiche DAE (Legge 116/2021) e presidi di primo soccorso arenile",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.safety,
+      atecoCode: "93.29.20",
+      macroGroup: "STABILIMENTI_BALNEARI",
+    },
+    {
+      name: "Piano di valutazione del rischio e prevenzione Legionella docce esterne e servizi arenile (D.Lgs. 18/2023)",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.both,
+      atecoCode: "93.29.20",
+      macroGroup: "STABILIMENTI_BALNEARI",
+    },
+    {
+      name: "Certificazione accessibilità arenile PMR e verifica disponibilità sedia JOB (Legge 104/1992)",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.safety,
+      atecoCode: "93.29.20",
+      macroGroup: "STABILIMENTI_BALNEARI",
+    },
+    {
+      name: "Registro manutenzione e sicurezza macchine puliscispiaggia e mezzi operativi arenile",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.safety,
+      atecoCode: "93.29.20",
+      macroGroup: "STABILIMENTI_BALNEARI",
+    },
+    {
+      name: "Manuale HACCP e schede tracciabilità somministrazione alimenti, chiosco bar e pesce fresco",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.haccp,
+      atecoCode: "93.29.20",
+      macroGroup: "STABILIMENTI_BALNEARI",
+    },
     ...remapDocumentsForCategory("BAR", "LOCALI_SERALI", "93.29.10", [
       [/bar/gi, "locale serale/discoteca"],
     ]),

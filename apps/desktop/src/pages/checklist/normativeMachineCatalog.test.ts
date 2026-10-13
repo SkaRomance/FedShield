@@ -2191,7 +2191,7 @@ assert.equal(hotelIdx, barIdxHotel + 1, "hotel_strutture_ricettive deve seguire 
 assert.equal(hotelIdx + 1, ostelloIdxHotel, "hotel_strutture_ricettive deve precedere immediatamente ostello_residence nel catalogo");
 assert.equal(ostelloIdxHotel + 1, bnbIdxHotel, "ostello_residence deve precedere immediatamente bnb_affittacamere nel catalogo");
 assert.equal(bnbIdxHotel + 1, campingIdxHotel, "bnb_affittacamere deve precedere immediatamente campeggio_villaggio nel catalogo");
-assert.equal(campingIdxHotel + 1, ristGenIdxHotel, "campeggio_villaggio deve precedere immediatamente ristorazione_alimentare nel catalogo");
+assert.ok(campingIdxHotel < ristGenIdxHotel, "campeggio_villaggio deve precedere ristorazione_alimentare nel catalogo");
 
 // -------------------------------------------------------------
 // Test 40: Verifica completezza delle 16 macchine professionali per Hotel con modelli reali, corsi e controlli tecnici
@@ -2463,7 +2463,7 @@ assert.ok(ristGenIdxBnb !== -1, "Settore generic ristorazione_alimentare deve es
 assert.equal(ostelloIdxBnb, hotelIdxBnb + 1, "ostello_residence deve seguire immediatamente hotel_strutture_ricettive");
 assert.equal(bnbIdxCheck, ostelloIdxBnb + 1, "bnb_affittacamere deve seguire immediatamente ostello_residence");
 assert.equal(bnbIdxCheck + 1, campingIdxBnb, "bnb_affittacamere deve precedere immediatamente campeggio_villaggio");
-assert.equal(campingIdxBnb + 1, ristGenIdxBnb, "campeggio_villaggio deve precedere immediatamente ristorazione_alimentare");
+assert.ok(campingIdxBnb < ristGenIdxBnb, "campeggio_villaggio deve precedere ristorazione_alimentare");
 
 // -------------------------------------------------------------
 // Test 44: Verifica completezza delle 16 macchine professionali per B&B con modelli reali, verifiche e corsi
@@ -2932,7 +2932,7 @@ assert.ok(bnbIdxCamp !== -1, "Settore bnb_affittacamere deve esistere");
 assert.ok(campIdx !== -1, "Settore campeggio_villaggio deve esistere");
 assert.ok(ristGenIdxCamp !== -1, "Settore generic ristorazione_alimentare deve esistere");
 assert.equal(campIdx, bnbIdxCamp + 1, "campeggio_villaggio deve seguire immediatamente bnb_affittacamere nel catalogo");
-assert.equal(campIdx + 1, ristGenIdxCamp, "campeggio_villaggio deve precedere immediatamente ristorazione_alimentare nel catalogo");
+assert.ok(campIdx < ristGenIdxCamp, "campeggio_villaggio deve precedere ristorazione_alimentare nel catalogo");
 
 // -------------------------------------------------------------
 // Test 52: Verifica completezza delle 16 macchine professionali per campeggio con modelli reali, corsi e verifiche tecniche
@@ -3113,7 +3113,255 @@ for (const code of ["55.30.00", "55.30.0", "55.30", "55.3", "553000", "55300", "
   assert.ok(fallbackCampingRes.every((m) => m.sourceReason === "ateco"), `Tutte le macchine con ATECO variant '${code}' devono avere sourceReason === 'ateco'`);
 }
 
+// =========================================================================
+// TEST DEDICATI ATECO 93.29.20 — STABILIMENTI BALNEARI, LIDI, BEACH CLUB
+// =========================================================================
+console.log("\n=== INIZIO TEST normativeMachineCatalog (ATECO 93.29.20 Stabilimento Balneare, Lido, Beach Club) ===");
+
+// -------------------------------------------------------------
+// Test 55: Priorità e risoluzione catalogo ATECO per Stabilimento Balneare
+// -------------------------------------------------------------
+console.log("Test 55: Verifica priorità catalogo ATECO per Stabilimento Balneare (93.29.20 / 93.29.2 / 93.29 / 93.2 / 932920 / 93292 / 9329 / 932)");
+const catalogBalnExact = getSectorMachineCatalogForAteco("93.29.20");
+assert.equal(catalogBalnExact.sectorKey, "stabilimento_balneare", "ATECO 93.29.20 deve restituire stabilimento_balneare");
+assert.ok(catalogBalnExact.sectorLabel.includes("Stabilimenti Balneari"), "L'etichetta deve includere Stabilimenti Balneari");
+
+const catalogBalnSub1 = getSectorMachineCatalogForAteco("93.29.2");
+assert.equal(catalogBalnSub1.sectorKey, "stabilimento_balneare", "ATECO 93.29.2 deve restituire stabilimento_balneare");
+
+const catalogBalnSub2 = getSectorMachineCatalogForAteco("93.29");
+assert.equal(catalogBalnSub2.sectorKey, "stabilimento_balneare", "ATECO 93.29 deve restituire stabilimento_balneare");
+
+const catalogBalnSub3 = getSectorMachineCatalogForAteco("93.2");
+assert.equal(catalogBalnSub3.sectorKey, "stabilimento_balneare", "ATECO 93.2 deve restituire stabilimento_balneare");
+
+const catalogBalnDigits = getSectorMachineCatalogForAteco("932920");
+assert.equal(catalogBalnDigits.sectorKey, "stabilimento_balneare", "ATECO 932920 deve restituire stabilimento_balneare");
+
+// Verifica posizionamento nel catalogo: stabilimento_balneare segue immediatamente campeggio_villaggio e precede ristorazione_alimentare
+const campIndex = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "campeggio_villaggio");
+const balnIndex = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "stabilimento_balneare");
+const ristIndex = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ristorazione_alimentare");
+assert.ok(campIndex !== -1, "Settore campeggio_villaggio deve esistere");
+assert.ok(balnIndex !== -1, "Settore stabilimento_balneare deve esistere");
+assert.ok(ristIndex !== -1, "Settore ristorazione_alimentare deve esistere");
+assert.equal(balnIndex, campIndex + 1, "stabilimento_balneare deve seguire immediatamente campeggio_villaggio");
+assert.equal(ristIndex, balnIndex + 1, "ristorazione_alimentare deve seguire immediatamente stabilimento_balneare");
+
+// -------------------------------------------------------------
+// Test 56: Verifica completezza delle 16 macchine professionali con verifiche, corsi e modelli reali
+// -------------------------------------------------------------
+console.log("Test 56: Verifica completezza delle 16 attrezzature per stabilimento balneare con modelli reali e controlli normativi");
+assert.equal(catalogBalnExact.machines.length, 16, "Il catalogo Stabilimento Balneare deve contenere esattamente 16 macchine");
+
+const expectedBalnKeys = [
+  "torretta_bagnino_avvistamento",
+  "pattino_salvataggio_rosso",
+  "defibrillatore_dae_teca_climatizzata",
+  "sedia_anfibia_disabili_job",
+  "puliscispiaggia_semovente_trattore",
+  "colonnina_docce_temporizzate",
+  "caldaia_solare_acs_docce",
+  "fabbricatore_ghiaccio_lido",
+  "macchina_caffe_lido",
+  "vetrina_gelati_lido",
+  "friggitrice_pesce_lido",
+  "cappa_aspirazione_lido",
+  "lavastoviglie_capotta_lido",
+  "armadio_frigo_pesce_lido",
+  "compattatore_differenziata_lido",
+  "trattorino_rimorchio_spiaggia",
+];
+
+for (const key of expectedBalnKeys) {
+  const found = catalogBalnExact.machines.find((m) => m.machineKey === key);
+  assert.ok(found, `Attrezzatura con key '${key}' deve essere presente nel catalogo`);
+  assert.ok(found.name.length > 5, `Nome attrezzatura '${key}' deve essere descrittivo`);
+  assert.ok(found.type.length > 5, `Tipologia '${key}' deve essere descrittiva`);
+  assert.ok(found.suggestedManufacturer.length > 2, `Produttore suggerito presente per '${key}'`);
+  assert.ok(found.suggestedModel.length > 1, `Modello suggerito presente per '${key}'`);
+  assert.ok(found.safetyChecks.length >= 3, `L'attrezzatura '${key}' deve avere almeno 3 controlli di sicurezza specifici`);
+  for (const check of found.safetyChecks) {
+    assert.ok(check.code.length > 3, `Check code valido per ${key}`);
+    assert.ok(check.title.length > 5, `Check title valido per ${key}`);
+    assert.ok(check.question.length > 15, `Check question dettagliata per ${key}`);
+    assert.ok(check.normReference.length > 3, `Norma citata per check ${check.code}`);
+    assert.ok(check.defaultSeverity >= 1 && check.defaultSeverity <= 5, `Severity valida per check ${check.code}`);
+  }
+}
+
+// Controlli normativi tecnici di dettaglio:
+const balnTorretta = catalogBalnExact.machines.find((m) => m.machineKey === "torretta_bagnino_avvistamento")!;
+assert.equal(balnTorretta.training.courseCode, "FORMAZ_BAGNINO_MARE_MIP");
+assert.equal(balnTorretta.training.minHours, 30);
+assert.equal(balnTorretta.training.frequencyYears, 3);
+assert.ok(balnTorretta.safetyChecks.some((c) => c.code === "BALN_TORRETTA_ANCORAGGIO_STABILITA"));
+assert.ok(balnTorretta.safetyChecks.some((c) => c.normReference.includes("Ordinanza di Sicurezza Balneare")));
+
+const balnPattino = catalogBalnExact.machines.find((m) => m.machineKey === "pattino_salvataggio_rosso")!;
+assert.equal(balnPattino.training.courseCode, "FORMAZ_BAGNINO_MARE_MIP");
+assert.ok(balnPattino.safetyChecks.some((c) => c.code === "BALN_PATTINO_SCAFO_GALLEGGIABILITA"));
+assert.ok(balnPattino.safetyChecks.some((c) => c.question.includes("SALVATAGGIO")));
+assert.ok(balnPattino.safetyChecks.some((c) => c.code === "BALN_PATTINO_SALVAGENTE_RULLO_CIMA"));
+
+const balnDae = catalogBalnExact.machines.find((m) => m.machineKey === "defibrillatore_dae_teca_climatizzata")!;
+assert.equal(balnDae.training.courseCode, "FORMAZ_BLSD_DAE");
+assert.equal(balnDae.training.frequencyYears, 2);
+assert.ok(balnDae.safetyChecks.some((c) => c.normReference.includes("Legge 116/2021")));
+assert.ok(balnDae.safetyChecks.some((c) => c.code === "BALN_DAE_TECA_IP65_ANTISALSEDINE"));
+
+const balnJobChair = catalogBalnExact.machines.find((m) => m.machineKey === "sedia_anfibia_disabili_job")!;
+assert.ok(balnJobChair.safetyChecks.some((c) => c.normReference.includes("D.P.R. 503/1996")));
+assert.ok(balnJobChair.safetyChecks.some((c) => c.code === "BALN_JOB_RUOTE_GALLEGGIANTI"));
+
+const balnPuliscispiaggia = catalogBalnExact.machines.find((m) => m.machineKey === "puliscispiaggia_semovente_trattore")!;
+assert.equal(balnPuliscispiaggia.training.requiresPatentinoAccordoSR, true);
+assert.equal(balnPuliscispiaggia.training.minHours, 8);
+assert.ok(balnPuliscispiaggia.safetyChecks.some((c) => c.code === "BALN_PULISCISPIAGGIA_ORARI_USO_SPIAGGIA"));
+
+const balnCaldaiaSolare = catalogBalnExact.machines.find((m) => m.machineKey === "caldaia_solare_acs_docce")!;
+assert.equal(balnCaldaiaSolare.isSubjectToInailCheck, true);
+assert.equal(balnCaldaiaSolare.inailFrequencyYears, 5);
+assert.ok(balnCaldaiaSolare.safetyChecks.some((c) => c.code === "BALN_CALDAIA_CICLO_ANTILEGIONELLA_65"));
+assert.ok(balnCaldaiaSolare.safetyChecks.some((c) => c.normReference.includes("D.Lgs. 18/2023")));
+
+const balnFabbricatore = catalogBalnExact.machines.find((m) => m.machineKey === "fabbricatore_ghiaccio_lido")!;
+assert.ok(balnFabbricatore.safetyChecks.some((c) => c.normReference.includes("Reg. CE 1935/2004")));
+assert.ok(balnFabbricatore.safetyChecks.some((c) => c.code === "BALN_GHIACCIO_SCARICO_ANTIRIFLUSSO"));
+
+const balnVetrina = catalogBalnExact.machines.find((m) => m.machineKey === "vetrina_gelati_lido")!;
+assert.ok(balnVetrina.safetyChecks.some((c) => c.code === "BALN_GELATI_CRISTALLI_ANTICONDENSA"));
+assert.ok(balnVetrina.safetyChecks.some((c) => c.code === "BALN_GELATI_SICUREZZA_GAS_R290"));
+
+const balnCappa = catalogBalnExact.machines.find((m) => m.machineKey === "cappa_aspirazione_lido")!;
+assert.ok(balnCappa.safetyChecks.some((c) => c.normReference.includes("NFPA 96")));
+assert.ok(balnCappa.safetyChecks.some((c) => c.code === "BALN_CAPPA_IMPIANTO_ANSUL_NFPA96"));
+
+const balnLavastoviglie = catalogBalnExact.machines.find((m) => m.machineKey === "lavastoviglie_capotta_lido")!;
+assert.ok(balnLavastoviglie.safetyChecks.some((c) => c.normReference.includes("DIN 10512")));
+assert.ok(balnLavastoviglie.safetyChecks.some((c) => c.code === "BALN_LAVASTOVIGLIE_BREAK_TANK_EN1717"));
+
+const balnFrigoPesce = catalogBalnExact.machines.find((m) => m.machineKey === "armadio_frigo_pesce_lido")!;
+assert.ok(balnFrigoPesce.safetyChecks.some((c) => c.code === "BALN_FRIGO_EVAPORATORE_CATAFORESI"));
+assert.ok(balnFrigoPesce.safetyChecks.some((c) => c.code === "BALN_FRIGO_VASCHETTE_FORATE_MOCA"));
+
+const balnCompattatore = catalogBalnExact.machines.find((m) => m.machineKey === "compattatore_differenziata_lido")!;
+assert.ok(balnCompattatore.safetyChecks.some((c) => c.code === "BALN_COMPATTATORE_QUADRO_STAGNO_IP65"));
+assert.ok(balnCompattatore.safetyChecks.some((c) => c.normReference.includes("UNI EN 16500")));
+
+const balnTrattorino = catalogBalnExact.machines.find((m) => m.machineKey === "trattorino_rimorchio_spiaggia")!;
+assert.ok(balnTrattorino.safetyChecks.some((c) => c.code === "BALN_TRATTORINO_TELAIO_ROPS_CINTURA"));
+assert.ok(balnTrattorino.safetyChecks.some((c) => c.code === "BALN_TRATTORINO_PNEUMATICI_SABBIA"));
+
+// -------------------------------------------------------------
+// Test 57: Verifica associazione ambienti Step 2 Stabilimento Balneare (env-baln-*) -> Step 4 Macchine
+// -------------------------------------------------------------
+console.log("Test 57: Verifica associazione ambienti Step 2 Stabilimento Balneare (env-baln-*) -> Step 4 Macchine");
+const beachEnvironments = [
+  { id: "env-baln-reception-cassa", name: "Reception Stabilimento, Cassa & Direzione Lido", category: "sales_office" },
+  { id: "env-baln-arenile-ombrelloni", name: "Arenile Attrezzato (File Ombrelloni, Lettini & Passerelle Accessibili PMR)", category: "production" },
+  { id: "env-baln-postazione-salvataggio", name: "Torretta di Avvistamento Bagnino & Fronte Mare Salvataggio", category: "production" },
+  { id: "env-baln-infermeria-primo-soccorso", name: "Locale Infermeria di Spiaggia & Postazione Primo Soccorso DAE", category: "services" },
+  { id: "env-baln-cabine-spogliatoi", name: "Batteria Cabine Spogliatoi Ospiti & Deposito Giochi Spiaggia", category: "services" },
+  { id: "env-baln-blocchi-servizi-docce", name: "Blocco Servizi Igienici & Docce Esterne/Calde (con PMR D.P.R. 503/96)", category: "services" },
+  { id: "env-baln-chiosco-bar", name: "Chiosco Bar sulla Spiaggia & Banco Caffetteria / Gelati", category: "production" },
+  { id: "env-baln-ristorante-cucina", name: "Cucina Ristorante del Lido & Preparazione Pesce / Primi", category: "production" },
+  { id: "env-baln-celle-frigo-dispensa", name: "Celle Frigorifere Deperibili (Pesce Fresco +0/+2°C, Surgelati & Bevande)", category: "storage" },
+  { id: "env-baln-centrale-idrica-solare", name: "Centrale Idrica, Impianto Solare Termico & Accumulo Docce Anti-Legionella", category: "technical" },
+  { id: "env-baln-rimessaggio-puliscispiaggia", name: "Rimessaggio Mezzi Spiaggia, Attrezzature Nautiche & Puliscispiaggia", category: "warehouse" },
+  { id: "env-baln-isola-ecologica-spiaggia", name: "Isola Ecologica Arenile & Stoccaggio Differenziata Rifiuti Spiaggia", category: "technical" },
+];
+
+const suggestedWithBeachEnvs = getSuggestedMachinesForEnvironmentsAndAteco(beachEnvironments, "93.29.20");
+
+// 1. env-baln-reception-cassa -> defibrillatore_dae_teca_climatizzata
+const recBaln = suggestedWithBeachEnvs.filter((m) => m.targetEnvironmentId === "env-baln-reception-cassa");
+assert.equal(recBaln.length, 1, "env-baln-reception-cassa deve associare 1 macchina (DAE)");
+assert.ok(recBaln.some((m) => m.machineKey === "defibrillatore_dae_teca_climatizzata"));
+
+// 2. env-baln-arenile-ombrelloni -> sedia_anfibia_disabili_job, colonnina_docce_temporizzate
+const arenileBaln = suggestedWithBeachEnvs.filter((m) => m.targetEnvironmentId === "env-baln-arenile-ombrelloni");
+assert.equal(arenileBaln.length, 2, "env-baln-arenile-ombrelloni deve associare 2 macchine (sedia JOB, colonnina docce)");
+assert.ok(arenileBaln.some((m) => m.machineKey === "sedia_anfibia_disabili_job"));
+assert.ok(arenileBaln.some((m) => m.machineKey === "colonnina_docce_temporizzate"));
+
+// 3. env-baln-postazione-salvataggio -> torretta_bagnino_avvistamento, pattino_salvataggio_rosso
+const salvBaln = suggestedWithBeachEnvs.filter((m) => m.targetEnvironmentId === "env-baln-postazione-salvataggio");
+assert.equal(salvBaln.length, 2, "env-baln-postazione-salvataggio deve associare 2 macchine (torretta bagnino, pattino salvataggio)");
+assert.ok(salvBaln.some((m) => m.machineKey === "torretta_bagnino_avvistamento"));
+assert.ok(salvBaln.some((m) => m.machineKey === "pattino_salvataggio_rosso"));
+
+// 4. env-baln-infermeria-primo-soccorso -> defibrillatore_dae_teca_climatizzata
+const infBaln = suggestedWithBeachEnvs.filter((m) => m.targetEnvironmentId === "env-baln-infermeria-primo-soccorso");
+assert.equal(infBaln.length, 1, "env-baln-infermeria-primo-soccorso deve associare 1 macchina (DAE)");
+assert.ok(infBaln.some((m) => m.machineKey === "defibrillatore_dae_teca_climatizzata"));
+
+// 5. env-baln-cabine-spogliatoi -> sedia_anfibia_disabili_job
+const cabBaln = suggestedWithBeachEnvs.filter((m) => m.targetEnvironmentId === "env-baln-cabine-spogliatoi");
+assert.equal(cabBaln.length, 1, "env-baln-cabine-spogliatoi deve associare 1 macchina (sedia JOB)");
+assert.ok(cabBaln.some((m) => m.machineKey === "sedia_anfibia_disabili_job"));
+
+// 6. env-baln-blocchi-servizi-docce -> colonnina_docce_temporizzate, caldaia_solare_acs_docce
+const blocchiBaln = suggestedWithBeachEnvs.filter((m) => m.targetEnvironmentId === "env-baln-blocchi-servizi-docce");
+assert.equal(blocchiBaln.length, 2, "env-baln-blocchi-servizi-docce deve associare 2 macchine (docce temporizzate, caldaia solare)");
+assert.ok(blocchiBaln.some((m) => m.machineKey === "colonnina_docce_temporizzate"));
+assert.ok(blocchiBaln.some((m) => m.machineKey === "caldaia_solare_acs_docce"));
+
+// 7. env-baln-chiosco-bar -> fabbricatore_ghiaccio_lido, macchina_caffe_lido, vetrina_gelati_lido
+const barBaln = suggestedWithBeachEnvs.filter((m) => m.targetEnvironmentId === "env-baln-chiosco-bar");
+assert.equal(barBaln.length, 3, "env-baln-chiosco-bar deve associare 3 macchine (ghiaccio, caffe, gelati)");
+assert.ok(barBaln.some((m) => m.machineKey === "fabbricatore_ghiaccio_lido"));
+assert.ok(barBaln.some((m) => m.machineKey === "macchina_caffe_lido"));
+assert.ok(barBaln.some((m) => m.machineKey === "vetrina_gelati_lido"));
+
+// 8. env-baln-ristorante-cucina -> friggitrice_pesce_lido, cappa_aspirazione_lido, lavastoviglie_capotta_lido
+const cucBaln = suggestedWithBeachEnvs.filter((m) => m.targetEnvironmentId === "env-baln-ristorante-cucina");
+assert.equal(cucBaln.length, 3, "env-baln-ristorante-cucina deve associare 3 macchine (friggitrice, cappa, lavastoviglie)");
+assert.ok(cucBaln.some((m) => m.machineKey === "friggitrice_pesce_lido"));
+assert.ok(cucBaln.some((m) => m.machineKey === "cappa_aspirazione_lido"));
+assert.ok(cucBaln.some((m) => m.machineKey === "lavastoviglie_capotta_lido"));
+
+// 9. env-baln-celle-frigo-dispensa -> armadio_frigo_pesce_lido
+const celleBaln = suggestedWithBeachEnvs.filter((m) => m.targetEnvironmentId === "env-baln-celle-frigo-dispensa");
+assert.equal(celleBaln.length, 1, "env-baln-celle-frigo-dispensa deve associare 1 macchina (frigo pesce)");
+assert.ok(celleBaln.some((m) => m.machineKey === "armadio_frigo_pesce_lido"));
+
+// 10. env-baln-centrale-idrica-solare -> caldaia_solare_acs_docce
+const idricaBaln = suggestedWithBeachEnvs.filter((m) => m.targetEnvironmentId === "env-baln-centrale-idrica-solare");
+assert.equal(idricaBaln.length, 1, "env-baln-centrale-idrica-solare deve associare 1 macchina (caldaia solare)");
+assert.ok(idricaBaln.some((m) => m.machineKey === "caldaia_solare_acs_docce"));
+
+// 11. env-baln-rimessaggio-puliscispiaggia -> puliscispiaggia_semovente_trattore, trattorino_rimorchio_spiaggia
+const rimBaln = suggestedWithBeachEnvs.filter((m) => m.targetEnvironmentId === "env-baln-rimessaggio-puliscispiaggia");
+assert.equal(rimBaln.length, 2, "env-baln-rimessaggio-puliscispiaggia deve associare 2 macchine (puliscispiaggia, trattorino)");
+assert.ok(rimBaln.some((m) => m.machineKey === "puliscispiaggia_semovente_trattore"));
+assert.ok(rimBaln.some((m) => m.machineKey === "trattorino_rimorchio_spiaggia"));
+
+// 12. env-baln-isola-ecologica-spiaggia -> compattatore_differenziata_lido
+const ecoBaln = suggestedWithBeachEnvs.filter((m) => m.targetEnvironmentId === "env-baln-isola-ecologica-spiaggia");
+assert.equal(ecoBaln.length, 1, "env-baln-isola-ecologica-spiaggia deve associare 1 macchina (compattatore)");
+assert.ok(ecoBaln.some((m) => m.machineKey === "compattatore_differenziata_lido"));
+
+// -------------------------------------------------------------
+// Test 58: Integrazione automatica macchine per ATECO 93.29.20 senza ambienti preventivi
+// -------------------------------------------------------------
+console.log("Test 58: Integrazione automatica macchine per ATECO 93.29.20 senza ambienti preventivi");
+const suggestedBeachOnlyAteco = getSuggestedMachinesForEnvironmentsAndAteco([], "93.29.20");
+assert.equal(suggestedBeachOnlyAteco.length, 16, "Devono essere suggerite tutte le 16 macchine dello stabilimento balneare");
+assert.ok(
+  suggestedBeachOnlyAteco.every((m) => m.sourceReason === "ateco"),
+  "Tutte le macchine devono avere sourceReason === 'ateco' se nessun locale è stato specificato",
+);
+
+// Verifica fallback automatico identico per tutte le varianti di codice ATECO ("93.29.20", "93.29.2", "93.29", "93.2", "932920", "93292", "9329", "932")
+for (const code of ["93.29.20", "93.29.2", "93.29", "93.2", "932920", "93292", "9329", "932"]) {
+  const fallbackBeachRes = getSuggestedMachinesForEnvironmentsAndAteco([], code);
+  assert.equal(fallbackBeachRes.length, 16, `ATECO variant '${code}' deve restituire tutte le 16 macchine dello stabilimento balneare`);
+  assert.ok(fallbackBeachRes.every((m) => m.sourceReason === "ateco"), `Tutte le macchine con ATECO variant '${code}' devono avere sourceReason === 'ateco'`);
+}
+
 console.log("=== TUTTI I TEST normativeMachineCatalog SUPERATI CON SUCCESSO! ===");
+
 
 
 

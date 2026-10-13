@@ -803,7 +803,217 @@ async function run() {
     `Expected at least 5 camping-specific document requirements for inspection, found ${campingSpecificDocs.length}`,
   );
 
-  console.log("HoReCa completeness test passed (including Hotel, B&B, Ostelli/Residence and Campeggi/Villaggi turistici ATECO variants and inspection integration)");
+  // Verifica varianti ATECO e query testuali per Stabilimenti Balneari (93.29.20, 93.29.2, 93.29, 93.2, 932920, 93292, 9329, 932, STABILIMENTO_BALNEARE, STABILIMENTI_BALNEARI, LIDO, BEACH_CLUB, BALNEARE, STRUTTURE_BALNEARI)
+  const beachVariants = [
+    "93.29.20",
+    "93.29.2",
+    "93.29",
+    "93.2",
+    "932920",
+    "93292",
+    "9329",
+    "932",
+    "STABILIMENTO_BALNEARE",
+    "STABILIMENTI_BALNEARI",
+    "LIDO",
+    "BEACH_CLUB",
+    "BALNEARE",
+    "STRUTTURE_BALNEARI",
+  ];
+  for (const variant of beachVariants) {
+    const templatesRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(templatesRes.statusCode, 200, `Templates request failed for beach variant ${variant}`);
+    const templates = templatesRes.json() as Array<{ id: string; name: string }>;
+    const specificTemplates = templates.filter(
+      (t) =>
+        t.name.includes("Stabilimenti Balneari") ||
+        t.name.includes("Stabilimento Balneare") ||
+        t.name.includes("Beach Club"),
+    );
+    assert.equal(
+      specificTemplates.length,
+      2,
+      `Expected 2 specific templates for beach variant ${variant}, found ${specificTemplates.length}`,
+    );
+
+    const docsRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/document-templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(docsRes.statusCode, 200, `Document templates request failed for beach variant ${variant}`);
+    const docs = docsRes.json() as DocumentTemplateLite[];
+    const beachDocs = docs.filter(
+      (d) =>
+        d.macroGroup === "STABILIMENTI_BALNEARI" ||
+        d.macroGroup === "STABILIMENTO_BALNEARE" ||
+        d.macroGroup === "BEACH_CLUB",
+    );
+    assert.ok(
+      beachDocs.length >= 14,
+      `Expected at least 14 beach docs for variant ${variant}, found ${beachDocs.length}`,
+    );
+  }
+
+  // Verifica generazione template e requisiti normativi specifici per Stabilimento balneare con somministrazione su 93.29.20 e dotless 932920:
+  // - Ordinanza balneare Capitaneria di Porto
+  // - Servizio di salvataggio e bagnino con brevetto MIP
+  // - DAE Legge 116/2021 e primo soccorso
+  // - Accessibilità PMR, passerelle e sedia JOB
+  // - Legionella docce esterne D.Lgs. 18/2023
+  // - Igiene alimenti, ristorazione/chiosco bar sul mare e pesce fresco HACCP
+  // - Puliscispiaggia e sicurezza mezzi D.Lgs. 81/2008
+  const beachCodesToVerify = ["93.29.20", "932920"];
+  for (const ateco of beachCodesToVerify) {
+    const tRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/templates?atecoCode=${encodeURIComponent(ateco)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(tRes.statusCode, 200);
+    const tmpls = tRes.json() as Array<{ id: string; name: string }>;
+    const beachTmpls = tmpls.filter(
+      (t) =>
+        t.name.includes("Stabilimenti Balneari") ||
+        t.name.includes("Stabilimento Balneare") ||
+        t.name.includes("Beach Club"),
+    );
+    assert.equal(beachTmpls.length, 2, `Expected 2 templates for ${ateco}`);
+
+    let allItemsText = "";
+    for (const t of beachTmpls) {
+      const itemsRes = await app.inject({
+        method: "GET",
+        url: `/api/checklists/templates/${t.id}/items?checklistMode=unified`,
+        headers,
+      });
+      assert.equal(itemsRes.statusCode, 200);
+      const items = itemsRes.json().items as Array<{
+        question: string;
+        area: string;
+        normReference?: string | null;
+        orderIndex: number;
+        defaultSeverity: number;
+      }>;
+      assert.equal(items.length, 25, `Expected 25 items for template ${t.id} under ${ateco}`);
+      for (const item of items) {
+        assert.ok(item.defaultSeverity >= 1 && item.defaultSeverity <= 4, `Invalid severity in item ${item.orderIndex}`);
+      }
+
+      const combined = items
+        .map((i) => `${i.area} ${i.question} ${i.normReference ?? ""}`.toLowerCase())
+        .join(" | ");
+      allItemsText += ` | ${combined}`;
+    }
+
+    // 1. Ordinanza balneare Capitaneria di Porto
+    assert.ok(
+      allItemsText.includes("ordinanza balneare") &&
+        (allItemsText.includes("capitaneria di porto") || allItemsText.includes("capitaneria")),
+      `Missing norm requirement "ordinanza balneare Capitaneria di Porto" for ${ateco}`,
+    );
+
+    // 2. Servizio salvataggio bagnino MIP
+    assert.ok(
+      (allItemsText.includes("servizio di salvataggio") || allItemsText.includes("salvataggio")) &&
+        (allItemsText.includes("bagnino") || allItemsText.includes("assistente bagnanti")) &&
+        (allItemsText.includes("mip") || allItemsText.includes("brevetto")),
+      `Missing norm requirement "servizio salvataggio bagnino MIP" for ${ateco}`,
+    );
+
+    // 3. DAE e primo soccorso Legge 116/2021
+    assert.ok(
+      (allItemsText.includes("dae") || allItemsText.includes("defibrillatore")) &&
+        (allItemsText.includes("legge 116/2021") || allItemsText.includes("116/2021")) &&
+        allItemsText.includes("primo soccorso"),
+      `Missing norm requirement "DAE e primo soccorso Legge 116/2021" for ${ateco}`,
+    );
+
+    // 4. Accessibilità PMR passerelle e sedia JOB
+    assert.ok(
+      (allItemsText.includes("accessibilit") || allItemsText.includes("pmr")) &&
+        (allItemsText.includes("passerell") || allItemsText.includes("passerelle")) &&
+        (allItemsText.includes("sedia job") || allItemsText.includes("job")),
+      `Missing norm requirement "accessibilità PMR passerelle e sedia JOB" for ${ateco}`,
+    );
+
+    // 5. Prevenzione Legionella docce esterne D.Lgs. 18/2023
+    assert.ok(
+      allItemsText.includes("legionella") &&
+        (allItemsText.includes("docce esterne") || allItemsText.includes("docce")) &&
+        (allItemsText.includes("18/2023") || allItemsText.includes("d.lgs. 18/2023")),
+      `Missing norm requirement "Legionella docce esterne D.Lgs. 18/2023" for ${ateco}`,
+    );
+
+    // 6. Igiene alimenti e pesce fresco HACCP somministrazione / chiosco bar sul mare
+    assert.ok(
+      (allItemsText.includes("pesce fresco") || allItemsText.includes("prodotti ittici")) &&
+        allItemsText.includes("haccp"),
+      `Missing norm requirement "igiene alimenti e pesce fresco HACCP" for ${ateco}`,
+    );
+
+    // 7. Puliscispiaggia e sicurezza mezzi operativi arenile D.Lgs. 81/2008
+    assert.ok(
+      allItemsText.includes("puliscispiaggia") &&
+        (allItemsText.includes("sicurezza") || allItemsText.includes("d.lgs. 81/2008") || allItemsText.includes("81/2008")),
+      `Missing norm requirement "puliscispiaggia e sicurezza mezzi" for ${ateco}`,
+    );
+  }
+
+  // Verifica integrazione ispezioni per azienda Stabilimento balneare con ATECO variante dotless (932920)
+  const beachCompany = await app.prisma.company.upsert({
+    where: { id: "test-beachclub-integration-company" },
+    update: { atecoCode: "932920" },
+    create: {
+      id: "test-beachclub-integration-company",
+      name: "Lido Beach Club FedShield",
+      vatNumber: "IT99887766558",
+      atecoCode: "932920",
+      legalAddress: "Lungomare delle Sirene 10, Viareggio",
+    },
+  });
+
+  const beachInspection = await app.inject({
+    method: "POST",
+    url: "/api/inspections",
+    headers,
+    payload: {
+      companyId: beachCompany.id,
+      title: "Ispezione Stabilimento Balneare Test",
+    },
+  });
+  assert.equal(beachInspection.statusCode, 201);
+  const beachInspectionId = beachInspection.json().id as string;
+
+  const beachInspectionDocsRes = await app.inject({
+    method: "GET",
+    url: `/api/inspections/${beachInspectionId}/documents/requirements`,
+    headers,
+  });
+  assert.equal(beachInspectionDocsRes.statusCode, 200);
+  const beachInspectionDocs = beachInspectionDocsRes.json() as Array<{ name: string; documentTemplateId: string }>;
+  const beachSpecificDocs = beachInspectionDocs.filter(
+    (d) =>
+      d.name.toLowerCase().includes("balneare") ||
+      d.name.toLowerCase().includes("salvamento") ||
+      d.name.toLowerCase().includes("bagnanti") ||
+      d.name.toLowerCase().includes("arenile") ||
+      d.name.toLowerCase().includes("spiaggia") ||
+      d.name.toLowerCase().includes("dae") ||
+      d.name.toLowerCase().includes("job") ||
+      d.name.toLowerCase().includes("pesce") ||
+      d.name.toLowerCase().includes("legionella"),
+  );
+  assert.ok(
+    beachSpecificDocs.length >= 5,
+    `Expected at least 5 beach-specific document requirements for inspection, found ${beachSpecificDocs.length}`,
+  );
+
+  console.log("HoReCa completeness test passed (including Hotel, B&B, Ostelli/Residence, Campeggi/Villaggi turistici and Stabilimenti Balneari ATECO variants and inspection integration)");
   await app.close();
 }
 

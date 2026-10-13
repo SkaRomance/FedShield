@@ -306,6 +306,33 @@ export const TRAINING_REQUIREMENTS_LIBRARY: Record<string, MachineTrainingRequir
     requiresPatentinoAccordoSR: false,
     targetRoleDescription: "Addetti alla squadra antincendio ed emergenza in campeggi e villaggi turistici con oltre 400 persone con idoneità tecnica VVF (16h, validità 5 anni)",
   },
+  bagnino_acque_libere_mare: {
+    courseCode: "FORMAZ_BAGNINO_MARE_MIP",
+    courseTitle: "Assistente Bagnanti per Acque Libere e Mare (Brevetto MIP)",
+    normReference: "FIN/SNS/FISA; Ordinanze Balneari Capitanerie di Porto; D.Lgs. 81/2008 art. 37 e 43",
+    minHours: 30,
+    frequencyYears: 3,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Assistenti bagnanti per acque libere e mare con brevetto MIP abilitato al salvamento e BLSD (30h, rinnovo triennale)",
+  },
+  operatore_puliscispiaggia: {
+    courseCode: "FORMAZ_OPERATORE_PULISCISPIAGGIA",
+    courseTitle: "Operatore Macchine Trattrici e Puliscispiaggia per Arenili",
+    normReference: "D.Lgs. 81/2008 art. 71 c. 7 e art. 73 c. 4-5; Accordo Stato-Regioni 22/02/2012 All. VIII",
+    minHours: 8,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: true,
+    targetRoleDescription: "Operatori addetti all'uso di macchine operatrici e puliscispiaggia semoventi su arenile (8h, validità 5 anni)",
+  },
+  addetto_blsd_dae: {
+    courseCode: "FORMAZ_BLSD_DAE",
+    courseTitle: "Operatore Abilitato all'Uso del Defibrillatore Semiautomatico Esterno (BLSD/PBLSD)",
+    normReference: "Legge 116/2021; D.M. 24/04/2013; D.Lgs. 81/2008 art. 45",
+    minHours: 5,
+    frequencyYears: 2,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Operatori abilitati all'uso del defibrillatore semiautomatico esterno (BLSD/PBLSD, 5h, rinnovo biennale)",
+  },
 };
 
 // -------------------------------------------------------------
@@ -8279,6 +8306,704 @@ export const SECTOR_MACHINERY_CATALOGS: SectorMachineCatalog[] = [
     ],
   },
 
+  // 14. STABILIMENTI BALNEARI, LIDI, BEACH CLUB E STRUTTURE TURISTICHE COSTIERE (ATECO 93.29.20 / 93.29.2 / 93.29 / 93.2)
+  {
+    sectorKey: "stabilimento_balneare",
+    sectorLabel: "Stabilimenti Balneari, Lidi, Beach Club e Strutture Turistiche Costiere",
+    atecoPrefixes: ["93.29.20", "93.29.2", "93.29", "93.2"],
+    machines: [
+      // 1. Torretta bagnino avvistamento
+      {
+        machineKey: "torretta_bagnino_avvistamento",
+        name: "Torretta di Avvistamento Bagnino in Alluminio/Legno Marino con Parasole",
+        type: "Postazione Sopraelevata di Sorveglianza e Primo Intervento Balneare",
+        suggestedManufacturer: "Cramer / Maritan / Beach Service / Canobbio",
+        suggestedModel: "Torretta Alluminio Marino Professional h 2.5m",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.bagnino_acque_libere_mare,
+        safetyChecks: [
+          {
+            code: "BALN_TORRETTA_ANCORAGGIO_STABILITA",
+            title: "Ancoraggio e Stabilità Strutturale Antiribaltamento su Arenile",
+            question: "La torretta è saldamente ancorata mediante piastre zavorrate o plinti interrati con calcolo di tenuta alle raffiche di vento e moto ondoso, ed è esente da giochi o deformazioni?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 4 e All. V; Ordinanza di Sicurezza Balneare Capitaneria di Porto; UNI EN 131-7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_TORRETTA_SCALA_CORRIMANO",
+            title: "Scala d'Accesso con Gradini Antiscivolo e Corrimano di Salita",
+            question: "La scaletta di accesso alla pedana superiore presenta pioli/gradini antiscivolo a distanza costante, montanti continui e corrimano protetto privo di spigoli vivi o bave metalliche taglienti?",
+            normReference: "D.Lgs. 81/2008 art. 113 e All. V p. 2; UNI EN 131",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_TORRETTA_PARAPETTO_PROTEZIONE",
+            title: "Parapetto Perimetrale Completo con Corrente Superiore e Fermapiede",
+            question: "La postazione di vedetta sopraelevata è provvista di parapetto rigido perimetrale alto almeno 1 metro con corrente intermedio e tavola fermapiede per prevenire cadute dall'alto dell'assistente bagnanti durante la sorveglianza?",
+            normReference: "D.Lgs. 81/2008 art. 126 e All. V p. 2; Ordinanze Balneari Capitanerie di Porto",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_TORRETTA_PARASOLE_DOTAZIONI",
+            title: "Copertura Parasole Anti-UVA e Alloggiamento Bandiere di Segnalazione",
+            question: "La torretta dispone di copertura parasole inclinabile contro l'irraggiamento solare acuto per la prevenzione dei colpi di calore del bagnino e di appositi supporti per issare tempestivamente le bandiere regolamentari (bianca, rossa, gialla/nera) e alloggiare megafono e binocolo marino?",
+            normReference: "D.Lgs. 81/2008 art. 180 (Radiazioni Ottiche Naturali/Microclima); Ordinanze Balneari Guardia Costiera",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      // 2. Pattino salvataggio rosso
+      {
+        machineKey: "pattino_salvataggio_rosso",
+        name: "Imbarcazione di Salvataggio a Remi Tipo Moscone/Pattino Rosso con Dotazioni",
+        type: "Battello di Salvataggio a Remi Omologato per Uso Litoraneo",
+        suggestedManufacturer: "Cantiere Navale Foschi / Nautica Viareggio / Martini Costruzioni Nautiche",
+        suggestedModel: "Pattino Standard Salvataggio 4.80m Vetroresina Rosso",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.bagnino_acque_libere_mare,
+        safetyChecks: [
+          {
+            code: "BALN_PATTINO_SCAFO_GALLEGGIABILITA",
+            title: "Integrità Scafo, Camere Stagne di Riserva e Dicitura 'SALVATAGGIO'",
+            question: "Lo scafo presenta colorazione rossa viva indelebile con scritta ben visibile 'SALVATAGGIO' in lettere bianche su entrambi i fianchi, struttura in vetroresina priva di osmosi o falle e blocchi di riserva di galleggiamento poliuretanici interni integri?",
+            normReference: "Ordinanze di Sicurezza Balneare Guardia Costiera / Capitanerie di Porto; D.Lgs. 81/2008 art. 71 c. 4",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_PATTINO_SCALMI_REMI_RISPETTO",
+            title: "Scalmiere con Fermo Antislittamento, Coppia Remi e Remo di Rispetto",
+            question: "Gli scalmi sono assicurati saldamente con legatura di sicurezza imperdibile per evitare la caduta in mare del remo durante la vogata d'emergenza, ed è presente a bordo il terzo remo di rispetto regolamentare conforme all'ordinanza?",
+            normReference: "Ordinanza di Sicurezza Balneare Capitanerie di Porto; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_PATTINO_SALVAGENTE_RULLO_CIMA",
+            title: "Salvagente Anulare Omologato SOLAS con Sagola 25m e Cavo di Traino Arenile",
+            question: "Il battello è equipaggiato con salvagente anulare omologato munito di sagola galleggiante di almeno 25 metri priva di nodi o usura, pronto per il lancio immediato, e gancio di traino con rullo di soccorso?",
+            normReference: "Ordinanza Balneare Capitaneria di Porto; D.P.R. 435/1991 (Regolamento Sicurezza della Navigazione); D.Lgs. 81/2008 art. 43",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_PATTINO_POSIZIONAMENTO_BATTIGIA",
+            title: "Posizionamento Strategico a Battigia con Scivolo Libero da Ostacoli",
+            question: "Il pattino è collocato direttamente sulla battigia a ridosso dell'arenile, rivolto verso il mare con rulli di alaggio o scivolo sgombro da ombrelloni, lettini o natanti privati per consentire il varo in mare in meno di 30 secondi?",
+            normReference: "Ordinanze di Polizia Marittima e Sicurezza Balneare; D.Lgs. 81/2008 art. 43",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      // 3. Defibrillatore DAE in teca climatizzata antisalsedine IP65
+      {
+        machineKey: "defibrillatore_dae_teca_climatizzata",
+        name: "Defibrillatore Semiautomatico Esterno (DAE) in Teca Climatizzata Antisalsedine IP65",
+        type: "Apparecchiatura Elettromedicale Salvavita per Emergenza Cardiaca e Drowning",
+        suggestedManufacturer: "Philips HeartStart FRx / Zoll AED 3",
+        suggestedModel: "HeartStart FRx Marine IP65 con Teca Riscaldata/Ventilata",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.addetto_blsd_dae,
+        safetyChecks: [
+          {
+            code: "BALN_DAE_TECA_IP65_ANTISALSEDINE",
+            title: "Teca Climatizzata Antisalsedine con Grado di Protezione IP65 e Allarme Acustico",
+            question: "Il DAE è alloggiato in teca stagna IP65 specificamente trattata contro la corrosione da salsedine marina, provvista di sistema termoregolato (anti-surriscaldamento estivo) e sirena/luce stroboscopica all'apertura?",
+            normReference: "Legge 116/2021 art. 4; D.M. 24/04/2013 All. E; CEI EN 60601-1; CEI EN 60529 (IP65)",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_DAE_VERIFICA_BATTERIA_PIASTRE",
+            title: "Autotest Operativo, Scadenza Elettrodi Adulti/Pediatrici e Kit Asciugatura",
+            question: "Viene registrato il controllo visivo periodico della spia di autotest (OK verde), la scadenza non superata delle piastre e la presenza a corredo del kit per annegamento (forbici taglia-abiti, rasoio monouso, teli per asciugatura torace, maschera pocket-mask con valvola unidirezionale)?",
+            normReference: "Legge 116/2021; D.M. 24/04/2013 All. E; D.Lgs. 81/2008 art. 45",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_DAE_SEGNALETICA_NUE112",
+            title: "Cartellonistica Internazionale ILCOR Visibile dall'Arenile e Registrazione NUE 112",
+            question: "La postazione DAE è chiaramente segnalata con cartello standard ILCOR verde con cuore e saetta visibile dall'arenile e dall'ingresso lido, ed è geolocalizzata e registrata presso la Centrale Operativa NUE 112 / 118 regionale?",
+            normReference: "Legge 116/2021 art. 6; D.Lgs. 81/2008 Titolo V All. XXV; Linee Guida 118 Ares",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      // 4. Sedia anfibia disabili JOB
+      {
+        machineKey: "sedia_anfibia_disabili_job",
+        name: "Sedia a Ruote Anfibia da Mare per Disabili (Tipo J.O.B. / Sand&Sea)",
+        type: "Ausilio e Dispositivo di Mobilità e Accessibilità Arenile e Balneazione Disabili",
+        suggestedManufacturer: "Neatech (J.O.B.) / SoleMare / Sand&Sea / Offcarr",
+        suggestedModel: "J.O.B. Classic con Ruote Pneumatiche Galleggianti",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "BALN_JOB_RUOTE_GALLEGGIANTI",
+            title: "Integrità Ruote Pneumatiche a Bassa Pressione e Galleggiabilità in Mare",
+            question: "Le ruote sagomate a bassa pressione sono integre, correttamente gonfiate per la trazione sulla sabbia asciutta, dotate di cuscinetti plastici privi di usura o bloccaggi da salsedine e garantiscono l'assetto galleggiante stabile in acqua?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 4; D.P.R. 503/1996; Ordinanza Balneare Accessibilità Diversamente Abili",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_JOB_CINTURA_TELAIO_ALLUMINIO",
+            title: "Cintura di Sicurezza a Sgancio Rapido e Telaio in Alluminio Anodizzato Marino",
+            question: "La seduta è provvista di cintura di sicurezza a sgancio rapido d'emergenza in poliestere imputrescibile e il telaio metallico in alluminio/inox è esente da cricche, corrosione salina o parti taglienti?",
+            normReference: "UNI EN ISO 12182 (Ausili tecnici per persone con disabilità); D.Lgs. 81/2008 art. 71 c. 4",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_JOB_BRACCIOLI_MANIGLIA_TRAINO",
+            title: "Braccioli di Contenimento Ribaltabili e Manubrio di Manovra/Traino",
+            question: "I braccioli laterali sono solidi e bloccabili durante il trasporto e la maniglia di spinta/traino posteriore consente all'operatore un controllo stabile durante l'entrata e l'uscita dalla battigia senza rischio di ribaltamento?",
+            normReference: "D.Lgs. 81/2008 art. 71; Linee Guida INAIL Accessibilità e Sicurezza Stabilimenti Balneari",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      // 5. Puliscispiaggia semovente trattore
+      {
+        machineKey: "puliscispiaggia_semovente_trattore",
+        name: "Macchina Puliscispiaggia Meccanica con Vagliatore Vibrante per Arenile",
+        type: "Macchina Operatrice Semovente / Trainata per Pulizia e Setacciatura Arenili",
+        suggestedManufacturer: "Tuareg / Piuma / Sanidelta / Cavalluccio",
+        suggestedModel: "Sanidelta Hydro / Tuareg Evo con Vagliatore Setacciatore Vibrante",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.operatore_puliscispiaggia,
+        safetyChecks: [
+          {
+            code: "BALN_PULISCISPIAGGIA_CARTER_ORGANI_MOTO",
+            title: "Carter di Protezione Fissi/Interbloccati su Vagliatore, Bielle e Organi di Trasmissione",
+            question: "Tutti gli organi meccanici in movimento (setaccio vibrante, bielle di azionamento, alberi cardanici e cinematismi di carico sabbia) sono segregati con carter metallici chiusi e conformi all'All. V del D.Lgs. 81/08 per evitare schiacciamento o cesoiamento?",
+            normReference: "D.Lgs. 81/2008 Titolo III All. V p. 6; Direttiva Macchine 2006/42/CE; UNI EN ISO 4254-1",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_PULISCISPIAGGIA_ARRESTO_EMERGENZA",
+            title: "Pulsante di Arresto d'Emergenza a Fungo e Dispositivo Uomo Presente",
+            question: "La macchina è equipaggiata con pulsanti di arresto di emergenza a fungo rosso facilmente accessibili e con leva di avanzamento 'a uomo presente' che arresta istantaneamente trazione e vagliatore al rilascio dei comandi da parte dell'operatore?",
+            normReference: "D.Lgs. 81/2008 Titolo III All. V p. 2; UNI EN ISO 13850; UNI EN ISO 12100",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_PULISCISPIAGGIA_LAMPEGGIANTE_SEGNALATORE",
+            title: "Lampeggiante Giallo Omologato, Fari da Lavoro e Segnalatore Acustico di Retromarcia",
+            question: "La macchina è provvista di lampeggiante rotante giallo/arancione attivo durante il funzionamento, fari ad alta visibilità per lavorazioni nelle prime ore dell'alba e avvisatore acustico automatico di retromarcia per la protezione dei pedoni?",
+            normReference: "D.Lgs. 81/2008 Titolo III All. VI p. 1.2; C.d.S. art. 57; UNI EN 474-1",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_PULISCISPIAGGIA_ORARI_USO_SPIAGGIA",
+            title: "Rispetto Rigoroso degli Orari di Interdizione Spiaggia al Pubblico",
+            question: "L'uso della macchina puliscispiaggia sull'arenile è tassativamente interdetto durante gli orari di apertura al pubblico e di balneazione (es. ammesso esclusivamente tra le 20:00 e le 07:30) per azzerare il rischio di collisione con bagnanti?",
+            normReference: "Ordinanza di Polizia Balneare della Capitaneria di Porto; D.Lgs. 81/2008 art. 71 c. 4",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      // 6. Colonnina docce temporizzate
+      {
+        machineKey: "colonnina_docce_temporizzate",
+        name: "Colonnina Docce Esterne in Acciaio Inox AISI 316 con Pulsante Temporizzato e Lavapiedi",
+        type: "Impianto Idrosanitario Esterno con Erogatori Temporizzati su Pedana Antiscivolo",
+        suggestedManufacturer: "Ama Luxury Shower / Fontealta / Inoxstyle / AstralPool",
+        suggestedModel: "Colonnina Doccia Marina Inox AISI 316 con Lavapiedi e Rubinetto Temporizzato",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "BALN_DOCCE_ACCIAIO_INOX_AISI316",
+            title: "Struttura in Acciaio Inox AISI 316 Resistente alla Salsedine e Assenza Spigoli Vivi",
+            question: "La colonnina doccia è interamente realizzata in acciaio inossidabile austenitico AISI 316 (grado marino), priva di ruggine, ossidazioni o bave taglienti sui profili e sugli ugelli erogatori?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 4; UNI EN 1112; UNI EN 1113",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_DOCCE_VALVOLA_ANTISCOTTATURA",
+            title: "Valvola Limitatrice di Temperatura Antiscottatura e Rubinetto Temporizzato",
+            question: "L'impianto doccia è equipaggiato con valvola miscelatrice termostatica di sicurezza che limita la temperatura di erogazione a un massimo di 40°C evitando scottature accidentali all'utenza e cartuccia temporizzata per il risparmio idrico?",
+            normReference: "UNI EN 1111; D.Lgs. 81/2008 art. 71; D.Lgs. 18/2023 (Qualità acque potabili)",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_DOCCE_PEDANA_DRENAGGIO_SCIVOLAMENTO",
+            title: "Pedana di Camminamento Antiscivolo e Griglia di Drenaggio Sifonata",
+            question: "La base della doccia è dotata di pedana calpestabile a finitura antiscivolo (legno trattato o materiale composito/plastico classe C DIN 51097 per piedi nudi) e griglia di scarico a livello senza ristagni d'acqua o pericolo di scivolamento e caduta?",
+            normReference: "D.Lgs. 81/2008 Titolo II All. IV punto 1.3.2; DIN 51097 (Superfici calpestabili piedi scalzi)",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_DOCCE_DISINFEZIONE_ANTILEGIONELLA",
+            title: "Programma di Spurgo Termico/Chimico e Decalcificazione dei Soffioni Anti-Legionella",
+            question: "I soffioni delle docce esterne e i tubi flessibili sono sottoposti a regolare pulizia e decalcificazione periodica con spurghi ad alta temperatura per prevenire la proliferazione e l'aerosolizzazione di Legionella pneumophila?",
+            normReference: "Linee Guida Nazionali Prevenzione Legionellosi (Accordo Stato-Regioni 07/05/2015); D.Lgs. 81/2008 Titolo X; D.Lgs. 18/2023",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      // 7. Caldaia solare ACS docce
+      {
+        machineKey: "caldaia_solare_acs_docce",
+        name: "Impianto Solare Termico con Caldaia a Condensazione e Accumulo ACS Anti-Legionella",
+        type: "Centrale Termica / Impianto Ibrido Solare-Gas Produzione Acqua Calda Sanitaria Arenile",
+        suggestedManufacturer: "Viessmann / Daikin / Ariston",
+        suggestedModel: "Vitosol 200-TM con Caldaia Vitodens e Bollitore Vitocell 100-B 1000L",
+        isSubjectToInailCheck: true,
+        inailFrequencyYears: 5,
+        training: TRAINING_REQUIREMENTS_LIBRARY.centrali_termiche_clima,
+        safetyChecks: [
+          {
+            code: "BALN_CALDAIA_CICLO_ANTILEGIONELLA_65",
+            title: "Ciclo Automatico Settimanale di Shock Termico Anti-Legionella a Temperatura >= 65°C",
+            question: "Il sistema di gestione del boiler di accumulo attiva regolarmente e traccia un ciclo di disinfezione termica automatica con innalzamento della temperatura ad almeno 65°C per l'abbattimento della carica batterica di Legionella Pneumophila?",
+            normReference: "Linee Guida Prevenzione Legionellosi (Accordo Stato-Regioni 07/05/2015); D.Lgs. 81/2008 Titolo X; D.Lgs. 18/2023",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_CALDAIA_VALVOLA_SICUREZZA_PED",
+            title: "Valvole di Sicurezza Certificate PED/INAIL e Vasi d'Espansione a Membrana",
+            question: "Il circuito solare e il generatore di calore sono dotati di valvole di sicurezza omologate e piombate con scarico convogliato a vista, vasi d'espansione conformi e manometri con indicazione chiara della pressione di esercizio?",
+            normReference: "D.Lgs. 26/2016 (Direttiva PED 2014/68/UE); Raccolta R INAIL; D.Lgs. 81/2008 art. 71 c. 11",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_CALDAIA_MISCELATRICE_GENERALE",
+            title: "Miscelatore Termostatico di Sicurezza Generale Antiscottatura in Uscita Accumulo",
+            question: "Sulla colonna di mandata principale dell'acqua calda alle docce e ai lavandini del lido è presente una valvola miscelatrice centrale tarata per non superare i 45-48°C per evitare traumi termici all'utenza?",
+            normReference: "UNI EN 1111; D.Lgs. 81/2008 art. 71; UNI 9182",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_CALDAIA_AERAZIONE_LOCALE_GAS",
+            title: "Apertura Permanente di Ventilazione del Locale Tecnico ed Elettrovalvola Gas",
+            question: "Il vano tecnico caldaia dispone di aperture permanenti di aerazione naturale verso l'esterno calcolate secondo UNI 7129/11528 e di elettrovalvola di intercettazione gas esterna con pulsante di sgancio d'emergenza?",
+            normReference: "D.M. 08/11/2019; UNI 7129-2; UNI 11528; D.Lgs. 81/2008 art. 46",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      // 8. Fabbricatore ghiaccio lido
+      {
+        machineKey: "fabbricatore_ghiaccio_lido",
+        name: "Fabbricatore di Ghiaccio a Cubetti ad Alta Resa con Filtro Acqua Antibatterico",
+        type: "Apparecchiatura di Produzione Ghiaccio Alimentare per Bar e Ristorante di Spiaggia",
+        suggestedManufacturer: "Brema CB 640 / Icematic",
+        suggestedModel: "Brema CB 640 A Marine Edition con Filtri Antipolvere/Sabbia",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_bar_vapore,
+        safetyChecks: [
+          {
+            code: "BALN_GHIACCIO_LAMPADA_UV_MOCA",
+            title: "Lampada UV Germicida nel Deposito e Conformità Materiali MOCA",
+            question: "La vasca di contenimento del ghiaccio e la coclea di estrazione sono realizzate con materiali conformi MOCA alimentare e dotate di lampada battericida UV o sistema antimicrobico attivo per impedire la contaminazione batterica dell'acqua di falda/rete?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004; D.Lgs. 29/2017 (Sanzioni MOCA)",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_GHIACCIO_FILTRO_CONDENSATORE_SABBIA",
+            title: "Filtro Antipolvere/Sabbia sul Condensatore e Pulizia Periodica",
+            question: "Il condensatore ad aria del gruppo frigorifero è protetto da griglia e filtro antipolvere e antisabbia facilmente ispezionabile e pulibile per evitare surriscaldamenti del compressore e rischio incendio elettrico?",
+            normReference: "CEI EN 60335-2-24; D.Lgs. 81/2008 art. 71 c. 4",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_GHIACCIO_SCARICO_ANTIRIFLUSSO",
+            title: "Scarico Sifonato con Interruzione d'Aria (Air-Gap) Anti-Reflusso Fognario",
+            question: "La tubazione di scarico della condensa e dello sbrinamento della vasca ghiaccio presenta un'interruzione d'aria visibile (air-gap) a monte del sifone per escludere qualsiasi rigurgito di esalazioni o acque nere fognarie verso il ghiaccio?",
+            normReference: "UNI EN 1717; Reg. CE 852/2004 All. II Cap. IX; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_GHIACCIO_PALETTA_MOCA_ESTERNA",
+            title: "Paletta Igienica Dedicata per Prelievo con Supporto Esterno Sanificato",
+            question: "Il prelievo del ghiaccio avviene unicamente mediante paletta in materiale alimentare MOCA conservata in apposito alloggio protetto e sanificato all'esterno del contenitore ghiaccio per evitare manipolazioni a mani nude?",
+            normReference: "Reg. CE 852/2004 All. II; D.Lgs. 193/2007 (HACCP); Reg. CE 1935/2004",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      // 9. Macchina caffe lido
+      {
+        machineKey: "macchina_caffe_lido",
+        name: "Macchina Professionale per Caffè Espresso a 2 o 3 Gruppi",
+        type: "Apparecchiatura Elettrica a Pressione per Somministrazione Caffetteria Bar Lido",
+        suggestedManufacturer: "La Marzocco Linea / Faema E71 / Victoria Arduino",
+        suggestedModel: "La Marzocco Linea Classic 2/3 Gruppi Inox Marine Edition",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_bar_vapore,
+        safetyChecks: [
+          {
+            code: "BALN_CAFFE_VALVOLA_PED_CALDAIA",
+            title: "Valvola di Sicurezza Sovrapressione Caldaia PED e Pressostato Operativo",
+            question: "La caldaia interna a vapore è munita di valvola di sicurezza certificata PED a riarmo contro sovrapressioni e di manometro di controllo pressione caldaia chiaramente leggibile?",
+            normReference: "D.Lgs. 26/2016 (Direttiva PED); D.Lgs. 81/2008 art. 71 c. 4; UNI EN 60335-2-75",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_CAFFE_LANCIA_COOLTOUCH_VAPORE",
+            title: "Isolamento Termico 'Cool-Touch' e Manopole di Presa sulle Lance Vapore",
+            question: "I tubi di erogazione del vapore per la montatura latte sono provvisti di rivestimento interno isolato anti-scottatura (tecnologia Cool-Touch) e impugnatura in gomma termoisolante per prevenire ustioni al personale?",
+            normReference: "CEI EN 60335-2-75 punto 11; D.Lgs. 81/2008 Titolo III All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_CAFFE_DISCONNETTORE_ANTICALCARE",
+            title: "Dispositivo di Non Ritorno UNI EN 1717 e Filtrazione Resine con Rigenerazione Periodica",
+            question: "Il raccordo all'impianto idrico comprende un disconnettore di non ritorno certificato a norma UNI EN 1717 per impedire riflussi in rete e un depuratore/addolcitore anticalcare sottoposto a regolare rigenerazione/sostituzione delle resine?",
+            normReference: "UNI EN 1717; Reg. CE 852/2004; D.Lgs. 18/2023",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_CAFFE_COLLEGAMENTO_EQUIPOTENZIALE",
+            title: "Messa a Terra Strutturale, Morsetto Equipotenziale e Interruttore Differenziale 30mA",
+            question: "Il telaio metallico in acciaio inox è collegato a terra tramite conduttore PE idoneo e morsetto equipotenziale protetto da interruttore differenziale ad alta sensibilità da 30 mA, costantemente verificato in ambiente a forte umidità marina?",
+            normReference: "CEI 64-8 parte 7; CEI EN 60335-1; D.Lgs. 81/2008 art. 80-86",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      // 10. Vetrina gelati lido
+      {
+        machineKey: "vetrina_gelati_lido",
+        name: "Vetrina Gelateria Professionale Ventilata con Cristalli Riscaldati Anticondensa (-18°C)",
+        type: "Apparecchiatura Frigorifera per Conservazione ed Esposizione Gelati e Dessert",
+        suggestedManufacturer: "IFI / Isa / Frigomeccanica",
+        suggestedModel: "IFI Panorama / ISA Millennium 16 Gusti R290 con Cristalli Pirolitici Riscaldati",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.buffet_colazioni_haccp,
+        safetyChecks: [
+          {
+            code: "BALN_GELATI_CRISTALLI_ANTICONDENSA",
+            title: "Vetri Riscaldati Pirolitici Anticondensa e Visibilità Perfetta",
+            question: "I vetri frontali e laterali sono dotati di riscaldamento pirolitico a basso voltaggio per prevenire l'appannamento da condensa tipico del clima caldo-umido salmastro e garantire trasparenza senza rischi di elettrocuzione?",
+            normReference: "CEI EN 60335-2-89; D.Lgs. 81/2008 art. 71 c. 4",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_GELATI_TEMPERATURA_HACCP_ALLARME",
+            title: "Termostato Digitale con Sbrinamento Rapido a Gas Caldo e Allarme Sonoro HACCP",
+            question: "La refrigerazione ventilata assicura temperatura costante a -16°C / -18°C sulle vaschette con ciclo rapido di sbrinamento a inversione di ciclo/gas caldo e display con allarme di superamento soglia termica registrato sul manuale HACCP?",
+            normReference: "Reg. CE 852/2004; D.Lgs. 193/2007; UNI EN ISO 23953-2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_GELATI_SICUREZZA_GAS_R290",
+            title: "Conformità Circuito Ermetico per Gas Refrigerante Idrocarburo R290 (A3)",
+            question: "Il circuito refrigerante a gas propano R290 è ermeticamente sigillato, privo di perdite rilevabili e provvisto di marcatura di avviso di infiammabilità secondo la norma UNI EN 378?",
+            normReference: "UNI EN 378-1/2; Reg. UE 517/2014 e Reg. UE 2024/573 (F-Gas); CEI EN 60335-2-89",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_GELATI_CHIUSURA_SCORREVOLI_INSETTI",
+            title: "Pannelli Posteriori Scorrevoli a Tenuta Antipolvere, Sabbia e Insetti",
+            question: "Il lato servizio operatore dispone di chiusure scorrevoli a chiusura automatica/ermetica con guarnizioni a tenuta per schermare le vaschette gelato da granelli di sabbia, raffiche di vento e insetti volanti tipici della spiaggia?",
+            normReference: "Reg. CE 852/2004 All. II Cap. I e II; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      // 11. Friggitrice pesce lido
+      {
+        machineKey: "friggitrice_pesce_lido",
+        name: "Friggitrice Professionale a Vasca Singola o Doppia per Pesce e Fritture",
+        type: "Apparecchiatura di Cottura Professionale ad Immersione in Olio ad Alta Temperatura",
+        suggestedManufacturer: "Lotus / Angelo Po / Giorik",
+        suggestedModel: "Lotus Professional 2x15L Vasca a 'V' con Paraspruzzi Inox",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "BALN_FRIGGITRICE_TERMOSTATO_SICUREZZA",
+            title: "Termostato di Sicurezza Limitatore a Riarmo Manuale Indipendente (< 230°C)",
+            question: "La friggitrice è provvista di un termostato di blocco di sicurezza indipendente da quello di regolazione, che intercetta l'alimentazione prima che l'olio raggiunga i 230°C per prevenire l'innesco di autocombustione violenta?",
+            normReference: "UNI EN 203-1 punto 5.4; CEI EN 60335-2-37; D.Lgs. 81/2008 All. V p. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_FRIGGITRICE_VALVOLA_SCARICO_DOPPIA_SICURA",
+            title: "Valvola Frontale di Svuotamento Olio con Dispositivo di Blocco a Doppia Azione",
+            question: "La valvola per lo scarico dell'olio esausto è dotata di sicura meccanica (leva a scatto o perno di fermo) che impedisce l'apertura accidentale durante il servizio e scarico convogliato in apposito recipiente filtrante in dotazione?",
+            normReference: "UNI EN 203-2-4; CEI EN 60335-2-37; D.Lgs. 81/2008 Titolo III All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_FRIGGITRICE_PARASPRUZZI_ZONA_FREDDA",
+            title: "Paraspruzzi Inox Perimetrale e Vasca con Zona Fredda per Residui Carboniosi",
+            question: "La vasca è corredata da alzatina e paraspruzzi laterali in acciaio inox per contenere schizzi d'olio caldo derivanti dalla frittura di pesce bagnato ed è provvista di zona fredda per evitare la carbonizzazione dei residui e lo sviluppo di acrilammide/fumi tossici?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 4; Reg. UE 2017/2158 (Acrilammide); Reg. CE 852/2004",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_FRIGGITRICE_COPERCHIO_ESTINZIONE",
+            title: "Coperchio Metallico di Copertura a Tenuta e Presenza Estintore Classe F",
+            question: "È sempre disponibile il coperchio metallico originale per soffocare prontamente eventuali principi d'incendio d'olio e nelle immediate vicinanze è posizionato un estintore a schiuma omologato classe d'incendio F (olii vegetali)?",
+            normReference: "D.M. 03/09/2021; UNI EN 3-7 (Classe F); D.Lgs. 81/2008 art. 46",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      // 12. Cappa aspirazione lido
+      {
+        machineKey: "cappa_aspirazione_lido",
+        name: "Cappa d'Aspirazione Compensata Inox con Filtri a Labirinto e Impianto Ansul R-102",
+        type: "Impianto di Estrazione Fumi di Cottura e Soppressione Automatica Incendi Cucina",
+        suggestedManufacturer: "Alvial / Smoki / Camini & Cappe",
+        suggestedModel: "Cappa Compensata Inox 304 con Impianto Ansul R-102 a Schiuma",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.antincendio_evac,
+        safetyChecks: [
+          {
+            code: "BALN_CAPPA_IMPIANTO_ANSUL_NFPA96",
+            title: "Sistema Automatico a Pioggia di Soppressione Incendio Ansul R-102 con Scarico Ugelli",
+            question: "La cappa della cucina del ristorante di spiaggia è dotata di impianto automatico di spegnimento a liquido chimico Ansul R-102 conforme NFPA 96, con fusibili termici e tirante manuale di sgancio in posizione sicura?",
+            normReference: "NFPA 96; NFPA 17A; D.M. 03/09/2021; D.Lgs. 81/2008 art. 46",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_CAPPA_FILTRI_LABIRINTO_LAVAGGIO",
+            title: "Filtri a Labirinto Parascintille Inox e Pulizia Periodica Antigocciolamento",
+            question: "I filtri a labirinto in acciaio inossidabile sono integri, posizionati con corretta inclinazione verso la canalina di raccolta grassi e smontati e lavati con frequenza settimanale registrata per impedire l'accumulo di grasso infiammabile?",
+            normReference: "UNI EN 16282-6; D.Lgs. 81/2008 art. 71; Reg. CE 852/2004",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_CAPPA_ASPIRATORE_CONDOTTO_SALSEDINE",
+            title: "Motore d'Aspirazione Esterno con Girante Pale Rovesce e Condotto Inox AISI 316",
+            question: "Il torrino o cassonetto d'estrazione fumi è resistente alla corrosione marina da salsedine e la canna fumaria è a tenuta e sfociante oltre il colmo del tetto secondo i regolamenti edilizi e igienico-sanitari locali?",
+            normReference: "UNI EN 16282-4; D.Lgs. 81/2008 art. 71; Regolamento d'Igiene Locale",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_CAPPA_INTERBLOCCO_ELETTROVALVOLA_GAS",
+            title: "Interblocco di Sicurezza con Elettrovalvola Intercettazione Gas Cucina",
+            question: "È attivo l'interblocco pressostatico che blocca l'erogazione del gas o spegne le friggitrici qualora l'impianto di aspirazione della cappa sia disattivato o in avaria?",
+            normReference: "UNI EN 203-1; UNI 8723; D.M. 08/11/2019; D.Lgs. 81/2008 art. 46",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      // 13. Lavastoviglie capotta lido
+      {
+        machineKey: "lavastoviglie_capotta_lido",
+        name: "Lavastoviglie Industriale a Capotta Passante con Risciacquo Igienizzante (82°C)",
+        type: "Macchina Lavastoviglie a Capotta Passante per Ristorante e Bar di Stabilimento Balneare",
+        suggestedManufacturer: "Winterhalter PT / Meiko / Krupps",
+        suggestedModel: "Winterhalter PT Marine / Krupps Elite Capotta Inox AISI 304",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "BALN_LAVASTOVIGLIE_RISCIACQUO_82C",
+            title: "Disinfezione Termica con Risciacquo Costante >= 82°C a Norma DIN 10512",
+            question: "Il boiler interno assicura un risciacquo igienizzante a temperatura costante non inferiore a 82°C per l'inattivazione di patogeni alimentari su piatti e posate utilizzati per servizio di pesce e crudi di mare?",
+            normReference: "DIN 10512; Reg. CE 852/2004; D.Lgs. 193/2007 (HACCP); D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_LAVASTOVIGLIE_BREAK_TANK_EN1717",
+            title: "Dispositivo Break Tank Antiriflusso in Rete Idrica Conforme UNI EN 1717",
+            question: "La macchina incorpora una vaschetta atmosferica Break Tank con pompa di risciacquo indipendente che impedisce il riflusso di detersivi e acque reflue inquinate nella rete idrica potabile del lido?",
+            normReference: "UNI EN 1717; D.Lgs. 18/2023; Reg. CE 852/2004 All. II",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_LAVASTOVIGLIE_MICRO_CAPOTTA_ERGO",
+            title: "Interblocco di Sicurezza Arresto Pompa su Sollevamento Capotta e Molle Bilanciate",
+            question: "Il sollevamento della capotta provoca l'arresto immediato delle pompe di lavaggio e risciacquo per evitare getti d'acqua bollente sull'operatore, e le molle di bilanciamento impediscono ricadute accidentali per gravità?",
+            normReference: "CEI EN 60335-2-58 punto 20; D.Lgs. 81/2008 Titolo III All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_LAVASTOVIGLIE_DOSATORI_PERISTALTICI",
+            title: "Dosatori Peristaltici Incorporati e Pescanti con Tappo di Sicurezza Chimica",
+            question: "I prodotti chimici corrosivi (detergente alcalino e brillantante acido) sono prelevati da dosatori peristaltici a circuito chiuso con pescanti e tappi di protezione per azzerare il contatto cutaneo dell'addetto?",
+            normReference: "D.Lgs. 81/2008 Titolo IX (Rischio Chimico) art. 224; Schede di Sicurezza SDS REACH",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      // 14. Armadio frigo pesce lido
+      {
+        machineKey: "armadio_frigo_pesce_lido",
+        name: "Armadio Frigorifero Statico/Ventilato Speciale Pesce Fresco (-2°C / +2°C)",
+        type: "Apparecchiatura Frigorifera Professionale per Conservazione Prodotti Ittici Freschi",
+        suggestedManufacturer: "Friulinox / Polaris / Ilsa",
+        suggestedModel: "Friulinox Fish Marine 700L con Vaschette Forate Inox e Scolo Liquidi",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "BALN_FRIGO_EVAPORATORE_CATAFORESI",
+            title: "Evaporatore Trattato con Verniciatura Cataforesi Anticorrosione Salina e Acidi di Pesce",
+            question: "La batteria evaporante interna è protetta con trattamento di verniciatura cataforetica per resistere all'azione corrosiva dell'ammoniaca naturale del pesce e della salsedine marina, evitando fughe di gas refrigerante?",
+            normReference: "UNI EN ISO 12944; CEI EN 60335-2-89; D.Lgs. 81/2008 art. 71 c. 4",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_FRIGO_VASCHETTE_FORATE_MOCA",
+            title: "Vaschette Forate in Acciaio Inox AISI 304/316 con Raccogliscolo e Separazione Liquidi",
+            question: "Il vano frigo è allestito con vaschette forate estraibili con doppio fondo e raccogliscolo per evitare il ristagno del pesce nell'acqua di scioglimento del ghiaccio, certificate MOCA per contatto alimentare?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 853/2004 All. III Sez. VIII; D.Lgs. 29/2017",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_FRIGO_TERMOREGOLATORE_HACCP",
+            title: "Monitoraggio Digitale Continuo della Temperatura (-2°C / +2°C) e Registrazione HACCP",
+            question: "La temperatura di conservazione del pesce fresco è costantemente mantenuta nel range critico compreso tra -2°C e +2°C con allarmi di deviazione acustici/visivi e tracciamento delle anomalie per la sicurezza alimentare?",
+            normReference: "Reg. CE 853/2004; Reg. CE 852/2004; D.Lgs. 193/2007",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_FRIGO_GUARNIZIONI_PEDALE_APERTURA",
+            title: "Guarnizioni Magnetiche Estraibili Facilmente Sanificabili e Apertura a Pedale",
+            question: "La porta è provvista di pedale per l'apertura a mani libere per scongiurare cross-contaminazioni batteriche durante la manipolazione del pesce e guarnizioni magnetiche integre e prive di fessurazioni o muffe?",
+            normReference: "Reg. CE 852/2004 All. II Cap. V; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      // 15. Compattatore differenziata lido
+      {
+        machineKey: "compattatore_differenziata_lido",
+        name: "Pressa Compattatrice Rifiuti e Cartoni da Spiaggia con Quadro Stagno IP65",
+        type: "Macchina Industriale di Compattazione e Riduzione Volume Rifiuti Arenile",
+        suggestedManufacturer: "Bramidan / Strautmann / Macfab",
+        suggestedModel: "Bramidan B3 Marine Edition con Quadro Elettrico Stagno IP65",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "BALN_COMPATTATORE_QUADRO_STAGNO_IP65",
+            title: "Quadro Elettrico di Comando con Grado di Protezione Stagno IP65",
+            question: "Il quadro elettrico e la pulsantiera di comando sono certificati con grado di protezione minimo IP65 per prevenire infiltrazioni di acqua piovana, sabbia e aerosol salino in ambiente esterno costiero?",
+            normReference: "CEI EN 60529 (IP65); CEI EN 60204-1; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_COMPATTATORE_INTERBLOCCO_SPORTOTTO",
+            title: "Interblocco di Sicurezza Meccanico/Elettrico dello Sportello di Carico (UNI EN 16500)",
+            question: "Lo sportello di carico rifiuti è vincolato da microinterruttore di sicurezza con bloccaggio che inibisce la discesa del piatto pressante all'apertura, evitando qualsiasi pericolo di schiacciamento arti?",
+            normReference: "UNI EN 16500:2014; D.Lgs. 81/2008 Titolo III All. V punto 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_COMPATTATORE_ARRESTO_EMERGENZA_CHIAVE",
+            title: "Fungo d'Emergenza Rosso Riarmo Rotazione e Selettore a Chiave per Personale Autorizzato",
+            question: "La macchina è provvista di pulsante di arresto di emergenza a fungo su fondo giallo ben visibile e selettore a chiave per interdire l'azionamento da parte di clienti o persone non addestrate?",
+            normReference: "UNI EN ISO 13850; UNI EN 16500; D.Lgs. 81/2008 art. 71 c. 7",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_COMPATTATORE_VASCA_PERCOLATO",
+            title: "Vasca di Raccolta Liquidi e Percolato Rifiuti con Valvola di Scarico",
+            question: "La base della pressa è dotata di vasca stagna di raccolta dei liquidi di percolato generati dalla compattazione di lattine e rifiuti da spiaggia, con rubinetto di spurgo verso scarico autorizzato per evitare inquinamento del suolo?",
+            normReference: "D.Lgs. 152/2006 (Testo Unico Ambientale) art. 186; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+      // 16. Trattorino rimorchio spiaggia
+      {
+        machineKey: "trattorino_rimorchio_spiaggia",
+        name: "Trattorino Gommato 4WD con Lampeggiante per Traino Puliscispiaggia e Mezzi Nautici",
+        type: "Trattore Agricolo/Comunale Ruotato 4x4 per Movimentazione Arenile e Servizi Spiaggia",
+        suggestedManufacturer: "Kubota / Antonio Carraro / John Deere",
+        suggestedModel: "Kubota B2441 4WD / Antonio Carraro Tigre 3200 con Pneumatici Sand Garden",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.operatore_puliscispiaggia,
+        safetyChecks: [
+          {
+            code: "BALN_TRATTORINO_TELAIO_ROPS_CINTURA",
+            title: "Arco di Protezione Antiribaltamento ROPS Omologato e Cintura di Sicurezza",
+            question: "Il trattorino è provvisto di roll-bar o telaio di protezione abbattibile/fisso ROPS certificato secondo direttive OECD e il sedile di guida è munito di cintura di sicurezza ventrale allacciata durante la guida sull'arenile?",
+            normReference: "D.Lgs. 81/2008 Titolo III All. V punto 2.4; Direttiva 2003/37/CE; Codice della Strada",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_TRATTORINO_PNEUMATICI_SABBIA",
+            title: "Pneumatici a Sezione Larga a Bassa Pressione per Arenile e Trazione 4x4",
+            question: "Il trattorino adotta pneumatici 'turf/sand' a sezione allargata e bassa pressione per garantire manovrabilità su sabbia bagnata e asciutta evitando affossamenti improvvisi e ribaltamenti?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 4; Manuale d'Uso del Fabbricante",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_TRATTORINO_GANCIO_TRAINO_SPINA",
+            title: "Gancio di Traino Omologato con Perno e Copiglia Elastica di Fermo",
+            question: "Il dispositivo di traino per il puliscispiaggia, carrelli lettini o rimorchi natanti presenta gancio omologato conforme C.d.S. provvisto di perno con coppiglia elastica o linguetta a scatto che impedisce lo sgancio accidentale durante il traino?",
+            normReference: "Regolamento CEE-ONU 55; C.d.S. art. 57; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "BALN_TRATTORINO_LAMPEGGIANTE_RETROMARCIA",
+            title: "Lampeggiante Rotante Giallo a Luce Continua e Cicalino Acustico di Retromarcia",
+            question: "Il mezzo è provvisto di lampeggiante giallo superiore attivo in ogni spostamento sulla spiaggia e segnalatore acustico di retromarcia per avvisare pedoni e bagnanti presenti sull'arenile?",
+            normReference: "D.Lgs. 81/2008 All. VI punto 1.2; C.d.S. art. 153",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+    ],
+  },
+
   // 2. RISTORAZIONE & ALIMENTARE
   {
     sectorKey: "ristorazione_alimentare",
@@ -10840,6 +11565,19 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
   const campingSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "campeggio_villaggio");
   const campingMachines = campingSector ? campingSector.machines : [];
 
+  const isBeachClubAteco = !!atecoCode && (
+    atecoCode.startsWith("93.29.20") ||
+    atecoCode.startsWith("93.29.2") ||
+    atecoCode.startsWith("93.29") ||
+    atecoCode.startsWith("93.2") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("932920") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("93292") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("9329") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("932")
+  );
+  const beachClubSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "stabilimento_balneare");
+  const beachClubMachines = beachClubSector ? beachClubSector.machines : [];
+
   // 1. MACCHINE SUGGERITE IN BASE AI LOCALI CENSITI NELLO STEP 2
   for (const env of environments) {
     const envId = (env.id || "").toLowerCase();
@@ -11918,6 +12656,115 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
     ) {
       matchingMachines = campingMachines.filter((m) =>
         ["caldaia_centrale_acs_campeggio", "gruppo_pompe_antincendio_uni12845"].includes(m.machineKey)
+      );
+    }
+
+    // Reparti Stabilimento Balneare, Lido e Beach Club (ATECO 93.29.20 / 93.29.2 / 93.29 / 93.2 / 932920 / 93292 / 9329 / 932)
+    else if (
+      envId === "env-baln-reception-cassa" ||
+      envId.includes("baln-reception") ||
+      (isBeachClubAteco && (nameLower.includes("reception") || nameLower.includes("cassa") || cat === "reception" || cat === "sales_office"))
+    ) {
+      matchingMachines = beachClubMachines.filter((m) =>
+        ["defibrillatore_dae_teca_climatizzata"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-baln-arenile-ombrelloni" ||
+      envId.includes("baln-arenile") ||
+      envId.includes("baln-ombrelloni") ||
+      (isBeachClubAteco && !nameLower.includes("isola") && !nameLower.includes("rifiuti") && !nameLower.includes("infermeria") && !nameLower.includes("chiosco") && !nameLower.includes("bar") && !nameLower.includes("puliscispiaggia") && (nameLower.includes("arenile") || nameLower.includes("ombrelloni") || nameLower.includes("lettini") || cat === "beach" || cat === "arenile"))
+    ) {
+      matchingMachines = beachClubMachines.filter((m) =>
+        ["sedia_anfibia_disabili_job", "colonnina_docce_temporizzate"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-baln-postazione-salvataggio" ||
+      envId.includes("baln-salvataggio") ||
+      envId.includes("baln-postazione") ||
+      (isBeachClubAteco && (nameLower.includes("salvataggio") || nameLower.includes("bagnino") || nameLower.includes("torretta") || cat === "lifeguard"))
+    ) {
+      matchingMachines = beachClubMachines.filter((m) =>
+        ["torretta_bagnino_avvistamento", "pattino_salvataggio_rosso"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-baln-infermeria-primo-soccorso" ||
+      envId.includes("baln-infermeria") ||
+      envId.includes("baln-primo-soccorso") ||
+      (isBeachClubAteco && (nameLower.includes("infermeria") || nameLower.includes("primo soccorso") || cat === "first_aid" || cat === "medical"))
+    ) {
+      matchingMachines = beachClubMachines.filter((m) =>
+        ["defibrillatore_dae_teca_climatizzata"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-baln-blocchi-servizi-docce" ||
+      envId.includes("baln-blocchi-servizi") ||
+      envId.includes("baln-servizi-docce") ||
+      (isBeachClubAteco && (nameLower.includes("blocchi servizi") || (nameLower.includes("docce") && !nameLower.includes("solare")) || cat === "bathrooms" || cat === "showers"))
+    ) {
+      matchingMachines = beachClubMachines.filter((m) =>
+        ["colonnina_docce_temporizzate", "caldaia_solare_acs_docce"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-baln-chiosco-bar" ||
+      envId.includes("baln-chiosco") ||
+      envId.includes("baln-bar") ||
+      (isBeachClubAteco && (nameLower.includes("chiosco") || nameLower.includes("bar") || cat === "bar"))
+    ) {
+      matchingMachines = beachClubMachines.filter((m) =>
+        ["fabbricatore_ghiaccio_lido", "macchina_caffe_lido", "vetrina_gelati_lido"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-baln-ristorante-cucina" ||
+      envId.includes("baln-ristorante") ||
+      envId.includes("baln-cucina") ||
+      (isBeachClubAteco && (nameLower.includes("ristorante") || nameLower.includes("cucina") || cat === "restaurant" || cat === "kitchen"))
+    ) {
+      matchingMachines = beachClubMachines.filter((m) =>
+        ["friggitrice_pesce_lido", "cappa_aspirazione_lido", "lavastoviglie_capotta_lido"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-baln-celle-frigo-dispensa" ||
+      envId.includes("baln-celle") ||
+      envId.includes("baln-dispensa") ||
+      (isBeachClubAteco && (nameLower.includes("celle") || nameLower.includes("dispensa") || nameLower.includes("pesce fresco") || cat === "cold_storage" || cat === "storage"))
+    ) {
+      matchingMachines = beachClubMachines.filter((m) =>
+        ["armadio_frigo_pesce_lido"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-baln-centrale-idrica-solare" ||
+      envId.includes("baln-centrale-idrica") ||
+      envId.includes("baln-solare") ||
+      (isBeachClubAteco && (nameLower.includes("solare termico") || nameLower.includes("centrale idrica") || cat === "boiler_room" || (cat === "technical" && !nameLower.includes("isola") && !nameLower.includes("rifiuti") && !nameLower.includes("differenziata"))))
+    ) {
+      matchingMachines = beachClubMachines.filter((m) =>
+        ["caldaia_solare_acs_docce"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-baln-rimessaggio-puliscispiaggia" ||
+      envId.includes("baln-rimessaggio") ||
+      envId.includes("baln-puliscispiaggia") ||
+      (isBeachClubAteco && (nameLower.includes("rimessaggio") || nameLower.includes("puliscispiaggia") || cat === "garage" || cat === "warehouse"))
+    ) {
+      matchingMachines = beachClubMachines.filter((m) =>
+        ["puliscispiaggia_semovente_trattore", "trattorino_rimorchio_spiaggia"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-baln-isola-ecologica-spiaggia" ||
+      envId.includes("baln-isola-ecologica") ||
+      (isBeachClubAteco && (nameLower.includes("ecologica") || nameLower.includes("differenziata") || nameLower.includes("rifiuti") || cat === "waste"))
+    ) {
+      matchingMachines = beachClubMachines.filter((m) =>
+        ["compattatore_differenziata_lido"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-baln-cabine-spogliatoi" ||
+      envId.includes("baln-cabine") ||
+      envId.includes("baln-spogliatoi") ||
+      (isBeachClubAteco && (nameLower.includes("cabine") || nameLower.includes("spogliatoi") || cat === "cabins" || cat === "changing_room"))
+    ) {
+      matchingMachines = beachClubMachines.filter((m) =>
+        ["sedia_anfibia_disabili_job"].includes(m.machineKey)
       );
     } else if (
       envId === "env-super-magazzino" ||

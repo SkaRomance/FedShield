@@ -2778,8 +2778,264 @@ export function getStandardEnvironmentsForAteco(atecoCode?: string): WorkEnviron
     ];
   }
 
-  // 0-undecies-ter. Aree di Campeggio, Villaggi Turistici, Camping Village e Allestimenti per Camper/Caravan (55.30.00, 55.30.0, 55.30, 55.3, 553000, 55300, 5530, 553)
+  // 0-undecies-quater. Stabilimenti Balneari, Lidi, Beach Club, Arenili Attrezzati (93.29.20, 93.29.2, 93.29, 93.2, 932920, 93292, 9329, 932)
   const cleanAteco = ateco.replace(/[^0-9]/g, "");
+  if (
+    cleanAteco.startsWith("932920") ||
+    cleanAteco.startsWith("93292") ||
+    cleanAteco.startsWith("9329") ||
+    cleanAteco.startsWith("932") ||
+    ateco.startsWith("93.29.20") ||
+    ateco.startsWith("93.29.2") ||
+    ateco.startsWith("93.29") ||
+    ateco.startsWith("93.2")
+  ) {
+    return [
+      {
+        id: "env-baln-reception-cassa",
+        key: "baln_reception_cassa_direzione",
+        name: "Reception Stabilimento, Cassa & Direzione Lido",
+        icon: "🏖️",
+        category: "sales_office",
+        isDefault: true,
+        surfaceSqM: 30,
+        heightM: 3.0,
+        volumeCuM: 90,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 4.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("sales_office"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-baln-arenile-ombrelloni",
+        key: "baln_arenile_ombrelloni_lettini_passerelle",
+        name: "Arenile Attrezzato (File Ombrelloni, Lettini & Passerelle Accessibili PMR)",
+        icon: "⛱️",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 6000,
+        heightM: 3.0,
+        volumeCuM: 18000,
+        occupantsCount: 300,
+        emergencyExitsCount: 4,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-baln-postazione-salvataggio",
+        key: "baln_postazione_salvataggio_torretta_bagnino",
+        name: "Torretta di Avvistamento Bagnino & Fronte Mare Salvataggio",
+        icon: "🛟",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 20,
+        heightM: 3.0,
+        volumeCuM: 60,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-baln-infermeria-primo-soccorso",
+        key: "baln_infermeria_spiaggia_primo_soccorso_dae",
+        name: "Locale Infermeria di Spiaggia & Postazione Primo Soccorso DAE",
+        icon: "🏥",
+        category: "services",
+        isDefault: true,
+        surfaceSqM: 15,
+        heightM: 2.7,
+        volumeCuM: 40.5,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("services"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-baln-cabine-spogliatoi",
+        key: "baln_cabine_spogliatoi_deposito_giochi",
+        name: "Batteria Cabine Spogliatoi Ospiti & Deposito Giochi Spiaggia",
+        icon: "🚪",
+        category: "services",
+        isDefault: true,
+        surfaceSqM: 80,
+        heightM: 2.4,
+        volumeCuM: 192,
+        occupantsCount: 4,
+        emergencyExitsCount: 2,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("services"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-baln-blocchi-servizi-docce",
+        key: "baln_blocchi_servizi_igienici_docce_pmr",
+        name: "Blocco Servizi Igienici & Docce Esterne/Calde (con PMR D.P.R. 503/96)",
+        icon: "🚿",
+        category: "services",
+        isDefault: true,
+        surfaceSqM: 60,
+        heightM: 2.6,
+        volumeCuM: 156,
+        occupantsCount: 6,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 4.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("services"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          forcedExhaustPresent: true,
+          forcedExhaustType: "blind_toilet_fan",
+        },
+      },
+      {
+        id: "env-baln-chiosco-bar",
+        key: "baln_chiosco_bar_spiaggia_caffetteria_gelati",
+        name: "Chiosco Bar sulla Spiaggia & Banco Caffetteria / Gelati",
+        icon: "🍹",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 40,
+        heightM: 3.0,
+        volumeCuM: 120,
+        occupantsCount: 3,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 6.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-baln-ristorante-cucina",
+        key: "baln_ristorante_cucina_preparazione_pesce",
+        name: "Cucina Ristorante del Lido & Preparazione Pesce / Primi",
+        icon: "🍳",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 50,
+        heightM: 3.2,
+        volumeCuM: 160,
+        occupantsCount: 4,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 5.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          forcedExhaustType: "kitchen_hood",
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-baln-celle-frigo-dispensa",
+        key: "baln_celle_frigorifere_pesce_fresco_surgelati",
+        name: "Celle Frigorifere Deperibili (Pesce Fresco +0/+2°C, Surgelati & Bevande)",
+        icon: "❄️",
+        category: "storage",
+        isDefault: true,
+        surfaceSqM: 25,
+        heightM: 2.6,
+        volumeCuM: 65,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("storage"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-baln-centrale-idrica-solare",
+        key: "baln_centrale_idrica_solare_termico_accumulo_docce",
+        name: "Centrale Idrica, Impianto Solare Termico & Accumulo Docce Anti-Legionella",
+        icon: "🚰",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 20,
+        heightM: 2.6,
+        volumeCuM: 52,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-baln-rimessaggio-puliscispiaggia",
+        key: "baln_rimessaggio_mezzi_spiaggia_nautiche_puliscispiaggia",
+        name: "Rimessaggio Mezzi Spiaggia, Attrezzature Nautiche & Puliscispiaggia",
+        icon: "🚜",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 70,
+        heightM: 3.5,
+        volumeCuM: 245,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 6.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-baln-isola-ecologica-spiaggia",
+        key: "baln_isola_ecologica_arenile_differenziata_rifiuti",
+        name: "Isola Ecologica Arenile & Stoccaggio Differenziata Rifiuti Spiaggia",
+        icon: "♻️",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 40,
+        heightM: 3.0,
+        volumeCuM: 120,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+    ];
+  }
+
+  // 0-undecies-ter. Aree di Campeggio, Villaggi Turistici, Camping Village e Allestimenti per Camper/Caravan (55.30.00, 55.30.0, 55.30, 55.3, 553000, 55300, 5530, 553)
   if (
     cleanAteco.startsWith("553000") ||
     cleanAteco.startsWith("55300") ||
@@ -4660,7 +4916,9 @@ export function evaluateEnvironmentCompliance(
     env.key.includes("bar_armadi_frigoriferi") ||
     env.id === "env-gelamb-cella-stoccaggio" ||
     env.key.includes("cella_negativa") ||
-    env.key.includes("cella_stoccaggio")
+    env.key.includes("cella_stoccaggio") ||
+    env.id === "env-baln-celle-frigo-dispensa" ||
+    env.key.includes("baln_celle_frigorifere")
   ) {
     minHeightRequired = 2.4; // 2,40 m per celle frigorifere prefabbricate e locali tecnici refrigerati
   } else if (
@@ -6719,6 +6977,250 @@ export function evaluateEnvironmentCompliance(
     summaryBadges.push({
       text: "🛢️ Fusto a tenuta con bacino di contenimento per oli minerali esausti officina & griglia sifonata",
       status: "info",
+    });
+  }
+
+  // ========================================================================
+  // REQUISITI E BADGE SPECIFICI STABILIMENTI BALNEARI, LIDI, BEACH CLUB (ATECO 93.29.20 / 93.29.2 / 93.29 / 93.2)
+  // ========================================================================
+
+  // 1. Reception Stabilimento, Cassa & Direzione Lido
+  const isBalnReception =
+    env.id === "env-baln-reception-cassa" ||
+    env.key === "baln_reception_cassa_direzione" ||
+    (env.id.includes("baln-reception-cassa") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("932") ?? false));
+  if (isBalnReception) {
+    summaryBadges.push({
+      text: "🏖️ Postazione VDT ergonomica D.Lgs. 81/08 Titolo VII & quadro generale con differenziale 30 mA",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🧯 Estintore 34A 233B & planimetria generale spiaggia bilingue con uscite d'emergenza",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "📡 Centralina meteo-marina & ricezione allerte burrasca Capitaneria di Porto",
+      status: "info",
+    });
+  }
+
+  // 2. Arenile Attrezzato (File Ombrelloni, Lettini & Passerelle Accessibili PMR)
+  const isBalnArenile =
+    env.id === "env-baln-arenile-ombrelloni" ||
+    env.key === "baln_arenile_ombrelloni_lettini_passerelle" ||
+    (env.id.includes("baln-arenile-ombrelloni") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("932") ?? false));
+  if (isBalnArenile) {
+    summaryBadges.push({
+      text: "♿ Passerella disabili PMR fino alla battigia ≥ 1,00 m (D.P.R. 503/96) & sedia JOB anfibia",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "⛱️ Distanziamento file ombrelloni conforme a Ordinanza Balneare Capitaneria di Porto",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🧯 Estintori a polvere distribuiti su perimetro arenile con cartelli di emergenza",
+      status: "warning",
+    });
+  }
+
+  // 3. Torretta di Avvistamento Bagnino & Fronte Mare Salvataggio
+  const isBalnSalvataggio =
+    env.id === "env-baln-postazione-salvataggio" ||
+    env.key === "baln_postazione_salvataggio_torretta_bagnino" ||
+    (env.id.includes("baln-postazione-salvataggio") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("932") ?? false));
+  if (isBalnSalvataggio) {
+    summaryBadges.push({
+      text: "🛟 Torretta sopraelevata visibile & bagnino abilitato MIP/FIN in orario balneazione",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🚣 Pattino di salvataggio rosso a remi, rullo 200 m, salvagente anulare con sagola 25 m & rescue can",
+      status: "danger",
+    });
+    summaryBadges.push({
+      text: "🚩 Albero segnali con bandiere meteo-marine Ordinanza Balneare, binocolo e megafono",
+      status: "info",
+    });
+  }
+
+  // 4. Locale Infermeria di Spiaggia & Postazione Primo Soccorso DAE
+  const isBalnInfermeria =
+    env.id === "env-baln-infermeria-primo-soccorso" ||
+    env.key === "baln_infermeria_spiaggia_primo_soccorso_dae" ||
+    (env.id.includes("baln-infermeria") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("932") ?? false));
+  if (isBalnInfermeria) {
+    summaryBadges.push({
+      text: "🏥 Locale infermeria con lettino visita & cassetta primo soccorso All. 1 D.M. 388/03 completa",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "⚡ Defibrillatore DAE in teca climatica antisalsedine con autotest verde e piastre valide",
+      status: "danger",
+    });
+    summaryBadges.push({
+      text: "🫁 Bombola ossigeno terapeutico con flussimetro & pallone rianimatore AMBU con maschere",
+      status: "warning",
+    });
+  }
+
+  // 5. Batteria Cabine Spogliatoi Ospiti & Deposito Giochi Spiaggia
+  const isBalnCabine =
+    env.id === "env-baln-cabine-spogliatoi" ||
+    env.key === "baln_cabine_spogliatoi_deposito_giochi" ||
+    (env.id.includes("baln-cabine-spogliatoi") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("932") ?? false));
+  if (isBalnCabine) {
+    summaryBadges.push({
+      text: "🚪 Cabine ospiti in materiale lavabile e disinfettabile con feritoie di aerazione naturale",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "♿ Cabina spogliatoio disabili PMR con porta scorrevole ≥ 90 cm e maniglioni a norma",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🧯 Estintori portatili presidiati lungo la batteria cabine & illuminazione d'emergenza",
+      status: "info",
+    });
+  }
+
+  // 6. Blocco Servizi Igienici & Docce Esterne/Calde (con PMR D.P.R. 503/96)
+  const isBalnDocce =
+    env.id === "env-baln-blocchi-servizi-docce" ||
+    env.key === "baln_blocchi_servizi_igienici_docce_pmr" ||
+    (env.id.includes("baln-blocchi-servizi-docce") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("932") ?? false));
+  if (isBalnDocce) {
+    summaryBadges.push({
+      text: "🚿 Box docce con piatto antiscivolo R11 & disinfezione periodica soffioni anti-legionella D.Lgs. 18/2023",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "♿ Bagno disabili PMR con tirante d'allarme d'emergenza a norma D.P.R. 503/96",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "💨 Aerazione forzata / finestrata & pavimentazione continua lavabile antiscivolo con lavapiedi",
+      status: "info",
+    });
+  }
+
+  // 7. Chiosco Bar sulla Spiaggia & Banco Caffetteria / Gelati
+  const isBalnBar =
+    env.id === "env-baln-chiosco-bar" ||
+    env.key === "baln_chiosco_bar_spiaggia_caffetteria_gelati" ||
+    (env.id.includes("baln-chiosco-bar") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("932") ?? false));
+  if (isBalnBar) {
+    summaryBadges.push({
+      text: "🍹 Banco bar inox MOCA protetto da sabbia e salsedine & fabbricatore ghiaccio con filtro addolcitore",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "☕ Macchina caffè con valvola sicurezza INAIL & vetrina gelati ventilata -18°C",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🍽️ Lavabicchieri con risciacquo igienico ≥ 82°C & estintori CO2/polvere idonei",
+      status: "warning",
+    });
+  }
+
+  // 8. Cucina Ristorante del Lido & Preparazione Pesce / Primi
+  const isBalnCucina =
+    env.id === "env-baln-ristorante-cucina" ||
+    env.key === "baln_ristorante_cucina_preparazione_pesce" ||
+    (env.id.includes("baln-ristorante-cucina") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("932") ?? false));
+  if (isBalnCucina) {
+    summaryBadges.push({
+      text: "🍳 Cappa compensata con filtri inox a labirinto & impianto spegnimento Ansul R-102",
+      status: "danger",
+    });
+    summaryBadges.push({
+      text: "🐟 Piano cottura e friggitrice pesce con paraspruzzi inox & lavamani a comando non manuale",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🦟 Finestre con zanzariere integre & pavimentazione antiscivolo R12 con canaline sifonate",
+      status: "info",
+    });
+  }
+
+  // 9. Celle Frigorifere Deperibili (Pesce Fresco +0/+2°C, Surgelati & Bevande)
+  const isBalnCelle =
+    env.id === "env-baln-celle-frigo-dispensa" ||
+    env.key === "baln_celle_frigorifere_pesce_fresco_surgelati" ||
+    (env.id.includes("baln-celle-frigo") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("932") ?? false));
+  if (isBalnCelle) {
+    summaryBadges.push({
+      text: "❄️ Cella pesce fresco +0/+2°C su letto di ghiaccio a scolo separato HACCP (Reg. CE 852/04)",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "⚠️ Allarme acustico-luminoso uomo intrappolato a 24V con sblocco interno di sicurezza (UNI EN 378)",
+      status: "danger",
+    });
+    summaryBadges.push({
+      text: "🌡️ Teletermometri continui registratori con allarmi di soglia per conservazione pesce e deperibili",
+      status: "warning",
+    });
+  }
+
+  // 10. Centrale Idrica, Impianto Solare Termico & Accumulo Docce Anti-Legionella
+  const isBalnCentraleIdrica =
+    env.id === "env-baln-centrale-idrica-solare" ||
+    env.key === "baln_centrale_idrica_solare_termico_accumulo_docce" ||
+    (env.id.includes("baln-centrale-idrica") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("932") ?? false));
+  if (isBalnCentraleIdrica) {
+    summaryBadges.push({
+      text: "💧 Boiler solari e caldaia con accumulo ACS ≥ 60°C per prevenzione Legionella D.Lgs. 18/2023",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "🚰 Impianto clorazione/disinfezione idrica con dosatore proporzionale per rete docce e lido",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "📋 Registro verifiche Legionella Pneumophila e manutenzione filtri acqua sanitaria",
+      status: "info",
+    });
+  }
+
+  // 11. Rimessaggio Mezzi Spiaggia, Attrezzature Nautiche & Puliscispiaggia
+  const isBalnRimessaggio =
+    env.id === "env-baln-rimessaggio-puliscispiaggia" ||
+    env.key === "baln_rimessaggio_mezzi_spiaggia_nautiche_puliscispiaggia" ||
+    (env.id.includes("baln-rimessaggio") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("932") ?? false));
+  if (isBalnRimessaggio) {
+    summaryBadges.push({
+      text: "🚜 Macchina puliscispiaggia e trattorino con carter protetti D.Lgs. 81/08 All. V",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "⚠️ Divieto transito mezzi meccanici su arenile in presenza di bagnanti (operazioni a spiaggia chiusa)",
+      status: "danger",
+    });
+    summaryBadges.push({
+      text: "🔥 Armadio tagliafuoco certificato REI 90 / EN 14470 per carburanti puliscispiaggia e benzine",
+      status: "danger",
+    });
+  }
+
+  // 12. Isola Ecologica Arenile & Stoccaggio Differenziata Rifiuti Spiaggia
+  const isBalnIsolaEcologica =
+    env.id === "env-baln-isola-ecologica-spiaggia" ||
+    env.key === "baln_isola_ecologica_arenile_differenziata_rifiuti" ||
+    (env.id.includes("baln-isola-ecologica") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("932") ?? false));
+  if (isBalnIsolaEcologica) {
+    summaryBadges.push({
+      text: "♻️ Cassonetti differenziata pesanti con coperchio ermetico a prova di vento e gabbiani",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🐀 Postazioni erogatori derattizzazione perimetrale numerate & compattatore cartoni protetto",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🧼 Punto presa acqua con gomma lavaggio cassonetti & canaletta sifonata per reflui di pulizia",
+      status: "warning",
     });
   }
 
@@ -12828,6 +13330,511 @@ export function generateEnvironmentChecklistItems(
       categoryTag: "igiene",
       suggestedNonConformity:
         "Cassonetti con coperchi rotti con fuoriuscita di percolato e attrattiva per gabbiani e ratti, o fusti olio motore sversati sul terreno privi di bacino.",
+    });
+  }
+
+  // ========================================================================
+  // REQUISITI SPECIFICI STABILIMENTI BALNEARI, LIDI, BEACH CLUB (ATECO 93.29.20 / 93.29.2 / 93.29 / 93.2)
+  // ========================================================================
+
+  // a) Reception Stabilimento, Cassa & Direzione Lido
+  if (env.id === "env-baln-reception-cassa" || env.id.includes("baln-reception-cassa")) {
+    items.push({
+      id: `${env.id}-postazione-vdt-quadro-differenziale-30ma-estintore`,
+      area: env.name,
+      title: "Postazione VDT Ergonomica, Quadro Elettrico con Differenziale 30 mA ed Estintore 34A 233B",
+      question:
+        "Nella postazione di cassa/reception la postazione videoterminale è ergonomica (All. XXXIV D.Lgs. 81/08), il quadro generale dello stabilimento è provvisto di interruttore differenziale coordinato da 30 mA con certificato di conformità CEI 64-8 ed è installato un estintore portatile omologato di capacità almeno 34A 233B regolarmente revisionato?",
+      normReference: "D.Lgs. 81/2008 Titolo VII, CEI 64-8 e D.M. 03/09/2021",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "vie_esodo",
+      suggestedNonConformity:
+        "Mancanza di estintore 34A 233B in reception lido o quadro elettrico privo di protezione differenziale da 30 mA.",
+    });
+
+    items.push({
+      id: `${env.id}-planimetria-spiaggia-bilingue-centralina-meteo`,
+      area: env.name,
+      title: "Planimetria Generale della Spiaggia Bilingue con Uscite d'Emergenza e Centralina Meteo-Marina",
+      question:
+        "È esposta in direzione/cassa una planimetria generale della spiaggia e dello stabilimento bilingue (italiano/inglese) con indicazione chiara delle vie di fuga verso la pubblica via, punti di raccolta, postazione DAE e torrette di salvataggio, ed è presente una centralina meteo o sistema costante di ricezione delle allerte meteo-marine della Capitaneria di Porto?",
+      normReference: "Ordinanza di Polizia Marittima e Sicurezza Balneare della Capitaneria di Porto e D.Lgs. 81/2008 art. 43",
+      defaultSeverity: 2,
+      defaultSanctionable: false,
+      domain: "safety",
+      categoryTag: "documentale",
+      suggestedNonConformity:
+        "Assenza di planimetria generale dell'arenile esposta o mancato presidio delle comunicazioni di allerta meteo della Capitaneria.",
+    });
+  }
+
+  // b) Arenile Attrezzato (File Ombrelloni, Lettini & Passerelle Accessibili PMR)
+  if (env.id === "env-baln-arenile-ombrelloni" || env.id.includes("baln-arenile-ombrelloni")) {
+    items.push({
+      id: `${env.id}-passerella-disabili-pmr-battigia-dpr-503-96`,
+      area: env.name,
+      title: "Passerella Pedonale Accessibile Disabili PMR fino alla Battigia e Assenza Dislivelli (D.P.R. 503/96)",
+      question:
+        "Le passerelle pedonali sull'arenile hanno una larghezza utile di almeno 1,00 m (minimo inderogabile 0,90 m), collegano direttamente l'ingresso, i servizi igienici dedicati e la battigia, sono realizzate in materiale antiscivolo complanare privo di chiodi sporgenti, fessure pericolose o dislivelli inciampo superiori a 2,5 cm (D.P.R. 503/96 e D.M. 236/89)?",
+      normReference: "D.P.R. 503/1996 art. 1, D.M. 236/1989 e Ordinanza Balneare della Capitaneria di Porto",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "strutturali",
+      suggestedNonConformity:
+        "Passerella per disabili interrotta prima della battigia, con larghezza inferiore a 0,90 m o con doghe sconnesse e chiodi sporgenti pericolosi.",
+    });
+
+    items.push({
+      id: `${env.id}-sedia-anfibia-job-disabili`,
+      area: env.name,
+      title: "Presenza e Piena Efficienza della Sedia Anfibia Speciale da Mare (Tipo JOB) per Balneazione Disabili",
+      question:
+        "Lo stabilimento dispone di almeno una sedia a ruote speciale da spiaggia per disabili (tipo sedia JOB o analoga sedia anfibia galleggiante) integra, pulita, regolarmente manutenuta e immediatamente disponibile per consentire l'ingresso in acqua e la balneazione in sicurezza delle persone a mobilità ridotta?",
+      normReference: "D.P.R. 503/1996, Legge 104/1992 e Ordinanza Balneare Regionale",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "attrezzature",
+      suggestedNonConformity:
+        "Assenza della sedia anfibia da mare per disabili JOB o sedia danneggiata e inservibile.",
+    });
+
+    items.push({
+      id: `${env.id}-distanziamento-ombrelloni-corridoi-sicurezza`,
+      area: env.name,
+      title: "Distanziamento tra le File di Ombrelloni e Corridoi di Transito per Mezzi di Soccorso",
+      question:
+        "Gli ombrelloni, i lettini e le sdraio sull'arenile rispettano le distanze minime stabilite dalla vigente Ordinanza Balneare tra paletto e paletto e tra le file (superficie minima per ombrellone garantita), assicurando corridoi di passaggio liberi da ostacoli per il rapido intervento del personale di salvataggio e dei mezzi di soccorso?",
+      normReference: "Ordinanza di Polizia Marittima e Sicurezza Balneare e Regolamento Igienico-Sanitario Locale",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "File di ombrelloni posizionate a distanza inferiore a quella prescritta dall'ordinanza balneare con ostruzione dei corridoi di sicurezza.",
+    });
+  }
+
+  // c) Torretta di Avvistamento Bagnino & Fronte Mare Salvataggio
+  if (env.id === "env-baln-postazione-salvataggio" || env.id.includes("baln-postazione-salvataggio")) {
+    items.push({
+      id: `${env.id}-torretta-avvistamento-bagnino-abilitato-mip`,
+      area: env.name,
+      title: "Torretta di Avvistamento Sopraelevata e Presenza Bagnino Abilitato MIP/FIN in Servizio Continuo",
+      question:
+        "La postazione di avvistamento è sopraelevata rispetto al piano dell'arenile, dipinta in colore visibile con targa identificativa, ed è presidiata continuativamente per l'intero orario di balneazione da assistente ai bagnanti abilitato (brevetto MIP SNS/FIN/FIMAA in corso di validità) munito di maglietta rossa di salvataggio?",
+      normReference: "Ordinanza di Polizia Marittima e Sicurezza Balneare della Capitaneria di Porto e D.Lgs. 81/2008",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "attrezzature",
+      suggestedNonConformity:
+        "Assenza del bagnino di salvataggio durante gli orari di balneazione o torretta non visibile priva di presidio.",
+    });
+
+    items.push({
+      id: `${env.id}-pattino-salvataggio-salvagente-cima-25m-rullo`,
+      area: env.name,
+      title: "Pattino di Salvataggio Rosso con Remi di Riserva, Rullo 200 m, Salvagente Anulare con Cima 25 m e Rescue Can",
+      question:
+        "Sulla battigia in prossimità della torretta è permanentemente ormeggiato a secco un pattino di salvataggio rosso con scritta 'SALVATAGGIO', scalmi, remi e coppia di riserva, rullo con sagola galleggiante di almeno 200 m, salvagente anulare omologato con cima galleggiante da 25 m e rescue can/baywatch tube?",
+      normReference: "Ordinanza di Polizia Marittima e Sicurezza Balneare della Capitaneria di Porto",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "attrezzature",
+      suggestedNonConformity:
+        "Pattino di salvataggio mancante, privo di remi di riserva o senza rullo con cima da 200 m e salvagente anulare con sagola.",
+    });
+
+    items.push({
+      id: `${env.id}-albero-segnali-bandiere-meteo-megafono`,
+      area: env.name,
+      title: "Albero dei Segnali con Bandiere Regolamentari (Bianca, Rossa, Gialla), Binocolo e Megafono",
+      question:
+        "La postazione dispone di albero per i segnali da spiaggia con serie completa di bandiere regolamentari (bianca: condizioni favorevoli; rossa: balneazione pericolosa o servizio non attivo; gialla: obbligo chiusura ombrelloni per raffiche di vento), binocolo di avvistamento ottico e megafono a batteria funzionante?",
+      normReference: "Ordinanza di Polizia Marittima e Sicurezza Balneare della Capitaneria di Porto",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "attrezzature",
+      suggestedNonConformity:
+        "Mancanza delle bandiere di segnalazione balneare, mancata issata della bandiera rossa in condizioni avverse o megafono scarico.",
+    });
+  }
+
+  // d) Locale Infermeria di Spiaggia & Postazione Primo Soccorso DAE
+  if (env.id === "env-baln-infermeria-primo-soccorso" || env.id.includes("baln-infermeria-primo-soccorso")) {
+    items.push({
+      id: `${env.id}-dae-teca-climatica-antisalsedine-autotest`,
+      area: env.name,
+      title: "Defibrillatore DAE in Teca Climatica Antisalsedine con Autotest Verde e Piastre Valide",
+      question:
+        "Il defibrillatore semiautomatico (DAE) è collocato in teca termoregolata a tenuta stagna contro umidità e salsedine, con spia di autotest attiva e verde, piastre per elettrodi adulti e pediatriche sigillate non scadute e batteria tampone verificata?",
+      normReference: "Legge 116/2021, D.Lgs. 81/2008 art. 45 e Linee Guida DAE Strutture Balneari",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "attrezzature",
+      suggestedNonConformity:
+        "DAE con elettrodi scaduti, batteria scarica, spia di allarme rossa o teca priva di protezione contro la salsedine.",
+    });
+
+    items.push({
+      id: `${env.id}-bombola-ossigeno-flussimetro-pallone-ambu`,
+      area: env.name,
+      title: "Bombola di Ossigeno Terapeutico con Flussimetro e Pallone Autoespandibile AMBU",
+      question:
+        "L'infermeria dispone di bombola di ossigeno terapeutico medicinale carica, con collaudo decennale valido, regolatore di pressione e flussimetro graduato, oltre a pallone autoespandibile tipo AMBU con mascherine di varie misure e cannule oro-faringee per rianimazione respiratoria?",
+      normReference: "Ordinanza della Capitaneria di Porto, D.M. 388/2003 e D.Lgs. 81/2008 art. 45",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "attrezzature",
+      suggestedNonConformity:
+        "Bombola di ossigeno terapeutico scarica, collaudo scaduto o priva di pallone AMBU funzionante.",
+    });
+
+    items.push({
+      id: `${env.id}-cassetta-pronto-soccorso-allegato-1-farmaci`,
+      area: env.name,
+      title: "Cassetta di Pronto Soccorso Allegato 1 D.M. 388/2003 Completa di Presidi e Disinfettanti Non Scaduti",
+      question:
+        "La cassetta di primo soccorso è pienamente conforme all'Allegato 1 del D.M. 388/2003, dotata di lettino visita con telo monouso, sfigmomanometro, ghiaccio istantaneo, lacci emostatici, garze sterili e presidi di disinfezione integri e non scaduti?",
+      normReference: "D.M. 388/2003 e D.Lgs. 81/2008 Allegato IV e art. 45",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Cassetta di primo soccorso priva di presidi obbligatori All. 1 o con disinfettanti e garze scaduti.",
+    });
+  }
+
+  // e) Batteria Cabine Spogliatoi Ospiti & Deposito Giochi Spiaggia
+  if (env.id === "env-baln-cabine-spogliatoi" || env.id.includes("baln-cabine-spogliatoi")) {
+    items.push({
+      id: `${env.id}-cabine-pareti-lavabili-aerazione-pulizia`,
+      area: env.name,
+      title: "Pareti Cabine Lavabili, Feritoie di Aerazione Naturale e Protocollo Sanificazione Giornaliera",
+      question:
+        "Le cabine spogliatoio e i depositi giochi presentano pareti e pavimenti in materiale facilmente lavabile e sanificabile resistente a salsedine e sabbia, sono dotate di feritoie superiori e inferiori per l'aerazione naturale e sono sottoposte a sanificazione quotidiana registrata?",
+      normReference: "D.Lgs. 81/2008 Allegato IV e Regolamento Igienico-Sanitario Locale",
+      defaultSeverity: 2,
+      defaultSanctionable: false,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Cabine spogliatoio con muffe, sporcizia persistente, feritoie ostruite o assenza di pulizia quotidiana.",
+    });
+
+    items.push({
+      id: `${env.id}-cabina-disabili-pmr-porta-scorrevole-maniglioni`,
+      area: env.name,
+      title: "Cabina Spogliatoio Accessibile PMR con Porta da 90 cm, Spazio Rotazione e Maniglioni",
+      question:
+        "È garantita almeno una cabina spogliatoio riservata e attrezzata per persone con disabilità (PMR) con porta utile da almeno 90 cm (scorrevole o con apertura all'esterno), priva di dislivelli alla soglia, con spazio interno per rotazione sedia a rotelle e maniglioni orizzontali e verticali di appoggio a norma D.P.R. 503/96 e D.M. 236/89?",
+      normReference: "D.P.R. 503/1996 e D.M. 236/1989 art. 5",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "strutturali",
+      suggestedNonConformity:
+        "Mancanza di cabina spogliatoio dedicata per persone disabili o cabina priva di larghezza sufficiente e maniglioni di sostegno.",
+    });
+  }
+
+  // f) Blocco Servizi Igienici & Docce Esterne/Calde (con PMR D.P.R. 503/96)
+  if (env.id === "env-baln-blocchi-servizi-docce" || env.id.includes("baln-blocchi-servizi-docce")) {
+    items.push({
+      id: `${env.id}-protocollo-legionella-soffioni-docce-dlgs-18-2023`,
+      area: env.name,
+      title: "Protocollo Prevenzione Legionella Docce Calde/Fredde, Flussaggio e Sanificazione Soffioni (D.Lgs. 18/2023)",
+      question:
+        "Tutti i soffioni delle docce calde e fredde sono sottoposti a decalcificazione e disinfezione settimanale con prodotti anticalcare e cloro, con flussaggio idrico preventivo ad alta temperatura prima dell'apertura per prevenire la proliferazione e aerosolizzazione di Legionella pneumophila, come prescritto dal D.Lgs. 18/2023?",
+      normReference: "D.Lgs. 18/2023, Linee Guida Nazionali per il Controllo della Legionellosi e D.Lgs. 81/2008 Titolo X",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Soffioni docce incrostati di calcare privi di disinfezione periodica e assenza del registro flussaggio anti-legionella.",
+    });
+
+    items.push({
+      id: `${env.id}-piatti-doccia-antiscivolo-r11-lavapiedi`,
+      area: env.name,
+      title: "Piatti Doccia con Superficie Antiscivolo Grado R11 e Pulizia Pozzetti Vasche Lavapiedi",
+      question:
+        "I piatti doccia e le pavimentazioni delle zone lavapiedi sono realizzati con superficie antiscivolo ad alta aderenza (almeno classe B / R11 a piedi nudi bagnati), prive di ristagni idrici melmosi o proliferazioni algali, con canalette di scarico sifonate e grigliate regolarmente bonificate?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.3 e Ordinanza Balneare",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "strutturali",
+      suggestedNonConformity:
+        "Piatti doccia scivolosi con formazione di alghe o pozzetti di scarico intasati da sabbia e capelli con ristagni idrici.",
+    });
+
+    items.push({
+      id: `${env.id}-bagno-disabili-pmr-tirante-allarme`,
+      area: env.name,
+      title: "Servizio Igienico Dedicato PMR con Tirante d'Allarme Collegato a Presidio Direzione/Cassa",
+      question:
+        "Il bagno per disabili PMR è privo di barriere architettoniche, provvisto di maniglioni ribaltabili, lavabo a mensola senza colonna e campanello a tirante d'emergenza posizionato a meno di 10 cm dal pavimento accanto al WC, collegato ad avvisatore acustico e luminoso funzionante presso la reception o bar?",
+      normReference: "D.M. 236/1989 art. 4 e D.P.R. 503/1996",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "tecnici",
+      suggestedNonConformity:
+        "Tirante d'allarme nel servizio disabili assente, rotto o non udibile dal personale dello stabilimento.",
+    });
+  }
+
+  // g) Chiosco Bar sulla Spiaggia & Banco Caffetteria / Gelati
+  if (env.id === "env-baln-chiosco-bar" || env.id.includes("baln-chiosco-bar")) {
+    items.push({
+      id: `${env.id}-banco-bar-inox-protezione-sabbia-salsedine`,
+      area: env.name,
+      title: "Banco Bar Inox MOCA con Protezioni Contro Sabbia/Vento e Fabbricatore Ghiaccio con Filtro",
+      question:
+        "Il banco di preparazione e somministrazione bevande è in acciaio inox a norma MOCA, dotato di barriere paravento protettive contro sabbia e salsedine marina, e il fabbricatore di ghiaccio alimentare per bibite e cocktail è fornito di filtro addolcitore/microfiltrazione e sottoposto a decalcificazione e sanificazione periodica registrata?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo III e Reg. CE 1935/2004 MOCA",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Ghiaccio per bevande esposto a polvere di sabbia o fabbricatore con depositi calcarei e muffe privo di disinfezione.",
+    });
+
+    items.push({
+      id: `${env.id}-vetrina-gelati-termometro-macchina-caffe-inail`,
+      area: env.name,
+      title: "Vetrina Gelati con Termometro a -18°C e Macchina Caffè con Valvola Sicurezza Verificata INAIL",
+      question:
+        "La vetrina o banco a pozzetti dei gelati garantisce una temperatura costante non superiore a -18°C con termometro a vista verificato, e la caldaia della macchina per caffè espresso è dotata di valvola di sovrappressione e manometro con verifiche periodiche di sicurezza INAIL/D.Lgs. 81/08?",
+      normReference: "Reg. CE 852/2004, D.Lgs. 81/2008 art. 71 e D.M. 329/2004 attrezzature a pressione",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "attrezzature",
+      suggestedNonConformity:
+        "Vetrina gelati a temperatura non idonea (superiore a -15°C) o macchina da caffè priva di verifica della valvola di sicurezza.",
+    });
+
+    items.push({
+      id: `${env.id}-lavastoviglie-bicchieri-risciacquo-82-gradi`,
+      area: env.name,
+      title: "Lavabicchieri Professionale con Dosatore Brillantante e Risciacquo Igienizzante ≥ 82°C",
+      question:
+        "La lavabicchieri del chiosco bar effettua il ciclo di risciacquo finale con acqua a temperatura di almeno 82°C tramite boiler interno efficiente, ed è alimentata da dosatori automatici di detergente e brillantante per assicurare la completa igienizzazione di bicchieri e cannucce?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo V e Linee Guida HACCP",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Lavabicchieri con risciacquo a temperatura insufficiente (< 80°C) o dosatore detergente esaurito.",
+    });
+  }
+
+  // h) Cucina Ristorante del Lido & Preparazione Pesce / Primi
+  if (env.id === "env-baln-ristorante-cucina" || env.id.includes("baln-ristorante-cucina")) {
+    items.push({
+      id: `${env.id}-cappa-aspirante-filtri-inox-spegnimento-ansul`,
+      area: env.name,
+      title: "Cappa Aspirante Compensata con Filtri Inox a Labirinto e Sistema Spegnimento Ansul",
+      question:
+        "La cucina dispone di cappa d'aspirazione compensata con filtri antigrasso a labirinto in acciaio inox regolarmente sgrassati, condotto fumi a tenuta con sbocco a tetto e impianto automatico di spegnimento a polvere chimica umida (tipo Ansul R-102 o conforme a UNI EN 16282-7) a protezione dei blocchi cottura e delle friggitrici pesce?",
+      normReference: "UNI EN 16282-7, D.M. 03/09/2021, D.Lgs. 81/2008 e Reg. CE 852/2004",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "attrezzature",
+      suggestedNonConformity:
+        "Cappa cucina satura di grasso priva di bonifica periodica o friggitrice priva di impianto automatico di estinzione incendi Ansul.",
+    });
+
+    items.push({
+      id: `${env.id}-stoccaggio-pesce-fresco-ghiaccio-scolo-separato`,
+      area: env.name,
+      title: "Stoccaggio del Pesce Fresco su Letto di Ghiaccio con Scolo Separato (+0/+2°C)",
+      question:
+        "I prodotti della pesca freschi sono mantenuti a una temperatura prossima a quella del ghiaccio in fusione (tra 0°C e +2°C) in recipienti forati con scolo separato dell'acqua di scioglimento verso canale di scarico, evitando il contatto diretto tra il pesce e l'acqua di sgelo stagnante conforme a Reg. CE 853/2004?",
+      normReference: "Reg. CE 853/2004 Allegato III Sezione VIII e Reg. CE 852/2004",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Pesce fresco conservato in acqua di sgelo stagnante privo di scolo o a temperatura superiore a +4°C.",
+    });
+
+    items.push({
+      id: `${env.id}-pavimentazione-antiscivolo-r12-lavamani-non-manuale`,
+      area: env.name,
+      title: "Pavimentazione Antiscivolo Grado R12 con Canaline Inox Sifonate e Lavamani a Pedale/Ginocchio",
+      question:
+        "Il pavimento della cucina è antiscivolo ad alta aderenza (grado R12), con pendenza verso canaline di raccolta reflui coperte da griglie inox asportabili e sifoni antiodore/antintrusione insetti, e i lavamani per gli operatori sono azionabili a pedale, ginocchio o fotocellula con dispenser sapone disinfettante e asciugamani a perdere?",
+      normReference: "D.Lgs. 81/2008 Allegato IV e Reg. CE 852/2004 Allegato II Capitolo I e II",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "strutturali",
+      suggestedNonConformity:
+        "Pavimento cucina scivoloso con ristagni d'unto, canaline non sifonate o lavamani azionabile con rubinetti a mano.",
+    });
+  }
+
+  // i) Celle Frigorifere Deperibili (Pesce Fresco +0/+2°C, Surgelati & Bevande)
+  if (env.id === "env-baln-celle-frigo-dispensa" || env.id.includes("baln-celle-frigo-dispensa")) {
+    items.push({
+      id: `${env.id}-allarme-uomo-intrappolato-24v-uni-en-378`,
+      area: env.name,
+      title: "Allarme Uomo Intrappolato a 24V con Batteria Tampone e Sblocco Interno Luminoso (UNI EN 378)",
+      question:
+        "Le celle frigorifere a temperatura positiva e negativa sono dotate di maniglia interna fosforescente con dispositivo meccanico di apertura antipanico anche a porta serrata dall'esterno a chiave, pulsante a fungo d'allarme uomo intrappolato a 24V con sirena ottico-acustica esterna e batteria tampone verificata semestralmente a norma UNI EN 378?",
+      normReference: "UNI EN 378-1, D.Lgs. 81/2008 Allegato IV punto 1.2 e art. 71",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "attrezzature",
+      suggestedNonConformity:
+        "Mancanza del pulsante di allarme uomo intrappolato all'interno della cella frigorifera o maniglia interna di sicurezza bloccata.",
+    });
+
+    items.push({
+      id: `${env.id}-teletermometri-registrazione-continua-haccp-pesce`,
+      area: env.name,
+      title: "Teletermometri Continui con Registrazione Automatica e Allarme Soglia HACCP",
+      question:
+        "Tutte le celle frigorifere sono munite di teletermometri e sonde di temperatura a registrazione continua conformi a UNI EN 12830, con display a lettura esterna e sistema di alert su smartphone per deriva termica oltre i limiti critici (+2°C pesce fresco, -18°C surgelati) con registrazioni archiviate nel piano HACCP?",
+      normReference: "Reg. CE 852/2004, Reg. CE 37/2005 e UNI EN 12830",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Cella frigo priva di termometro a lettura esterna o con temperatura non registrata e fuori range critico.",
+    });
+  }
+
+  // j) Centrale Idrica, Impianto Solare Termico & Accumulo Docce Anti-Legionella
+  if (env.id === "env-baln-centrale-idrica-solare" || env.id.includes("baln-centrale-idrica-solare")) {
+    items.push({
+      id: `${env.id}-temperatura-accumulo-acs-60-gradi-solare-termico`,
+      area: env.name,
+      title: "Temperatura Accumulo ACS ≥ 60°C nei Boiler Solari/Caldaia per Prevenzione Legionella",
+      question:
+        "I serbatoi di accumulo dell'acqua calda sanitaria (ACS) alimentati dai pannelli solari termici e dalle caldaie garantiscono una temperatura costante di accumulo di almeno 60°C (e distribuzione ai punti d'uso ≥ 50°C tramite miscelatori termostatici) contro la proliferazione della Legionella Pneumophila?",
+      normReference: "D.Lgs. 18/2023, Linee Guida Nazionali per il Controllo e Prevenzione della Legionellosi e D.Lgs. 81/08",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "tecnici",
+      suggestedNonConformity:
+        "Temperatura nei boiler di accumulo inferiore a 60°C con rischio proliferazione batterica Legionella.",
+    });
+
+    items.push({
+      id: `${env.id}-dosatore-clorazione-acque-registro-manutenzione-filtri`,
+      area: env.name,
+      title: "Impianto di Dosaggio Proporzionale Cloro/Disinfettante e Registro Manutenzione Filtri",
+      question:
+        "La centrale idrica include un dosatore proporzionale per il trattamento disinfettante dell'acqua destinata alle docce e ai servizi, con filtri a sabbia/rete regolarmente spurgati e registro dei controlli chimico-fisici e microbiologici aggiornato?",
+      normReference: "D.Lgs. 18/2023 e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "tecnici",
+      suggestedNonConformity:
+        "Mancanza di impianto di disinfezione idrica per rete docce o filtri intasati privi di manutenzione periodica.",
+    });
+  }
+
+  // k) Rimessaggio Mezzi Spiaggia, Attrezzature Nautiche & Puliscispiaggia
+  if (env.id === "env-baln-rimessaggio-puliscispiaggia" || env.id.includes("baln-rimessaggio-puliscispiaggia")) {
+    items.push({
+      id: `${env.id}-carter-protezione-macchina-puliscispiaggia-all-v`,
+      area: env.name,
+      title: "Protezione Organi Meccanici in Movimento Macchina Puliscispiaggia e Trattorino (All. V)",
+      question:
+        "La macchina puliscispiaggia semovente o trainata da trattore presenta tutti i carter di protezione fissi e interbloccati a protezione della griglia vibrante, rulli rotanti e cardano PTO, conforme all'Allegato V del D.Lgs. 81/2008 e Direttiva Macchine?",
+      normReference: "D.Lgs. 81/2008 art. 70, 71 e Allegato V (Requisiti di sicurezza attrezzature di lavoro)",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "attrezzature",
+      suggestedNonConformity:
+        "Macchina puliscispiaggia con carter rimossi, albero cardanico privo di cuffia protettiva o organi rotanti esposti.",
+    });
+
+    items.push({
+      id: `${env.id}-divieto-transito-mezzi-arenile-bagnanti`,
+      area: env.name,
+      title: "Divieto Assoluto Transito e Manovra Mezzi Meccanici su Arenile durante la Balneazione",
+      question:
+        "È formalizzato nelle procedure operative aziendali ed esposto con apposita segnaletica il divieto assoluto di transito, manovra o impiego di macchine puliscispiaggia, trattorini, ruspe o quad sull'arenile durante le ore di apertura dello stabilimento e in presenza di bagnanti (attività consentite esclusivamente prima dell'apertura o a spiaggia chiusa)?",
+      normReference: "Ordinanza di Polizia Marittima e Sicurezza Balneare della Capitaneria di Porto e D.Lgs. 81/08",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "documentale",
+      suggestedNonConformity:
+        "Utilizzo di mezzi meccanici o trattorini puliscispiaggia sull'arenile in orario di balneazione tra i bagnanti.",
+    });
+
+    items.push({
+      id: `${env.id}-armadio-tagliafuoco-carburanti-lubrificanti`,
+      area: env.name,
+      title: "Armadio Tagliafuoco Certificato REI 90 per Benzina e Carburanti Attrezzature",
+      question:
+        "I carburanti (benzina per puliscispiaggia, decespugliatori, gruppi elettrogeni) sono conservati esclusivamente all'interno di un armadio tagliafuoco certificato conforme a norma EN 14470-1 provvisto di bacino di contenimento sversamenti e condotto di sfiato naturale all'aperto?",
+      normReference: "D.M. 03/09/2021, D.M. 02/09/2021 e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Taniche di benzina stoccate a terra in contenitori non omologati prive di armadio tagliafuoco e bacino di contenimento.",
+    });
+  }
+
+  // l) Isola Ecologica Arenile & Stoccaggio Differenziata Rifiuti Spiaggia
+  if (env.id === "env-baln-isola-ecologica-spiaggia" || env.id.includes("baln-isola-ecologica-spiaggia")) {
+    items.push({
+      id: `${env.id}-cassonetti-differenziata-ermetici-antivento-gabbiani`,
+      area: env.name,
+      title: "Cassonetti Differenziata Pesanti Ermetici a Prova di Raffiche di Vento e Gabbiani",
+      question:
+        "Tutti i cassonetti per la raccolta differenziata dei rifiuti dell'arenile sono dotati di coperchio pesante basculante o con chiusura ermetica anti-vento, ancorati o zavorrati contro il ribaltamento da burrasca ed esenti da aperture che consentano l'accesso di gabbiani, roditori e animali randagi?",
+      normReference: "Reg. CE 852/2004, D.Lgs. 152/2006 (Codice Ambientale) e Ordinanza Balneare",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Cassonetti rifiuti privi di coperchio con dispersione di rifiuti causata dal vento o attacco di gabbiani e gabbie aperte.",
+    });
+
+    items.push({
+      id: `${env.id}-pulizia-compattatore-derattizzazione-perimetrale`,
+      area: env.name,
+      title: "Piano Derattizzazione Arenile con Mappa Erogatori Sigillati e Pulizia Compattatore",
+      question:
+        "L'isola ecologica è dotata di pavimentazione lavabile con griglia di raccolta reflui sifonata, gli erogatori di esca derattizzante sono numerati e ancorati a terra lungo il perimetro, e l'eventuale compattatore per plastica/cartoni è mantenuto pulito e privo di odori molesti?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo VI e D.Lgs. 81/2008",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Isola ecologica priva di erogatori derattizzazione o con residui organici maleodoranti a terra che attirano infestanti.",
     });
   }
 
