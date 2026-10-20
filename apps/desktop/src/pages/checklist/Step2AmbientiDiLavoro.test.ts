@@ -5993,6 +5993,469 @@ assert.ok(
   "In modalità safety_only tutti gli item arenile Lido devono essere safety o both",
 );
 
+// ============================================================================
+// Test 35: getStandardEnvironmentsForAteco & conformità per Discoteche, Sale da Ballo, Night-Club (93.29.10 / 93.29.1 / 932910 / 93291)
+// ============================================================================
+console.log("Test 35: getStandardEnvironmentsForAteco & conformità per Discoteche, Sale da Ballo (93.29.10 / 93.29.1 / 932910 / 93291)");
+
+const dscEnvs = getStandardEnvironmentsForAteco("93.29.10");
+assert.equal(dscEnvs.length, 12, "La Discoteca / Sala da Ballo deve avere esattamente 12 ambienti standard");
+
+// Verifica varianti codice ATECO (93.29.1, 932910, 93291)
+const dscEnvsVar1 = getStandardEnvironmentsForAteco("93.29.1");
+assert.equal(dscEnvsVar1.length, 12, "Anche prefisso 93.29.1 deve restituire 12 ambienti Discoteca");
+const dscEnvsVar2 = getStandardEnvironmentsForAteco("932910");
+assert.equal(dscEnvsVar2.length, 12, "Anche codice numerico 932910 deve restituire 12 ambienti Discoteca");
+const dscEnvsVar3 = getStandardEnvironmentsForAteco("93291");
+assert.equal(dscEnvsVar3.length, 12, "Anche codice numerico 93291 deve restituire 12 ambienti Discoteca");
+
+// Verifica ID dei 12 ambienti standard Discoteca
+const expectedDscIds = [
+  "env-dsc-ingresso-foyer",
+  "env-dsc-guardaroba-deposito",
+  "env-dsc-pista-ballo-centrale",
+  "env-dsc-consolle-dj-regia",
+  "env-dsc-cocktail-bar-principale",
+  "env-dsc-secondo-bar-estivo",
+  "env-dsc-area-tavoli-prive",
+  "env-dsc-cucina-snack-food",
+  "env-dsc-dispensa-beverage",
+  "env-dsc-infermeria-primo-soccorso",
+  "env-dsc-blocco-servizi-igienici",
+  "env-dsc-locale-tecnico-quadri",
+];
+
+for (const id of expectedDscIds) {
+  assert.ok(
+    dscEnvs.some((e) => e.id === id),
+    `Ambiente ${id} deve essere presente nella lista standard Discoteca per 93.29.10`,
+  );
+}
+
+// 1. Ingresso Principale, Foyer, Biglietteria & Cassa / Filtro Conta-Persone
+const dscIngresso = dscEnvs.find((e) => e.id === "env-dsc-ingresso-foyer")!;
+assert.equal(dscIngresso.category, "sales_office");
+assert.equal(dscIngresso.surfaceSqM, 60);
+assert.equal(dscIngresso.heightM, 3.2);
+assert.equal(dscIngresso.volumeCuM, 192);
+assert.equal(dscIngresso.occupantsCount, 4);
+const evalIngresso = evaluateEnvironmentCompliance(dscIngresso, "93.29.10");
+assert.ok(evalIngresso.isHeightCompliant, "Altezza Foyer (3,20 m) deve essere a norma");
+assert.ok(
+  evalIngresso.summaryBadges.some((b) => b.text.includes("ASC abilitato D.M. 06/10/2009")),
+  "Foyer deve avere badge controllo accessi ASC",
+);
+assert.ok(
+  evalIngresso.summaryBadges.some((b) => b.text.includes("conta-persone")),
+  "Foyer deve avere badge conta-persone",
+);
+
+// 2. Locale Guardaroba Ospiti & Deposito Oggetti Smarriti / Caschi
+const dscGuardaroba = dscEnvs.find((e) => e.id === "env-dsc-guardaroba-deposito")!;
+assert.equal(dscGuardaroba.category, "services");
+assert.equal(dscGuardaroba.surfaceSqM, 40);
+assert.equal(dscGuardaroba.heightM, 3.0);
+const evalGuardaroba = evaluateEnvironmentCompliance(dscGuardaroba, "93.29.10");
+assert.ok(evalGuardaroba.isHeightCompliant, "Altezza Guardaroba (3,00 m) deve essere a norma");
+assert.ok(
+  evalGuardaroba.summaryBadges.some((b) => b.text.includes("Rastrelliere")),
+  "Guardaroba deve avere badge rastrelliere ignifughe",
+);
+
+// 3. Pista da Ballo Centrale & Platea Spettacolo
+const dscPista = dscEnvs.find((e) => e.id === "env-dsc-pista-ballo-centrale")!;
+assert.equal(dscPista.category, "production");
+assert.equal(dscPista.surfaceSqM, 400);
+assert.equal(dscPista.heightM, 5.0);
+assert.equal(dscPista.volumeCuM, 2000);
+assert.equal(dscPista.occupantsCount, 400);
+const evalPista = evaluateEnvironmentCompliance(dscPista, "93.29.10");
+assert.ok(evalPista.isHeightCompliant, "Altezza Pista (5,00 m) deve essere a norma");
+assert.ok(evalPista.cpiActivityAlert !== null, "Pista da 400 mq / 400 persone deve attivare alert Attività 65 CPI");
+assert.equal(evalPista.cpiActivityAlert?.code, "Attività 65 (D.P.R. 151/2011)");
+assert.ok(
+  evalPista.summaryBadges.some((b) => b.text.includes("UNI EN 1125")),
+  "Pista deve avere badge uscite con maniglioni antipanico UNI EN 1125",
+);
+assert.ok(
+  evalPista.summaryBadges.some((b) => b.text.includes("EVAC") && b.text.includes("zittimento automatico")),
+  "Pista deve avere badge EVAC con zittimento automatico",
+);
+assert.ok(
+  evalPista.summaryBadges.some((b) => b.text.includes("≥ 5 lux")),
+  "Pista deve avere badge illuminazione emergenza ≥ 5 lux",
+);
+
+// 4. Consolle DJ, Palco Animazione & Regia Audio/Luci/Laser
+const dscConsolle = dscEnvs.find((e) => e.id === "env-dsc-consolle-dj-regia")!;
+assert.equal(dscConsolle.category, "production");
+assert.equal(dscConsolle.surfaceSqM, 35);
+assert.equal(dscConsolle.heightM, 3.5);
+const evalConsolle = evaluateEnvironmentCompliance(dscConsolle, "93.29.10");
+assert.ok(evalConsolle.isHeightCompliant, "Altezza Consolle DJ (3,50 m) deve essere a norma");
+assert.ok(
+  evalConsolle.summaryBadges.some((b) => b.text.includes("Titolo VIII") && b.text.includes("otoprotettori")),
+  "Consolle DJ deve avere badge otoprotettori rumore Titolo VIII",
+);
+assert.ok(
+  evalConsolle.summaryBadges.some((b) => b.text.includes("Limitatore acustico sigillato") && b.text.includes("D.P.C.M. 215/99")),
+  "Consolle DJ deve avere badge limitatore acustico sigillato D.P.C.M. 215/99",
+);
+assert.ok(
+  evalConsolle.summaryBadges.some((b) => b.text.includes("Laser show") && b.text.includes("> 3 m")),
+  "Consolle DJ deve avere badge laser show a quota > 3m CEI EN 60825-1",
+);
+
+// 5. Cocktail Bar Principale & Banchi di Mescita Bevande
+const dscCocktailBar = dscEnvs.find((e) => e.id === "env-dsc-cocktail-bar-principale")!;
+assert.equal(dscCocktailBar.category, "production");
+assert.equal(dscCocktailBar.surfaceSqM, 70);
+assert.equal(dscCocktailBar.heightM, 3.2);
+const evalCocktailBar = evaluateEnvironmentCompliance(dscCocktailBar, "93.29.10");
+assert.ok(evalCocktailBar.isHeightCompliant, "Altezza Cocktail Bar Principale (3,20 m) deve essere a norma");
+assert.ok(
+  evalCocktailBar.summaryBadges.some((b) => b.text.includes("≥ 82°C")),
+  "Cocktail Bar Principale deve avere badge risciacquo lavabicchieri ≥ 82°C",
+);
+assert.ok(
+  evalCocktailBar.summaryBadges.some((b) => b.text.includes("MOCA")),
+  "Cocktail Bar Principale deve avere badge fabbricatore ghiaccio MOCA",
+);
+
+// 6. Cocktail Bar Secondario / Area Bar Privé
+const dscBarSecondario = dscEnvs.find((e) => e.id === "env-dsc-secondo-bar-estivo")!;
+assert.equal(dscBarSecondario.category, "production");
+assert.equal(dscBarSecondario.surfaceSqM, 35);
+const evalBarSecondario = evaluateEnvironmentCompliance(dscBarSecondario, "93.29.10");
+assert.ok(evalBarSecondario.isHeightCompliant, "Altezza Bar Secondario (3,00 m) deve essere a norma");
+
+// 7. Area Privé, Salottini VIP & Tavoli con Servizio Bottiglie
+const dscPrive = dscEnvs.find((e) => e.id === "env-dsc-area-tavoli-prive")!;
+assert.equal(dscPrive.category, "sales_office");
+assert.equal(dscPrive.surfaceSqM, 120);
+assert.equal(dscPrive.occupantsCount, 80);
+const evalPrive = evaluateEnvironmentCompliance(dscPrive, "93.29.10");
+assert.ok(evalPrive.isHeightCompliant, "Altezza Privé (3,50 m) deve essere a norma");
+assert.ok(
+  evalPrive.summaryBadges.some((b) => b.text.includes("classe 1 IM")),
+  "Privé deve avere badge arredi imbottiti classe 1 IM",
+);
+assert.ok(
+  evalPrive.summaryBadges.some((b) => b.text.includes("≥ 1,20 m")),
+  "Privé deve avere badge corsie di passaggio ≥ 1,20 m",
+);
+
+// 8. Cucina Snack Bar, Friggitoria & Preparazione Food Notturno
+const dscCucina = dscEnvs.find((e) => e.id === "env-dsc-cucina-snack-food")!;
+assert.equal(dscCucina.category, "production");
+assert.equal(dscCucina.surfaceSqM, 35);
+const evalCucina = evaluateEnvironmentCompliance(dscCucina, "93.29.10");
+assert.ok(evalCucina.isHeightCompliant, "Altezza Cucina Snack (3,00 m) deve essere a norma");
+assert.ok(
+  evalCucina.summaryBadges.some((b) => b.text.includes("Ansul")),
+  "Cucina Snack deve avere badge spegnimento Ansul",
+);
+assert.ok(
+  evalCucina.summaryBadges.some((b) => b.text.includes("< 230°C")),
+  "Cucina Snack deve avere badge termostato friggitrice < 230°C",
+);
+
+// 9. Magazzino Merci Secche, Scorte Fusti Birra & Deposito Beverage
+const dscMagazzino = dscEnvs.find((e) => e.id === "env-dsc-dispensa-beverage")!;
+assert.equal(dscMagazzino.category, "warehouse");
+assert.equal(dscMagazzino.surfaceSqM, 50);
+const evalMagazzino = evaluateEnvironmentCompliance(dscMagazzino, "93.29.10");
+assert.ok(evalMagazzino.isHeightCompliant, "Altezza Magazzino Beverage (3,20 m) deve essere a norma");
+assert.ok(
+  evalMagazzino.summaryBadges.some((b) => b.text.includes("CO2/azoto") && b.text.includes("1.5% e 3%")),
+  "Magazzino Beverage deve avere badge rilevatore fughe gas CO2/azoto",
+);
+assert.ok(
+  evalMagazzino.summaryBadges.some((b) => b.text.includes("catene metalliche")),
+  "Magazzino Beverage deve avere badge bombole assicurate con catene",
+);
+
+// 10. Locale Infermeria di Presidio, Primo Soccorso & Postazione DAE
+const dscInfermeria = dscEnvs.find((e) => e.id === "env-dsc-infermeria-primo-soccorso")!;
+assert.equal(dscInfermeria.category, "services");
+assert.equal(dscInfermeria.surfaceSqM, 18);
+const evalInfermeria = evaluateEnvironmentCompliance(dscInfermeria, "93.29.10");
+assert.ok(evalInfermeria.isHeightCompliant, "Altezza Infermeria (2,70 m) deve essere a norma");
+assert.ok(
+  evalInfermeria.summaryBadges.some((b) => b.text.includes("DAE") && b.text.includes("Legge 116/2021")),
+  "Infermeria deve avere badge DAE Legge 116/2021",
+);
+assert.ok(
+  evalInfermeria.summaryBadges.some((b) => b.text.includes("ossigeno terapeutico")),
+  "Infermeria deve avere badge bombola ossigeno terapeutico",
+);
+
+// 11. Blocchi Servizi Igienici & Servizio Disabili PMR (D.M. 236/89)
+const dscBagni = dscEnvs.find((e) => e.id === "env-dsc-blocco-servizi-igienici")!;
+assert.equal(dscBagni.category, "services");
+assert.equal(dscBagni.surfaceSqM, 50);
+assert.equal(dscBagni.heightM, 2.4);
+const evalBagni = evaluateEnvironmentCompliance(dscBagni, "93.29.10");
+assert.ok(evalBagni.isHeightCompliant, "Altezza Bagni (2,40 m) deve essere a norma");
+assert.ok(
+  evalBagni.summaryBadges.some((b) => b.text.includes("PMR") && b.text.includes("tirante allarme")),
+  "Bagni devono avere badge bagno disabili PMR con tirante allarme",
+);
+
+// 12. Locale Tecnico / Cabina Elettrica Principale & Gruppo di Continuità (UPS)
+const dscLocaleTecnico = dscEnvs.find((e) => e.id === "env-dsc-locale-tecnico-quadri")!;
+assert.equal(dscLocaleTecnico.category, "technical");
+assert.equal(dscLocaleTecnico.surfaceSqM, 25);
+const evalLocaleTecnico = evaluateEnvironmentCompliance(dscLocaleTecnico, "93.29.10");
+assert.ok(evalLocaleTecnico.isHeightCompliant, "Altezza Locale Tecnico (3,00 m) deve essere a norma");
+assert.ok(
+  evalLocaleTecnico.summaryBadges.some((b) => b.text.includes("Pulsante di sgancio generale di emergenza esterno")),
+  "Locale Tecnico deve avere badge pulsante di sgancio generale",
+);
+assert.ok(
+  evalLocaleTecnico.summaryBadges.some((b) => b.text.includes("≥ 2 ore")),
+  "Locale Tecnico deve avere badge gruppo UPS con autonomia ≥ 2 ore",
+);
+
+// ============================================================================
+// Test 36: generateEnvironmentChecklistItems per locali Discoteca e Locali Serali (ATECO 93.29.10)
+// ============================================================================
+console.log("Test 36: generateEnvironmentChecklistItems per locali Discoteca (ATECO 93.29.10)");
+
+// 1. Pista da Ballo Centrale
+const dscPistaItems = generateEnvironmentChecklistItems(dscPista, "93.29.10");
+assert.ok(
+  dscPistaItems.some(
+    (it) => it.id.includes("uscite-sicurezza-maniglioni-antipanico-uni-en-1125") && it.domain === "safety" && it.defaultSeverity === 4,
+  ),
+  "Pista deve verificare uscite di emergenza con maniglioni antipanico UNI EN 1125 a spinta (domain: safety, severity 4)",
+);
+assert.ok(
+  dscPistaItems.some(
+    (it) => it.id.includes("zittimento-automatico-evac-diffusione-sonora") && it.domain === "safety" && it.defaultSeverity === 4,
+  ),
+  "Pista deve verificare zittimento automatico EVAC diffusione sonora su allarme (domain: safety, severity 4)",
+);
+assert.ok(
+  dscPistaItems.some(
+    (it) => it.id.includes("illuminazione-emergenza-5-lux-pavimento-ignifugo") && it.domain === "safety",
+  ),
+  "Pista deve verificare illuminazione di emergenza ≥ 5 lux e pavimento R10 (domain: safety)",
+);
+assert.ok(
+  dscPistaItems.some(
+    (it) => it.id.includes("capienza-massima-autorizzata-ccvlps") && it.domain === "safety",
+  ),
+  "Pista deve verificare rispetto capienza massima CCVLPS (domain: safety)",
+);
+
+// 2. Consolle DJ, Palco Animazione & Regia Audio/Luci/Laser
+const dscConsolleItems = generateEnvironmentChecklistItems(dscConsolle, "93.29.10");
+assert.ok(
+  dscConsolleItems.some(
+    (it) => it.id.includes("fascicolo-laser-show-interblocco-quota-3m") && it.domain === "safety",
+  ),
+  "Consolle DJ deve verificare laser show quota > 3m e fascicolo TSL (domain: safety)",
+);
+assert.ok(
+  dscConsolleItems.some(
+    (it) => it.id.includes("limitatore-acustico-sigillato-dpcm-215-99") && it.domain === "safety",
+  ),
+  "Consolle DJ deve verificare limitatore acustico sigillato D.P.C.M. 215/99 (domain: safety)",
+);
+assert.ok(
+  dscConsolleItems.some(
+    (it) => it.id.includes("otoprotettori-dpi-rumore-sorveglianza-sanitaria-dj") && it.domain === "safety",
+  ),
+  "Consolle DJ deve verificare DPI otoprotettori e sorveglianza sanitaria audiometrica (domain: safety)",
+);
+
+// 3. Ingresso Principale, Foyer & Cassa
+const dscIngressoItems = generateEnvironmentChecklistItems(dscIngresso, "93.29.10");
+assert.ok(
+  dscIngressoItems.some(
+    (it) => it.id.includes("addetti-controllo-asc-elenco-prefettizio") && it.domain === "safety",
+  ),
+  "Foyer deve verificare addetti sicurezza ASC iscritti all'elenco prefettizio (domain: safety)",
+);
+assert.ok(
+  dscIngressoItems.some(
+    (it) => it.id.includes("conta-persone-digitale-capienza-ccvlps") && it.domain === "safety",
+  ),
+  "Foyer deve verificare dispositivi conta-persone digitali per capienza CCVLPS (domain: safety)",
+);
+assert.ok(
+  dscIngressoItems.some(
+    (it) => it.id.includes("planimetria-esodo-bilingue-estintori-34a-233b") && it.domain === "safety",
+  ),
+  "Foyer deve verificare planimetria di esodo bilingue ed estintori 34A 233B (domain: safety)",
+);
+
+// 4. Area Privé & Salottini VIP
+const dscPriveItems = generateEnvironmentChecklistItems(dscPrive, "93.29.10");
+assert.ok(
+  dscPriveItems.some(
+    (it) => it.id.includes("reazione-fuoco-arredi-imbottiti-classe-1-im") && it.domain === "safety",
+  ),
+  "Privé deve verificare omologazione reazione al fuoco classe 1 IM per poltrone (domain: safety)",
+);
+assert.ok(
+  dscPriveItems.some(
+    (it) => it.id.includes("corsie-passaggio-tavoli-uscite-sicurezza") && it.domain === "safety",
+  ),
+  "Privé deve verificare corsie di passaggio libere verso le uscite ≥ 1,20 m (domain: safety)",
+);
+
+// 5. Cocktail Bar Principale & Banchi di Mescita
+const dscCocktailBarItems = generateEnvironmentChecklistItems(dscCocktailBar, "93.29.10");
+assert.ok(
+  dscCocktailBarItems.some(
+    (it) => it.id.includes("lavabicchieri-risciacquo-82-gradi-sanificazione") && it.domain === "both",
+  ),
+  "Cocktail Bar deve verificare lavabicchieri con risciacquo ≥ 82°C per sanificazione (domain: both)",
+);
+assert.ok(
+  dscCocktailBarItems.some(
+    (it) => it.id.includes("igiene-fabbricatore-pozzetto-ghiaccio-moca") && it.domain === "haccp",
+  ),
+  "Cocktail Bar deve verificare igiene e conformità MOCA del fabbricatore ghiaccio (domain: haccp)",
+);
+assert.ok(
+  dscCocktailBarItems.some(
+    (it) => it.id.includes("pedana-antiscivolo-drenante-barman-sicurezza") && it.domain === "safety",
+  ),
+  "Cocktail Bar deve verificare pedana drenante antiscivolo per barman (domain: safety)",
+);
+
+// 6. Cocktail Bar Secondario / Area Privé
+const dscBarSecondarioItems = generateEnvironmentChecklistItems(dscBarSecondario, "93.29.10");
+assert.ok(
+  dscBarSecondarioItems.some(
+    (it) => it.id.includes("lavabicchieri-risciacquo-82-gradi-sanificazione") && it.domain === "both",
+  ),
+  "Bar Secondario deve verificare lavabicchieri con risciacquo ≥ 82°C (domain: both)",
+);
+
+// 7. Cucina Snack Bar, Friggitoria & Food Notturno
+const dscCucinaItems = generateEnvironmentChecklistItems(dscCucina, "93.29.10");
+assert.ok(
+  dscCucinaItems.some(
+    (it) => it.id.includes("cappa-compensata-spegnimento-ansul-friggitrici") && it.domain === "both",
+  ),
+  "Cucina Snack deve verificare cappa compensata con estinzione Ansul (domain: both)",
+);
+assert.ok(
+  dscCucinaItems.some(
+    (it) => it.id.includes("termostato-sicurezza-friggitrici-230-gradi") && it.domain === "safety",
+  ),
+  "Cucina Snack deve verificare termostato friggitrice < 230°C a riarmo manuale (domain: safety)",
+);
+assert.ok(
+  dscCucinaItems.some(
+    (it) => it.id.includes("lavamani-pedale-pareti-lavabili-zanzariere") && it.domain === "both",
+  ),
+  "Cucina Snack deve verificare lavamani a pedale, pareti lavabili a 2m e zanzariere (domain: both)",
+);
+
+// 8. Magazzino Merci Secche & Deposito Beverage
+const dscMagazzinoItems = generateEnvironmentChecklistItems(dscMagazzino, "93.29.10");
+assert.ok(
+  dscMagazzinoItems.some(
+    (it) => it.id.includes("rilevatore-fughe-co2-allarme-spillatura-birra") && it.domain === "safety" && it.defaultSeverity === 4,
+  ),
+  "Magazzino Beverage deve verificare sensore allarme fughe CO2 al 1.5% e 3% (domain: safety, severity 4)",
+);
+assert.ok(
+  dscMagazzinoItems.some(
+    (it) => it.id.includes("ancoraggio-bombole-gas-compresso-catenelle") && it.domain === "safety",
+  ),
+  "Magazzino Beverage deve verificare bombole gas vincolate con catenelle (domain: safety)",
+);
+assert.ok(
+  dscMagazzinoItems.some(
+    (it) => it.id.includes("scaffalature-certificate-stoccaggio-sollevato-15cm") && it.domain === "both",
+  ),
+  "Magazzino Beverage deve verificare scaffalature con portata e merci sollevate ≥ 15 cm (domain: both)",
+);
+
+// 9. Locale Infermeria di Presidio, Primo Soccorso & Postazione DAE
+const dscInfermeriaItems = generateEnvironmentChecklistItems(dscInfermeria, "93.29.10");
+assert.ok(
+  dscInfermeriaItems.some(
+    (it) => it.id.includes("defibrillatore-dae-teca-allarmata-autotest-verde") && it.domain === "safety" && it.defaultSeverity === 4,
+  ),
+  "Infermeria deve verificare DAE con autotest verde Legge 116/2021 (domain: safety, severity 4)",
+);
+assert.ok(
+  dscInfermeriaItems.some(
+    (it) => it.id.includes("bombola-ossigeno-ambu-cassetta-pronto-soccorso-all-1") && it.domain === "safety",
+  ),
+  "Infermeria deve verificare bombola ossigeno collaudata, pallone AMBU e cassetta All. 1 (domain: safety)",
+);
+assert.ok(
+  dscInfermeriaItems.some(
+    (it) => it.id.includes("barella-telo-sedia-portantina-soccorso") && it.domain === "safety",
+  ),
+  "Infermeria deve verificare barella a telo o sedia portantina per ambulanza 118 (domain: safety)",
+);
+
+// 10. Blocchi Servizi Igienici & Servizio Disabili PMR (D.M. 236/89)
+const dscBagniItems = generateEnvironmentChecklistItems(dscBagni, "93.29.10");
+assert.ok(
+  dscBagniItems.some(
+    (it) => it.id.includes("bagno-disabili-pmr-tirante-allarme-dm-236-89") && it.domain === "safety",
+  ),
+  "Bagni devono verificare bagno PMR con tirante allarme a campanello D.M. 236/89 (domain: safety)",
+);
+assert.ok(
+  dscBagniItems.some(
+    (it) => it.id.includes("aerazione-forzata-permanente-bagni-ciechi") && it.domain === "both",
+  ),
+  "Bagni devono verificare aerazione forzata permanente bagni ciechi (domain: both)",
+);
+
+// 11. Locale Tecnico / Cabina Elettrica Principale & Gruppo di Continuità (UPS)
+const dscLocaleTecnicoItems = generateEnvironmentChecklistItems(dscLocaleTecnico, "93.29.10");
+assert.ok(
+  dscLocaleTecnicoItems.some(
+    (it) => it.id.includes("pulsante-sgancio-emergenza-esterno-bobina") && it.domain === "safety",
+  ),
+  "Locale Tecnico deve verificare pulsante di sgancio generale di emergenza esterno (domain: safety)",
+);
+assert.ok(
+  dscLocaleTecnicoItems.some(
+    (it) => it.id.includes("soccorritore-ups-emergenza-autonomia-2-ore") && it.domain === "safety",
+  ),
+  "Locale Tecnico deve verificare gruppo soccorritore/UPS con autonomia ≥ 2 ore (domain: safety)",
+);
+
+// 12. Verifica del filtraggio checklistMode su cucina e cocktail bar della Discoteca
+const dscCocktailBarHaccpMode = filterEnvironmentItemsByChecklistMode(dscCocktailBarItems, "haccp_only");
+assert.ok(
+  dscCocktailBarHaccpMode.every((it) => it.domain === "haccp" || it.domain === "both"),
+  "In modalità haccp_only tutti gli item del Cocktail Bar devono essere haccp o both",
+);
+assert.ok(
+  !dscCocktailBarHaccpMode.some((it) => it.domain === "safety"),
+  "In modalità haccp_only nessun item del Cocktail Bar deve avere domain safety",
+);
+
+const dscCocktailBarSafetyMode = filterEnvironmentItemsByChecklistMode(dscCocktailBarItems, "safety_only");
+assert.ok(
+  dscCocktailBarSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item del Cocktail Bar devono essere safety o both",
+);
+assert.ok(
+  !dscCocktailBarSafetyMode.some((it) => it.domain === "haccp"),
+  "In modalità safety_only nessun item del Cocktail Bar deve avere domain haccp",
+);
+
+const dscPistaSafetyMode = filterEnvironmentItemsByChecklistMode(dscPistaItems, "safety_only");
+assert.ok(
+  dscPistaSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item della Pista devono essere safety o both",
+);
+
 console.log("=== TUTTI I TEST Step2AmbientiDiLavoro SUPERATI CON SUCCESSO! ===");
 
 

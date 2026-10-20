@@ -3146,7 +3146,7 @@ assert.ok(campIndex !== -1, "Settore campeggio_villaggio deve esistere");
 assert.ok(balnIndex !== -1, "Settore stabilimento_balneare deve esistere");
 assert.ok(ristIndex !== -1, "Settore ristorazione_alimentare deve esistere");
 assert.equal(balnIndex, campIndex + 1, "stabilimento_balneare deve seguire immediatamente campeggio_villaggio");
-assert.equal(ristIndex, balnIndex + 1, "ristorazione_alimentare deve seguire immediatamente stabilimento_balneare");
+assert.ok(balnIndex < ristIndex, "stabilimento_balneare deve precedere ristorazione_alimentare");
 
 // -------------------------------------------------------------
 // Test 56: Verifica completezza delle 16 macchine professionali con verifiche, corsi e modelli reali
@@ -3358,6 +3358,273 @@ for (const code of ["93.29.20", "93.29.2", "93.29", "93.2", "932920", "93292", "
   const fallbackBeachRes = getSuggestedMachinesForEnvironmentsAndAteco([], code);
   assert.equal(fallbackBeachRes.length, 16, `ATECO variant '${code}' deve restituire tutte le 16 macchine dello stabilimento balneare`);
   assert.ok(fallbackBeachRes.every((m) => m.sourceReason === "ateco"), `Tutte le macchine con ATECO variant '${code}' devono avere sourceReason === 'ateco'`);
+}
+
+// =========================================================================
+// TEST DEDICATI ATECO 93.29.10 — DISCOTECHE, NIGHT CLUB, LOCALI SERALI
+// =========================================================================
+console.log("\n=== INIZIO TEST normativeMachineCatalog (ATECO 93.29.10 Discoteche, Night Club e Locali Serali) ===");
+
+// -------------------------------------------------------------
+// Test 59: Priorità e risoluzione catalogo ATECO per Discoteche e Locali Serali
+// -------------------------------------------------------------
+console.log("Test 59: Verifica priorità catalogo ATECO per Discoteche e Locali Serali (93.29.10 / 93.29.1 / 932910 / 93291)");
+const catalogDiscoExact = getSectorMachineCatalogForAteco("93.29.10");
+assert.equal(catalogDiscoExact.sectorKey, "discoteca_locale_serale", "ATECO 93.29.10 deve restituire discoteca_locale_serale");
+assert.ok(catalogDiscoExact.sectorLabel.includes("Discoteche"), "L'etichetta deve includere Discoteche");
+
+const catalogDiscoPrefix = getSectorMachineCatalogForAteco("93.29.1");
+assert.equal(catalogDiscoPrefix.sectorKey, "discoteca_locale_serale", "ATECO 93.29.1 deve restituire discoteca_locale_serale");
+
+const catalogDiscoDigits6 = getSectorMachineCatalogForAteco("932910");
+assert.equal(catalogDiscoDigits6.sectorKey, "discoteca_locale_serale", "ATECO 932910 deve restituire discoteca_locale_serale");
+
+const catalogDiscoDigits5 = getSectorMachineCatalogForAteco("93291");
+assert.equal(catalogDiscoDigits5.sectorKey, "discoteca_locale_serale", "ATECO 93291 deve restituire discoteca_locale_serale");
+
+// Verifica posizionamento nel catalogo: discoteca_locale_serale segue immediatamente stabilimento_balneare e precede ristorazione_alimentare
+const balnIndexDsc = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "stabilimento_balneare");
+const discoIndexDsc = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "discoteca_locale_serale");
+const ristIndexDsc = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ristorazione_alimentare");
+assert.ok(balnIndexDsc !== -1, "Settore stabilimento_balneare deve esistere");
+assert.ok(discoIndexDsc !== -1, "Settore discoteca_locale_serale deve esistere");
+assert.ok(ristIndexDsc !== -1, "Settore ristorazione_alimentare deve esistere");
+assert.equal(discoIndexDsc, balnIndexDsc + 1, "discoteca_locale_serale deve seguire immediatamente stabilimento_balneare");
+assert.equal(ristIndexDsc, discoIndexDsc + 1, "ristorazione_alimentare deve seguire immediatamente discoteca_locale_serale");
+
+// -------------------------------------------------------------
+// Test 60: Verifica completezza delle 16 macchine professionali con verifiche, corsi e modelli reali
+// -------------------------------------------------------------
+console.log("Test 60: Verifica completezza delle 16 macchine per discoteca con modelli reali, corsi e controlli tecnici");
+assert.equal(catalogDiscoExact.machines.length, 16, "Il catalogo Discoteche deve contenere esattamente 16 macchine");
+
+const expectedDiscoKeys = [
+  "centrale_rivelazione_evac_discoteca",
+  "limitatore_acustico_sigillato",
+  "sistema_laser_show_dmx",
+  "macchina_fumo_hazer_base_acqua",
+  "porte_emergenza_antipanico_lido",
+  "tornello_contapersone_bidirezionale",
+  "defibrillatore_dae_teca_discoteca",
+  "fabbricatore_ghiaccio_cubetto_pieno",
+  "lavabicchieri_osmosi_discoteca",
+  "bottigliera_refrigerata_sottobanco",
+  "centrale_spillatura_birra_co2",
+  "tritaghiaccio_frullatore_cocktail",
+  "friggitrice_snack_discoteca",
+  "cappa_snack_bar_discoteca",
+  "compattatore_vetro_lattine",
+  "gruppo_elettrogeno_emergenza_discoteca",
+];
+
+for (const key of expectedDiscoKeys) {
+  const found = catalogDiscoExact.machines.find((m) => m.machineKey === key);
+  assert.ok(found, `Attrezzatura con key '${key}' deve essere presente nel catalogo`);
+  assert.ok(found.name.length > 5, `Nome attrezzatura '${key}' deve essere descrittivo`);
+  assert.ok(found.type.length > 5, `Tipologia '${key}' deve essere descrittiva`);
+  assert.ok(found.suggestedManufacturer.length > 2, `Produttore suggerito presente per '${key}'`);
+  assert.ok(found.suggestedModel.length > 1, `Modello suggerito presente per '${key}'`);
+  assert.ok(found.safetyChecks.length >= 4, `L'attrezzatura '${key}' deve avere almeno 4 controlli di sicurezza specifici`);
+  for (const check of found.safetyChecks) {
+    assert.ok(check.code.length > 3, `Check code valido per ${key}`);
+    assert.ok(check.title.length > 5, `Check title valido per ${key}`);
+    assert.ok(check.question.length > 15, `Check question dettagliata per ${key}`);
+    assert.ok(check.normReference.length > 3, `Norma citata per check ${check.code}`);
+    assert.ok(check.defaultSeverity >= 1 && check.defaultSeverity <= 5, `Severity valida per check ${check.code}`);
+  }
+}
+
+// Controlli tecnici e normativi specifici di dettaglio:
+// 1. Centrale EVAC con relè di zittimento DJ
+const dscEvac = catalogDiscoExact.machines.find((m) => m.machineKey === "centrale_rivelazione_evac_discoteca")!;
+assert.equal(dscEvac.training.courseCode, "FORMAZ_ANTINCENDIO_L3_DISCOTECA");
+assert.equal(dscEvac.training.minHours, 16);
+assert.equal(dscEvac.training.frequencyYears, 5);
+assert.ok(dscEvac.safetyChecks.some((c) => c.code === "DSC_EVAC_ZITTIMENTO_AUDIO_DJ"));
+assert.ok(dscEvac.safetyChecks.some((c) => c.normReference.includes("D.M. 19/08/1996")));
+
+// 2. Limitatore acustico sigillato DPCM 215/99
+const dscLimitatore = catalogDiscoExact.machines.find((m) => m.machineKey === "limitatore_acustico_sigillato")!;
+assert.ok(dscLimitatore.safetyChecks.some((c) => c.code === "DSC_LIMITATORE_SIGILLO_ANTIMANOMISSIONE"));
+assert.ok(dscLimitatore.safetyChecks.some((c) => c.normReference.includes("D.P.C.M. 215/1999")));
+assert.ok(dscLimitatore.safetyChecks.some((c) => c.code === "DSC_LIMITATORE_ATTENUAZIONE_AUTOMATICA"));
+
+// 3. Sistema Laser Show classe 4 con PASS e interblocco
+const dscLaser = catalogDiscoExact.machines.find((m) => m.machineKey === "sistema_laser_show_dmx")!;
+assert.ok(dscLaser.safetyChecks.some((c) => c.code === "DSC_LASER_SISTEMA_PASS_QUOTA_3M"));
+assert.ok(dscLaser.safetyChecks.some((c) => c.normReference.includes("CEI EN 60825-1")));
+assert.ok(dscLaser.safetyChecks.some((c) => c.code === "DSC_LASER_ESTOP_ARRESTO_EMERGENZA"));
+
+// 4. Macchina fumo hazer a base acqua
+const dscHazer = catalogDiscoExact.machines.find((m) => m.machineKey === "macchina_fumo_hazer_base_acqua")!;
+assert.ok(dscHazer.safetyChecks.some((c) => c.code === "DSC_FUMO_LIQUIDO_ATOSSICO_REACH"));
+assert.ok(dscHazer.safetyChecks.some((c) => c.normReference.includes("REACH")));
+assert.ok(dscHazer.safetyChecks.some((c) => c.code === "DSC_FUMO_PREVENZIONE_SCIVOLOSITA_PISTA"));
+
+// 5. Porte d'emergenza antipanico
+const dscPorte = catalogDiscoExact.machines.find((m) => m.machineKey === "porte_emergenza_antipanico_lido")!;
+assert.ok(dscPorte.safetyChecks.some((c) => c.code === "DSC_PORTE_MANIGLIONE_EN1125_SPINTA"));
+assert.ok(dscPorte.safetyChecks.some((c) => c.normReference.includes("UNI EN 1125")));
+assert.ok(dscPorte.safetyChecks.some((c) => c.code === "DSC_PORTE_DIVIETO_CATENACCI_CHIAVI"));
+
+// 6. Tornello contapersone TULPS art. 80
+const dscTornello = catalogDiscoExact.machines.find((m) => m.machineKey === "tornello_contapersone_bidirezionale")!;
+assert.equal(dscTornello.training.courseCode, "FORMAZ_ASC_BUTTAFUORI");
+assert.equal(dscTornello.training.minHours, 90);
+assert.ok(dscTornello.safetyChecks.some((c) => c.code === "DSC_TORNELLO_FAILSAFE_CADUTA_BRACCI"));
+assert.ok(dscTornello.safetyChecks.some((c) => c.code === "DSC_TORNELLO_CONTEGGIO_TULPS_CAPIENZA"));
+assert.ok(dscTornello.safetyChecks.some((c) => c.normReference.includes("TULPS")));
+
+// 7. Defibrillatore DAE
+const dscDae = catalogDiscoExact.machines.find((m) => m.machineKey === "defibrillatore_dae_teca_discoteca")!;
+assert.equal(dscDae.training.courseCode, "FORMAZ_BLSD_DAE");
+assert.equal(dscDae.training.frequencyYears, 2);
+assert.ok(dscDae.safetyChecks.some((c) => c.code === "DSC_DAE_TECA_ALLARMATA_LUCE_SIRENA"));
+assert.ok(dscDae.safetyChecks.some((c) => c.normReference.includes("Legge 116/2021")));
+
+// 8. Fabbricatore ghiaccio MOCA
+const dscGhiaccio = catalogDiscoExact.machines.find((m) => m.machineKey === "fabbricatore_ghiaccio_cubetto_pieno")!;
+assert.ok(dscGhiaccio.safetyChecks.some((c) => c.code === "DSC_GHIACCIO_MOCA_SUPERFICI_ALIMENTARI"));
+assert.ok(dscGhiaccio.safetyChecks.some((c) => c.normReference.includes("UNI EN 1717")));
+
+// 9. Lavabicchieri osmosi inversa
+const dscLavabicchieri = catalogDiscoExact.machines.find((m) => m.machineKey === "lavabicchieri_osmosi_discoteca")!;
+assert.ok(dscLavabicchieri.safetyChecks.some((c) => c.code === "DSC_LAVABICCHIERI_RISCIACQUO_82_DIN10512"));
+assert.ok(dscLavabicchieri.safetyChecks.some((c) => c.normReference.includes("DIN 10512")));
+
+// 10. Bottigliera refrigerata R290
+const dscBottigliera = catalogDiscoExact.machines.find((m) => m.machineKey === "bottigliera_refrigerata_sottobanco")!;
+assert.ok(dscBottigliera.safetyChecks.some((c) => c.code === "DSC_BOTTIGLIERA_GAS_ECOLOGICO_R290_SICUREZZA"));
+
+// 11. Centrale spillatura birra con rilevatore CO2
+const dscSpillatura = catalogDiscoExact.machines.find((m) => m.machineKey === "centrale_spillatura_birra_co2")!;
+assert.ok(dscSpillatura.safetyChecks.some((c) => c.code === "DSC_CO2_RILEVATORE_GAS_ELETTROVALVOLA"));
+assert.ok(dscSpillatura.safetyChecks.some((c) => c.code === "DSC_CO2_BOMBOLE_CATENELLE_ANTICADUTA"));
+
+// 12. Tritaghiaccio frullatore silenziato
+const dscBlender = catalogDiscoExact.machines.find((m) => m.machineKey === "tritaghiaccio_frullatore_cocktail")!;
+assert.ok(dscBlender.safetyChecks.some((c) => c.code === "DSC_BLENDER_CAMPANA_MICROINTERRUTTORE"));
+assert.ok(dscBlender.safetyChecks.some((c) => c.normReference.includes("UNI EN 12852")));
+
+// 13. Friggitrice snack
+const dscFriggitrice = catalogDiscoExact.machines.find((m) => m.machineKey === "friggitrice_snack_discoteca")!;
+assert.ok(dscFriggitrice.safetyChecks.some((c) => c.code === "DSC_FRIGGITRICE_TERMOSTATO_MAX_230"));
+assert.ok(dscFriggitrice.safetyChecks.some((c) => c.code === "DSC_FRIGGITRICE_ESTINTORE_CLASSE_F_COPERTA"));
+
+// 14. Cappa snack bar con Ansul R-102
+const dscCappa = catalogDiscoExact.machines.find((m) => m.machineKey === "cappa_snack_bar_discoteca")!;
+assert.ok(dscCappa.safetyChecks.some((c) => c.code === "DSC_CAPPA_IMPIANTO_ANSUL_NFPA96"));
+assert.ok(dscCappa.safetyChecks.some((c) => c.normReference.includes("NFPA 96")));
+
+// 15. Compattatore vetro e lattine
+const dscCompattatore = catalogDiscoExact.machines.find((m) => m.machineKey === "compattatore_vetro_lattine")!;
+assert.ok(dscCompattatore.safetyChecks.some((c) => c.code === "DSC_COMPATTATORE_MICRO_TRAMOGGIA_SALVAMANI"));
+assert.ok(dscCompattatore.safetyChecks.some((c) => c.normReference.includes("UNI EN 16500")));
+
+// 16. Gruppo elettrogeno emergenza
+const dscGeneratore = catalogDiscoExact.machines.find((m) => m.machineKey === "gruppo_elettrogeno_emergenza_discoteca")!;
+assert.ok(dscGeneratore.safetyChecks.some((c) => c.code === "DSC_GENERATORE_QUADRO_ATS_AVVIAMENTO_15S"));
+assert.ok(dscGeneratore.safetyChecks.some((c) => c.code === "DSC_GENERATORE_VASCA_GASOLIO_110"));
+assert.ok(dscGeneratore.safetyChecks.some((c) => c.normReference.includes("D.M. 13/07/2011")));
+
+// -------------------------------------------------------------
+// Test 61: Mappatura ambienti Step 2 (env-dsc-*) -> Step 4 Macchine
+// -------------------------------------------------------------
+console.log("Test 61: Verifica associazione ambienti Step 2 Discoteca (env-dsc-*) -> Step 4 Macchine");
+const nightlifeEnvironments = [
+  { id: "env-dsc-ingresso-foyer", name: "Ingresso Principale, Foyer, Biglietteria & Cassa / Filtro Conta-Persone", category: "sales_office" },
+  { id: "env-dsc-pista-ballo-centrale", name: "Pista da Ballo Centrale & Platea Spettacolo (Main Dancefloor)", category: "production" },
+  { id: "env-dsc-consolle-dj-regia", name: "Consolle DJ, Palco Animazione & Regia Audio/Luci/Laser", category: "production" },
+  { id: "env-dsc-cocktail-bar-principale", name: "Cocktail Bar Principale & Banchi di Mescita Bevande", category: "production" },
+  { id: "env-dsc-secondo-bar-estivo", name: "Cocktail Bar Secondario / Area Bar Privé", category: "production" },
+  { id: "env-dsc-cucina-snack-food", name: "Cucina Snack Bar, Friggitoria & Preparazione Food Notturno", category: "production" },
+  { id: "env-dsc-dispensa-beverage", name: "Magazzino Merci Secche, Scorte Fusti Birra & Deposito Beverage", category: "warehouse" },
+  { id: "env-dsc-infermeria-primo-soccorso", name: "Locale Infermeria di Presidio, Primo Soccorso & Postazione DAE", category: "services" },
+  { id: "env-dsc-locale-tecnico-quadri", name: "Locale Tecnico / Cabina Elettrica Principale & Gruppo di Continuità (UPS/Gruppo Elettrogeno)", category: "technical" },
+  { id: "env-dsc-guardaroba-deposito", name: "Locale Guardaroba Ospiti & Deposito Oggetti Smarriti / Caschi", category: "services" },
+];
+
+const suggestedWithDiscoEnvs = getSuggestedMachinesForEnvironmentsAndAteco(nightlifeEnvironments, "93.29.10");
+
+// 1. env-dsc-ingresso-foyer -> tornello_contapersone_bidirezionale, centrale_rivelazione_evac_discoteca
+const ingrDsc = suggestedWithDiscoEnvs.filter((m) => m.targetEnvironmentId === "env-dsc-ingresso-foyer");
+assert.equal(ingrDsc.length, 2, "env-dsc-ingresso-foyer deve associare 2 macchine (tornello, centrale evac)");
+assert.ok(ingrDsc.some((m) => m.machineKey === "tornello_contapersone_bidirezionale"));
+assert.ok(ingrDsc.some((m) => m.machineKey === "centrale_rivelazione_evac_discoteca"));
+
+// 2. env-dsc-pista-ballo-centrale -> centrale_rivelazione_evac_discoteca, limitatore_acustico_sigillato, macchina_fumo_hazer_base_acqua, porte_emergenza_antipanico_lido
+const pistaDsc = suggestedWithDiscoEnvs.filter((m) => m.targetEnvironmentId === "env-dsc-pista-ballo-centrale");
+assert.equal(pistaDsc.length, 4, "env-dsc-pista-ballo-centrale deve associare 4 macchine");
+assert.ok(pistaDsc.some((m) => m.machineKey === "centrale_rivelazione_evac_discoteca"));
+assert.ok(pistaDsc.some((m) => m.machineKey === "limitatore_acustico_sigillato"));
+assert.ok(pistaDsc.some((m) => m.machineKey === "macchina_fumo_hazer_base_acqua"));
+assert.ok(pistaDsc.some((m) => m.machineKey === "porte_emergenza_antipanico_lido"));
+
+// 3. env-dsc-consolle-dj-regia -> limitatore_acustico_sigillato, sistema_laser_show_dmx
+const consolleDsc = suggestedWithDiscoEnvs.filter((m) => m.targetEnvironmentId === "env-dsc-consolle-dj-regia");
+assert.equal(consolleDsc.length, 2, "env-dsc-consolle-dj-regia deve associare 2 macchine (limitatore, laser)");
+assert.ok(consolleDsc.some((m) => m.machineKey === "limitatore_acustico_sigillato"));
+assert.ok(consolleDsc.some((m) => m.machineKey === "sistema_laser_show_dmx"));
+
+// 4. env-dsc-cocktail-bar-principale -> fabbricatore_ghiaccio_cubetto_pieno, lavabicchieri_osmosi_discoteca, bottigliera_refrigerata_sottobanco, tritaghiaccio_frullatore_cocktail
+const bar1Dsc = suggestedWithDiscoEnvs.filter((m) => m.targetEnvironmentId === "env-dsc-cocktail-bar-principale");
+assert.equal(bar1Dsc.length, 4, "env-dsc-cocktail-bar-principale deve associare 4 macchine bar");
+assert.ok(bar1Dsc.some((m) => m.machineKey === "fabbricatore_ghiaccio_cubetto_pieno"));
+assert.ok(bar1Dsc.some((m) => m.machineKey === "lavabicchieri_osmosi_discoteca"));
+assert.ok(bar1Dsc.some((m) => m.machineKey === "bottigliera_refrigerata_sottobanco"));
+assert.ok(bar1Dsc.some((m) => m.machineKey === "tritaghiaccio_frullatore_cocktail"));
+
+// 5. env-dsc-secondo-bar-estivo -> fabbricatore_ghiaccio_cubetto_pieno, lavabicchieri_osmosi_discoteca, bottigliera_refrigerata_sottobanco, tritaghiaccio_frullatore_cocktail
+const bar2Dsc = suggestedWithDiscoEnvs.filter((m) => m.targetEnvironmentId === "env-dsc-secondo-bar-estivo");
+assert.equal(bar2Dsc.length, 4, "env-dsc-secondo-bar-estivo deve associare 4 macchine bar");
+assert.ok(bar2Dsc.some((m) => m.machineKey === "fabbricatore_ghiaccio_cubetto_pieno"));
+assert.ok(bar2Dsc.some((m) => m.machineKey === "lavabicchieri_osmosi_discoteca"));
+assert.ok(bar2Dsc.some((m) => m.machineKey === "bottigliera_refrigerata_sottobanco"));
+assert.ok(bar2Dsc.some((m) => m.machineKey === "tritaghiaccio_frullatore_cocktail"));
+
+// 6. env-dsc-cucina-snack-food -> friggitrice_snack_discoteca, cappa_snack_bar_discoteca
+const cucinaDsc = suggestedWithDiscoEnvs.filter((m) => m.targetEnvironmentId === "env-dsc-cucina-snack-food");
+assert.equal(cucinaDsc.length, 2, "env-dsc-cucina-snack-food deve associare 2 macchine (friggitrice, cappa)");
+assert.ok(cucinaDsc.some((m) => m.machineKey === "friggitrice_snack_discoteca"));
+assert.ok(cucinaDsc.some((m) => m.machineKey === "cappa_snack_bar_discoteca"));
+
+// 7. env-dsc-dispensa-beverage -> centrale_spillatura_birra_co2, bottigliera_refrigerata_sottobanco
+const dispensaDsc = suggestedWithDiscoEnvs.filter((m) => m.targetEnvironmentId === "env-dsc-dispensa-beverage");
+assert.equal(dispensaDsc.length, 2, "env-dsc-dispensa-beverage deve associare 2 macchine (spillatura CO2, bottigliera)");
+assert.ok(dispensaDsc.some((m) => m.machineKey === "centrale_spillatura_birra_co2"));
+assert.ok(dispensaDsc.some((m) => m.machineKey === "bottigliera_refrigerata_sottobanco"));
+
+// 8. env-dsc-infermeria-primo-soccorso -> defibrillatore_dae_teca_discoteca
+const infermeriaDsc = suggestedWithDiscoEnvs.filter((m) => m.targetEnvironmentId === "env-dsc-infermeria-primo-soccorso");
+assert.equal(infermeriaDsc.length, 1, "env-dsc-infermeria-primo-soccorso deve associare 1 macchina (DAE)");
+assert.ok(infermeriaDsc.some((m) => m.machineKey === "defibrillatore_dae_teca_discoteca"));
+
+// 9. env-dsc-locale-tecnico-quadri -> gruppo_elettrogeno_emergenza_discoteca
+const tecnicoDsc = suggestedWithDiscoEnvs.filter((m) => m.targetEnvironmentId === "env-dsc-locale-tecnico-quadri");
+assert.equal(tecnicoDsc.length, 1, "env-dsc-locale-tecnico-quadri deve associare 1 macchina (gruppo elettrogeno)");
+assert.ok(tecnicoDsc.some((m) => m.machineKey === "gruppo_elettrogeno_emergenza_discoteca"));
+
+// 10. env-dsc-guardaroba-deposito -> compattatore_vetro_lattine
+const guardarobaDsc = suggestedWithDiscoEnvs.filter((m) => m.targetEnvironmentId === "env-dsc-guardaroba-deposito");
+assert.equal(guardarobaDsc.length, 1, "env-dsc-guardaroba-deposito deve associare 1 macchina (compattatore vetro)");
+assert.ok(guardarobaDsc.some((m) => m.machineKey === "compattatore_vetro_lattine"));
+
+// -------------------------------------------------------------
+// Test 62: Integrazione automatica macchine per ATECO 93.29.10 senza ambienti preventivi
+// -------------------------------------------------------------
+console.log("Test 62: Integrazione automatica macchine per ATECO 93.29.10 senza ambienti preventivi");
+const suggestedDiscoOnlyAteco = getSuggestedMachinesForEnvironmentsAndAteco([], "93.29.10");
+assert.equal(suggestedDiscoOnlyAteco.length, 16, "Devono essere suggerite tutte le 16 macchine della discoteca");
+assert.ok(
+  suggestedDiscoOnlyAteco.every((m) => m.sourceReason === "ateco"),
+  "Tutte le macchine devono avere sourceReason === 'ateco' se nessun locale è stato specificato",
+);
+
+// Verifica fallback automatico identico per tutte le varianti di codice ATECO ("93.29.10", "93.29.1", "932910", "93291")
+for (const code of ["93.29.10", "93.29.1", "932910", "93291"]) {
+  const fallbackDiscoRes = getSuggestedMachinesForEnvironmentsAndAteco([], code);
+  assert.equal(fallbackDiscoRes.length, 16, `ATECO variant '${code}' deve restituire tutte le 16 macchine della discoteca`);
+  assert.ok(fallbackDiscoRes.every((m) => m.sourceReason === "ateco"), `Tutte le macchine con ATECO variant '${code}' devono avere sourceReason === 'ateco'`);
 }
 
 console.log("=== TUTTI I TEST normativeMachineCatalog SUPERATI CON SUCCESSO! ===");

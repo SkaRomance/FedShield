@@ -333,6 +333,24 @@ export const TRAINING_REQUIREMENTS_LIBRARY: Record<string, MachineTrainingRequir
     requiresPatentinoAccordoSR: false,
     targetRoleDescription: "Operatori abilitati all'uso del defibrillatore semiautomatico esterno (BLSD/PBLSD, 5h, rinnovo biennale)",
   },
+  addetto_servizi_controllo_asc: {
+    courseCode: "FORMAZ_ASC_BUTTAFUORI",
+    courseTitle: "Addetto ai Servizi di Controllo delle Attività di Intrattenimento e Spettacolo (ASC / Ex Buttafuori)",
+    normReference: "D.M. 06/10/2009; Legge 94/2009 art. 3 c. 7-13; D.Lgs. 81/2008 art. 37",
+    minHours: 90,
+    frequencyYears: 2,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Personale addetto ai servizi di controllo e sicurezza (ASC) iscritto nell'Elenco Prefettizio ex D.M. 06/10/2009 (90h, rinnovo periodico)",
+  },
+  antincendio_livello_3_discoteca: {
+    courseCode: "FORMAZ_ANTINCENDIO_L3_DISCOTECA",
+    courseTitle: "Addetto Antincendio in Attività a Livello 3 / Rischio Elevato con Idoneità Tecnica VVF (Locali di Pubblico Spettacolo)",
+    normReference: "D.M. 02/09/2021; D.M. 19/08/1996; D.Lgs. 81/2008 art. 37 c. 9, art. 43 (con idoneità tecnica rilasciata dal Comando VVF)",
+    minHours: 16,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Addetti antincendio in locali di pubblico spettacolo e intrattenimento danzante con idoneità tecnica VVF (16h, validità 5 anni)",
+  },
 };
 
 // -------------------------------------------------------------
@@ -9004,6 +9022,734 @@ export const SECTOR_MACHINERY_CATALOGS: SectorMachineCatalog[] = [
     ],
   },
 
+  // 15. LOCALI SERALI, DISCOTECHE, NIGHT CLUB E SALE DA BALLO CON SOMMINISTRAZIONE (ATECO 93.29.10 / 93.29.1)
+  {
+    sectorKey: "discoteca_locale_serale",
+    sectorLabel: "Locali Serali, Discoteche, Night Club e Sale da Ballo con Somministrazione",
+    atecoPrefixes: ["93.29.10", "93.29.1"],
+    machines: [
+      // 1. Centrale Rivelazione Incendi ed EVAC con Zittimento Audio
+      {
+        machineKey: "centrale_rivelazione_evac_discoteca",
+        name: "Centrale Rivelazione Incendi e Diffusione Vocale EVAC con Zittimento Audio Automatico",
+        type: "Sistema Indirizzato Rivelazione Fumi, Allarme Vocale EVAC e Disattivazione Audio Pista",
+        suggestedManufacturer: "Notifier / Inim / Bosch",
+        suggestedModel: "AM-4000 / Previdia Max / Praesideo UNI EN 54",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.antincendio_livello_3_discoteca,
+        safetyChecks: [
+          {
+            code: "DSC_EVAC_ZITTIMENTO_AUDIO_DJ",
+            title: "Relè Interblocco Sgancio e Zittimento Immediato Impianto Audio DJ in Allarme",
+            question: "La centrale di rivelazione incendi è provvista di relè prioritario a sicurezza positiva (fail-safe) collegato al processore/mixer audio principale che silenzia istantaneamente la musica in caso di pre-allarme o allarme generale consentendo l'ascolto dei messaggi vocali di evacuazione?",
+            normReference: "D.M. 19/08/1996 Titolo IX; UNI EN 54-16; UNI ISO 7240-19; D.Lgs. 81/2008 art. 46",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_EVAC_DIFFUSIONE_VOCALE_INTELLIGIBILE",
+            title: "Diffusori Vocali EVAC Multilingue con Pressione Sonora Conforme e STI Adeguato",
+            question: "L'impianto EVAC garantisce un indice di intelligibilità STI >= 0.50 e un livello sonoro di almeno 75 dB(A) (o +10 dB(A) rispetto al rumore di fondo) in ogni zona aperta al pubblico e di servizio, con messaggi registrati in italiano e inglese?",
+            normReference: "UNI EN 54-16; UNI EN 54-24; CEI EN 60849; D.M. 19/08/1996 art. 14",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_EVAC_PULSANTI_MANUALI_VIE_FUGA",
+            title: "Pulsanti Manuali di Allarme ad Azione Immediata su Uscite di Sicurezza",
+            question: "Lungo tutte le vie di fuga, in prossimità delle porte di emergenza, alla cassa e in regia/consolle sono installati pulsanti manuali di allarme tipo break-glass ben segnalati, accessibili e non ostruiti?",
+            normReference: "UNI EN 54-11; D.M. 19/08/1996; D.Lgs. 81/2008 All. IV punto 1.8",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_EVAC_BATTERIE_TAMPONE_AUTONOMIA",
+            title: "Batterie Tampone e Alimentazione Ausiliaria Certificata EN 54-4",
+            question: "L'alimentatore di emergenza della centrale assicura un'autonomia minima di 24 ore in stato di vigilanza più almeno 30 minuti di allarme generale ed evacuazione continua, con batterie stazionarie sigillate regolarmente manutenute?",
+            normReference: "UNI EN 54-4; D.M. 19/08/1996 Titolo IX; D.M. 02/09/2021",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 2. Centralina Limitatore Acustico Ambientale Sigillata
+      {
+        machineKey: "limitatore_acustico_sigillato",
+        name: "Centralina Limitatore Acustico Ambientale Sigillata con Registratore Dati",
+        type: "Limitatore Elettronico di Livello Sonoro con Microfono di Misura e Data Logger",
+        suggestedManufacturer: "Cesva / Pulsar / NTi Audio",
+        suggestedModel: "LRF-05 / Nova Sound Limiter / XL2 D.P.C.M. 215/99",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "DSC_LIMITATORE_SIGILLO_ANTIMANOMISSIONE",
+            title: "Sigillo Fisico/Elettronico Antimanomissione e Taratura Periodica Certificata",
+            question: "La centralina del limitatore acustico presenta il sigillo antimanomissione integro apposto dal tecnico competente in acustica o dall'organo di controllo, e il certificato di calibrazione è in corso di validità ai sensi del D.P.C.M. 215/1999?",
+            normReference: "D.P.C.M. 215/1999 art. 3; Legge 447/1995; D.Lgs. 81/2008 Titolo VIII Capo II",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_LIMITATORE_MICROFONO_CLASSE_1",
+            title: "Sensore Microfonico Classe 1 Posizionato a Quota Inviolabile in Pista",
+            question: "La sonda microfonica di misura in classe di precisione 1 è installata al centro della pista o nella zona di massimo livello sonoro ad altezza non raggiungibile dal pubblico e al riparo da manomissioni o schermature accidentali?",
+            normReference: "CEI EN 61672-1; D.P.C.M. 215/1999 Allegato A; D.Lgs. 81/2008 art. 190",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_LIMITATORE_ATTENUAZIONE_AUTOMATICA",
+            title: "Intervento Automatico di Taglio/Attenuazione Audio al Superamento Soglie di Legge",
+            question: "L'apparato è configurato per intervenire istantaneamente attenuando o interrompendo il segnale audio qualora il livello Leq superi 102 dB(A) su base oraria o il picco superi 120 dB(A) LASmax, garantendo la protezione dell'udito di lavoratori e clienti?",
+            normReference: "D.P.C.M. 215/1999 art. 2; D.Lgs. 81/2008 art. 192 (Valori limite di esposizione al rumore)",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_LIMITATORE_DATA_LOGGER_STORICO",
+            title: "Registrazione Continua dei Dati Storici (Data Logger) con Memoria Non Volatile",
+            question: "Il data logger interno memorizza in modo indelebile i valori di esposizione continua con data e ora per almeno 30 giorni ed evidenzia sul report eventuali tentativi di disconnessione, spegnimento o bypass?",
+            normReference: "D.P.C.M. 215/1999 art. 4; D.Lgs. 81/2008 art. 181",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 3. Proiettore Laser Show Professionale RGB
+      {
+        machineKey: "sistema_laser_show_dmx",
+        name: "Proiettore Laser Show Professionale RGB con Sensore di Sicurezza Scansione Aerea",
+        type: "Impianto Laser Show Scansione Grafica Classe 4 per Intrattenimento",
+        suggestedManufacturer: "Kvant / Pangolin / Laserworld",
+        suggestedModel: "Clubmax 3000 / FB4 Airmax / Purelight Series CEI EN 60825-1",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "DSC_LASER_SISTEMA_PASS_QUOTA_3M",
+            title: "Dispositivo di Sicurezza PASS e Quota Minima di Irraggiamento >= 3 Metri",
+            question: "Il proiettore laser classe 4 è dotato di modulo elettronico di sicurezza per la scansione aerea PASS (Passive Aerial Safety Scan) che blocca istantaneamente l'emissione in caso di fascio fermo o collimato diretto al di sotto dei 3 metri di altezza dal piano di calpestio del pubblico?",
+            normReference: "CEI EN 60825-1; CEI EN 60825-3; D.Lgs. 81/2008 Titolo VIII Capo V (Radiazioni Ottiche Artificiali - ROA)",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_LASER_ESTOP_ARRESTO_EMERGENZA",
+            title: "Fungo di Emergenza (E-Stop) Remoto Cablato a Disconnessione Meccanica",
+            question: "In postazione DJ/regia è presente un pulsante di arresto rapido a fungo rosso con autoritenuta cablato direttamente all'interblocco laser (E-Stop), chiaramente identificato e testato ad ogni apertura del locale?",
+            normReference: "CEI EN 60825-1 art. 4.4; D.Lgs. 81/2008 All. V punto 2.4",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_LASER_CHIAVE_INTERBLOCCO_MASCHERAMENTO",
+            title: "Interblocco a Chiave Estraibile e Mascheramento Meccanico dell'Angolo Cieco",
+            question: "L'attivazione del laser richiede chiave di consenso custodita dal responsabile di sala e l'apertura ottica presenta bandiere meccaniche di mascheramento che impediscono fisicamente proiezioni verso consolle, bar, specchi e uscite di emergenza?",
+            normReference: "CEI EN 60825-1; Linee Guida ICNIRP per Spettacoli Laser; D.Lgs. 81/2008 art. 216",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_LASER_SEGNALETICA_ROA_COLLAUDO",
+            title: "Segnaletica di Avvertimento Radiazione Laser e Relazione Collaudo TSL/TSR",
+            question: "È affissa la cartellonistica di pericolo radiazione laser visibile/invisibile classe 4 e l'impianto dispone della relazione di collaudo e delimitazione ZOR (Zona Operativa a Rischio) a firma di Tecnico della Sicurezza Laser (TSL)?",
+            normReference: "D.Lgs. 81/2008 Titolo V e art. 216 c. 2; Guida CEI 76-6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 4. Generatore di Fumo e Nebbia Professionale DMX (Hazer)
+      {
+        machineKey: "macchina_fumo_hazer_base_acqua",
+        name: "Generatore di Fumo e Nebbia Professionale DMX a Base d'Acqua (Hazer)",
+        type: "Macchina del Fumo e Nebbia Fine per Scenografia ed Effetti Luce",
+        suggestedManufacturer: "Look Solutions / Martin Professional / Smoke Factory",
+        suggestedModel: "Unique 2.1 / Jem Hazer Pro / Tour Hazer II",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "DSC_FUMO_LIQUIDO_ATOSSICO_REACH",
+            title: "Uso Esclusivo di Liquidi a Base d'Acqua Certificati Atossici con Scheda di Sicurezza",
+            question: "Il fluido impiegato è rigorosamente a base acquosa e glicoli di grado farmaceutico USP privo di idrocarburi, ftalati, oli minerali o sostanze tossico-nocive, con SDS conforme al Regolamento REACH archiviata nel registro sicurezza?",
+            normReference: "Reg. CE 1907/2006 (REACH); Reg. CE 1272/2008 (CLP); D.Lgs. 81/2008 Titolo IX (Sostanze Pericolose)",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_FUMO_TERMOSTATO_SICUREZZA_RIARMO",
+            title: "Termostato di Sicurezza a Riarmo e Controllo Elettronico Riscaldatore",
+            question: "Il generatore è munito di doppio termostato di protezione con spegnimento automatico per prevenire surriscaldamenti anomali della camera di vaporizzazione che potrebbero generare aldeidi o prodotti di pirolisi irritanti?",
+            normReference: "CEI EN 60335-1; Direttiva Bassa Tensione 2014/35/UE; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_FUMO_PREVENZIONE_SCIVOLOSITA_PISTA",
+            title: "Erogazione a Microparticelle Secche e Assenza Residui Scivolosi su Pavimenti",
+            question: "La macchina è tarata con ugello micronizzatore che non rilascia film oleosi o condensazione acquosa scivolosa sulla pista da ballo, garantendo il mantenimento del coefficiente di attrito dinamico del pavimento?",
+            normReference: "D.Lgs. 81/2008 All. IV punto 1.3.2; D.M. 236/1989 art. 8.2.2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_FUMO_COORDINAMENTO_FOTORIVELATORI",
+            title: "Coordinamento con Impianto Antincendio e Prevenzione Falsi Allarmi Fumo",
+            question: "L'erogazione di haze/fumo scenico è coordinata con la disposizione dei rivelatori ottici di fumo per prevenire accecamenti impropri o falsi allarmi, assicurando al contempo visibilità sufficiente delle vie di fuga (> 5 metri)?",
+            normReference: "D.M. 19/08/1996 Titolo IX; UNI 9795; D.Lgs. 81/2008 art. 46",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 5. Porte di Sicurezza per Uscite di Emergenza con Maniglione Antipanico e Allarme
+      {
+        machineKey: "porte_emergenza_antipanico_lido",
+        name: "Porte di Sicurezza per Uscite di Emergenza con Maniglione Antipanico e Allarme",
+        type: "Serramenti Tagliafuoco e Vie d'Esodo con Dispositivo di Apertura a Spinta UNI EN 1125",
+        suggestedManufacturer: "Ninz / Dierre / Novoferm",
+        suggestedModel: "Proget REI 120 / New Idra / Universale UNI EN 1125",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.antincendio_livello_3_discoteca,
+        safetyChecks: [
+          {
+            code: "DSC_PORTE_MANIGLIONE_EN1125_SPINTA",
+            title: "Maniglione Antipanico Orizzontale a Piena Larghezza Conforme UNI EN 1125",
+            question: "Tutte le porte poste sulle vie di uscita sono provviste di maniglione antipanico orizzontale marcato CE UNI EN 1125 che si apre istantaneamente a semplice spinta da parte di chiunque anche al buio senza rotazione di maniglia?",
+            normReference: "UNI EN 1125; D.M. 03/11/2004; D.M. 19/08/1996 Titolo III; D.Lgs. 81/2008 All. IV",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_PORTE_DIVIETO_CATENACCI_CHIAVI",
+            title: "Assoluta Assenza di Catenacci, Lucchetti o Sbarre Durante l'Apertura al Pubblico",
+            question: "È rigorosamente vietato e controllato ad ogni turno di apertura che le porte di sicurezza siano bloccate con catenacci, lucchetti, fermi a pavimento o sbarre metalliche che ne impediscano l'apertura immediata verso l'esterno?",
+            normReference: "D.M. 19/08/1996 art. 5; R.D. 773/1931 TULPS art. 80; D.Lgs. 81/2008 art. 64 e All. IV",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_PORTE_MICROSWITCH_MONITORAGGIO",
+            title: "Microinterruttore di Apertura Indebita Collegato a Quadro Sicurezza/Cassa",
+            question: "Le porte di emergenza esterne sono dotate di microinterruttore di allarme sonoro locale e remoto collegato alla postazione del personale ASC e cassa per segnalare aperture non autorizzate o tentativi di intrusione abusiva?",
+            normReference: "D.M. 19/08/1996 Titolo III; D.M. 06/10/2009 (Personale ASC); D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_PORTE_CHIUDIPORTA_GUARNIZIONI_FUMI",
+            title: "Dispositivo di Autochiusura Idraulico e Integrità Guarnizioni Termoespandenti",
+            question: "Le porte tagliafuoco d'esodo sono equipaggiate con chiudiporta idraulico regolato per garantire la richiusura automatica corretta (scatto finale) e presentano guarnizioni termoespandenti intatte per tenuta a fumi e calore?",
+            normReference: "UNI EN 1154; D.M. 10/03/1998; D.M. 02/09/2021 Allegato II",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 6. Tornello / Varco Elettronico Conta-Persone Bidirezionale per Controllo Capienza
+      {
+        machineKey: "tornello_contapersone_bidirezionale",
+        name: "Tornello / Varco Elettronico Conta-Persone Bidirezionale per Controllo Capienza",
+        type: "Sistema Meccatronico di Filtraggio Ingressi con Conteggio Bidirezionale Fiscale",
+        suggestedManufacturer: "Gunnebo / Came Ozak / ZKTeco",
+        suggestedModel: "SlimStile BA / Twister 400 / ProWing Capienza TULPS",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.addetto_servizi_controllo_asc,
+        safetyChecks: [
+          {
+            code: "DSC_TORNELLO_FAILSAFE_CADUTA_BRACCI",
+            title: "Sblocco Istantaneo a Caduta Bracci (Drop-Arm) su Allarme Incendio o Blackout",
+            question: "In presenza di segnale di evacuazione/incendio dalla centrale EVAC o in caso di assenza di rete elettrica, i bracci del tornello cadono istantaneamente liberando completamente il varco d'esodo senza ostacoli per la fuga?",
+            normReference: "D.M. 19/08/1996 Titolo III; UNI EN 13637; D.Lgs. 81/2008 All. IV punto 1.5",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_TORNELLO_CONTEGGIO_TULPS_CAPIENZA",
+            title: "Conteggio Ingressi/Uscite in Tempo Reale e Rispetto Limite CCVLPS TULPS Art. 80",
+            question: "Il sistema conta-persone bidirezionale trasmette in tempo reale il numero esatto di presenti all'interno del locale al monitor cassa/direzione e blocca automaticamente gli accessi al raggiungimento della capienza massima autorizzata?",
+            normReference: "R.D. 773/1931 TULPS art. 80; D.M. 19/08/1996 art. 2; Legge 94/2009",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_TORNELLO_VARCO_PMR_ACCESSIBILE",
+            title: "Varco Motorizzato Complanare per Persone con Disabilità (PMR)",
+            question: "Adiacente alla batteria dei tornelli è presente un cancello a battente motorizzato complanare privo di scalini o inciampi di larghezza utile >= 90 cm per l'accesso e l'evacuazione agevole di persone su sedia a rotelle?",
+            normReference: "D.P.R. 503/1996; Legge 104/1992 art. 24; D.M. 236/1989",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_TORNELLO_SENSORI_ANTISCHIACCIAMENTO",
+            title: "Sensori di Sicurezza Ottici Anti-Intrappolamento e Anti-Schiacciamento",
+            question: "Il meccanismo di rotazione è dotato di limitatore di coppia dinamica e fotocellule di protezione anti-schiacciamento che arrestano la rotazione qualora venga rilevato un ostacolo o un passaggio rallentato?",
+            normReference: "Direttiva Macchine 2006/42/CE; UNI EN ISO 12100; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 7. Defibrillatore Semiautomatico Esterno (DAE) in Teca Allarmata
+      {
+        machineKey: "defibrillatore_dae_teca_discoteca",
+        name: "Defibrillatore Semiautomatico Esterno (DAE) in Teca Allarmata ad Alta Visibilità",
+        type: "Dispositivo Medico di Rianimazione Cardiopolmonare d'Emergenza",
+        suggestedManufacturer: "Philips / Zoll / Mindray",
+        suggestedModel: "HeartStart FRx / AED Plus / BeneHeart D1",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.addetto_blsd_dae,
+        safetyChecks: [
+          {
+            code: "DSC_DAE_TECA_ALLARMATA_LUCE_SIRENA",
+            title: "Teca Allarmata con Sirena Locale e Lampeggiante Stroboscopico all'Apertura",
+            question: "Il DAE è alloggiato in apposita teca protetta fissata a parete a quota accessibile (h 1.00-1.40 m), provvista di contatto allarme con sirena acustica e luce lampeggiante che si attiva all'apertura dello sportello per attirare l'attenzione dei soccorritori?",
+            normReference: "Legge 116/2021; D.M. 16/03/2023; D.Lgs. 81/2008 art. 45",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_DAE_STATO_BATTERIA_ELETTRODI",
+            title: "Indicatore di Stato Operativo Verde e Scadenza Elettrodi Monouso Sigillati",
+            question: "L'indicatore visivo di autodiagnosi sul fronte DAE segnala stato operativo (LED verde/OK) e le piastre adesive di defibrillazione per adulti e pediatriche sono integre nella busta sigillata sotto vuoto con data di scadenza controllata?",
+            normReference: "Legge 116/2021 art. 4; D.M. 24/04/2013; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_DAE_KIT_SOCCORSO_FORBICI_MASCHERA",
+            title: "Kit Accessori di Rianimazione (Forbici Taglia-Abiti, Rasoio, Maschera Pocket Mask)",
+            question: "All'interno della teca è presente il kit di pronto soccorso DAE comprendente forbici taglia-abiti di Lister per apertura rapida indumenti, rasoio monouso, guanti in nitrile e maschera facciale unidirezionale per ventilazione artificiale?",
+            normReference: "Linee Guida Nazionali ILCOR/IRC; D.Lgs. 81/2008 All. IV",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_DAE_SEGNALETICA_FOTOLUMINESCENTE_ILCOR",
+            title: "Cartello Segnalatore ILCOR Verde Fotoluminescente e Registro Verifiche",
+            question: "La postazione DAE è chiaramente indicata da cartello segnalatore internazionale ILCOR verde fotoluminescente visibile da tutta la sala ed è presente il registro delle verifiche periodiche mensili con firma del referente incaricato?",
+            normReference: "D.Lgs. 81/2008 Titolo V All. XXV; Legge 116/2021",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 8. Fabbricatore di Ghiaccio a Cubetto Pieno Cristallino
+      {
+        machineKey: "fabbricatore_ghiaccio_cubetto_pieno",
+        name: "Fabbricatore di Ghiaccio a Cubetto Pieno Cristallino ad Alta Densità (150-300 kg/24h)",
+        type: "Macchina Elettromeccanica di Produzione Ghiaccio Alimentare per Cocktail Bar",
+        suggestedManufacturer: "Brema / Hoshizaki / Icematic",
+        suggestedModel: "CB 1565 / IM-240 ANE / K150 Nano Clean",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_bar_vapore,
+        safetyChecks: [
+          {
+            code: "DSC_GHIACCIO_MOCA_SUPERFICI_ALIMENTARI",
+            title: "Conformità MOCA delle Superfici a Contatto e Certificazione Riserva Inox",
+            question: "Il contenitore di stoccaggio del ghiaccio e gli ugelli evaporatori sono realizzati in acciaio inox AISI 304 o polietilene alimentare atossico certificato per contatto con alimenti con dichiarazione MOCA disponibile agli atti?",
+            normReference: "Reg. CE 1935/2004; D.M. 21/03/1973; D.Lgs. 29/2017 Sanzioni MOCA; Reg. CE 852/2004",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_GHIACCIO_SCARICO_INTERRUZIONE_ARIA",
+            title: "Scarico Acque con Disconnessione Idraulica ad Aria Libera (Anti-Reflusso)",
+            question: "Il condotto di scarico della condensa e dell'acqua di sbrinamento presenta un'interruzione d'aria a caduta libera (air-gap) di almeno 5 cm rispetto alla tubazione fognaria per prevenire contaminazioni batteriche da reflusso?",
+            normReference: "UNI EN 1717; Reg. CE 852/2004 All. II Cap. V; D.Lgs. 18/2023",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_GHIACCIO_SANIFICAZIONE_FILTRO_CALCARE",
+            title: "Piano di Sanificazione Periodica del Circuito e Filtro Trattamento Acqua Potabile",
+            question: "È installato a monte un sistema di filtrazione meccanica e anticalcare dell'acqua di alimentazione con cartuccia sostituita periodicamente e viene eseguita la disinfezione chimica trimestrale del circuito registrata nel manuale HACCP?",
+            normReference: "Reg. CE 852/2004; D.Lgs. 18/2023 (Qualità delle acque destinate al consumo umano)",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_GHIACCIO_CONDENSATORE_PULIZIA_MOTORE",
+            title: "Pulizia Filtro Aria Condensatore e Ventilazione Anti-Surriscaldamento",
+            question: "La griglia e il filtro del gruppo condensatore frigorifero sono puliti e privi di accumuli di lanugine o polvere, con spazio perimetrale libero per lo smaltimento termico del compressore?",
+            normReference: "CEI EN 60335-2-24; D.Lgs. 81/2008 All. V punto 1.2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 9. Lavabicchieri Industriale con Risciacquo Igienizzante (82°C) e Osmosi Inversa
+      {
+        machineKey: "lavabicchieri_osmosi_discoteca",
+        name: "Lavabicchieri Industriale con Risciacquo Igienizzante (82°C) e Impianto a Osmosi Inversa",
+        type: "Lavastoviglie Professionale da Bar a Ciclo Rapido con Trattamento Acqua a Membrana",
+        suggestedManufacturer: "Winterhalter / Meiko / Comenda",
+        suggestedModel: "UC-L Excellence-i / M-iClean US / Prime Osmosi DIN 10512",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "DSC_LAVABICCHIERI_RISCIACQUO_82_DIN10512",
+            title: "Risciacquo Termico Igienizzante a Temperatura Minima di 82°C (DIN 10512)",
+            question: "Il boiler di risciacquo mantiene costantemente una temperatura dell'acqua >= 82°C durante tutta la fase di risciacquo finale, assicurando la distruzione dei patogeni su bicchieri da cocktail e stoviglie conforme alla norma DIN 10512?",
+            normReference: "DIN 10512; Reg. CE 852/2004 All. II Cap. V; D.Lgs. 81/2008 All. IV",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_LAVABICCHIERI_OSMOSI_NO_CANOVACCIO",
+            title: "Impianto di Osmosi Inversa per Asciugatura Immediata senza Canovaccio Manuale",
+            question: "L'acqua di risciacquo è trattata mediante demineralizzazione a osmosi inversa che garantisce l'assenza totale di aloni salini e un'asciugatura spontanea senza necessità di strofinamento manuale con canovacci vietato dall'HACCP?",
+            normReference: "Reg. CE 852/2004; Linee Guida HACCP per Somministrazione Bevande; D.M. 21/03/1973",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_LAVABICCHIERI_BREAK_TANK_EN1717",
+            title: "Disconnettore Idrico Break Tank di Classe AA a Protezione Rete Potabile",
+            question: "La macchina è provvista di serbatoio di disconnessione idraulica integrato Break Tank con valvola di non ritorno conforme UNI EN 1717 tipo AA per impedire qualsiasi reflusso di detergenti chimici verso l'acquedotto potabile?",
+            normReference: "UNI EN 1717; D.Lgs. 18/2023; D.Lgs. 81/2008 All. IV",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_LAVABICCHIERI_MICRO_PORTELLA_BLOCCO",
+            title: "Microinterruttore di Sicurezza Portella con Blocco Istantaneo Pompa e Bracci",
+            question: "L'apertura della porta durante il ciclo di lavaggio provoca l'arresto immediato dei bracci rotanti e delle pompe di lavaggio con blocco degli schizzi ad alta temperatura a salvaguardia degli occhi e del viso del barista?",
+            normReference: "Direttiva Macchine 2006/42/CE; CEI EN 60335-2-58; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 10. Frigobar / Bottigliera Professionale a Sportelli a Vetro (+2/+4°C)
+      {
+        machineKey: "bottigliera_refrigerata_sottobanco",
+        name: "Frigobar / Bottigliera Professionale a Sportelli a Vetro con Illuminazione LED (+2/+4°C)",
+        type: "Refrigeratore Sottobanco per Beverage e Bibite ad Ante Vetrate Scorrevoli o a Battente",
+        suggestedManufacturer: "Afinox / Friulinox / Forcar",
+        suggestedModel: "Fast Bar 3 / Back Bar LED / ColdMaster R290",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "DSC_BOTTIGLIERA_VETRO_TEMPERATO_CHIAVE",
+            title: "Sportelli in Doppio Vetro Temperato di Sicurezza Antisfondamento con Serratura",
+            question: "Le ante vetrate sono dotate di doppi vetri temperati antisfondamento conformi UNI EN 12150 capaci di resistere a urti accidentali di bottiglie e presentano serratura a chiave per la chiusura sicura a fine turno?",
+            normReference: "UNI EN 12150; D.Lgs. 81/2008 All. IV punto 1.3; Direttiva Bassa Tensione 2014/35/UE",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_BOTTIGLIERA_TERMOSTATO_DIGITALE_HACCP",
+            title: "Controllo Digitale della Temperatura (+2°C/+4°C) con Allarme di Superamento Soglia",
+            question: "La centralina elettronica con display digitale visibile all'operatore mantiene la temperatura impostata a norma di conservazione beverage/latticini e segnala acusticamente eventuali anomalie termiche o porta rimasta aperta?",
+            normReference: "Reg. CE 852/2004; D.Lgs. 81/2008 All. IV; Manuale HACCP",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_BOTTIGLIERA_GAS_ECOLOGICO_R290_SICUREZZA",
+            title: "Circuito Frigorifero a Idrocarburo Naturale R290/R600a con Componenti Sigillati",
+            question: "Il gruppo refrigerante impiega gas ecologico naturale R290 o R600a a basso GWP con componenti elettrici sigillati a prova di scintilla e tubazioni protette da vibrazioni per prevenire perdite infiammabili sotto il banco?",
+            normReference: "UNI EN 378; CEI EN 60335-2-89; Reg. UE 517/2014 (F-Gas)",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_BOTTIGLIERA_MESSA_A_TERRA_CAVI",
+            title: "Protezione Meccanica dei Cavi e Continuità del Circuito di Messa a Terra",
+            question: "I cavi di alimentazione elettrica e le guaine sotto il banco bar sono protetti da schiacciamento e umidità, e la carcassa metallica inox presenta continuità equipotenziale di terra verificata?",
+            normReference: "CEI 64-8; D.Lgs. 81/2008 Titolo III Capo III (Impianti Elettrici)",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 11. Impianto di Spillatura Birra e Premix con Rilevatore CO2
+      {
+        machineKey: "centrale_spillatura_birra_co2",
+        name: "Impianto di Spillatura Birra e Premix con Rilevatore Fughe Gas Anidride Carbonica (CO2)",
+        type: "Centrale di Spillatura con Banco Frigo a Secco e Impianto Gas Tecnico CO2 ad Alta Pressione",
+        suggestedManufacturer: "Celli Group / Cornelio / Micromatic",
+        suggestedModel: "Bavaria Mega / Valvola CO2 Safety / Matrix Smart PED",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_bar_vapore,
+        safetyChecks: [
+          {
+            code: "DSC_CO2_RILEVATORE_GAS_ELETTROVALVOLA",
+            title: "Rilevatore Continuo Ambientale Fughe Gas CO2 a Pavimento con Allarme Ottico-Acustico",
+            question: "Nel locale cantina/deposito fusti e bombole è installato un sensore elettrochimico di CO2 posizionato a circa 20-30 cm dal pavimento (gas pesante asfissiante) con allarme ottico-acustico a soglia 1.5% e blocco elettrovalvola a 3%?",
+            normReference: "D.Lgs. 81/2008 art. 64, 66 e Titolo IX; Linee Guida EIGA IGC Doc 04/09/E; D.M. 10/03/1998",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_CO2_BOMBOLE_CATENELLE_ANTICADUTA",
+            title: "Fissaggio Bombole Gas a Parete con Catenelle Metalliche Anticaduta",
+            question: "Tutte le bombole di anidride carbonica e miscele carbo-azoto sono saldamente ancorate a parete tramite collarini e doppie catenelle metalliche a prova di ribaltamento, sia per le bombole in uso che per quelle piene di scorta?",
+            normReference: "D.Lgs. 81/2008 All. V punto 2.5; D.M. 07/01/1999; Circolare Ministero Interno 5/1987",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_CO2_RIDUTTORE_PRESSIONE_PED",
+            title: "Riduttore di Pressione Collaudato con Valvola di Sovrapressione Conforme PED",
+            question: "Il gruppo di regolazione e riduzione della pressione del gas tecnico dispone di manometri di alta e bassa pressione protetti e valvola di sicurezza tarata a scarico libero marcata CE conforme alla Direttiva PED 2014/68/UE?",
+            normReference: "D.Lgs. 26/2016 (Direttiva PED 2014/68/UE); UNI EN ISO 2503; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_CO2_SANIFICAZIONE_LINEE_PITONE_MOCA",
+            title: "Lavaggio Chimico Periodico Linee Pitone e Raccordi con Registro HACCP",
+            question: "Le linee di adduzione bevande (pitoni isolati) e i rubinetti di erogazione sono realizzati con materiali atossici certificati MOCA e vengono regolarmente sottoposti a lavaggio chimico disinfettante con frequenza quindicinale annotata sul registro?",
+            normReference: "Reg. CE 1935/2004; Reg. CE 852/2004 All. II; D.Lgs. 29/2017",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 12. Tritaghiaccio Professionale e Blender per Frozen Drink a Campana Insonorizzata
+      {
+        machineKey: "tritaghiaccio_frullatore_cocktail",
+        name: "Tritaghiaccio Professionale e Blender per Frozen Drink a Campana Insonorizzata",
+        type: "Robot Frullatore e Frantuma-Ghiaccio Industriale Silenziato per Banco Bar",
+        suggestedManufacturer: "Ceado / Sirman / Hamilton Beach",
+        suggestedModel: "B285 Insonorizzato / Orione VV / Eclipse HBH755 MOCA",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_bar_vapore,
+        safetyChecks: [
+          {
+            code: "DSC_BLENDER_CAMPANA_MICROINTERRUTTORE",
+            title: "Campana Insonorizzante Trasparente con Microinterruttore di Sicurezza al Sollevamento",
+            question: "Il blender è protetto da campana acustica trasparente in policarbonato dotata di sensore di sicurezza magnetico che arresta istantaneamente la rotazione delle lame non appena la calotta viene sollevata?",
+            normReference: "UNI EN 12852; Direttiva Macchine 2006/42/CE; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_BLENDER_LAME_MOCA_BPA_FREE",
+            title: "Bicchiere Graduato BPA-Free e Coltelli in Acciaio Inox Alimentare Certificato MOCA",
+            question: "Il gruppo lame rotanti e il caraffa sono costruiti con materiali specifici per contatto con alimenti (acciaio inox AISI 304/420 e copoliestere privo di bisfenolo A) corredati di dichiarazione di conformità MOCA?",
+            normReference: "Reg. CE 1935/2004; D.M. 21/03/1973; D.Lgs. 29/2017; Reg. UE 10/2011",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_BLENDER_PIEDINI_ANTIVIBRANTI_STABILITA",
+            title: "Piedini a Ventosa Antiscivolo e Stabilità Dinamica sul Banco di Mescita",
+            question: "L'apparecchio poggia su piedini elastici antivibranti a ventosa che impediscono slittamenti, movimenti spontanei o cadute accidentali dal banco di lavoro durante la frantumazione del ghiaccio a massima velocità?",
+            normReference: "D.Lgs. 81/2008 All. V punto 1.2; CEI EN 60335-2-64",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_BLENDER_PROTEZIONE_LIQUIDI_IPX3",
+            title: "Grado di Protezione da Schizzi di Liquidi (IPX3/IPX4) e Isolamento Comandi",
+            question: "I pulsanti di comando e il corpo motore presentano guarnizioni stagne contro la penetrazione di bevande alcoliche, sciroppi e acqua con grado di protezione minimo IPX3 per prevenire cortocircuiti?",
+            normReference: "CEI EN 60529; CEI 64-8; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 13. Friggitrice Professionale Compatta a Vasca Singola o Doppia
+      {
+        machineKey: "friggitrice_snack_discoteca",
+        name: "Friggitrice Professionale Compatta a Vasca Singola o Doppia con Coperchio Spegni-Fiamma",
+        type: "Friggitrice Elettrica ad Alta Resa con Termostato di Sicurezza Anti-Innesco Oli",
+        suggestedManufacturer: "Lotus / Angelo Po / Giorik",
+        suggestedModel: "F13-74ET / FES-12 / Snack Pro 10L < 230°C",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "DSC_FRIGGITRICE_TERMOSTATO_MAX_230",
+            title: "Termostato di Sicurezza a Riarmo Manuale Tarato Rigorosamente < 230°C",
+            question: "La friggitrice è equipaggiata con termostato limite di sicurezza a riarmo manuale indipendente dal regolatore di lavoro che disattiva l'alimentazione prima che l'olio raggiunga i 230°C (temperatura di innesco vapori e autocombustione)?",
+            normReference: "UNI EN 203-1; CEI EN 60335-2-37; D.M. 19/08/1996; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_FRIGGITRICE_RUBINETTO_SCARICO_SICURA",
+            title: "Rubinetto di Scarico Olio Esausto con Dispositivo Meccanico Anti-Apertura",
+            question: "La valvola a sfera di drenaggio della vasca dell'olio è collocata all'interno del vano chiuso o presenta leva con blocco meccanico di sicurezza per scongiurare aperture accidentali durante l'orario di lavoro del personale?",
+            normReference: "Direttiva Macchine 2006/42/CE; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_FRIGGITRICE_ESTINTORE_CLASSE_F_COPERTA",
+            title: "Presidio Antincendio Dedicato: Estintore Classe F e Coperta Spegnifiamma",
+            question: "A distanza immediata dalla postazione di frittura è collocato un estintore omologato specifico per fuochi da oli vegetali esausti (Classe F) e una coperta antifiamma in fibra di vetro conforme UNI EN 1869 per soffocamento rapido?",
+            normReference: "UNI EN 3-7; UNI EN 1869; D.M. 02/09/2021; D.M. 19/08/1996",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_FRIGGITRICE_COPERCHIO_INOX_ATERMICO",
+            title: "Coperchio Metallico di Contenimento con Impugnatura Termicamente Isolata",
+            question: "La vasca è provvista di coperchio inox asportabile con maniglia atermica che consente la chiusura immediata in caso di sfrigolamento violento o principio d'incendio e la protezione dell'olio da contaminazioni a riposo?",
+            normReference: "D.Lgs. 81/2008 All. V punto 2; Reg. CE 852/2004",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 14. Cappa di Aspirazione Inox con Filtri a Labirinto e Impianto Ansul R-102
+      {
+        machineKey: "cappa_snack_bar_discoteca",
+        name: "Cappa di Aspirazione Inox con Filtri a Labirinto e Impianto Automatico Ansul R-102",
+        type: "Impianto di Captazione e Trattamento Fumi di Frittura e Cottura con Estinzione Automatica",
+        suggestedManufacturer: "Smoki / Alvial / Camini & Cappe",
+        suggestedModel: "Master Ansul R-102 / Labirinto Inox / EcoBox NFPA 96",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.macchine_alimentari,
+        safetyChecks: [
+          {
+            code: "DSC_CAPPA_IMPIANTO_ANSUL_NFPA96",
+            title: "Impianto Automatico di Estinzione Incendi Ansul R-102 su Friggitrice e Condotto",
+            question: "La cappa è protetta da sistema di soppressione incendi automatico a schiumogeno/sale chimico liquido Ansul R-102 conforme NFPA 96, con ugelli puntati su friggitrice e canale d'estrazione e leva di sgancio manuale remota?",
+            normReference: "NFPA 96; NFPA 17A; D.M. 19/08/1996 Titolo V; D.M. 03/08/2015 Codice Prevenzione Incendi",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_CAPPA_FILTRI_LABIRINTO_LAVAGGIO",
+            title: "Filtri Antigrasso a Labirinto in Acciaio Inox Lavabili e Privi di Accumuli",
+            question: "I filtri a labirinto in acciaio inox AISI 304 sono integri, perfettamente alloggiati nella canalina raccogli-olio e vengono lavati e sgrassati con frequenza settimanale registrata per evitare accumuli di grasso infiammabile?",
+            normReference: "D.Lgs. 81/2008 All. IV punto 2.1; Reg. CE 852/2004; D.M. 10/03/1998",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_CAPPA_CANALE_ESPULSIONE_TETTO",
+            title: "Condotto di Espulsione Fumi a Tenuta Stagna con Sfogo all'Esterno a Quota Tetto",
+            question: "La condotta di scarico fumi è realizzata in lamiera d'acciaio a tenuta stagna con portine di ispezione per la pulizia delle fuliggini e sfocia a tetto oltre il colmo dell'edificio conformemente ai regolamenti d'igiene edilizia?",
+            normReference: "D.Lgs. 152/2006 art. 269; Regolamento Locale d'Igiene; UNI 10339",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_CAPPA_INTERBLOCCO_COTTURA_VENTILATORE",
+            title: "Interblocco Elettrico tra Aspiratore e Alimentazione Apparecchi di Cottura",
+            question: "È presente l'interblocco elettrico che consente l'accensione della friggitrice e delle piastre di cottura solo a ventilatore d'estrazione fumi attivo, prevenendo l'accumulo di vapori grassi e monossido nel locale snack?",
+            normReference: "CEI 64-8; D.Lgs. 81/2008 All. V; UNI EN 203-1",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 15. Frantumatore Compattatore Professionale per Bottiglie di Vetro e Lattine
+      {
+        machineKey: "compattatore_vetro_lattine",
+        name: "Frantumatore Compattatore Professionale per Bottiglie di Vetro e Lattine",
+        type: "Pressa Elettromeccanica Insonorizzata di Riduzione Volume Vetro e Alluminio",
+        suggestedManufacturer: "Pelican Pel / Bramidan / Strautmann",
+        suggestedModel: "PEL BB01 / Baby Press / GlassCrusher Silent UNI EN 16500",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "DSC_COMPATTATORE_MICRO_TRAMOGGIA_SALVAMANI",
+            title: "Microinterruttore di Sicurezza su Tramoggia di Carico con Protezione Salvamani",
+            question: "La bocca di inserimento bottiglie presenta paratie sagomate a labirinto anti-rimbalzo schegge e microinterruttore di sicurezza che arresta immediatamente il rotore frantumatore qualora lo sportello o la tramoggia vengano aperti?",
+            normReference: "UNI EN 16500; Direttiva Macchine 2006/42/CE; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_COMPATTATORE_CAMERA_INSONORIZZATA",
+            title: "Camera di Frantumazione Insonorizzata con Rumorosità Contenuta < 72 dB(A)",
+            question: "L'apparato è rivestito internamente con pannelli fonoassorbenti che limitano il picco sonoro della frantumazione del vetro al di sotto di 72 dB(A) ad un metro, prevenendo rischi da rumore impulsivo per gli addetti bar e magazzino?",
+            normReference: "D.Lgs. 81/2008 Titolo VIII Capo II; Direttiva 2000/14/CE",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_COMPATTATORE_CARRELLO_ESTRAIBILE_MMC",
+            title: "Carrello Portasacco Estraibile su Ruote per Movimentazione Ergonomica del Rottame",
+            question: "Il vetro frantumato viene raccolto in un carrello carrellato estraibile con peso del carico limitato a parametri ergonomici (< 20-25 kg) per evitare sforzi biomeccanici eccessivi durante lo svuotamento nel cassonetto esterno?",
+            normReference: "D.Lgs. 81/2008 Titolo VI (Movimentazione Manuale Carichi); ISO 11228-1",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_COMPATTATORE_FUNGO_EMERGENZA_ESTOP",
+            title: "Pulsante di Arresto d'Emergenza a Fungo con Riarmo Manuale",
+            question: "Sul frontale della macchina è ben visibile e raggiungibile un pulsante d'arresto d'emergenza a fungo rosso su sfondo giallo a ritenuta meccanica per l'arresto immediato di tutte le parti in movimento?",
+            normReference: "CEI EN 60204-1; D.Lgs. 81/2008 All. V punto 2.4",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 16. Gruppo Elettrogeno Silenziato Diesel di Emergenza (50-100 kVA)
+      {
+        machineKey: "gruppo_elettrogeno_emergenza_discoteca",
+        name: "Gruppo Elettrogeno Silenziato Diesel di Emergenza per Evacuazione Locale (50-100 kVA)",
+        type: "Generatore Autonomo Silenziato con Quadro ATS di Scambio Rete/Gruppo Automatico",
+        suggestedManufacturer: "Pramac / Caterpillar / Bruno Generators",
+        suggestedModel: "GSW 65 / DE65 GC / Fustaq Super Silent D.M. 13/07/2011",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "DSC_GENERATORE_QUADRO_ATS_AVVIAMENTO_15S",
+            title: "Quadro ATS di Avviamento Automatico e Inserzione Carichi Critici Entro 15 Secondi",
+            question: "In caso di interruzione dell'energia elettrica di rete, il quadro di commutazione automatica ATS avvia il gruppo e rialimenta entro massimo 15 secondi le luci di sicurezza, l'impianto EVAC, le pompe antincendio e le uscite d'emergenza?",
+            normReference: "D.M. 19/08/1996 Titolo IX; CEI 64-8 sez. 718; CEI EN 60947-6-1; D.Lgs. 81/2008 All. IV",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_GENERATORE_VASCA_GASOLIO_110",
+            title: "Serbatoio Carburante con Bacino di Contenimento al 110% Conforme D.M. 13/07/2011",
+            question: "Il generatore diesel è collocato all'aperto o in locale tecnico dedicato compartimentato REI 120 e dispone di serbatoio incorporato dotato di vasca di raccolta a tenuta di capacità non inferiore al 110% del volume del gasolio?",
+            normReference: "D.M. 13/07/2011 (Regola tecnica antincendio gruppi elettrogeni); D.Lgs. 152/2006",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_GENERATORE_SGANCIO_EMERGENZA_ESTERNO",
+            title: "Pulsante di Sgancio Elettrico e Intercettazione Combustibile Esterno al Locale",
+            question: "All'esterno dell'accesso al locale del generatore è presente il pulsante di sgancio elettrico generale di emergenza e la valvola a strappo manuale di intercettazione del combustibile protetta da cassetta frangibile?",
+            normReference: "D.M. 13/07/2011 art. 6; D.M. 19/08/1996; CEI 64-8",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "DSC_GENERATORE_CANALE_FUMI_SILENZIATORE",
+            title: "Scarico Gas di Combustione a Tetto con Silenziatore di Abbattimento Acustico",
+            question: "La tubazione di espulsione dei gas di scarico è coibentata contro scottature accidentali, provvista di silenziatore residenziale e convogliata all'esterno lontano da finestre, prese d'aria e vie di fuga?",
+            normReference: "D.M. 13/07/2011; D.Lgs. 81/2008 All. IV; D.Lgs. 152/2006",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+    ],
+  },
+
   // 2. RISTORAZIONE & ALIMENTARE
   {
     sectorKey: "ristorazione_alimentare",
@@ -11565,7 +12311,16 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
   const campingSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "campeggio_villaggio");
   const campingMachines = campingSector ? campingSector.machines : [];
 
-  const isBeachClubAteco = !!atecoCode && (
+  const isNightlifeAteco = !!atecoCode && (
+    atecoCode.startsWith("93.29.10") ||
+    atecoCode.startsWith("93.29.1") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("932910") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("93291")
+  );
+  const nightlifeSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "discoteca_locale_serale");
+  const nightlifeMachines = nightlifeSector ? nightlifeSector.machines : [];
+
+  const isBeachClubAteco = !isNightlifeAteco && !!atecoCode && (
     atecoCode.startsWith("93.29.20") ||
     atecoCode.startsWith("93.29.2") ||
     atecoCode.startsWith("93.29") ||
@@ -12146,7 +12901,7 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
     else if (
       envId === "env-bar-cocktail-station" ||
       envId.includes("bar-cocktail-station") ||
-      envId.includes("cocktail") ||
+      envId.includes("bar-cocktail") ||
       (isBarAteco && (nameLower.includes("cocktail") || nameLower.includes("mixology") || nameLower.includes("barman")))
     ) {
       matchingMachines = barMachines.filter((m) =>
@@ -12159,7 +12914,7 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
     } else if (
       envId === "env-bar-banco-caffetteria" ||
       envId.includes("bar-banco-caffetteria") ||
-      envId.includes("banco-caffetteria") ||
+      envId.includes("bar-banco") ||
       (isBarAteco && (
         envId === "env-banco" ||
         nameLower.includes("caffetteria") ||
@@ -12181,7 +12936,7 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
     } else if (
       envId === "env-bar-retrobanco-snack" ||
       envId.includes("bar-retrobanco-snack") ||
-      envId.includes("retrobanco") ||
+      envId.includes("bar-retrobanco") ||
       (isBarAteco && (nameLower.includes("retrobanco") || nameLower.includes("snack") || nameLower.includes("panini") || nameLower.includes("tavola fredda")))
     ) {
       matchingMachines = barMachines.filter((m) =>
@@ -12194,7 +12949,7 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
     } else if (
       envId === "env-bar-spillatura-co2" ||
       envId.includes("bar-spillatura-co2") ||
-      envId.includes("spillatura") ||
+      envId.includes("bar-spillatura") ||
       (isBarAteco && !envId.includes("deposito") && !nameLower.includes("deposito") && !nameLower.includes("magazzino") && (nameLower.includes("spillatura") || nameLower.includes("spina") || nameLower.includes("bombole") || (nameLower.includes("birra") && !nameLower.includes("deposito") && !nameLower.includes("magazzino"))))
     ) {
       matchingMachines = barMachines.filter((m) =>
@@ -12765,6 +13520,99 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
     ) {
       matchingMachines = beachClubMachines.filter((m) =>
         ["sedia_anfibia_disabili_job"].includes(m.machineKey)
+      );
+    }
+
+    // Reparti Discoteche, Locali Serali, Night Club e Sale da Ballo (ATECO 93.29.10 / 93.29.1 / 932910 / 93291)
+    else if (
+      envId === "env-dsc-ingresso-foyer" ||
+      envId.includes("dsc-ingresso") ||
+      envId.includes("dsc-foyer") ||
+      (isNightlifeAteco && (nameLower.includes("foyer") || nameLower.includes("biglietteria") || cat === "entrance" || cat === "reception" || (cat === "sales_office" && nameLower.includes("ingresso"))))
+    ) {
+      matchingMachines = nightlifeMachines.filter((m) =>
+        ["tornello_contapersone_bidirezionale", "centrale_rivelazione_evac_discoteca"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-dsc-pista-ballo-centrale" ||
+      envId.includes("dsc-pista") ||
+      (isNightlifeAteco && (nameLower.includes("pista") || nameLower.includes("ballo") || cat === "dancefloor" || (cat === "production" && nameLower.includes("pista"))))
+    ) {
+      matchingMachines = nightlifeMachines.filter((m) =>
+        [
+          "centrale_rivelazione_evac_discoteca",
+          "limitatore_acustico_sigillato",
+          "macchina_fumo_hazer_base_acqua",
+          "porte_emergenza_antipanico_lido",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-dsc-consolle-dj-regia" ||
+      envId.includes("dsc-consolle") ||
+      envId.includes("dsc-regia") ||
+      (isNightlifeAteco && (nameLower.includes("consolle") || nameLower.includes("dj") || nameLower.includes("regia") || cat === "control_room"))
+    ) {
+      matchingMachines = nightlifeMachines.filter((m) =>
+        ["limitatore_acustico_sigillato", "sistema_laser_show_dmx"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-dsc-cucina-snack-food" ||
+      envId.includes("dsc-cucina") ||
+      envId.includes("dsc-snack") ||
+      (isNightlifeAteco && (nameLower.includes("snack") || nameLower.includes("cucina") || nameLower.includes("food") || cat === "kitchen" || cat === "restaurant"))
+    ) {
+      matchingMachines = nightlifeMachines.filter((m) =>
+        ["friggitrice_snack_discoteca", "cappa_snack_bar_discoteca"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-dsc-cocktail-bar-principale" ||
+      envId === "env-dsc-secondo-bar-estivo" ||
+      envId.includes("dsc-cocktail") ||
+      envId.includes("dsc-bar") ||
+      (isNightlifeAteco && !nameLower.includes("cucina") && !nameLower.includes("snack") && (nameLower.includes("cocktail") || nameLower.includes("banco bar") || nameLower.includes("bar") || cat === "bar"))
+    ) {
+      matchingMachines = nightlifeMachines.filter((m) =>
+        [
+          "fabbricatore_ghiaccio_cubetto_pieno",
+          "lavabicchieri_osmosi_discoteca",
+          "bottigliera_refrigerata_sottobanco",
+          "tritaghiaccio_frullatore_cocktail",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-dsc-dispensa-beverage" ||
+      envId.includes("dsc-dispensa") ||
+      envId.includes("dsc-beverage") ||
+      (isNightlifeAteco && (nameLower.includes("beverage") || nameLower.includes("fusti") || (nameLower.includes("dispensa") && !nameLower.includes("frigo"))))
+    ) {
+      matchingMachines = nightlifeMachines.filter((m) =>
+        ["centrale_spillatura_birra_co2", "bottigliera_refrigerata_sottobanco"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-dsc-infermeria-primo-soccorso" ||
+      envId.includes("dsc-infermeria") ||
+      envId.includes("dsc-primo-soccorso") ||
+      (isNightlifeAteco && (nameLower.includes("infermeria") || nameLower.includes("soccorso") || cat === "first_aid" || cat === "medical"))
+    ) {
+      matchingMachines = nightlifeMachines.filter((m) =>
+        ["defibrillatore_dae_teca_discoteca"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-dsc-locale-tecnico-quadri" ||
+      envId.includes("dsc-locale-tecnico") ||
+      envId.includes("dsc-quadri") ||
+      (isNightlifeAteco && (nameLower.includes("quadri") || nameLower.includes("gruppo") || (cat === "technical" && (nameLower.includes("elettric") || nameLower.includes("cabina")))))
+    ) {
+      matchingMachines = nightlifeMachines.filter((m) =>
+        ["gruppo_elettrogeno_emergenza_discoteca"].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-dsc-guardaroba-deposito" ||
+      envId.includes("dsc-guardaroba") ||
+      (isNightlifeAteco && (nameLower.includes("guardaroba") || cat === "cloakroom" || cat === "wardrobe"))
+    ) {
+      matchingMachines = nightlifeMachines.filter((m) =>
+        ["compattatore_vetro_lattine"].includes(m.machineKey)
       );
     } else if (
       envId === "env-super-magazzino" ||

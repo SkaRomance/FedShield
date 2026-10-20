@@ -1013,7 +1013,222 @@ async function run() {
     `Expected at least 5 beach-specific document requirements for inspection, found ${beachSpecificDocs.length}`,
   );
 
-  console.log("HoReCa completeness test passed (including Hotel, B&B, Ostelli/Residence, Campeggi/Villaggi turistici and Stabilimenti Balneari ATECO variants and inspection integration)");
+  // Verifica varianti ATECO e query testuali per Discoteche, Sale da Ballo e Locali Serali (93.29.10, 93.29.1, 932910, 93291, DISCOTECA, DISCOTECHE, LOCALI_SERALI, LOCALE_NOTTURNO, LOCALI_NOTTURNI, NIGHTLIFE, CLUB, PUB_SERALE, PUB_DISCO, DISCOTECA_LOCALE_SERALE)
+  const discoVariants = [
+    "93.29.10",
+    "93.29.1",
+    "932910",
+    "93291",
+    "DISCOTECA",
+    "DISCOTECHE",
+    "LOCALI_SERALI",
+    "LOCALE_NOTTURNO",
+    "LOCALI_NOTTURNI",
+    "NIGHTLIFE",
+    "CLUB",
+    "PUB_SERALE",
+    "PUB_DISCO",
+    "DISCOTECA_LOCALE_SERALE",
+  ];
+
+  for (const variant of discoVariants) {
+    const tRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(tRes.statusCode, 200, `Templates failed for variant ${variant}`);
+    const tmpls = tRes.json() as Array<{ id: string; name: string }>;
+    const discoTmpls = tmpls.filter(
+      (t) =>
+        t.name.includes("Locali Serali/Discoteca") ||
+        t.name.includes("Discoteca") ||
+        t.name.includes("Locali Serali"),
+    );
+    assert.ok(
+      discoTmpls.length >= 2,
+      `Expected at least 2 templates for variant ${variant}, found ${discoTmpls.length}`,
+    );
+
+    const dRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/document-templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(dRes.statusCode, 200, `Docs failed for variant ${variant}`);
+    const docs = dRes.json() as DocumentTemplateLite[];
+    const discoDocs = docs.filter(
+      (d) =>
+        d.macroGroup === "LOCALI_SERALI" ||
+        d.macroGroup === "DISCOTECA" ||
+        d.macroGroup === "DISCOTECA_LOCALE_SERALE",
+    );
+    assert.ok(
+      discoDocs.length >= 14,
+      `Expected at least 14 nightlife docs for variant ${variant}, found ${discoDocs.length}`,
+    );
+  }
+
+  // Verifica generazione template e requisiti normativi specifici per Discoteca / Locale serale con somministrazione su 93.29.10 e dotless 932910:
+  // - Antincendio pubblico spettacolo D.M. 19/08/1996 e Attività 65 CPI > 100 persone
+  // - Addetti sicurezza ASC D.M. 06/10/2009 e Legge 94/2009
+  // - Limitatori acustici D.P.C.M. 215/99 e impatto fonometrico L. 447/1995
+  // - Sicurezza laser CEI EN 60825-1 a quota > 3m
+  // - Rilevatore fughe CO2 spillatura birra
+  // - DAE Legge 116/2021 e presidi di primo soccorso
+  // - Igiene cocktail bar e banchi mescita HACCP, risciacquo igienico >= 82°C DIN 10512 e ghiaccio alimentare MOCA
+  const discoCodesToVerify = ["93.29.10", "932910"];
+  for (const ateco of discoCodesToVerify) {
+    const tRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/templates?atecoCode=${encodeURIComponent(ateco)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(tRes.statusCode, 200);
+    const tmpls = tRes.json() as Array<{ id: string; name: string }>;
+    const discoTmpls = tmpls.filter(
+      (t) =>
+        t.name.includes("Locali Serali/Discoteca") ||
+        t.name.includes("Discoteca") ||
+        t.name.includes("Locali Serali"),
+    );
+    assert.equal(discoTmpls.length, 2, `Expected 2 templates for ${ateco}`);
+
+    let allItemsText = "";
+    for (const t of discoTmpls) {
+      const itemsRes = await app.inject({
+        method: "GET",
+        url: `/api/checklists/templates/${t.id}/items?checklistMode=unified`,
+        headers,
+      });
+      assert.equal(itemsRes.statusCode, 200);
+      const items = itemsRes.json().items as Array<{
+        question: string;
+        area: string;
+        normReference?: string | null;
+        orderIndex: number;
+        defaultSeverity: number;
+      }>;
+      assert.equal(items.length, 25, `Expected 25 items for template ${t.id} under ${ateco}`);
+      for (const item of items) {
+        assert.ok(item.defaultSeverity >= 1 && item.defaultSeverity <= 4, `Invalid severity in item ${item.orderIndex}`);
+      }
+
+      const combined = items
+        .map((i) => `${i.area} ${i.question} ${i.normReference ?? ""}`.toLowerCase())
+        .join(" | ");
+      allItemsText += ` | ${combined}`;
+    }
+
+    // 1. Antincendio pubblico spettacolo D.M. 19/08/1996 e Attività 65 CPI > 100 persone
+    assert.ok(
+      allItemsText.includes("19/08/1996") &&
+        (allItemsText.includes("pubblico spettacolo") || allItemsText.includes("spettacolo")) &&
+        (allItemsText.includes("attività 65") || allItemsText.includes("cpi")),
+      `Missing norm requirement "antincendio pubblico spettacolo DM 19/08/1996" for ${ateco}`,
+    );
+
+    // 2. Addetti sicurezza ASC D.M. 06/10/2009
+    assert.ok(
+      (allItemsText.includes("asc") || allItemsText.includes("servizi di controllo") || allItemsText.includes("addetti alla sicurezza")) &&
+        (allItemsText.includes("06/10/2009") || allItemsText.includes("94/2009")),
+      `Missing norm requirement "addetti sicurezza ASC DM 06/10/2009" for ${ateco}`,
+    );
+
+    // 3. Limitatori acustici D.P.C.M. 215/99
+    assert.ok(
+      allItemsText.includes("limitator") &&
+        (allItemsText.includes("215/99") || allItemsText.includes("215/1999")),
+      `Missing norm requirement "limitatori acustici DPCM 215/99" for ${ateco}`,
+    );
+
+    // 4. Sicurezza laser CEI EN 60825-1 a quota > 3m
+    assert.ok(
+      allItemsText.includes("laser") &&
+        (allItemsText.includes("60825-1") || allItemsText.includes("cei en 60825-1")) &&
+        (allItemsText.includes("3 metr") || allItemsText.includes("quota")),
+      `Missing norm requirement "sicurezza laser CEI EN 60825-1" for ${ateco}`,
+    );
+
+    // 5. Rilevatore fughe CO2 spillatura birra
+    assert.ok(
+      allItemsText.includes("co2") &&
+        allItemsText.includes("spillatura") &&
+        allItemsText.includes("rilevator"),
+      `Missing norm requirement "rilevatore fughe CO2 spillatura birra" for ${ateco}`,
+    );
+
+    // 6. DAE Legge 116/2021
+    assert.ok(
+      (allItemsText.includes("dae") || allItemsText.includes("defibrillatore")) &&
+        (allItemsText.includes("legge 116/2021") || allItemsText.includes("116/2021")),
+      `Missing norm requirement "DAE Legge 116/2021" for ${ateco}`,
+    );
+
+    // 7. Igiene cocktail bar e banchi mescita HACCP, risciacquo >= 82°C DIN 10512 e ghiaccio alimentare MOCA
+    assert.ok(
+      allItemsText.includes("cocktail bar") &&
+        allItemsText.includes("haccp") &&
+        (allItemsText.includes("82°c") || allItemsText.includes("82") || allItemsText.includes("din 10512")) &&
+        allItemsText.includes("moca"),
+      `Missing norm requirement "igiene cocktail bar e banchi mescita HACCP" for ${ateco}`,
+    );
+  }
+
+  // Verifica integrazione ispezioni per azienda Discoteca / Locale serale con ATECO variante dotless (932910)
+  const discoCompany = await app.prisma.company.upsert({
+    where: { id: "test-nightlife-integration-company" },
+    update: { atecoCode: "932910" },
+    create: {
+      id: "test-nightlife-integration-company",
+      name: "Club Discoteca FedShield",
+      vatNumber: "IT99887766559",
+      atecoCode: "932910",
+      legalAddress: "Via della Notte 42, Milano",
+    },
+  });
+
+  const discoInspection = await app.inject({
+    method: "POST",
+    url: "/api/inspections",
+    headers,
+    payload: {
+      companyId: discoCompany.id,
+      title: "Ispezione Discoteca Locale Serale Test",
+    },
+  });
+  assert.equal(discoInspection.statusCode, 201);
+  const discoInspectionId = discoInspection.json().id as string;
+
+  const discoInspectionDocsRes = await app.inject({
+    method: "GET",
+    url: `/api/inspections/${discoInspectionId}/documents/requirements`,
+    headers,
+  });
+  assert.equal(discoInspectionDocsRes.statusCode, 200);
+  const discoInspectionDocs = discoInspectionDocsRes.json() as Array<{ name: string; documentTemplateId: string }>;
+  const discoSpecificDocs = discoInspectionDocs.filter(
+    (d) =>
+      d.name.toLowerCase().includes("antincendio") ||
+      d.name.toLowerCase().includes("pubblico spettacolo") ||
+      d.name.toLowerCase().includes("asc") ||
+      d.name.toLowerCase().includes("servizi di controllo") ||
+      d.name.toLowerCase().includes("acustico") ||
+      d.name.toLowerCase().includes("limitator") ||
+      d.name.toLowerCase().includes("laser") ||
+      d.name.toLowerCase().includes("dae") ||
+      d.name.toLowerCase().includes("co2") ||
+      d.name.toLowerCase().includes("spillatura") ||
+      d.name.toLowerCase().includes("cocktail") ||
+      d.name.toLowerCase().includes("discoteca") ||
+      d.name.toLowerCase().includes("serale"),
+  );
+  assert.ok(
+    discoSpecificDocs.length >= 5,
+    `Expected at least 5 nightlife-specific document requirements for inspection, found ${discoSpecificDocs.length}`,
+  );
+
+  console.log("HoReCa completeness test passed (including Hotel, B&B, Ostelli/Residence, Campeggi/Villaggi turistici, Stabilimenti Balneari and Discoteche/Locali Serali ATECO variants and inspection integration)");
   await app.close();
 }
 

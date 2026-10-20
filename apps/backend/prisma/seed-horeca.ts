@@ -6588,10 +6588,114 @@ export async function seedHoreca() {
 
   const nightlifePremisesItems = remapChecklistItems(barPremisesItems, nightlifePremisesTemplate.id, [
     [/bar/gi, "locale serale/discoteca"],
-  ]);
+  ]).map((item) => {
+    if (item.orderIndex === 4) {
+      return {
+        ...item,
+        area: "Impianti Luci di Scena e Sicurezza Laser",
+        question:
+          "Proiettori laser per intrattenimento e spettacoli visivi conformi alla norma CEI EN 60825-1 con fasci posizionati a una quota di sicurezza superiore a 3 metri dal piano di calpestio del pubblico (o azionati senza irraggiamento oculare diretto), verificati da tecnico abilitato e impianto elettrico di scena a norma D.Lgs. 81/2008?",
+        normReference: "CEI EN 60825-1, D.Lgs. 81/2008 Titolo VIII Capo V, D.M. 19/08/1996",
+        domain: ComplianceDomain.safety,
+      };
+    }
+    if (item.orderIndex === 7) {
+      return {
+        ...item,
+        area: "Antincendio e Pubblico Spettacolo",
+        question:
+          "Attività di pubblico spettacolo dotata di Certificato di Prevenzione Incendi (CPI / SCIA per Attività 65 D.P.R. 151/2011 con capienza > 100 persone), estintori, idranti, porte di emergenza con maniglioni antipanico e conformità integrale alle prescrizioni del D.M. 19/08/1996?",
+        normReference: "D.M. 19/08/1996, D.P.R. 151/2011 Attività 65, D.Lgs. 81/2008",
+        domain: ComplianceDomain.safety,
+      };
+    }
+    if (item.orderIndex === 9) {
+      return {
+        ...item,
+        area: "DAE e Primo Soccorso",
+        question:
+          "Defibrillatore semiautomatico DAE presente, verificato e segnalato ai sensi della Legge 116/2021, integrato con locale o cassetta di primo soccorso e presenza di addetti formati BLSD durante le serate di apertura?",
+        normReference: "Legge 116/2021, D.M. 18/03/2011, D.Lgs. 81/2008",
+        domain: ComplianceDomain.safety,
+      };
+    }
+    if (item.orderIndex === 11) {
+      return {
+        ...item,
+        area: "Lavabicchieri e Risciacquo Igienico",
+        question:
+          "Lavabicchieri e lavastoviglie professionali dei banchi mescita e cocktail bar funzionanti con fase di risciacquo igienico a temperatura >= 82°C conforme a DIN 10512 e manuale HACCP per assicurare la perfetta decontaminazione dei bicchieri nei momenti di massima affluenza?",
+        normReference: "Reg. CE 852/2004, DIN 10512, D.Lgs. 193/2007",
+        domain: ComplianceDomain.haccp,
+      };
+    }
+    if (item.orderIndex === 13) {
+      return {
+        ...item,
+        area: "Ghiaccio Alimentare e Materiali MOCA",
+        question:
+          "Fabbricatori di ghiaccio alimentare per cocktail bar posizionati in ambienti idonei, con filtri antibatterici regolarmente sanificati, palette e contenitori idonei MOCA certificati (Reg. CE 1935/2004) e divieto assoluto di conservare bottiglie all'interno del vano di accumulo ghiaccio?",
+        normReference: "Reg. CE 852/2004, Reg. CE 1935/2004 MOCA, D.M. 21/03/1973",
+        domain: ComplianceDomain.haccp,
+      };
+    }
+    if (item.orderIndex === 14) {
+      return {
+        ...item,
+        area: "Spillatura Bevande e Rilevatore CO2",
+        question:
+          "Impianti di spillatura bevande e birra con bombole di anidride carbonica (CO2) saldamente fissate, impianto dotato di rilevatore di fughe CO2 con allarme ottico-acustico nei locali di stoccaggio o interrati e ventilazione permanente a norma D.Lgs. 81/2008?",
+        normReference: "D.Lgs. 81/2008 Allegato IV, UNI EN 13444",
+        domain: ComplianceDomain.safety,
+      };
+    }
+    return item;
+  });
   const nightlifeProcedureItems = remapChecklistItems(barProcedureItems, nightlifeProceduresTemplate.id, [
     [/bar/gi, "locale serale/discoteca"],
-  ]);
+  ]).map((item) => {
+    if (item.orderIndex === 5) {
+      return {
+        ...item,
+        area: "Igiene Cocktail Bar e Banchi Mescita HACCP",
+        question:
+          "Procedure operative HACCP per cocktail bar e banchi mescita rigorosamente applicate: gestione del ghiaccio alimentare con utensili dedicati MOCA sanificati, conservazione refrigerata di preparazioni analcoliche/alcoliche e frutta, e tracciabilità sciroppi/puree?",
+        normReference: "Reg. CE 852/2004, Reg. CE 1935/2004",
+        domain: ComplianceDomain.haccp,
+      };
+    }
+    if (item.orderIndex === 18) {
+      return {
+        ...item,
+        area: "Sanificazione Bicchieri e Risciacquo DIN 10512",
+        question:
+          "Procedure operative di sanificazione rapida bicchieri al banco bar verificate con controlli di concentrazione del detergente/brillantante e cicli con temperatura di risciacquo igienico >= 82°C conformi a norma DIN 10512 per prevenire contaminazioni crociate?",
+        normReference: "Reg. CE 852/2004, DIN 10512",
+        domain: ComplianceDomain.haccp,
+      };
+    }
+    if (item.orderIndex === 22) {
+      return {
+        ...item,
+        area: "Limitatori Acustici ed Emissioni Sonore",
+        question:
+          "Gestione delle emissioni sonore della sala da ballo con limitatori acustici fonometrici sigillati e tarati nel rispetto dei limiti di legge fissati dal D.P.C.M. 215/99 e dalla L. 447/1995, con relazione previsionale di impatto acustico e registrazioni periodiche?",
+        normReference: "D.P.C.M. 215/1999, Legge 447/1995, D.Lgs. 81/2008",
+        domain: ComplianceDomain.both,
+      };
+    }
+    if (item.orderIndex === 24) {
+      return {
+        ...item,
+        area: "Addetti Sicurezza ASC e Gestione Flussi",
+        question:
+          "Presenza e impiego di addetti ai servizi di controllo (ASC / addetti alla sicurezza) regolarmente formati e iscritti nell'elenco prefettizio ai sensi del D.M. 06/10/2009 e Legge 94/2009, con compiti di controllo ingressi, capienza sala e gestione vie di esodo?",
+        normReference: "D.M. 06/10/2009, Legge 94/2009, T.U.L.P.S. art. 68-69",
+        domain: ComplianceDomain.safety,
+      };
+    }
+    return item;
+  });
 
   const retailLargePremisesItems = [
     {
@@ -8492,6 +8596,62 @@ export async function seedHoreca() {
     ...remapDocumentsForCategory("BAR", "LOCALI_SERALI", "93.29.10", [
       [/bar/gi, "locale serale/discoteca"],
     ]),
+    {
+      name: "Certificato di Prevenzione Incendi (CPI/SCIA) e piano emergenza pubblico spettacolo (D.M. 19/08/1996 - Attività 65)",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.safety,
+      atecoCode: "93.29.10",
+      macroGroup: "LOCALI_SERALI",
+    },
+    {
+      name: "Registro e attestati addetti ai servizi di controllo (ASC / sicurezza - D.M. 06/10/2009)",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.safety,
+      atecoCode: "93.29.10",
+      macroGroup: "LOCALI_SERALI",
+    },
+    {
+      name: "Relazione impatto acustico e verifica taratura limitatori acustici fonometrici (D.P.C.M. 215/1999)",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.both,
+      atecoCode: "93.29.10",
+      macroGroup: "LOCALI_SERALI",
+    },
+    {
+      name: "Valutazione rischio ROA e conformità sicurezza impianti laser e luci (CEI EN 60825-1)",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.safety,
+      atecoCode: "93.29.10",
+      macroGroup: "LOCALI_SERALI",
+    },
+    {
+      name: "Registro verifiche DAE (Legge 116/2021) e presidi di primo soccorso locale serale",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.safety,
+      atecoCode: "93.29.10",
+      macroGroup: "LOCALI_SERALI",
+    },
+    {
+      name: "Registro sicurezza impianti spillatura e manutenzione rilevatore fughe gas CO2",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.safety,
+      atecoCode: "93.29.10",
+      macroGroup: "LOCALI_SERALI",
+    },
+    {
+      name: "Manuale HACCP cocktail bar, sanificazione lavabicchieri (DIN 10512) e conformità MOCA ghiaccio alimentare",
+      isGeneral: false,
+      isRequired: true,
+      domain: ComplianceDomain.haccp,
+      atecoCode: "93.29.10",
+      macroGroup: "LOCALI_SERALI",
+    },
   ];
 
   const retailLargeDocumentTemplates = [

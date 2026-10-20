@@ -420,6 +420,65 @@ function buildAtecoVariants(atecoCode?: string | null) {
     variants.add("BAR");
   }
 
+  // Discoteche, sale da ballo, night-club, locali serali e club (93.29.10, 93.29.1, 932910, 93291)
+  const isDiscoText =
+    upper === "DISCOTECA_LOCALE_SERALE" ||
+    upper === "DISCOTECHE_LOCALI_SERALI" ||
+    upper === "DISCOTECA LOCALE SERALE" ||
+    upper === "DISCOTECHE LOCALI SERALI" ||
+    upper === "DISCOTECA" ||
+    upper === "DISCOTECHE" ||
+    upper === "LOCALE_SERALE" ||
+    upper === "LOCALI_SERALI" ||
+    upper === "LOCALE SERALE" ||
+    upper === "LOCALI SERALI" ||
+    upper === "LOCALE_NOTTURNO" ||
+    upper === "LOCALI_NOTTURNI" ||
+    upper === "LOCALE NOTTURNO" ||
+    upper === "LOCALI NOTTURNI" ||
+    upper === "NIGHTLIFE" ||
+    upper === "NIGHT_LIFE" ||
+    upper === "NIGHT LIFE" ||
+    upper === "NIGHTCLUB" ||
+    upper === "NIGHT_CLUB" ||
+    upper === "NIGHT CLUB" ||
+    upper === "NIGHT-CLUB" ||
+    upper === "CLUB" ||
+    upper === "PUB_SERALE" ||
+    upper === "PUB SERALE" ||
+    upper === "PUB_DISCO" ||
+    upper === "PUB DISCO" ||
+    upper === "SALA_DA_BALLO" ||
+    upper === "SALE_DA_BALLO" ||
+    upper === "SALA DA BALLO" ||
+    upper === "SALE DA BALLO" ||
+    upper === "DISCO";
+
+  const isDiscoCode =
+    normalized.startsWith("93.29.1") ||
+    digits.startsWith("93291");
+
+  if (isDiscoCode || isDiscoText) {
+    variants.add("93.29.10");
+    variants.add("93.29.1");
+    variants.add("932910");
+    variants.add("93291");
+    variants.add("DISCOTECA_LOCALE_SERALE");
+    variants.add("DISCOTECA");
+    variants.add("DISCOTECHE");
+    variants.add("LOCALE_SERALE");
+    variants.add("LOCALI_SERALI");
+    variants.add("LOCALE_NOTTURNO");
+    variants.add("LOCALI_NOTTURNI");
+    variants.add("NIGHTLIFE");
+    variants.add("NIGHTCLUB");
+    variants.add("CLUB");
+    variants.add("PUB_SERALE");
+    variants.add("PUB_DISCO");
+    variants.add("HORECA");
+    variants.add("HO.RE.CA");
+  }
+
   // Stabilimenti balneari / Lidi / Beach club (93.29.20, 93.29.2, 93.29, 93.2, 932920, 93292, 9329, 932)
   const isBeachClubText =
     upper === "STABILIMENTO_BALNEARE" ||
@@ -441,10 +500,8 @@ function buildAtecoVariants(atecoCode?: string | null) {
   const isBeachClubCode =
     normalized.startsWith("93.29.2") ||
     digits.startsWith("93292") ||
-    normalized === "93.29" ||
-    digits === "9329" ||
-    normalized === "93.2" ||
-    digits === "932";
+    ((normalized === "93.29" || digits === "9329" || normalized === "93.2" || digits === "932") &&
+      !isDiscoCode);
 
   if (isBeachClubCode || isBeachClubText) {
     variants.add("93.29.20");
@@ -463,12 +520,6 @@ function buildAtecoVariants(atecoCode?: string | null) {
     variants.add("STRUTTURE_BALNEARI");
     variants.add("HORECA");
     variants.add("HO.RE.CA");
-  }
-
-  if (normalized.startsWith("93.29.1") || digits.startsWith("93291")) {
-    variants.add("LOCALI_SERALI");
-    variants.add("HO.RE.CA");
-    variants.add("HORECA");
   }
 
   // Ricerca testuale diretta per nome macrosettore
@@ -535,6 +586,13 @@ function buildAtecoVariants(atecoCode?: string | null) {
     variants.add("STRUTTURE_BALNEARI");
     variants.add("93.29.20");
     variants.add("932920");
+    variants.add("LOCALI_SERALI");
+    variants.add("LOCALE_SERALE");
+    variants.add("DISCOTECA");
+    variants.add("DISCOTECHE");
+    variants.add("DISCOTECA_LOCALE_SERALE");
+    variants.add("93.29.10");
+    variants.add("932910");
   }
 
   if (parts[0] === "47" && !normalized.startsWith("47.11")) {

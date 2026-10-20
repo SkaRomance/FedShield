@@ -2778,8 +2778,266 @@ export function getStandardEnvironmentsForAteco(atecoCode?: string): WorkEnviron
     ];
   }
 
-  // 0-undecies-quater. Stabilimenti Balneari, Lidi, Beach Club, Arenili Attrezzati (93.29.20, 93.29.2, 93.29, 93.2, 932920, 93292, 9329, 932)
+  // 0-undecies-quater-bis. Discoteche, Sale da Ballo, Night-Club e Locali Serali (93.29.10, 93.29.1, 932910, 93291)
   const cleanAteco = ateco.replace(/[^0-9]/g, "");
+  if (
+    cleanAteco.startsWith("932910") ||
+    cleanAteco.startsWith("93291") ||
+    ateco.startsWith("93.29.10") ||
+    ateco.startsWith("93.29.1")
+  ) {
+    return [
+      {
+        id: "env-dsc-ingresso-foyer",
+        key: "dsc_ingresso_foyer_biglietteria_filtro",
+        name: "Ingresso Principale, Foyer, Biglietteria & Cassa / Filtro Conta-Persone",
+        icon: "🎫",
+        category: "sales_office",
+        isDefault: true,
+        surfaceSqM: 60,
+        heightM: 3.2,
+        volumeCuM: 192,
+        occupantsCount: 4,
+        emergencyExitsCount: 2,
+        windowSurfaceSqM: 4.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("sales_office"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-dsc-guardaroba-deposito",
+        key: "dsc_guardaroba_ospiti_deposito_caschi",
+        name: "Locale Guardaroba Ospiti & Deposito Oggetti Smarriti / Caschi",
+        icon: "🧥",
+        category: "services",
+        isDefault: true,
+        surfaceSqM: 40,
+        heightM: 3.0,
+        volumeCuM: 120,
+        occupantsCount: 3,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("services"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-dsc-pista-ballo-centrale",
+        key: "dsc_pista_ballo_centrale_platea_spettacolo",
+        name: "Pista da Ballo Centrale & Platea Spettacolo (Main Dancefloor)",
+        icon: "🪩",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 400,
+        heightM: 5.0,
+        volumeCuM: 2000,
+        occupantsCount: 400,
+        emergencyExitsCount: 4,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          emergencyLighting: true,
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-dsc-consolle-dj-regia",
+        key: "dsc_consolle_dj_palco_regia_laser",
+        name: "Consolle DJ, Palco Animazione & Regia Audio/Luci/Laser",
+        icon: "🎧",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 35,
+        heightM: 3.5,
+        volumeCuM: 122.5,
+        occupantsCount: 3,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-dsc-cocktail-bar-principale",
+        key: "dsc_cocktail_bar_principale_banchi_mescita",
+        name: "Cocktail Bar Principale & Banchi di Mescita Bevande",
+        icon: "🍸",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 70,
+        heightM: 3.2,
+        volumeCuM: 224,
+        occupantsCount: 6,
+        emergencyExitsCount: 2,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          microclimateCompliant: true,
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-dsc-secondo-bar-estivo",
+        key: "dsc_cocktail_bar_secondario_area_prive",
+        name: "Cocktail Bar Secondario / Area Bar Privé",
+        icon: "🍹",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 35,
+        heightM: 3.0,
+        volumeCuM: 105,
+        occupantsCount: 3,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-dsc-area-tavoli-prive",
+        key: "dsc_area_prive_salottini_vip_tavoli",
+        name: "Area Privé, Salottini VIP & Tavoli con Servizio Bottiglie",
+        icon: "🍾",
+        category: "sales_office",
+        isDefault: true,
+        surfaceSqM: 120,
+        heightM: 3.5,
+        volumeCuM: 420,
+        occupantsCount: 80,
+        emergencyExitsCount: 2,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("sales_office"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-dsc-cucina-snack-food",
+        key: "dsc_cucina_snack_bar_friggitoria_notturna",
+        name: "Cucina Snack Bar, Friggitoria & Preparazione Food Notturno",
+        icon: "🍔",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 35,
+        heightM: 3.0,
+        volumeCuM: 105,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          forcedExhaustType: "kitchen_hood",
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-dsc-dispensa-beverage",
+        key: "dsc_magazzino_merci_secche_fusti_birra_beverage",
+        name: "Magazzino Merci Secche, Scorte Fusti Birra & Deposito Beverage",
+        icon: "📦",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 50,
+        heightM: 3.2,
+        volumeCuM: 160,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          shelvingCertified: true,
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-dsc-infermeria-primo-soccorso",
+        key: "dsc_infermeria_presidio_primo_soccorso_dae",
+        name: "Locale Infermeria di Presidio, Primo Soccorso & Postazione DAE",
+        icon: "🏥",
+        category: "services",
+        isDefault: true,
+        surfaceSqM: 18,
+        heightM: 2.7,
+        volumeCuM: 48.6,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("services"),
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-dsc-blocco-servizi-igienici",
+        key: "dsc_servizi_igienici_uomini_donne_disabili_pmr",
+        name: "Blocchi Servizi Igienici Uomini/Donne & Servizio Disabili PMR (D.M. 236/89)",
+        icon: "🚻",
+        category: "services",
+        isDefault: true,
+        surfaceSqM: 50,
+        heightM: 2.4,
+        volumeCuM: 120,
+        occupantsCount: 6,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("services"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          forcedExhaustPresent: true,
+          forcedExhaustType: "blind_toilet_fan",
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-dsc-locale-tecnico-quadri",
+        key: "dsc_locale_tecnico_cabina_elettrica_ups_gruppo",
+        name: "Locale Tecnico / Cabina Elettrica Principale & Gruppo di Continuità (UPS/Gruppo Elettrogeno)",
+        icon: "⚡",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 25,
+        heightM: 3.0,
+        volumeCuM: 75,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          emergencyLighting: true,
+        },
+      },
+    ];
+  }
+
+  // 0-undecies-quater. Stabilimenti Balneari, Lidi, Beach Club, Arenili Attrezzati (93.29.20, 93.29.2, 93.29, 93.2, 932920, 93292, 9329, 932)
   if (
     cleanAteco.startsWith("932920") ||
     cleanAteco.startsWith("93292") ||
@@ -5106,9 +5364,15 @@ export function evaluateEnvironmentCompliance(
     }
   }
 
-  // Attività 65: Locali di pubblico spettacolo / somministrazione con affollamento > 100 persone
+  // Attività 65: Locali di pubblico spettacolo / discoteche / somministrazione con affollamento > 100 persone o superficie >= 200 mq
   if (
-    (env.category === "public" || env.key.includes("sala") || env.key.includes("somministraz")) &&
+    (env.category === "public" ||
+      env.key.includes("sala") ||
+      env.key.includes("somministraz") ||
+      env.id.startsWith("env-dsc-pista-ballo") ||
+      env.key.includes("pista_ballo") ||
+      env.id.startsWith("env-dsc-area-tavoli-prive") ||
+      env.key.includes("area_prive")) &&
     (occupants > 100 || surface >= 200)
   ) {
     cpiActivityAlert = {
@@ -7224,6 +7488,254 @@ export function evaluateEnvironmentCompliance(
     });
   }
 
+  // ========================================================================
+  // REQUISITI E BADGE SPECIFICI DISCOTECHE, SALE DA BALLO, NIGHT-CLUB, LOCALI SERALI (ATECO 93.29.10 / 93.29.1 / 932910 / 93291)
+  // ========================================================================
+
+  // 1. Ingresso Principale, Foyer, Biglietteria & Cassa / Filtro Conta-Persone
+  const isDscIngresso =
+    env.id === "env-dsc-ingresso-foyer" ||
+    env.key === "dsc_ingresso_foyer_biglietteria_filtro" ||
+    (env.id.includes("dsc-ingresso-foyer") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("93291") ?? false));
+  if (isDscIngresso) {
+    summaryBadges.push({
+      text: "🎫 Controllo accessi con personale ASC abilitato D.M. 06/10/2009 iscritto all'elenco prefettizio",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🔢 Tornelli e conta-persone digitali per monitoraggio in tempo reale capienza CCVLPS",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🧯 Estintori portatili 34A 233B, metal detector e planimetria di esodo bilingue illuminata",
+      status: "info",
+    });
+  }
+
+  // 2. Locale Guardaroba Ospiti & Deposito Caschi
+  const isDscGuardaroba =
+    env.id === "env-dsc-guardaroba-deposito" ||
+    env.key === "dsc_guardaroba_ospiti_deposito_caschi" ||
+    (env.id.includes("dsc-guardaroba-deposito") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("93291") ?? false));
+  if (isDscGuardaroba) {
+    summaryBadges.push({
+      text: "🧥 Rastrelliere e stand numerati ignifughi con banco di distribuzione a prova di ressa",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🪖 Ripiani dedicati a custodia sicura caschi moto e oggetti smarriti con registro",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🧯 Estintore a polvere 34A 233B di presidio per carichi d'incendio da indumenti",
+      status: "warning",
+    });
+  }
+
+  // 3. Pista da Ballo Centrale & Platea Spettacolo
+  const isDscPistaBallo =
+    env.id === "env-dsc-pista-ballo-centrale" ||
+    env.key === "dsc_pista_ballo_centrale_platea_spettacolo" ||
+    (env.id.includes("dsc-pista-ballo") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("93291") ?? false));
+  if (isDscPistaBallo) {
+    summaryBadges.push({
+      text: "🪩 Uscite di sicurezza contrapposte ≥ 1,20 m con maniglioni antipanico UNI EN 1125 sempre sgombre",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "📢 Impianto EVAC con zittimento automatico diffusione sonora su allarme antincendio (D.M. 19/08/1996)",
+      status: "danger",
+    });
+    summaryBadges.push({
+      text: "💡 Illuminazione emergenza ≥ 5 lux a terra e pavimentazione ignifuga antiscivolo R10",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "👥 Capienza massima calcolata su parametri di affollamento CCVLPS (T.U.L.P.S. art. 80)",
+      status: "info",
+    });
+  }
+
+  // 4. Consolle DJ, Palco Animazione & Regia Audio/Luci/Laser
+  const isDscConsolleDj =
+    env.id === "env-dsc-consolle-dj-regia" ||
+    env.key === "dsc_consolle_dj_palco_regia_laser" ||
+    (env.id.includes("dsc-consolle-dj") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("93291") ?? false));
+  if (isDscConsolleDj) {
+    summaryBadges.push({
+      text: "🎧 Valutazione rischio rumore Titolo VIII & DPI otoprotettori per lavoratori esposti > 85 dB(A)",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "⚡ Limitatore acustico sigillato con piombatura e registro taratura annuale (D.P.C.M. 215/99)",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🔴 Laser show con fascio aereo a quota > 3 m dal piano calpestio e interblocco (CEI EN 60825-1)",
+      status: "danger",
+    });
+  }
+
+  // 5. Cocktail Bar Principale & Banchi di Mescita Bevande
+  const isDscCocktailBar =
+    env.id === "env-dsc-cocktail-bar-principale" ||
+    env.key === "dsc_cocktail_bar_principale_banchi_mescita" ||
+    (env.id.includes("dsc-cocktail-bar-principale") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("93291") ?? false));
+  if (isDscCocktailBar) {
+    summaryBadges.push({
+      text: "🍸 Lavabicchieri industriali con risciacquo igienico ad alta temperatura ≥ 82°C (DIN 10512)",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🧊 Fabbricatore ghiaccio conforme MOCA con filtro antibatterico e registro sanificazione periodica",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🦶 Pedana di lavoro drenante antiscivolo forata e banchi inox con speed-rail sanificabili",
+      status: "info",
+    });
+  }
+
+  // 6. Cocktail Bar Secondario / Area Bar Privé
+  const isDscBarSecondario =
+    env.id === "env-dsc-secondo-bar-estivo" ||
+    env.key === "dsc_cocktail_bar_secondario_area_prive" ||
+    (env.id.includes("dsc-secondo-bar") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("93291") ?? false));
+  if (isDscBarSecondario) {
+    summaryBadges.push({
+      text: "🍹 Pozzetto ghiaccio coibentato MOCA con scarico sifonato e lavabicchieri con dosatori automatici",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🦶 Pedane antiscivolo drenanti e pavimento impermeabile R11 con canalina di lavaggio",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🧯 Estintore idrico / CO2 dedicato alla postazione barman",
+      status: "warning",
+    });
+  }
+
+  // 7. Area Privé, Salottini VIP & Tavoli con Servizio Bottiglie
+  const isDscPrive =
+    env.id === "env-dsc-area-tavoli-prive" ||
+    env.key === "dsc_area_prive_salottini_vip_tavoli" ||
+    (env.id.includes("dsc-area-tavoli-prive") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("93291") ?? false));
+  if (isDscPrive) {
+    summaryBadges.push({
+      text: "🛋️ Divanetti, poltrone e tendaggi con omologazione reazione al fuoco classe 1 IM e classe 1",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🚪 Corsie di passaggio tra i tavoli ≥ 1,20 m costantemente sgombre verso le uscite di sicurezza",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "🧯 Estintori a CO2 e idrici posizionati a presidio del compartimento tavoli VIP",
+      status: "info",
+    });
+  }
+
+  // 8. Cucina Snack Bar, Friggitoria & Food Notturno
+  const isDscCucina =
+    env.id === "env-dsc-cucina-snack-food" ||
+    env.key === "dsc_cucina_snack_bar_friggitoria_notturna" ||
+    (env.id.includes("dsc-cucina-snack") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("93291") ?? false));
+  if (isDscCucina) {
+    summaryBadges.push({
+      text: "🍔 Cappa d'aspirazione compensata con filtri inox e impianto spegnimento fiamme automatico Ansul",
+      status: "danger",
+    });
+    summaryBadges.push({
+      text: "🍟 Friggitrice con termostato di sicurezza a riarmo manuale tarato < 230°C contro autoignizione",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "🧼 Lavamani a comando non manuale a ginocchio/pedale con sapone battericida e asciugamani a perdere",
+      status: "success",
+    });
+  }
+
+  // 9. Magazzino Merci Secche, Scorte Fusti Birra & Deposito Beverage
+  const isDscMagazzinoBeverage =
+    env.id === "env-dsc-dispensa-beverage" ||
+    env.key === "dsc_magazzino_merci_secche_fusti_birra_beverage" ||
+    (env.id.includes("dsc-dispensa-beverage") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("93291") ?? false));
+  if (isDscMagazzinoBeverage) {
+    summaryBadges.push({
+      text: "🍺 Rilevatore fughe gas CO2/azoto con allarme ottico-acustico al 1.5% e 3% e ventilazione a pavimento",
+      status: "danger",
+    });
+    summaryBadges.push({
+      text: "🔒 Bombole gas compresso per spillatura saldamente assicurate a muro con catene metalliche",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "📦 Scaffalature metalliche certificate con carichi ammissibili e fusti sollevati da terra ≥ 15 cm",
+      status: "info",
+    });
+  }
+
+  // 10. Locale Infermeria di Presidio, Primo Soccorso & Postazione DAE
+  const isDscInfermeria =
+    env.id === "env-dsc-infermeria-primo-soccorso" ||
+    env.key === "dsc_infermeria_presidio_primo_soccorso_dae" ||
+    (env.id.includes("dsc-infermeria") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("93291") ?? false));
+  if (isDscInfermeria) {
+    summaryBadges.push({
+      text: "💚 DAE semiautomatico in teca allarmata Legge 116/2021 con indicatore verde autotest e piastre valide",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "🏥 Bombola ossigeno terapeutico con riduttore collaudato, pallone AMBU e cassetta All. 1 D.M. 388/03",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🛏️ Barella a telo e sedia a rotelle/portantina per evacuazione rapida dei feriti verso ambulanza 118",
+      status: "info",
+    });
+  }
+
+  // 11. Blocchi Servizi Igienici & Servizio Disabili PMR
+  const isDscServiziIgienici =
+    env.id === "env-dsc-blocco-servizi-igienici" ||
+    env.key === "dsc_servizi_igienici_uomini_donne_disabili_pmr" ||
+    (env.id.includes("dsc-blocco-servizi") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("93291") ?? false));
+  if (isDscServiziIgienici) {
+    summaryBadges.push({
+      text: "♿ Bagno accessibile PMR a norma D.M. 236/89 con tirante allarme a campanello ottico-acustico esterno",
+      status: "success",
+    });
+    summaryBadges.push({
+      text: "💨 Aerazione forzata permanente conforme per servizi ciechi e antibagno con lavamani",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🧼 Pavimentazione antiscivolo R11 con canalina di scarico sifonata e pareti lavabili a 2 metri",
+      status: "info",
+    });
+  }
+
+  // 12. Locale Tecnico / Cabina Elettrica Principale & Gruppo di Continuità (UPS)
+  const isDscLocaleTecnico =
+    env.id === "env-dsc-locale-tecnico-quadri" ||
+    env.key === "dsc_locale_tecnico_cabina_elettrica_ups_gruppo" ||
+    (env.id.includes("dsc-locale-tecnico") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("93291") ?? false));
+  if (isDscLocaleTecnico) {
+    summaryBadges.push({
+      text: "⚡ Pulsante di sgancio generale di emergenza esterno IP55 con bobina a lancio di corrente",
+      status: "danger",
+    });
+    summaryBadges.push({
+      text: "🔋 Gruppo di continuità UPS e soccorritore con autonomia certificata ≥ 2 ore per EVAC e luci emergenza",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🧯 Impianto rilevazione fumi e spegnimento gas inerte / estintori a CO2 dedicati al quadro elettrico",
+      status: "warning",
+    });
+  }
+
   return {
     isHeightCompliant,
     minHeightRequired,
@@ -7298,6 +7810,13 @@ export function generateEnvironmentChecklistItems(
       env.key.includes("gelamb_") ||
       env.id.includes("bar-") ||
       env.key.includes("bar_") ||
+      env.id.includes("dsc-cocktail-bar") ||
+      env.id.includes("dsc-secondo-bar") ||
+      env.id.includes("dsc-cucina") ||
+      env.id.includes("dsc-dispensa") ||
+      env.key.includes("dsc_cocktail_bar") ||
+      env.key.includes("dsc_cucina") ||
+      env.key.includes("dsc_magazzino_merci_secche") ||
       env.id.includes("hotel-office-cucina") ||
       env.key.includes("hotel_office_cucina") ||
       env.id.includes("ost-cucina") ||
@@ -13835,6 +14354,465 @@ export function generateEnvironmentChecklistItems(
       categoryTag: "igiene",
       suggestedNonConformity:
         "Isola ecologica priva di erogatori derattizzazione o con residui organici maleodoranti a terra che attirano infestanti.",
+    });
+  }
+
+  // ========================================================================
+  // REQUISITI SPECIFICI PER LOCALI DISCOTECHE, SALE DA BALLO E NIGHT-CLUB (ATECO 93.29.10)
+  // ========================================================================
+
+  // a) Pista da Ballo Centrale & Platea Spettacolo
+  if (env.id === "env-dsc-pista-ballo-centrale" || env.id.includes("dsc-pista-ballo")) {
+    items.push({
+      id: `${env.id}-uscite-sicurezza-maniglioni-antipanico-uni-en-1125`,
+      area: env.name,
+      title: "Porte e Uscite di Emergenza con Maniglioni Antipanico UNI EN 1125 Sempre Sgombre",
+      question:
+        "Tutte le uscite di sicurezza della pista da ballo e platea (larghezza ≥ 1,20 m) sono dotate di maniglioni antipanico conformi a UNI EN 1125, risultano costantemente apribili a semplice spinta dall'interno senza catenacci, lucchetti o chiavistelli e sono prive di ostacoli, transenne o materiali combustibili lungo i percorsi di esodo?",
+      normReference: "D.M. 19/08/1996 Titolo III, D.P.R. 151/2011 Attività 65 e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Uscite di emergenza della pista da ballo chiuse con catene/chiavistelli o percorsi di fuga parzialmente ostruiti.",
+    });
+
+    items.push({
+      id: `${env.id}-zittimento-automatico-evac-diffusione-sonora`,
+      area: env.name,
+      title: "Zittimento Automatico della Diffusione Sonora su Allarme Antincendio EVAC (D.M. 19/08/1996)",
+      question:
+        "L'impianto di diffusione sonora musicale della pista da ballo è asservito alla centralina antincendio con dispositivo di zittimento automatico (audio mute) istantaneo all'attivazione dell'allarme EVAC, consentendo la diffusione immediata dei messaggi vocali di emergenza ed evacuazione guidata?",
+      normReference: "D.M. 19/08/1996 Titolo VIII e Regola Tecnica Pubblico Spettacolo",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Assenza o mancato funzionamento del dispositivo di zittimento automatico dell'impianto audio su attivazione dell'allarme antincendio.",
+    });
+
+    items.push({
+      id: `${env.id}-illuminazione-emergenza-5-lux-pavimento-ignifugo`,
+      area: env.name,
+      title: "Illuminazione di Sicurezza ≥ 5 Lux e Pavimentazione Ignifuga Antiscivolo R10",
+      question:
+        "La pista da ballo garantisce un livello di illuminamento di emergenza non inferiore a 5 lux ad altezza calpestio (autonomia ≥ 2 ore) e la pavimentazione è ignifuga, continua, priva di dislivelli non raccordati e classificata con coefficiente antiscivolo R10?",
+      normReference: "D.M. 19/08/1996 e CEI EN 1838",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "microclima_luce",
+      suggestedNonConformity:
+        "Illuminazione di emergenza insufficiente (< 5 lux) o pavimentazione pista da ballo sdrucciolevole / con dislivelli insidiosi.",
+    });
+
+    items.push({
+      id: `${env.id}-capienza-massima-autorizzata-ccvlps`,
+      area: env.name,
+      title: "Rispetto della Capienza Massima di Affollamento Autorizzata dalla CCVLPS",
+      question:
+        "Il numero di avventori e ballerini presenti contemporaneamente sulla pista da ballo rispetta scrupolosamente il limite massimo stabilito dalla Commissione Comunale/Provinciale di Vigilanza sui Locali di Pubblico Spettacolo (CCVLPS) e dalla licenza T.U.L.P.S. art. 80?",
+      normReference: "T.U.L.P.S. art. 80 e D.M. 19/08/1996",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Superamento del limite di affollamento e capienza massima autorizzata dal verbale di agibilità CCVLPS.",
+    });
+  }
+
+  // b) Consolle DJ, Palco Animazione & Regia Audio/Luci/Laser
+  if (env.id === "env-dsc-consolle-dj-regia" || env.id.includes("dsc-consolle-dj")) {
+    items.push({
+      id: `${env.id}-fascicolo-laser-show-interblocco-quota-3m`,
+      area: env.name,
+      title: "Laser Show a Fascio Aereo a Quota > 3 m, Interblocco e Fascicolo Tecnico (CEI EN 60825-1)",
+      question:
+        "Gli impianti di emissione laser scenici di classe 3B o 4 sono orientati a fascio aereo con quota minima di scansione superiore a 3,0 metri dal piano calpestio del pubblico, dotati di circuito di interblocco d'emergenza a rilascio immediato, fascicolo tecnico con calcolo dell'Esposizione Massima Permessa (EMP) e perizia asseverata da Tecnico Sicurezza Laser (TSL)?",
+      normReference: "D.Lgs. 81/2008 Titolo VIII Capo V (ROA) e Norma CEI EN 60825-1",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Puntamento laser scenico ad altezza inferiore a 3 metri dal pubblico o assenza del fascicolo tecnico TSL e circuito di interblocco.",
+    });
+
+    items.push({
+      id: `${env.id}-limitatore-acustico-sigillato-dpcm-215-99`,
+      area: env.name,
+      title: "Limitatore Acustico Sigillato con Piombatura e Taratura Periodica (D.P.C.M. 215/1999)",
+      question:
+        "L'impianto audio è governato da una centralina limitatrice dei livelli di pressione sonora sigillata con piombatura intatta, dotata di certificato di conformità e taratura periodica annuale con registrazione continua del livello continuo equivalente (Leq) entro i limiti di legge?",
+      normReference: "D.P.C.M. 215/1999 e Legge Quadro 447/1995 sull'inquinamento acustico",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "microclima_luce",
+      suggestedNonConformity:
+        "Limitatore acustico manomesso, con sigillo piombato rimosso o sprovvisto di certificato annuale di taratura valida.",
+    });
+
+    items.push({
+      id: `${env.id}-otoprotettori-dpi-rumore-sorveglianza-sanitaria-dj`,
+      area: env.name,
+      title: "Valutazione Rischio Rumore Titolo VIII, DPI Otoprotettori e Sorveglianza Sanitaria Audiometrica",
+      question:
+        "È presente la valutazione strumentale del rumore ex Titolo VIII D.Lgs. 81/08 per i lavoratori esposti (DJ, fonici, tecnici luci, barman), sono forniti DPI otoprotettori a filtro graduato ed è attivata la sorveglianza sanitaria periodica con audiometria per esposizioni superiori a 85 dB(A)?",
+      normReference: "D.Lgs. 81/2008 Titolo VIII Capo II (artt. 187-198)",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "microclima_luce",
+      suggestedNonConformity:
+        "Mancata fornitura o utilizzo dei DPI otoprotettori specifici e omissione della sorveglianza sanitaria audiometrica per personale esposto a livelli sonori > 85 dB(A).",
+    });
+  }
+
+  // c) Ingresso Principale, Foyer, Biglietteria & Cassa / Filtro Conta-Persone
+  if (env.id === "env-dsc-ingresso-foyer" || env.id.includes("dsc-ingresso-foyer")) {
+    items.push({
+      id: `${env.id}-addetti-controllo-asc-elenco-prefettizio`,
+      area: env.name,
+      title: "Registro e Personale Addetto ai Servizi di Controllo (ASC) Iscritto all'Elenco Prefettizio",
+      question:
+        "Il personale adibito ai servizi di controllo accessi (ASC / sicurezza porte) è regolarmente iscritto nell'elenco prefettizio della provincia ex D.M. 06/10/2009, provvisto di tesserino di riconoscimento visibile e risulta annotato sul registro di servizio vidimato per ciascuna serata?",
+      normReference: "D.M. 06/10/2009 e Legge 94/2009 art. 3 commi 7-13",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Impiego di personale di controllo accessi privo dell'abilitazione prefettizia ASC o assenza del registro di servizio.",
+    });
+
+    items.push({
+      id: `${env.id}-conta-persone-digitale-capienza-ccvlps`,
+      area: env.name,
+      title: "Dispositivi Conta-Persone Digitali ai Varchi per Monitoraggio Capienza Massima CCVLPS",
+      question:
+        "I varchi di ingresso e uscita sono equipaggiati con sistemi conta-persone digitali affidabili e costantemente sincronizzati, che consentono al responsabile di sicurezza e agli addetti ASC di bloccare tempestivamente gli accessi al raggiungimento della capienza autorizzata dalla licenza CCVLPS?",
+      normReference: "T.U.L.P.S. art. 80 e Circolari Ministero dell'Interno sulla sicurezza degli eventi",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Assenza di sistema di conteggio delle presenze ai varchi di accesso con rischio di sovraffollamento oltre la capienza consentita.",
+    });
+
+    items.push({
+      id: `${env.id}-planimetria-esodo-bilingue-estintori-34a-233b`,
+      area: env.name,
+      title: "Planimetria di Esodo Bilingue Illuminata ed Estintori 34A 233B Presidiati",
+      question:
+        "Nel foyer/ingresso è esposta una planimetria di emergenza ed evacuazione chiara, retroilluminata e bilingue, con indicazione 'Voi siete qui', uscite di sicurezza e punti di raccolta, ed è presente un presidio di estintori portatili omologati 34A 233B con cartello segnaletico ad alta visibilità?",
+      normReference: "D.M. 19/08/1996 e D.M. 03/09/2021 (GSA)",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Planimetria di emergenza assente, non leggibile al buio o estintori del foyer non segnalati o ostruiti.",
+    });
+  }
+
+  // d) Area Privé, Salottini VIP & Tavoli con Servizio Bottiglie
+  if (env.id === "env-dsc-area-tavoli-prive" || env.id.includes("dsc-area-tavoli-prive")) {
+    items.push({
+      id: `${env.id}-reazione-fuoco-arredi-imbottiti-classe-1-im`,
+      area: env.name,
+      title: "Certificati di Reazione al Fuoco Classe 1 IM per Arredi Imbottiti e Classe 1 per Tendaggi",
+      question:
+        "Tutti i divani, poltrone, cuscini, sedute imbottite e tendaggi del Privé dispongono di certificato di omologazione e conformità di reazione al fuoco (classe 1 IM per imbottiti, classe 1 per tendaggi e drappeggi) rilasciato da laboratori autorizzati dal Ministero dell'Interno?",
+      normReference: "D.M. 19/08/1996 Titolo II e D.M. 26/06/1984",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Arredi imbottiti, divanetti o tendaggi privi di certificazione di reazione al fuoco classe 1 IM / classe 1.",
+    });
+
+    items.push({
+      id: `${env.id}-corsie-passaggio-tavoli-uscite-sicurezza`,
+      area: env.name,
+      title: "Corsie di Passaggio Tra i Tavoli ≥ 1,20 m Costantemente Sgombre Verso le Uscite di Sicurezza",
+      question:
+        "La disposizione dei tavoli Privé garantisce percorsi interni continui di larghezza non inferiore a 1,20 m costantemente liberi da carrelli portabottiglie, sedute aggiunte, champagne-cooler a colonna o ostacoli mobili diretti verso le uscite di sicurezza?",
+      normReference: "D.M. 19/08/1996 Titolo III e D.Lgs. 81/2008 Allegato IV",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "dimensionale",
+      suggestedNonConformity:
+        "Corsie tra i tavoli dell'area Privé ristrette (< 1,20 m) o bloccate da sedute e tavolini extra che impediscono il deflusso rapido.",
+    });
+  }
+
+  // e) Cocktail Bar Principale & Banchi Mescita / Bar Privé Secondario
+  if (
+    env.id === "env-dsc-cocktail-bar-principale" ||
+    env.id === "env-dsc-secondo-bar-estivo" ||
+    env.id.includes("dsc-cocktail-bar") ||
+    env.id.includes("dsc-secondo-bar")
+  ) {
+    items.push({
+      id: `${env.id}-lavabicchieri-risciacquo-82-gradi-sanificazione`,
+      area: env.name,
+      title: "Lavabicchieri Industriali con Risciacquo Igienico ≥ 82°C per Sanificazione Termica (DIN 10512)",
+      question:
+        "I lavabicchieri industriali del banco bar sono dotati di boiler e dosatori automatici peristaltici di detergente e brillantante, con temperatura del ciclo di risciacquo finale mantenuta costantemente a ≥ 82°C per garantire la completa sanificazione termica e l'abbattimento della carica batterica sui bicchieri?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo V e Norma DIN 10512",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Lavabicchieri con temperatura di risciacquo insufficiente (< 82°C) o privi di dosatore automatico di igienizzante.",
+    });
+
+    items.push({
+      id: `${env.id}-igiene-fabbricatore-pozzetto-ghiaccio-moca`,
+      area: env.name,
+      title: "Fabbricatori e Pozzetti Ghiaccio a Norma MOCA con Piano di Pulizia e Analisi Microbiologica",
+      question:
+        "I fabbricatori di ghiaccio e i pozzetti coibentati con scarico sifonato sono realizzati con materiali conformi MOCA, dotati di palette inox dedicate (mai bicchieri di vetro usati come paletta) e sottoposti a sanificazione settimanale e campionamento microbiologico periodico (escherichia coli, enterococchi)?",
+      normReference: "Reg. CE 852/2004, D.Lgs. 18/2023 (Acque Potabili) e Reg. CE 1935/2004 (MOCA)",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Pozzetto o fabbricatore del ghiaccio con biofilm calcareo/muffa, palette non idonee o bicchieri di vetro immersi direttamente nel ghiaccio.",
+    });
+
+    items.push({
+      id: `${env.id}-pedana-antiscivolo-drenante-barman-sicurezza`,
+      area: env.name,
+      title: "Pedana di Lavoro Dietro al Banco Bar Drenante Antiscivolo e Pulita",
+      question:
+        "Dietro al bancone bar la postazione di lavoro dei barman è provvista di pedana drenante forata in gomma/plastica antiscivolo, sollevata dal suolo per consentire il deflusso di liquidi rovesciati, mantenuta pulita e sgrassata giornalmente per prevenire scivolamenti e cadute su bagnato?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.3 e punto 1.4",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "pavimenti_pareti",
+      suggestedNonConformity:
+        "Assenza di pedana drenante antiscivolo dietro al bancone bar o pedane intrise di liquidi zuccherini scivolose.",
+    });
+  }
+
+  // f) Cucina Snack Bar, Friggitoria & Food Notturno
+  if (env.id === "env-dsc-cucina-snack-food" || env.id.includes("dsc-cucina-snack")) {
+    items.push({
+      id: `${env.id}-cappa-compensata-spegnimento-ansul-friggitrici`,
+      area: env.name,
+      title: "Cappa d'Aspirazione Compensata con Filtri Inox e Impianto di Estinzione Automatico Ansul",
+      question:
+        "La cappa di aspirazione è del tipo a compensazione con filtri a labirinto in acciaio inox regolarmente manutenuti ed è dotata di impianto di estinzione automatico a liquido schiumogeno (sistema Ansul o equivalente conforme UNI EN 16282-7) a protezione del piano friggitrici e piastre calde notturne?",
+      normReference: "D.M. 03/09/2021, D.P.R. 151/2011 e Norma UNI EN 16282-7",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Cappa aspirante con filtri saturi di grasso infiammabile o assenza del sistema di spegnimento automatico sopra le friggitrici.",
+    });
+
+    items.push({
+      id: `${env.id}-termostato-sicurezza-friggitrici-230-gradi`,
+      area: env.name,
+      title: "Friggitrici con Termostato di Sicurezza a Riarmo Manuale Tarato < 230°C",
+      question:
+        "Tutte le friggitrici impiegate per la preparazione dello snack-food notturno sono provviste di termostato di lavoro e di un termostato di sicurezza a intervento rapido e a riarmo manuale, indipendente da quello di esercizio e tarato per bloccare l'alimentazione a temperatura inferiore a 230°C?",
+      normReference: "D.Lgs. 81/2008 Allegato V e Norma CEI EN 60335-2-37",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Friggitrice sprovvista di termostato di massima sicurezza a riarmo manuale o termostato bloccato (rischio autocombustione olio).",
+    });
+
+    items.push({
+      id: `${env.id}-lavamani-pedale-pareti-lavabili-zanzariere`,
+      area: env.name,
+      title: "Lavamani a Pedale/Ginocchio, Pareti Lavabili Fino a 2 m e Zanzariere alle Finestre",
+      question:
+        "La cucina snack dispone di lavamani con comando non manuale a ginocchio/pedale, dosatore di sapone antibatterico e salviette a perdere, pareti rivestite con materiale lavabile e sanificabile fino ad almeno 2 metri di altezza e reti anti-insetto amovibili e integre sulle aperture esterne?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo I e II",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Lavamani con rubinetto manuale, pareti con intonaco scrostato non lavabile o finestre prive di zanzariere integre.",
+    });
+  }
+
+  // g) Magazzino Merci Secche, Scorte Fusti Birra & Deposito Beverage
+  if (env.id === "env-dsc-dispensa-beverage" || env.id.includes("dsc-dispensa-beverage")) {
+    items.push({
+      id: `${env.id}-rilevatore-fughe-co2-allarme-spillatura-birra`,
+      area: env.name,
+      title: "Rilevatore Fughe CO2 con Allarme Acustico-Ottico al 1.5% e 3% e Ventilazione di Sicurezza",
+      question:
+        "Nel locale adibito a stoccaggio bombole e impianto spillatura è presente un sensore fisso di monitoraggio anidride carbonica (CO2) con taratura periodica, posizionato a filo pavimento e collegato ad allarme acustico-ottico a due soglie (1,5% e 3%) e attivazione automatica della ventilazione forzata di soccorso?",
+      normReference: "D.Lgs. 81/2008 Titolo IX (Agenti Chimici / Asfissianti) e Circolari di sicurezza impianti spillatura gas",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Assenza di sensore di allarme fughe di gas CO2/azoto in locale stoccaggio bombole di spillatura (grave rischio asfissia).",
+    });
+
+    items.push({
+      id: `${env.id}-ancoraggio-bombole-gas-compresso-catenelle`,
+      area: env.name,
+      title: "Ancoraggio a Parete con Catenelle Metalliche per Tutte le Bombole di Gas Compresso",
+      question:
+        "Tutte le bombole di gas compresso cariche e vuote (CO2, azoto, carboazoto) sono stoccate in posizione rigorosamente verticale, assicurate alla parete con collari o catenelle metalliche anticaduta e dotate di cappellotto di protezione delle valvole quando non in uso?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.4 e D.M. 03/09/2021",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Bombole di gas compresso libere a terra prive di catenelle di sicurezza contro il ribaltamento accidentale.",
+    });
+
+    items.push({
+      id: `${env.id}-scaffalature-certificate-stoccaggio-sollevato-15cm`,
+      area: env.name,
+      title: "Scaffalature Metalliche Certificate con Cartello Portata e Merci Sollevate ≥ 15 cm",
+      question:
+        "Le scaffalature del magazzino merci e scorte bibite sono in metallo zincato/verniciato certificate (UNI EN 15635) con cartelli di portata massima esposti, e tutti i fusti, cartoni e contenitori sono stoccati su pedane o ripiani sollevati dal pavimento di almeno 15 cm?",
+      normReference: "D.Lgs. 81/2008 art. 71, UNI EN 15635 e Reg. CE 852/2004 Allegato II Capitolo IX",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Scaffali privi di cartello di portata massima o scorte di alimenti e fusti appoggiati direttamente sul pavimento bagnato.",
+    });
+  }
+
+  // h) Locale Infermeria di Presidio, Primo Soccorso & Postazione DAE
+  if (env.id === "env-dsc-infermeria-primo-soccorso" || env.id.includes("dsc-infermeria")) {
+    items.push({
+      id: `${env.id}-defibrillatore-dae-teca-allarmata-autotest-verde`,
+      area: env.name,
+      title: "Defibrillatore DAE in Teca Allarmata con Autotest Verde, Piastre e Batteria Valide (Legge 116/2021)",
+      question:
+        "Il defibrillatore semiautomatico DAE è collocato in teca riscaldata/allarmata chiaramente segnalata, presenta l'indicatore di autotest giornaliero su spia verde (OK), dispone di elettrodi adesivi sigillati integri non scaduti (adulti e pediatrici) e batteria con carica garantita?",
+      normReference: "Legge 116/2021 e D.M. 18/03/2011",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Defibrillatore DAE guasto, con spia di autotest rossa, piastre adesive scadute o teca allarmata manomessa.",
+    });
+
+    items.push({
+      id: `${env.id}-bombola-ossigeno-ambu-cassetta-pronto-soccorso-all-1`,
+      area: env.name,
+      title: "Bombola Ossigeno Terapeutico Collaudata, Pallone AMBU e Cassetta All. 1 D.M. 388/2003",
+      question:
+        "L'infermeria è dotata di bombola di ossigeno terapeutico con certificato di revisione periodica e riduttore di pressione collaudato, pallone autoespandibile AMBU con maschere di varie misure e armadietto/cassetta di pronto soccorso conforme all'Allegato 1 D.M. 388/2003 con contenuti costantemente riforniti e non scaduti?",
+      normReference: "D.M. 388/2003 Allegato 1 e D.Lgs. 81/2008 art. 45",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Bombola di ossigeno terapeutico con collaudo scaduto, pallone AMBU mancante o presidi della cassetta All. 1 incompleti/scaduti.",
+    });
+
+    items.push({
+      id: `${env.id}-barella-telo-sedia-portantina-soccorso`,
+      area: env.name,
+      title: "Barella a Telo e Sedia Portantina per Evacuazione Rapida dei Feriti Verso Ambulanza 118",
+      question:
+        "È prontamente disponibile nell'infermeria una barella a cucchiaio o a telo rinforzato e una sedia portantina per consentire il trasporto agevole e sicuro di avventori infortunati o colti da malore attraverso i corridoi e le scale fino al varco di carico dell'ambulanza?",
+      normReference: "D.Lgs. 81/2008 art. 45 e Linee Guida Soccorso Sanitario nei Locali di Pubblico Spettacolo",
+      defaultSeverity: 2,
+      defaultSanctionable: false,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Assenza di barella o presidio per la movimentazione e trasporto protetto dell'infortunato verso il mezzo di soccorso.",
+    });
+  }
+
+  // i) Blocchi Servizi Igienici Uomini/Donne & Servizio Disabili PMR (D.M. 236/89)
+  if (env.id === "env-dsc-blocco-servizi-igienici" || env.id.includes("dsc-blocco-servizi")) {
+    items.push({
+      id: `${env.id}-bagno-disabili-pmr-tirante-allarme-dm-236-89`,
+      area: env.name,
+      title: "Servizio Igienico Disabili PMR a Norma D.M. 236/89 con Tirante Allarme Ottico-Acustico Esterno",
+      question:
+        "Il locale igienico dedicato a persone con disabilità rispetta le dimensioni minime e gli accorgimenti del D.M. 236/89 (porta apribile verso l'esterno da 90 cm, maniglioni orizzontali e ribaltabili, WC con apertura anteriore) ed è dotato di campanello di allarme a tirante collegato a luce stroboscopica e cicalino esterno all'antibagno?",
+      normReference: "D.M. 236/1989 art. 5 e D.P.R. 503/1996",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Bagno per disabili privo di tirante di allarme funzionante, con maniglioni mancanti o porta non a norma.",
+    });
+
+    items.push({
+      id: `${env.id}-aerazione-forzata-permanente-bagni-ciechi`,
+      area: env.name,
+      title: "Impianto di Aerazione Forzata Permanente per Servizi Ciechi e Dotazioni Antibagno",
+      question:
+        "Tutti i vani WC privi di aperture naturali sono dotati di impianto di aspirazione forzata d'aria ad attivazione automatica con portata continua a norma, e l'antibagno è attrezzato con distributori di sapone liquido, cestini a pedale e asciugamani elettrici ad aria protetti?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.13 e Regolamenti d'Igiene Edilizia",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Estrattore d'aria forzata del bagno cieco non funzionante o antibagno sprovvisto di asciugamani o sapone igienizzante.",
+    });
+  }
+
+  // j) Locale Tecnico / Cabina Elettrica Principale & Gruppo di Continuità (UPS)
+  if (env.id === "env-dsc-locale-tecnico-quadri" || env.id.includes("dsc-locale-tecnico")) {
+    items.push({
+      id: `${env.id}-pulsante-sgancio-emergenza-esterno-bobina`,
+      area: env.name,
+      title: "Pulsante di Sgancio Generale di Emergenza Esterno al Locale Tecnico con Bobina a Lancio",
+      question:
+        "All'esterno del locale cabina/quadri elettrici, in posizione facilmente accessibile e presidiata, è installato un pulsante di sgancio generale di emergenza con custodia protetta a rottura di vetro (IP55), dotato di cartello segnaletico normativo e collegato a bobina a lancio di corrente per il sezionamento immediato dell'energia elettrica in caso di incendio?",
+      normReference: "D.M. 19/08/1996 Titolo VII e Norma CEI 64-8",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Pulsante di sgancio generale elettrico non funzionante, ostruito o sprovvisto di cartello di identificazione e marcatura CE.",
+    });
+
+    items.push({
+      id: `${env.id}-soccorritore-ups-emergenza-autonomia-2-ore`,
+      area: env.name,
+      title: "Gruppo UPS / Soccorritore con Autonomia ≥ 2 Ore per Luci di Emergenza ed Impianto EVAC",
+      question:
+        "Il gruppo soccorritore o UPS centralizzato assicura l'alimentazione ininterrotta delle lampade di sicurezza dell'intero locale e dell'impianto di allarme vocale EVAC per una durata certificata non inferiore a 2 ore, e le batterie sono verificate con prova semestrale di scarica registrata nel registro antincendio?",
+      normReference: "D.M. 19/08/1996 Titolo VII, CEI EN 50171 e CEI EN 50172",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Batterie del soccorritore/UPS esaurite, con autonomia sotto le 2 ore prescritte o mancata effettuazione della prova periodica di scarica.",
     });
   }
 
