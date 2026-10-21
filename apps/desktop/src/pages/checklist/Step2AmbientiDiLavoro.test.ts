@@ -6456,6 +6456,595 @@ assert.ok(
   "In modalità safety_only tutti gli item della Pista devono essere safety o both",
 );
 
+// ============================================================================
+// Test 37: getStandardEnvironmentsForAteco & conformità per Pasticcerie, Gelaterie Artigianali con Laboratorio e Somministrazione (56.10.30 / 56.10.3 / 561030 / 56103)
+// ============================================================================
+console.log("Test 37: getStandardEnvironmentsForAteco & conformità per Pasticcerie, Gelaterie Artigianali (56.10.30 / 56.10.3 / 561030 / 56103)");
+
+const pastryEnvs = getStandardEnvironmentsForAteco("56.10.30");
+assert.equal(pastryEnvs.length, 12, "La Pasticceria e Gelateria artigianale deve avere esattamente 12 ambienti standard");
+
+// Verifica varianti codice ATECO (56.10.3, 561030, 56103)
+const pastryEnvsVar1 = getStandardEnvironmentsForAteco("56.10.3");
+assert.equal(pastryEnvsVar1.length, 12, "Anche prefisso 56.10.3 deve restituire 12 ambienti Pasticceria/Gelateria");
+const pastryEnvsVar2 = getStandardEnvironmentsForAteco("561030");
+assert.equal(pastryEnvsVar2.length, 12, "Anche codice numerico 561030 deve restituire 12 ambienti Pasticceria/Gelateria");
+const pastryEnvsVar3 = getStandardEnvironmentsForAteco("56103");
+assert.equal(pastryEnvsVar3.length, 12, "Anche codice numerico 56103 deve restituire 12 ambienti Pasticceria/Gelateria");
+
+// Verifica ID dei 12 ambienti standard Pasticceria/Gelateria
+const expectedPastryIds = [
+  "env-pastry-laboratorio-pasticceria",
+  "env-pastry-laboratorio-gelateria",
+  "env-pastry-decorazione-cioccolateria",
+  "env-pastry-cella-frigo-materie-prime",
+  "env-pastry-cella-negativa-semifreddi",
+  "env-pastry-dispensa-farine-zuccheri",
+  "env-pastry-plonge-lavaggio-teglie",
+  "env-pastry-area-vendita-banco-vetrine",
+  "env-pastry-banco-caffetteria-snack",
+  "env-pastry-sala-consumazione-tavoli",
+  "env-pastry-spogliatoi-servizi-personale",
+  "env-pastry-locale-tecnico-compressori",
+];
+
+for (const id of expectedPastryIds) {
+  assert.ok(
+    pastryEnvs.some((e) => e.id === id),
+    `Ambiente ${id} deve essere presente nella lista standard Pasticceria/Gelateria per 56.10.30`,
+  );
+}
+
+// 1. Laboratorio Principale di Pasticceria, Forni & Cottura
+const pastLabPastry = pastryEnvs.find((e) => e.id === "env-pastry-laboratorio-pasticceria")!;
+assert.equal(pastLabPastry.category, "production");
+assert.equal(pastLabPastry.surfaceSqM, 45);
+assert.equal(pastLabPastry.heightM, 3.0);
+assert.equal(pastLabPastry.volumeCuM, 135);
+assert.equal(pastLabPastry.occupantsCount, 3);
+assert.equal(pastLabPastry.emergencyExitsCount, 1);
+assert.equal(pastLabPastry.windowSurfaceSqM, 4.5);
+assert.equal(pastLabPastry.features.forcedExhaustPresent, true);
+assert.equal(pastLabPastry.features.forcedExhaustType, "kitchen_hood");
+assert.equal(pastLabPastry.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(pastLabPastry.features.flooringCondition, "compliant_anti_slip");
+const evalPastryLab = evaluateEnvironmentCompliance(pastLabPastry, "56.10.30");
+assert.ok(evalPastryLab.isHeightCompliant, "Altezza Laboratorio Pasticceria (3,00 m) deve essere a norma (min 3.0m)");
+assert.equal(evalPastryLab.minHeightRequired, 3.0);
+assert.ok(
+  evalPastryLab.summaryBadges.some((b) => b.text.includes("sfogliatrice protetta (UNI EN 1674)")),
+  "Laboratorio Pasticceria deve avere badge cappa fumi e sfogliatrice protetta",
+);
+assert.ok(
+  evalPastryLab.summaryBadges.some((b) => b.text.includes("Lavamani comando non manuale")),
+  "Laboratorio Pasticceria deve avere badge lavamani comando non manuale",
+);
+
+// 2. Laboratorio di Gelateria, Miscelazione & Mantecazione
+const pastLabGelato = pastryEnvs.find((e) => e.id === "env-pastry-laboratorio-gelateria")!;
+assert.equal(pastLabGelato.category, "production");
+assert.equal(pastLabGelato.surfaceSqM, 30);
+assert.equal(pastLabGelato.heightM, 3.0);
+assert.equal(pastLabGelato.volumeCuM, 90);
+assert.equal(pastLabGelato.occupantsCount, 2);
+assert.equal(pastLabGelato.emergencyExitsCount, 1);
+assert.equal(pastLabGelato.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(pastLabGelato.features.flooringCondition, "compliant_anti_slip");
+const evalPastryGelato = evaluateEnvironmentCompliance(pastLabGelato, "56.10.30");
+assert.ok(evalPastryGelato.isHeightCompliant, "Altezza Laboratorio Gelateria (3,00 m) deve essere a norma (min 3.0m)");
+assert.equal(evalPastryGelato.minHeightRequired, 3.0);
+assert.ok(
+  evalPastryGelato.summaryBadges.some((b) => b.text.includes("pastorizzatore con registrazione HACCP")),
+  "Laboratorio Gelateria deve avere badge pastorizzatore HACCP",
+);
+assert.ok(
+  evalPastryGelato.summaryBadges.some((b) => b.text.includes("Abbattitore rapido")),
+  "Laboratorio Gelateria deve avere badge abbattitore rapido",
+);
+
+// 3. Area Finitura, Decorazione Dolci, Pralineria & Cake Design
+const pastDecorazione = pastryEnvs.find((e) => e.id === "env-pastry-decorazione-cioccolateria")!;
+assert.equal(pastDecorazione.category, "production");
+assert.equal(pastDecorazione.surfaceSqM, 20);
+assert.equal(pastDecorazione.heightM, 2.8);
+assert.equal(pastDecorazione.volumeCuM, 56);
+assert.equal(pastDecorazione.occupantsCount, 2);
+const evalPastryDecorazione = evaluateEnvironmentCompliance(pastDecorazione, "56.10.30");
+assert.ok(evalPastryDecorazione.isHeightCompliant, "Altezza Area Decorazione (2,80 m) deve essere a norma (min 2.7m)");
+assert.equal(evalPastryDecorazione.minHeightRequired, 2.7);
+assert.ok(
+  evalPastryDecorazione.summaryBadges.some((b) => b.text.includes("microclima controllato (18-20°C")),
+  "Area Decorazione deve avere badge microclima controllato",
+);
+assert.ok(
+  evalPastryDecorazione.summaryBadges.some((b) => b.text.includes("Piani in granito")),
+  "Area Decorazione deve avere badge piani in granito e MOCA",
+);
+
+// 4. Cella Frigorifera Materie Prime Deperibili (+4°C)
+const pastCellaPos = pastryEnvs.find((e) => e.id === "env-pastry-cella-frigo-materie-prime")!;
+assert.equal(pastCellaPos.category, "storage");
+assert.equal(pastCellaPos.surfaceSqM, 12);
+assert.equal(pastCellaPos.heightM, 2.5);
+assert.equal(pastCellaPos.volumeCuM, 30);
+const evalPastryCellaPos = evaluateEnvironmentCompliance(pastCellaPos, "56.10.30");
+assert.ok(evalPastryCellaPos.isHeightCompliant, "Altezza Cella Materie Prime (2,50 m) deve essere a norma (min 2.4m)");
+assert.equal(evalPastryCellaPos.minHeightRequired, 2.4);
+assert.ok(
+  evalPastryCellaPos.summaryBadges.some((b) => b.text.includes("teletermometro continuo HACCP")),
+  "Cella Materie Prime deve avere badge teletermometro",
+);
+assert.ok(
+  evalPastryCellaPos.summaryBadges.some((b) => b.text.includes("Scaffalature forate MOCA sollevate ≥ 15 cm")),
+  "Cella Materie Prime deve avere badge scaffalature MOCA",
+);
+
+// 5. Cella Frigorifera / Congelatore Negativo Semifreddi e Gelati (-18°/-25°C)
+const pastCellaNeg = pastryEnvs.find((e) => e.id === "env-pastry-cella-negativa-semifreddi")!;
+assert.equal(pastCellaNeg.category, "storage");
+assert.equal(pastCellaNeg.surfaceSqM, 12);
+assert.equal(pastCellaNeg.heightM, 2.5);
+assert.equal(pastCellaNeg.volumeCuM, 30);
+const evalPastryCellaNeg = evaluateEnvironmentCompliance(pastCellaNeg, "56.10.30");
+assert.ok(evalPastryCellaNeg.isHeightCompliant, "Altezza Cella Negativa (2,50 m) deve essere a norma (min 2.4m)");
+assert.equal(evalPastryCellaNeg.minHeightRequired, 2.4);
+assert.ok(
+  evalPastryCellaNeg.summaryBadges.some((b) => b.text.includes("pulsante luminoso uomo intrappolato") && b.status === "danger"),
+  "Cella Negativa deve avere badge pericolo allarme uomo intrappolato UNI EN 378",
+);
+assert.ok(
+  evalPastryCellaNeg.summaryBadges.some((b) => b.text.includes("resistenza termica anticongelamento")),
+  "Cella Negativa deve avere badge resistenza anticongelamento porta",
+);
+
+// 6. Magazzino / Deposito Merci Secche, Farine e Zuccheri
+const pastDispensa = pastryEnvs.find((e) => e.id === "env-pastry-dispensa-farine-zuccheri")!;
+assert.equal(pastDispensa.category, "warehouse");
+assert.equal(pastDispensa.surfaceSqM, 25);
+assert.equal(pastDispensa.heightM, 2.7);
+assert.equal(pastDispensa.volumeCuM, 67.5);
+assert.equal(pastDispensa.features.shelvingCertified, true);
+const evalPastryDispensa = evaluateEnvironmentCompliance(pastDispensa, "56.10.30");
+assert.ok(evalPastryDispensa.isHeightCompliant, "Altezza Deposito Farine (2,70 m) deve essere a norma (min 2.7m)");
+assert.equal(evalPastryDispensa.minHeightRequired, 2.7);
+assert.ok(
+  evalPastryDispensa.summaryBadges.some((b) => b.text.includes("pedane sollevate ≥ 15 cm")),
+  "Deposito Farine deve avere badge stoccaggio sacchi su pedane sollevate",
+);
+assert.ok(
+  evalPastryDispensa.summaryBadges.some((b) => b.text.includes("tarme della farina")),
+  "Deposito Farine deve avere badge trappole tarme e lampada UV",
+);
+
+// 7. Plonge / Locale Lavaggio Teglie 60x40, Carapine e Attrezzi Laboratorio
+const pastPlonge = pastryEnvs.find((e) => e.id === "env-pastry-plonge-lavaggio-teglie")!;
+assert.equal(pastPlonge.category, "production");
+assert.equal(pastPlonge.surfaceSqM, 15);
+assert.equal(pastPlonge.heightM, 2.7);
+assert.equal(pastPlonge.volumeCuM, 40.5);
+assert.equal(pastPlonge.features.forcedExhaustPresent, true);
+const evalPastryPlonge = evaluateEnvironmentCompliance(pastPlonge, "56.10.30");
+assert.ok(evalPastryPlonge.isHeightCompliant, "Altezza Plonge Teglie (2,70 m) deve essere a norma (min 2.7m)");
+assert.equal(evalPastryPlonge.minHeightRequired, 2.7);
+assert.ok(
+  evalPastryPlonge.summaryBadges.some((b) => b.text.includes("risciacquo 85°C DIN 10512")),
+  "Plonge deve avere badge risciacquo 85°C DIN 10512",
+);
+assert.ok(
+  evalPastryPlonge.summaryBadges.some((b) => b.text.includes("Break Tank UNI EN 1717")),
+  "Plonge deve avere badge Break Tank antiriflusso",
+);
+
+// 8. Area Vendita, Cassa & Vetrina Espositiva Pasticceria Fresca e Gelati
+const pastAreaVendita = pastryEnvs.find((e) => e.id === "env-pastry-area-vendita-banco-vetrine")!;
+assert.equal(pastAreaVendita.category, "sales_office");
+assert.equal(pastAreaVendita.surfaceSqM, 40);
+assert.equal(pastAreaVendita.heightM, 3.2);
+assert.equal(pastAreaVendita.volumeCuM, 128);
+assert.equal(pastAreaVendita.occupantsCount, 3);
+assert.equal(pastAreaVendita.emergencyExitsCount, 1);
+const evalPastryAreaVendita = evaluateEnvironmentCompliance(pastAreaVendita, "56.10.30");
+assert.ok(evalPastryAreaVendita.isHeightCompliant, "Altezza Area Vendita (3,20 m) deve essere a norma (min 2.7m)");
+assert.ok(
+  evalPastryAreaVendita.summaryBadges.some((b) => b.text.includes("allergeni") && b.text.includes("Reg. UE 1169/2011")),
+  "Area Vendita deve avere badge registro allergeni Reg. UE 1169/2011",
+);
+assert.ok(
+  evalPastryAreaVendita.summaryBadges.some((b) => b.text.includes("Vetrina refrigerata (+4°C)")),
+  "Area Vendita deve avere badge vetrina refrigerata e pozzetti",
+);
+
+// 9. Banco Caffetteria, Somministrazione Bevande & Colazioni
+const pastBancoBar = pastryEnvs.find((e) => e.id === "env-pastry-banco-caffetteria-snack")!;
+assert.equal(pastBancoBar.category, "sales_office");
+assert.equal(pastBancoBar.surfaceSqM, 25);
+assert.equal(pastBancoBar.heightM, 3.0);
+assert.equal(pastBancoBar.volumeCuM, 75);
+const evalPastryBancoBar = evaluateEnvironmentCompliance(pastBancoBar, "56.10.30");
+assert.ok(evalPastryBancoBar.isHeightCompliant, "Altezza Banco Caffetteria (3,00 m) deve essere a norma");
+assert.ok(
+  evalPastryBancoBar.summaryBadges.some((b) => b.text.includes("caldaia certificata PED") || b.text.includes("Cool-Touch")),
+  "Banco Caffetteria deve avere badge caldaia PED e lancia Cool-Touch",
+);
+assert.ok(
+  evalPastryBancoBar.summaryBadges.some((b) => b.text.includes("Lavabicchieri sottobanco risciacquo 85°C")),
+  "Banco Caffetteria deve avere badge lavabicchieri 85°C",
+);
+
+// 10. Sala Consumazione / Dehors Clienti per Colazioni e Merende
+const pastSala = pastryEnvs.find((e) => e.id === "env-pastry-sala-consumazione-tavoli")!;
+assert.equal(pastSala.category, "public");
+assert.equal(pastSala.surfaceSqM, 35);
+assert.equal(pastSala.heightM, 3.0);
+assert.equal(pastSala.volumeCuM, 105);
+assert.equal(pastSala.occupantsCount, 25);
+assert.equal(pastSala.emergencyExitsCount, 1);
+const evalPastrySala = evaluateEnvironmentCompliance(pastSala, "56.10.30");
+assert.ok(evalPastrySala.isHeightCompliant, "Altezza Sala (3,00 m) deve essere a norma");
+assert.ok(
+  evalPastrySala.summaryBadges.some((b) => b.text.includes("estintore omologato 34A 233B")),
+  "Sala deve avere badge estintore 34A 233B",
+);
+assert.ok(
+  evalPastrySala.summaryBadges.some((b) => b.text.includes("igienizzante MOCA")),
+  "Sala deve avere badge disinfezione tavoli MOCA",
+);
+
+// 11. Spogliatoi e Servizi Igienici del Personale con Doccia
+const pastSpogliatoi = pastryEnvs.find((e) => e.id === "env-pastry-spogliatoi-servizi-personale")!;
+assert.equal(pastSpogliatoi.category, "changing_rooms");
+assert.equal(pastSpogliatoi.surfaceSqM, 18);
+assert.equal(pastSpogliatoi.heightM, 2.4);
+assert.equal(pastSpogliatoi.volumeCuM, 43.2);
+assert.equal(pastSpogliatoi.occupantsCount, 6);
+const evalPastrySpogliatoi = evaluateEnvironmentCompliance(pastSpogliatoi, "56.10.30");
+assert.ok(evalPastrySpogliatoi.isHeightCompliant, "Altezza Spogliatoi (2,40 m) deve essere a norma");
+assert.ok(
+  evalPastrySpogliatoi.summaryBadges.some((b) => b.text.includes("armadietti individuali doppi sporco/pulito")),
+  "Spogliatoi devono avere badge armadietti doppi sporco/pulito",
+);
+assert.ok(
+  evalPastrySpogliatoi.summaryBadges.some((b) => b.text.includes("Antibagno con lavamani a comando non manuale")),
+  "Spogliatoi devono avere badge antibagno con lavamani a comando non manuale",
+);
+
+// 12. Locale Tecnico / Vano Compressori Centralizzati & Deposito Rifiuti
+const pastLocaleTecnico = pastryEnvs.find((e) => e.id === "env-pastry-locale-tecnico-compressori")!;
+assert.equal(pastLocaleTecnico.category, "technical");
+assert.equal(pastLocaleTecnico.surfaceSqM, 15);
+assert.equal(pastLocaleTecnico.heightM, 2.5);
+assert.equal(pastLocaleTecnico.volumeCuM, 37.5);
+const evalPastryLocaleTecnico = evaluateEnvironmentCompliance(pastLocaleTecnico, "56.10.30");
+assert.ok(evalPastryLocaleTecnico.isHeightCompliant, "Altezza Locale Tecnico (2,50 m) deve essere a norma");
+assert.ok(
+  evalPastryLocaleTecnico.summaryBadges.some((b) => b.text.includes("Vano compressori con aerazione permanente")),
+  "Locale Tecnico deve avere badge aerazione compressori UNI EN 378",
+);
+assert.ok(
+  evalPastryLocaleTecnico.summaryBadges.some((b) => b.text.includes("addolcitore/filtro a resine")),
+  "Locale Tecnico deve avere badge addolcitore acque D.Lgs. 18/2023",
+);
+
+// ============================================================================
+// Test 38: generateEnvironmentChecklistItems per locali Pasticceria e Gelateria (ATECO 56.10.30)
+// ============================================================================
+console.log("Test 38: generateEnvironmentChecklistItems per locali Pasticceria e Gelateria (ATECO 56.10.30)");
+
+// 1. Laboratorio Principale Pasticceria
+const pastLabPastryItems = generateEnvironmentChecklistItems(pastLabPastry, "56.10.30");
+assert.ok(
+  pastLabPastryItems.some(
+    (it) => it.id.includes("cappa-aspirazione-forni-labirinto") && it.domain === "both",
+  ),
+  "Laboratorio Pasticceria deve verificare cappa forni filtri a labirinto (domain: both)",
+);
+assert.ok(
+  pastLabPastryItems.some(
+    (it) => it.id.includes("forni-pasticceria-sicurezza-termoisolante") && it.domain === "safety",
+  ),
+  "Laboratorio Pasticceria deve verificare sicurezza forni pasticceria (domain: safety)",
+);
+assert.ok(
+  pastLabPastryItems.some(
+    (it) => it.id.includes("sfogliatrice-ripari-salvamani-interblocco") && it.domain === "safety" && it.defaultSeverity === 4,
+  ),
+  "Laboratorio Pasticceria deve verificare sfogliatrice con ripari salvamani UNI EN 1674 (domain: safety, severity 4)",
+);
+assert.ok(
+  pastLabPastryItems.some(
+    (it) => it.id.includes("tavoli-lavoro-inox-moca") && it.domain === "haccp",
+  ),
+  "Laboratorio Pasticceria deve verificare banchi inox conformi MOCA (domain: haccp)",
+);
+assert.ok(
+  pastLabPastryItems.some(
+    (it) => it.id.includes("lavamani-comando-non-manuale-sapone") && it.domain === "haccp",
+  ),
+  "Laboratorio Pasticceria deve verificare lavamani a comando non manuale (domain: haccp)",
+);
+
+// 2. Laboratorio Gelateria
+const pastLabGelatoItems = generateEnvironmentChecklistItems(pastLabGelato, "56.10.30");
+assert.ok(
+  pastLabGelatoItems.some(
+    (it) => it.id.includes("pastorizzatore-miscele-termoregistrazione-haccp") && it.domain === "haccp",
+  ),
+  "Laboratorio Gelateria deve verificare pastorizzatore con termoregistrazione (domain: haccp)",
+);
+assert.ok(
+  pastLabGelatoItems.some(
+    (it) => it.id.includes("mantecatore-gelato-interblocco-protezioni") && it.domain === "safety" && it.defaultSeverity === 4,
+  ),
+  "Laboratorio Gelateria deve verificare mantecatore con protezioni e blocco (domain: safety, severity 4)",
+);
+assert.ok(
+  pastLabGelatoItems.some(
+    (it) => it.id.includes("abbattitore-temperatura-rapido-sonda") && it.domain === "haccp",
+  ),
+  "Laboratorio Gelateria deve verificare abbattitore rapido con sonda al cuore (domain: haccp)",
+);
+assert.ok(
+  pastLabGelatoItems.some(
+    (it) => it.id.includes("vasca-lavello-carapine-non-manuale") && it.domain === "haccp",
+  ),
+  "Laboratorio Gelateria deve verificare vasca carapine con comando non manuale (domain: haccp)",
+);
+assert.ok(
+  pastLabGelatoItems.some(
+    (it) => it.id.includes("pavimento-antiscivolo-canaletta-sifonata") && it.domain === "both",
+  ),
+  "Laboratorio Gelateria deve verificare pavimentazione antiscivolo con canaletta sifonata (domain: both)",
+);
+
+// 3. Area Finitura, Decorazione Dolci & Cioccolateria
+const pastDecorazioneItems = generateEnvironmentChecklistItems(pastDecorazione, "56.10.30");
+assert.ok(
+  pastDecorazioneItems.some(
+    (it) => it.id.includes("microclima-condizionamento-temperatura-umidita") && it.domain === "both",
+  ),
+  "Area Decorazione deve verificare microclima controllato 18-20°C (domain: both)",
+);
+assert.ok(
+  pastDecorazioneItems.some(
+    (it) => it.id.includes("piani-temperaggio-granito-inox-moca") && it.domain === "haccp",
+  ),
+  "Area Decorazione deve verificare piani granito per temperaggio cioccolato (domain: haccp)",
+);
+assert.ok(
+  pastDecorazioneItems.some(
+    (it) => it.id.includes("dosatrici-creme-beccucci-inox-moca") && it.domain === "haccp",
+  ),
+  "Area Decorazione deve verificare dosatrici creme MOCA (domain: haccp)",
+);
+assert.ok(
+  pastDecorazioneItems.some(
+    (it) => it.id.includes("aerografo-colori-alimentari-aspirazione") && it.domain === "both",
+  ),
+  "Area Decorazione deve verificare aerografo colori alimentari con aspirazione (domain: both)",
+);
+
+// 4. Cella Frigorifera Materie Prime (+4°C)
+const pastCellaPosItems = generateEnvironmentChecklistItems(pastCellaPos, "56.10.30");
+assert.ok(
+  pastCellaPosItems.some(
+    (it) => it.id.includes("teletermometro-digitale-allarme-fuori-soglia") && it.domain === "haccp",
+  ),
+  "Cella Materie Prime deve verificare teletermometro continuo +4°C (domain: haccp)",
+);
+assert.ok(
+  pastCellaPosItems.some(
+    (it) => it.id.includes("scaffalature-forate-moca-rialzate-15cm") && it.domain === "haccp",
+  ),
+  "Cella Materie Prime deve verificare scaffalature forate MOCA rialzate (domain: haccp)",
+);
+assert.ok(
+  pastCellaPosItems.some(
+    (it) => it.id.includes("maniglia-interna-antintrappolamento-luminescente") && it.domain === "safety" && it.defaultSeverity === 4,
+  ),
+  "Cella Materie Prime deve verificare maniglia interna luminescente (domain: safety, severity 4)",
+);
+
+// 5. Cella Negativa Semifreddi e Gelati (-18°/-25°C)
+const pastCellaNegItems = generateEnvironmentChecklistItems(pastCellaNeg, "56.10.30");
+assert.ok(
+  pastCellaNegItems.some(
+    (it) => it.id.includes("allarme-uomo-intrappolato-uni-en-378") && it.domain === "safety" && it.defaultSeverity === 4,
+  ),
+  "Cella Negativa deve verificare allarme uomo intrappolato UNI EN 378 (domain: safety, severity 4)",
+);
+assert.ok(
+  pastCellaNegItems.some(
+    (it) => it.id.includes("resistenza-anticongelamento-valvola-compensazione") && it.domain === "safety",
+  ),
+  "Cella Negativa deve verificare resistenza anticongelamento porta (domain: safety)",
+);
+assert.ok(
+  pastCellaNegItems.some(
+    (it) => it.id.includes("termoregistratore-continuo-catena-freddo") && it.domain === "haccp",
+  ),
+  "Cella Negativa deve verificare termoregistratore catena del freddo (domain: haccp)",
+);
+
+// 6. Magazzino Farine e Zuccheri
+const pastDispensaItems = generateEnvironmentChecklistItems(pastDispensa, "56.10.30");
+assert.ok(
+  pastDispensaItems.some(
+    (it) => it.id.includes("stoccaggio-sacchi-pedane-sollevate-asciutto") && it.domain === "both",
+  ),
+  "Magazzino Farine deve verificare stoccaggio su pedane sollevate (domain: both)",
+);
+assert.ok(
+  pastDispensaItems.some(
+    (it) => it.id.includes("lampada-uv-trappole-feromoni-tarme") && it.domain === "haccp",
+  ),
+  "Magazzino Farine deve verificare trappole feromoni e lampada UV (domain: haccp)",
+);
+assert.ok(
+  pastDispensaItems.some(
+    (it) => it.id.includes("scaffalature-cartelli-portata-antiribaltamento") && it.domain === "safety",
+  ),
+  "Magazzino Farine deve verificare cartelli portata scaffali (domain: safety)",
+);
+
+// 7. Plonge Lavaggio Teglie 60x40
+const pastPlongeItems = generateEnvironmentChecklistItems(pastPlonge, "56.10.30");
+assert.ok(
+  pastPlongeItems.some(
+    (it) => it.id.includes("lavaoggetti-teglie-carapine-risciacquo-85c") && it.domain === "haccp",
+  ),
+  "Plonge deve verificare lavaoggetti teglie risciacquo 85°C DIN 10512 (domain: haccp)",
+);
+assert.ok(
+  pastPlongeItems.some(
+    (it) => it.id.includes("disconnessione-idrica-break-tank-uni-en-1717") && it.domain === "both",
+  ),
+  "Plonge deve verificare disconnessione Break Tank UNI EN 1717 (domain: both)",
+);
+assert.ok(
+  pastPlongeItems.some(
+    (it) => it.id.includes("vasca-doppio-bacino-doccione-prelavaggio") && it.domain === "haccp",
+  ),
+  "Plonge deve verificare vasca due buche e doccione (domain: haccp)",
+);
+assert.ok(
+  pastPlongeItems.some(
+    (it) => it.id.includes("cappa-estrazione-vapori-pavimento-antiscivolo") && it.domain === "safety",
+  ),
+  "Plonge deve verificare cappa estrazione vapori (domain: safety)",
+);
+
+// 8. Area Vendita, Vetrina Espositiva e Cassa
+const pastAreaVenditaItems = generateEnvironmentChecklistItems(pastAreaVendita, "56.10.30");
+assert.ok(
+  pastAreaVenditaItems.some(
+    (it) => it.id.includes("vetrina-refrigerata-pozzetti-parafiato") && it.domain === "haccp",
+  ),
+  "Area Vendita deve verificare vetrina refrigerata e pozzetti con parafiato (domain: haccp)",
+);
+assert.ok(
+  pastAreaVenditaItems.some(
+    (it) => it.id.includes("cartello-unico-allergeni-registro-ingredienti") && it.domain === "haccp" && it.defaultSeverity === 4,
+  ),
+  "Area Vendita deve verificare cartello unico allergeni Reg. UE 1169/2011 (domain: haccp, severity 4)",
+);
+assert.ok(
+  pastAreaVenditaItems.some(
+    (it) => it.id.includes("vetrate-sicurezza-antisfondamento-banco-cassa") && it.domain === "safety",
+  ),
+  "Area Vendita deve verificare vetrate antisfondamento UNI EN 12600 (domain: safety)",
+);
+
+// 9. Banco Caffetteria e Somministrazione
+const pastBancoBarItems = generateEnvironmentChecklistItems(pastBancoBar, "56.10.30");
+assert.ok(
+  pastBancoBarItems.some(
+    (it) => it.id.includes("macchina-caffe-ped-lancia-cooltouch") && it.domain === "safety",
+  ),
+  "Banco Caffetteria deve verificare macchina caffè PED con lancia Cool-Touch (domain: safety)",
+);
+assert.ok(
+  pastBancoBarItems.some(
+    (it) => it.id.includes("cassetto-battifiltro-fonoassorbente-rumore") && it.domain === "safety",
+  ),
+  "Banco Caffetteria deve verificare cassetto battifiltro fonoassorbente (domain: safety)",
+);
+assert.ok(
+  pastBancoBarItems.some(
+    (it) => it.id.includes("lavabicchieri-sottobanco-risciacquo-85c") && it.domain === "haccp",
+  ),
+  "Banco Caffetteria deve verificare lavabicchieri 85°C (domain: haccp)",
+);
+
+// 10. Sala Consumazione e Dehors
+const pastSalaItems = generateEnvironmentChecklistItems(pastSala, "56.10.30");
+assert.ok(
+  pastSalaItems.some(
+    (it) => it.id.includes("vie-esodo-sgombre-larghezza-norma") && it.domain === "safety",
+  ),
+  "Sala deve verificare percorsi di esodo sgombri (domain: safety)",
+);
+assert.ok(
+  pastSalaItems.some(
+    (it) => it.id.includes("estintore-omologato-34a-233b-revisione") && it.domain === "safety",
+  ),
+  "Sala deve verificare estintore omologato 34A 233B (domain: safety)",
+);
+assert.ok(
+  pastSalaItems.some(
+    (it) => it.id.includes("disinfezione-tavoli-prodotti-moca") && it.domain === "haccp",
+  ),
+  "Sala deve verificare procedura disinfezione tavoli con prodotti MOCA (domain: haccp)",
+);
+
+// 11. Spogliatoi e Servizi Personale
+const pastSpogliatoiItems = generateEnvironmentChecklistItems(pastSpogliatoi, "56.10.30");
+assert.ok(
+  pastSpogliatoiItems.some(
+    (it) => it.id.includes("armadietti-doppi-divise-laboratorio") && it.domain === "both",
+  ),
+  "Spogliatoi devono verificare armadietti doppi sporco/pulito (domain: both)",
+);
+assert.ok(
+  pastSpogliatoiItems.some(
+    (it) => it.id.includes("antibagno-lavamani-non-manuale-sapone") && it.domain === "both",
+  ),
+  "Spogliatoi devono verificare antibagno con comando non manuale (domain: both)",
+);
+assert.ok(
+  pastSpogliatoiItems.some(
+    (it) => it.id.includes("aspirazione-meccanica-bagni-ciechi") && it.domain === "safety",
+  ),
+  "Spogliatoi devono verificare aspirazione forzata bagni ciechi (domain: safety)",
+);
+
+// 12. Locale Tecnico Compressori Centralizzati
+const pastLocaleTecnicoItems = generateEnvironmentChecklistItems(pastLocaleTecnico, "56.10.30");
+assert.ok(
+  pastLocaleTecnicoItems.some(
+    (it) => it.id.includes("aerazione-permanente-compressori-uni-en-378") && it.domain === "safety",
+  ),
+  "Locale Tecnico deve verificare aerazione permanente compressori UNI EN 378 (domain: safety)",
+);
+assert.ok(
+  pastLocaleTecnicoItems.some(
+    (it) => it.id.includes("addolcitore-resine-potabilita-dlgs-18-2023") && it.domain === "haccp",
+  ),
+  "Locale Tecnico deve verificare impianto addolcitore D.Lgs. 18/2023 (domain: haccp)",
+);
+assert.ok(
+  pastLocaleTecnicoItems.some(
+    (it) => it.id.includes("stoccaggio-rifiuti-bidoni-pedale-ermetici") && it.domain === "haccp",
+  ),
+  "Locale Tecnico deve verificare bidoni rifiuti ermetici a pedale (domain: haccp)",
+);
+
+// 13. Verifica filtraggio checklistMode per locali Pasticceria
+const pastLabPastryHaccpMode = filterEnvironmentItemsByChecklistMode(pastLabPastryItems, "haccp_only");
+assert.ok(
+  pastLabPastryHaccpMode.every((it) => it.domain === "haccp" || it.domain === "both"),
+  "In modalità haccp_only tutti gli item del Laboratorio Pasticceria devono essere haccp o both",
+);
+assert.ok(
+  !pastLabPastryHaccpMode.some((it) => it.domain === "safety"),
+  "In modalità haccp_only nessun item del Laboratorio Pasticceria deve avere domain safety",
+);
+
+const pastLabPastrySafetyMode = filterEnvironmentItemsByChecklistMode(pastLabPastryItems, "safety_only");
+assert.ok(
+  pastLabPastrySafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item del Laboratorio Pasticceria devono essere safety o both",
+);
+assert.ok(
+  !pastLabPastrySafetyMode.some((it) => it.domain === "haccp"),
+  "In modalità safety_only nessun item del Laboratorio Pasticceria deve avere domain haccp",
+);
+
+const pastSalaSafetyMode = filterEnvironmentItemsByChecklistMode(pastSalaItems, "safety_only");
+assert.ok(
+  pastSalaSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item della Sala devono essere safety o both",
+);
+
 console.log("=== TUTTI I TEST Step2AmbientiDiLavoro SUPERATI CON SUCCESSO! ===");
 
 

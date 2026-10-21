@@ -1228,7 +1228,199 @@ async function run() {
     `Expected at least 5 nightlife-specific document requirements for inspection, found ${discoSpecificDocs.length}`,
   );
 
-  console.log("HoReCa completeness test passed (including Hotel, B&B, Ostelli/Residence, Campeggi/Villaggi turistici, Stabilimenti Balneari and Discoteche/Locali Serali ATECO variants and inspection integration)");
+  
+  // Verifica varianti ATECO e query testuali per Pasticcerie e Gelaterie (56.10.30, 56.10.3, 561030, 56103, PASTICCERIA, GELATERIA, PASTICCERIA_GELATERIA)
+  const pastryVariants = [
+    "56.10.30",
+    "56.10.3",
+    "561030",
+    "56103",
+    "PASTICCERIA",
+    "GELATERIA",
+    "PASTICCERIA_GELATERIA",
+  ];
+  for (const variant of pastryVariants) {
+    const templatesRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(templatesRes.statusCode, 200, `Templates request failed for pastry variant ${variant}`);
+    const templates = templatesRes.json() as Array<{ id: string; name: string }>;
+    const specificTemplates = templates.filter(
+      (t) =>
+        t.name.includes("Pasticceria/Gelateria") ||
+        t.name.includes("Pasticceria") ||
+        t.name.includes("Gelateria"),
+    );
+    assert.ok(
+      specificTemplates.length >= 2,
+      `Expected at least 2 specific templates for pastry variant ${variant}, found ${specificTemplates.length}`,
+    );
+
+    const docsRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/document-templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(docsRes.statusCode, 200, `Document templates request failed for pastry variant ${variant}`);
+    const docs = docsRes.json() as DocumentTemplateLite[];
+    const pastryDocs = docs.filter((d) => d.macroGroup === "PASTICCERIA_GELATERIA");
+    assert.ok(
+      pastryDocs.length >= 18,
+      `Expected at least 18 pastry docs for variant ${variant}, found ${pastryDocs.length}`,
+    );
+  }
+
+  // Verifica requisiti normativi specifici per laboratorio Pasticceria e Gelateria su codici e varianti
+  const pastryCodesToVerify = ["56.10.30", "56.10.3", "561030", "56103"];
+  for (const ateco of pastryCodesToVerify) {
+    const tRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/templates?atecoCode=${encodeURIComponent(ateco)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(tRes.statusCode, 200);
+    const tmpls = tRes.json() as Array<{ id: string; name: string }>;
+    const pastryTmpls = tmpls.filter(
+      (t) =>
+        t.name.includes("Pasticceria/Gelateria") ||
+        t.name.includes("Pasticceria") ||
+        t.name.includes("Gelateria"),
+    );
+    assert.equal(pastryTmpls.length, 2, `Expected 2 templates for ${ateco}`);
+
+    let allItemsText = "";
+    for (const t of pastryTmpls) {
+      const itemsRes = await app.inject({
+        method: "GET",
+        url: `/api/checklists/templates/${t.id}/items?checklistMode=unified`,
+        headers,
+      });
+      assert.equal(itemsRes.statusCode, 200);
+      const items = itemsRes.json().items as Array<{
+        question: string;
+        area: string;
+        normReference?: string | null;
+        orderIndex: number;
+        defaultSeverity: number;
+      }>;
+      assert.equal(items.length, 25, `Expected 25 items for template ${t.id} under ${ateco}`);
+      for (const item of items) {
+        assert.ok(item.defaultSeverity >= 1 && item.defaultSeverity <= 4, `Invalid severity in item ${item.orderIndex}`);
+      }
+
+      const combined = items
+        .map((i) => `${i.area} ${i.question} ${i.normReference ?? ""}`.toLowerCase())
+        .join(" | ");
+      allItemsText += ` | ${combined}`;
+    }
+
+    // 1. Rischio inalazione polveri farina / asma professionale (D.Lgs. 81/08 Titolo IX)
+    assert.ok(
+      (allItemsText.includes("polveri farina") || (allItemsText.includes("farina") && allItemsText.includes("polveri"))) &&
+        (allItemsText.includes("asma professionale") || allItemsText.includes("asma")) &&
+        (allItemsText.includes("titolo ix") || allItemsText.includes("81/08") || allItemsText.includes("81/2008")),
+      `Missing norm requirement "polveri farina / asma professionale D.Lgs. 81/08 Titolo IX" for ${ateco}`,
+    );
+
+    // 2. Sicurezza macchine impastatrici/planetarie/sfogliatrici (UNI EN 453, UNI EN 454, UNI EN 1674)
+    assert.ok(
+      (allItemsText.includes("planetari") || allItemsText.includes("impastatric") || allItemsText.includes("sfogliatric")) &&
+        (allItemsText.includes("453") || allItemsText.includes("uni en 453")) &&
+        (allItemsText.includes("454") || allItemsText.includes("uni en 454")) &&
+        (allItemsText.includes("1674") || allItemsText.includes("uni en 1674")),
+      `Missing norm requirement "planetaria/sfogliatrice UNI EN 453/454/1674" for ${ateco}`,
+    );
+
+    // 3. Autocontrollo HACCP pastorizzazione e catena del freddo gelato/semifreddi (Reg. CE 852/04)
+    assert.ok(
+      allItemsText.includes("pastorizzat") &&
+        (allItemsText.includes("gelat") || allItemsText.includes("semifreddi")) &&
+        (allItemsText.includes("852/04") || allItemsText.includes("852/2004")),
+      `Missing norm requirement "pastorizzatore e catena del freddo gelato Reg. CE 852/04" for ${ateco}`,
+    );
+
+    // 4. Allergeni alimentari esposti e libro ingredienti per ciascun dolce/gelato (Reg. UE 1169/2011)
+    assert.ok(
+      allItemsText.includes("allergen") &&
+        (allItemsText.includes("libro ingredienti") || allItemsText.includes("ingredienti")) &&
+        (allItemsText.includes("1169/2011") || allItemsText.includes("1169")),
+      `Missing norm requirement "allergeni e libro ingredienti Reg. UE 1169/2011" for ${ateco}`,
+    );
+
+    // 5. Manutenzione celle frigo e allarme uomo intrappolato a -18°/-25°C e -20°C (UNI EN 378)
+    assert.ok(
+      (allItemsText.includes("celle") || allItemsText.includes("cella")) &&
+        (allItemsText.includes("allarme") || allItemsText.includes("uomo intrappolato")) &&
+        (allItemsText.includes("-20") || allItemsText.includes("-18") || allItemsText.includes("-25")) &&
+        (allItemsText.includes("378") || allItemsText.includes("uni en 378")),
+      `Missing norm requirement "allarme celle -20°C e uomo intrappolato UNI EN 378" for ${ateco}`,
+    );
+
+    // 6. Conformita MOCA carapine e teglie alluminio/inox (Reg. CE 1935/2004)
+    assert.ok(
+      allItemsText.includes("moca") &&
+        (allItemsText.includes("carapine") || allItemsText.includes("teglie")) &&
+        (allItemsText.includes("1935/2004") || allItemsText.includes("1935")),
+      `Missing norm requirement "conformita MOCA carapine e teglie alluminio/inox" for ${ateco}`,
+    );
+
+    // 7. Disinfezione termica lavaoggetti 85°C (DIN 10512)
+    assert.ok(
+      (allItemsText.includes("lavaoggetti") || allItemsText.includes("lavastoviglie")) &&
+        (allItemsText.includes("85°c") || allItemsText.includes("85")) &&
+        (allItemsText.includes("din 10512") || allItemsText.includes("10512")),
+      `Missing norm requirement "disinfezione termica lavaoggetti 85°C DIN 10512" for ${ateco}`,
+    );
+  }
+
+  // Verifica integrazione ispezioni per azienda Pasticceria/Gelateria con ATECO variante dotless (561030)
+  const pastryCompany = await app.prisma.company.upsert({
+    where: { id: "test-pastry-integration-company" },
+    update: { atecoCode: "561030" },
+    create: {
+      id: "test-pastry-integration-company",
+      name: "Pasticceria Gelateria Dolce Arte FedShield",
+      vatNumber: "IT99887766560",
+      atecoCode: "561030",
+      legalAddress: "Corso Italia 15, Bologna",
+    },
+  });
+
+  const pastryInspection = await app.inject({
+    method: "POST",
+    url: "/api/inspections",
+    headers,
+    payload: {
+      companyId: pastryCompany.id,
+      title: "Ispezione Pasticceria Gelateria Test",
+    },
+  });
+  assert.equal(pastryInspection.statusCode, 201);
+  const pastryInspectionId = pastryInspection.json().id as string;
+
+  const pastryInspectionDocsRes = await app.inject({
+    method: "GET",
+    url: `/api/inspections/${pastryInspectionId}/documents/requirements`,
+    headers,
+  });
+  assert.equal(pastryInspectionDocsRes.statusCode, 200);
+  const pastryInspectionDocs = pastryInspectionDocsRes.json() as Array<{ name: string; documentTemplateId: string }>;
+  const pastrySpecificDocs = pastryInspectionDocs.filter(
+    (d) =>
+      d.name.toLowerCase().includes("pasticceria") ||
+      d.name.toLowerCase().includes("gelateria") ||
+      d.name.toLowerCase().includes("moca") ||
+      d.name.toLowerCase().includes("shelf-life") ||
+      d.name.toLowerCase().includes("pastorizzaz"),
+  );
+  assert.ok(
+    pastrySpecificDocs.length >= 5,
+    `Expected at least 5 pastry-specific document requirements for inspection, found ${pastrySpecificDocs.length}`,
+  );
+
+  console.log("HoReCa completeness test passed (including Hotel, B&B, Ostelli/Residence, Campeggi/Villaggi turistici, Stabilimenti Balneari, Discoteche/Locali Serali and Pasticcerie/Gelaterie ATECO variants and inspection integration)");
   await app.close();
 }
 

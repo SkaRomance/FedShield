@@ -3390,7 +3390,7 @@ assert.ok(balnIndexDsc !== -1, "Settore stabilimento_balneare deve esistere");
 assert.ok(discoIndexDsc !== -1, "Settore discoteca_locale_serale deve esistere");
 assert.ok(ristIndexDsc !== -1, "Settore ristorazione_alimentare deve esistere");
 assert.equal(discoIndexDsc, balnIndexDsc + 1, "discoteca_locale_serale deve seguire immediatamente stabilimento_balneare");
-assert.equal(ristIndexDsc, discoIndexDsc + 1, "ristorazione_alimentare deve seguire immediatamente discoteca_locale_serale");
+assert.ok(discoIndexDsc < ristIndexDsc, "discoteca_locale_serale deve precedere ristorazione_alimentare");
 
 // -------------------------------------------------------------
 // Test 60: Verifica completezza delle 16 macchine professionali con verifiche, corsi e modelli reali
@@ -3625,6 +3625,287 @@ for (const code of ["93.29.10", "93.29.1", "932910", "93291"]) {
   const fallbackDiscoRes = getSuggestedMachinesForEnvironmentsAndAteco([], code);
   assert.equal(fallbackDiscoRes.length, 16, `ATECO variant '${code}' deve restituire tutte le 16 macchine della discoteca`);
   assert.ok(fallbackDiscoRes.every((m) => m.sourceReason === "ateco"), `Tutte le macchine con ATECO variant '${code}' devono avere sourceReason === 'ateco'`);
+}
+
+// =========================================================================
+// TEST DEDICATI ATECO 56.10.30 — PASTICCERIE E GELATERIE ARTIGIANALI
+// =========================================================================
+console.log("\n=== INIZIO TEST normativeMachineCatalog (ATECO 56.10.30 Pasticcerie e Gelaterie Artigianali con Laboratorio) ===");
+
+// -------------------------------------------------------------
+// Test 63: Priorità e risoluzione catalogo ATECO per Pasticceria e Gelateria Artigianale
+// -------------------------------------------------------------
+console.log("Test 63: Verifica priorità catalogo ATECO per Pasticceria e Gelateria Artigianale (56.10.30 / 56.10.3 / 561030 / 56103)");
+const catalogPastryExact = getSectorMachineCatalogForAteco("56.10.30");
+assert.equal(catalogPastryExact.sectorKey, "pasticceria_gelateria", "ATECO 56.10.30 deve restituire pasticceria_gelateria");
+assert.ok(catalogPastryExact.sectorLabel.includes("Pasticcerie"), "L'etichetta deve includere Pasticcerie");
+assert.ok(catalogPastryExact.sectorLabel.includes("Gelaterie"), "L'etichetta deve includere Gelaterie");
+
+const catalogPastryPrefix = getSectorMachineCatalogForAteco("56.10.3");
+assert.equal(catalogPastryPrefix.sectorKey, "pasticceria_gelateria", "ATECO 56.10.3 deve restituire pasticceria_gelateria");
+
+const catalogPastryDigits6 = getSectorMachineCatalogForAteco("561030");
+assert.equal(catalogPastryDigits6.sectorKey, "pasticceria_gelateria", "ATECO 561030 deve restituire pasticceria_gelateria");
+
+const catalogPastryDigits5 = getSectorMachineCatalogForAteco("56103");
+assert.equal(catalogPastryDigits5.sectorKey, "pasticceria_gelateria", "ATECO 56103 deve restituire pasticceria_gelateria");
+
+// Verifica non interferenza con altri codici ristorazione/somministrazione/ambulante/bar/pizzeria
+assert.equal(getSectorMachineCatalogForAteco("56.10.41").sectorKey, "gelateria_pasticceria_ambulante", "ATECO 56.10.41 deve rimanere gelateria ambulante");
+assert.equal(getSectorMachineCatalogForAteco("56.30").sectorKey, "bar_caffetteria", "ATECO 56.30 deve rimanere bar");
+assert.equal(getSectorMachineCatalogForAteco("56.10.20").sectorKey, "pizzeria_asporto", "ATECO 56.10.20 deve rimanere pizzeria");
+assert.equal(getSectorMachineCatalogForAteco("56.10.11").sectorKey, "ristorazione_somministrazione", "ATECO 56.10.11 deve rimanere ristorante");
+
+// Verifica posizionamento nel catalogo: pasticceria_gelateria segue discoteca_locale_serale e precede il generico ristorazione_alimentare
+const discoIndexPastry = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "discoteca_locale_serale");
+const pastryIndex = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "pasticceria_gelateria");
+const ristIndexPastry = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ristorazione_alimentare");
+assert.ok(discoIndexPastry !== -1, "Settore discoteca_locale_serale deve esistere");
+assert.ok(pastryIndex !== -1, "Settore pasticceria_gelateria deve esistere");
+assert.ok(ristIndexPastry !== -1, "Settore ristorazione_alimentare deve esistere");
+assert.equal(pastryIndex, discoIndexPastry + 1, "pasticceria_gelateria deve seguire immediatamente discoteca_locale_serale");
+assert.equal(ristIndexPastry, pastryIndex + 1, "ristorazione_alimentare deve seguire immediatamente pasticceria_gelateria");
+
+// -------------------------------------------------------------
+// Test 64: Verifica completezza delle 16 macchine professionali per pasticceria e gelateria
+// -------------------------------------------------------------
+console.log("Test 64: Verifica completezza delle 16 macchine professionali per pasticceria e gelateria con verifiche, corsi e modelli reali");
+assert.equal(catalogPastryExact.machines.length, 16, "Il catalogo Pasticcerie e Gelaterie deve contenere esattamente 16 macchine");
+
+const expectedPastryKeys = [
+  "planetaria_industriale_pasticceria",
+  "impastatrice_spirale_pasticceria",
+  "sfogliatrice_banco_pavimento",
+  "forno_pasticceria_ventilato_piani",
+  "pastorizzatore_miscele_gelato",
+  "mantecatore_gelato_artigianale",
+  "abbattitore_temperatura_pasticceria",
+  "armadio_congelatore_negativo_teglie",
+  "armadio_frigo_positivo_pasticceria",
+  "vetrina_refrigerata_pasticceria",
+  "vetrina_gelati_pozzetti_vaschette",
+  "dosatrice_riempitrice_creme",
+  "temperatrice_cioccolato_continua",
+  "lavastoviglie_lavaoggetti_capotta",
+  "macchina_caffe_bar_pasticceria",
+  "fabbricatore_ghiaccio_pasticceria",
+];
+
+for (const key of expectedPastryKeys) {
+  const found = catalogPastryExact.machines.find((m) => m.machineKey === key);
+  assert.ok(found, `Attrezzatura con key '${key}' deve essere presente nel catalogo`);
+  assert.ok(found.name.length > 5, `Nome attrezzatura '${key}' deve essere descrittivo`);
+  assert.ok(found.type.length > 5, `Tipologia '${key}' deve essere descrittiva`);
+  assert.ok(found.suggestedManufacturer.length > 2, `Produttore suggerito presente per '${key}'`);
+  assert.ok(found.suggestedModel.length > 1, `Modello suggerito presente per '${key}'`);
+  assert.ok(found.safetyChecks.length >= 4, `L'attrezzatura '${key}' deve avere almeno 4 controlli di sicurezza specifici`);
+  for (const check of found.safetyChecks) {
+    assert.ok(check.code.length > 3, `Check code valido per ${key}`);
+    assert.ok(check.title.length > 5, `Check title valido per ${key}`);
+    assert.ok(check.question.length > 15, `Check question dettagliata per ${key}`);
+    assert.ok(check.normReference.length > 3, `Norma citata per check ${check.code}`);
+    assert.ok(check.defaultSeverity >= 1 && check.defaultSeverity <= 5, `Severity valida per check ${check.code}`);
+  }
+}
+
+// Controlli tecnici e normativi specifici di dettaglio:
+// 1. Planetaria industriale: microinterruttore griglia UNI EN 454 e corso polveri farina
+const pastPlanetaria = catalogPastryExact.machines.find((m) => m.machineKey === "planetaria_industriale_pasticceria")!;
+assert.equal(pastPlanetaria.training.courseCode, "FORMAZ_POLVERI_FARINA_ASMA");
+assert.equal(pastPlanetaria.training.minHours, 4);
+assert.equal(pastPlanetaria.training.frequencyYears, 5);
+assert.ok(pastPlanetaria.safetyChecks.some((c) => c.code === "PLANETARIA_GRIGLIA_PROTEZIONE_INTERBLOCCO"));
+assert.ok(pastPlanetaria.safetyChecks.some((c) => c.normReference.includes("UNI EN 454")));
+assert.ok(pastPlanetaria.safetyChecks.some((c) => c.code === "PLANETARIA_FUNGO_EMERGENZA_RESET"));
+assert.ok(pastPlanetaria.safetyChecks.some((c) => c.code === "PLANETARIA_MOCA_UTENSILI_VASCA"));
+
+// 2. Impastatrice a spirale: riparo interbloccato UNI EN 453 e doppio timer
+const pastSpirale = catalogPastryExact.machines.find((m) => m.machineKey === "impastatrice_spirale_pasticceria")!;
+assert.equal(pastSpirale.training.courseCode, "FORMAZ_POLVERI_FARINA_ASMA");
+assert.ok(pastSpirale.safetyChecks.some((c) => c.code === "SPIRALE_RIPARO_INTERBLOCCATO_UNI_EN_453"));
+assert.ok(pastSpirale.safetyChecks.some((c) => c.normReference.includes("UNI EN 453")));
+assert.ok(pastSpirale.safetyChecks.some((c) => c.code === "SPIRALE_FUNGO_EMERGENZA_DOPPIO_TIMER"));
+assert.ok(pastSpirale.safetyChecks.some((c) => c.code === "SPIRALE_MOCA_VASCA_SPACCAPASTA"));
+
+// 3. Sfogliatrice professionale: ripari mobili salvamani UNI EN 1674 e inversione senso
+const pastSfogliatrice = catalogPastryExact.machines.find((m) => m.machineKey === "sfogliatrice_banco_pavimento")!;
+assert.equal(pastSfogliatrice.training.courseCode, "FORMAZ_PASTICCERIA_GELATERIA_HACCP");
+assert.equal(pastSfogliatrice.training.minHours, 8);
+assert.equal(pastSfogliatrice.training.frequencyYears, 3);
+assert.ok(pastSfogliatrice.safetyChecks.some((c) => c.code === "SFOGLIATRICE_RIPARI_RULLI_UNI_EN_1674"));
+assert.ok(pastSfogliatrice.safetyChecks.some((c) => c.normReference.includes("UNI EN 1674")));
+assert.ok(pastSfogliatrice.safetyChecks.some((c) => c.code === "SFOGLIATRICE_INVERSIONE_SENSO_PEDALE_LEVA"));
+assert.ok(pastSfogliatrice.safetyChecks.some((c) => c.code === "SFOGLIATRICE_FUNGO_EMERGENZA_LATERALE"));
+
+// 4. Forno pasticceria ventilato a piani: porta a triplo vetro antiustione UNI EN 203 e micro porta ventole
+const pastForno = catalogPastryExact.machines.find((m) => m.machineKey === "forno_pasticceria_ventilato_piani")!;
+assert.ok(pastForno.safetyChecks.some((c) => c.code === "FORNO_PAST_PORTA_TRIPLO_VETRO_ANTIUSTIONE"));
+assert.ok(pastForno.safetyChecks.some((c) => c.normReference.includes("UNI EN 203-1")));
+assert.ok(pastForno.safetyChecks.some((c) => c.code === "FORNO_PAST_MICROINTERRUTTORE_PORTA_VENTOLE"));
+assert.ok(pastForno.safetyChecks.some((c) => c.code === "FORNO_PAST_INIEZIONE_VAPORE_SCARICO_SICUREZZA"));
+
+// 5. Pastorizzatore miscele gelato: ciclo termico HACCP e micro coperchio UNI EN 12852
+const pastPastorizzatore = catalogPastryExact.machines.find((m) => m.machineKey === "pastorizzatore_miscele_gelato")!;
+assert.ok(pastPastorizzatore.safetyChecks.some((c) => c.code === "PASTORIZZATORE_CICLO_TERMICO_HACCP_REGISTRAZIONE"));
+assert.ok(pastPastorizzatore.safetyChecks.some((c) => c.code === "PASTORIZZATORE_MICRO_COPERCHIO_AGITATORE_UNI_EN_12852"));
+assert.ok(pastPastorizzatore.safetyChecks.some((c) => c.normReference.includes("UNI EN 12852")));
+assert.ok(pastPastorizzatore.safetyChecks.some((c) => c.code === "PASTORIZZATORE_RUBINETTO_LAVAGGIO_MONTAGGIO"));
+
+// 6. Mantecatore gelato: tramoggia con griglia fissa UNI EN 12852 e portello con blocco magnetico
+const pastMantecatore = catalogPastryExact.machines.find((m) => m.machineKey === "mantecatore_gelato_artigianale")!;
+assert.ok(pastMantecatore.safetyChecks.some((c) => c.code === "MANTECATORE_TRAMOGGIA_GRIGLIA_UNI_EN_12852"));
+assert.ok(pastMantecatore.safetyChecks.some((c) => c.normReference.includes("UNI EN 12852")));
+assert.ok(pastMantecatore.safetyChecks.some((c) => c.code === "MANTECATORE_PORTELLO_SENSORE_MAGNETICO"));
+assert.ok(pastMantecatore.safetyChecks.some((c) => c.code === "MANTECATORE_MOCA_PATINI_RASCHIANTI"));
+
+// 7. Abbattitore pasticceria: sonda al cuore multipoint HACCP e gas naturale R290
+const pastAbbattitore = catalogPastryExact.machines.find((m) => m.machineKey === "abbattitore_temperatura_pasticceria")!;
+assert.ok(pastAbbattitore.safetyChecks.some((c) => c.code === "ABBATTITORE_PAST_CICLO_HACCP_SONDA_CUORE"));
+assert.ok(pastAbbattitore.safetyChecks.some((c) => c.code === "ABBATTITORE_PAST_GAS_ECOLOGICO_R290"));
+assert.ok(pastAbbattitore.safetyChecks.some((c) => c.normReference.includes("UNI EN 378")));
+
+// 8. Armadio congelatore negativo teglie: termostato digitale HACCP e sbrinamento gas caldo
+const pastCongelatore = catalogPastryExact.machines.find((m) => m.machineKey === "armadio_congelatore_negativo_teglie")!;
+assert.ok(pastCongelatore.safetyChecks.some((c) => c.code === "CONGELATORE_PAST_TERMOSTATO_ALLARME_HACCP"));
+assert.ok(pastCongelatore.safetyChecks.some((c) => c.code === "CONGELATORE_PAST_SBRINAMENTO_GAS_CALDO"));
+assert.ok(pastCongelatore.safetyChecks.some((c) => c.code === "CONGELATORE_PAST_GUIDE_TEGLIE_EURONORM"));
+
+// 9. Armadio frigo positivo pasticceria: controllo umidità e separazione allergeni
+const pastFrigoPos = catalogPastryExact.machines.find((m) => m.machineKey === "armadio_frigo_positivo_pasticceria")!;
+assert.ok(pastFrigoPos.safetyChecks.some((c) => c.code === "FRIGO_POSITIVO_PAST_TEMP_CONTROLLO_UMIDITA"));
+assert.ok(pastFrigoPos.safetyChecks.some((c) => c.code === "FRIGO_POSITIVO_PAST_SEPARAZIONE_ALLERGENI"));
+assert.ok(pastFrigoPos.safetyChecks.some((c) => c.normReference.includes("Reg. UE 1169/2011")));
+
+// 10. Vetrina refrigerata pasticceria: cristalli riscaldati anticondensa e termometro visibile
+const pastVetrina = catalogPastryExact.machines.find((m) => m.machineKey === "vetrina_refrigerata_pasticceria")!;
+assert.ok(pastVetrina.safetyChecks.some((c) => c.code === "VETRINA_PAST_CRISTALLI_RISCALDATI_ANTICONDENSA"));
+assert.ok(pastVetrina.safetyChecks.some((c) => c.code === "VETRINA_PAST_TERMOMETRO_VISIBILE_HACCP"));
+
+// 11. Vetrina gelati pozzetti/vaschette: schermo parafiato e lavaporzionatore integrato
+const pastVetrinaGel = catalogPastryExact.machines.find((m) => m.machineKey === "vetrina_gelati_pozzetti_vaschette")!;
+assert.ok(pastVetrinaGel.safetyChecks.some((c) => c.code === "VETRINA_GELATO_TEMPERATURA_STABILE_HACCP"));
+assert.ok(pastVetrinaGel.safetyChecks.some((c) => c.code === "VETRINA_GELATO_PARASPUTI_IGIENICO"));
+assert.ok(pastVetrinaGel.safetyChecks.some((c) => c.code === "VETRINA_GELATO_LAVAPORZIONATORE_INTEGRATO"));
+
+// 12. Dosatrice riempitrice creme: tramoggia inox MOCA e comando pedale a bassa tensione SELV
+const pastDosatrice = catalogPastryExact.machines.find((m) => m.machineKey === "dosatrice_riempitrice_creme")!;
+assert.ok(pastDosatrice.safetyChecks.some((c) => c.code === "DOSATRICE_TRAMOGGIA_MOCA_SMONTABILE"));
+assert.ok(pastDosatrice.safetyChecks.some((c) => c.code === "DOSATRICE_COMANDO_PEDALE_SELV_24V"));
+
+// 13. Temperatrice cioccolato continua: coclea estraibile e tavola vibrante riscaldata
+const pastTemperatrice = catalogPastryExact.machines.find((m) => m.machineKey === "temperatrice_cioccolato_continua")!;
+assert.ok(pastTemperatrice.safetyChecks.some((c) => c.code === "TEMPERATRICE_COCLEA_ESTRAIBILE_LAVAGGIO"));
+assert.ok(pastTemperatrice.safetyChecks.some((c) => c.code === "TEMPERATRICE_TAVOLA_VIBRANTE_BASSA_TENSIONE"));
+
+// 14. Lavaoggetti / lavastoviglie capotta: risciacquo 85°C DIN 10512 e Break Tank UNI EN 1717
+const pastLavaoggetti = catalogPastryExact.machines.find((m) => m.machineKey === "lavastoviglie_lavaoggetti_capotta")!;
+assert.ok(pastLavaoggetti.safetyChecks.some((c) => c.code === "LAVAOGGETTI_RISCIACQUO_85_DIN_10512"));
+assert.ok(pastLavaoggetti.safetyChecks.some((c) => c.normReference.includes("DIN 10512")));
+assert.ok(pastLavaoggetti.safetyChecks.some((c) => c.code === "LAVAOGGETTI_BREAK_TANK_UNI_EN_1717"));
+assert.ok(pastLavaoggetti.safetyChecks.some((c) => c.normReference.includes("UNI EN 1717")));
+assert.ok(pastLavaoggetti.safetyChecks.some((c) => c.code === "LAVAOGGETTI_MICRO_SOLLEVAMENTO_CAPOTTA"));
+
+// 15. Macchina caffè espresso: caldaia PED D.Lgs. 26/2016 e lance vapore Cool-Touch
+const pastCaffe = catalogPastryExact.machines.find((m) => m.machineKey === "macchina_caffe_bar_pasticceria")!;
+assert.equal(pastCaffe.training.courseCode, "FORMAZ_MACCHINE_BAR_VAPORE");
+assert.ok(pastCaffe.safetyChecks.some((c) => c.code === "CAFFE_PAST_CALDAIA_PED_VALVOLA_SCARICO"));
+assert.ok(pastCaffe.safetyChecks.some((c) => c.normReference.includes("D.Lgs. 26/2016")));
+assert.ok(pastCaffe.safetyChecks.some((c) => c.code === "CAFFE_PAST_LANCE_VAPORE_COOL_TOUCH"));
+
+// 16. Fabbricatore ghiaccio: vano MOCA antibatterico e scarico air-gap UNI EN 1717
+const pastGhiaccio = catalogPastryExact.machines.find((m) => m.machineKey === "fabbricatore_ghiaccio_pasticceria")!;
+assert.ok(pastGhiaccio.safetyChecks.some((c) => c.code === "GHIACCIO_PAST_MOCA_ANTIBATTERICO_AG"));
+assert.ok(pastGhiaccio.safetyChecks.some((c) => c.code === "GHIACCIO_PAST_SCARICO_AIR_GAP_UNI_EN_1717"));
+assert.ok(pastGhiaccio.safetyChecks.some((c) => c.normReference.includes("UNI EN 1717")));
+
+// -------------------------------------------------------------
+// Test 65: Verifica associazione ambienti Step 2 Pasticceria (env-pastry-*) -> Step 4 Macchine
+// -------------------------------------------------------------
+console.log("Test 65: Verifica associazione ambienti Step 2 Pasticceria (env-pastry-*) -> Step 4 Macchine");
+const pastryEnvironments = [
+  { id: "env-pastry-laboratorio-pasticceria", name: "Laboratorio Pasticceria, Forno & Reparto Impasti Grandi Lievitati", category: "production" },
+  { id: "env-pastry-laboratorio-gelateria", name: "Laboratorio Gelateria Artigianale (Mantecatori & Pastorizzatori)", category: "production" },
+  { id: "env-pastry-decorazione-cioccolateria", name: "Reparto Farcitura, Decorazione Torte & Cioccolateria Artigianale", category: "production" },
+  { id: "env-pastry-cella-frigo-materie-prime", name: "Cella Frigorifera Positiva (+2/+4°C) Materie Prime, Uova & Panna", category: "warehouse" },
+  { id: "env-pastry-cella-negativa-semifreddi", name: "Cella Negativa (-18/-25°C) Semifreddi, Torte Gelato & Bacinelle", category: "warehouse" },
+  { id: "env-pastry-plonge-lavaggio-teglie", name: "Plonge, Lavaggio Teglie Euronorm 60x40 cm & Bacinelle Gelato", category: "services" },
+  { id: "env-pastry-area-vendita-banco-vetrine", name: "Area Vendita, Banchi Espositivi Refrigerati Torte & Vetrina Gelato", category: "sales_office" },
+  { id: "env-pastry-banco-caffetteria-snack", name: "Banco Somministrazione Caffetteria, Bevande & Servizio Colazioni", category: "sales_office" },
+];
+
+const suggestedWithPastryEnvs = getSuggestedMachinesForEnvironmentsAndAteco(pastryEnvironments, "56.10.30");
+
+// 1. env-pastry-laboratorio-pasticceria -> planetaria_industriale_pasticceria, impastatrice_spirale_pasticceria, sfogliatrice_banco_pavimento, forno_pasticceria_ventilato_piani
+const labPast = suggestedWithPastryEnvs.filter((m) => m.targetEnvironmentId === "env-pastry-laboratorio-pasticceria");
+assert.equal(labPast.length, 4, "env-pastry-laboratorio-pasticceria deve associare 4 macchine");
+assert.ok(labPast.some((m) => m.machineKey === "planetaria_industriale_pasticceria"));
+assert.ok(labPast.some((m) => m.machineKey === "impastatrice_spirale_pasticceria"));
+assert.ok(labPast.some((m) => m.machineKey === "sfogliatrice_banco_pavimento"));
+assert.ok(labPast.some((m) => m.machineKey === "forno_pasticceria_ventilato_piani"));
+
+// 2. env-pastry-laboratorio-gelateria -> pastorizzatore_miscele_gelato, mantecatore_gelato_artigianale, abbattitore_temperatura_pasticceria
+const labGel = suggestedWithPastryEnvs.filter((m) => m.targetEnvironmentId === "env-pastry-laboratorio-gelateria");
+assert.equal(labGel.length, 3, "env-pastry-laboratorio-gelateria deve associare 3 macchine");
+assert.ok(labGel.some((m) => m.machineKey === "pastorizzatore_miscele_gelato"));
+assert.ok(labGel.some((m) => m.machineKey === "mantecatore_gelato_artigianale"));
+assert.ok(labGel.some((m) => m.machineKey === "abbattitore_temperatura_pasticceria"));
+
+// 3. env-pastry-decorazione-cioccolateria -> dosatrice_riempitrice_creme, temperatrice_cioccolato_continua
+const labCiocc = suggestedWithPastryEnvs.filter((m) => m.targetEnvironmentId === "env-pastry-decorazione-cioccolateria");
+assert.equal(labCiocc.length, 2, "env-pastry-decorazione-cioccolateria deve associare 2 macchine");
+assert.ok(labCiocc.some((m) => m.machineKey === "dosatrice_riempitrice_creme"));
+assert.ok(labCiocc.some((m) => m.machineKey === "temperatrice_cioccolato_continua"));
+
+// 4. env-pastry-cella-frigo-materie-prime -> armadio_frigo_positivo_pasticceria
+const frigoPos = suggestedWithPastryEnvs.filter((m) => m.targetEnvironmentId === "env-pastry-cella-frigo-materie-prime");
+assert.equal(frigoPos.length, 1, "env-pastry-cella-frigo-materie-prime deve associare 1 macchina (frigo positivo)");
+assert.ok(frigoPos.some((m) => m.machineKey === "armadio_frigo_positivo_pasticceria"));
+
+// 5. env-pastry-cella-negativa-semifreddi -> armadio_congelatore_negativo_teglie
+const frigoNeg = suggestedWithPastryEnvs.filter((m) => m.targetEnvironmentId === "env-pastry-cella-negativa-semifreddi");
+assert.equal(frigoNeg.length, 1, "env-pastry-cella-negativa-semifreddi deve associare 1 macchina (congelatore negativo)");
+assert.ok(frigoNeg.some((m) => m.machineKey === "armadio_congelatore_negativo_teglie"));
+
+// 6. env-pastry-plonge-lavaggio-teglie -> lavastoviglie_lavaoggetti_capotta
+const plongePast = suggestedWithPastryEnvs.filter((m) => m.targetEnvironmentId === "env-pastry-plonge-lavaggio-teglie");
+assert.equal(plongePast.length, 1, "env-pastry-plonge-lavaggio-teglie deve associare 1 macchina (lavaoggetti capotta)");
+assert.ok(plongePast.some((m) => m.machineKey === "lavastoviglie_lavaoggetti_capotta"));
+
+// 7. env-pastry-area-vendita-banco-vetrine -> vetrina_refrigerata_pasticceria, vetrina_gelati_pozzetti_vaschette
+const venditaPast = suggestedWithPastryEnvs.filter((m) => m.targetEnvironmentId === "env-pastry-area-vendita-banco-vetrine");
+assert.equal(venditaPast.length, 2, "env-pastry-area-vendita-banco-vetrine deve associare 2 macchine (vetrina pasticceria, vetrina gelati)");
+assert.ok(venditaPast.some((m) => m.machineKey === "vetrina_refrigerata_pasticceria"));
+assert.ok(venditaPast.some((m) => m.machineKey === "vetrina_gelati_pozzetti_vaschette"));
+
+// 8. env-pastry-banco-caffetteria-snack -> macchina_caffe_bar_pasticceria, fabbricatore_ghiaccio_pasticceria
+const bancoCaffe = suggestedWithPastryEnvs.filter((m) => m.targetEnvironmentId === "env-pastry-banco-caffetteria-snack");
+assert.equal(bancoCaffe.length, 2, "env-pastry-banco-caffetteria-snack deve associare 2 macchine (caffè espresso, fabbricatore ghiaccio)");
+assert.ok(bancoCaffe.some((m) => m.machineKey === "macchina_caffe_bar_pasticceria"));
+assert.ok(bancoCaffe.some((m) => m.machineKey === "fabbricatore_ghiaccio_pasticceria"));
+
+// Verifica che tutte le 16 macchine suggerite abbiano sourceReason === 'environment'
+assert.equal(suggestedWithPastryEnvs.length, 16, "Tutti gli 8 ambienti devono censire la totalità delle 16 macchine senza esclusioni");
+assert.ok(
+  suggestedWithPastryEnvs.every((m) => m.sourceReason === "environment"),
+  "Tutte le macchine associate agli ambienti devono avere sourceReason === 'environment'",
+);
+
+// -------------------------------------------------------------
+// Test 66: Integrazione automatica macchine per ATECO 56.10.30 senza ambienti preventivi
+// -------------------------------------------------------------
+console.log("Test 66: Integrazione automatica macchine per ATECO 56.10.30 senza ambienti preventivi");
+const suggestedPastryOnlyAteco = getSuggestedMachinesForEnvironmentsAndAteco([], "56.10.30");
+assert.equal(suggestedPastryOnlyAteco.length, 16, "Devono essere suggerite tutte le 16 macchine della pasticceria/gelateria");
+assert.ok(
+  suggestedPastryOnlyAteco.every((m) => m.sourceReason === "ateco"),
+  "Tutte le macchine devono avere sourceReason === 'ateco' se nessun locale è stato specificato",
+);
+
+// Verifica fallback automatico identico per tutte le varianti di codice ATECO ("56.10.30", "56.10.3", "561030", "56103")
+for (const code of ["56.10.30", "56.10.3", "561030", "56103"]) {
+  const fallbackPastryRes = getSuggestedMachinesForEnvironmentsAndAteco([], code);
+  assert.equal(fallbackPastryRes.length, 16, `ATECO variant '${code}' deve restituire tutte le 16 macchine della pasticceria/gelateria`);
+  assert.ok(fallbackPastryRes.every((m) => m.sourceReason === "ateco"), `Tutte le macchine con ATECO variant '${code}' devono avere sourceReason === 'ateco'`);
 }
 
 console.log("=== TUTTI I TEST normativeMachineCatalog SUPERATI CON SUCCESSO! ===");

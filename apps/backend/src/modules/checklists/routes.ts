@@ -209,9 +209,36 @@ function buildAtecoVariants(atecoCode?: string | null) {
   if (normalized.startsWith("56.10.42") || digits.startsWith("561042")) {
     variants.add("FOOD_TRUCK");
   }
-  if (normalized.startsWith("56.10.30") || digits.startsWith("561030")) {
+
+  // Pasticcerie e Gelaterie artigianali con laboratorio (56.10.30, 56.10.3, 561030, 56103)
+  const isPastryGelateriaText =
+    upper === "PASTICCERIA" ||
+    upper === "PASTICCERIE" ||
+    upper === "GELATERIA" ||
+    upper === "GELATERIE" ||
+    upper === "PASTICCERIA_GELATERIA" ||
+    upper === "GELATERIA_PASTICCERIA" ||
+    upper === "PASTICCERIA GELATERIA" ||
+    upper === "GELATERIA PASTICCERIA" ||
+    upper === "LABORATORIO_PASTICCERIA" ||
+    upper === "LABORATORIO PASTICCERIA";
+
+  const isPastryGelateriaCode =
+    normalized.startsWith("56.10.3") ||
+    digits.startsWith("56103");
+
+  if (isPastryGelateriaCode || isPastryGelateriaText) {
+    variants.add("56.10.30");
+    variants.add("56.10.3");
+    variants.add("561030");
+    variants.add("56103");
     variants.add("PASTICCERIA_GELATERIA");
+    variants.add("PASTICCERIA");
+    variants.add("GELATERIA");
+    variants.add("HORECA");
+    variants.add("HO.RE.CA");
   }
+
   if (normalized.startsWith("56.10.20") || digits.startsWith("561020")) {
     variants.add("PIZZERIA_ASPORTO");
   }

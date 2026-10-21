@@ -1019,6 +1019,288 @@ export function getStandardEnvironmentsForAteco(atecoCode?: string): WorkEnviron
     ];
   }
 
+  // 0-undecies-quater-ter. Pasticcerie, Gelaterie Artigianali con Laboratorio e Somministrazione (56.10.30, 56.10.3, 561030, 56103)
+  const cleanAteco = ateco.replace(/[^0-9]/g, "");
+  if (
+    cleanAteco.startsWith("561030") ||
+    cleanAteco.startsWith("56103") ||
+    ateco.startsWith("56.10.30") ||
+    ateco.startsWith("56.10.3") ||
+    (atecoCode ?? "").startsWith("56.10.30") ||
+    (atecoCode ?? "").startsWith("56.10.3")
+  ) {
+    return [
+      {
+        id: "env-pastry-laboratorio-pasticceria",
+        key: "pastry_laboratorio_produzione_forni",
+        name: "Laboratorio Principale di Pasticceria, Forni & Cottura",
+        icon: "🥐",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 45,
+        heightM: 3.0,
+        volumeCuM: 135,
+        occupantsCount: 3,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 4.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          forcedExhaustType: "kitchen_hood",
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+        },
+      },
+      {
+        id: "env-pastry-laboratorio-gelateria",
+        key: "pastry_laboratorio_gelateria_mantecazione",
+        name: "Laboratorio di Gelateria, Miscelazione & Mantecazione",
+        icon: "🍨",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 30,
+        heightM: 3.0,
+        volumeCuM: 90,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 3.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+        },
+      },
+      {
+        id: "env-pastry-decorazione-cioccolateria",
+        key: "pastry_finitura_decorazione_cioccolateria",
+        name: "Area Finitura, Decorazione Dolci, Pralineria & Cake Design",
+        icon: "🎂",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 20,
+        heightM: 2.8,
+        volumeCuM: 56,
+        occupantsCount: 2,
+        emergencyExitsCount: 0,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          insectScreens: true,
+          microclimateCompliant: true,
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-pastry-cella-frigo-materie-prime",
+        key: "pastry_cella_frigo_materie_prime",
+        name: "Cella Frigorifera Materie Prime Deperibili (+4°C)",
+        icon: "🧊",
+        category: "storage",
+        isDefault: true,
+        surfaceSqM: 12,
+        heightM: 2.5,
+        volumeCuM: 30,
+        occupantsCount: 1,
+        emergencyExitsCount: 0,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("storage"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          emergencyLighting: true,
+          hasTrappedPersonAlarm: true,
+        },
+      },
+      {
+        id: "env-pastry-cella-negativa-semifreddi",
+        key: "pastry_cella_negativa_semifreddi_gelati",
+        name: "Cella Frigorifera / Congelatore Negativo Semifreddi e Gelati (-18°/-25°C)",
+        icon: "❄️",
+        category: "storage",
+        isDefault: true,
+        surfaceSqM: 12,
+        heightM: 2.5,
+        volumeCuM: 30,
+        occupantsCount: 1,
+        emergencyExitsCount: 0,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("storage"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          emergencyLighting: true,
+          hasTrappedPersonAlarm: true,
+        },
+      },
+      {
+        id: "env-pastry-dispensa-farine-zuccheri",
+        key: "pastry_deposito_merci_secche_farine",
+        name: "Magazzino / Deposito Merci Secche, Farine e Zuccheri",
+        icon: "📦",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 25,
+        heightM: 2.7,
+        volumeCuM: 67.5,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          shelvingCertified: true,
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+        },
+      },
+      {
+        id: "env-pastry-plonge-lavaggio-teglie",
+        key: "pastry_plonge_lavaggio_teglie_attrezzi",
+        name: "Plonge / Locale Lavaggio Teglie 60x40, Carapine e Attrezzi Laboratorio",
+        icon: "🧼",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 15,
+        heightM: 2.7,
+        volumeCuM: 40.5,
+        occupantsCount: 1,
+        emergencyExitsCount: 0,
+        windowSurfaceSqM: 1.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-pastry-area-vendita-banco-vetrine",
+        key: "pastry_area_vendita_banco_vetrine",
+        name: "Area Vendita, Cassa & Vetrina Espositiva Pasticceria Fresca e Gelati",
+        icon: "🏪",
+        category: "sales_office",
+        isDefault: true,
+        surfaceSqM: 40,
+        heightM: 3.2,
+        volumeCuM: 128,
+        occupantsCount: 3,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 6.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("sales_office"),
+          emergencyLighting: true,
+          antiShatterGlass: true,
+          emergencyExitsCount: 1,
+        },
+      },
+      {
+        id: "env-pastry-banco-caffetteria-snack",
+        key: "pastry_banco_caffetteria_somministrazione",
+        name: "Banco Caffetteria, Somministrazione Bevande & Colazioni",
+        icon: "☕",
+        category: "sales_office",
+        isDefault: true,
+        surfaceSqM: 25,
+        heightM: 3.0,
+        volumeCuM: 75,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 3.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("sales_office"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+        },
+      },
+      {
+        id: "env-pastry-sala-consumazione-tavoli",
+        key: "pastry_sala_consumazione_tavoli_dehors",
+        name: "Sala Consumazione / Dehors Clienti per Colazioni e Merende",
+        icon: "🪑",
+        category: "public",
+        isDefault: true,
+        surfaceSqM: 35,
+        heightM: 3.0,
+        volumeCuM: 105,
+        occupantsCount: 25,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 5.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("public"),
+          emergencyLighting: true,
+          antiShatterGlass: true,
+          emergencyExitsCount: 1,
+        },
+      },
+      {
+        id: "env-pastry-spogliatoi-servizi-personale",
+        key: "pastry_spogliatoi_servizi_personale_doccia",
+        name: "Spogliatoi e Servizi Igienici del Personale con Doccia",
+        icon: "🚻",
+        category: "changing_rooms",
+        isDefault: true,
+        surfaceSqM: 18,
+        heightM: 2.4,
+        volumeCuM: 43.2,
+        occupantsCount: 6,
+        emergencyExitsCount: 0,
+        windowSurfaceSqM: 1.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("changing_rooms"),
+          wallsCondition: "washable_sanitizable_2m",
+          flooringCondition: "compliant_anti_slip",
+          forcedExhaustPresent: true,
+          forcedExhaustType: "blind_toilet_fan",
+          emergencyLighting: true,
+        },
+      },
+      {
+        id: "env-pastry-locale-tecnico-compressori",
+        key: "pastry_locale_tecnico_compressori_rifiuti",
+        name: "Locale Tecnico / Vano Compressori Centralizzati & Deposito Rifiuti",
+        icon: "⚙️",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 15,
+        heightM: 2.5,
+        volumeCuM: 37.5,
+        occupantsCount: 1,
+        emergencyExitsCount: 0,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          emergencyLighting: true,
+          flooringCondition: "compliant_anti_slip",
+          forcedExhaustPresent: true,
+        },
+      },
+    ];
+  }
+
   // 0-ter. Ristorazione con somministrazione (56.10.11, 56.10.1, 56.10.10 - Ristoranti, Trattorie, Osterie)
   if (ateco.startsWith("561011") || ateco.startsWith("56101")) {
     return [
@@ -2779,7 +3061,6 @@ export function getStandardEnvironmentsForAteco(atecoCode?: string): WorkEnviron
   }
 
   // 0-undecies-quater-bis. Discoteche, Sale da Ballo, Night-Club e Locali Serali (93.29.10, 93.29.1, 932910, 93291)
-  const cleanAteco = ateco.replace(/[^0-9]/g, "");
   if (
     cleanAteco.startsWith("932910") ||
     cleanAteco.startsWith("93291") ||
@@ -5219,6 +5500,31 @@ export function evaluateEnvironmentCompliance(
     env.key.includes("cmp_villaggio_case_mobili")
   ) {
     minHeightRequired = 2.5; // 2,50 m per bungalow turistici e case mobili prefabbricate (D.M. 05/07/1975 e norme regionali)
+  } else if (
+    env.id.includes("pastry-cella") ||
+    env.key.includes("pastry_cella")
+  ) {
+    minHeightRequired = 2.4; // 2,40 m per celle frigorifere prefabbricate (h = 2,50m -> conforme)
+  } else if (
+    env.id.includes("pastry-plonge") ||
+    env.key.includes("pastry_plonge")
+  ) {
+    minHeightRequired = 2.7; // 2,70 m per plonge e lavaggio teglie (h = 2,70m -> conforme)
+  } else if (
+    env.id.includes("pastry-decorazione") ||
+    env.key.includes("pastry_finitura")
+  ) {
+    minHeightRequired = 2.7; // 2,70 m per area finitura dolci e cioccolateria (h = 2,80m -> conforme)
+  } else if (
+    env.id.includes("pastry-laboratorio") ||
+    env.key.includes("pastry_laboratorio")
+  ) {
+    minHeightRequired = 3.0; // 3,00 m per laboratori principali di produzione pasticceria e gelateria (h = 3,00m -> conforme)
+  } else if (
+    env.id.includes("pastry-dispensa") ||
+    env.key.includes("pastry_deposito")
+  ) {
+    minHeightRequired = 2.7; // 2,70 m per deposito merci secche e farine (h = 2,70m -> conforme)
   } else if (env.category === "production" || env.category === "warehouse" || env.category === "storage") {
     minHeightRequired = 3.0; // 3,00 m per locali industriali, stoccaggio e lavorazioni
   } else if (env.category === "services" || env.category === "changing_rooms" || env.category === "technical") {
@@ -7736,6 +8042,221 @@ export function evaluateEnvironmentCompliance(
     });
   }
 
+  // 13. Regole ad hoc per Pasticcerie, Gelaterie Artigianali con Laboratorio e Somministrazione (56.10.30)
+  // a) Laboratorio Principale Pasticceria, Forni & Cottura
+  const isPastryLabPastry =
+    env.id === "env-pastry-laboratorio-pasticceria" ||
+    env.key === "pastry_laboratorio_produzione_forni" ||
+    (env.id.includes("pastry-laboratorio-pasticceria") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("56103") ?? false));
+  if (isPastryLabPastry) {
+    if (height >= 3.0) {
+      summaryBadges.push({
+        text: "🥐 Laboratorio pasticceria a norma: cappa fumi filtri labirinto inox & sfogliatrice protetta (UNI EN 1674)",
+        status: "success",
+      });
+    } else if (height >= 2.7) {
+      summaryBadges.push({
+        text: "🥐 Laboratorio pasticceria con deroga ASL: altezza ≥ 2,70m con VMC e cappa forni",
+        status: "warning",
+      });
+    }
+    summaryBadges.push({
+      text: "🚿 Lavamani comando non manuale a ginocchio/pedale con sapone antibatterico (Reg. CE 852/04)",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🛡️ Piani di lavoro inox AISI 304 conformi MOCA (Reg. CE 1935/2004)",
+      status: "info",
+    });
+  }
+
+  // b) Laboratorio Gelateria, Miscelazione & Mantecazione
+  const isPastryLabGelato =
+    env.id === "env-pastry-laboratorio-gelateria" ||
+    env.key === "pastry_laboratorio_gelateria_mantecazione" ||
+    (env.id.includes("pastry-laboratorio-gelateria") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("56103") ?? false));
+  if (isPastryLabGelato) {
+    if (height >= 3.0) {
+      summaryBadges.push({
+        text: "🍨 Laboratorio gelateria a norma: pastorizzatore con registrazione HACCP & mantecatore continuo",
+        status: "success",
+      });
+    } else if (height >= 2.7) {
+      summaryBadges.push({
+        text: "🍨 Laboratorio gelateria con deroga ASL: altezza ≥ 2,70m con VMC",
+        status: "warning",
+      });
+    }
+    summaryBadges.push({
+      text: "🚿 Vasca e lavello carapine con comando non manuale & canaletta inox sifonata",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "❄️ Abbattitore rapido di temperatura positivo/negativo con sonda al cuore conforme HACCP",
+      status: "info",
+    });
+  }
+
+  // c) Area Finitura, Decorazione Dolci, Pralineria & Cake Design
+  const isPastryDecorazione =
+    env.id === "env-pastry-decorazione-cioccolateria" ||
+    env.key === "pastry_finitura_decorazione_cioccolateria" ||
+    (env.id.includes("pastry-decorazione") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("56103") ?? false));
+  if (isPastryDecorazione) {
+    summaryBadges.push({
+      text: "🎂 Area decorazione e cioccolateria: microclima controllato (18-20°C, UR < 50%)",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🍫 Piani in granito alimentare e dosatrici creme con beccucci inox MOCA",
+      status: "info",
+    });
+  }
+
+  // d) Cella Frigorifera Materie Prime Deperibili (+4°C)
+  const isPastryColdRoomPos =
+    env.id === "env-pastry-cella-frigo-materie-prime" ||
+    env.key === "pastry_cella_frigo_materie_prime" ||
+    (env.id.includes("pastry-cella-frigo") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("56103") ?? false));
+  if (isPastryColdRoomPos) {
+    summaryBadges.push({
+      text: "🧊 Cella frigorifera (+4°C): teletermometro continuo HACCP con allarme fuori soglia",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "📦 Scaffalature forate MOCA sollevate ≥ 15 cm & maniglia interna antintrappolamento luminescente",
+      status: "info",
+    });
+  }
+
+  // e) Cella Frigorifera / Congelatore Negativo Semifreddi e Gelati (-18°/-25°C)
+  const isPastryColdRoomNeg =
+    env.id === "env-pastry-cella-negativa-semifreddi" ||
+    env.key === "pastry_cella_negativa_semifreddi_gelati" ||
+    (env.id.includes("pastry-cella-negativa") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("56103") ?? false));
+  if (isPastryColdRoomNeg) {
+    summaryBadges.push({
+      text: "❄️ Cella negativa semifreddi e gelati (-18°/-25°C): pulsante luminoso uomo intrappolato e sirena UNI EN 378",
+      status: "danger",
+    });
+    summaryBadges.push({
+      text: "🚪 Porta cella con resistenza termica anticongelamento e termoregistratore UNI EN 12830",
+      status: "info",
+    });
+  }
+
+  // f) Magazzino / Deposito Merci Secche, Farine e Zuccheri
+  const isPastryDispensa =
+    env.id === "env-pastry-dispensa-farine-zuccheri" ||
+    env.key === "pastry_deposito_merci_secche_farine" ||
+    (env.id.includes("pastry-dispensa") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("56103") ?? false));
+  if (isPastryDispensa) {
+    summaryBadges.push({
+      text: "📦 Merci secche: sacchi farina e zuccheri su pedane sollevate ≥ 15 cm da terra",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🪤 Monitoraggio infestanti: trappole a feromoni tarme della farina e lampada UV",
+      status: "info",
+    });
+  }
+
+  // g) Plonge / Locale Lavaggio Teglie 60x40, Carapine e Attrezzi Laboratorio
+  const isPastryPlonge =
+    env.id === "env-pastry-plonge-lavaggio-teglie" ||
+    env.key === "pastry_plonge_lavaggio_teglie_attrezzi" ||
+    (env.id.includes("pastry-plonge") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("56103") ?? false));
+  if (isPastryPlonge) {
+    summaryBadges.push({
+      text: "🧼 Plonge lavaggio: lavastoviglie lavaoggetti capotta teglie 60x40 con risciacquo 85°C DIN 10512",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🚰 Dispositivo antiriflusso Break Tank UNI EN 1717 & cappa estrazione vapore",
+      status: "info",
+    });
+  }
+
+  // h) Area Vendita, Cassa & Vetrina Espositiva Pasticceria Fresca e Gelati
+  const isPastryAreaVendita =
+    env.id === "env-pastry-area-vendita-banco-vetrine" ||
+    env.key === "pastry_area_vendita_banco_vetrine" ||
+    (env.id.includes("pastry-area-vendita") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("56103") ?? false));
+  if (isPastryAreaVendita) {
+    summaryBadges.push({
+      text: "🏪 Vetrina refrigerata (+4°C) e pozzetti gelato (-14°C) con cristalli parafiato igienici",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "📋 Cartello unico e registro degli allergeni ben visibile ai clienti (Reg. UE 1169/2011)",
+      status: "warning",
+    });
+  }
+
+  // i) Banco Caffetteria, Somministrazione Bevande & Colazioni
+  const isPastryBancoBar =
+    env.id === "env-pastry-banco-caffetteria-snack" ||
+    env.key === "pastry_banco_caffetteria_somministrazione" ||
+    (env.id.includes("pastry-banco-caffetteria") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("56103") ?? false));
+  if (isPastryBancoBar) {
+    summaryBadges.push({
+      text: "☕ Macchina caffè certificata PED, lancia Cool-Touch e battifiltro fonoassorbente",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🥛 Lavabicchieri sottobanco risciacquo 85°C con dosatori detersivo MOCA",
+      status: "info",
+    });
+  }
+
+  // j) Sala Consumazione / Dehors Clienti per Colazioni e Merende
+  const isPastrySala =
+    env.id === "env-pastry-sala-consumazione-tavoli" ||
+    env.key === "pastry_sala_consumazione_tavoli_dehors" ||
+    (env.id.includes("pastry-sala-consumazione") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("56103") ?? false));
+  if (isPastrySala) {
+    summaryBadges.push({
+      text: "🪑 Sala consumazione: vie di esodo libere ≥ 0,90-1,20m ed estintore omologato 34A 233B",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "✨ Protocollo di disinfezione tavoli tra clienti con igienizzante MOCA",
+      status: "info",
+    });
+  }
+
+  // k) Spogliatoi e Servizi Igienici del Personale con Doccia
+  const isPastrySpogliatoi =
+    env.id === "env-pastry-spogliatoi-servizi-personale" ||
+    env.key === "pastry_spogliatoi_servizi_personale_doccia" ||
+    (env.id.includes("pastry-spogliatoi") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("56103") ?? false));
+  if (isPastrySpogliatoi) {
+    summaryBadges.push({
+      text: "🚻 Spogliatoi personale: armadietti individuali doppi sporco/pulito (D.Lgs. 81/08 All. IV)",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🧼 Antibagno con lavamani a comando non manuale e salviette a perdere",
+      status: "info",
+    });
+  }
+
+  // l) Locale Tecnico / Vano Compressori Centralizzati & Deposito Rifiuti
+  const isPastryLocaleTecnico =
+    env.id === "env-pastry-locale-tecnico-compressori" ||
+    env.key === "pastry_locale_tecnico_compressori_rifiuti" ||
+    (env.id.includes("pastry-locale-tecnico") && (atecoCode?.replace(/[^0-9]/g, "").startsWith("56103") ?? false));
+  if (isPastryLocaleTecnico) {
+    summaryBadges.push({
+      text: "⚙️ Vano compressori con aerazione permanente verso l'esterno conforme UNI EN 378",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "💧 Impianto addolcitore/filtro a resine conforme D.Lgs. 18/2023 & bidoni differenziata ermetici",
+      status: "info",
+    });
+  }
+
   return {
     isHeightCompliant,
     minHeightRequired,
@@ -7804,6 +8325,8 @@ export function generateEnvironmentChecklistItems(
       env.key.includes("mensa_") ||
       env.id.includes("cat-") ||
       env.key.includes("cat_") ||
+      env.id.includes("pastry-") ||
+      env.key.includes("pastry_") ||
       env.id.includes("ft-") ||
       env.key.includes("ft_") ||
       env.id.includes("gelamb-") ||
@@ -7985,6 +8508,8 @@ export function generateEnvironmentChecklistItems(
   ) {
     const isFoodSector =
       isFoodEnv ||
+      env.id.includes("pastry") ||
+      env.key.includes("pastry") ||
       env.id.includes("rist") ||
       env.id.includes("super") ||
       env.id.includes("iper") ||
@@ -14813,6 +15338,676 @@ export function generateEnvironmentChecklistItems(
       categoryTag: "cpi",
       suggestedNonConformity:
         "Batterie del soccorritore/UPS esaurite, con autonomia sotto le 2 ore prescritte o mancata effettuazione della prova periodica di scarica.",
+    });
+  }
+
+  // ============================================================================
+  // Regole Checklist per Pasticcerie, Gelaterie Artigianali con Laboratorio e Somministrazione (56.10.30)
+  // ============================================================================
+
+  // a) Laboratorio Principale di Pasticceria, Forni & Cottura
+  if (env.id === "env-pastry-laboratorio-pasticceria" || env.id.includes("pastry-laboratorio-pasticceria")) {
+    items.push({
+      id: `${env.id}-cappa-aspirazione-forni-labirinto`,
+      area: env.name,
+      title: "Cappa di Aspirazione Fumi e Vapori Forni con Filtri a Labirinto Inox",
+      question:
+        "I forni di pasticceria e le zone di cottura su fuochi/piastre sono sovrastati da cappa aspirante compensata con filtri a labirinto in acciaio inox conformi, con registro di pulizia periodica e scarico canalizzato a tetto?",
+      normReference: "D.Lgs. 81/2008 All. IV p.to 1.9 e Reg. CE 852/2004 All. II Cap. I",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Cappa aspirante con filtri intasati di grassi/fuliggine o priva di tiraggio sufficiente con dispersione di fumi e calore nel laboratorio.",
+    });
+
+    items.push({
+      id: `${env.id}-forni-pasticceria-sicurezza-termoisolante`,
+      area: env.name,
+      title: "Forni Pasticceria Elettrici/Gas con Scarico Vapori e Protezioni Termiche",
+      question:
+        "I forni da pasticceria (a piani o rotativi/ventilati) sono provvisti di sportelli con vetri termoisolanti antiurto, guarnizioni stagne, sfiato vapori efficiente e pulsante di arresto di emergenza facilmente accessibile?",
+      normReference: "D.Lgs. 81/2008 Titolo III artt. 70-71 e All. V, Direttiva Macchine 2006/42/CE",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "macchine",
+      suggestedNonConformity:
+        "Sportelli forni con vetri danneggiati, guarnizioni usurate con fuoriuscita di vapori bollenti o pulsante di arresto rapido non funzionante.",
+    });
+
+    items.push({
+      id: `${env.id}-sfogliatrice-ripari-salvamani-interblocco`,
+      area: env.name,
+      title: "Sfogliatrice con Ripari Mobili Interbloccati Salvamani (UNI EN 1674)",
+      question:
+        "La sfogliatrice per pasta sfoglia/croissant è provvista di griglie o ripari salvamani sui cilindri di laminazione collegati a microinterruttore di sicurezza che arresta istantaneamente i rulli in caso di sollevamento accidentale (UNI EN 1674)?",
+      normReference: "Norma UNI EN 1674, D.Lgs. 81/2008 art. 71 e Allegato V",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "macchine",
+      suggestedNonConformity:
+        "Sfogliatrice priva di riparo mobile interbloccato o con microinterruttore manomesso con grave rischio di schiacciamento e trascinamento arti superiori.",
+    });
+
+    items.push({
+      id: `${env.id}-tavoli-lavoro-inox-moca`,
+      area: env.name,
+      title: "Banchi e Tavoli di Lavoro in Acciaio Inox AISI 304 Conformi MOCA",
+      question:
+        "I piani di lavoro, le spianatoie e i tavoli del laboratorio sono realizzati in acciaio inox AISI 304 certificato per contatto con alimenti (MOCA), lisci, privi di spigoli vivi o fessure in cui possano annidarsi residui di farina e grassi?",
+      normReference: "Reg. CE 1935/2004 (MOCA), Reg. CE 852/2004 All. II Cap. V",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Banchi da lavoro con superfici deteriorate, corrose o non idonee al contatto con alimenti con rischio di contaminazione chimica e batterica.",
+    });
+
+    items.push({
+      id: `${env.id}-lavamani-comando-non-manuale-sapone`,
+      area: env.name,
+      title: "Lavamani a Comando Non Manuale con Sapone Disinfettante e Carta a Perdere",
+      question:
+        "È presente un lavamani dedicato per il personale ad azionamento a ginocchio o pedale, provvisto di acqua calda e fredda miscelata, dispenser di sapone antibatterico, salviette monouso e cestino con coperchio a pedale?",
+      normReference: "Reg. CE 852/2004 All. II Cap. I punto 4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Lavamani a comando manuale o privo di erogatore di sapone liquido battericida e asciugamani a perdere monouso.",
+    });
+  }
+
+  // b) Laboratorio di Gelateria, Miscelazione & Mantecazione
+  if (env.id === "env-pastry-laboratorio-gelateria" || env.id.includes("pastry-laboratorio-gelateria")) {
+    items.push({
+      id: `${env.id}-pastorizzatore-miscele-termoregistrazione-haccp`,
+      area: env.name,
+      title: "Pastorizzatore Miscele Gelato con Termoregistrazione HACCP (+85°C/+4°C)",
+      question:
+        "Il pastorizzatore è dotato di sistema di registrazione continua del ciclo termico (riscaldamento a +85°C e rapido raffreddamento a +4°C) con display visibile e allarme di mancato raggiungimento della temperatura conforme HACCP?",
+      normReference: "Reg. CE 852/2004 All. II Cap. IX e Reg. CE 853/2004 All. III Sez. IX",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Pastorizzatore privo di termoregistrazione o con ciclo termico non conforme ai parametri microbiologici di sicurezza HACCP per latte e uova.",
+    });
+
+    items.push({
+      id: `${env.id}-mantecatore-gelato-interblocco-protezioni`,
+      area: env.name,
+      title: "Mantecatore Continuo per Gelato con Dispositivi di Protezione e Blocco (UNI EN 2006/42)",
+      question:
+        "Il mantecatore dispone di tramoggia con griglia di protezione fissa o interbloccata per impedire l'accesso accidentale alla pala rotante del cilindro, pulsante a fungo d'emergenza e interblocco all'apertura del portello frontale?",
+      normReference: "D.Lgs. 81/2008 All. V e Direttiva Macchine 2006/42/CE",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "macchine",
+      suggestedNonConformity:
+        "Griglia di protezione tramoggia mantecatore rimossa o microinterruttore di sicurezza sportello bypassato con rischio cesoiamento dita.",
+    });
+
+    items.push({
+      id: `${env.id}-abbattitore-temperatura-rapido-sonda`,
+      area: env.name,
+      title: "Abbattitore di Temperatura Rapido Positivo/Negativo (+90°C -> +3°C / -18°C)",
+      question:
+        "È presente un abbattitore rapido di temperatura con sonda al cuore tarata, in grado di portare il gelato o i preparati caldi a +3°C in meno di 90 minuti o a -18°C in meno di 240 minuti, con registro sanificazione e manutenzione?",
+      normReference: "Reg. CE 852/2004 All. II Cap. IX e Linee Guida HACCP",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Abbattitore rapido non funzionante o privo di registrazione dei cicli di abbattimento con rischio di proliferazione batterica da spore termoresistenti.",
+    });
+
+    items.push({
+      id: `${env.id}-vasca-lavello-carapine-non-manuale`,
+      area: env.name,
+      title: "Vasca e Lavello per Porzionatori e Carapine con Comando Non Manuale",
+      question:
+        "Il reparto gelateria dispone di apposito lavello e vasca per il risciacquo igienico delle carapine e porzionatori gelato dotato di rubinetteria a comando non manuale e scarico sifonato con griglia rimovibile?",
+      normReference: "Reg. CE 852/2004 All. II Cap. II p.to 2 e Cap. V",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Lavello lavaggio carapine e porzionatori con rubinetteria manuale o assenza di idoneo disinfettante alimentare tra utilizzi successivi.",
+    });
+
+    items.push({
+      id: `${env.id}-pavimento-antiscivolo-canaletta-sifonata`,
+      area: env.name,
+      title: "Pavimentazione Antiscivolo R11 e Canaletta Inox Sifonata per Gelateria",
+      question:
+        "Il pavimento del laboratorio gelateria presenta classificazione antiscivolo minima R11/R12 con pendenza adeguata verso canalina di scarico in acciaio inox sifonata con cestello estraibile per evitare pozzanghere scivolose di acqua e latte?",
+      normReference: "D.Lgs. 81/2008 All. IV p.to 1.3 e Reg. CE 852/2004 All. II Cap. II",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "pavimenti_pareti",
+      suggestedNonConformity:
+        "Pavimentazione liscia con ristagno di acqua di lavorazione e residui di miscele gelato priva di canalina sifonata, con pericolo grave di caduta.",
+    });
+  }
+
+  // c) Area Finitura, Decorazione Dolci, Pralineria & Cake Design
+  if (env.id === "env-pastry-decorazione-cioccolateria" || env.id.includes("pastry-decorazione")) {
+    items.push({
+      id: `${env.id}-microclima-condizionamento-temperatura-umidita`,
+      area: env.name,
+      title: "Microclima e Condizionamento Termoigrometrico Controllato (18-20°C / UR < 50%)",
+      question:
+        "L'area decorazione e temperaggio dispone di impianto di climatizzazione a temperatura controllata (18-20°C) e deumidificazione attiva (UR < 50%) per la lavorazione del cioccolato e della pasta di zucchero, con filtri d'aria regolarmente sanificati?",
+      normReference: "D.Lgs. 81/2008 All. IV p.to 1.9 e Reg. CE 852/2004 All. II Cap. I",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "microclima",
+      suggestedNonConformity:
+        "Temperatura o umidità eccessiva nel locale con condensa sui prodotti finiti e deterioramento delle caratteristiche chimico-fisiche del cioccolato.",
+    });
+
+    items.push({
+      id: `${env.id}-piani-temperaggio-granito-inox-moca`,
+      area: env.name,
+      title: "Piani Granito/Acciaio Inox AISI 304 per Temperaggio e Modellaggio MOCA",
+      question:
+        "I piani per il temperaggio manuale e la lavorazione del cioccolato sono in lastra di granito alimentare levigato o acciaio inox AISI 304 certificato MOCA, esenti da crepe, fessure o scheggiature?",
+      normReference: "Reg. CE 1935/2004 (MOCA) e Reg. CE 852/2004 All. II Cap. V",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Piani di temperaggio fessurati o con porosità che impediscono la completa igienizzazione tra una lavorazione e l'altra.",
+    });
+
+    items.push({
+      id: `${env.id}-dosatrici-creme-beccucci-inox-moca`,
+      area: env.name,
+      title: "Dosatrici, Sac-à-Poche e Beccucci per Creme in Materiali MOCA e Sanificazione",
+      question:
+        "Le dosatrici pneumatiche o manuali, sac-à-poche e beccucci decoratori sono conformi MOCA, sanificabili ad alta temperatura o monouso certificati, per prevenire proliferazioni microbiche nelle creme e glasse?",
+      normReference: "Reg. CE 1935/2004 e Reg. CE 852/2004 All. II Cap. V",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Utensili e beccucci dosatori incrostati o sac-à-poche riutilizzabili non adeguatamente sterilizzati dopo l'uso con creme all'uovo.",
+    });
+
+    items.push({
+      id: `${env.id}-aerografo-colori-alimentari-aspirazione`,
+      area: env.name,
+      title: "Cabina/Aspirazione o Aerografo Alimentare e Sicurezza Utilizzo Colori",
+      question:
+        "L'applicazione di colori alimentari tramite aerografo/spray avviene in postazione provvista di captazione localizzata o aspirazione idonea ad evitare dispersione aerosol nell'aria del laboratorio, con impiego esclusivo di coloranti alimentari conformi?",
+      normReference: "D.Lgs. 81/2008 Titolo IX Sostanze Pericolose e Reg. CE 1333/2008",
+      defaultSeverity: 2,
+      defaultSanctionable: false,
+      domain: "both",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Uso di aerografo alimentare senza captazione con dispersione di pulviscolo colorante respirabile nell'ambiente o coloranti privi di tracciabilità.",
+    });
+  }
+
+  // d) Cella Frigorifera Materie Prime Deperibili (+4°C)
+  if (env.id === "env-pastry-cella-frigo-materie-prime" || env.id.includes("pastry-cella-frigo")) {
+    items.push({
+      id: `${env.id}-teletermometro-digitale-allarme-fuori-soglia`,
+      area: env.name,
+      title: "Teletermometro Digitale HACCP e Allarmi Temperatura Fuori Soglia (+4°C)",
+      question:
+        "La cella frigorifera è dotata di termometro digitale esterno visibile, con registrazione continua delle temperature e allarme di deviazione per latte fresco, uova pastorizzate, burro, lievito e preparati (+0°C / +4°C)?",
+      normReference: "Reg. CE 852/2004 All. II Cap. IX e Reg. CE 37/2005",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "temperatura",
+      suggestedNonConformity:
+        "Teletermometro digitale della cella non funzionante, privo di allarme o temperatura interna superiore a +4°C con interruzione catena del freddo.",
+    });
+
+    items.push({
+      id: `${env.id}-scaffalature-forate-moca-rialzate-15cm`,
+      area: env.name,
+      title: "Scaffalature Forate in Plastica/Alluminio MOCA Rialzate ≥ 15 cm da Terra",
+      question:
+        "Le merci deperibili sono collocate su scaffalature a ripiani forati igienici amovibili conformi MOCA, sollevate ad almeno 15 cm dal pavimento e distanziate dalle pareti per consentire la perfetta circolazione dell'aria e la pulizia del fondo?",
+      normReference: "Reg. CE 852/2004 All. II Cap. IX e Reg. CE 1935/2004",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "stoccaggio",
+      suggestedNonConformity:
+        "Contenitori e materie prime deperibili poggiati direttamente sul pavimento della cella frigorifera o su ripiani arrugginiti non conformi MOCA.",
+    });
+
+    items.push({
+      id: `${env.id}-maniglia-interna-antintrappolamento-luminescente`,
+      area: env.name,
+      title: "Maniglia Interna di Sicurezza Antintrappolamento Luminescente",
+      question:
+        "La porta della cella frigorifera è provvista di maniglia interna di sicurezza fosforescente o pulsante di apertura di emergenza dall'interno anche con porta chiusa a chiave dall'esterno?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.4 e punto 1.11, Norma UNI EN 378",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "emergenza",
+      suggestedNonConformity:
+        "Maniglia interna di sicurezza antintrappolamento della cella frigorifera bloccata, rotta o mancante con rischio di reclusione involontaria del lavoratore.",
+    });
+  }
+
+  // e) Cella Frigorifera / Congelatore Negativo Semifreddi e Gelati (-18°/-25°C)
+  if (env.id === "env-pastry-cella-negativa-semifreddi" || env.id.includes("pastry-cella-negativa")) {
+    items.push({
+      id: `${env.id}-allarme-uomo-intrappolato-uni-en-378`,
+      area: env.name,
+      title: "Allarme Uomo Intrappolato a Pulsante Luminoso con Sirena Esterna (UNI EN 378)",
+      question:
+        "La cella a bassa temperatura (-18°C / -25°C) è dotata di pulsante luminoso di allarme uomo intrappolato interno ad altezza uomo collegato a segnalatore ottico-acustico esterno con alimentazione di soccorso autonoma conforme a UNI EN 378?",
+      normReference: "Norma UNI EN 378-1/2/3, D.Lgs. 81/2008 Allegato IV punto 1.11",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "emergenza",
+      suggestedNonConformity:
+        "Dispositivo di allarme uomo intrappolato guasto, sirena esterna non udibile o batterie di back-up esaurite con grave rischio letale da congelamento.",
+    });
+
+    items.push({
+      id: `${env.id}-resistenza-anticongelamento-valvola-compensazione`,
+      area: env.name,
+      title: "Resistenza Termica Elettrica Anticongelamento Guarnizione e Valvola di Compensazione",
+      question:
+        "Il battente della porta della cella negativa è provvisto di resistenza elettrica perimetrale perfettamente funzionante per impedire il blocco da ghiaccio della guarnizione e di valvola di compensazione delle pressioni barometriche?",
+      normReference: "Norma UNI EN 378 e D.Lgs. 81/2008 Allegato IV punto 1.4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "impianti",
+      suggestedNonConformity:
+        "Resistenza elettrica del portone guasta con accumulo di ghiaccio, blocco della chiusura o valvola di compensazione intasata che impedisce l'apertura.",
+    });
+
+    items.push({
+      id: `${env.id}-termoregistratore-continuo-catena-freddo`,
+      area: env.name,
+      title: "Termoregistratore Continuo e Monitoraggio Catena del Freddo (-18°C / -25°C)",
+      question:
+        "La conservazione di semifreddi, torte gelato, vaschette e monoporzioni è presidiata da registratore di temperatura conforme alla norma UNI EN 12830 con allarme ottico per black-out o anomalie del circuito frigorifero?",
+      normReference: "Reg. CE 852/2004 All. II Cap. IX, Reg. CE 37/2005 e UNI EN 12830",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "temperatura",
+      suggestedNonConformity:
+        "Temperatura del congelatore superiore a -15°C con scongelamento parziale dei semifreddi e gelati e mancata registrazione dei grafici termici HACCP.",
+    });
+  }
+
+  // f) Magazzino / Deposito Merci Secche, Farine e Zuccheri
+  if (env.id === "env-pastry-dispensa-farine-zuccheri" || env.id.includes("pastry-dispensa")) {
+    items.push({
+      id: `${env.id}-stoccaggio-sacchi-pedane-sollevate-asciutto`,
+      area: env.name,
+      title: "Stoccaggio Sacchi Farina e Zuccheri su Pedane Sollevate ≥ 15 cm e Locali Asciutti",
+      question:
+        "I sacchi di farina, fecola, zuccheri e materie prime secche sono stoccati su bancali in plastica o scaffalature metalliche sollevate di almeno 15 cm dal pavimento, distanziati dalle pareti per aerazione e prevenzione di muffe e umidità?",
+      normReference: "Reg. CE 852/2004 All. II Cap. I e Cap. IX, D.Lgs. 81/2008 All. IV p.to 1.4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "stoccaggio",
+      suggestedNonConformity:
+        "Sacchi di farina o zucchero accatastati direttamente a terra a contatto col pavimento o addossati a pareti umide.",
+    });
+
+    items.push({
+      id: `${env.id}-lampada-uv-trappole-feromoni-tarme`,
+      area: env.name,
+      title: "Monitoraggio Infestanti con Lampada UV ed Esche a Feromoni per Tarme della Farina",
+      question:
+        "Il locale deposito farine dispone di trappole a feromoni per insetti delle derrate (Plodia interpunctella/Ephestia kuehniella), lampada UV a piastra collante (non a folgorazione) e postazioni di monitoraggio roditori numerate e mappate?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo IX punto 4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "infestanti",
+      suggestedNonConformity:
+        "Mancanza di trappole per monitoraggio insetti delle farine o presenza di farfalline/tarme visibili tra le confezioni di stoccaggio.",
+    });
+
+    items.push({
+      id: `${env.id}-scaffalature-cartelli-portata-antiribaltamento`,
+      area: env.name,
+      title: "Scaffalature con Cartelli Portata Massima e Fissaggio Antiribaltamento",
+      question:
+        "Le scaffalature industriali/metalliche destinate a fardelli, cartoni e contenitori di materie prime recano cartelli ben visibili indicanti la portata massima per campata e ripiano (UNI EN 15635) e sono ancorate saldamente a parete o pavimento?",
+      normReference: "D.Lgs. 81/2008 art. 71, Allegato IV punto 1.4 e UNI EN 15635",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "scaffali",
+      suggestedNonConformity:
+        "Scaffali privi di targa di portata massima ammissibile, sovraccarichi o non vincolati alla parete con rischio ribaltamento.",
+    });
+  }
+
+  // g) Plonge / Locale Lavaggio Teglie 60x40, Carapine e Attrezzi Laboratorio
+  if (env.id === "env-pastry-plonge-lavaggio-teglie" || env.id.includes("pastry-plonge")) {
+    items.push({
+      id: `${env.id}-lavaoggetti-teglie-carapine-risciacquo-85c`,
+      area: env.name,
+      title: "Lavaoggetti Industriale per Teglie 60x40 e Carapine con Risciacquo a 85°C (DIN 10512)",
+      question:
+        "La lavastoviglie lavaoggetti a capotta o vasca gigante per teglie 60x40 cm e attrezzature da pasticceria garantisce la temperatura di risciacquo igienico ad alta temperatura (≥ 85°C) conforme a DIN 10512 con termometro visibile?",
+      normReference: "Norma DIN 10512, Reg. CE 852/2004 All. II Cap. V",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Lavaoggetti con temperatura di risciacquo inferiore a 85°C o assenza di dosatore automatico del detergente sanificante.",
+    });
+
+    items.push({
+      id: `${env.id}-disconnessione-idrica-break-tank-uni-en-1717`,
+      area: env.name,
+      title: "Dispositivo di Disconnessione Idrica Break Tank Antiriflusso (UNI EN 1717)",
+      question:
+        "La macchina lavaoggetti e la rete idrica di lavaggio sono protette da dispositivo di disconnessione idrica a caduta libera con camera d'aria Break Tank certificato conforme UNI EN 1717 per impedire qualsiasi reflusso di detergenti nella rete potabile?",
+      normReference: "Norma UNI EN 1717, D.Lgs. 18/2023 (acque potabili) e Reg. CE 852/04",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "impianti",
+      suggestedNonConformity:
+        "Assenza di dispositivo di disconnessione idrica antiriflusso Break Tank sulla lavaoggetti con pericolo di contaminazione della rete idrica potabile.",
+    });
+
+    items.push({
+      id: `${env.id}-vasca-doppio-bacino-doccione-prelavaggio`,
+      area: env.name,
+      title: "Vasca Inox Gigante a Due Buche con Doccione di Prelavaggio e Paraspruzzi",
+      question:
+        "La plonge dispone di vasca lavello in acciaio inox AISI 304 dimensionata per teglie pasticceria 60x40 cm con doppio bacino, doccione orientabile di prelavaggio con molla e comandi privi di perdite o ristagni d'acqua?",
+      normReference: "Reg. CE 852/2004 All. II Cap. II punto 2 e Cap. V",
+      defaultSeverity: 2,
+      defaultSanctionable: false,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Vasca di lavaggio sottodimensionata per teglie 60x40 con sversamento d'acqua a terra e guarnizioni doccione usurate con perdite continue.",
+    });
+
+    items.push({
+      id: `${env.id}-cappa-estrazione-vapori-pavimento-antiscivolo`,
+      area: env.name,
+      title: "Aspirazione Forzata Vapori Plonge e Pavimento Antiscivolo",
+      question:
+        "Il locale lavaggio teglie è dotato di cappa di captazione dei vapori di scarico della lavastoviglie o estrattore VMC e pavimento con rivestimento antisdrucciolo e pendenza verso canaletta sifonata?",
+      normReference: "D.Lgs. 81/2008 All. IV p.to 1.3 e p.to 1.9",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Saturazione di vapore acqueo nell'aria con formazione di condense a soffitto e pavimento scivoloso privo di griglia sifonata.",
+    });
+  }
+
+  // h) Area Vendita, Cassa & Vetrina Espositiva Pasticceria Fresca e Gelati
+  if (env.id === "env-pastry-area-vendita-banco-vetrine" || env.id.includes("pastry-area-vendita")) {
+    items.push({
+      id: `${env.id}-vetrina-refrigerata-pozzetti-parafiato`,
+      area: env.name,
+      title: "Vetrina Refrigerata Pasticceria (+4°C) e Pozzetti Gelato (-14°C) con Cristalli Parafiato",
+      question:
+        "Le vetrine espositive per pasticceria fresca garantiscono +2/+4°C e il banco pozzetti/vaschette gelato -12/-14°C, con termometri digitali visibili, chiusure posteriori scorrevoli ermetiche e vetrate parafiato integre a protezione dagli avventori?",
+      normReference: "Reg. CE 852/2004 All. II Cap. V e Cap. IX",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Vetrina pasticceria a temperatura superiore a +6°C o cristalli parafiato assenti/fessurati con esposizione diretta dei prodotti a starnuti o contatto dei clienti.",
+    });
+
+    items.push({
+      id: `${env.id}-cartello-unico-allergeni-registro-ingredienti`,
+      area: env.name,
+      title: "Cartello Unico degli Allergeni e Registro Ingredienti Visibile (Reg. UE 1169/2011)",
+      question:
+        "È esposto in modo chiaramente visibile ai clienti all'ingresso o sul banco vendita il cartello unico degli allergeni con indicazione puntuale delle 14 sostanze allergeniche (glutine, latte, uova, frutta a guscio, soia, ecc.) conforme al Reg. UE 1169/2011 e D.Lgs. 231/2017?",
+      normReference: "Reg. UE 1169/2011 art. 44, D.Lgs. 231/2017 e Circolare Min. Salute 06/02/2015",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "allergeni",
+      suggestedNonConformity:
+        "Assenza di cartello o libro degli ingredienti con allergeni non segnalati per ciascun dolce/gelato in vendita (sanzione da 3.000 a 24.000 euro D.Lgs. 231/2017).",
+    });
+
+    items.push({
+      id: `${env.id}-vetrate-sicurezza-antisfondamento-banco-cassa`,
+      area: env.name,
+      title: "Vetrate di Sicurezza Stratificate Antisfondamento Vetrine ed Espositori (UNI EN 12600)",
+      question:
+        "Tutti i cristalli espositivi frontali del banco vetrina e della cassa sono realizzati in vetro stratificato di sicurezza o temperato anti-infortunio (UNI EN 12600) per prevenire frantumazioni da urto con i clienti?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.3.16 e Norma UNI EN 12600",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "finestre",
+      suggestedNonConformity:
+        "Vetri espositivi anteriori in vetro semplice non stratificato e sprovvisti di marcatura di sicurezza UNI EN 12600 esposti a rischio urto avventori.",
+    });
+  }
+
+  // i) Banco Caffetteria, Somministrazione Bevande & Colazioni
+  if (env.id === "env-pastry-banco-caffetteria-snack" || env.id.includes("pastry-banco-caffetteria")) {
+    items.push({
+      id: `${env.id}-macchina-caffe-ped-lancia-cooltouch`,
+      area: env.name,
+      title: "Macchina Caffè Espresso con Caldaia a Norma PED e Lancia Vapore Cool-Touch",
+      question:
+        "La macchina per caffè dispone di caldaia a pressione con valvola di sicurezza certificata PED (Direttiva 2014/68/UE), manometri di controllo visibili e lance erogazione vapore con protezione termica anti-scottatura Cool-Touch per l'operatore barman?",
+      normReference: "Direttiva PED 2014/68/UE, D.Lgs. 81/2008 art. 71 e Allegato V",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "macchine",
+      suggestedNonConformity:
+        "Caldaia macchina da caffè priva di verifica valvola di sicurezza o lancia vapore priva di isolamento con rischio scottature per il barista.",
+    });
+
+    items.push({
+      id: `${env.id}-cassetto-battifiltro-fonoassorbente-rumore`,
+      area: env.name,
+      title: "Macinadosatore On-Demand e Cassetto Battifiltro Fonoassorbente (D.Lgs. 81/08 Titolo VIII)",
+      question:
+        "Il macinadosatore è posizionato su piano stabile e il cassetto battifiltro dei fondi di caffè è provvisto di barra rivestita in gomma fonoassorbente ammortizzata per l'abbattimento del rumore impulsivo ripetitivo e vibrazioni al polso?",
+      normReference: "D.Lgs. 81/2008 Titolo VIII Capo II (rumore) e Capo III (vibrazioni)",
+      defaultSeverity: 2,
+      defaultSanctionable: false,
+      domain: "safety",
+      categoryTag: "rumore",
+      suggestedNonConformity:
+        "Battifiltro privo di rivestimento ammortizzante con forte impatto acustico metallico ripetitivo durante la giornata lavorativa.",
+    });
+
+    items.push({
+      id: `${env.id}-lavabicchieri-sottobanco-risciacquo-85c`,
+      area: env.name,
+      title: "Lavabicchieri Sottobanco con Risciacquo Igienizzante a 85°C e Detergente MOCA",
+      question:
+        "La lavabicchieri sottobanco del banco caffetteria assicura il ciclo di lavaggio e risciacquo igienico ad alta temperatura a 85°C con dosatori automatici di detersivo e brillantante idonei al contatto con stoviglie (MOCA)?",
+      normReference: "Reg. CE 852/2004 All. II Cap. V e Reg. CE 1935/2004",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Lavabicchieri con risciacquo a bassa temperatura o priva di detersivo sanitizzante conforme MOCA con aloni e rischio contaminazione microbiologica.",
+    });
+  }
+
+  // j) Sala Consumazione / Dehors Clienti per Colazioni e Merende
+  if (env.id === "env-pastry-sala-consumazione-tavoli" || env.id.includes("pastry-sala-consumazione")) {
+    items.push({
+      id: `${env.id}-vie-esodo-sgombre-larghezza-norma`,
+      area: env.name,
+      title: "Corridoi di Transito e Vie di Fuga Sgombre da Tavoli e Sedie (≥ 0,90 - 1,20 m)",
+      question:
+        "La disposizione dei tavoli e delle sedute nella sala consumazione garantisce percorsi di circolazione e vie di esodo verso l'uscita sempre libere e prive di ostacoli con larghezza minima non inferiore a 0,90-1,20 metri?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.5 e D.M. 03/09/2021 (Mini-Codice Antincendio)",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "vie_esodo",
+      suggestedNonConformity:
+        "Tavolini e sedie disposti in modo da ostruire parzialmente l'accesso alla porta di sicurezza o ridurre il corridoio di evacuazione sotto 0,90 m.",
+    });
+
+    items.push({
+      id: `${env.id}-estintore-omologato-34a-233b-revisione`,
+      area: env.name,
+      title: "Estintore Portatile Omologato 34A 233B con Cartello Segnaletico e Registro",
+      question:
+        "Nella sala è installato almeno un estintore portatile omologato con classe di spegnimento non inferiore a 34A 233B, posizionato ad altezza regolamentare (1,10-1,50 m), segnalato da cartello UNI EN ISO 7010 e con revisione semestrale in corso di validità?",
+      normReference: "D.M. 03/09/2021, D.M. 10/03/1998 e Norma UNI 9994-1",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "antincendio",
+      suggestedNonConformity:
+        "Estintore di sala scaduto di revisione periodica semestrale, nascosto da piante o arredi oppure privo di cartellino di controllo.",
+    });
+
+    items.push({
+      id: `${env.id}-disinfezione-tavoli-prodotti-moca`,
+      area: env.name,
+      title: "Procedura di Pulizia e Disinfezione Tavoli tra Avventori Successivi con Prodotti MOCA",
+      question:
+        "È attuata una procedura documentata di pulizia e disinfezione delle superfici dei tavoli e delle sedute al ricambio dei clienti, con impiego di prodotti igienizzanti idonei all'uso alimentare (MOCA) e panni monouso o differenziati?",
+      normReference: "Reg. CE 852/2004 All. II Cap. V e Manuale di Autocontrollo HACCP",
+      defaultSeverity: 2,
+      defaultSanctionable: false,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Mancata igienizzazione dei piani tavoli tra clienti successivi o impiego di stracci multiuso non disinfettati con rischio cross-contamination.",
+    });
+  }
+
+  // k) Spogliatoi e Servizi Igienici del Personale con Doccia
+  if (env.id === "env-pastry-spogliatoi-servizi-personale" || env.id.includes("pastry-spogliatoi")) {
+    items.push({
+      id: `${env.id}-armadietti-doppi-divise-laboratorio`,
+      area: env.name,
+      title: "Armadietti Individuali Doppi a Scomparto Separato Divise Bianche / Abiti Civili",
+      question:
+        "Lo spogliatoio è dotato di armadietti metallici individuali lavabili a doppio scomparto per ciascun addetto, con separazione netta tra abiti civili e divise bianche da laboratorio di pasticceria/gelateria (D.Lgs. 81/08 All. IV p.to 1.12)?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.12 e Reg. CE 852/2004 All. II Cap. I p.to 9",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "spogliatoi",
+      suggestedNonConformity:
+        "Armadietti spogliatoio a scomparto unico privi di separazione tra abiti da lavoro bianchi e vestiario civile, o armadietti insufficienti per il personale.",
+    });
+
+    items.push({
+      id: `${env.id}-antibagno-lavamani-non-manuale-sapone`,
+      area: env.name,
+      title: "Antibagno con Lavamani a Comando Non Manuale, Sapone Igienizzante e Salviette a Perdere",
+      question:
+        "L'antibagno del personale è provvisto di rubinetto azionabile a ginocchio, pedale o fotocellula, dispenser di sapone battericida, salviette monouso e cestino a pedale, con divieto di accesso diretto del wc ai locali di produzione?",
+      normReference: "Reg. CE 852/2004 All. II Cap. I punto 3 e D.Lgs. 81/2008 All. IV p.to 1.13",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Wc comunicante direttamente con l'area produzione senza porta con chiusura automatica o antibagno sprovvisto di asciugamani a perdere e comando non manuale.",
+    });
+
+    items.push({
+      id: `${env.id}-aspirazione-meccanica-bagni-ciechi`,
+      area: env.name,
+      title: "Estrattore Meccanico di Aerazione Forzata nei Bagni Ciechi con Interruttore a Tempo",
+      question:
+        "I servizi igienici privi di finestre verso l'esterno sono provvisti di impianto di aspirazione forzata canalizzata verso l'esterno conforme, con accensione automatica collegata alla luce e temporizzatore di spegnimento ritardato?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.13 e Regolamenti Edilizi/Igiene Comunali",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Estrattore d'aria forzata del bagno cieco del personale guasto o rumoroso, con ristagno di odori ed umidità.",
+    });
+  }
+
+  // l) Locale Tecnico / Vano Compressori Centralizzati & Deposito Rifiuti
+  if (env.id === "env-pastry-locale-tecnico-compressori" || env.id.includes("pastry-locale-tecnico")) {
+    items.push({
+      id: `${env.id}-aerazione-permanente-compressori-uni-en-378`,
+      area: env.name,
+      title: "Aerazione Naturale Permanente e Smaltimento Calore Compressori Frigo",
+      question:
+        "Il vano compressori frigoriferi dispone di aperture di aerazione permanente verso l'esterno calcolate per lo smaltimento del calore e l'evacuazione in caso di micro-perdite di gas refrigerante conforme a norma UNI EN 378?",
+      normReference: "Norma UNI EN 378 e D.Lgs. 81/2008 Allegato IV punto 1.9",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Vano compressori privo di prese d'aria verso l'esterno con surriscaldamento delle unità motocondensanti e rischio accumulo gas refrigerante in caso di perdita.",
+    });
+
+    items.push({
+      id: `${env.id}-addolcitore-resine-potabilita-dlgs-18-2023`,
+      area: env.name,
+      title: "Impianto Addolcitore/Filtrazione Acqua con Manutenzione e Conforme D.Lgs. 18/2023",
+      question:
+        "L'impianto addolcitore/filtro a resine per l'alimentazione delle macchine da caffè e dei forni a vapore è sottoposto a reintegro periodico di sale per uso alimentare, rigenerazione e controllo microbiologico conforme a D.Lgs. 18/2023?",
+      normReference: "D.Lgs. 18/2023 (acque potabili) e D.M. 25/2012 (apparecchiature trattamento acque)",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "impianti",
+      suggestedNonConformity:
+        "Addolcitore privo di sale rigenerante, con resine incrostate o mancata sostituzione cartucce filtranti con possibile cessione di impurità.",
+    });
+
+    items.push({
+      id: `${env.id}-stoccaggio-rifiuti-bidoni-pedale-ermetici`,
+      area: env.name,
+      title: "Stoccaggio Rifiuti Organici e Differenziata in Contenitori Ermetici a Pedale Lavabili",
+      question:
+        "I rifiuti di lavorazione e gli scarti alimentari sono stoccati in bidoni lavabili, dotati di coperchio con azionamento a pedale e sacco impermeabile, collocati in area dedicata esente da odori e infestanti?",
+      normReference: "Reg. CE 852/2004 Allegato II Capitolo VI e D.Lgs. 152/2006",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "haccp",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Bidoni dei rifiuti lasciati aperti, privi di coperchio a pedale o posizionati vicino alle zone di passaggio delle materie prime.",
     });
   }
 
