@@ -1420,7 +1420,208 @@ async function run() {
     `Expected at least 5 pastry-specific document requirements for inspection, found ${pastrySpecificDocs.length}`,
   );
 
-  console.log("HoReCa completeness test passed (including Hotel, B&B, Ostelli/Residence, Campeggi/Villaggi turistici, Stabilimenti Balneari, Discoteche/Locali Serali and Pasticcerie/Gelaterie ATECO variants and inspection integration)");
+  // Verifica varianti ATECO e query testuali per Gastronomia / Produzione Pasti Pronti
+  // (10.85, 10.85.0, 10.85.00, 10.8, 108500, 1085, GASTRONOMIA, GASTRONOMIA_PRODUZIONE, PRODUZIONE_ALIMENTARE)
+  const gastronomyVariants = [
+    "10.85",
+    "10.85.0",
+    "10.85.00",
+    "10.8",
+    "108500",
+    "1085",
+    "GASTRONOMIA",
+    "GASTRONOMIA_PRODUZIONE",
+    "PRODUZIONE_ALIMENTARE",
+  ];
+
+  for (const variant of gastronomyVariants) {
+    const templatesRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(templatesRes.statusCode, 200, `Templates request failed for gastronomy variant ${variant}`);
+    const templates = templatesRes.json() as Array<{ id: string; name: string }>;
+    const specificTemplates = templates.filter(
+      (t) =>
+        t.name.toLowerCase().includes("gastronomia") ||
+        t.name.toLowerCase().includes("produzione alimentare"),
+    );
+    assert.equal(
+      specificTemplates.length,
+      2,
+      `Expected 2 specific templates for gastronomy variant ${variant}, found ${specificTemplates.length}`,
+    );
+
+    const docsRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/document-templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(docsRes.statusCode, 200, `Document templates request failed for gastronomy variant ${variant}`);
+    const docs = docsRes.json() as DocumentTemplateLite[];
+    const gastronomyDocs = docs.filter((d) => d.macroGroup === "GASTRONOMIA_PRODUZIONE");
+    assert.ok(
+      gastronomyDocs.length >= 15,
+      `Expected at least 15 gastronomy docs for variant ${variant}, found ${gastronomyDocs.length}`,
+    );
+  }
+
+  // Controllo presenza dei requisiti normativi specifici per ATECO 10.85
+  const gastronomyNormAteco = ["10.85", "108500", "GASTRONOMIA_PRODUZIONE"];
+  for (const ateco of gastronomyNormAteco) {
+    const tRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/templates?atecoCode=${encodeURIComponent(ateco)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(tRes.statusCode, 200);
+    const templates = tRes.json() as Array<{ id: string; name: string }>;
+    const specificTemplates = templates.filter(
+      (t) =>
+        t.name.toLowerCase().includes("gastronomia") ||
+        t.name.toLowerCase().includes("produzione alimentare"),
+    );
+    assert.equal(specificTemplates.length, 2);
+
+    let allItemsText = "";
+    for (const t of specificTemplates) {
+      const itemsRes = await app.inject({
+        method: "GET",
+        url: `/api/checklists/templates/${t.id}/items?checklistMode=unified`,
+        headers,
+      });
+      assert.equal(itemsRes.statusCode, 200);
+      const items = itemsRes.json().items as Array<{
+        question: string;
+        area: string;
+        normReference?: string | null;
+        orderIndex: number;
+        defaultSeverity: number;
+      }>;
+      assert.equal(items.length, 25, `Expected 25 items for template ${t.id} under ${ateco}`);
+      for (const item of items) {
+        assert.ok(item.defaultSeverity >= 1 && item.defaultSeverity <= 4, `Invalid severity in item ${item.orderIndex}`);
+      }
+
+      const combined = items
+        .map((i) => `${i.area} ${i.question} ${i.normReference ?? ""}`.toLowerCase())
+        .join(" | ");
+      allItemsText += ` | ${combined}`;
+    }
+
+    // 1. Trattamenti termici di cottura e pastorizzazione (brasiere/cuocitori, Reg. CE 852/04, Reg. CE 853/04)
+    assert.ok(
+      (allItemsText.includes("brasiere") || allItemsText.includes("cuocitori")) &&
+        (allItemsText.includes("pastorizzaz") || allItemsText.includes("cottura")) &&
+        (allItemsText.includes("852/04") || allItemsText.includes("852/2004")) &&
+        (allItemsText.includes("853/04") || allItemsText.includes("853/2004")),
+      `Missing norm requirement "brasiere/cuocitori trattamenti termici e pastorizzazione Reg. CE 852/04, Reg. CE 853/04" for ${ateco}`,
+    );
+
+    // 2. Raffreddamento e surgelazione rapida (abbattitore/surgelatore)
+    assert.ok(
+      allItemsText.includes("abbattitore") &&
+        (allItemsText.includes("surgelatore") || allItemsText.includes("surgelazion")),
+      `Missing norm requirement "abbattitore/surgelatore" for ${ateco}`,
+    );
+
+    // 3. Confezionamento in atmosfera modificata (MAP/termosigillatrice, Reg. CE 1935/2004 MOCA, D.Lgs. 81/08 All. IV)
+    assert.ok(
+      allItemsText.includes("map") &&
+        (allItemsText.includes("termosigillat") || allItemsText.includes("termosaldat")) &&
+        (allItemsText.includes("1935/2004") || allItemsText.includes("1935") || allItemsText.includes("moca")),
+      `Missing norm requirement "MAP/termosigillatrice Reg. CE 1935/2004 MOCA" for ${ateco}`,
+    );
+
+    // 4. Linea pesatura, etichettatura ingredienti, data di scadenza e metaldetector con scarto automatico (Reg. UE 1169/2011, HACCP)
+    assert.ok(
+      (allItemsText.includes("metal detector") || allItemsText.includes("metaldetector")) &&
+        (allItemsText.includes("scarto automatico") || allItemsText.includes("scarto")) &&
+        (allItemsText.includes("1169/2011") || allItemsText.includes("1169")),
+      `Missing norm requirement "metaldetector con scarto automatico ed etichettatura Reg. UE 1169/2011" for ${ateco}`,
+    );
+
+    // 5. Sanificazione centralizzata Clean-in-Place (CIP chimico, D.Lgs. 81/08 Titolo IX)
+    assert.ok(
+      (allItemsText.includes("cip") || allItemsText.includes("clean-in-place")) &&
+        (allItemsText.includes("chimico") || allItemsText.includes("acidi/alcalin")) &&
+        (allItemsText.includes("titolo ix") || allItemsText.includes("81/08") || allItemsText.includes("81/2008")),
+      `Missing norm requirement "CIP chimico D.Lgs. 81/08 Titolo IX" for ${ateco}`,
+    );
+
+    // 6. Allarme uomo intrappolato celle BT -20°C con sirena e batteria in tampone (UNI EN 378)
+    assert.ok(
+      (allItemsText.includes("allarme") || allItemsText.includes("uomo intrappolato")) &&
+        (allItemsText.includes("-20") || allItemsText.includes("-20°c")) &&
+        (allItemsText.includes("378") || allItemsText.includes("uni en 378")),
+      `Missing norm requirement "allarme celle -20°C e uomo intrappolato UNI EN 378" for ${ateco}`,
+    );
+
+    // 7. Controllo microbiologico e piano campionamento Listeria monocytogenes / Salmonella (Reg. CE 2073/2005)
+    assert.ok(
+      allItemsText.includes("listeria") &&
+        allItemsText.includes("salmonella") &&
+        (allItemsText.includes("2073/2005") || allItemsText.includes("2073")),
+      `Missing norm requirement "Listeria monocytogenes e Salmonella Reg. CE 2073/2005" for ${ateco}`,
+    );
+
+    // 8. Lavacasse a tunnel con risciacquo igienico ad alta temperatura >= 85°C (DIN 10512) e Break Tank antiriflusso (UNI EN 1717)
+    assert.ok(
+      allItemsText.includes("lavacasse") &&
+        (allItemsText.includes("85°c") || allItemsText.includes("85")) &&
+        (allItemsText.includes("din 10512") || allItemsText.includes("10512")) &&
+        (allItemsText.includes("break tank") || allItemsText.includes("1717") || allItemsText.includes("uni en 1717")),
+      `Missing norm requirement "lavacasse 85°C DIN 10512 e Break Tank UNI EN 1717" for ${ateco}`,
+    );
+  }
+
+  // Verifica integrazione ispezioni per azienda Gastronomia / Produzione Pasti Pronti con ATECO dotless (108500)
+  const gastronomyCompany = await app.prisma.company.upsert({
+    where: { id: "test-gastronomy-integration-company" },
+    update: { atecoCode: "108500" },
+    create: {
+      id: "test-gastronomy-integration-company",
+      name: "Gastronomia Gourmet & Piatti Pronti FedShield",
+      vatNumber: "IT99887766570",
+      atecoCode: "108500",
+      legalAddress: "Via dell'Artigianato 42, Parma",
+    },
+  });
+
+  const gastronomyInspection = await app.inject({
+    method: "POST",
+    url: "/api/inspections",
+    headers,
+    payload: {
+      companyId: gastronomyCompany.id,
+      title: "Ispezione Gastronomia Pasti Pronti Test",
+    },
+  });
+  assert.equal(gastronomyInspection.statusCode, 201);
+  const gastronomyInspectionId = gastronomyInspection.json().id as string;
+
+  const gastronomyInspectionDocsRes = await app.inject({
+    method: "GET",
+    url: `/api/inspections/${gastronomyInspectionId}/documents/requirements`,
+    headers,
+  });
+  assert.equal(gastronomyInspectionDocsRes.statusCode, 200);
+  const gastronomyInspectionDocs = gastronomyInspectionDocsRes.json() as Array<{ name: string; documentTemplateId: string }>;
+  const gastronomySpecificDocs = gastronomyInspectionDocs.filter(
+    (d) =>
+      d.name.toLowerCase().includes("gastronomia") ||
+      d.name.toLowerCase().includes("produzione alimentare") ||
+      d.name.toLowerCase().includes("moca") ||
+      d.name.toLowerCase().includes("haccp") ||
+      d.name.toLowerCase().includes("cottura"),
+  );
+  assert.ok(
+    gastronomySpecificDocs.length >= 5,
+    `Expected at least 5 gastronomy-specific document requirements for inspection, found ${gastronomySpecificDocs.length}`,
+  );
+
+  console.log("HoReCa completeness test passed (including Hotel, B&B, Ostelli/Residence, Campeggi/Villaggi turistici, Stabilimenti Balneari, Discoteche/Locali Serali, Pasticcerie/Gelaterie and Gastronomia/Produzione Pasti Pronti ATECO variants and inspection integration)");
   await app.close();
 }
 

@@ -640,7 +640,47 @@ function buildAtecoVariants(atecoCode?: string | null) {
   if (parts[0] === "45" || normalized.startsWith("45.2")) {
     variants.add("AUTORIPARAZIONE");
   }
-  if (parts[0] === "10" && !normalized.startsWith("10.85")) {
+  // Gastronomia / Produzione e Confezionamento di Piatti Pronti, Pasti Cotti e Basi Alimentari Refrigerate/Surgelate
+  // ATECO 10.85 (10.85, 10.85.0, 10.85.00, 10.85.01, 10.8, 108500, 10850, 1085, 108)
+  const isGastronomyCode =
+    normalized.startsWith("10.85") ||
+    digits.startsWith("1085") ||
+    normalized === "10.8" ||
+    digits === "108";
+
+  const isGastronomyText =
+    upper === "GASTRONOMIA_PRODUZIONE" ||
+    upper === "GASTRONOMIA PRODUZIONE" ||
+    upper === "GASTRONOMIA" ||
+    upper === "PRODUZIONE_ALIMENTARE" ||
+    upper === "PRODUZIONE ALIMENTARE" ||
+    upper === "PASTI_PRONTI" ||
+    upper === "PASTI PRONTI" ||
+    upper === "PIATTI_PRONTI" ||
+    upper === "PIATTI PRONTI" ||
+    upper === "INDUSTRIA_ALIMENTARE" ||
+    upper === "INDUSTRIA ALIMENTARE";
+
+  if (isGastronomyCode || isGastronomyText) {
+    variants.add("10.85");
+    variants.add("10.85.0");
+    variants.add("10.85.00");
+    variants.add("10.85.01");
+    variants.add("10.8");
+    variants.add("108500");
+    variants.add("10850");
+    variants.add("1085");
+    variants.add("108");
+    variants.add("GASTRONOMIA_PRODUZIONE");
+    variants.add("GASTRONOMIA");
+    variants.add("PRODUZIONE_ALIMENTARE");
+    variants.add("PASTI_PRONTI");
+    variants.add("PIATTI_PRONTI");
+    variants.add("HORECA");
+    variants.add("HO.RE.CA");
+  }
+
+  if (parts[0] === "10" && !isGastronomyCode) {
     variants.add("INDUSTRIA_ALIMENTARE");
   }
 

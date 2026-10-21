@@ -3656,15 +3656,18 @@ assert.equal(getSectorMachineCatalogForAteco("56.30").sectorKey, "bar_caffetteri
 assert.equal(getSectorMachineCatalogForAteco("56.10.20").sectorKey, "pizzeria_asporto", "ATECO 56.10.20 deve rimanere pizzeria");
 assert.equal(getSectorMachineCatalogForAteco("56.10.11").sectorKey, "ristorazione_somministrazione", "ATECO 56.10.11 deve rimanere ristorante");
 
-// Verifica posizionamento nel catalogo: pasticceria_gelateria segue discoteca_locale_serale e precede il generico ristorazione_alimentare
+// Verifica posizionamento nel catalogo: pasticceria_gelateria segue discoteca_locale_serale, seguita da gastronomia_produzione e dal generico ristorazione_alimentare
 const discoIndexPastry = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "discoteca_locale_serale");
 const pastryIndex = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "pasticceria_gelateria");
+const gastroIndexPastry = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "gastronomia_produzione");
 const ristIndexPastry = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ristorazione_alimentare");
 assert.ok(discoIndexPastry !== -1, "Settore discoteca_locale_serale deve esistere");
 assert.ok(pastryIndex !== -1, "Settore pasticceria_gelateria deve esistere");
+assert.ok(gastroIndexPastry !== -1, "Settore gastronomia_produzione deve esistere");
 assert.ok(ristIndexPastry !== -1, "Settore ristorazione_alimentare deve esistere");
 assert.equal(pastryIndex, discoIndexPastry + 1, "pasticceria_gelateria deve seguire immediatamente discoteca_locale_serale");
-assert.equal(ristIndexPastry, pastryIndex + 1, "ristorazione_alimentare deve seguire immediatamente pasticceria_gelateria");
+assert.equal(gastroIndexPastry, pastryIndex + 1, "gastronomia_produzione deve seguire immediatamente pasticceria_gelateria");
+assert.equal(ristIndexPastry, gastroIndexPastry + 1, "ristorazione_alimentare deve seguire immediatamente gastronomia_produzione");
 
 // -------------------------------------------------------------
 // Test 64: Verifica completezza delle 16 macchine professionali per pasticceria e gelateria
@@ -3906,6 +3909,312 @@ for (const code of ["56.10.30", "56.10.3", "561030", "56103"]) {
   const fallbackPastryRes = getSuggestedMachinesForEnvironmentsAndAteco([], code);
   assert.equal(fallbackPastryRes.length, 16, `ATECO variant '${code}' deve restituire tutte le 16 macchine della pasticceria/gelateria`);
   assert.ok(fallbackPastryRes.every((m) => m.sourceReason === "ateco"), `Tutte le macchine con ATECO variant '${code}' devono avere sourceReason === 'ateco'`);
+}
+
+// -------------------------------------------------------------
+// Test 67: Priorità e risoluzione catalogo ATECO per Gastronomia e Piatti Pronti (10.85, 10.8)
+// -------------------------------------------------------------
+console.log("\n=== INIZIO TEST normativeMachineCatalog (ATECO 10.85 Gastronomia / Piatti Pronti Industriali) ===");
+console.log("Test 67: Verifica priorità catalogo ATECO per Gastronomia e Confezionamento Piatti Pronti (10.85 / 10.85.0 / 10.85.00 / 10.85.01 / 10.8 / 108500 / 10850 / 1085 / 108)");
+const catalogGastroExact = getSectorMachineCatalogForAteco("10.85");
+assert.equal(catalogGastroExact.sectorKey, "gastronomia_produzione", "ATECO 10.85 deve restituire gastronomia_produzione");
+assert.ok(catalogGastroExact.sectorLabel.includes("Gastronomia"), "L'etichetta deve includere Gastronomia");
+assert.ok(catalogGastroExact.sectorLabel.includes("Piatti Pronti"), "L'etichetta deve includere Piatti Pronti");
+
+const catalogGastroPrefix0 = getSectorMachineCatalogForAteco("10.85.0");
+assert.equal(catalogGastroPrefix0.sectorKey, "gastronomia_produzione", "ATECO 10.85.0 deve restituire gastronomia_produzione");
+
+const catalogGastroPrefix00 = getSectorMachineCatalogForAteco("10.85.00");
+assert.equal(catalogGastroPrefix00.sectorKey, "gastronomia_produzione", "ATECO 10.85.00 deve restituire gastronomia_produzione");
+
+const catalogGastroPrefix01 = getSectorMachineCatalogForAteco("10.85.01");
+assert.equal(catalogGastroPrefix01.sectorKey, "gastronomia_produzione", "ATECO 10.85.01 deve restituire gastronomia_produzione");
+
+const catalogGastroPrefix108 = getSectorMachineCatalogForAteco("10.8");
+assert.equal(catalogGastroPrefix108.sectorKey, "gastronomia_produzione", "ATECO 10.8 deve restituire gastronomia_produzione");
+
+const catalogGastroDigits6 = getSectorMachineCatalogForAteco("108500");
+assert.equal(catalogGastroDigits6.sectorKey, "gastronomia_produzione", "ATECO 108500 deve restituire gastronomia_produzione");
+
+const catalogGastroDigits5 = getSectorMachineCatalogForAteco("10850");
+assert.equal(catalogGastroDigits5.sectorKey, "gastronomia_produzione", "ATECO 10850 deve restituire gastronomia_produzione");
+
+const catalogGastroDigits4 = getSectorMachineCatalogForAteco("1085");
+assert.equal(catalogGastroDigits4.sectorKey, "gastronomia_produzione", "ATECO 1085 deve restituire gastronomia_produzione");
+
+const catalogGastroDigits3 = getSectorMachineCatalogForAteco("108");
+assert.equal(catalogGastroDigits3.sectorKey, "gastronomia_produzione", "ATECO 108 deve restituire gastronomia_produzione");
+
+// Verifica non interferenza con altri codici ristorazione/somministrazione/ambulante/bar/pasticceria
+assert.equal(getSectorMachineCatalogForAteco("56.10.11").sectorKey, "ristorazione_somministrazione", "ATECO 56.10.11 deve rimanere ristorante");
+assert.equal(getSectorMachineCatalogForAteco("56.10.30").sectorKey, "pasticceria_gelateria", "ATECO 56.10.30 deve rimanere pasticceria");
+assert.equal(getSectorMachineCatalogForAteco("56.10.42").sectorKey, "food_truck_street_food", "ATECO 56.10.42 deve rimanere street food");
+assert.equal(getSectorMachineCatalogForAteco("56.30").sectorKey, "bar_caffetteria", "ATECO 56.30 deve rimanere bar");
+
+// Verifica posizionamento nel catalogo: gastronomia_produzione segue pasticceria_gelateria e precede il generico ristorazione_alimentare
+const pastryIndexGastro = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "pasticceria_gelateria");
+const gastroIndex = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "gastronomia_produzione");
+const ristIndexGastro = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "ristorazione_alimentare");
+assert.ok(pastryIndexGastro !== -1, "Settore pasticceria_gelateria deve esistere");
+assert.ok(gastroIndex !== -1, "Settore gastronomia_produzione deve esistere");
+assert.ok(ristIndexGastro !== -1, "Settore ristorazione_alimentare deve esistere");
+assert.equal(gastroIndex, pastryIndexGastro + 1, "gastronomia_produzione deve seguire immediatamente pasticceria_gelateria");
+assert.equal(ristIndexGastro, gastroIndex + 1, "ristorazione_alimentare deve seguire immediatamente gastronomia_produzione");
+
+// -------------------------------------------------------------
+// Test 68: Verifica completezza delle 16 macchine professionali per gastronomia industriale
+// -------------------------------------------------------------
+console.log("Test 68: Verifica completezza delle 16 macchine professionali per gastronomia industriale con verifiche, corsi e modelli reali");
+assert.equal(catalogGastroExact.machines.length, 16, "Il catalogo Gastronomia e Piatti Pronti deve contenere esattamente 16 macchine");
+
+const expectedGastroKeys = [
+  "brasiera_ribaltabile_automatica",
+  "cuocitore_vapore_indiretto",
+  "forno_convezione_carrello_industriale",
+  "abbattitore_tunnel_industriale",
+  "termosigillatrice_vaschette_map",
+  "dosatrice_volumetrica_pneumatica",
+  "confezionatrice_sottovuoto_campana_doppia",
+  "affettatrice_industriale_continua",
+  "cutter_emulsionatore_sottovuoto",
+  "lavatrice_verdure_borbottaggio",
+  "pelapatate_mondatrice_continua",
+  "lavacasse_tunnel_industriale",
+  "etichettatrice_peso_prezzo_automatica",
+  "generatore_azoto_alimentare_map",
+  "centrale_lavaggio_cip_automatica",
+  "transpallet_elettrico_inox",
+];
+
+for (const key of expectedGastroKeys) {
+  const found = catalogGastroExact.machines.find((m) => m.machineKey === key);
+  assert.ok(found, `Attrezzatura con key '${key}' deve essere presente nel catalogo gastronomia`);
+  assert.ok(found.name.length > 5, `Nome attrezzatura '${key}' deve essere descrittivo`);
+  assert.ok(found.type.length > 5, `Tipologia '${key}' deve essere descrittiva`);
+  assert.ok(found.suggestedManufacturer.length > 2, `Produttore suggerito presente per '${key}'`);
+  assert.ok(found.suggestedModel.length > 1, `Modello suggerito presente per '${key}'`);
+  assert.ok(found.safetyChecks.length >= 4, `L'attrezzatura '${key}' deve avere almeno 4 controlli di sicurezza specifici`);
+  for (const check of found.safetyChecks) {
+    assert.ok(check.code.length > 3, `Check code valido per ${key}`);
+    assert.ok(check.title.length > 5, `Check title valido per ${key}`);
+    assert.ok(check.question.length > 15, `Check question dettagliata per ${key}`);
+    assert.ok(check.normReference.length > 3, `Norma citata per check ${check.code}`);
+    assert.ok(check.defaultSeverity >= 1 && check.defaultSeverity <= 5, `Severity valida per check ${check.code}`);
+    assert.equal(check.defaultSanctionable, true, `Controllo ${check.code} deve essere sanzionabile`);
+  }
+}
+
+// Controlli tecnici e normativi specifici di dettaglio:
+// 1. Brasiera industriale ribaltabile: uomo presente, coperchio bilanciato e MOCA AISI 316
+const gastroBrasiera = catalogGastroExact.machines.find((m) => m.machineKey === "brasiera_ribaltabile_automatica")!;
+assert.equal(gastroBrasiera.training.courseCode, "FORMAZ_INDUSTRIA_ALIMENTARE_GMP");
+assert.equal(gastroBrasiera.training.minHours, 8);
+assert.equal(gastroBrasiera.training.frequencyYears, 3);
+assert.ok(gastroBrasiera.safetyChecks.some((c) => c.code === "BRASIERA_RIBALTAMENTO_UOMO_PRESENTE"));
+assert.ok(gastroBrasiera.safetyChecks.some((c) => c.code === "BRASIERA_COPERCHIO_BILANCIATO_INTERBLOCCO"));
+assert.ok(gastroBrasiera.safetyChecks.some((c) => c.code === "BRASIERA_VALVOLA_GAS_TERMOCOPPIA_SICUREZZA"));
+assert.ok(gastroBrasiera.safetyChecks.some((c) => c.code === "BRASIERA_MOCA_FONDO_VASCA_AISI316"));
+assert.ok(gastroBrasiera.safetyChecks.some((c) => c.code === "BRASIERA_FUNGO_EMERGENZA_RESET"));
+
+// 2. Marmitta / Cuocitore a vapore indiretto PED: certificazione PED, valvola di sicurezza piombata e verifica INAIL
+const gastroCuocitore = catalogGastroExact.machines.find((m) => m.machineKey === "cuocitore_vapore_indiretto")!;
+assert.equal(gastroCuocitore.isSubjectToInailCheck, true, "Cuocitore a vapore PED è soggetto a verifica periodica INAIL");
+assert.equal(gastroCuocitore.inailFrequencyYears, 3);
+assert.equal(gastroCuocitore.training.courseCode, "FORMAZ_INDUSTRIA_ALIMENTARE_GMP");
+assert.ok(gastroCuocitore.safetyChecks.some((c) => c.code === "CUOCITORE_CERTIFICAZIONE_PED_INAIL"));
+assert.ok(gastroCuocitore.safetyChecks.some((c) => c.code === "CUOCITORE_VALVOLA_SICUREZZA_PIOMBATA"));
+assert.ok(gastroCuocitore.safetyChecks.some((c) => c.code === "CUOCITORE_MANOMETRO_PRESSIONE_INTERCAPEDINE"));
+assert.ok(gastroCuocitore.safetyChecks.some((c) => c.code === "CUOCITORE_RUBINETTO_SCARICO_MOCA_BLOCCO"));
+assert.ok(gastroCuocitore.safetyChecks.some((c) => c.code === "CUOCITORE_GUARNIZIONE_COPERCHIO_PRESSIONE"));
+
+// 3. Forno combinato convezione/vapore roll-in: rampa carrello a filo, cappa a condensazione e porta triplo vetro
+const gastroForno = catalogGastroExact.machines.find((m) => m.machineKey === "forno_convezione_carrello_industriale")!;
+assert.ok(gastroForno.safetyChecks.some((c) => c.code === "FORNO_CARRELLO_RAMPA_GUIDA_FILO"));
+assert.ok(gastroForno.safetyChecks.some((c) => c.code === "FORNO_CAPPA_CONDENSAZIONE_INTEGRATA"));
+assert.ok(gastroForno.safetyChecks.some((c) => c.code === "FORNO_PORTA_TRIPLO_VETRO_VENTILATO"));
+assert.ok(gastroForno.safetyChecks.some((c) => c.code === "FORNO_LAVAGGIO_AUTOMATICO_SICURO"));
+assert.ok(gastroForno.safetyChecks.some((c) => c.code === "FORNO_SONDA_CUORE_MULTIPOINT"));
+
+// 4. Abbattitore tunnel/cella: sonda al cuore multipoint HACCP, registrazione digitale e sblocco anti-intrappolamento
+const gastroAbbattitore = catalogGastroExact.machines.find((m) => m.machineKey === "abbattitore_tunnel_industriale")!;
+assert.ok(gastroAbbattitore.safetyChecks.some((c) => c.code === "ABBATTITORE_CICLI_AUTOMATICI_SONDA_HACCP"));
+assert.ok(gastroAbbattitore.safetyChecks.some((c) => c.code === "ABBATTITORE_REGISTRAZIONE_DIGITALE_DATI"));
+assert.ok(gastroAbbattitore.safetyChecks.some((c) => c.code === "ABBATTITORE_GAS_ECOLOGICO_UNI_EN_378"));
+assert.ok(gastroAbbattitore.safetyChecks.some((c) => c.code === "ABBATTITORE_RAMPA_PAVIMENTO_GUARNIZIONI_TERMICHE"));
+assert.ok(gastroAbbattitore.safetyChecks.some((c) => c.code === "ABBATTITORE_DISPOSITIVO_ANTI_INTRAPPOLAMENTO"));
+
+// 5. Termosigillatrice vaschette MAP: barriere ottiche Classe 4, pressostato gas MAP e taglio film protetto
+const gastroTermosigillatrice = catalogGastroExact.machines.find((m) => m.machineKey === "termosigillatrice_vaschette_map")!;
+assert.ok(gastroTermosigillatrice.safetyChecks.some((c) => c.code === "TERMOSIGILLATRICE_BARRIERE_OTTICHE_CLASSE_4"));
+assert.ok(gastroTermosigillatrice.safetyChecks.some((c) => c.normReference.includes("UNI EN ISO 13849-1")));
+assert.ok(gastroTermosigillatrice.safetyChecks.some((c) => c.code === "TERMOSIGILLATRICE_CIRCUITO_GAS_MAP_PRESSOSTATO"));
+assert.ok(gastroTermosigillatrice.safetyChecks.some((c) => c.code === "TERMOSIGILLATRICE_TAGLIO_FILM_CARTER_PROTETTI"));
+assert.ok(gastroTermosigillatrice.safetyChecks.some((c) => c.code === "TERMOSIGILLATRICE_CONTROLLO_RESIDUO_O2"));
+
+// 6. Dosatrice volumetrica pneumatica: tramoggia AISI 316, comando a pedale protetto e disgiuntore scarico
+const gastroDosatrice = catalogGastroExact.machines.find((m) => m.machineKey === "dosatrice_volumetrica_pneumatica")!;
+assert.ok(gastroDosatrice.safetyChecks.some((c) => c.code === "DOSATRICE_TRAMOGGIA_AISI316_MOCA"));
+assert.ok(gastroDosatrice.safetyChecks.some((c) => c.code === "DOSATRICE_PEDALE_SICUREZZA_COPERTURA"));
+assert.ok(gastroDosatrice.safetyChecks.some((c) => c.code === "DOSATRICE_DISGIUNTORE_SCARICO_PNEUMATICO"));
+assert.ok(gastroDosatrice.safetyChecks.some((c) => c.code === "DOSATRICE_VALVOLA_TAGLIAGOCCIA_MOCA"));
+
+// 7. Confezionatrice sottovuoto campana doppia: finecorsa basculante, isolamento barre e filtro disoleatore
+const gastroSottovuoto = catalogGastroExact.machines.find((m) => m.machineKey === "confezionatrice_sottovuoto_campana_doppia")!;
+assert.ok(gastroSottovuoto.safetyChecks.some((c) => c.code === "SOTTOVUOTO_FINECORSA_CAMPANA_BASCULANTE"));
+assert.ok(gastroSottovuoto.safetyChecks.some((c) => c.code === "SOTTOVUOTO_BARRE_SALDANTI_ISOLAMENTO_TERMICO"));
+assert.ok(gastroSottovuoto.safetyChecks.some((c) => c.code === "SOTTOVUOTO_POMPA_BUSCH_FILTRO_DISOLEATORE"));
+assert.ok(gastroSottovuoto.safetyChecks.some((c) => c.code === "SOTTOVUOTO_SISTEMA_GAS_FLUSSATO_INNESTO"));
+
+// 8. Affettatrice industriale continua: ripari interbloccati UNI EN 1974, freno lama e corso macchine alimentari
+const gastroAffettatrice = catalogGastroExact.machines.find((m) => m.machineKey === "affettatrice_industriale_continua")!;
+assert.equal(gastroAffettatrice.training.courseCode, "FORMAZ_MACCHINE_ALIMENTARI");
+assert.ok(gastroAffettatrice.safetyChecks.some((c) => c.code === "AFFETTATRICE_NASTRO_RIPARI_INTERBLOCCATI_UNI_EN_1974"));
+assert.ok(gastroAffettatrice.safetyChecks.some((c) => c.normReference.includes("UNI EN 1974")));
+assert.ok(gastroAffettatrice.safetyChecks.some((c) => c.code === "AFFETTATRICE_FRENO_LAMA_ARRESTO_EMERGENZA"));
+assert.ok(gastroAffettatrice.safetyChecks.some((c) => c.code === "AFFETTATRICE_ANELLO_PROTEZIONE_LAMA_PERMANENTE"));
+
+// 9. Cutter emulsionatore sottovuoto: coperchio interbloccato UNI EN 12855 arresto < 2 sec e controllo temperatura
+const gastroCutter = catalogGastroExact.machines.find((m) => m.machineKey === "cutter_emulsionatore_sottovuoto")!;
+assert.ok(gastroCutter.safetyChecks.some((c) => c.code === "CUTTER_COPERCHIO_INTERBLOCCO_UNI_EN_12855"));
+assert.ok(gastroCutter.safetyChecks.some((c) => c.normReference.includes("UNI EN 12855")));
+assert.ok(gastroCutter.safetyChecks.some((c) => c.code === "CUTTER_FRENO_MOTORE_POSITIVO"));
+assert.ok(gastroCutter.safetyChecks.some((c) => c.code === "CUTTER_SONDA_TEMPERATURA_IMPASTO"));
+
+// 10. Lavatrice verdure a borbottaggio: nastro con protezioni ingranaggi, dosatore disinfettante e disconnessione air-gap
+const gastroLavatrice = catalogGastroExact.machines.find((m) => m.machineKey === "lavatrice_verdure_borbottaggio")!;
+assert.ok(gastroLavatrice.safetyChecks.some((c) => c.code === "LAVATRICE_NASTRO_ESTRAZIONE_CARTER"));
+assert.ok(gastroLavatrice.safetyChecks.some((c) => c.code === "LAVATRICE_DOSATORE_DISINFETTANTE_HACCP"));
+assert.ok(gastroLavatrice.safetyChecks.some((c) => c.code === "LAVATRICE_DISCONNESSIONE_AIR_GAP_UNI_EN_1717"));
+assert.ok(gastroLavatrice.safetyChecks.some((c) => c.normReference.includes("UNI EN 1717")));
+
+// 11. Pelapatate / mondatrice continua: micro coperchio/sportello UNI EN 13208 e filtro fanghi
+const gastroPelapatate = catalogGastroExact.machines.find((m) => m.machineKey === "pelapatate_mondatrice_continua")!;
+assert.ok(gastroPelapatate.safetyChecks.some((c) => c.code === "PELAPATATE_MICRO_COPERCHIO_SPORTELLO_UNI_EN_13208"));
+assert.ok(gastroPelapatate.safetyChecks.some((c) => c.normReference.includes("UNI EN 13208")));
+assert.ok(gastroPelapatate.safetyChecks.some((c) => c.code === "PELAPATATE_FILTRO_DECANTATORE_FANGHI"));
+
+// 12. Lavacasse a tunnel continuo: risciacquo >= 85°C DIN 10512, Break Tank UNI EN 1717 e corso rischio chimico CIP
+const gastroLavacasse = catalogGastroExact.machines.find((m) => m.machineKey === "lavacasse_tunnel_industriale")!;
+assert.equal(gastroLavacasse.training.courseCode, "FORMAZ_CHIMICO_LAVAGGIO_CIP");
+assert.equal(gastroLavacasse.training.minHours, 4);
+assert.equal(gastroLavacasse.training.frequencyYears, 3);
+assert.ok(gastroLavacasse.safetyChecks.some((c) => c.code === "LAVACASSE_RISCIACQUO_85_DIN10512"));
+assert.ok(gastroLavacasse.safetyChecks.some((c) => c.code === "LAVACASSE_BREAK_TANK_UNI_EN_1717"));
+assert.ok(gastroLavacasse.safetyChecks.some((c) => c.code === "LAVACASSE_MICRO_PORTE_TENDINE_PARASPRUZZI"));
+
+// 13. Etichettatrice peso-prezzo con metaldetector: espulsore pneumatico chiave e verifica allergeni Reg. UE 1169/2011
+const gastroEtichettatrice = catalogGastroExact.machines.find((m) => m.machineKey === "etichettatrice_peso_prezzo_automatica")!;
+assert.ok(gastroEtichettatrice.safetyChecks.some((c) => c.code === "ETICHETTATRICE_METALDETECTOR_ESPULSORE_CHIAVE"));
+assert.ok(gastroEtichettatrice.safetyChecks.some((c) => c.code === "ETICHETTATRICE_STAMPANTE_ALLERGENI_REG_1169"));
+assert.ok(gastroEtichettatrice.safetyChecks.some((c) => c.normReference.includes("1169/2011")));
+assert.ok(gastroEtichettatrice.safetyChecks.some((c) => c.code === "ETICHETTATRICE_CELLA_CARICO_MID_METROLOGIA"));
+
+// 14. Generatore di azoto MAP: serbatoio PED INAIL, purezza >= 99.5% E941 e allarme ambiente O2 anti-asfissia
+const gastroAzoto = catalogGastroExact.machines.find((m) => m.machineKey === "generatore_azoto_alimentare_map")!;
+assert.equal(gastroAzoto.isSubjectToInailCheck, true, "Serbatoio generatore azoto è soggetto a verifica periodica PED INAIL");
+assert.equal(gastroAzoto.inailFrequencyYears, 3);
+assert.ok(gastroAzoto.safetyChecks.some((c) => c.code === "GENERATORE_AZOTO_PUREZZA_E941_MOCA"));
+assert.ok(gastroAzoto.safetyChecks.some((c) => c.code === "GENERATORE_SERBATOIO_PED_VALVOLA_SICUREZZA"));
+assert.ok(gastroAzoto.safetyChecks.some((c) => c.code === "GENERATORE_ANALIZZATORE_O2_AMBIENTE_ALLARME"));
+
+// 15. Centrale lavaggio CIP automatica: serbatoi soda/acido con bacini di contenimento e corso chimico CIP
+const gastroCip = catalogGastroExact.machines.find((m) => m.machineKey === "centrale_lavaggio_cip_automatica")!;
+assert.equal(gastroCip.training.courseCode, "FORMAZ_CHIMICO_LAVAGGIO_CIP");
+assert.ok(gastroCip.safetyChecks.some((c) => c.code === "CIP_SERBATOI_SODA_ACIDO_BACINI_CONTENIMENTO"));
+assert.ok(gastroCip.safetyChecks.some((c) => c.code === "CIP_CONDUTTIVIMETRI_VERIFICA_RISCIACQUO"));
+assert.ok(gastroCip.safetyChecks.some((c) => c.code === "CIP_DOCCIA_LAVAOCCHI_EMERGENZA"));
+assert.ok(gastroCip.safetyChecks.some((c) => c.code === "CIP_VALVOLE_DOPPIA_SEDE_ANTI_MISCELAZIONE"));
+
+// 16. Transpallet elettrico inox: telaio AISI 304, tenuta IP65 e timone anti-schiacciamento
+const gastroTranspallet = catalogGastroExact.machines.find((m) => m.machineKey === "transpallet_elettrico_inox")!;
+assert.equal(gastroTranspallet.training.courseCode, "FORMAZ_TRANSPALLET");
+assert.ok(gastroTranspallet.safetyChecks.some((c) => c.code === "TRANSPALLET_INOX_TELAIO_AISI304_SANIFICABILE"));
+assert.ok(gastroTranspallet.safetyChecks.some((c) => c.code === "TRANSPALLET_INOX_TENUTA_STAGNA_IP65"));
+assert.ok(gastroTranspallet.safetyChecks.some((c) => c.code === "TRANSPALLET_INOX_TIMONE_ANTISCHIACCIAMENTO"));
+
+// -------------------------------------------------------------
+// Test 69: Mappatura ambienti Step 2 Gastronomia (env-gastro-*) -> Step 4 Macchine
+// -------------------------------------------------------------
+console.log("Test 69: Verifica associazione ambienti Step 2 Gastronomia (env-gastro-*) -> Step 4 Macchine");
+const gastronomyEnvironments = [
+  { id: "env-gastro-reparto-cotture-calde", name: "Reparto Cotture Calde & Preparazione Sughi/Basi (Brasiere, Marmitte, Forni)", category: "production" },
+  { id: "env-gastro-abbattimento-surgelazione", name: "Locale Abbattimento Rapido di Temperatura, Surgelazione & Crioconservazione", category: "production" },
+  { id: "env-gastro-confezionamento-atmosfera-protettiva", name: "Reparto Dosaggio, Porzionatura & Confezionamento MAP Vaschette Sigillate", category: "production" },
+  { id: "env-gastro-preparazione-primaria-mondatura", name: "Reparto Preparazione Primaria, Lavaggio Ortaggi, Mondatura & Taglio Industriale", category: "production" },
+  { id: "env-gastro-locale-lavaggio-casse-attrezzi", name: "Locale Lavaggio Casse, Vassoi, Stoviglie & Attrezzature con Lavatunnel", category: "dishwashing" },
+  { id: "env-gastro-locale-tecnico-centrale-frigo-cip", name: "Centrale Impianti Tecnologici, Generazione Azoto MAP & Centrale CIP Sanificazione", category: "technical_rooms" },
+  { id: "env-gastro-ricevimento-materie-prime", name: "Area Ricevimento Merci, Banchina di Scarico & Stoccaggio Pallet Refrigerati", category: "warehouse" },
+];
+
+const suggestedWithGastroEnvs = getSuggestedMachinesForEnvironmentsAndAteco(gastronomyEnvironments, "10.85");
+
+// 1. env-gastro-reparto-cotture-calde -> brasiera_ribaltabile_automatica, cuocitore_vapore_indiretto, forno_convezione_carrello_industriale
+const cottureCalde = suggestedWithGastroEnvs.filter((m) => m.targetEnvironmentId === "env-gastro-reparto-cotture-calde");
+assert.equal(cottureCalde.length, 3, "env-gastro-reparto-cotture-calde deve associare 3 macchine (brasiera, cuocitore, forno roll-in)");
+assert.ok(cottureCalde.some((m) => m.machineKey === "brasiera_ribaltabile_automatica"));
+assert.ok(cottureCalde.some((m) => m.machineKey === "cuocitore_vapore_indiretto"));
+assert.ok(cottureCalde.some((m) => m.machineKey === "forno_convezione_carrello_industriale"));
+
+// 2. env-gastro-abbattimento-surgelazione -> abbattitore_tunnel_industriale
+const abbattimento = suggestedWithGastroEnvs.filter((m) => m.targetEnvironmentId === "env-gastro-abbattimento-surgelazione");
+assert.equal(abbattimento.length, 1, "env-gastro-abbattimento-surgelazione deve associare 1 macchina (abbattitore tunnel)");
+assert.ok(abbattimento.some((m) => m.machineKey === "abbattitore_tunnel_industriale"));
+
+// 3. env-gastro-confezionamento-atmosfera-protettiva -> termosigillatrice_vaschette_map, dosatrice_volumetrica_pneumatica, confezionatrice_sottovuoto_campana_doppia, etichettatrice_peso_prezzo_automatica
+const confezionamento = suggestedWithGastroEnvs.filter((m) => m.targetEnvironmentId === "env-gastro-confezionamento-atmosfera-protettiva");
+assert.equal(confezionamento.length, 4, "env-gastro-confezionamento-atmosfera-protettiva deve associare 4 macchine (termosigillatrice, dosatrice, sottovuoto doppia campana, etichettatrice/metaldetector)");
+assert.ok(confezionamento.some((m) => m.machineKey === "termosigillatrice_vaschette_map"));
+assert.ok(confezionamento.some((m) => m.machineKey === "dosatrice_volumetrica_pneumatica"));
+assert.ok(confezionamento.some((m) => m.machineKey === "confezionatrice_sottovuoto_campana_doppia"));
+assert.ok(confezionamento.some((m) => m.machineKey === "etichettatrice_peso_prezzo_automatica"));
+
+// 4. env-gastro-preparazione-primaria-mondatura -> affettatrice_industriale_continua, cutter_emulsionatore_sottovuoto, lavatrice_verdure_borbottaggio, pelapatate_mondatrice_continua
+const preparazione = suggestedWithGastroEnvs.filter((m) => m.targetEnvironmentId === "env-gastro-preparazione-primaria-mondatura");
+assert.equal(preparazione.length, 4, "env-gastro-preparazione-primaria-mondatura deve associare 4 macchine (affettatrice continua, cutter sottovuoto, lavatrice borbottaggio, pelapatate)");
+assert.ok(preparazione.some((m) => m.machineKey === "affettatrice_industriale_continua"));
+assert.ok(preparazione.some((m) => m.machineKey === "cutter_emulsionatore_sottovuoto"));
+assert.ok(preparazione.some((m) => m.machineKey === "lavatrice_verdure_borbottaggio"));
+assert.ok(preparazione.some((m) => m.machineKey === "pelapatate_mondatrice_continua"));
+
+// 5. env-gastro-locale-lavaggio-casse-attrezzi -> lavacasse_tunnel_industriale
+const lavaggioCasse = suggestedWithGastroEnvs.filter((m) => m.targetEnvironmentId === "env-gastro-locale-lavaggio-casse-attrezzi");
+assert.equal(lavaggioCasse.length, 1, "env-gastro-locale-lavaggio-casse-attrezzi deve associare 1 macchina (lavacasse tunnel)");
+assert.ok(lavaggioCasse.some((m) => m.machineKey === "lavacasse_tunnel_industriale"));
+
+// 6. env-gastro-locale-tecnico-centrale-frigo-cip -> generatore_azoto_alimentare_map, centrale_lavaggio_cip_automatica
+const localeTecnico = suggestedWithGastroEnvs.filter((m) => m.targetEnvironmentId === "env-gastro-locale-tecnico-centrale-frigo-cip");
+assert.equal(localeTecnico.length, 2, "env-gastro-locale-tecnico-centrale-frigo-cip deve associare 2 macchine (generatore azoto, centrale CIP)");
+assert.ok(localeTecnico.some((m) => m.machineKey === "generatore_azoto_alimentare_map"));
+assert.ok(localeTecnico.some((m) => m.machineKey === "centrale_lavaggio_cip_automatica"));
+
+// 7. env-gastro-ricevimento-materie-prime -> transpallet_elettrico_inox
+const ricevimento = suggestedWithGastroEnvs.filter((m) => m.targetEnvironmentId === "env-gastro-ricevimento-materie-prime");
+assert.equal(ricevimento.length, 1, "env-gastro-ricevimento-materie-prime deve associare 1 macchina (transpallet elettrico inox)");
+assert.ok(ricevimento.some((m) => m.machineKey === "transpallet_elettrico_inox"));
+
+// Verifica che tutte le 16 macchine suggerite abbiano sourceReason === 'environment'
+assert.equal(suggestedWithGastroEnvs.length, 16, "Tutti i 7 ambienti devono censire la totalità delle 16 macchine senza esclusioni");
+assert.ok(
+  suggestedWithGastroEnvs.every((m) => m.sourceReason === "environment"),
+  "Tutte le macchine associate agli ambienti devono avere sourceReason === 'environment'",
+);
+
+// -------------------------------------------------------------
+// Test 70: Integrazione automatica macchine per ATECO 10.85 senza ambienti preventivi
+// -------------------------------------------------------------
+console.log("Test 70: Integrazione automatica macchine per ATECO 10.85 senza ambienti preventivi");
+const suggestedGastroOnlyAteco = getSuggestedMachinesForEnvironmentsAndAteco([], "10.85");
+assert.equal(suggestedGastroOnlyAteco.length, 16, "Devono essere suggerite tutte le 16 macchine della gastronomia/piatti pronti");
+assert.ok(
+  suggestedGastroOnlyAteco.every((m) => m.sourceReason === "ateco"),
+  "Tutte le macchine devono avere sourceReason === 'ateco' se nessun locale è stato specificato",
+);
+
+// Verifica fallback automatico identico per tutte le varianti di codice ATECO ("10.85", "10.85.0", "10.85.00", "10.85.01", "10.8", "108500", "10850", "1085", "108")
+for (const code of ["10.85", "10.85.0", "10.85.00", "10.85.01", "10.8", "108500", "10850", "1085", "108"]) {
+  const fallbackGastroRes = getSuggestedMachinesForEnvironmentsAndAteco([], code);
+  assert.equal(fallbackGastroRes.length, 16, `ATECO variant '${code}' deve restituire tutte le 16 macchine della gastronomia`);
+  assert.ok(fallbackGastroRes.every((m) => m.sourceReason === "ateco"), `Tutte le macchine con ATECO variant '${code}' devono avere sourceReason === 'ateco'`);
 }
 
 console.log("=== TUTTI I TEST normativeMachineCatalog SUPERATI CON SUCCESSO! ===");

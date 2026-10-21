@@ -7045,6 +7045,585 @@ assert.ok(
   "In modalità safety_only tutti gli item della Sala devono essere safety o both",
 );
 
+// ============================================================================
+// Test 39: getStandardEnvironmentsForAteco & conformità per Gastronomia e Piatti Pronti (10.85 / 10.85.0 / 10.85.00 / 10.85.01 / 10.8 / 108500 / 10850 / 1085 / 108)
+// ============================================================================
+console.log("Test 39: getStandardEnvironmentsForAteco & conformità per Gastronomia e Piatti Pronti (10.85 / 10.85.0 / 10.85.00 / 10.85.01 / 10.8 / 108500 / 10850 / 1085 / 108)");
+
+const gastroEnvs = getStandardEnvironmentsForAteco("10.85");
+assert.equal(gastroEnvs.length, 12, "Gastronomia / Piatti Pronti deve avere esattamente 12 ambienti standard");
+
+// Verifica varianti codice ATECO
+const gastroEnvsVar1 = getStandardEnvironmentsForAteco("10.85.0");
+assert.equal(gastroEnvsVar1.length, 12, "Anche prefisso 10.85.0 deve restituire 12 ambienti Gastronomia");
+const gastroEnvsVar2 = getStandardEnvironmentsForAteco("10.85.00");
+assert.equal(gastroEnvsVar2.length, 12, "Anche codice 10.85.00 deve restituire 12 ambienti Gastronomia");
+const gastroEnvsVar3 = getStandardEnvironmentsForAteco("10.85.01");
+assert.equal(gastroEnvsVar3.length, 12, "Anche codice 10.85.01 deve restituire 12 ambienti Gastronomia");
+const gastroEnvsVar4 = getStandardEnvironmentsForAteco("10.8");
+assert.equal(gastroEnvsVar4.length, 12, "Anche codice 10.8 deve restituire 12 ambienti Gastronomia");
+const gastroEnvsVar5 = getStandardEnvironmentsForAteco("108500");
+assert.equal(gastroEnvsVar5.length, 12, "Anche codice numerico 108500 deve restituire 12 ambienti Gastronomia");
+const gastroEnvsVar6 = getStandardEnvironmentsForAteco("10850");
+assert.equal(gastroEnvsVar6.length, 12, "Anche codice numerico 10850 deve restituire 12 ambienti Gastronomia");
+const gastroEnvsVar7 = getStandardEnvironmentsForAteco("1085");
+assert.equal(gastroEnvsVar7.length, 12, "Anche codice numerico 1085 deve restituire 12 ambienti Gastronomia");
+const gastroEnvsVar8 = getStandardEnvironmentsForAteco("108");
+assert.equal(gastroEnvsVar8.length, 12, "Anche codice numerico 108 deve restituire 12 ambienti Gastronomia");
+
+// Verifica ID dei 12 ambienti standard Gastronomia
+const expectedGastroIds = [
+  "env-gastro-ricevimento-materie-prime",
+  "env-gastro-preparazione-primaria-mondatura",
+  "env-gastro-reparto-cotture-calde",
+  "env-gastro-abbattimento-surgelazione",
+  "env-gastro-confezionamento-atmosfera-protettiva",
+  "env-gastro-cella-frigo-materie-prime",
+  "env-gastro-cella-negativa-congelati",
+  "env-gastro-cella-prodotto-finito-spedizione",
+  "env-gastro-locale-lavaggio-casse-attrezzi",
+  "env-gastro-deposito-imballaggi-film-cartoni",
+  "env-gastro-spogliatoi-filtro-igienico",
+  "env-gastro-locale-tecnico-centrale-frigo-cip",
+];
+
+for (const id of expectedGastroIds) {
+  assert.ok(
+    gastroEnvs.some((e) => e.id === id),
+    `Ambiente ${id} deve essere presente nella lista standard Gastronomia per 10.85`,
+  );
+}
+
+// 1. Reparto Ricevimento Merci, Controllo Accettazione & Baia di Scarico
+const gastroRicevimento = gastroEnvs.find((e) => e.id === "env-gastro-ricevimento-materie-prime")!;
+assert.equal(gastroRicevimento.category, "warehouse");
+assert.equal(gastroRicevimento.surfaceSqM, 60);
+assert.equal(gastroRicevimento.heightM, 3.5);
+assert.equal(gastroRicevimento.volumeCuM, 210);
+assert.equal(gastroRicevimento.occupantsCount, 2);
+assert.equal(gastroRicevimento.emergencyExitsCount, 1);
+assert.equal(gastroRicevimento.features.forcedExhaustPresent, true);
+assert.equal(gastroRicevimento.features.emergencyLighting, true);
+const evalGastroRicevimento = evaluateEnvironmentCompliance(gastroRicevimento, "10.85");
+assert.ok(evalGastroRicevimento.isHeightCompliant, "Altezza Ricevimento (3,50 m) deve essere a norma (min 3.0m)");
+assert.equal(evalGastroRicevimento.minHeightRequired, 3.0);
+assert.ok(
+  evalGastroRicevimento.summaryBadges.some((b) => b.text.includes("banchina di scarico isotermica")),
+  "Ricevimento deve avere badge banchina isotermica e teletermometro Reg. CE 852/04",
+);
+assert.ok(
+  evalGastroRicevimento.summaryBadges.some((b) => b.text.includes("Bilancia a piattaforma certificata")),
+  "Ricevimento deve avere badge bilancia a piattaforma",
+);
+
+// 2. Locale Preparazione Primaria, Lavaggio & Mondatura Ortaggi e Carni
+const gastroPreparazione = gastroEnvs.find((e) => e.id === "env-gastro-preparazione-primaria-mondatura")!;
+assert.equal(gastroPreparazione.category, "production");
+assert.equal(gastroPreparazione.surfaceSqM, 50);
+assert.equal(gastroPreparazione.heightM, 3.0);
+assert.equal(gastroPreparazione.volumeCuM, 150);
+assert.equal(gastroPreparazione.occupantsCount, 4);
+assert.equal(gastroPreparazione.emergencyExitsCount, 1);
+assert.equal(gastroPreparazione.features.forcedExhaustPresent, true);
+assert.equal(gastroPreparazione.features.forcedExhaustType, "kitchen_hood");
+assert.equal(gastroPreparazione.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(gastroPreparazione.features.flooringCondition, "compliant_anti_slip");
+const evalGastroPreparazione = evaluateEnvironmentCompliance(gastroPreparazione, "10.85");
+assert.ok(evalGastroPreparazione.isHeightCompliant, "Altezza Preparazione (3,00 m) deve essere a norma (min 2.7m)");
+assert.equal(evalGastroPreparazione.minHeightRequired, 2.7);
+assert.ok(
+  evalGastroPreparazione.summaryBadges.some((b) => b.text.includes("Vasche continue lavaggio a borbottaggio")),
+  "Preparazione deve avere badge vasche borbottaggio ozono/cloro",
+);
+assert.ok(
+  evalGastroPreparazione.summaryBadges.some((b) => b.text.includes("Canaline di scarico a pavimento sifonate")),
+  "Preparazione deve avere badge canaline di scarico sifonate",
+);
+
+// 3. Reparto Cottura Calda, Brasiere Industriali & Trattamenti Termici
+const gastroCotture = gastroEnvs.find((e) => e.id === "env-gastro-reparto-cotture-calde")!;
+assert.equal(gastroCotture.category, "production");
+assert.equal(gastroCotture.surfaceSqM, 80);
+assert.equal(gastroCotture.heightM, 3.5);
+assert.equal(gastroCotture.volumeCuM, 280);
+assert.equal(gastroCotture.occupantsCount, 4);
+assert.equal(gastroCotture.emergencyExitsCount, 2);
+assert.equal(gastroCotture.features.forcedExhaustPresent, true);
+assert.equal(gastroCotture.features.forcedExhaustType, "kitchen_hood");
+assert.equal(gastroCotture.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(gastroCotture.features.flooringCondition, "compliant_anti_slip");
+const evalGastroCotture = evaluateEnvironmentCompliance(gastroCotture, "10.85");
+assert.ok(evalGastroCotture.isHeightCompliant, "Altezza Reparto Cotture (3,50 m) deve essere a norma (min 3.0m)");
+assert.equal(evalGastroCotture.minHeightRequired, 3.0);
+assert.ok(
+  evalGastroCotture.summaryBadges.some((b) => b.text.includes("Ansul R-102")),
+  "Cotture deve avere badge cappa Ansul R-102",
+);
+assert.ok(
+  evalGastroCotture.summaryBadges.some((b) => b.text.includes("Brasiere e cuocitori industriali")),
+  "Cotture deve avere badge brasiere industriali",
+);
+
+// 4. Zona Abbattimento Rapido di Temperatura & Surgelazione Carrellata
+const gastroAbbattimento = gastroEnvs.find((e) => e.id === "env-gastro-abbattimento-surgelazione")!;
+assert.equal(gastroAbbattimento.category, "production");
+assert.equal(gastroAbbattimento.surfaceSqM, 40);
+assert.equal(gastroAbbattimento.heightM, 3.2);
+assert.equal(gastroAbbattimento.volumeCuM, 128);
+assert.equal(gastroAbbattimento.occupantsCount, 2);
+assert.equal(gastroAbbattimento.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(gastroAbbattimento.features.flooringCondition, "compliant_anti_slip");
+const evalGastroAbbattimento = evaluateEnvironmentCompliance(gastroAbbattimento, "10.85");
+assert.ok(evalGastroAbbattimento.isHeightCompliant, "Altezza Abbattimento (3,20 m) deve essere a norma (min 2.7m)");
+assert.equal(evalGastroAbbattimento.minHeightRequired, 2.7);
+assert.ok(
+  evalGastroAbbattimento.summaryBadges.some((b) => b.text.includes("Abbattimento rapido +70°C -> +3°C")),
+  "Abbattimento deve avere badge abbattimento rapido nei tempi HACCP",
+);
+assert.ok(
+  evalGastroAbbattimento.summaryBadges.some((b) => b.text.includes("Termoregistratore digitale continuo")),
+  "Abbattimento deve avere badge termoregistratore UNI EN 12830",
+);
+
+// 5. Reparto Dosaggio, Porzionatura & Confezionamento in Atmosfera Protettiva (MAP)
+const gastroConfezionamento = gastroEnvs.find((e) => e.id === "env-gastro-confezionamento-atmosfera-protettiva")!;
+assert.equal(gastroConfezionamento.category, "production");
+assert.equal(gastroConfezionamento.surfaceSqM, 70);
+assert.equal(gastroConfezionamento.heightM, 3.0);
+assert.equal(gastroConfezionamento.volumeCuM, 210);
+assert.equal(gastroConfezionamento.occupantsCount, 5);
+assert.equal(gastroConfezionamento.features.wallsCondition, "washable_sanitizable_2m");
+assert.equal(gastroConfezionamento.features.flooringCondition, "compliant_anti_slip");
+assert.equal(gastroConfezionamento.features.microclimateCompliant, true);
+const evalGastroConfezionamento = evaluateEnvironmentCompliance(gastroConfezionamento, "10.85");
+assert.ok(evalGastroConfezionamento.isHeightCompliant, "Altezza Confezionamento MAP (3,00 m) deve essere a norma (min 2.7m)");
+assert.equal(evalGastroConfezionamento.minHeightRequired, 2.7);
+assert.ok(
+  evalGastroConfezionamento.summaryBadges.some((b) => b.text.includes("Confezionamento MAP")),
+  "Confezionamento deve avere badge atmosfera protettiva N2/CO2 a T <= +12°C",
+);
+assert.ok(
+  evalGastroConfezionamento.summaryBadges.some((b) => b.text.includes("barriere ottiche immateriali")),
+  "Confezionamento deve avere badge barriere ottiche Classe 4",
+);
+
+// 6. Cella Frigorifera Materie Prime (+0°/+4°C)
+const gastroCellaMateriePrime = gastroEnvs.find((e) => e.id === "env-gastro-cella-frigo-materie-prime")!;
+assert.equal(gastroCellaMateriePrime.category, "storage");
+assert.equal(gastroCellaMateriePrime.surfaceSqM, 30);
+assert.equal(gastroCellaMateriePrime.heightM, 2.6);
+assert.equal(gastroCellaMateriePrime.volumeCuM, 78);
+assert.equal(gastroCellaMateriePrime.occupantsCount, 1);
+const evalGastroCellaMateriePrime = evaluateEnvironmentCompliance(gastroCellaMateriePrime, "10.85");
+assert.ok(evalGastroCellaMateriePrime.isHeightCompliant, "Altezza Cella Frigo (2,60 m) deve essere a norma (min 2.4m)");
+assert.equal(evalGastroCellaMateriePrime.minHeightRequired, 2.4);
+assert.ok(
+  evalGastroCellaMateriePrime.summaryBadges.some((b) => b.text.includes("Cella frigorifera materie prime")),
+  "Cella frigo deve avere badge stoccaggio separato MOCA",
+);
+assert.ok(
+  evalGastroCellaMateriePrime.summaryBadges.some((b) => b.text.includes("Maniglia interna di sicurezza antintrappolamento")),
+  "Cella frigo deve avere badge maniglia antintrappolamento",
+);
+
+// 7. Cella Frigorifera a Bassa Temperatura per Basi Surgelate (-18°/-22°C)
+const gastroCellaNegativa = gastroEnvs.find((e) => e.id === "env-gastro-cella-negativa-congelati")!;
+assert.equal(gastroCellaNegativa.category, "storage");
+assert.equal(gastroCellaNegativa.surfaceSqM, 35);
+assert.equal(gastroCellaNegativa.heightM, 2.6);
+assert.equal(gastroCellaNegativa.volumeCuM, 91);
+assert.equal(gastroCellaNegativa.occupantsCount, 1);
+const evalGastroCellaNegativa = evaluateEnvironmentCompliance(gastroCellaNegativa, "10.85");
+assert.ok(evalGastroCellaNegativa.isHeightCompliant, "Altezza Cella Negativa (2,60 m) deve essere a norma (min 2.4m)");
+assert.equal(evalGastroCellaNegativa.minHeightRequired, 2.4);
+assert.ok(
+  evalGastroCellaNegativa.summaryBadges.some((b) => b.text.includes("allarme uomo intrappolato a batteria tampone UNI EN 378")),
+  "Cella negativa deve avere badge allarme uomo intrappolato UNI EN 378",
+);
+assert.ok(
+  evalGastroCellaNegativa.summaryBadges.some((b) => b.text.includes("resistenza elettrica anticongelamento")),
+  "Cella negativa deve avere badge resistenza anticongelamento",
+);
+
+// 8. Cella Frigorifera Prodotti Finiti Confezionati Pronti per Spedizione (+2°/+4°C)
+const gastroCellaProdottoFinito = gastroEnvs.find((e) => e.id === "env-gastro-cella-prodotto-finito-spedizione")!;
+assert.equal(gastroCellaProdottoFinito.category, "storage");
+assert.equal(gastroCellaProdottoFinito.surfaceSqM, 45);
+assert.equal(gastroCellaProdottoFinito.heightM, 2.8);
+assert.equal(gastroCellaProdottoFinito.volumeCuM, 126);
+assert.equal(gastroCellaProdottoFinito.occupantsCount, 2);
+const evalGastroCellaProdottoFinito = evaluateEnvironmentCompliance(gastroCellaProdottoFinito, "10.85");
+assert.ok(evalGastroCellaProdottoFinito.isHeightCompliant, "Altezza Cella Spedizione (2,80 m) deve essere a norma (min 2.4m)");
+assert.equal(evalGastroCellaProdottoFinito.minHeightRequired, 2.4);
+assert.ok(
+  evalGastroCellaProdottoFinito.summaryBadges.some((b) => b.text.includes("paracolpi ad alta densità in polizene")),
+  "Cella spedizione deve avere badge paracolpi in polizene",
+);
+assert.ok(
+  evalGastroCellaProdottoFinito.summaryBadges.some((b) => b.text.includes("automezzi refrigerati ATP")),
+  "Cella spedizione deve avere badge catena del freddo ATP",
+);
+
+// 9. Locale Lavaggio Industriale Casse, Gastronorm & Attrezzature
+const gastroLavaggio = gastroEnvs.find((e) => e.id === "env-gastro-locale-lavaggio-casse-attrezzi")!;
+assert.equal(gastroLavaggio.category, "production");
+assert.equal(gastroLavaggio.surfaceSqM, 35);
+assert.equal(gastroLavaggio.heightM, 2.8);
+assert.equal(gastroLavaggio.volumeCuM, 98);
+assert.equal(gastroLavaggio.occupantsCount, 2);
+const evalGastroLavaggio = evaluateEnvironmentCompliance(gastroLavaggio, "10.85");
+assert.ok(evalGastroLavaggio.isHeightCompliant, "Altezza Lavaggio (2,80 m) deve essere a norma (min 2.7m)");
+assert.equal(evalGastroLavaggio.minHeightRequired, 2.7);
+assert.ok(
+  evalGastroLavaggio.summaryBadges.some((b) => b.text.includes("risciacquo igienico ad alta temperatura ≥ 85°C DIN 10512")),
+  "Lavaggio deve avere badge risciacquo >= 85°C DIN 10512",
+);
+assert.ok(
+  evalGastroLavaggio.summaryBadges.some((b) => b.text.includes("Break Tank conforme UNI EN 1717")),
+  "Lavaggio deve avere badge Break Tank UNI EN 1717",
+);
+
+// 10. Magazzino Imballaggi Primari MOCA, Vaschette Barriera, Film & Cartoni
+const gastroDepositoImballaggi = gastroEnvs.find((e) => e.id === "env-gastro-deposito-imballaggi-film-cartoni")!;
+assert.equal(gastroDepositoImballaggi.category, "warehouse");
+assert.equal(gastroDepositoImballaggi.surfaceSqM, 40);
+assert.equal(gastroDepositoImballaggi.heightM, 3.2);
+assert.equal(gastroDepositoImballaggi.volumeCuM, 128);
+assert.equal(gastroDepositoImballaggi.occupantsCount, 1);
+const evalGastroDepositoImballaggi = evaluateEnvironmentCompliance(gastroDepositoImballaggi, "10.85");
+assert.ok(evalGastroDepositoImballaggi.isHeightCompliant, "Altezza Magazzino Imballaggi (3,20 m) deve essere a norma (min 2.7m)");
+assert.equal(evalGastroDepositoImballaggi.minHeightRequired, 2.7);
+assert.ok(
+  evalGastroDepositoImballaggi.summaryBadges.some((b) => b.text.includes("Reg. CE 1935/2004 e Reg. UE 10/2011 (MOCA)")),
+  "Magazzino imballaggi deve avere badge conformità MOCA",
+);
+assert.ok(
+  evalGastroDepositoImballaggi.summaryBadges.some((b) => b.text.includes("UNI EN 15635")),
+  "Magazzino imballaggi deve avere badge scaffalature UNI EN 15635",
+);
+
+// 11. Spogliatoi del Personale con Varco Sanitario / Filtro Igienico Obbligatorio
+const gastroSpogliatoi = gastroEnvs.find((e) => e.id === "env-gastro-spogliatoi-filtro-igienico")!;
+assert.equal(gastroSpogliatoi.category, "changing_rooms");
+assert.equal(gastroSpogliatoi.surfaceSqM, 30);
+assert.equal(gastroSpogliatoi.heightM, 2.4);
+assert.equal(gastroSpogliatoi.volumeCuM, 72);
+assert.equal(gastroSpogliatoi.occupantsCount, 10);
+const evalGastroSpogliatoi = evaluateEnvironmentCompliance(gastroSpogliatoi, "10.85");
+assert.ok(evalGastroSpogliatoi.isHeightCompliant, "Altezza Spogliatoi (2,40 m) deve essere a norma (min 2.4m)");
+assert.equal(evalGastroSpogliatoi.minHeightRequired, 2.4);
+assert.ok(
+  evalGastroSpogliatoi.summaryBadges.some((b) => b.text.includes("armadietti doppi sporco/pulito")),
+  "Spogliatoi deve avere badge armadietti doppi All. IV",
+);
+assert.ok(
+  evalGastroSpogliatoi.summaryBadges.some((b) => b.text.includes("Varco sanitario obbligatorio")),
+  "Spogliatoi deve avere badge varco sanitario con lavaggio suole",
+);
+
+// 12. Centrale Impianti Frigoriferi & Stazione Lavaggio CIP (Clean-In-Place)
+const gastroCentraleCIP = gastroEnvs.find((e) => e.id === "env-gastro-locale-tecnico-centrale-frigo-cip")!;
+assert.equal(gastroCentraleCIP.category, "technical");
+assert.equal(gastroCentraleCIP.surfaceSqM, 25);
+assert.equal(gastroCentraleCIP.heightM, 2.6);
+assert.equal(gastroCentraleCIP.volumeCuM, 65);
+assert.equal(gastroCentraleCIP.occupantsCount, 1);
+const evalGastroCentraleCIP = evaluateEnvironmentCompliance(gastroCentraleCIP, "10.85");
+assert.ok(evalGastroCentraleCIP.isHeightCompliant, "Altezza Centrale CIP (2,60 m) deve essere a norma (min 2.4m)");
+assert.equal(evalGastroCentraleCIP.minHeightRequired, 2.4);
+assert.ok(
+  evalGastroCentraleCIP.summaryBadges.some((b) => b.text.includes("rilevatore fughe refrigerante e allarme ottico-acustico UNI EN 378")),
+  "Centrale frigo deve avere badge sensore gas UNI EN 378",
+);
+assert.ok(
+  evalGastroCentraleCIP.summaryBadges.some((b) => b.text.includes("Stazione lavaggio centralizzato CIP")),
+  "Centrale CIP deve avere badge vasche contenimento Titolo IX e lavaocchi",
+);
+
+// ============================================================================
+// Test 40: generateEnvironmentChecklistItems per locali Gastronomia e Piatti Pronti (ATECO 10.85)
+// ============================================================================
+console.log("Test 40: generateEnvironmentChecklistItems per locali Gastronomia e Piatti Pronti (ATECO 10.85)");
+
+// 1. Reparto Ricevimento Merci
+const gastroRicevimentoItems = generateEnvironmentChecklistItems(gastroRicevimento, "10.85");
+assert.ok(
+  gastroRicevimentoItems.some(
+    (it) => it.id.includes("banchina-scarico-pedana-antischiacciamento") && it.domain === "safety",
+  ),
+  "Ricevimento deve verificare banchina isotermica e bordo antischiacciamento (domain: safety)",
+);
+assert.ok(
+  gastroRicevimentoItems.some(
+    (it) => it.id.includes("controllo-temperatura-merci-deperibili-haccp") && it.domain === "haccp",
+  ),
+  "Ricevimento deve verificare controllo T merci deperibili e termometro MOCA a sonda (domain: haccp)",
+);
+assert.ok(
+  gastroRicevimentoItems.some(
+    (it) => it.id.includes("bilancia-piattaforma-ricevimento-metrologica") && it.domain === "both",
+  ),
+  "Ricevimento deve verificare bilancia a piattaforma certificata (domain: both)",
+);
+
+// 2. Locale Preparazione Primaria, Lavaggio & Mondatura
+const gastroPreparazioneItems = generateEnvironmentChecklistItems(gastroPreparazione, "10.85");
+assert.ok(
+  gastroPreparazioneItems.some(
+    (it) => it.id.includes("vasche-lavaggio-borbottaggio-igienizzazione") && it.domain === "haccp",
+  ),
+  "Preparazione deve verificare vasche continue lavaggio con borbottaggio d'aria e dosaggio disinfettante (domain: haccp)",
+);
+assert.ok(
+  gastroPreparazioneItems.some(
+    (it) => it.id.includes("canaline-scarico-inox-sifonate-cestello") && it.domain === "both",
+  ),
+  "Preparazione deve verificare canaline di scarico inox sifonate con cestello (domain: both)",
+);
+assert.ok(
+  gastroPreparazioneItems.some(
+    (it) => it.id.includes("lavamani-fotocellula-comando-non-manuale") && it.domain === "haccp",
+  ),
+  "Preparazione deve verificare lavamani chirurgico a fotocellula (domain: haccp)",
+);
+
+// 3. Reparto Cottura Calda, Brasiere Industriali
+const gastroCottureItems = generateEnvironmentChecklistItems(gastroCotture, "10.85");
+assert.ok(
+  gastroCottureItems.some(
+    (it) => it.id.includes("cappa-compensazione-antincendio-ansul") && it.domain === "safety",
+  ),
+  "Cotture deve verificare cappa a compensazione con impianto spegnimento Ansul R-102 (domain: safety)",
+);
+assert.ok(
+  gastroCottureItems.some(
+    (it) => it.id.includes("brasiere-cuocitori-blocco-ribaltamento-scarico") && it.domain === "safety",
+  ),
+  "Cotture deve verificare sicurezza meccanica brasiere con blocco fine corsa (domain: safety)",
+);
+assert.ok(
+  gastroCottureItems.some(
+    (it) => it.id.includes("forni-vapore-carrellati-roll-in") && it.domain === "both",
+  ),
+  "Cotture deve verificare forni a vapore roll-in carrellati (domain: both)",
+);
+
+// 4. Zona Abbattimento Rapido di Temperatura & Surgelazione Carrellata
+const gastroAbbattimentoItems = generateEnvironmentChecklistItems(gastroAbbattimento, "10.85");
+assert.ok(
+  gastroAbbattimentoItems.some(
+    (it) => it.id.includes("abbattimento-rapido-parametri-haccp-tempi") && it.domain === "haccp",
+  ),
+  "Abbattimento deve verificare parametri HACCP tempi raffreddamento (+3°C <90min, -18°C <240min) (domain: haccp)",
+);
+assert.ok(
+  gastroAbbattimentoItems.some(
+    (it) => it.id.includes("termoregistratore-digitale-sonda-uni-en-12830") && it.domain === "haccp",
+  ),
+  "Abbattimento deve verificare termoregistratore digitale UNI EN 12830 (domain: haccp)",
+);
+assert.ok(
+  gastroAbbattimentoItems.some(
+    (it) => it.id.includes("pavimentazione-antiscivolo-cella-abbattimento") && it.domain === "safety",
+  ),
+  "Abbattimento deve verificare pavimento antiscivolo R11/R12 e rampa carrelli (domain: safety)",
+);
+
+// 5. Reparto Dosaggio, Porzionatura & Confezionamento MAP
+const gastroConfezionamentoItems = generateEnvironmentChecklistItems(gastroConfezionamento, "10.85");
+assert.ok(
+  gastroConfezionamentoItems.some(
+    (it) => it.id.includes("temperatura-locale-confezionamento-map") && it.domain === "haccp",
+  ),
+  "Confezionamento deve verificare temperatura controllata <= +12°C (domain: haccp)",
+);
+assert.ok(
+  gastroConfezionamentoItems.some(
+    (it) => it.id.includes("termosigillatrice-map-miscela-gas-barriere-sicurezza") && it.domain === "both",
+  ),
+  "Confezionamento deve verificare termosigillatrice MAP con gas E941/E290 e barriere ottiche Cat. 4 (domain: both)",
+);
+assert.ok(
+  gastroConfezionamentoItems.some(
+    (it) => it.id.includes("controllo-tenuta-saldatura-residuo-ossigeno") && it.domain === "haccp",
+  ),
+  "Confezionamento deve verificare tenuta saldature e analizzatore O2 residuo (domain: haccp)",
+);
+
+// 6. Cella Frigorifera Materie Prime (+0°/+4°C)
+const gastroCellaMateriePrimeItems = generateEnvironmentChecklistItems(gastroCellaMateriePrime, "10.85");
+assert.ok(
+  gastroCellaMateriePrimeItems.some(
+    (it) => it.id.includes("separazione-materie-prime-scaffalature-moca") && it.domain === "haccp",
+  ),
+  "Cella Materie Prime deve verificare stoccaggio distinto e ripiani forati MOCA >= 15 cm (domain: haccp)",
+);
+assert.ok(
+  gastroCellaMateriePrimeItems.some(
+    (it) => it.id.includes("termoregistratore-cella-materie-prime-allarmi") && it.domain === "haccp",
+  ),
+  "Cella Materie Prime deve verificare termoregistrazione continua e allarmi remoti (domain: haccp)",
+);
+assert.ok(
+  gastroCellaMateriePrimeItems.some(
+    (it) => it.id.includes("maniglia-antintrappolamento-cella-positiva") && it.domain === "safety",
+  ),
+  "Cella Materie Prime deve verificare maniglia interna luminescente antintrappolamento (domain: safety)",
+);
+
+// 7. Cella Frigorifera Bassa Temperatura Basi Surgelate (-18°/-22°C)
+const gastroCellaNegativaItems = generateEnvironmentChecklistItems(gastroCellaNegativa, "10.85");
+assert.ok(
+  gastroCellaNegativaItems.some(
+    (it) => it.id.includes("allarme-uomo-intrappolato-cella-negativa") && it.domain === "safety",
+  ),
+  "Cella Negativa deve verificare allarme uomo intrappolato a batteria tampone UNI EN 378 (domain: safety)",
+);
+assert.ok(
+  gastroCellaNegativaItems.some(
+    (it) => it.id.includes("resistenza-anticongelamento-porta-termoisolante") && it.domain === "safety",
+  ),
+  "Cella Negativa deve verificare resistenza elettrica guarnizione porta e valvola compensazione (domain: safety)",
+);
+assert.ok(
+  gastroCellaNegativaItems.some(
+    (it) => it.id.includes("temperatura-stoccaggio-surgelati-18") && it.domain === "haccp",
+  ),
+  "Cella Negativa deve verificare mantenimento temperatura costante <= -18°C (domain: haccp)",
+);
+
+// 8. Cella Frigorifera Prodotti Finiti Spedizione (+2°/+4°C)
+const gastroCellaProdottoFinitoItems = generateEnvironmentChecklistItems(gastroCellaProdottoFinito, "10.85");
+assert.ok(
+  gastroCellaProdottoFinitoItems.some(
+    (it) => it.id.includes("protezione-paracolpi-polizene-roll-container") && it.domain === "both",
+  ),
+  "Cella Spedizione deve verificare paracolpi in polizene per roll container (domain: both)",
+);
+assert.ok(
+  gastroCellaProdottoFinitoItems.some(
+    (it) => it.id.includes("etichettatura-lotto-scadenza-allergeni-reg-ue-1169") && it.domain === "haccp",
+  ),
+  "Cella Spedizione deve verificare etichettatura, lotto, TMC e allergeni Reg. UE 1169/2011 (domain: haccp)",
+);
+assert.ok(
+  gastroCellaProdottoFinitoItems.some(
+    (it) => it.id.includes("procedura-carico-veicoli-coibentati-atp") && it.domain === "haccp",
+  ),
+  "Cella Spedizione deve verificare trasferimento diretto su veicoli ATP senza soste (domain: haccp)",
+);
+
+// 9. Locale Lavaggio Industriale Casse & Attrezzature
+const gastroLavaggioItems = generateEnvironmentChecklistItems(gastroLavaggio, "10.85");
+assert.ok(
+  gastroLavaggioItems.some(
+    (it) => it.id.includes("lavacasse-tunnel-temperatura-din-10512") && it.domain === "haccp",
+  ),
+  "Lavaggio Casse deve verificare risciacquo igienico >= 85°C conforme DIN 10512 (domain: haccp)",
+);
+assert.ok(
+  gastroLavaggioItems.some(
+    (it) => it.id.includes("disconnessione-idrica-break-tank-uni-en-1717") && it.domain === "both",
+  ),
+  "Lavaggio Casse deve verificare dispositivo Break Tank antiriflusso UNI EN 1717 (domain: both)",
+);
+assert.ok(
+  gastroLavaggioItems.some(
+    (it) => it.id.includes("aspirazione-vapore-condense-locale-lavaggio") && it.domain === "safety",
+  ),
+  "Lavaggio Casse deve verificare cappa aspirazione vapore e scarico condense (domain: safety)",
+);
+
+// 10. Magazzino Imballaggi Primari MOCA
+const gastroDepositoImballaggiItems = generateEnvironmentChecklistItems(gastroDepositoImballaggi, "10.85");
+assert.ok(
+  gastroDepositoImballaggiItems.some(
+    (it) => it.id.includes("dichiarazioni-conformita-moca-imballaggi") && it.domain === "haccp",
+  ),
+  "Magazzino Imballaggi deve verificare fascicolo dichiarazioni MOCA Reg. CE 1935/2004 (domain: haccp)",
+);
+assert.ok(
+  gastroDepositoImballaggiItems.some(
+    (it) => it.id.includes("scaffalature-portata-ispezione-uni-en-15635") && it.domain === "safety",
+  ),
+  "Magazzino Imballaggi deve verificare scaffalature certificate e verifica UNI EN 15635 (domain: safety)",
+);
+assert.ok(
+  gastroDepositoImballaggiItems.some(
+    (it) => it.id.includes("protezione-polveri-infestanti-imballaggi") && it.domain === "haccp",
+  ),
+  "Magazzino Imballaggi deve verificare protezione da polvere e infestanti (domain: haccp)",
+);
+
+// 11. Spogliatoi del Personale con Varco Sanitario
+const gastroSpogliatoiItems = generateEnvironmentChecklistItems(gastroSpogliatoi, "10.85");
+assert.ok(
+  gastroSpogliatoiItems.some(
+    (it) => it.id.includes("varco-sanitario-tornello-lavamani-suole") && it.domain === "haccp",
+  ),
+  "Spogliatoi deve verificare varco sanitario con tornello, igienizzazione mani e lavaggio suole (domain: haccp)",
+);
+assert.ok(
+  gastroSpogliatoiItems.some(
+    (it) => it.id.includes("armadietti-doppio-scomparto-sporco-pulito") && it.domain === "both",
+  ),
+  "Spogliatoi deve verificare armadietti doppi a tetto spiovente All. IV (domain: both)",
+);
+assert.ok(
+  gastroSpogliatoiItems.some(
+    (it) => it.id.includes("distributore-dpi-monouso-cuffie-calzari") && it.domain === "both",
+  ),
+  "Spogliatoi deve verificare dispenser DPI monouso (cuffie, calzari) (domain: both)",
+);
+
+// 12. Centrale Impianti Frigoriferi & Stazione CIP
+const gastroCentraleCIPItems = generateEnvironmentChecklistItems(gastroCentraleCIP, "10.85");
+assert.ok(
+  gastroCentraleCIPItems.some(
+    (it) => it.id.includes("rilevatore-fughe-gas-refrigerante-uni-en-378") && it.domain === "safety",
+  ),
+  "Centrale CIP deve verificare rilevatore fughe gas con allarme UNI EN 378 (domain: safety)",
+);
+assert.ok(
+  gastroCentraleCIPItems.some(
+    (it) => it.id.includes("stazione-lavaggio-cip-vasche-contenimento-acidi") && it.domain === "safety",
+  ),
+  "Centrale CIP deve verificare vasche contenimento detergenti Titolo IX (domain: safety)",
+);
+assert.ok(
+  gastroCentraleCIPItems.some(
+    (it) => it.id.includes("doccia-d-emergenza-lavaocchi-centrale-chimica") && it.domain === "safety",
+  ),
+  "Centrale CIP deve verificare doccia d'emergenza e lavaocchi UNI EN 15154 (domain: safety)",
+);
+
+// 13. Verifica filtraggio checklistMode per locali Gastronomia
+const gastroCottureHaccpMode = filterEnvironmentItemsByChecklistMode(gastroCottureItems, "haccp_only");
+assert.ok(
+  gastroCottureHaccpMode.every((it) => it.domain === "haccp" || it.domain === "both"),
+  "In modalità haccp_only tutti gli item del Reparto Cotture devono essere haccp o both",
+);
+assert.ok(
+  !gastroCottureHaccpMode.some((it) => it.domain === "safety"),
+  "In modalità haccp_only nessun item del Reparto Cotture deve avere domain safety",
+);
+
+const gastroCottureSafetyMode = filterEnvironmentItemsByChecklistMode(gastroCottureItems, "safety_only");
+assert.ok(
+  gastroCottureSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item del Reparto Cotture devono essere safety o both",
+);
+assert.ok(
+  !gastroCottureSafetyMode.some((it) => it.domain === "haccp"),
+  "In modalità safety_only nessun item del Reparto Cotture deve avere domain haccp",
+);
+
+const gastroRicevimentoSafetyMode = filterEnvironmentItemsByChecklistMode(gastroRicevimentoItems, "safety_only");
+assert.ok(
+  gastroRicevimentoSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item del Ricevimento devono essere safety o both",
+);
+
 console.log("=== TUTTI I TEST Step2AmbientiDiLavoro SUPERATI CON SUCCESSO! ===");
 
 
