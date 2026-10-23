@@ -622,8 +622,67 @@ function buildAtecoVariants(atecoCode?: string | null) {
     variants.add("932910");
   }
 
-  if (parts[0] === "47" && !normalized.startsWith("47.11")) {
+  // Commercio al Dettaglio Non Alimentare / Abbigliamento, Calzature, Casalinghi, Elettronica ed Esercizi Commerciali Specializzati
+  // ATECO 47.71, 47.72, 47.5, 47.6, 47.7 e prefissi
+  const isFoodRetail =
+    normalized.startsWith("47.11") ||
+    digits.startsWith("4711") ||
+    normalized.startsWith("47.2") ||
+    digits.startsWith("472") ||
+    normalized.startsWith("47.81") ||
+    digits.startsWith("4781");
+
+  const isCommerceNonFoodText =
+    upper === "COMMERCIO_NON_FOOD" ||
+    upper === "COMMERCIO NON FOOD" ||
+    upper === "COMMERCIO_NON_ALIMENTARE" ||
+    upper === "COMMERCIO NON ALIMENTARE" ||
+    upper === "RETAIL_NON_FOOD" ||
+    upper === "RETAIL NON FOOD" ||
+    upper === "NEGOZIO_ABBIGLIAMENTO" ||
+    upper === "NEGOZIO ABBIGLIAMENTO" ||
+    upper === "COMMERCIO_DETTAGLIO_NON_FOOD" ||
+    upper === "COMMERCIO DETTAGLIO NON FOOD";
+
+  const isCommerceNonFoodCode =
+    !isFoodRetail &&
+    (normalized.startsWith("47.71") ||
+      normalized.startsWith("47.72") ||
+      normalized.startsWith("47.7") ||
+      normalized.startsWith("47.5") ||
+      normalized.startsWith("47.6") ||
+      digits.startsWith("4771") ||
+      digits.startsWith("4772") ||
+      digits.startsWith("477") ||
+      digits.startsWith("475") ||
+      digits.startsWith("476") ||
+      normalized === "47" ||
+      digits === "47" ||
+      parts[0] === "47");
+
+  if (isCommerceNonFoodCode || isCommerceNonFoodText) {
+    variants.add("47.71");
+    variants.add("47.71.1");
+    variants.add("47.71.10");
+    variants.add("47.71.2");
+    variants.add("47.71.3");
+    variants.add("47.72");
+    variants.add("47.5");
+    variants.add("47.6");
+    variants.add("47.7");
+    variants.add("4771");
+    variants.add("477110");
+    variants.add("477120");
+    variants.add("47711");
+    variants.add("47712");
+    variants.add("47713");
+    variants.add("477");
+    variants.add("475");
+    variants.add("476");
     variants.add("COMMERCIO_NON_FOOD");
+    variants.add("COMMERCIO_NON_ALIMENTARE");
+    variants.add("RETAIL_NON_FOOD");
+    variants.add("NEGOZIO_ABBIGLIAMENTO");
   }
   if (normalized.startsWith("49.4") || parts[0] === "52" || parts[0] === "53") {
     variants.add("LOGISTICA_MAGAZZINO");

@@ -1621,7 +1621,119 @@ async function run() {
     `Expected at least 5 gastronomy-specific document requirements for inspection, found ${gastronomySpecificDocs.length}`,
   );
 
-  console.log("HoReCa completeness test passed (including Hotel, B&B, Ostelli/Residence, Campeggi/Villaggi turistici, Stabilimenti Balneari, Discoteche/Locali Serali, Pasticcerie/Gelaterie and Gastronomia/Produzione Pasti Pronti ATECO variants and inspection integration)");
+  // =========================================================================
+  // Diciottesimo settore prioritario: ATECO 47.71 (Commercio al Dettaglio Non Alimentare / Negozi Abbigliamento)
+  // =========================================================================
+  const nonFoodVariants = [
+    "47.71",
+    "47.71.1",
+    "47.71.2",
+    "47.72",
+    "47.5",
+    "47.7",
+    "4771",
+    "477110",
+    "COMMERCIO_NON_FOOD",
+    "COMMERCIO_NON_ALIMENTARE",
+    "RETAIL_NON_FOOD",
+  ];
+
+  for (const variant of nonFoodVariants) {
+    // 1. Modalità unified: template e documenti
+    const unifiedTmplRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(unifiedTmplRes.statusCode, 200, `Unified template request failed for variant ${variant}`);
+    const unifiedTemplates = unifiedTmplRes.json() as Array<{ id: string; name: string; macroGroup?: string | null }>;
+    const unifiedMatch = unifiedTemplates.find((t) => t.macroGroup === "COMMERCIO_NON_FOOD");
+    assert.ok(unifiedMatch, `Missing COMMERCIO_NON_FOOD template in unified mode for variant ${variant}`);
+
+    const unifiedDocsRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/document-templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(unifiedDocsRes.statusCode, 200, `Unified doc template request failed for variant ${variant}`);
+    const unifiedDocs = unifiedDocsRes.json() as Array<{ name: string; macroGroup?: string | null }>;
+    const unifiedNonFoodDocs = unifiedDocs.filter((d) => d.macroGroup === "COMMERCIO_NON_FOOD");
+    assert.ok(
+      unifiedNonFoodDocs.length >= 6,
+      `Expected >= 6 non-food docs in unified mode for variant ${variant}, found ${unifiedNonFoodDocs.length}`,
+    );
+
+    // 2. Modalità safety_only: template e documenti
+    const safetyTmplRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=safety_only`,
+      headers,
+    });
+    assert.equal(safetyTmplRes.statusCode, 200, `Safety_only template request failed for variant ${variant}`);
+    const safetyTemplates = safetyTmplRes.json() as Array<{ id: string; name: string; macroGroup?: string | null }>;
+    const safetyMatch = safetyTemplates.find((t) => t.macroGroup === "COMMERCIO_NON_FOOD");
+    assert.ok(safetyMatch, `Missing COMMERCIO_NON_FOOD template in safety_only mode for variant ${variant}`);
+
+    const safetyDocsRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/document-templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=safety_only`,
+      headers,
+    });
+    assert.equal(safetyDocsRes.statusCode, 200, `Safety_only doc template request failed for variant ${variant}`);
+    const safetyDocs = safetyDocsRes.json() as Array<{ name: string; macroGroup?: string | null }>;
+    const safetyNonFoodDocs = safetyDocs.filter((d) => d.macroGroup === "COMMERCIO_NON_FOOD");
+    assert.ok(
+      safetyNonFoodDocs.length >= 6,
+      `Expected >= 6 non-food docs in safety_only mode for variant ${variant}, found ${safetyNonFoodDocs.length}`,
+    );
+  }
+
+  // 3. Creazione azienda di test con ATECO 477110, avvio ispezione e controllo requisiti documentali
+  const boutiqueCompany = await app.prisma.company.create({
+    data: {
+      name: "Boutique Moda Elegante FedShield",
+      vatNumber: `IT${Date.now().toString().slice(-11)}`,
+      atecoCode: "477110",
+      legalAddress: "Via Monte Napoleone 8, Milano",
+    },
+  });
+
+  const boutiqueInspection = await app.inject({
+    method: "POST",
+    url: "/api/inspections",
+    headers,
+    payload: {
+      companyId: boutiqueCompany.id,
+      title: "Ispezione Negozio Abbigliamento Test ATECO 477110",
+      checklistMode: "safety_only",
+    },
+  });
+  assert.equal(boutiqueInspection.statusCode, 201);
+  const boutiqueInspectionId = boutiqueInspection.json().id as string;
+
+  const boutiqueInspectionDocsRes = await app.inject({
+    method: "GET",
+    url: `/api/inspections/${boutiqueInspectionId}/documents/requirements`,
+    headers,
+  });
+  assert.equal(boutiqueInspectionDocsRes.statusCode, 200);
+  const boutiqueInspectionDocs = boutiqueInspectionDocsRes.json() as Array<{ name: string; documentTemplateId: string }>;
+  const boutiqueMatchedDocs = boutiqueInspectionDocs.filter(
+    (d) =>
+      d.name.toLowerCase().includes("commercio") ||
+      d.name.toLowerCase().includes("scaffalature") ||
+      d.name.toLowerCase().includes("antincendio") ||
+      d.name.toLowerCase().includes("462/01") ||
+      d.name.toLowerCase().includes("piano emergenza") ||
+      d.name.toLowerCase().includes("dvr"),
+  );
+  assert.ok(
+    boutiqueMatchedDocs.length >= 5,
+    `Expected at least 5 non-food document requirements for boutique inspection, found ${boutiqueMatchedDocs.length}`,
+  );
+
+
+  console.log("HoReCa completeness test passed (including Hotel, B&B, Ostelli/Residence, Campeggi/Villaggi turistici, Stabilimenti Balneari, Discoteche/Locali Serali, Pasticcerie/Gelaterie, Gastronomia and Commercio al Dettaglio Non Food 47.71 ATECO variants and inspection integration)");
   await app.close();
 }
 

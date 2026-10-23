@@ -4217,6 +4217,367 @@ for (const code of ["10.85", "10.85.0", "10.85.00", "10.85.01", "10.8", "108500"
   assert.ok(fallbackGastroRes.every((m) => m.sourceReason === "ateco"), `Tutte le macchine con ATECO variant '${code}' devono avere sourceReason === 'ateco'`);
 }
 
+// =============================================================
+// TEST 71-74: COMMERCIO AL DETTAGLIO NON ALIMENTARE (ATECO 47.71 / 47.72 / 47.5 / 47.6 / 47.7)
+// =============================================================
+console.log("\n=== INIZIO TEST normativeMachineCatalog (ATECO 47.71 Commercio al Dettaglio Non Alimentare / Negozi Abbigliamento, Calzature e Retail Specializzato) ===");
+
+// -------------------------------------------------------------
+// Test 71: Priorità e risoluzione catalogo ATECO per Commercio al Dettaglio Non Alimentare
+// -------------------------------------------------------------
+console.log("Test 71: Verifica priorità catalogo ATECO per Commercio al Dettaglio Non Alimentare (47.71 / 47.71.1 / 47.71.2 / 47.71.3 / 47.72 / 47.5 / 47.6 / 47.7 / 4771 / 477110 / 477120 / 47711 / 47712 / 47713 / 477 / 475 / 476)");
+const retailCodesToTest = [
+  "47.71",
+  "47.71.1",
+  "47.71.2",
+  "47.71.3",
+  "47.72",
+  "47.5",
+  "47.6",
+  "47.7",
+  "4771",
+  "477110",
+  "477120",
+  "47711",
+  "47712",
+  "47713",
+  "477",
+  "475",
+  "476",
+];
+
+for (const code of retailCodesToTest) {
+  const catalog = getSectorMachineCatalogForAteco(code);
+  assert.equal(
+    catalog.sectorKey,
+    "commercio_dettaglio_non_alimentare",
+    `Codice ATECO '${code}' deve restituire 'commercio_dettaglio_non_alimentare'`,
+  );
+  assert.ok(
+    catalog.sectorLabel.includes("Commercio al Dettaglio Non Alimentare") ||
+      catalog.sectorLabel.includes("Abbigliamento"),
+    `L'etichetta del catalogo per '${code}' deve indicare retail non alimentare`,
+  );
+}
+
+// Verifica non interferenza con supermercati/ipermercati e altri settori ATECO
+assert.equal(getSectorMachineCatalogForAteco("47.11.1").sectorKey, "ipermercato_gdo", "47.11.1 deve rimanere ipermercato");
+assert.equal(getSectorMachineCatalogForAteco("47.11.2").sectorKey, "supermercato_alimentare", "47.11.2 deve rimanere supermercato");
+assert.equal(getSectorMachineCatalogForAteco("56.10.11").sectorKey, "ristorazione_somministrazione", "56.10.11 deve rimanere ristorante");
+assert.equal(getSectorMachineCatalogForAteco("10.85").sectorKey, "gastronomia_produzione", "10.85 deve rimanere gastronomia");
+
+// Verifica esistenza nel catalogo
+const retailSectorIndex = SECTOR_MACHINERY_CATALOGS.findIndex((s) => s.sectorKey === "commercio_dettaglio_non_alimentare");
+assert.ok(retailSectorIndex !== -1, "Settore commercio_dettaglio_non_alimentare deve esistere in SECTOR_MACHINERY_CATALOGS");
+
+// -------------------------------------------------------------
+// Test 72: Verifica completezza delle 16 macchine professionali per retail non alimentare
+// -------------------------------------------------------------
+console.log("Test 72: Verifica completezza delle 16 macchine professionali per retail non alimentare con verifiche, corsi e modelli reali");
+const catalogRetailExact = getSectorMachineCatalogForAteco("47.71");
+assert.equal(catalogRetailExact.machines.length, 16, "Il catalogo Commercio al Dettaglio Non Alimentare deve contenere esattamente 16 macchine");
+
+const expectedRetailKeys = [
+  "pressa_compattatrice_cartoni_retail",
+  "transpallet_manuale_magazzino",
+  "transpallet_elettrico_compatto_retail",
+  "scala_castello_mobile_sicurezza",
+  "generatore_vapore_stiratrice_verticale",
+  "fissatrice_cartellinatrice_pneumatica",
+  "barriera_antitaccheggio_radiofrequenza",
+  "transenna_guidata_tornello_antiritorno",
+  "taglierina_rifilatrice_rotativa_sicurezza",
+  "carrello_roll_container_pieghevole",
+  "avvitatore_trapano_allestimenti",
+  "impianto_videosorveglianza_nvr",
+  "distributore_snack_bevande_break",
+  "gruppo_accumulo_ups_casse",
+  "climatizzatore_pompa_calore_vav",
+  "defibrillatore_dae_retail",
+];
+
+for (const key of expectedRetailKeys) {
+  const found = catalogRetailExact.machines.find((m) => m.machineKey === key);
+  assert.ok(found, `Attrezzatura con key '${key}' deve essere presente nel catalogo retail non alimentare`);
+  assert.ok(found.name.length > 5, `Nome attrezzatura '${key}' deve essere descrittivo`);
+  assert.ok(found.type.length > 5, `Tipologia '${key}' deve essere descrittiva`);
+  assert.ok(found.suggestedManufacturer.length > 2, `Produttore suggerito presente per '${key}'`);
+  assert.ok(found.suggestedModel.length > 1, `Modello suggerito presente per '${key}'`);
+  assert.ok(found.safetyChecks.length >= 5, `L'attrezzatura '${key}' deve avere almeno 5 controlli di sicurezza specifici`);
+  for (const check of found.safetyChecks) {
+    assert.ok(check.code.length > 3, `Check code valido per ${key}`);
+    assert.ok(check.title.length > 5, `Check title valido per ${key}`);
+    assert.ok(check.question.length > 15, `Check question dettagliata per ${key}`);
+    assert.ok(check.normReference.length > 3, `Norma citata per check ${check.code}`);
+    assert.ok(check.defaultSeverity >= 1 && check.defaultSeverity <= 5, `Severity valida per check ${check.code}`);
+    assert.equal(check.defaultSanctionable, true, `Controllo ${check.code} deve essere sanzionabile`);
+  }
+}
+
+// Verifiche sui corsi di formazione nella libreria
+assert.ok(TRAINING_REQUIREMENTS_LIBRARY.addetto_vendita_sicurezza_retail, "addetto_vendita_sicurezza_retail presente in library");
+assert.equal(TRAINING_REQUIREMENTS_LIBRARY.addetto_vendita_sicurezza_retail.courseCode, "FORMAZ_SICUREZZA_RETAIL_BASE");
+assert.equal(TRAINING_REQUIREMENTS_LIBRARY.addetto_vendita_sicurezza_retail.minHours, 8);
+assert.equal(TRAINING_REQUIREMENTS_LIBRARY.addetto_vendita_sicurezza_retail.frequencyYears, 5);
+
+assert.ok(TRAINING_REQUIREMENTS_LIBRARY.addetto_movimentazione_scale_magazzino, "addetto_movimentazione_scale_magazzino presente in library");
+assert.equal(TRAINING_REQUIREMENTS_LIBRARY.addetto_movimentazione_scale_magazzino.courseCode, "FORMAZ_SCALE_TRABATTELLI_MMC");
+assert.equal(TRAINING_REQUIREMENTS_LIBRARY.addetto_movimentazione_scale_magazzino.minHours, 4);
+assert.equal(TRAINING_REQUIREMENTS_LIBRARY.addetto_movimentazione_scale_magazzino.frequencyYears, 5);
+
+// Verifiche tecniche di dettaglio sulle 16 macchine:
+// 1. Pressa compattatrice: microinterruttore interblocco UNI EN 16500, fungo emergenza, valvola sovraccarico
+const retailPressa = catalogRetailExact.machines.find((m) => m.machineKey === "pressa_compattatrice_cartoni_retail")!;
+assert.equal(retailPressa.training.courseCode, "FORMAZ_SCALE_TRABATTELLI_MMC");
+assert.ok(retailPressa.suggestedModel.includes("Orwak 3110") || retailPressa.suggestedModel.includes("Bale Press"));
+assert.ok(retailPressa.safetyChecks.some((c) => c.code === "RETAIL_PRESS_DOOR_INTERLOCK" && c.normReference.includes("UNI EN 16500")));
+assert.ok(retailPressa.safetyChecks.some((c) => c.code === "RETAIL_PRESS_EMERGENCY_STOP"));
+assert.ok(retailPressa.safetyChecks.some((c) => c.code === "RETAIL_PRESS_HYDRAULIC_SAFETY"));
+assert.ok(retailPressa.safetyChecks.some((c) => c.code === "RETAIL_PRESS_EJECTION_SAFETY"));
+assert.ok(retailPressa.safetyChecks.some((c) => c.code === "RETAIL_PRESS_DPI_RESIDUAL_RISK"));
+
+// 2. Transpallet manuale: valvola sovraccarico 2200 kg, leva timone 3 posizioni, salvapiedi
+const retailTpm = catalogRetailExact.machines.find((m) => m.machineKey === "transpallet_manuale_magazzino")!;
+assert.ok(retailTpm.suggestedModel.includes("AM 22") || retailTpm.suggestedModel.includes("GS Basic") || retailTpm.suggestedModel.includes("LHM230"));
+assert.ok(retailTpm.safetyChecks.some((c) => c.code === "RETAIL_TPM_OVERLOAD_VALVE" && c.normReference.includes("UNI EN ISO 3691-5")));
+assert.ok(retailTpm.safetyChecks.some((c) => c.code === "RETAIL_TPM_STEERING_CONTROL"));
+assert.ok(retailTpm.safetyChecks.some((c) => c.code === "RETAIL_TPM_WHEELS_INTEGRITY"));
+assert.ok(retailTpm.safetyChecks.some((c) => c.code === "RETAIL_TPM_FOOT_GUARD"));
+assert.ok(retailTpm.safetyChecks.some((c) => c.code === "RETAIL_TPM_CAPACITY_LABEL"));
+
+// 3. Transpallet elettrico: pulsante pancia UNI EN ISO 3691-1, freno timone dead-man, sgancio emergenza
+const retailTpe = catalogRetailExact.machines.find((m) => m.machineKey === "transpallet_elettrico_compatto_retail")!;
+assert.equal(retailTpe.training.courseCode, "FORMAZ_TRANSPALLET");
+assert.ok(retailTpe.suggestedModel.includes("EJE M13") || retailTpe.suggestedModel.includes("Levio") || retailTpe.suggestedModel.includes("ECH 12"));
+assert.ok(retailTpe.safetyChecks.some((c) => c.code === "RETAIL_TPE_BELLY_BUTTON" && c.normReference.includes("UNI EN ISO 3691-1")));
+assert.ok(retailTpe.safetyChecks.some((c) => c.code === "RETAIL_TPE_BRAKING_SYSTEM"));
+assert.ok(retailTpe.safetyChecks.some((c) => c.code === "RETAIL_TPE_EMERGENCY_DISCONNECT"));
+assert.ok(retailTpe.safetyChecks.some((c) => c.code === "RETAIL_TPE_CREEP_SPEED"));
+assert.ok(retailTpe.safetyChecks.some((c) => c.code === "RETAIL_TPE_BATTERY_CHARGING"));
+
+// 4. Scala mobile a castello: parapetto 1m e fermapiede 15cm EN 131-7, autofrenante, stabilizzatori
+const retailScala = catalogRetailExact.machines.find((m) => m.machineKey === "scala_castello_mobile_sicurezza")!;
+assert.ok(retailScala.suggestedModel.includes("Faraone") || retailScala.suggestedModel.includes("Regina") || retailScala.suggestedModel.includes("Stabilo"));
+assert.ok(retailScala.safetyChecks.some((c) => c.code === "RETAIL_SCALA_PARAPETTO_FERMAPIEDE" && c.normReference.includes("UNI EN 131-7")));
+assert.ok(retailScala.safetyChecks.some((c) => c.code === "RETAIL_SCALA_AUTO_BRAKE"));
+assert.ok(retailScala.safetyChecks.some((c) => c.code === "RETAIL_SCALA_ANTI_SLIP_STEPS"));
+assert.ok(retailScala.safetyChecks.some((c) => c.code === "RETAIL_SCALA_STABILIZER_OUTRIGGERS"));
+assert.ok(retailScala.safetyChecks.some((c) => c.code === "RETAIL_SCALA_CAPACITY_SIGN"));
+
+// 5. Generatore vapore stiratrice verticale: caldaia PED, termostato limite, isolamento termico
+const retailStir = catalogRetailExact.machines.find((m) => m.machineKey === "generatore_vapore_stiratrice_verticale")!;
+assert.equal(retailStir.training.courseCode, "FORMAZ_SICUREZZA_RETAIL_BASE");
+assert.ok(retailStir.suggestedModel.includes("Laurastar") || retailStir.suggestedModel.includes("Jiffy") || retailStir.suggestedModel.includes("Vaporino"));
+assert.ok(retailStir.safetyChecks.some((c) => c.code === "RETAIL_STIR_PED_SAFETY_CAP" && c.normReference.includes("PED")));
+assert.ok(retailStir.safetyChecks.some((c) => c.code === "RETAIL_STIR_SAFETY_THERMOSTAT"));
+assert.ok(retailStir.safetyChecks.some((c) => c.code === "RETAIL_STIR_HOSE_INSULATION"));
+assert.ok(retailStir.safetyChecks.some((c) => c.code === "RETAIL_STIR_EARTH_PROTECTION"));
+assert.ok(retailStir.safetyChecks.some((c) => c.code === "RETAIL_STIR_DPI_HEAT_GLOVE"));
+
+// 6. Fissatrice cartellinatrice: riparo ago retrattile UNI EN ISO 13857, regolatore pressione, DPI puntura
+const retailCart = catalogRetailExact.machines.find((m) => m.machineKey === "fissatrice_cartellinatrice_pneumatica")!;
+assert.ok(retailCart.suggestedModel.includes("Avery Dennison") || retailCart.suggestedModel.includes("Mark III"));
+assert.ok(retailCart.safetyChecks.some((c) => c.code === "RETAIL_CART_NEEDLE_GUARD" && c.normReference.includes("ISO 13857")));
+assert.ok(retailCart.safetyChecks.some((c) => c.code === "RETAIL_CART_PRESSURE_REGULATOR"));
+assert.ok(retailCart.safetyChecks.some((c) => c.code === "RETAIL_CART_TRIGGER_SAFETY"));
+assert.ok(retailCart.safetyChecks.some((c) => c.code === "RETAIL_CART_NEEDLE_CHANGE"));
+assert.ok(retailCart.safetyChecks.some((c) => c.code === "RETAIL_CART_DPI_PUNCTURE"));
+
+// 7. Barriera antitaccheggio EAS: conformità CEM Titolo VIII Capo IV, passaggio utile evacuazione >= 1.20m
+const retailEas = catalogRetailExact.machines.find((m) => m.machineKey === "barriera_antitaccheggio_radiofrequenza")!;
+assert.ok(retailEas.suggestedModel.includes("Ultra Exit") || retailEas.suggestedModel.includes("EVOLVE"));
+assert.ok(retailEas.safetyChecks.some((c) => c.code === "RETAIL_EAS_CEM_COMPLIANCE" && c.normReference.includes("Titolo VIII")));
+assert.ok(retailEas.safetyChecks.some((c) => c.code === "RETAIL_EAS_EXIT_CLEAR_WIDTH" && c.question.includes("1.20")));
+assert.ok(retailEas.safetyChecks.some((c) => c.code === "RETAIL_EAS_FLOOR_ANCHOR"));
+assert.ok(retailEas.safetyChecks.some((c) => c.code === "RETAIL_EAS_PACEMAKER_WARNING"));
+assert.ok(retailEas.safetyChecks.some((c) => c.code === "RETAIL_EAS_CABLE_PROTECTION"));
+
+// 8. Transenna tornello antiritorno: sblocco antipanico spinta EN 13637, limitatore coppia, sblocco antincendio
+const retailTorn = catalogRetailExact.machines.find((m) => m.machineKey === "transenna_guidata_tornello_antiritorno")!;
+assert.ok(retailTorn.suggestedModel.includes("Gunnebo") || retailTorn.suggestedModel.includes("Came") || retailTorn.suggestedModel.includes("Kaba"));
+assert.ok(retailTorn.safetyChecks.some((c) => c.code === "RETAIL_TORN_PANIC_BREAKOUT" && c.normReference.includes("UNI EN 13637")));
+assert.ok(retailTorn.safetyChecks.some((c) => c.code === "RETAIL_TORN_TORQUE_LIMITER"));
+assert.ok(retailTorn.safetyChecks.some((c) => c.code === "RETAIL_TORN_ROUNDED_SURFACES"));
+assert.ok(retailTorn.safetyChecks.some((c) => c.code === "RETAIL_TORN_FIRE_RELEASE"));
+assert.ok(retailTorn.safetyChecks.some((c) => c.code === "RETAIL_TORN_MANUAL_LOCK_KEY"));
+
+// 9. Taglierina rifilatrice rotativa: lama protetta in carter plastico UNI EN ISO 13857, pressafoglio, stabilità
+const retailTagl = catalogRetailExact.machines.find((m) => m.machineKey === "taglierina_rifilatrice_rotativa_sicurezza")!;
+assert.ok(retailTagl.suggestedModel.includes("Dahle 552") || retailTagl.suggestedModel.includes("Rotatrim"));
+assert.ok(retailTagl.safetyChecks.some((c) => c.code === "RETAIL_TAGL_ENCLOSED_BLADE" && c.normReference.includes("ISO 13857")));
+assert.ok(retailTagl.safetyChecks.some((c) => c.code === "RETAIL_TAGL_AUTO_CLAMP"));
+assert.ok(retailTagl.safetyChecks.some((c) => c.code === "RETAIL_TAGL_COUNTER_BLADE"));
+assert.ok(retailTagl.safetyChecks.some((c) => c.code === "RETAIL_TAGL_BENCH_STABILITY"));
+assert.ok(retailTagl.safetyChecks.some((c) => c.code === "RETAIL_TAGL_REPLACEMENT_SAFETY"));
+
+// 10. Carrello roll container: ruote con freno UNI EN 12674-4, rete liscia, cinghie ritenuta, blocco pareti
+const retailRoll = catalogRetailExact.machines.find((m) => m.machineKey === "carrello_roll_container_pieghevole")!;
+assert.ok(retailRoll.suggestedModel.includes("Roll Store") || retailRoll.suggestedModel.includes("Cagsen") || retailRoll.suggestedModel.includes("Fa.Me.S."));
+assert.ok(retailRoll.safetyChecks.some((c) => c.code === "RETAIL_ROLL_BRAKE_SYSTEM" && c.normReference.includes("UNI EN 12674-4")));
+assert.ok(retailRoll.safetyChecks.some((c) => c.code === "RETAIL_ROLL_MESH_SAFETY"));
+assert.ok(retailRoll.safetyChecks.some((c) => c.code === "RETAIL_ROLL_RETENTION_STRAPS"));
+assert.ok(retailRoll.safetyChecks.some((c) => c.code === "RETAIL_ROLL_HINGE_LOCK"));
+assert.ok(retailRoll.safetyChecks.some((c) => c.code === "RETAIL_ROLL_LOAD_RATING"));
+
+// 11. Avvitatore trapano: frizione antislogamento CEI EN 62841-2-1, doppio isolamento, mandrino metallo
+const retailTrap = catalogRetailExact.machines.find((m) => m.machineKey === "avvitatore_trapano_allestimenti")!;
+assert.equal(retailTrap.training.courseCode, "FORMAZ_ATTREZZATURE_BASE");
+assert.ok(retailTrap.suggestedModel.includes("DDF485") || retailTrap.suggestedModel.includes("GSR 18V") || retailTrap.suggestedModel.includes("DCD791"));
+assert.ok(retailTrap.safetyChecks.some((c) => c.code === "RETAIL_TRAP_TORQUE_CLUTCH" && c.normReference.includes("CEI EN 62841-2-1")));
+assert.ok(retailTrap.safetyChecks.some((c) => c.code === "RETAIL_TRAP_DOUBLE_INSULATION"));
+assert.ok(retailTrap.safetyChecks.some((c) => c.code === "RETAIL_TRAP_KEYLESS_CHUCK"));
+assert.ok(retailTrap.safetyChecks.some((c) => c.code === "RETAIL_TRAP_LITHIUM_BATTERY"));
+assert.ok(retailTrap.safetyChecks.some((c) => c.code === "RETAIL_TRAP_DPI_EYE_PROTECTION"));
+
+// 12. Impianto videosorveglianza NVR: cartelli GDPR art. 13, autorizzazione ITL art. 4 L. 300/70, armadio blindato
+const retailTvcc = catalogRetailExact.machines.find((m) => m.machineKey === "impianto_videosorveglianza_nvr")!;
+assert.ok(retailTvcc.suggestedModel.includes("AcuSense") || retailTvcc.suggestedModel.includes("WizSense") || retailTvcc.suggestedModel.includes("Axis"));
+assert.ok(retailTvcc.safetyChecks.some((c) => c.code === "RETAIL_TVCC_GDPR_SIGNAGE" && c.normReference.includes("GDPR")));
+assert.ok(retailTvcc.safetyChecks.some((c) => c.code === "RETAIL_TVCC_STATUTO_LAVORATORI" && c.normReference.includes("300/1970")));
+assert.ok(retailTvcc.safetyChecks.some((c) => c.code === "RETAIL_TVCC_RACK_LOCK"));
+assert.ok(retailTvcc.safetyChecks.some((c) => c.code === "RETAIL_TVCC_PASSWORD_POLICY"));
+assert.ok(retailTvcc.safetyChecks.some((c) => c.code === "RETAIL_TVCC_NO_WORKSTATION_FOCUS"));
+
+// 13. Distributore snack vending: presa interbloccata IP44, disconnettore UNI EN 1717, antiribaltamento, blocco HACCP
+const retailVend = catalogRetailExact.machines.find((m) => m.machineKey === "distributore_snack_bevande_break")!;
+assert.ok(retailVend.suggestedModel.includes("Necta") || retailVend.suggestedModel.includes("Bianchi") || retailVend.suggestedModel.includes("Fas"));
+assert.ok(retailVend.safetyChecks.some((c) => c.code === "RETAIL_VEND_INTERLOCKED_SOCKET"));
+assert.ok(retailVend.safetyChecks.some((c) => c.code === "RETAIL_VEND_BACKFLOW_PREVENTER" && c.normReference.includes("UNI EN 1717")));
+assert.ok(retailVend.safetyChecks.some((c) => c.code === "RETAIL_VEND_ANTI_TILT_ANCHOR"));
+assert.ok(retailVend.safetyChecks.some((c) => c.code === "RETAIL_VEND_SAFETY_GLASS"));
+assert.ok(retailVend.safetyChecks.some((c) => c.code === "RETAIL_VEND_TEMP_LOCKOUT"));
+
+// 14. Gruppo accumulo UPS: batterie ermetiche CEI EN 62040-1, ventilazione, comando EPO emergenza
+const retailUps = catalogRetailExact.machines.find((m) => m.machineKey === "gruppo_accumulo_ups_casse")!;
+assert.ok(retailUps.suggestedModel.includes("APC") || retailUps.suggestedModel.includes("Riello") || retailUps.suggestedModel.includes("Eaton"));
+assert.ok(retailUps.safetyChecks.some((c) => c.code === "RETAIL_UPS_SEALED_BATTERIES" && c.normReference.includes("CEI EN 62040-1")));
+assert.ok(retailUps.safetyChecks.some((c) => c.code === "RETAIL_UPS_VENTILATION"));
+assert.ok(retailUps.safetyChecks.some((c) => c.code === "RETAIL_UPS_EPO_SHUTDOWN"));
+assert.ok(retailUps.safetyChecks.some((c) => c.code === "RETAIL_UPS_SELFTEST_DIAG"));
+assert.ok(retailUps.safetyChecks.some((c) => c.code === "RETAIL_UPS_OVERLOAD_SWITCH"));
+
+// 15. Climatizzatore pompa calore VAV: serrande tagliafuoco UNI EN 15650 con sgancio IRAI, sgancio emergenza, F-Gas
+const retailHvac = catalogRetailExact.machines.find((m) => m.machineKey === "climatizzatore_pompa_calore_vav")!;
+assert.equal(retailHvac.training.courseCode, "FORMAZ_CENTRALI_TERMICHE_CLIMA");
+assert.ok(retailHvac.suggestedModel.includes("Daikin") || retailHvac.suggestedModel.includes("Mitsubishi") || retailHvac.suggestedModel.includes("Carrier"));
+assert.ok(retailHvac.safetyChecks.some((c) => c.code === "RETAIL_HVAC_FIRE_DAMPER" && c.normReference.includes("UNI EN 15650")));
+assert.ok(retailHvac.safetyChecks.some((c) => c.code === "RETAIL_HVAC_EMERGENCY_SHUTOFF"));
+assert.ok(retailHvac.safetyChecks.some((c) => c.code === "RETAIL_HVAC_REFRIGERANT_LEAK"));
+assert.ok(retailHvac.safetyChecks.some((c) => c.code === "RETAIL_HVAC_FILTER_HYGIENE"));
+assert.ok(retailHvac.safetyChecks.some((c) => c.code === "RETAIL_HVAC_FAN_PROTECTION"));
+
+// 16. Defibrillatore DAE: Legge 116/2021, teca allarmata sonora, verifica semestrale elettrodi, corso BLSD
+const retailDae = catalogRetailExact.machines.find((m) => m.machineKey === "defibrillatore_dae_retail")!;
+assert.equal(retailDae.training.courseCode, "FORMAZ_BLSD_DAE");
+assert.ok(retailDae.suggestedModel.includes("HeartStart") || retailDae.suggestedModel.includes("AED Plus") || retailDae.suggestedModel.includes("HeartSine"));
+assert.ok(retailDae.safetyChecks.some((c) => c.code === "RETAIL_DAE_ALARMED_CABINET" && c.normReference.includes("116/2021")));
+assert.ok(retailDae.safetyChecks.some((c) => c.code === "RETAIL_DAE_ELECTRODES_VALIDITY"));
+assert.ok(retailDae.safetyChecks.some((c) => c.code === "RETAIL_DAE_SELFTEST_STATUS"));
+assert.ok(retailDae.safetyChecks.some((c) => c.code === "RETAIL_DAE_CPR_ACCESSORY_KIT"));
+assert.ok(retailDae.safetyChecks.some((c) => c.code === "RETAIL_DAE_118_REGISTRATION"));
+
+// -------------------------------------------------------------
+// Test 73: Mappatura ambienti Step 2 Retail (env-retail-*) -> Step 4 Macchine
+// -------------------------------------------------------------
+console.log("Test 73: Mappatura 1-a-1 tra ambienti Step 2 Retail (env-retail-*) -> Step 4 Macchine");
+const retailEnvironments = [
+  { id: "env-retail-area-vendita-principale", name: "Area Vendita Principale e Corsie Espositive Retail", category: "sales_floor" },
+  { id: "env-retail-banco-cassa-vdt", name: "Barriera Casse, Postazioni POS e Controllo Varchi", category: "checkout" },
+  { id: "env-retail-magazzino-scorte-merci", name: "Magazzino Scorte Merci, Ricevimento Colli e Banchina", category: "warehouse" },
+  { id: "env-retail-reparto-stoccaggio-capi-appesi", name: "Reparto Stoccaggio Capi Appesi e Scaffalature Alte", category: "warehouse" },
+  { id: "env-retail-zona-stiratura-ricondizionamento", name: "Zona Stiratura a Vapore, Ricondizionamento e Cartellinatura Capi", category: "workshop" },
+  { id: "env-retail-soppalco-magazzino", name: "Soppalco Magazzino e Prelievo Colli Leggeri in Quota", category: "warehouse" },
+  { id: "env-retail-ufficio-direzione-amministrazione", name: "Ufficio Direzione, Amministrazione e Postazione NVR TVCC", category: "office" },
+  { id: "env-retail-area-break-distributori", name: "Area Break Personale, Ristoro e Distributori Vending", category: "break_area" },
+  { id: "env-retail-vano-tecnico-quadro-clima", name: "Vano Tecnico, Quadro Elettrico Generale e Centrale Climatizzazione", category: "technical_room" },
+  { id: "env-retail-area-compattazione-cartoni-scarico", name: "Area Compattazione Cartoni, Raccolta Imballaggi e Banchina Rifiuti", category: "waste" },
+];
+
+const suggestedWithRetailEnvs = getSuggestedMachinesForEnvironmentsAndAteco(retailEnvironments, "47.71");
+
+// 1. env-retail-area-vendita-principale -> defibrillatore_dae_retail, transenna_guidata_tornello_antiritorno, climatizzatore_pompa_calore_vav
+const retailAreaVendita = suggestedWithRetailEnvs.filter((m) => m.targetEnvironmentId === "env-retail-area-vendita-principale");
+assert.equal(retailAreaVendita.length, 3, "env-retail-area-vendita-principale deve associare 3 macchine (DAE, tornello, clima VAV)");
+assert.ok(retailAreaVendita.some((m) => m.machineKey === "defibrillatore_dae_retail"));
+assert.ok(retailAreaVendita.some((m) => m.machineKey === "transenna_guidata_tornello_antiritorno"));
+assert.ok(retailAreaVendita.some((m) => m.machineKey === "climatizzatore_pompa_calore_vav"));
+
+// 2. env-retail-banco-cassa-vdt -> barriera_antitaccheggio_radiofrequenza, gruppo_accumulo_ups_casse
+const retailBancoCassa = suggestedWithRetailEnvs.filter((m) => m.targetEnvironmentId === "env-retail-banco-cassa-vdt");
+assert.equal(retailBancoCassa.length, 2, "env-retail-banco-cassa-vdt deve associare 2 macchine (barriera EAS, UPS casse)");
+assert.ok(retailBancoCassa.some((m) => m.machineKey === "barriera_antitaccheggio_radiofrequenza"));
+assert.ok(retailBancoCassa.some((m) => m.machineKey === "gruppo_accumulo_ups_casse"));
+
+// 3. env-retail-magazzino-scorte-merci -> transpallet_manuale_magazzino, transpallet_elettrico_compatto_retail, scala_castello_mobile_sicurezza, carrello_roll_container_pieghevole
+const retailMagazzino = suggestedWithRetailEnvs.filter((m) => m.targetEnvironmentId === "env-retail-magazzino-scorte-merci");
+assert.equal(retailMagazzino.length, 4, "env-retail-magazzino-scorte-merci deve associare 4 macchine (transpallet manuale, elettrico, scala castello, roll container)");
+assert.ok(retailMagazzino.some((m) => m.machineKey === "transpallet_manuale_magazzino"));
+assert.ok(retailMagazzino.some((m) => m.machineKey === "transpallet_elettrico_compatto_retail"));
+assert.ok(retailMagazzino.some((m) => m.machineKey === "scala_castello_mobile_sicurezza"));
+assert.ok(retailMagazzino.some((m) => m.machineKey === "carrello_roll_container_pieghevole"));
+
+// 4. env-retail-reparto-stoccaggio-capi-appesi -> carrello_roll_container_pieghevole, scala_castello_mobile_sicurezza
+const retailCapiAppesi = suggestedWithRetailEnvs.filter((m) => m.targetEnvironmentId === "env-retail-reparto-stoccaggio-capi-appesi");
+assert.equal(retailCapiAppesi.length, 2, "env-retail-reparto-stoccaggio-capi-appesi deve associare 2 macchine (roll container, scala castello)");
+assert.ok(retailCapiAppesi.some((m) => m.machineKey === "carrello_roll_container_pieghevole"));
+assert.ok(retailCapiAppesi.some((m) => m.machineKey === "scala_castello_mobile_sicurezza"));
+
+// 5. env-retail-zona-stiratura-ricondizionamento -> generatore_vapore_stiratrice_verticale, fissatrice_cartellinatrice_pneumatica, taglierina_rifilatrice_rotativa_sicurezza
+const retailStiratura = suggestedWithRetailEnvs.filter((m) => m.targetEnvironmentId === "env-retail-zona-stiratura-ricondizionamento");
+assert.equal(retailStiratura.length, 3, "env-retail-zona-stiratura-ricondizionamento deve associare 3 macchine (stiratrice vapore, cartellinatrice, taglierina)");
+assert.ok(retailStiratura.some((m) => m.machineKey === "generatore_vapore_stiratrice_verticale"));
+assert.ok(retailStiratura.some((m) => m.machineKey === "fissatrice_cartellinatrice_pneumatica"));
+assert.ok(retailStiratura.some((m) => m.machineKey === "taglierina_rifilatrice_rotativa_sicurezza"));
+
+// 6. env-retail-soppalco-magazzino -> scala_castello_mobile_sicurezza
+const retailSoppalco = suggestedWithRetailEnvs.filter((m) => m.targetEnvironmentId === "env-retail-soppalco-magazzino");
+assert.equal(retailSoppalco.length, 1, "env-retail-soppalco-magazzino deve associare 1 macchina (scala castello)");
+assert.ok(retailSoppalco.some((m) => m.machineKey === "scala_castello_mobile_sicurezza"));
+
+// 7. env-retail-ufficio-direzione-amministrazione -> impianto_videosorveglianza_nvr
+const retailUfficio = suggestedWithRetailEnvs.filter((m) => m.targetEnvironmentId === "env-retail-ufficio-direzione-amministrazione");
+assert.equal(retailUfficio.length, 1, "env-retail-ufficio-direzione-amministrazione deve associare 1 macchina (impianto TVCC NVR)");
+assert.ok(retailUfficio.some((m) => m.machineKey === "impianto_videosorveglianza_nvr"));
+
+// 8. env-retail-area-break-distributori -> distributore_snack_bevande_break
+const retailAreaBreak = suggestedWithRetailEnvs.filter((m) => m.targetEnvironmentId === "env-retail-area-break-distributori");
+assert.equal(retailAreaBreak.length, 1, "env-retail-area-break-distributori deve associare 1 macchina (distributore snack vending)");
+assert.ok(retailAreaBreak.some((m) => m.machineKey === "distributore_snack_bevande_break"));
+
+// 9. env-retail-vano-tecnico-quadro-clima -> gruppo_accumulo_ups_casse, climatizzatore_pompa_calore_vav
+const retailVanoTecnico = suggestedWithRetailEnvs.filter((m) => m.targetEnvironmentId === "env-retail-vano-tecnico-quadro-clima");
+assert.equal(retailVanoTecnico.length, 2, "env-retail-vano-tecnico-quadro-clima deve associare 2 macchine (UPS, clima VAV)");
+assert.ok(retailVanoTecnico.some((m) => m.machineKey === "gruppo_accumulo_ups_casse"));
+assert.ok(retailVanoTecnico.some((m) => m.machineKey === "climatizzatore_pompa_calore_vav"));
+
+// 10. env-retail-area-compattazione-cartoni-scarico -> pressa_compattatrice_cartoni_retail, transpallet_manuale_magazzino
+const retailCompattazione = suggestedWithRetailEnvs.filter((m) => m.targetEnvironmentId === "env-retail-area-compattazione-cartoni-scarico");
+assert.equal(retailCompattazione.length, 2, "env-retail-area-compattazione-cartoni-scarico deve associare 2 macchine (pressa cartoni, transpallet manuale)");
+assert.ok(retailCompattazione.some((m) => m.machineKey === "pressa_compattatrice_cartoni_retail"));
+assert.ok(retailCompattazione.some((m) => m.machineKey === "transpallet_manuale_magazzino"));
+
+// Tutte le macchine associate agli ambienti devono avere sourceReason === 'environment'
+const envMappedMachines = suggestedWithRetailEnvs.filter((m) => m.sourceReason === "environment");
+assert.ok(envMappedMachines.length >= 15, "Almeno 15 associazioni ambiente devono avere sourceReason === 'environment'");
+
+// -------------------------------------------------------------
+// Test 74: Integrazione automatica macchine per ATECO 47.71 senza ambienti preventivi
+// -------------------------------------------------------------
+console.log("Test 74: Integrazione automatica macchine per ATECO 47.71 senza ambienti preventivi");
+const suggestedRetailOnlyAteco = getSuggestedMachinesForEnvironmentsAndAteco([], "47.71");
+assert.equal(suggestedRetailOnlyAteco.length, 16, "Devono essere suggerite tutte le 16 macchine del retail non alimentare");
+assert.ok(
+  suggestedRetailOnlyAteco.every((m) => m.sourceReason === "ateco"),
+  "Tutte le macchine devono avere sourceReason === 'ateco' se nessun locale è stato specificato",
+);
+
+// Verifica fallback automatico identico per tutte le varianti di codice ATECO non food
+for (const code of retailCodesToTest) {
+  const fallbackRes = getSuggestedMachinesForEnvironmentsAndAteco([], code);
+  assert.equal(fallbackRes.length, 16, `ATECO variant '${code}' deve restituire tutte le 16 macchine del retail non alimentare`);
+  assert.ok(fallbackRes.every((m) => m.sourceReason === "ateco"), `Tutte le macchine con ATECO variant '${code}' devono avere sourceReason === 'ateco'`);
+}
+
 console.log("=== TUTTI I TEST normativeMachineCatalog SUPERATI CON SUCCESSO! ===");
 
 

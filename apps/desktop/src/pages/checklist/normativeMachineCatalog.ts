@@ -387,6 +387,24 @@ export const TRAINING_REQUIREMENTS_LIBRARY: Record<string, MachineTrainingRequir
     requiresPatentinoAccordoSR: false,
     targetRoleDescription: "Lavoratori addetti alla manipolazione detergenti corrosivi, disinfettanti e sanificazione centralizzata CIP (4h, rinnovo triennale)",
   },
+  addetto_vendita_sicurezza_retail: {
+    courseCode: "FORMAZ_SICUREZZA_RETAIL_BASE",
+    courseTitle: "Formazione Lavoratori Rischio Basso - Settore Commercio al Dettaglio e Negozi Specializzati",
+    normReference: "D.Lgs. 81/2008 art. 37; Accordo Stato-Regioni 21/12/2011 (4h Gen + 4h Spec)",
+    minHours: 8,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Commessi, addetti alla vendita, cassieri e personale di punto vendita retail (8h, rinnovo quinquennale)",
+  },
+  addetto_movimentazione_scale_magazzino: {
+    courseCode: "FORMAZ_SCALE_TRABATTELLI_MMC",
+    courseTitle: "Addestramento all'Uso Sicuro di Scale Portatili, Trabattelli e Movimentazione Manuale Carichi nel Magazzino Retail",
+    normReference: "D.Lgs. 81/2008 art. 37, 71, 73, Titolo IV (Scale) e Titolo VI (MMC ISO 11228)",
+    minHours: 4,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Addetti al magazzino, scaffalisti, addetti allestimento vetrine e prelievo merci in quota (4h)",
+  },
 };
 
 // -------------------------------------------------------------
@@ -13483,6 +13501,880 @@ export const SECTOR_MACHINERY_CATALOGS: SectorMachineCatalog[] = [
     ],
   },
 
+  // 16. COMMERCIO AL DETTAGLIO NON ALIMENTARE (Negozi Abbigliamento, Calzature, Casalinghi e Retail Specializzato - ATECO 47.71, 47.72, 47.5, 47.6, 47.7)
+  {
+    sectorKey: "commercio_dettaglio_non_alimentare",
+    sectorLabel: "Commercio al Dettaglio Non Alimentare, Negozi Abbigliamento, Calzature e Retail Specializzato",
+    atecoPrefixes: [
+      "47.71",
+      "47.71.1",
+      "47.71.2",
+      "47.71.3",
+      "47.72",
+      "47.5",
+      "47.6",
+      "47.7",
+      "4771",
+      "477110",
+      "477120",
+      "47711",
+      "47712",
+      "47713",
+      "477",
+      "475",
+      "476",
+    ],
+    machines: [
+      // 1. Pressa compattatrice cartoni retail
+      {
+        machineKey: "pressa_compattatrice_cartoni_retail",
+        name: "Pressa Compattatrice Verticale per Cartoni e Imballaggi Retail",
+        type: "Compattatrice Elettroidraulica per Rifiuti Cellulosici e Imballaggi",
+        suggestedManufacturer: "Orwak / Strautmann / Bramidan",
+        suggestedModel: "Orwak 3110 / Strautmann Bale Press / Bramidan B3",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.addetto_movimentazione_scale_magazzino,
+        safetyChecks: [
+          {
+            code: "RETAIL_PRESS_DOOR_INTERLOCK",
+            title: "Interblocco di Sicurezza Codificato Portello di Carico (UNI EN 16500)",
+            question: "Il piatto pressante scende esclusivamente a portellone anteriore completamente chiuso con microinterruttore di sicurezza codificato a prova di manomissione (PL d conforme a UNI EN 16500)?",
+            normReference: "UNI EN 16500:2014; D.Lgs. 81/2008 All. V p. 6; Direttiva Macchine 2006/42/CE",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_PRESS_EMERGENCY_STOP",
+            title: "Pulsante di Arresto di Emergenza a Fungo con Riarmo Manuale",
+            question: "Sulla console di comando è presente e funzionante un pulsante di arresto di emergenza a fungo rosso su sfondo giallo ad azione positiva con riarmo manuale conforme a CEI EN ISO 13850?",
+            normReference: "CEI EN ISO 13850; D.Lgs. 81/2008 All. V p. 2.1",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_PRESS_HYDRAULIC_SAFETY",
+            title: "Valvola Limitatrice di Pressione Idraulica e Protezione Sovraccarico",
+            question: "Il circuito idraulico è provvisto di valvola di massima pressione tarata per prevenire sovrapressioni e rischio di rottura di tubazioni flessibili con sversamento di fluido oleoidraulico?",
+            normReference: "UNI EN ISO 4413; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_PRESS_EJECTION_SAFETY",
+            title: "Sistema di Espulsione Automatica Balla a Due Mani",
+            question: "Il sistema meccanico o idraulico per l'espulsione della balla legata impedisce il ribaltamento incontrollato sul personale ed è azionato con comando a due mani in condizioni di sicurezza?",
+            normReference: "UNI EN 16500:2014 punto 5.3; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_PRESS_DPI_RESIDUAL_RISK",
+            title: "Segnaletica di Rischio Residuo e DPI Antitaglio/Calzature S1P",
+            question: "Sono chiaramente affissi i cartelli di divieto introduzione mani con macchina in moto ed è prescritto l'uso di guanti antitaglio (EN 388) e scarpe antinfortunistiche (EN ISO 20345)?",
+            normReference: "D.Lgs. 81/2008 art. 75, 77, All. V e VIII; UNI EN 388",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 2. Transpallet manuale magazzino
+      {
+        machineKey: "transpallet_manuale_magazzino",
+        name: "Transpallet Idraulico Manuale per Magazzino e Scarico Merci",
+        type: "Carrello per Movimentazione Manuale Carichi a Basso Sollevamento",
+        suggestedManufacturer: "Jungheinrich / Pramac / Toyota BT Lifter",
+        suggestedModel: "Jungheinrich AM 22 / Pramac GS Basic / BT Lifter LHM230 (portata 2200 kg)",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.addetto_movimentazione_scale_magazzino,
+        safetyChecks: [
+          {
+            code: "RETAIL_TPM_OVERLOAD_VALVE",
+            title: "Valvola Idraulica di Sovraccarico Tarata (Portata 2200 kg)",
+            question: "Il gruppo idraulico di sollevamento è dotato di valvola di massima pressione che blocca il sollevamento qualora il carico ecceda la portata nominale di targa (2200 kg)?",
+            normReference: "UNI EN ISO 3691-5; D.Lgs. 81/2008 All. V p. 2.4",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TPM_STEERING_CONTROL",
+            title: "Leva di Comando Timone a Tre Posizioni con Discesa Controllata",
+            question: "La leva di comando sul timone consente le tre posizioni stabili (sollevamento, marcia a folle, discesa progressiva) senza cedimenti o scatti improvvisi del gruppo forche?",
+            normReference: "UNI EN 1757; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TPM_WHEELS_INTEGRITY",
+            title: "Integrità Battistrada Ruote Direzionali e Rulli Forche in Poliuretano",
+            question: "Le ruote direzionali e i doppi rulli anteriori sono esenti da tagli, deformazioni da impatto o usura anomala che incrementino lo sforzo di trazione/spinta oltre i limiti ISO 11228?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 4, Titolo VI; ISO 11228-2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TPM_FOOT_GUARD",
+            title: "Protezione Meccanica Salvapiedi su Ruote Sterzanti",
+            question: "Le ruote direzionali alla base del timone sono alloggiate entro carter di protezione sagomati che evitano lo schiacciamento accidentale dei piedi dell'operatore durante le manovre?",
+            normReference: "UNI EN 1757 punto 4.3; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TPM_CAPACITY_LABEL",
+            title: "Targhetta di Identificazione e Marcatura Portata Massima",
+            question: "Sul telaio o sul timone è presente la targhetta del costruttore con marcatura CE, matricola e portata massima (2200 kg) perfettamente leggibile e indelebile?",
+            normReference: "D.Lgs. 81/2008 All. V p. 1.2; Direttiva Macchine 2006/42/CE",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 3. Transpallet elettrico compatto retail
+      {
+        machineKey: "transpallet_elettrico_compatto_retail",
+        name: "Transpallet Elettrico Compatto a Timone per Negozio e Magazzino",
+        type: "Carrello Elettrico Semovente con Guida da Terra a Basso Sollevamento",
+        suggestedManufacturer: "Jungheinrich / Toyota BT / Still",
+        suggestedModel: "Jungheinrich EJE M13 / Toyota Levio LWE130 / Still ECH 12",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.transpallet_elettrico,
+        safetyChecks: [
+          {
+            code: "RETAIL_TPE_BELLY_BUTTON",
+            title: "Pulsante Antinfortunistico Antipizzicamento sul Timone ('Pulsante Pancia')",
+            question: "Sulla testata del timone è presente e funzionante il pulsante di sicurezza rosso che inverte immediatamente il senso di marcia se premuto contro il corpo dell'operatore conforme a UNI EN ISO 3691-1?",
+            normReference: "UNI EN ISO 3691-1 punto 4.4.2; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TPE_BRAKING_SYSTEM",
+            title: "Freno di Stazionamento ed Emergenza con Timone Verticale/Orizzontale",
+            question: "Il carrello si arresta automaticamente frenando in condizioni di sicurezza al rilascio del timone o quando questo si trova in posizione completamente alzata o abbassata (dispositivo uomo morto)?",
+            normReference: "UNI EN ISO 3691-1; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TPE_EMERGENCY_DISCONNECT",
+            title: "Disconnettore Rapido Generale Alimentazione Elettrica di Emergenza",
+            question: "È presente un fungo o sezionatore rapido di emergenza a bordo macchina per isolare istantaneamente il pacco batterie in caso di anomalia o principio d'incendio?",
+            normReference: "CEI EN 1175; D.Lgs. 81/2008 All. V p. 2.1",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TPE_CREEP_SPEED",
+            title: "Modalità Tartaruga a Velocità Ridotta per Corsie di Vendita",
+            question: "È funzionante il pulsante marcia lenta (tartaruga) che consente manovre millimetriche a velocità controllata con timone verticale per operare in sicurezza tra scaffali e clienti?",
+            normReference: "UNI EN ISO 3691-1; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TPE_BATTERY_CHARGING",
+            title: "Ricarica Batteria Ioni Litio/Gel in Area Areata e Cavo Conforme",
+            question: "Il caricabatterie dedicato presenta cavi integri, spina industriale, spegnimento termico automatico e la ricarica avviene in ambiente idoneo e areato privo di materiali combustibili?",
+            normReference: "CEI EN 62485-3; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 4. Scala mobile a castello sicurezza
+      {
+        machineKey: "scala_castello_mobile_sicurezza",
+        name: "Scala Mobile a Castello con Piattaforma di Lavoro e Parapetto",
+        type: "Attrezzatura per Lavori Temporanei in Quota nel Magazzino Retail",
+        suggestedManufacturer: "Faraone / Svelt / Krause",
+        suggestedModel: "Faraone Scala Castello PL / Svelt Regina Special / Krause Stabilo",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.addetto_movimentazione_scale_magazzino,
+        safetyChecks: [
+          {
+            code: "RETAIL_SCALA_PARAPETTO_FERMAPIEDE",
+            title: "Parapetto Perimetrale a 1 Metro con Corrente Intermedio e Fermapiede 15 cm",
+            question: "La piattaforma di lavoro sommitale è provvista su tutti i lati aperti di parapetto normale alto almeno 100 cm, corrente intermedio e tavola fermapiede di altezza minima 15 cm conforme a UNI EN 131-7?",
+            normReference: "UNI EN 131-7; D.Lgs. 81/2008 art. 113, 126, All. XX",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_SCALA_AUTO_BRAKE",
+            title: "Sistema Autofrenante a Pressione o Ruote con Freno a Leva",
+            question: "Le ruote di spostamento sono provviste di sistema autofrenante che blocca la scala sotto il carico dell'operatore o di freni meccanici su ciascuna ruota prima della salita?",
+            normReference: "UNI EN 131-7 punto 4.2; D.Lgs. 81/2008 art. 113",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_SCALA_ANTI_SLIP_STEPS",
+            title: "Gradini Profondi e Piattaforma in Alluminio Rigato Antiscivolo",
+            question: "I gradini e la piattaforma superiore presentano superficie sagomata antiscivolo, priva di usure, tracce di grasso, polvere o pellicole plastiche d'imballaggio scivolose?",
+            normReference: "UNI EN 131-7; D.Lgs. 81/2008 All. V p. 1.1",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_SCALA_STABILIZER_OUTRIGGERS",
+            title: "Bracci Stabilizzatori Laterali Estraibili Antiribaltamento",
+            question: "I bracci stabilizzatori telescopici alla base sono correttamente estesi e serrati per garantire la stabilità trasversale durante le operazioni di prelievo scatole dagli scaffali alti?",
+            normReference: "UNI EN 131-7; D.Lgs. 81/2008 art. 111, 113",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_SCALA_CAPACITY_SIGN",
+            title: "Marcatura Portata Massima (150 kg) e Limiti d'Uso in Quota",
+            question: "È presente e leggibile l'etichetta del costruttore con marcatura EN 131-7, portata massima 150 kg (1 operatore + attrezzi) e divieto di salita a due persone contemporaneamente?",
+            normReference: "UNI EN 131-7; D.Lgs. 81/2008 art. 113",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 5. Generatore vapore stiratrice verticale
+      {
+        machineKey: "generatore_vapore_stiratrice_verticale",
+        name: "Generatore di Vapore Professionale e Stiratrice Verticale per Capi",
+        type: "Attrezzatura a Vapore per Ricondizionamento e Stiratura Tessuti",
+        suggestedManufacturer: "Laurastar / Jiffy Steamer / Battistella",
+        suggestedModel: "Laurastar Pro / Jiffy Steamer J-4000 / Battistella Vaporino Maxi",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.addetto_vendita_sicurezza_retail,
+        safetyChecks: [
+          {
+            code: "RETAIL_STIR_PED_SAFETY_CAP",
+            title: "Tappo di Sicurezza Caldaia Certificato con Valvola Antideflagrazione",
+            question: "Il tappo del generatore di vapore è dotato di valvola di sfiato termomeccanico certificata che impedisce l'apertura manuale se la caldaia è ancora sotto pressione residua?",
+            normReference: "Direttiva PED 2014/68/UE; CEI EN 60335-2-3; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_STIR_SAFETY_THERMOSTAT",
+            title: "Termostato di Sicurezza Anti-Surriscaldamento a Riarmo Manuale",
+            question: "La caldaia è protetta da un termostato di limite tarato che toglie alimentazione alla resistenza elettrica in caso di mancanza acqua o anomalie del pressostato?",
+            normReference: "CEI EN 60335-2-3; D.Lgs. 81/2008 All. V p. 2.1",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_STIR_HOSE_INSULATION",
+            title: "Tubo Flessibile Vapore con Guaina Termoisolante ed Erogatore Ergonomico",
+            question: "Il tubo vapore e l'impugnatura della spazzola stirante sono provvisti di rivestimento termoisolante continuo privo di screpolature, perdite o parti calde a contatto?",
+            normReference: "CEI EN 60335-2-3; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_STIR_EARTH_PROTECTION",
+            title: "Collegamento Elettrico con Messa a Terra e Differenziale 30 mA",
+            question: "L'apparecchio è alimentato tramite linea con conduttore di terra continuo, cavo in gomma anti-calore integro e protetto da differenziale ad alta sensibilità?",
+            normReference: "CEI 64-8; D.Lgs. 81/2008 art. 80, 84",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_STIR_DPI_HEAT_GLOVE",
+            title: "Fornitura Guanto Termoisolante per Manipolazione Capi in Tensione",
+            question: "È a disposizione dell'addetto un guanto di protezione termica certificato (UNI EN 407) per sorreggere e tendere i capi tessili durante l'erogazione diretta del vapore caldo?",
+            normReference: "D.Lgs. 81/2008 art. 75, 77; UNI EN 407",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 6. Fissatrice cartellinatrice pneumatica
+      {
+        machineKey: "fissatrice_cartellinatrice_pneumatica",
+        name: "Fissatrice Cartellinatrice Pneumatica per Micro-Sigilli ed Etichette",
+        type: "Attrezzatura Pneumo-Meccanica per Cartellinatura Capi di Abbigliamento",
+        suggestedManufacturer: "Avery Dennison / Dennison",
+        suggestedModel: "Avery Dennison Mark III / Dennison Pneumatic Fine Fabric System",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.addetto_vendita_sicurezza_retail,
+        safetyChecks: [
+          {
+            code: "RETAIL_CART_NEEDLE_GUARD",
+            title: "Riparo Perimetrale Protettivo dell'Ago con Protezione Retrattile",
+            question: "L'ago foratore della cartellinatrice è protetto da carter o bussola mobile che avanza automaticamente coprendo la punta quando l'attrezzo non è a contatto col capo da cartellinare?",
+            normReference: "UNI EN ISO 13857; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_CART_PRESSURE_REGULATOR",
+            title: "Regolatore di Pressione Pneumatica Tarato con Manometro (max 4-6 bar)",
+            question: "La linea dell'aria compressa è dotata di gruppo riduttore-filtro che mantiene la pressione entro il limite massimo consentito dal fabbricante evitando spari violenti?",
+            normReference: "UNI EN ISO 4414; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_CART_TRIGGER_SAFETY",
+            title: "Dispositivo di Blocco Grilletto contro Azionamenti Involontari",
+            question: "La leva o pulsante di azionamento pneumatico presenta una sicura meccanica che ne impedisce la pressione accidentale durante la movimentazione o la posa sul banco?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_CART_NEEDLE_CHANGE",
+            title: "Procedura Sicura per Sostituzione Ago e Sezionamento Aria",
+            question: "La sostituzione degli aghi perforatori avviene tassativamente previa disconnessione dell'innesto rapido pneumatico mediante apposita chiavetta/pinza fornita dal costruttore?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 4; All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_CART_DPI_PUNCTURE",
+            title: "Dotazione Guanti di Protezione Meccanica Anti-Puntura (EN 388)",
+            question: "Gli addetti alla cartellinatura continuativa sono dotati di guanti di protezione individuale conformi a EN 388 con specifico livello di resistenza alla perforazione meccanica?",
+            normReference: "D.Lgs. 81/2008 art. 75, 77; UNI EN 388",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 7. Barriera antitaccheggio radiofrequenza
+      {
+        machineKey: "barriera_antitaccheggio_radiofrequenza",
+        name: "Barriera Antitaccheggio a Radiofrequenza / Acusto-Magnetica (Varco Uscita)",
+        type: "Sistema Elettronico di Sorveglianza Articoli (EAS) e Rilevazione Varchi",
+        suggestedManufacturer: "Sensormatic / Checkpoint",
+        suggestedModel: "Sensormatic Ultra Exit 2.4m / Checkpoint EVOLVE iSys",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.addetto_vendita_sicurezza_retail,
+        safetyChecks: [
+          {
+            code: "RETAIL_EAS_CEM_COMPLIANCE",
+            title: "Marcatura CE e Conformità Esposizione a Campi Elettromagnetici (CEM)",
+            question: "Le antenne EAS dispongono di dichiarazione di conformità CE attestante il rispetto dei limiti di esposizione umana ai campi elettromagnetici per lavoratori e pubblico (ICNIRP / CEI EN 50364)?",
+            normReference: "D.Lgs. 81/2008 Titolo VIII Capo IV; CEI EN 50364",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_EAS_EXIT_CLEAR_WIDTH",
+            title: "Larghezza Utile di Passaggio per Vie d'Esodo (>= 1.20 m per Varco)",
+            question: "Il posizionamento delle colonne antitaccheggio non riduce la larghezza utile delle uscite di sicurezza e delle vie di fuga al di sotto delle misure minime prescritte per l'evacuazione (>= 1.20 m)?",
+            normReference: "D.M. 03/09/2021; D.Lgs. 81/2008 All. IV p. 1.5",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_EAS_FLOOR_ANCHOR",
+            title: "Fissaggio Meccanico Rigido a Pavimento Antiribaltamento",
+            question: "Le antenne sono saldamente ancorate al basamento mediante tasselli metallici a scomparsa senza pericolo di ribaltamento per urti accidentali con carrelli o clienti?",
+            normReference: "UNI EN 62368-1; D.Lgs. 81/2008 All. IV p. 1.1",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_EAS_PACEMAKER_WARNING",
+            title: "Segnaletica di Avvertenza per Portatori di Pacemaker e Dispositivi Medici Attivi",
+            question: "In corrispondenza dell'ingresso e del varco antitaccheggio è esposto il cartello di avviso normalizzato per portatori di stimolatori cardiaci o impianti acustici?",
+            normReference: "D.Lgs. 81/2008 All. XXV; D.Lgs. 17/2010; UNI EN ISO 7010",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_EAS_CABLE_PROTECTION",
+            title: "Passaggio Cavi Sottotraccia o Pedana Carrabile Antinciampo",
+            question: "I cavi di alimentazione e collegamento dati sono inseriti sotto pavimento o protetti da canalina ribassata carrabile priva di rilievi o gradini causa di inciampo?",
+            normReference: "CEI 64-8; D.Lgs. 81/2008 All. IV p. 1.4",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 8. Transenna guidata tornello antiritorno
+      {
+        machineKey: "transenna_guidata_tornello_antiritorno",
+        name: "Transenna Guidata e Tornello Meccanico Antiritorno Flusso Clientela",
+        type: "Dispositivo di Instradamento e Controllo Accessi Flusso Negozio",
+        suggestedManufacturer: "Gunnebo / Came / Kaba",
+        suggestedModel: "Gunnebo Pass-O-Mat / Came Saloon / Kaba Kentaur",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.addetto_vendita_sicurezza_retail,
+        safetyChecks: [
+          {
+            code: "RETAIL_TORN_PANIC_BREAKOUT",
+            title: "Dispositivo Meccanico di Sblocco Antipanico a Spinta per Vie d'Esodo",
+            question: "Il battente del tornello o della transenna è munito di sistema antipanico certificato (UNI EN 13637) che si apre liberamente verso l'uscita applicando una spinta manuale <= 150 N?",
+            normReference: "UNI EN 13637; D.M. 03/09/2021; D.Lgs. 81/2008 All. IV p. 1.5",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TORN_TORQUE_LIMITER",
+            title: "Frizione Meccanica di Sicurezza o Limitatore di Coppia Motore",
+            question: "La forza d'impatto e la coppia del braccio rotante sono tarate per arrestarsi istantaneamente al contatto evitando schiacciamenti o intrappolamenti di arti o bambini?",
+            normReference: "UNI EN 16005; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TORN_ROUNDED_SURFACES",
+            title: "Profili Arrotondati, Paracolpi in Gomma e Assenza Spigoli Vivi",
+            question: "Tutte le parti metalliche e i pannelli in plexiglass/policarbonato presentano bordi smussati e raccordati con guarnizioni morbide prive di sbavature taglienti?",
+            normReference: "UNI EN ISO 13857; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TORN_FIRE_RELEASE",
+            title: "Sblocco Automatico a Battente Aperto su Allarme Antincendio / Blackout",
+            question: "In caso di interruzione dell'alimentazione elettrica o attivazione dell'allarme incendio, il varco si sblocca automaticamente e stabilmente in posizione aperta verso la via di fuga?",
+            normReference: "D.M. 03/09/2021; CEI EN 54; D.Lgs. 81/2008 All. IV",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TORN_MANUAL_LOCK_KEY",
+            title: "Chiave di Esclusione Manuale per il Personale di Servizio",
+            question: "È presente e custodita presso la cassa la chiave di sblocco rapido che permette al personale di disattivare il tornello in caso di evacuazione o passaggio merci voluminose?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 4",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 9. Taglierina rifilatrice rotativa sicurezza
+      {
+        machineKey: "taglierina_rifilatrice_rotativa_sicurezza",
+        name: "Taglierina Rifilatrice Rotativa di Precisione per Cartellonistica e P.O.P.",
+        type: "Attrezzatura Manuale di Taglio Protetto per Carta, Film Plastico e Cartone",
+        suggestedManufacturer: "Dahle / Rotatrim",
+        suggestedModel: "Dahle 552 Professional / Rotatrim Professional M-Series",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.addetto_vendita_sicurezza_retail,
+        safetyChecks: [
+          {
+            code: "RETAIL_TAGL_ENCLOSED_BLADE",
+            title: "Lama Rotante Circolare Chiusa in Carter Plastico Sigillato",
+            question: "La lama rotante in acciaio rettificato è completamente racchiusa all'interno della testina di taglio in plastica antiurto rendendo impossibile il contatto accidentale delle dita con il tagliente?",
+            normReference: "UNI EN ISO 13857; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TAGL_AUTO_CLAMP",
+            title: "Dispositivo Automatico di Blocco Foglio durante la Corsa di Taglio",
+            question: "La barra di pressione trasparente blocca stabilmente il supporto cartaceo prima e durante il passaggio della testina per evitare trascinamenti o movimenti imprevisti del foglio?",
+            normReference: "D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TAGL_COUNTER_BLADE",
+            title: "Integrità Controlama Inferiore Fissa e Assenza Scheggiature",
+            question: "Il bordo metallico della controlama inferiore è integro, privo di tacche, deformazioni o residui metallici che possano provocare inceppamenti della lama rotante?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 4",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TAGL_BENCH_STABILITY",
+            title: "Piedini in Gomma Antiscivolo e Stabilità sul Piano di Lavoro",
+            question: "Il basamento metallico con griglia millimetrata è dotato di piedini d'appoggio in gomma ad alta aderenza che impediscono scivolamenti della taglierina durante il taglio?",
+            normReference: "D.Lgs. 81/2008 All. V p. 1.1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TAGL_REPLACEMENT_SAFETY",
+            title: "Procedura e DPI per Sostituzione Sicura della Testina Lama Usurata",
+            question: "La sostituzione del gruppo testina portalama usurato avviene secondo il manuale del costruttore con l'impiego di guanti antitaglio certificati EN 388?",
+            normReference: "D.Lgs. 81/2008 art. 73, 75, 77; UNI EN 388",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 10. Carrello roll container pieghevole
+      {
+        machineKey: "carrello_roll_container_pieghevole",
+        name: "Carrello Roll Container Pieghevole a Rete per Ricevimento Merci Retail",
+        type: "Attrezzatura Mobile su Ruote per Movimentazione Merci e Rifornimento Corsie",
+        suggestedManufacturer: "Roll Store / Cagsen / Fa.Me.S.",
+        suggestedModel: "Roll Store RC-3 Pareti / Cagsen 3 pareti smontabile / Fa.Me.S. Eco Roll",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.addetto_movimentazione_scale_magazzino,
+        safetyChecks: [
+          {
+            code: "RETAIL_ROLL_BRAKE_SYSTEM",
+            title: "Freni Meccanici di Stazionamento sulle Ruote Pivotanti",
+            question: "Almeno due ruote orientabili sono provviste di freno a pedale perfettamente efficiente per immobilizzare il carrello su rampe, pendenze o durante il carico/scarico?",
+            normReference: "UNI EN 12674-4; D.Lgs. 81/2008 All. V p. 2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_ROLL_MESH_SAFETY",
+            title: "Rete Metallica Elettrosaldata Priva di Tondini Rotti o Punte Taglienti",
+            question: "Le pareti laterali in tondino metallico sono prive di saldature distaccate, spigoli vivi o bavature che possano lacerare i guanti o ferire le mani dell'addetto?",
+            normReference: "UNI EN 12674-1; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_ROLL_RETENTION_STRAPS",
+            title: "Cinghie Tessili di Ritenuta Carico con Ganci di Sicurezza Chiusi",
+            question: "Il roll container è corredato di cinghie elastiche o tessili con ganci di ritenuta integri per impedire la caduta accidentale di cartoni e merce durante il transito?",
+            normReference: "UNI EN 12195-2; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_ROLL_HINGE_LOCK",
+            title: "Perni di Cerniera e Chiavistelli di Bloccaggio Antiapertura Pareti",
+            question: "I sistemi di innesto rapido e blocco delle pareti pieghevoli al basamento impediscono lo sgancio o il collasso accidentale della struttura sotto sforzo?",
+            normReference: "UNI EN 12674-4; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_ROLL_LOAD_RATING",
+            title: "Targhetta Portata Massima e Rispetto Limiti MMC a Spinta/Trazione",
+            question: "Sul telaio è indicata la portata massima (500-600 kg) e il personale applica le tecniche di spinta a due mani evitando la trazione all'indietro conforme a ISO 11228-2?",
+            normReference: "D.Lgs. 81/2008 Titolo VI; ISO 11228-2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 11. Avvitatore trapano allestimenti
+      {
+        machineKey: "avvitatore_trapano_allestimenti",
+        name: "Trapano Avvitatore a Batteria per Allestimento Scaffalature e Vetrine",
+        type: "Utensile Elettrico Portatile Ricaricabile per Allestimenti e Manutenzione",
+        suggestedManufacturer: "Makita / Bosch Professional / DeWalt",
+        suggestedModel: "Makita DDF485 / Bosch Professional GSR 18V-55 / DeWalt DCD791",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "RETAIL_TRAP_TORQUE_CLUTCH",
+            title: "Frizione Meccanica di Coppia Regolabile Antislogamento Polso",
+            question: "La ghiera di regolazione del momento torcente interviene tempestivamente evitando contraccolpi o torsioni brusche del polso in caso di impuntamento della punta o vite?",
+            normReference: "CEI EN 62841-2-1; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TRAP_DOUBLE_INSULATION",
+            title: "Involucro a Doppio Isolamento e Integrità Scocca Antiurto",
+            question: "La carcassa dell'elettroutensile è esente da spaccature o fessurazioni ed è provvista di marcatura di doppio isolamento (Classe II) e marchio CE indelebile?",
+            normReference: "CEI EN 62841-1; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TRAP_KEYLESS_CHUCK",
+            title: "Mandrino Autoserrante in Metallo con Bloccaggio Punta Sicuro",
+            question: "Il mandrino autoserrante blocca saldamente punte e inserti senza giochi eccentrici o allentamenti durante le forature su metallo o legno?",
+            normReference: "CEI EN 62841-2-1; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TRAP_LITHIUM_BATTERY",
+            title: "Pacco Batterie Ioni di Litio con Protezione Sovraccarico e Caricatore Dedicato",
+            question: "Le batterie ricaricabili sono prive di deformazioni, rigonfiamenti o perdite e la ricarica avviene con caricatore originale dotato di cut-off termico?",
+            normReference: "CEI EN 62133-2; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TRAP_DPI_EYE_PROTECTION",
+            title: "Dotazione Occhiali di Protezione Meccanica e Guanti EN 388",
+            question: "L'addetto all'allestimento scaffalature dispone di occhiali di protezione antischeggia (UNI EN 166) per forature a parete/soffitto e guanti da lavoro meccanico?",
+            normReference: "D.Lgs. 81/2008 art. 75, 77; UNI EN 166; UNI EN 388",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 12. Impianto videosorveglianza NVR
+      {
+        machineKey: "impianto_videosorveglianza_nvr",
+        name: "Impianto Videosorveglianza TVCC con NVR per Sicurezza Punto Vendita",
+        type: "Sistema TVCC Elettronico di Registrazione e Sicurezza Anticrimine",
+        suggestedManufacturer: "Hikvision / Dahua / Axis",
+        suggestedModel: "Hikvision AcuSense NVR / Dahua WizSense / Axis Companion",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.addetto_vendita_sicurezza_retail,
+        safetyChecks: [
+          {
+            code: "RETAIL_TVCC_GDPR_SIGNAGE",
+            title: "Informativa di Primo Livello Videosorveglianza (GDPR art. 13)",
+            question: "Prima del raggio di ripresa delle telecamere sono posizionati cartelli visibili conformi al modello del Garante Privacy recanti finalità, titolare del trattamento e diritti?",
+            normReference: "Regolamento UE 2016/679 (GDPR) art. 13; Provv. Garante 08/04/2010",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TVCC_STATUTO_LAVORATORI",
+            title: "Autorizzazione ITL o Accordo Sindacale ex Art. 4 Statuto Lavoratori",
+            question: "L'impianto che inquadra aree di transito dei dipendenti è autorizzato con apposito accordo con le RSA/RSU o con provvedimento formale dell'Ispettorato del Lavoro?",
+            normReference: "Legge 300/1970 art. 4; D.Lgs. 151/2015; D.Lgs. 81/2008",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TVCC_RACK_LOCK",
+            title: "NVR Custodito in Locale Tecnico o Armadio Rack Blindato a Chiave",
+            question: "Il videoregistratore digitale NVR è installato all'interno di un armadio rack metallico chiuso con serratura di sicurezza accessibile esclusivamente ai soggetti autorizzati?",
+            normReference: "Regolamento UE 2016/679 art. 32; D.Lgs. 196/2003",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TVCC_PASSWORD_POLICY",
+            title: "Gestione Credenziali con Rotazione Periodica e Tempo di Sovrascrittura (24-48h)",
+            question: "L'accesso all'NVR è protetto da credenziali complesse con log di accesso inalterabile e sovrascrittura automatica delle immagini entro massimo 24-48 ore?",
+            normReference: "Provv. Garante Privacy 08/04/2010 punto 3.4",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_TVCC_NO_WORKSTATION_FOCUS",
+            title: "Orientamento Telecamere Mirato a Casse/Varchi senza Controllo a Distanza Continuo",
+            question: "Il cono visivo delle telecamere è circoscritto ai beni aziendali, casse e varchi di accesso, senza puntamento fisso e ravvicinato sulle postazioni ordinarie dei commessi?",
+            normReference: "Legge 300/1970 art. 4; D.Lgs. 81/2008",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 13. Distributore snack bevande break
+      {
+        machineKey: "distributore_snack_bevande_break",
+        name: "Distributore Automatico di Snack e Bevande Calde/Fredde (Vending)",
+        type: "Apparecchio di Distribuzione Automatica Alimenti e Bevande Confezionate",
+        suggestedManufacturer: "Necta / Bianchi Vending / Fas International",
+        suggestedModel: "Necta Samba Classic / Bianchi Vending BVM / Fas Perla",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "RETAIL_VEND_INTERLOCKED_SOCKET",
+            title: "Presa Elettrica Interbloccata IP44 o Quadro con Differenziale 30 mA",
+            question: "L'apparecchio è collegato mediante presa industriale protetta o linea dedicata con interruttore differenziale ad alta sensibilità (Idn <= 30 mA) contro contatti indiretti?",
+            normReference: "CEI 64-8; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_VEND_BACKFLOW_PREVENTER",
+            title: "Disconnettore Idrico con Valvola di Non Ritorno Rete Potabile",
+            question: "La tubazione di carico acqua potabile del distributore bevande calde è provvista di disconnettore idraulico a riflusso certificato conforme a norma UNI EN 1717?",
+            normReference: "UNI EN 1717; D.Lgs. 31/2001; D.Lgs. 18/2023",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_VEND_ANTI_TILT_ANCHOR",
+            title: "Staffa Metallica di Ancoraggio a Parete Antiribaltamento",
+            question: "Il mobile del distributore è saldamente vincolato alla parete mediante staffe meccaniche di sicurezza per escludere il rischio di schiacciamento da ribaltamento o urto?",
+            normReference: "UNI EN 60335-2-75; D.Lgs. 81/2008 All. V p. 1.1",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_VEND_SAFETY_GLASS",
+            title: "Vetrina Frontale in Vetro di Sicurezza Stratificato Antisfondamento",
+            question: "Il vetro panoramico anteriore è di tipo stratificato o temperato di sicurezza certificato EN 12600 per evitare proiezioni di schegge in caso di urto o tentata effrazione?",
+            normReference: "UNI EN 12600; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_VEND_TEMP_LOCKOUT",
+            title: "Sensore Termico con Blocco Erogazione Alimenti Deperibili HACCP",
+            question: "Il comparto snack refrigerato dispone di sonda termica che inibisce l'erogazione dei prodotti deperibili (tramezzini, latte) qualora la temperatura superi +4°C / +8°C?",
+            normReference: "Reg. CE 852/2004; D.Lgs. 193/2007",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 14. Gruppo accumulo UPS casse
+      {
+        machineKey: "gruppo_accumulo_ups_casse",
+        name: "Gruppo di Continuità UPS per Barriera Casse, POS e Server Retail",
+        type: "Sorgente di Alimentazione Ausiliaria Elettronica a Batterie Ermetiche",
+        suggestedManufacturer: "APC by Schneider Electric / Riello UPS / Eaton",
+        suggestedModel: "APC Smart-UPS 1500VA LCD / Riello Dialog Vision / Eaton 5PX",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "RETAIL_UPS_SEALED_BATTERIES",
+            title: "Batterie Ermetiche al Piombo Sigillato (VRLA) Senza Esalazioni Acide",
+            question: "Gli accumulatori interni sono del tipo al piombo-acido a ricombinazione di gas o al litio senza rilascio di fumi acidi e certificati conformi a CEI EN 62040-1?",
+            normReference: "CEI EN 62040-1; CEI EN 50272-2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_UPS_VENTILATION",
+            title: "Feritoie di Aerazione Libere e Assenza Sovratemperature",
+            question: "Il gruppo statico è alloggiato in vano aerato, libero da accumuli di polvere, carte o materiali infiammabili e con ventole di raffreddamento efficienti?",
+            normReference: "CEI EN 62040-1; D.Lgs. 81/2008 art. 80",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_UPS_EPO_SHUTDOWN",
+            title: "Comando di Spegnimento d'Emergenza EPO (Emergency Power Off)",
+            question: "L'UPS supporta il comando rapido di sgancio EPO per sezionare istantaneamente sia l'ingresso di rete che l'uscita inverter in caso di emergenza o incendio al quadro?",
+            normReference: "CEI EN 62040-1 punto 4.7.7; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_UPS_SELFTEST_DIAG",
+            title: "Autodiagnosi Periodica Batterie con Segnalazione Visiva/Acustica",
+            question: "Il display LCD e il sistema acustico segnalano tempestivamente guasti interni, batterie esauste da sostituire o sovraccarichi sulle linee casse?",
+            normReference: "CEI EN 62040-3; D.Lgs. 81/2008 art. 71 c. 4",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_UPS_OVERLOAD_SWITCH",
+            title: "Interruttori Magnetotermici di Protezione Linee Uscita",
+            question: "I circuiti a valle dell'UPS dedicati ai singoli terminali cassa e scanner sono protetti da interruttori automatici coordinati con il potere di cortocircuito dell'inverter?",
+            normReference: "CEI 64-8; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 15. Climatizzatore pompa calore VAV
+      {
+        machineKey: "climatizzatore_pompa_calore_vav",
+        name: "Impianto di Climatizzazione a Pompa di Calore e Volume Aria Variabile (VRV/VAV)",
+        type: "Sistema Centralizzato di Climatizzazione, Trattamento Aria e Termoregolazione",
+        suggestedManufacturer: "Daikin / Mitsubishi Electric / Carrier",
+        suggestedModel: "Daikin VRV IV-i / Mitsubishi Electric City Multi / Carrier VRF",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.centrali_termiche_clima,
+        safetyChecks: [
+          {
+            code: "RETAIL_HVAC_FIRE_DAMPER",
+            title: "Serrande Tagliafuoco Canalizzazioni Certificate con Sgancio IRAI",
+            question: "I condotti aeraulici che attraversano compartimenti antincendio sono dotati di serrande tagliafuoco certificate UNI EN 15650 collegate all'impianto rivelazione fumi per chiusura automatica?",
+            normReference: "UNI EN 15650; D.M. 03/08/2015; D.Lgs. 81/2008 All. IV",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_HVAC_EMERGENCY_SHUTOFF",
+            title: "Pulsante di Sgancio Elettrico Generale d'Emergenza Esterno",
+            question: "All'esterno della centrale tecnologica/quadro clima è presente un pulsante a fungo di sgancio rapido per togliere tensione a compressori e ventilatori in emergenza?",
+            normReference: "D.M. 03/09/2021; CEI 64-8; D.Lgs. 81/2008 All. IV p. 1.8",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_HVAC_REFRIGERANT_LEAK",
+            title: "Rilevatore Fuga Gas Refrigerante F-Gas e Registro Apparecchiatura",
+            question: "Gli ambienti chiusi con elevata carica di refrigerante sono dotati di sensori di fuga con allarme e l'impianto possiede libretto F-Gas conforme al D.P.R. 146/2018?",
+            normReference: "UNI EN 378-3; D.P.R. 146/2018; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_HVAC_FILTER_HYGIENE",
+            title: "Pulizia e Sanificazione Periodica Pacchi Filtranti e Canali Aria",
+            question: "I filtri dell'aria sono periodicamente sostituiti/sanificati con registro manutenzioni secondo le linee guida per la prevenzione della Legionella e la qualità dell'aria indoor?",
+            normReference: "Accordo Stato-Regioni 07/05/2015; D.Lgs. 81/2008 All. IV p. 1.9",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_HVAC_FAN_PROTECTION",
+            title: "Griglie di Protezione Infortunistica su Ventilatori ed Elettroventole",
+            question: "Tutte le giranti dei ventilatori delle unità esterne e di trattamento aria sono protette da griglie metalliche fisse conformi a UNI EN ISO 13857 contro contatti accidentali?",
+            normReference: "UNI EN ISO 13857; D.Lgs. 81/2008 All. V p. 6",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 16. Defibrillatore DAE retail
+      {
+        machineKey: "defibrillatore_dae_retail",
+        name: "Defibrillatore Semiautomatico Esterno (DAE) in Teca Allarmata per Negozio",
+        type: "Dispositivo Medico Elettromedicale Salvavita per Emergenze Cardiovascolari",
+        suggestedManufacturer: "Philips / Zoll / HeartSine",
+        suggestedModel: "Philips HeartStart FRx / Zoll AED Plus / HeartSine Samaritan PAD 350P",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.addetto_blsd_dae,
+        safetyChecks: [
+          {
+            code: "RETAIL_DAE_ALARMED_CABINET",
+            title: "Teca a Parete Allarmata Acustica e Connessa con Apertura a Strappo",
+            question: "Il DAE è alloggiato in teca murale chiaramente segnalata con cartello ILCOR, dotata di sirena acustica di allarme all'apertura e installata ad altezza accessibile (100-140 cm)?",
+            normReference: "Legge 116/2021 art. 3; D.Lgs. 81/2008 art. 45",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_DAE_ELECTRODES_VALIDITY",
+            title: "Controllo Semestrale Scadenza Elettrodi Monouso e Piastre Pediatriche",
+            question: "Le piastre adesive per defibrillazione sono sigillate nell'involucro originale, non scadute e corredate da riduttore/chiave per utilizzo su bambini in caso di necessità?",
+            normReference: "D.M. 24/04/2013; D.Lgs. 81/2008 art. 71 c. 4",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_DAE_SELFTEST_STATUS",
+            title: "Indicatore di Stato Autodiagnosi Permanente (Spia Verde / Icona OK)",
+            question: "Il dispositivo esegue autotest automatici giornalieri e mostra chiaramente sul frontale l'indicatore verde di prontezza all'uso senza codici di errore acustici o visivi?",
+            normReference: "CEI EN 60601-2-4; Legge 116/2021",
+            defaultSeverity: 5,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_DAE_CPR_ACCESSORY_KIT",
+            title: "Kit di Soccorso di Corredo (Forbici Taglia-Abiti, Maschera Pocket, Rasoio, Guanti)",
+            question: "All'interno della teca è presente il kit di rianimazione con forbici taglia-abiti per denudare il torace, rasoio monouso, guanti protettivi e mascherina barriera per ventilazione?",
+            normReference: "Linee Guida IRC/ERC; D.M. 18/03/2011; D.Lgs. 81/2008",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "RETAIL_DAE_118_REGISTRATION",
+            title: "Registrazione e Mappatura Presso la Centrale Operativa 118 / ARES",
+            question: "Il dispositivo è stato formalmente censito e comunicato al servizio di emergenza sanitaria 118 territorialmente competente con l'elenco degli addetti formati BLSD aziendali?",
+            normReference: "Legge 116/2021 art. 6; D.M. 24/04/2013",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+    ],
+  },
+
   // 7. COMMERCIO AL DETTAGLIO & SUPERMERCATI
   {
     sectorKey: "commercio_dettaglio",
@@ -13944,6 +14836,21 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
   );
   const beachClubSector = SECTOR_MACHINERY_CATALOGS.find((s) => s.sectorKey === "stabilimento_balneare");
   const beachClubMachines = beachClubSector ? beachClubSector.machines : [];
+
+  const isRetailNonFoodAteco = !!atecoCode && (
+    atecoCode.startsWith("47.71") ||
+    atecoCode.startsWith("47.72") ||
+    atecoCode.startsWith("47.5") ||
+    atecoCode.startsWith("47.6") ||
+    atecoCode.startsWith("47.7") ||
+    (atecoCode.startsWith("47") && !atecoCode.startsWith("47.11") && !atecoCode.startsWith("47.2")) ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("4771") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("477")
+  );
+  const retailNonFoodSector = SECTOR_MACHINERY_CATALOGS.find(
+    (s) => s.sectorKey === "commercio_dettaglio_non_alimentare"
+  );
+  const retailNonFoodMachines = retailNonFoodSector ? retailNonFoodSector.machines : [];
 
   // 1. MACCHINE SUGGERITE IN BASE AI LOCALI CENSITI NELLO STEP 2
   for (const env of environments) {
@@ -15569,6 +16476,183 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
       matchingMachines = iperMachines.filter((m) =>
         [
           "lavasciuga_uomo_bordo",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-retail-area-vendita-principale" ||
+      envId.includes("retail-area-vendita") ||
+      (isRetailNonFoodAteco && !envId.startsWith("env-retail-") && (
+        nameLower.includes("area vendita") ||
+        nameLower.includes("negozio") ||
+        nameLower.includes("showroom") ||
+        cat === "sales_floor" ||
+        cat === "area_vendita" ||
+        cat === "public"
+      ))
+    ) {
+      matchingMachines = retailNonFoodMachines.filter((m) =>
+        [
+          "defibrillatore_dae_retail",
+          "transenna_guidata_tornello_antiritorno",
+          "climatizzatore_pompa_calore_vav",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-retail-banco-cassa-vdt" ||
+      envId.includes("retail-banco-cassa") ||
+      envId.includes("retail-cassa") ||
+      (isRetailNonFoodAteco && !envId.startsWith("env-retail-") && (
+        nameLower.includes("cassa") ||
+        nameLower.includes("barriera casse") ||
+        nameLower.includes("banco cassa") ||
+        nameLower.includes("pos") ||
+        cat === "cassa" ||
+        cat === "checkout"
+      ))
+    ) {
+      matchingMachines = retailNonFoodMachines.filter((m) =>
+        [
+          "barriera_antitaccheggio_radiofrequenza",
+          "gruppo_accumulo_ups_casse",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-retail-magazzino-scorte-merci" ||
+      envId.includes("retail-magazzino-scorte") ||
+      envId.includes("retail-magazzino") ||
+      (isRetailNonFoodAteco && !envId.startsWith("env-retail-") && (
+        (nameLower.includes("magazzino") && !nameLower.includes("soppalco") && !nameLower.includes("capi")) ||
+        nameLower.includes("scorte") ||
+        nameLower.includes("deposito merci") ||
+        cat === "warehouse" ||
+        cat === "magazzino_merci"
+      ))
+    ) {
+      matchingMachines = retailNonFoodMachines.filter((m) =>
+        [
+          "transpallet_manuale_magazzino",
+          "transpallet_elettrico_compatto_retail",
+          "scala_castello_mobile_sicurezza",
+          "carrello_roll_container_pieghevole",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-retail-reparto-stoccaggio-capi-appesi" ||
+      envId.includes("retail-reparto-stoccaggio") ||
+      envId.includes("retail-capi-appesi") ||
+      (isRetailNonFoodAteco && !envId.startsWith("env-retail-") && (
+        nameLower.includes("capi appesi") ||
+        nameLower.includes("stoccaggio capi") ||
+        nameLower.includes("reparto capi") ||
+        nameLower.includes("appesi")
+      ))
+    ) {
+      matchingMachines = retailNonFoodMachines.filter((m) =>
+        [
+          "carrello_roll_container_pieghevole",
+          "scala_castello_mobile_sicurezza",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-retail-zona-stiratura-ricondizionamento" ||
+      envId.includes("retail-zona-stiratura") ||
+      envId.includes("retail-stiratura") ||
+      (isRetailNonFoodAteco && !envId.startsWith("env-retail-") && (
+        nameLower.includes("stiratura") ||
+        nameLower.includes("stiratrice") ||
+        nameLower.includes("ricondizionamento") ||
+        nameLower.includes("cartellinatura") ||
+        nameLower.includes("etichettatura capi")
+      ))
+    ) {
+      matchingMachines = retailNonFoodMachines.filter((m) =>
+        [
+          "generatore_vapore_stiratrice_verticale",
+          "fissatrice_cartellinatrice_pneumatica",
+          "taglierina_rifilatrice_rotativa_sicurezza",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-retail-soppalco-magazzino" ||
+      envId.includes("retail-soppalco") ||
+      (isRetailNonFoodAteco && !envId.startsWith("env-retail-") && (
+        nameLower.includes("soppalco")
+      ))
+    ) {
+      matchingMachines = retailNonFoodMachines.filter((m) =>
+        [
+          "scala_castello_mobile_sicurezza",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-retail-ufficio-direzione-amministrazione" ||
+      envId.includes("retail-ufficio") ||
+      (isRetailNonFoodAteco && !envId.startsWith("env-retail-") && (
+        nameLower.includes("ufficio") ||
+        nameLower.includes("direzione") ||
+        nameLower.includes("amministrazione") ||
+        cat === "office" ||
+        cat === "ufficio"
+      ))
+    ) {
+      matchingMachines = retailNonFoodMachines.filter((m) =>
+        [
+          "impianto_videosorveglianza_nvr",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-retail-area-break-distributori" ||
+      envId.includes("retail-area-break") ||
+      envId.includes("retail-break") ||
+      (isRetailNonFoodAteco && !envId.startsWith("env-retail-") && (
+        nameLower.includes("break") ||
+        nameLower.includes("distributori") ||
+        nameLower.includes("ristoro") ||
+        nameLower.includes("caffetteria personale") ||
+        cat === "break_area" ||
+        cat === "relax"
+      ))
+    ) {
+      matchingMachines = retailNonFoodMachines.filter((m) =>
+        [
+          "distributore_snack_bevande_break",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-retail-vano-tecnico-quadro-clima" ||
+      envId.includes("retail-vano-tecnico") ||
+      envId.includes("retail-quadro-clima") ||
+      (isRetailNonFoodAteco && !envId.startsWith("env-retail-") && (
+        nameLower.includes("vano tecnico") ||
+        nameLower.includes("locale tecnico") ||
+        nameLower.includes("quadro elettrico") ||
+        nameLower.includes("centrale clima") ||
+        cat === "technical_rooms" ||
+        cat === "technical_room"
+      ))
+    ) {
+      matchingMachines = retailNonFoodMachines.filter((m) =>
+        [
+          "gruppo_accumulo_ups_casse",
+          "climatizzatore_pompa_calore_vav",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-retail-area-compattazione-cartoni-scarico" ||
+      envId.includes("retail-area-compattazione") ||
+      envId.includes("retail-compattazione") ||
+      (isRetailNonFoodAteco && !envId.startsWith("env-retail-") && (
+        nameLower.includes("compattazione") ||
+        nameLower.includes("pressa cartoni") ||
+        nameLower.includes("scarico merci") ||
+        nameLower.includes("rifiuti") ||
+        cat === "waste"
+      ))
+    ) {
+      matchingMachines = retailNonFoodMachines.filter((m) =>
+        [
+          "pressa_compattatrice_cartoni_retail",
+          "transpallet_manuale_magazzino",
         ].includes(m.machineKey)
       );
     } else if (cat === "cucina" || nameLower.includes("cucina") || nameLower.includes("laboratorio")) {

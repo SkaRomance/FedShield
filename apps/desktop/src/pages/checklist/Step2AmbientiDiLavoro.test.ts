@@ -7624,6 +7624,474 @@ assert.ok(
   "In modalità safety_only tutti gli item del Ricevimento devono essere safety o both",
 );
 
+// ============================================================================
+// Test 41: getStandardEnvironmentsForAteco & conformità per Commercio al Dettaglio Non Alimentare / Negozi Abbigliamento e Retail Specializzato (47.71, 47.71.1, 47.71.2, 47.71.3, 47.72, 47.5, 47.6, 47.7, 4771, 477110, 477120, 47711, 47712, 47713, 477, 475, 476)
+// ============================================================================
+console.log("Test 41: getStandardEnvironmentsForAteco & conformità per Commercio al Dettaglio Non Alimentare / Retail (47.71, 47.71.1, 47.71.2, 47.71.3, 47.72, 47.5, 47.6, 47.7, 4771, 477110, 477120, 47711, 47712, 47713, 477, 475, 476)");
+
+const retailAtecoVariants = [
+  "47.71",
+  "47.71.1",
+  "47.71.2",
+  "47.71.3",
+  "47.72",
+  "47.5",
+  "47.6",
+  "47.7",
+  "4771",
+  "477110",
+  "477120",
+  "47711",
+  "47712",
+  "47713",
+  "477",
+  "475",
+  "476",
+];
+
+for (const code of retailAtecoVariants) {
+  const envs = getStandardEnvironmentsForAteco(code);
+  assert.equal(envs.length, 12, `ATECO ${code} deve restituire esattamente 12 ambienti standard retail`);
+  assert.ok(envs.some((e) => e.id === "env-retail-area-vendita-principale"), `ATECO ${code} deve contenere Area Vendita`);
+  assert.ok(envs.some((e) => e.id === "env-retail-banco-cassa-vdt"), `ATECO ${code} deve contenere Banco Cassa`);
+  assert.ok(envs.some((e) => e.id === "env-retail-camerini-prova"), `ATECO ${code} deve contenere Camerini di Prova`);
+  assert.ok(envs.some((e) => e.id === "env-retail-magazzino-scorte-merci"), `ATECO ${code} deve contenere Magazzino Scorte`);
+  assert.ok(envs.some((e) => e.id === "env-retail-reparto-stoccaggio-capi-appesi"), `ATECO ${code} deve contenere Capi Appesi`);
+  assert.ok(envs.some((e) => e.id === "env-retail-zona-stiratura-ricondizionamento"), `ATECO ${code} deve contenere Stiratura`);
+  assert.ok(envs.some((e) => e.id === "env-retail-soppalco-magazzino"), `ATECO ${code} deve contenere Soppalco`);
+  assert.ok(envs.some((e) => e.id === "env-retail-ufficio-direzione-amministrazione"), `ATECO ${code} deve contenere Ufficio`);
+  assert.ok(envs.some((e) => e.id === "env-retail-spogliatoi-servizi-personale"), `ATECO ${code} deve contenere Spogliatoi e Servizi`);
+  assert.ok(envs.some((e) => e.id === "env-retail-area-break-distributori"), `ATECO ${code} deve contenere Area Break`);
+  assert.ok(envs.some((e) => e.id === "env-retail-vano-tecnico-quadro-clima"), `ATECO ${code} deve contenere Vano Tecnico`);
+  assert.ok(envs.some((e) => e.id === "env-retail-area-compattazione-cartoni-scarico"), `ATECO ${code} deve contenere Area Scarico`);
+}
+
+const retailEnvs = getStandardEnvironmentsForAteco("47.71");
+const retailAreaVendita = retailEnvs.find((e) => e.id === "env-retail-area-vendita-principale")!;
+const retailBancoCassa = retailEnvs.find((e) => e.id === "env-retail-banco-cassa-vdt")!;
+const retailCamerini = retailEnvs.find((e) => e.id === "env-retail-camerini-prova")!;
+const retailMagazzino = retailEnvs.find((e) => e.id === "env-retail-magazzino-scorte-merci")!;
+const retailCapiAppesi = retailEnvs.find((e) => e.id === "env-retail-reparto-stoccaggio-capi-appesi")!;
+const retailStiratura = retailEnvs.find((e) => e.id === "env-retail-zona-stiratura-ricondizionamento")!;
+const retailSoppalco = retailEnvs.find((e) => e.id === "env-retail-soppalco-magazzino")!;
+const retailUfficio = retailEnvs.find((e) => e.id === "env-retail-ufficio-direzione-amministrazione")!;
+const retailSpogliatoi = retailEnvs.find((e) => e.id === "env-retail-spogliatoi-servizi-personale")!;
+const retailAreaBreak = retailEnvs.find((e) => e.id === "env-retail-area-break-distributori")!;
+const retailVanoTecnico = retailEnvs.find((e) => e.id === "env-retail-vano-tecnico-quadro-clima")!;
+const retailAreaScarico = retailEnvs.find((e) => e.id === "env-retail-area-compattazione-cartoni-scarico")!;
+
+// Verifica conformità dimensionale e badge per ciascun ambiente
+const evalRetailAreaVendita = evaluateEnvironmentCompliance(retailAreaVendita, "47.71");
+assert.equal(evalRetailAreaVendita.minHeightRequired, 3.0, "Area vendita richiede altezza minima 3,00m");
+assert.ok(evalRetailAreaVendita.isHeightCompliant, "Area vendita deve essere conforme in altezza (3.20m >= 3.00m)");
+assert.ok(evalRetailAreaVendita.isCubatureCompliant, "Area vendita deve essere conforme in cubatura (480 / 25 = 19.2 mc/op)");
+assert.ok(
+  evalRetailAreaVendita.summaryBadges.some((b) => b.text.includes("Corsie di vendita e vie di esodo")),
+  "Area vendita deve avere badge vie di esodo >= 1.20m",
+);
+assert.ok(
+  evalRetailAreaVendita.summaryBadges.some((b) => b.text.includes("Illuminazione di emergenza")),
+  "Area vendita deve avere badge illuminazione emergenza UNI EN 1838",
+);
+
+const evalRetailBancoCassa = evaluateEnvironmentCompliance(retailBancoCassa, "47.71");
+assert.equal(evalRetailBancoCassa.minHeightRequired, 2.7, "Banco cassa richiede altezza minima 2,70m");
+assert.ok(evalRetailBancoCassa.isHeightCompliant, "Banco cassa deve essere conforme in altezza (3.00m >= 2.70m)");
+assert.ok(evalRetailBancoCassa.isCubatureCompliant, "Banco cassa deve essere conforme in cubatura");
+assert.ok(
+  evalRetailBancoCassa.summaryBadges.some((b) => b.text.includes("Postazione cassa ergonomica")),
+  "Banco cassa deve avere badge ergonomia e VDT",
+);
+assert.ok(
+  evalRetailBancoCassa.summaryBadges.some((b) => b.text.includes("Barriera antitaccheggio EAS")),
+  "Banco cassa deve avere badge barriera antitaccheggio CEM UNI EN 50364",
+);
+
+const evalRetailCamerini = evaluateEnvironmentCompliance(retailCamerini, "47.71");
+assert.equal(evalRetailCamerini.minHeightRequired, 2.7, "Camerini richiedono altezza minima 2,70m");
+assert.ok(evalRetailCamerini.isHeightCompliant, "Camerini devono essere conformi in altezza (2.70m >= 2.70m)");
+assert.ok(evalRetailCamerini.isCubatureCompliant, "Camerini devono essere conformi in cubatura");
+assert.ok(
+  evalRetailCamerini.summaryBadges.some((b) => b.text.includes("Box prova accessibile PMR")),
+  "Camerini devono avere badge PMR D.P.R. 503/96",
+);
+assert.ok(
+  evalRetailCamerini.summaryBadges.some((b) => b.text.includes("Specchi di sicurezza antischeggia")),
+  "Camerini devono avere badge specchi antischeggia UNI EN 12600",
+);
+
+const evalRetailMagazzino = evaluateEnvironmentCompliance(retailMagazzino, "47.71");
+assert.equal(evalRetailMagazzino.minHeightRequired, 3.0, "Magazzino richiede altezza minima 3,00m");
+assert.ok(evalRetailMagazzino.isHeightCompliant, "Magazzino deve essere conforme in altezza (3.50m >= 3.00m)");
+assert.ok(evalRetailMagazzino.isCubatureCompliant, "Magazzino deve essere conforme in cubatura");
+assert.ok(
+  evalRetailMagazzino.summaryBadges.some((b) => b.text.includes("Scaffalature industriali metalliche")),
+  "Magazzino deve avere badge scaffalature UNI EN 15635",
+);
+
+const evalRetailCapiAppesi = evaluateEnvironmentCompliance(retailCapiAppesi, "47.71");
+assert.equal(evalRetailCapiAppesi.minHeightRequired, 3.0, "Reparto Capi Appesi richiede altezza minima 3,00m");
+assert.ok(evalRetailCapiAppesi.isHeightCompliant, "Capi appesi devono essere conformi in altezza (3.50m >= 3.00m)");
+assert.ok(evalRetailCapiAppesi.isCubatureCompliant, "Capi appesi devono essere conformi in cubatura");
+assert.ok(
+  evalRetailCapiAppesi.summaryBadges.some((b) => b.text.includes("Stender ad alta densità")),
+  "Capi appesi devono avere badge stender All. V D.Lgs. 81/08",
+);
+assert.ok(
+  evalRetailCapiAppesi.summaryBadges.some((b) => b.text.includes("Distanziamento corpi illuminanti")),
+  "Capi appesi devono avere badge prevenzione incendio tessuti",
+);
+
+const evalRetailStiratura = evaluateEnvironmentCompliance(retailStiratura, "47.71");
+assert.equal(evalRetailStiratura.minHeightRequired, 2.7, "Zona Stiratura richiede altezza minima 2,70m");
+assert.ok(evalRetailStiratura.isHeightCompliant, "Stiratura deve essere conforme in altezza (2.80m >= 2.70m)");
+assert.ok(evalRetailStiratura.isCubatureCompliant, "Stiratura deve essere conforme in cubatura");
+assert.ok(
+  evalRetailStiratura.summaryBadges.some((b) => b.text.includes("Caldaia e generatori di vapore")),
+  "Stiratura deve avere badge valvola sicurezza PED",
+);
+assert.ok(
+  evalRetailStiratura.summaryBadges.some((b) => b.text.includes("Ventilazione ed estrazione")),
+  "Stiratura deve avere badge controllo microclima vapore",
+);
+
+const evalRetailSoppalco = evaluateEnvironmentCompliance(retailSoppalco, "47.71");
+assert.equal(evalRetailSoppalco.minHeightRequired, 2.4, "Soppalco deposito scorte richiede altezza minima 2,40m");
+assert.ok(evalRetailSoppalco.isHeightCompliant, "Soppalco deve essere conforme in altezza (2.40m >= 2.40m)");
+assert.ok(evalRetailSoppalco.isCubatureCompliant, "Soppalco deve essere conforme in cubatura");
+assert.ok(
+  evalRetailSoppalco.summaryBadges.some((b) => b.text.includes("Parapetto perimetrale normale h ≥ 1,00m")),
+  "Soppalco deve avere badge parapetto e fermapiede 15 cm All. IV punto 1.4",
+);
+
+const evalRetailUfficio = evaluateEnvironmentCompliance(retailUfficio, "47.71");
+assert.equal(evalRetailUfficio.minHeightRequired, 2.7, "Ufficio direzione richiede altezza minima 2,70m");
+assert.ok(evalRetailUfficio.isHeightCompliant, "Ufficio deve essere conforme in altezza (2.70m >= 2.70m)");
+assert.ok(evalRetailUfficio.isCubatureCompliant, "Ufficio deve essere conforme in cubatura");
+assert.ok(
+  evalRetailUfficio.summaryBadges.some((b) => b.text.includes("Impianto videosorveglianza")),
+  "Ufficio deve avere badge videosorveglianza ITL e GDPR",
+);
+
+const evalRetailSpogliatoi = evaluateEnvironmentCompliance(retailSpogliatoi, "47.71");
+assert.equal(evalRetailSpogliatoi.minHeightRequired, 2.4, "Spogliatoi richiedono altezza minima 2,40m");
+assert.ok(evalRetailSpogliatoi.isHeightCompliant, "Spogliatoi devono essere conformi in altezza (2.40m >= 2.40m)");
+assert.ok(
+  evalRetailSpogliatoi.summaryBadges.some((b) => b.text.includes("Armadietti individuali")),
+  "Spogliatoi devono avere badge armadietti All. IV",
+);
+
+const evalRetailAreaBreak = evaluateEnvironmentCompliance(retailAreaBreak, "47.71");
+assert.equal(evalRetailAreaBreak.minHeightRequired, 2.7, "Area Break richiede altezza minima 2,70m");
+assert.ok(evalRetailAreaBreak.isHeightCompliant, "Area break deve essere conforme in altezza (2.70m >= 2.70m)");
+assert.ok(evalRetailAreaBreak.isCubatureCompliant, "Area break deve essere conforme in cubatura");
+assert.ok(
+  evalRetailAreaBreak.summaryBadges.some((b) => b.text.includes("Distributori cibi e bevande")),
+  "Area break deve avere badge distributori automatici CEI 64-8",
+);
+
+const evalRetailVanoTecnico = evaluateEnvironmentCompliance(retailVanoTecnico, "47.71");
+assert.ok(evalRetailVanoTecnico.isHeightCompliant, "Vano tecnico deve essere conforme in altezza (2.60m >= 2.40m)");
+assert.ok(evalRetailVanoTecnico.isCubatureCompliant, "Vano tecnico deve essere conforme in cubatura");
+assert.ok(
+  evalRetailVanoTecnico.summaryBadges.some((b) => b.text.includes("Pulsante di sgancio elettrico")),
+  "Vano tecnico deve avere badge pulsante sgancio CEI EN 60204-1",
+);
+assert.ok(
+  evalRetailVanoTecnico.summaryBadges.some((b) => b.text.includes("Estintore CO2 5 kg classe 89B")),
+  "Vano tecnico deve avere badge estintore CO2",
+);
+
+const evalRetailAreaScarico = evaluateEnvironmentCompliance(retailAreaScarico, "47.71");
+assert.equal(evalRetailAreaScarico.minHeightRequired, 3.0, "Area scarico cartoni richiede altezza minima 3,00m");
+assert.ok(evalRetailAreaScarico.isHeightCompliant, "Area scarico deve essere conforme in altezza (3.00m >= 3.00m)");
+assert.ok(evalRetailAreaScarico.isCubatureCompliant, "Area scarico deve essere conforme in cubatura");
+assert.ok(
+  evalRetailAreaScarico.summaryBadges.some((b) => b.text.includes("Pressa compattatrice certificata")),
+  "Area scarico deve avere badge pressa compattatrice Direttiva Macchine",
+);
+
+// ============================================================================
+// Test 42: generateEnvironmentChecklistItems per locali Retail Non Alimentare (ATECO 47.71)
+// ============================================================================
+console.log("Test 42: generateEnvironmentChecklistItems per locali Retail Non Alimentare (ATECO 47.71)");
+
+// 1. Area Vendita Principale
+const retailAreaVenditaItems = generateEnvironmentChecklistItems(retailAreaVendita, "47.71");
+assert.ok(
+  retailAreaVenditaItems.some(
+    (it) => it.id.includes("corsie-esodo-vie-fuga-dm-2021") && it.domain === "safety",
+  ),
+  "Area Vendita deve verificare corsie di vendita e vie di fuga libere >= 1.20m (domain: safety)",
+);
+assert.ok(
+  retailAreaVenditaItems.some(
+    (it) => it.id.includes("illuminazione-emergenza-uni-en-1838") && it.domain === "safety",
+  ),
+  "Area Vendita deve verificare illuminazione emergenza UNI EN 1838 (domain: safety)",
+);
+assert.ok(
+  retailAreaVenditaItems.some(
+    (it) => it.id.includes("stabilita-gondole-scaffali-espositivi") && it.domain === "safety",
+  ),
+  "Area Vendita deve verificare stabilità e ancoraggio gondole/scaffalature (domain: safety)",
+);
+
+// 2. Banco Cassa, Postazioni POS & Barriera Antitaccheggio
+const retailBancoCassaItems = generateEnvironmentChecklistItems(retailBancoCassa, "47.71");
+assert.ok(
+  retailBancoCassaItems.some(
+    (it) => it.id.includes("postazione-cassa-ergonomia-vdt") && it.domain === "safety",
+  ),
+  "Banco Cassa deve verificare ergonomia postazione e VDT EN 1335 (domain: safety)",
+);
+assert.ok(
+  retailBancoCassaItems.some(
+    (it) => it.id.includes("barriera-antitaccheggio-cem-uni-en-50364") && it.domain === "safety",
+  ),
+  "Banco Cassa deve verificare conformità barriera antitaccheggio CEM UNI EN 50364 (domain: safety)",
+);
+assert.ok(
+  retailBancoCassaItems.some(
+    (it) => it.id.includes("pulsante-antirapina-gestione-contante") && it.domain === "safety",
+  ),
+  "Banco Cassa deve verificare allarme silenzioso antirapina e cassa temporizzata (domain: safety)",
+);
+
+// 3. Camerini di Prova
+const retailCameriniItems = generateEnvironmentChecklistItems(retailCamerini, "47.71");
+assert.ok(
+  retailCameriniItems.some(
+    (it) => it.id.includes("box-prova-accessibile-pmr-porte") && it.domain === "safety",
+  ),
+  "Camerini deve verificare accessibilità PMR porta >= 90 cm D.P.R. 503/96 (domain: safety)",
+);
+assert.ok(
+  retailCameriniItems.some(
+    (it) => it.id.includes("specchi-sicurezza-antischeggia-uni-en-12600") && it.domain === "safety",
+  ),
+  "Camerini deve verificare specchi di sicurezza antischeggia UNI EN 12600 (domain: safety)",
+);
+assert.ok(
+  retailCameriniItems.some(
+    (it) => it.id.includes("aerazione-illuminazione-box-camerini") && it.domain === "safety",
+  ),
+  "Camerini deve verificare aerazione e corpi illuminanti protetti (domain: safety)",
+);
+
+// 4. Magazzino Scorte Merci
+const retailMagazzinoItems = generateEnvironmentChecklistItems(retailMagazzino, "47.71");
+assert.ok(
+  retailMagazzinoItems.some(
+    (it) => it.id.includes("scaffalature-portata-tassellamento-uni-en-15635") && it.domain === "safety",
+  ),
+  "Magazzino deve verificare scaffalature con cartelli portata e tassellamento UNI EN 15635 (domain: safety)",
+);
+assert.ok(
+  retailMagazzinoItems.some(
+    (it) => it.id.includes("movimentazione-carichi-transpallet-percorsi") && it.domain === "safety",
+  ),
+  "Magazzino deve verificare corsie transpallet libere da ingombri All. IV (domain: safety)",
+);
+assert.ok(
+  retailMagazzinoItems.some(
+    (it) => it.id.includes("scale-sgabelli-prelievo-uni-en-131") && it.domain === "safety",
+  ),
+  "Magazzino deve verificare scale e sgabelli UNI EN 131 / art. 113 (domain: safety)",
+);
+
+// 5. Reparto Capi Appesi
+const retailCapiAppesiItems = generateEnvironmentChecklistItems(retailCapiAppesi, "47.71");
+assert.ok(
+  retailCapiAppesiItems.some(
+    (it) => it.id.includes("stender-alta-densita-stabilita-ruote-frenate") && it.domain === "safety",
+  ),
+  "Capi Appesi deve verificare stender ad alta densità con ruote frenabili (domain: safety)",
+);
+assert.ok(
+  retailCapiAppesiItems.some(
+    (it) => it.id.includes("strutture-sospensione-aste-fermi-antisfilamento") && it.domain === "safety",
+  ),
+  "Capi Appesi deve verificare strutture sospensione con fermi antisfilamento (domain: safety)",
+);
+assert.ok(
+  retailCapiAppesiItems.some(
+    (it) => it.id.includes("distanziamento-lampade-tessuti-prevenzione-incendio") && it.domain === "safety",
+  ),
+  "Capi Appesi deve verificare distanza >= 0,50m lampade da tessuti infiammabili (domain: safety)",
+);
+
+// 6. Zona Stiratura
+const retailStiraturaItems = generateEnvironmentChecklistItems(retailStiratura, "47.71");
+assert.ok(
+  retailStiraturaItems.some(
+    (it) => it.id.includes("generatori-vapore-valvole-ped-direttiva-2014-68") && it.domain === "safety",
+  ),
+  "Stiratura deve verificare generatori vapore e valvole sicurezza PED (domain: safety)",
+);
+assert.ok(
+  retailStiraturaItems.some(
+    (it) => it.id.includes("estrazione-vapore-calore-microclima-stiratura") && it.domain === "safety",
+  ),
+  "Stiratura deve verificare estrazione vapore e controllo microclima (domain: safety)",
+);
+assert.ok(
+  retailStiraturaItems.some(
+    (it) => it.id.includes("guaine-isolanti-antitermiche-ferri-vapore") && it.domain === "safety",
+  ),
+  "Stiratura deve verificare guaine isolanti antiscottatura e cavi siliconici (domain: safety)",
+);
+
+// 7. Soppalco Metallico
+const retailSoppalcoItems = generateEnvironmentChecklistItems(retailSoppalco, "47.71");
+assert.ok(
+  retailSoppalcoItems.some(
+    (it) => it.id.includes("parapetto-perimetrale-fermapiede-all-iv") && it.domain === "safety",
+  ),
+  "Soppalco deve verificare parapetto h >= 1,00m e fermapiede 15 cm All. IV punto 1.4 (domain: safety)",
+);
+assert.ok(
+  retailSoppalcoItems.some(
+    (it) => it.id.includes("cartello-portata-sovraccarico-soppalco") && it.domain === "safety",
+  ),
+  "Soppalco deve verificare cartello portata massima kg/m² e collaudo statico (domain: safety)",
+);
+assert.ok(
+  retailSoppalcoItems.some(
+    (it) => it.id.includes("scala-fissa-accesso-soppalco-gradini-antiscivolo") && it.domain === "safety",
+  ),
+  "Soppalco deve verificare scala fissa con pendenza <= 45° e corrimano (domain: safety)",
+);
+
+// 8. Ufficio Direzione & Videosorveglianza
+const retailUfficioItems = generateEnvironmentChecklistItems(retailUfficio, "47.71");
+assert.ok(
+  retailUfficioItems.some(
+    (it) => it.id.includes("videosorveglianza-accordo-sindacale-gdpr") && it.domain === "safety",
+  ),
+  "Ufficio deve verificare videosorveglianza art. 4 L. 300/70 e GDPR (domain: safety)",
+);
+assert.ok(
+  retailUfficioItems.some(
+    (it) => it.id.includes("postazione-vdt-amministrazione-comfort") && it.domain === "safety",
+  ),
+  "Ufficio deve verificare postazione VDT ed ergonomia seduta EN 1335 (domain: safety)",
+);
+assert.ok(
+  retailUfficioItems.some(
+    (it) => it.id.includes("cassaforte-custodia-documenti-riservati") && it.domain === "safety",
+  ),
+  "Ufficio deve verificare custodia documenti e ancoraggio cassaforte (domain: safety)",
+);
+
+// 9. Spogliatoi e Servizi Igienici
+const retailSpogliatoiItems = generateEnvironmentChecklistItems(retailSpogliatoi, "47.71");
+assert.ok(
+  retailSpogliatoiItems.some(
+    (it) => it.id.includes("armadietti-personali-doppio-scomparto-all-iv") && it.domain === "safety",
+  ),
+  "Spogliatoi deve verificare armadietti individuali a doppio scomparto All. IV (domain: safety)",
+);
+assert.ok(
+  retailSpogliatoiItems.some(
+    (it) => it.id.includes("servizi-igienici-antibagno-aerazione-meccanica") && it.domain === "both",
+  ),
+  "Spogliatoi deve verificare servizi igienici con antibagno e aspirazione forzata (domain: both)",
+);
+assert.ok(
+  retailSpogliatoiItems.some(
+    (it) => it.id.includes("cassetta-pronto-soccorso-allegato-2-dm-388") && it.domain === "safety",
+  ),
+  "Spogliatoi deve verificare cassetta primo soccorso All. 2 D.M. 388/03 (domain: safety)",
+);
+
+// 10. Area Break Personale
+const retailAreaBreakItems = generateEnvironmentChecklistItems(retailAreaBreak, "47.71");
+assert.ok(
+  retailAreaBreakItems.some(
+    (it) => it.id.includes("distributori-automatici-sicurezza-elettrica-cei-64") && it.domain === "safety",
+  ),
+  "Area Break deve verificare distributori automatici a norma CEI 64-8 (domain: safety)",
+);
+assert.ok(
+  retailAreaBreakItems.some(
+    (it) => it.id.includes("igiene-elettrodomestici-ristoro-microonde-moca") && it.domain === "both",
+  ),
+  "Area Break deve verificare igiene elettrodomestici ristoro e cestini a pedale (domain: both)",
+);
+assert.ok(
+  retailAreaBreakItems.some(
+    (it) => it.id.includes("spazio-ristoro-confortevole-arredi-salubrita") && it.domain === "safety",
+  ),
+  "Area Break deve verificare arredi ristoro e salubrità locale All. IV p.to 1.11 (domain: safety)",
+);
+
+// 11. Vano Tecnico Quadro Elettrico & Clima
+const retailVanoTecnicoItems = generateEnvironmentChecklistItems(retailVanoTecnico, "47.71");
+assert.ok(
+  retailVanoTecnicoItems.some(
+    (it) => it.id.includes("sgancio-elettrico-emergenza-esterno-cei-en-60204") && it.domain === "safety",
+  ),
+  "Vano Tecnico deve verificare pulsante di sgancio d'emergenza esterno a fungo CEI EN 60204-1 (domain: safety)",
+);
+assert.ok(
+  retailVanoTecnicoItems.some(
+    (it) => it.id.includes("ups-batterie-ventilazione-antideflagrante") && it.domain === "safety",
+  ),
+  "Vano Tecnico deve verificare batterie UPS e ventilazione antiesalazioni CEI EN 50272-2 (domain: safety)",
+);
+assert.ok(
+  retailVanoTecnicoItems.some(
+    (it) => it.id.includes("estintore-co2-quadro-elettrico-classe-89b") && it.domain === "safety",
+  ),
+  "Vano Tecnico deve verificare estintore CO2 5 kg classe 89B (domain: safety)",
+);
+
+// 12. Area Retro Scarico & Compattazione Cartoni
+const retailAreaScaricoItems = generateEnvironmentChecklistItems(retailAreaScarico, "47.71");
+assert.ok(
+  retailAreaScaricoItems.some(
+    (it) => it.id.includes("pressa-compattatrice-direttiva-macchine-arresto-fungo") && it.domain === "safety",
+  ),
+  "Area Scarico deve verificare pressa compattatrice Direttiva Macchine con stop a fungo (domain: safety)",
+);
+assert.ok(
+  retailAreaScaricoItems.some(
+    (it) => it.id.includes("sicurezza-ribalta-scarico-autocarri-caduta") && it.domain === "safety",
+  ),
+  "Area Scarico deve verificare sicurezza banchina e cunei fermaruote autocarri (domain: safety)",
+);
+assert.ok(
+  retailAreaScaricoItems.some(
+    (it) => it.id.includes("gestione-antincendio-imballaggi-divieto-fumo") && it.domain === "safety",
+  ),
+  "Area Scarico deve verificare stoccaggio cartoni pressati e divieto di fumo (domain: safety)",
+);
+
+// 13. Verifica filtraggio checklistMode per locali Retail
+const retailAreaSafetyMode = filterEnvironmentItemsByChecklistMode(retailAreaVenditaItems, "safety_only");
+assert.ok(
+  retailAreaSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item dell'Area Vendita devono essere safety o both",
+);
+assert.ok(
+  !retailAreaSafetyMode.some((it) => it.domain === "haccp"),
+  "In modalità safety_only nessun item dell'Area Vendita deve avere domain haccp",
+);
+
+const retailAreaUnifiedMode = filterEnvironmentItemsByChecklistMode(retailAreaVenditaItems, "unified");
+assert.equal(
+  retailAreaUnifiedMode.length,
+  retailAreaVenditaItems.length,
+  "In modalità unified tutti gli item dell'Area Vendita devono essere presenti",
+);
+
+const retailSpogliatoiSafetyMode = filterEnvironmentItemsByChecklistMode(retailSpogliatoiItems, "safety_only");
+assert.ok(
+  retailSpogliatoiSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item degli Spogliatoi devono essere safety o both",
+);
+
 console.log("=== TUTTI I TEST Step2AmbientiDiLavoro SUPERATI CON SUCCESSO! ===");
 
 

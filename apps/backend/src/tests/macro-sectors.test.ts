@@ -189,7 +189,197 @@ async function run() {
     "Food retail must not receive non-food retail checklist",
   );
 
-  console.log("Macro sectors checklist test passed");
+  const foodRetailResponse = await app.inject({
+    method: "GET",
+    url: "/api/checklists/templates?atecoCode=47.21&checklistMode=unified",
+    headers,
+  });
+  assert.equal(foodRetailResponse.statusCode, 200);
+  const foodRetailTemplates = foodRetailResponse.json() as Array<{ macroGroup?: string | null }>;
+  assert.equal(
+    foodRetailTemplates.some((template) => template.macroGroup === "COMMERCIO_NON_FOOD"),
+    false,
+    "Food retail (47.21) must not receive non-food retail checklist",
+  );
+
+  // =========================================================================
+  // Deep verification ATECO 47.71 (Commercio al Dettaglio Non Alimentare / Negozi Abbigliamento)
+  // =========================================================================
+  const retailNonFoodVariants = [
+    "47.71",
+    "47.71.1",
+    "47.71.2",
+    "47.72",
+    "47.5",
+    "47.7",
+    "4771",
+    "477110",
+    "COMMERCIO_NON_FOOD",
+    "COMMERCIO_NON_ALIMENTARE",
+    "RETAIL_NON_FOOD",
+  ];
+
+  for (const variant of retailNonFoodVariants) {
+    // 1. Unified mode: template + document templates
+    const unifiedTmplRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(unifiedTmplRes.statusCode, 200, `Unified template request failed for variant ${variant}`);
+    const unifiedTemplates = unifiedTmplRes.json() as Array<{ id: string; name: string; macroGroup?: string | null }>;
+    const unifiedMatch = unifiedTemplates.find((t) => t.macroGroup === "COMMERCIO_NON_FOOD");
+    assert.ok(unifiedMatch, `Missing COMMERCIO_NON_FOOD template in unified mode for variant ${variant}`);
+
+    const unifiedDocsRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/document-templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(unifiedDocsRes.statusCode, 200, `Unified doc template request failed for variant ${variant}`);
+    const unifiedDocs = unifiedDocsRes.json() as Array<{ name: string; macroGroup?: string | null }>;
+    const unifiedNonFoodDocs = unifiedDocs.filter((d) => d.macroGroup === "COMMERCIO_NON_FOOD");
+    assert.ok(
+      unifiedNonFoodDocs.length >= 6,
+      `Expected >= 6 non-food docs in unified mode for variant ${variant}, found ${unifiedNonFoodDocs.length}`,
+    );
+
+    // 2. Safety_only mode: template + document templates
+    const safetyTmplRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=safety_only`,
+      headers,
+    });
+    assert.equal(safetyTmplRes.statusCode, 200, `Safety_only template request failed for variant ${variant}`);
+    const safetyTemplates = safetyTmplRes.json() as Array<{ id: string; name: string; macroGroup?: string | null }>;
+    const safetyMatch = safetyTemplates.find((t) => t.macroGroup === "COMMERCIO_NON_FOOD");
+    assert.ok(safetyMatch, `Missing COMMERCIO_NON_FOOD template in safety_only mode for variant ${variant}`);
+
+    const safetyDocsRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/document-templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=safety_only`,
+      headers,
+    });
+    assert.equal(safetyDocsRes.statusCode, 200, `Safety_only doc template request failed for variant ${variant}`);
+    const safetyDocs = safetyDocsRes.json() as Array<{ name: string; macroGroup?: string | null }>;
+    const safetyNonFoodDocs = safetyDocs.filter((d) => d.macroGroup === "COMMERCIO_NON_FOOD");
+    assert.ok(
+      safetyNonFoodDocs.length >= 6,
+      `Expected >= 6 non-food docs in safety_only mode for variant ${variant}, found ${safetyNonFoodDocs.length}`,
+    );
+  }
+
+  // 3. Specialist items verification on template items
+  const nonFoodTmpl = (
+    await app.inject({
+      method: "GET",
+      url: `/api/checklists/templates?atecoCode=47.71&checklistMode=unified`,
+      headers,
+    })
+  )
+    .json()
+    .find((t: { macroGroup?: string | null }) => t.macroGroup === "COMMERCIO_NON_FOOD");
+  assert.ok(nonFoodTmpl, "Template COMMERCIO_NON_FOOD non trovato per 47.71");
+
+  const nonFoodItemsRes = await app.inject({
+    method: "GET",
+    url: `/api/checklists/templates/${nonFoodTmpl.id}/items?checklistMode=unified`,
+    headers,
+  });
+  assert.equal(nonFoodItemsRes.statusCode, 200);
+  const nonFoodItems = nonFoodItemsRes.json().items as Array<{ area: string; question: string; normReference?: string }>;
+  const fullChecklistText = nonFoodItems
+    .map((item) => `${item.area} ${item.question} ${item.normReference ?? ""}`.toLowerCase())
+    .join(" | ");
+
+  const requiredSpecialistTokens = [
+    "vie d'esodo",
+    "scale a castello",
+    "parapetti soppalchi",
+    "barriera antitaccheggio",
+    "pressa compattatrice",
+    "16500",
+    "vav",
+    "videosorveglianza gdpr",
+  ];
+  for (const token of requiredSpecialistTokens) {
+    assert.ok(
+      fullChecklistText.includes(token.toLowerCase()),
+      `Controlli specialistici non-food privi del requisito: "${token}"`,
+    );
+  }
+
+  // 4. Verification of required documents
+  const nonFoodDocListRes = await app.inject({
+    method: "GET",
+    url: `/api/checklists/document-templates?atecoCode=47.71&checklistMode=unified`,
+    headers,
+  });
+  assert.equal(nonFoodDocListRes.statusCode, 200);
+  const nonFoodDocNames = (nonFoodDocListRes.json() as Array<{ name: string }>)
+    .map((doc) => doc.name.toLowerCase())
+    .join(" | ");
+
+  const requiredDocTokens = [
+    "dvr",
+    "piano emergenza",
+    "462/01",
+    "15635",
+    "03/09/2021",
+  ];
+  for (const docToken of requiredDocTokens) {
+    assert.ok(
+      nonFoodDocNames.includes(docToken.toLowerCase()),
+      `Documenti non-food privi del documento atteso: "${docToken}"`,
+    );
+  }
+
+  // 5. Creazione azienda di test con ATECO 477110, avvio ispezione e verifica requisiti documentali
+  const testCompanyVat = `IT${Date.now().toString().slice(-11)}`;
+  const nonFoodCompany = await app.prisma.company.create({
+    data: {
+      name: "Boutique Abbigliamento & Calzature FedShield Test",
+      vatNumber: testCompanyVat,
+      atecoCode: "477110",
+      legalAddress: "Via del Corso 120, Roma",
+    },
+  });
+
+  const inspectionRes = await app.inject({
+    method: "POST",
+    url: "/api/inspections",
+    headers,
+    payload: {
+      companyId: nonFoodCompany.id,
+      title: "Sopralluogo Negozio Abbigliamento ATECO 477110 Test",
+      checklistMode: "safety_only",
+    },
+  });
+  assert.equal(inspectionRes.statusCode, 201, "Creazione ispezione 477110 fallita");
+  const inspectionId = inspectionRes.json().id as string;
+
+  const inspectionDocsRes = await app.inject({
+    method: "GET",
+    url: `/api/inspections/${inspectionId}/documents/requirements`,
+    headers,
+  });
+  assert.equal(inspectionDocsRes.statusCode, 200, "Recupero requisiti documentali fallito");
+  const inspectionDocs = inspectionDocsRes.json() as Array<{ name: string; documentTemplateId: string }>;
+  const matchedNonFoodRequirements = inspectionDocs.filter(
+    (doc) =>
+      doc.name.toLowerCase().includes("commercio") ||
+      doc.name.toLowerCase().includes("scaffalature") ||
+      doc.name.toLowerCase().includes("antincendio") ||
+      doc.name.toLowerCase().includes("462/01") ||
+      doc.name.toLowerCase().includes("piano emergenza") ||
+      doc.name.toLowerCase().includes("dvr"),
+  );
+  assert.ok(
+    matchedNonFoodRequirements.length >= 5,
+    `Attesi almeno 5 requisiti documentali per ATECO 477110, trovati ${matchedNonFoodRequirements.length}`,
+  );
+
+    console.log("Macro sectors checklist test passed");
   await app.close();
 }
 

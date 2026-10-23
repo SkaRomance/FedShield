@@ -4872,6 +4872,279 @@ export function getStandardEnvironmentsForAteco(atecoCode?: string): WorkEnviron
     ];
   }
 
+  // 0-undecies-quater-quinquies. Commercio al Dettaglio Non Alimentare, Negozi Abbigliamento, Calzature e Retail Specializzato (47.71, 47.71.1, 47.71.2, 47.71.3, 47.72, 47.5, 47.6, 47.7, 4771, 477110, 477120, 47711, 47712, 47713, 477, 475, 476)
+  if (
+    cleanAteco.startsWith("4771") ||
+    cleanAteco.startsWith("4772") ||
+    cleanAteco.startsWith("475") ||
+    cleanAteco.startsWith("476") ||
+    cleanAteco.startsWith("477") ||
+    ateco.startsWith("47.71") ||
+    ateco.startsWith("47.72") ||
+    ateco.startsWith("47.5") ||
+    ateco.startsWith("47.6") ||
+    ateco.startsWith("47.7")
+  ) {
+    return [
+      {
+        id: "env-retail-area-vendita-principale",
+        key: "retail_area_vendita_corsie_scaffalature",
+        name: "Area Vendita Principale, Corsie e Scaffalature Espositive",
+        icon: "🛍️",
+        category: "sales_office",
+        isDefault: true,
+        surfaceSqM: 150,
+        heightM: 3.2,
+        volumeCuM: 480,
+        occupantsCount: 25,
+        emergencyExitsCount: 2,
+        windowSurfaceSqM: 18.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("sales_office"),
+          shelvingCertified: true,
+          emergencyLighting: true,
+          emergencyExitsCount: 2,
+          microclimateCompliant: true,
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-retail-banco-cassa-vdt",
+        key: "retail_banco_cassa_pos_antitaccheggio",
+        name: "Banco Cassa, Postazioni POS & Barriera Antitaccheggio",
+        icon: "💳",
+        category: "sales_office",
+        isDefault: true,
+        surfaceSqM: 20,
+        heightM: 3.0,
+        volumeCuM: 60,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("sales_office"),
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-retail-camerini-prova",
+        key: "retail_camerini_prova_zona_specchi_pmr",
+        name: "Camerini di Prova & Zona Specchi con Box Accessibile PMR",
+        icon: "🪞",
+        category: "sales_office",
+        isDefault: true,
+        surfaceSqM: 25,
+        heightM: 2.7,
+        volumeCuM: 67.5,
+        occupantsCount: 6,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("sales_office"),
+          forcedExhaustPresent: true,
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+        },
+      },
+      {
+        id: "env-retail-magazzino-scorte-merci",
+        key: "retail_magazzino_scorte_merci_ricevimento_unpacking",
+        name: "Magazzino Scorte Merci, Ricevimento Colli & Unpacking",
+        icon: "📦",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 80,
+        heightM: 3.5,
+        volumeCuM: 280,
+        occupantsCount: 2,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 4.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          shelvingCertified: true,
+          fireLoadHigh: true,
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+        },
+      },
+      {
+        id: "env-retail-reparto-stoccaggio-capi-appesi",
+        key: "retail_stoccaggio_capi_appesi_stender_alta_densita",
+        name: "Reparto Stoccaggio Capi Appesi & Stender ad Alta Densità",
+        icon: "👔",
+        category: "storage",
+        isDefault: true,
+        surfaceSqM: 40,
+        heightM: 3.5,
+        volumeCuM: 140,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("storage"),
+          fireLoadHigh: true,
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+        },
+      },
+      {
+        id: "env-retail-zona-stiratura-ricondizionamento",
+        key: "retail_zona_stiratura_verticale_ricondizionamento_capi",
+        name: "Zona Stiratura Verticale, Ricondizionamento Capi & Cartellinatura",
+        icon: "💨",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 25,
+        heightM: 2.8,
+        volumeCuM: 70,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 2.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          forcedExhaustPresent: true,
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-retail-soppalco-magazzino",
+        key: "retail_soppalco_metallico_deposito_scorte_leggere",
+        name: "Soppalco Metallico ad Uso Deposito Scorte Leggere",
+        icon: "🪜",
+        category: "storage",
+        isDefault: true,
+        surfaceSqM: 35,
+        heightM: 2.4,
+        volumeCuM: 84,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("storage"),
+          shelvingCertified: true,
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+        },
+      },
+      {
+        id: "env-retail-ufficio-direzione-amministrazione",
+        key: "retail_ufficio_direzione_amministrazione_videosorveglianza",
+        name: "Ufficio Direzione, Amministrazione & Postazione Videosorveglianza",
+        icon: "🖥️",
+        category: "sales_office",
+        isDefault: true,
+        surfaceSqM: 16,
+        heightM: 2.7,
+        volumeCuM: 43.2,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("sales_office"),
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-retail-spogliatoi-servizi-personale",
+        key: "retail_spogliatoi_servizi_igienici_personale",
+        name: "Spogliatoi e Servizi Igienici per il Personale",
+        icon: "🚻",
+        category: "changing_rooms",
+        isDefault: true,
+        surfaceSqM: 20,
+        heightM: 2.4,
+        volumeCuM: 48,
+        occupantsCount: 6,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 1.5,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("changing_rooms"),
+          forcedExhaustPresent: true,
+          forcedExhaustType: "blind_toilet_fan",
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+        },
+      },
+      {
+        id: "env-retail-area-break-distributori",
+        key: "retail_area_break_ristoro_distributori_automatici",
+        name: "Area Break Personale, Ristoro & Distributori Automatici",
+        icon: "☕",
+        category: "services",
+        isDefault: true,
+        surfaceSqM: 15,
+        heightM: 2.7,
+        volumeCuM: 40.5,
+        occupantsCount: 4,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 2.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("services"),
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-retail-vano-tecnico-quadro-clima",
+        key: "retail_vano_tecnico_quadro_elettrico_clima_ups",
+        name: "Vano Tecnico Quadro Elettrico Generale, Centrale Clima & UPS",
+        icon: "⚡",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 12,
+        heightM: 2.6,
+        volumeCuM: 31.2,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+        },
+      },
+      {
+        id: "env-retail-area-compattazione-cartoni-scarico",
+        key: "retail_area_retro_scarico_compattazione_cartoni",
+        name: "Area Retro Scarico Merci & Compattazione Cartoni/Imballaggi",
+        icon: "♻️",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 30,
+        heightM: 3.0,
+        volumeCuM: 90,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          fireLoadHigh: true,
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+        },
+      },
+    ];
+  }
+
   // 1. Ristorazione, HoReCa, Somministrazione alimenti (56.x, 10.x, 11.x, 47.11, 47.2, 55.1)
   if (
     ateco.startsWith("56") ||
@@ -5845,6 +6118,51 @@ export function evaluateEnvironmentCompliance(
     env.key.includes("gastro_deposito")
   ) {
     minHeightRequired = 2.7; // 2,70 m per magazzino imballaggi primari MOCA e cartoni (h = 3,20m -> conforme)
+  } else if (
+    env.id.includes("retail-soppalco") ||
+    env.key.includes("retail_soppalco")
+  ) {
+    minHeightRequired = 2.4; // 2,40 m per soppalco metallico ad uso deposito All. IV punto 1.4 (h = 2,40m -> conforme)
+  } else if (
+    env.id.includes("retail-camerini") ||
+    env.key.includes("retail_camerini")
+  ) {
+    minHeightRequired = 2.7; // 2,70 m per camerini di prova e zona specchi retail (h = 2,70m -> conforme)
+  } else if (
+    env.id.includes("retail-stiratura") ||
+    env.key.includes("retail_zona_stiratura")
+  ) {
+    minHeightRequired = 2.7; // 2,70 m per zona ricondizionamento e stiratura capi con deroga/VMC (h = 2,80m -> conforme)
+  } else if (
+    env.id.includes("retail-area-vendita") ||
+    env.key.includes("retail_area_vendita")
+  ) {
+    minHeightRequired = 3.0; // 3,00 m per area vendita principale e corsie retail (h = 3,20m -> conforme)
+  } else if (
+    env.id.includes("retail-banco-cassa") ||
+    env.key.includes("retail_banco_cassa")
+  ) {
+    minHeightRequired = 2.7; // 2,70 m per banco cassa e postazioni POS (h = 3,00m -> conforme)
+  } else if (
+    env.id.includes("retail-magazzino") ||
+    env.key.includes("retail_magazzino")
+  ) {
+    minHeightRequired = 3.0; // 3,00 m per magazzino scorte merci e unpacking (h = 3,50m -> conforme)
+  } else if (
+    env.id.includes("retail-capi-appesi") ||
+    env.key.includes("retail_stoccaggio_capi_appesi")
+  ) {
+    minHeightRequired = 3.0; // 3,00 m per reparto stoccaggio capi appesi ad alta densità (h = 3,50m -> conforme)
+  } else if (
+    env.id.includes("retail-break") ||
+    env.key.includes("retail_area_break")
+  ) {
+    minHeightRequired = 2.7; // 2,70 m per area break personale e ristoro (h = 2,70m -> conforme)
+  } else if (
+    env.id.includes("retail-ufficio") ||
+    env.key.includes("retail_ufficio")
+  ) {
+    minHeightRequired = 2.7; // 2,70 m per ufficio direzione e amministrazione (h = 2,70m -> conforme)
   } else if (env.category === "production" || env.category === "warehouse" || env.category === "storage") {
     minHeightRequired = 3.0; // 3,00 m per locali industriali, stoccaggio e lavorazioni
   } else if (env.category === "services" || env.category === "changing_rooms" || env.category === "technical") {
@@ -8768,6 +9086,204 @@ export function evaluateEnvironmentCompliance(
     });
     summaryBadges.push({
       text: "🧪 Stazione lavaggio centralizzato CIP con vasche di contenimento sversamenti detergenti Titolo IX e lavaocchi",
+      status: "info",
+    });
+  }
+
+  // ============================================================================
+  // Regole Specifiche Step 2 per Commercio al Dettaglio Non Alimentare & Retail (ATECO 47.71, 47.72, 47.5, 47.6, 47.7)
+  // ============================================================================
+
+  // a) Area Vendita Principale, Corsie e Scaffalature Espositive
+  const isRetailAreaVendita =
+    env.id === "env-retail-area-vendita-principale" ||
+    env.key === "retail_area_vendita_corsie_scaffalature" ||
+    env.id.includes("retail-area-vendita");
+  if (isRetailAreaVendita) {
+    summaryBadges.push({
+      text: "🚪 Corsie di vendita e vie di esodo libere ≥ 1,20m (D.M. 03/09/2021)",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "💡 Illuminazione di emergenza ad attivazione autonoma ≥ 5 lux (UNI EN 1838)",
+      status: "success",
+    });
+  }
+
+  // b) Banco Cassa, Postazioni POS & Barriera Antitaccheggio
+  const isRetailBancoCassa =
+    env.id === "env-retail-banco-cassa-vdt" ||
+    env.key === "retail_banco_cassa_pos_antitaccheggio" ||
+    env.id.includes("retail-banco-cassa");
+  if (isRetailBancoCassa) {
+    summaryBadges.push({
+      text: "🪑 Postazione cassa ergonomica EN 1335 e monitor orientabile VDT (D.Lgs. 81/08 Titolo VII)",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🛡️ Barriera antitaccheggio EAS conforme a limiti esposizione CEM (UNI EN 50364)",
+      status: "info",
+    });
+  }
+
+  // c) Camerini di Prova & Zona Specchi con Box Accessibile PMR
+  const isRetailCamerini =
+    env.id === "env-retail-camerini-prova" ||
+    env.key === "retail_camerini_prova_zona_specchi_pmr" ||
+    env.id.includes("retail-camerini");
+  if (isRetailCamerini) {
+    summaryBadges.push({
+      text: "♿ Box prova accessibile PMR con varco porta ≥ 90 cm (D.P.R. 503/96 e D.M. 236/89)",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🪞 Specchi di sicurezza antischeggia certificati classe 2B2 (UNI EN 12600)",
+      status: "success",
+    });
+  }
+
+  // d) Magazzino Scorte Merci, Ricevimento Colli & Unpacking
+  const isRetailMagazzino =
+    env.id === "env-retail-magazzino-scorte-merci" ||
+    env.key === "retail_magazzino_scorte_merci_ricevimento_unpacking" ||
+    env.id.includes("retail-magazzino");
+  if (isRetailMagazzino) {
+    summaryBadges.push({
+      text: "📐 Scaffalature industriali metalliche con cartelli di portata e tassellamento (UNI EN 15635)",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "📦 Vie di circolazione e movimentazione merci libere da ingombri a terra (D.Lgs. 81/08 All. IV)",
+      status: "info",
+    });
+  }
+
+  // e) Reparto Stoccaggio Capi Appesi & Stender ad Alta Densità
+  const isRetailCapiAppesi =
+    env.id === "env-retail-reparto-stoccaggio-capi-appesi" ||
+    env.key === "retail_stoccaggio_capi_appesi_stender_alta_densita" ||
+    env.id.includes("retail-reparto-stoccaggio-capi-appesi") ||
+    env.id.includes("retail-capi-appesi");
+  if (isRetailCapiAppesi) {
+    summaryBadges.push({
+      text: "👔 Stender ad alta densità con ruote frenabili e verifica tenuta carichi sospesi (All. V D.Lgs. 81/08)",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🔥 Distanziamento corpi illuminanti ≥ 0,50m da tessuti e carichi infiammabili (D.M. 03/09/2021)",
+      status: "warning",
+    });
+  }
+
+  // f) Zona Stiratura Verticale, Ricondizionamento Capi & Cartellinatura
+  const isRetailStiratura =
+    env.id === "env-retail-zona-stiratura-ricondizionamento" ||
+    env.key === "retail_zona_stiratura_verticale_ricondizionamento_capi" ||
+    env.id.includes("retail-zona-stiratura") ||
+    env.id.includes("retail-stiratura");
+  if (isRetailStiratura) {
+    summaryBadges.push({
+      text: "💨 Caldaia e generatori di vapore con valvola di sicurezza sovrapressione PED (Direttiva 2014/68/UE)",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "🌡️ Ventilazione ed estrazione per controllo microclimatico di calore e umidità (D.Lgs. 81/08 All. IV)",
+      status: "info",
+    });
+  }
+
+  // g) Soppalco Metallico ad Uso Deposito Scorte Leggere
+  const isRetailSoppalco =
+    env.id === "env-retail-soppalco-magazzino" ||
+    env.key === "retail_soppalco_metallico_deposito_scorte_leggere" ||
+    env.id.includes("retail-soppalco");
+  if (isRetailSoppalco) {
+    summaryBadges.push({
+      text: "🪜 Parapetto perimetrale normale h ≥ 1,00m con fascia fermapiede 15 cm (D.Lgs. 81/08 All. IV p.to 1.4)",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "⚖️ Cartello portata massima sovraccarico accidentale soppalco kg/m² e scala fissa a norma",
+      status: "info",
+    });
+  }
+
+  // h) Ufficio Direzione, Amministrazione & Postazione Videosorveglianza
+  const isRetailUfficio =
+    env.id === "env-retail-ufficio-direzione-amministrazione" ||
+    env.key === "retail_ufficio_direzione_amministrazione_videosorveglianza" ||
+    env.id.includes("retail-ufficio");
+  if (isRetailUfficio) {
+    summaryBadges.push({
+      text: "📹 Impianto videosorveglianza con accordo sindacale ITL art. 4 L. 300/70 e informativa GDPR",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🖥️ Postazione VDT ergonomica con regolazioni indipendenti a norma Titolo VII D.Lgs. 81/08",
+      status: "info",
+    });
+  }
+
+  // i) Spogliatoi e Servizi Igienici per il Personale
+  const isRetailSpogliatoi =
+    env.id === "env-retail-spogliatoi-servizi-personale" ||
+    env.key === "retail_spogliatoi_servizi_igienici_personale" ||
+    env.id.includes("retail-spogliatoi");
+  if (isRetailSpogliatoi) {
+    summaryBadges.push({
+      text: "🚻 Armadietti individuali per il personale e servizi igienici separati o conformi (D.Lgs. 81/08 All. IV)",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🧯 Cassetta di primo soccorso aziendale conforme Allegato 2 D.M. 388/2003",
+      status: "info",
+    });
+  }
+
+  // j) Area Break Personale, Ristoro & Distributori Automatici
+  const isRetailAreaBreak =
+    env.id === "env-retail-area-break-distributori" ||
+    env.key === "retail_area_break_ristoro_distributori_automatici" ||
+    env.id.includes("retail-area-break");
+  if (isRetailAreaBreak) {
+    summaryBadges.push({
+      text: "☕ Distributori cibi e bevande con allacciamento a norma CEI 64-8 e pulizia periodica",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🪑 Locale di ristoro confortevole separato dalle aree operative e di stoccaggio (All. IV p.to 1.11)",
+      status: "info",
+    });
+  }
+
+  // k) Vano Tecnico Quadro Elettrico Generale, Centrale Clima & UPS
+  const isRetailVanoTecnico =
+    env.id === "env-retail-vano-tecnico-quadro-clima" ||
+    env.key === "retail_vano_tecnico_quadro_elettrico_clima_ups" ||
+    env.id.includes("retail-vano-tecnico");
+  if (isRetailVanoTecnico) {
+    summaryBadges.push({
+      text: "⚡ Pulsante di sgancio elettrico d'emergenza esterno a fungo protetto (CEI EN 60204-1)",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "🧯 Estintore CO2 5 kg classe 89B per quadri elettrici sotto tensione e UPS",
+      status: "info",
+    });
+  }
+
+  // l) Area Retro Scarico Merci & Compattazione Cartoni/Imballaggi
+  const isRetailAreaScarico =
+    env.id === "env-retail-area-compattazione-cartoni-scarico" ||
+    env.key === "retail_area_retro_scarico_compattazione_cartoni" ||
+    env.id.includes("retail-area-compattazione");
+  if (isRetailAreaScarico) {
+    summaryBadges.push({
+      text: "♻️ Pressa compattatrice certificata con arresto d'emergenza a fungo (Direttiva Macchine 2006/42/CE)",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "🚚 Area scarico con segnaletica di sicurezza a terra e presidi antincendio idonei (All. XXVIII)",
       status: "info",
     });
   }
@@ -17105,6 +17621,598 @@ export function generateEnvironmentChecklistItems(
       categoryTag: "cpi",
       suggestedNonConformity:
         "Doccia lavaocchi ostruita da attrezzature, priva di acqua a pressione o priva di cartello segnaletico di sicurezza.",
+    });
+  }
+
+  // ============================================================================
+  // Controlli Specifici Step 2 per Commercio al Dettaglio Non Alimentare & Retail (ATECO 47.71, 47.72, 47.5, 47.6, 47.7)
+  // ============================================================================
+
+  // 1. Area Vendita Principale, Corsie e Scaffalature Espositive
+  if (env.id === "env-retail-area-vendita-principale" || env.id.includes("retail-area-vendita")) {
+    items.push({
+      id: `${env.id}-corsie-esodo-vie-fuga-dm-2021`,
+      area: env.name,
+      title: "Larghezza Corsie di Vendita e Libera Percorribilità Vie di Fuga",
+      question:
+        "Le corsie principali di vendita e i percorsi verso le uscite di sicurezza hanno una larghezza netta non inferiore a 1,20 metri e sono costantemente sgombri da espositori promozionali, cestoni o cartoni a terra?",
+      normReference: "D.M. 03/09/2021 e D.Lgs. 81/2008 Allegato IV punto 1.5",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "esodo",
+      suggestedNonConformity:
+        "Corsie principali dell'area vendita ristrette al di sotto di 1,20 m o parzialmente ostruite da display promozionali e colli di merci.",
+    });
+
+    items.push({
+      id: `${env.id}-illuminazione-emergenza-uni-en-1838`,
+      area: env.name,
+      title: "Illuminazione di Sicurezza e Segnaletica Fotoluminescente (UNI EN 1838)",
+      question:
+        "L'area vendita è dotata di illuminazione di emergenza con attivazione automatica in caso di black-out avente autonomia >= 60 minuti e livello non inferiore a 5 lux lungo i percorsi d'esodo e sulle porte di sicurezza?",
+      normReference: "Norma UNI EN 1838 e D.Lgs. 81/2008 Allegato IV punto 1.10",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "illuminazione",
+      suggestedNonConformity:
+        "Lampade di emergenza dell'area vendita non funzionanti, con batterie esauste o prive di verifica semestrale di efficienza.",
+    });
+
+    items.push({
+      id: `${env.id}-stabilita-gondole-scaffali-espositivi`,
+      area: env.name,
+      title: "Stabilità, Ancoraggio e Protezione Gondole ed Espositori Merci",
+      question:
+        "Le scaffalature espositive, le gondole centrali e le pareti dogate sono stabili, ancorate a parete o dotate di base zavorrata antiribaltamento, con bordi protetti privi di spigoli vivi taglienti accessibili al pubblico?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.1 e Norma UNI EN 15635",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Gondole espositive instabili, prive di piedini livellatori o scaffali metallici alti non ancorati a parete con rischio ribaltamento.",
+    });
+  }
+
+  // 2. Banco Cassa, Postazioni POS & Barriera Antitaccheggio
+  if (env.id === "env-retail-banco-cassa-vdt" || env.id.includes("retail-banco-cassa")) {
+    items.push({
+      id: `${env.id}-postazione-cassa-ergonomia-vdt`,
+      area: env.name,
+      title: "Ergonomia Postazione Cassa, Seduta Regolabile e Monitor VDT",
+      question:
+        "Il banco cassa è strutturato ergonomicamente con piano di lavoro ad altezza corretta, sedile girevole regolabile con supporto lombare (UNI EN 1335), poggiapiedi regolabile e monitor POS orientabile per evitare riflessi molesti?",
+      normReference: "D.Lgs. 81/2008 Titolo VII (Videoterminali) artt. 173-175 e Allegato XXXIV",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "vdt",
+      suggestedNonConformity:
+        "Seduta operatore di cassa fissa non ergonomica o priva di regolazione lombare e poggiapiedi regolabile.",
+    });
+
+    items.push({
+      id: `${env.id}-barriera-antitaccheggio-cem-uni-en-50364`,
+      area: env.name,
+      title: "Conformità Barriera Antitaccheggio e Valutazione Campi Elettromagnetici CEM",
+      question:
+        "Le colonne antitaccheggio EAS installate in prossimità della cassa e delle uscite sono provviste di marcatura CE, conformità UNI EN 50364 e valutazione del rischio campi elettromagnetici per soggetti con dispositivi medici impiantabili (pacemaker) e gestanti?",
+      normReference: "D.Lgs. 81/2008 Titolo VIII Capo IV (Campi Elettromagnetici) e Norma UNI EN 50364",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "impianto_elettrico",
+      suggestedNonConformity:
+        "Antenne antitaccheggio prive di documentazione CE / conformità ai limiti di esposizione a campi elettromagnetici CEM.",
+    });
+
+    items.push({
+      id: `${env.id}-pulsante-antirapina-gestione-contante`,
+      area: env.name,
+      title: "Pulsante d'Allarme Antirapina e Cassa di Sicurezza Temporizzata",
+      question:
+        "La postazione cassa è munita di pulsante d'allarme silenzioso antirapina collegato a istituto di vigilanza o forze dell'ordine e di cassetto/cassaforte temporizzata per il disinvestimento periodico del contante?",
+      normReference: "D.Lgs. 81/2008 art. 28 (Valutazione di tutti i rischi) e Linee Guida Anticrimine Prefettizie",
+      defaultSeverity: 2,
+      defaultSanctionable: false,
+      domain: "safety",
+      categoryTag: "emergenze",
+      suggestedNonConformity:
+        "Postazione cassa con cospicua giacenza di contante non protetta e assenza di dispositivo per la chiamata di emergenza antirapina.",
+    });
+  }
+
+  // 3. Camerini di Prova & Zona Specchi con Box Accessibile PMR
+  if (env.id === "env-retail-camerini-prova" || env.id.includes("retail-camerini")) {
+    items.push({
+      id: `${env.id}-box-prova-accessibile-pmr-porte`,
+      area: env.name,
+      title: "Accessibilità Box Prova per Persone a Ridotta Mobilità (PMR)",
+      question:
+        "È presente almeno un box di prova accessibile a persone su sedia a ruote, con porta a luce netta >= 90 cm apribile verso l'esterno o tenda scorrevole, spazio interno di manovra adeguato e assenza di dislivelli a pavimento?",
+      normReference: "D.P.R. 503/1996 art. 4 e D.M. 236/1989 art. 5",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "esodo",
+      suggestedNonConformity:
+        "Tutti i camerini di prova presentano varchi stretti (< 80 cm) o gradini a pavimento che impediscono l'accesso a persone a ridotta mobilità (PMR).",
+    });
+
+    items.push({
+      id: `${env.id}-specchi-sicurezza-antischeggia-uni-en-12600`,
+      area: env.name,
+      title: "Specchi di Sicurezza con Pellicola Antischeggia (UNI EN 12600)",
+      question:
+        "Tutti gli specchi installati all'interno dei box e nella zona prova comune sono realizzati in vetro stratificato di sicurezza o dotati di pellicola posteriore antischeggia certificata UNI EN 12600 classe 2B2 contro il distacco di frammenti in caso d'urto?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.3.8 e Norma UNI EN 12600",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "pavimenti_pareti",
+      suggestedNonConformity:
+        "Specchi dei camerini in vetro semplice non di sicurezza e privi di pellicola posteriore di protezione antischeggia.",
+    });
+
+    items.push({
+      id: `${env.id}-aerazione-illuminazione-box-camerini`,
+      area: env.name,
+      title: "Aerazione, Microclima e Apparecchi Illuminanti Protetti nei Box",
+      question:
+        "La zona camerini è provvista di idoneo ricambio d'aria (naturale o meccanico VMC) per evitare ristagni viziati e di corpi illuminanti protetti a bassa emissione di calore (LED) posizionati fuori dal raggio di contatto accidentale?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punti 1.9 e 1.10",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Camerini ciechi privi di ventilazione con aria viziata e surriscaldamento causato da corpi illuminanti alogeni non schermati.",
+    });
+  }
+
+  // 4. Magazzino Scorte Merci, Ricevimento Colli & Unpacking
+  if (env.id === "env-retail-magazzino-scorte-merci" || env.id.includes("retail-magazzino")) {
+    items.push({
+      id: `${env.id}-scaffalature-portata-tassellamento-uni-en-15635`,
+      area: env.name,
+      title: "Scaffalature Metalliche Certificate con Cartelli di Portata e Ancoraggio",
+      question:
+        "Le scaffalature metalliche porta-pallet e a ripiani sono saldamente tassellate alla pavimentazione, provviste di perni di sicurezza sui correnti, protezioni angolari paracolpi e cartelli indicanti la portata massima per ripiano e campata (UNI EN 15635)?",
+      normReference: "D.Lgs. 81/2008 art. 71, Allegato IV punto 1.4 e Norma UNI EN 15635",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Scaffali del magazzino scorte privi di targhe di portata massima, perni di bloccaggio sfilati o montanti non tassellati a pavimento.",
+    });
+
+    items.push({
+      id: `${env.id}-movimentazione-carichi-transpallet-percorsi`,
+      area: env.name,
+      title: "Movimentazione Merci, Transpallet e Viabilità Pedonale Magazzino",
+      question:
+        "Le corsie di transito del magazzino sono mantenute sgombre da colli e bancali a terra, con larghezza adeguata alla manovra sicura di carrelli/transpallet manuali ed elettrici verificati periodicamente?",
+      normReference: "D.Lgs. 81/2008 Titolo VI (Movimentazione Manuale Carichi) e Allegato IV punto 1.4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "esodo",
+      suggestedNonConformity:
+        "Corsie del magazzino invase da scatoloni e pallet a terra con impedimento al transito sicuro dei transpallet e vie d'uscita ostruite.",
+    });
+
+    items.push({
+      id: `${env.id}-scale-sgabelli-prelievo-uni-en-131`,
+      area: env.name,
+      title: "Scale Portatili, Trabattelli e Sgabelli di Prelievo Scorte a Norma",
+      question:
+        "I mezzi di accesso ai piani alti degli scaffali (scale a castello, scale doppie portatili o sgabelli con gradini antiscivolo) sono conformi a UNI EN 131 / D.Lgs. 81/08 art. 113, dotati di piedini in gomma integri e verificati periodicamente?",
+      normReference: "D.Lgs. 81/2008 artt. 111-113 e Norma UNI EN 131",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "attrezzature",
+      suggestedNonConformity:
+        "Uso in magazzino di scale artigianali precarie, sgabelli rotti o sedie per il prelievo di colli da ripiani alti.",
+    });
+  }
+
+  // 5. Reparto Stoccaggio Capi Appesi & Stender ad Alta Densità
+  if (
+    env.id === "env-retail-reparto-stoccaggio-capi-appesi" ||
+    env.id.includes("retail-reparto-stoccaggio-capi-appesi") ||
+    env.id.includes("retail-capi-appesi")
+  ) {
+    items.push({
+      id: `${env.id}-stender-alta-densita-stabilita-ruote-frenate`,
+      area: env.name,
+      title: "Stabilità Stender Portabiti ad Alta Densità e Freni di Stazionamento",
+      question:
+        "Gli stender carrellati per lo stoccaggio dei capi appesi sono certificati per il carico gravante, stabili contro il ribaltamento accidentale e provvisti di ruote piroettanti dotate di freno di stazionamento regolarmente utilizzato?",
+      normReference: "D.Lgs. 81/2008 Allegato V e Allegato VI punto 1",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "attrezzature",
+      suggestedNonConformity:
+        "Stender portabiti sovraccarichi con curvature dei montanti o ruote prive di freno in prossimità di dislivelli.",
+    });
+
+    items.push({
+      id: `${env.id}-strutture-sospensione-aste-fermi-antisfilamento`,
+      area: env.name,
+      title: "Strutture di Sospensione Aeree con Fermi Antisfilamento Capi",
+      question:
+        "Le barre e le strutture tubolari aeree per capi appesi sono tassellate a solaio o a parete con certificazione di portata, e dotate di terminali di battuta antisfilamento per impedire la caduta improvvisa delle grucce?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.4 e Titolo III",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Barre di sospensione capi prive di fermi laterali di sicurezza con rischio di sfilamento e caduta delle grucce sul personale.",
+    });
+
+    items.push({
+      id: `${env.id}-distanziamento-lampade-tessuti-prevenzione-incendio`,
+      area: env.name,
+      title: "Distanza di Sicurezza tra Corpi Illuminanti e Tessuti Infiammabili",
+      question:
+        "Tutti i corpi illuminanti a soffitto o a parete mantengono una distanza netta >= 0,50 m dai capi d'abbigliamento e tessuti immagazzinati, e il reparto è dotato di rilevatori di fumo ottici funzionanti e non schermati?",
+      normReference: "D.M. 03/09/2021 (Mini-Codice Antincendio) e D.Lgs. 81/2008 Allegato IV punto 1.10",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Capi d'abbigliamento appesi a ridosso immediato di lampade o faretti con surriscaldamento e rischio d'innesco incendio.",
+    });
+  }
+
+  // 6. Zona Stiratura Verticale, Ricondizionamento Capi & Cartellinatura
+  if (
+    env.id === "env-retail-zona-stiratura-ricondizionamento" ||
+    env.id.includes("retail-zona-stiratura") ||
+    env.id.includes("retail-stiratura")
+  ) {
+    items.push({
+      id: `${env.id}-generatori-vapore-valvole-ped-direttiva-2014-68`,
+      area: env.name,
+      title: "Generatore di Vapore e Ferri da Stiro a Norma PED con Valvola Sovrapressione",
+      question:
+        "I generatori di vapore, le caldaie per manichini e i ferri da stiro professionali possiedono marcatura CE a norma Direttiva 2014/68/UE (PED), valvola di sicurezza contro le sovrapressioni e termostato di blocco tarati e verificati periodicamente?",
+      normReference: "Direttiva 2014/68/UE (PED), D.Lgs. 81/2008 art. 71 e Allegato V",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "attrezzature",
+      suggestedNonConformity:
+        "Caldaia per stiro vapore con valvola di sicurezza incrostata da calcare o priva di controllo periodico di tenuta e pressione.",
+    });
+
+    items.push({
+      id: `${env.id}-estrazione-vapore-calore-microclima-stiratura`,
+      area: env.name,
+      title: "Impianto di Estrazione Vapore, Evacuazione Calore e Microclima",
+      question:
+        "La postazione di stiro è dotata di cappa aspirante o sistema di ventilazione forzata con espulsione all'esterno dei vapori caldi, assicurando temperature e umidità adeguate ed esenti da condense sulle superfici?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.9 (Aerazione e Microclima)",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Locale stiratura sprovvisto di aspirazione forzata con accumulo di calore e vapore acqueo saturo dannoso per la salute dell'operatore.",
+    });
+
+    items.push({
+      id: `${env.id}-guaine-isolanti-antitermiche-ferri-vapore`,
+      area: env.name,
+      title: "Protezione Scottature, Cavi Termoresistenti e Pedana Defaticante",
+      question:
+        "Le tubazioni flessibili del vapore e le impugnature dei ferri sono provviste di isolamento termico integro contro ustioni, i cavi elettrici sono del tipo antitaglio al silicone e l'operatore dispone di pedana defaticante ammortizzante a terra?",
+      normReference: "D.Lgs. 81/2008 Allegato V punto 2 e Allegato VI",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "attrezzature",
+      suggestedNonConformity:
+        "Tubo vapore del ferro da stiro con isolamento termico logoro ed esposto al contatto con rischio ustioni alle braccia dell'addetto.",
+    });
+  }
+
+  // 7. Soppalco Metallico ad Uso Deposito Scorte Leggere
+  if (env.id === "env-retail-soppalco-magazzino" || env.id.includes("retail-soppalco")) {
+    items.push({
+      id: `${env.id}-parapetto-perimetrale-fermapiede-all-iv`,
+      area: env.name,
+      title: "Parapetto Perimetrale Normale con Fascia Fermapiede da 15 cm",
+      question:
+        "Tutti i lati aperti del soppalco metallico sono protetti da parapetto normale rigido alto almeno 1,00 metro, con corrente intermedio e fascia fermapiede piena di altezza minima pari a 15 centimetri contro la caduta di oggetti?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.4.3",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "pavimenti_pareti",
+      suggestedNonConformity:
+        "Parapetto del soppalco privo di fascia fermapiede da 15 cm o con fessure aperte da cui possono precipitare colli e merci.",
+    });
+
+    items.push({
+      id: `${env.id}-cartello-portata-sovraccarico-soppalco`,
+      area: env.name,
+      title: "Targa di Portata Massima Ammissibile e Relazione di Calcolo Statico",
+      question:
+        "In prossimità dell'accesso al soppalco è esposta in modo chiaro la targa indicante il sovraccarico massimo accidentale ammissibile (es. 250 kg/m²), conforme alla relazione di calcolo e collaudo statico dell'opera?",
+      normReference: "D.Lgs. 81/2008 art. 67 e Allegato IV punto 1.1",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Soppalco utilizzato come deposito merci privo di indicazione del carico massimo ammissibile e di verifica statica strutturale.",
+    });
+
+    items.push({
+      id: `${env.id}-scala-fissa-accesso-soppalco-gradini-antiscivolo`,
+      area: env.name,
+      title: "Scala Fissa di Accesso con Pendenza Idonea, Gradini Antiscivolo e Corrimano",
+      question:
+        "Il soppalco è accessibile tramite scala fissa a giorno avente pendenza non superiore a 45°, gradini con superficie antiscivolo di profondità adeguata e corrimano continuo su entrambi i lati?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.4.10",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "esodo",
+      suggestedNonConformity:
+        "Scala di accesso al soppalco eccessivamente ripida a pioli o priva di corrimano di trattenuta e gradini antiscivolo.",
+    });
+  }
+
+  // 8. Ufficio Direzione, Amministrazione & Postazione Videosorveglianza
+  if (env.id === "env-retail-ufficio-direzione-amministrazione" || env.id.includes("retail-ufficio")) {
+    items.push({
+      id: `${env.id}-videosorveglianza-accordo-sindacale-gdpr`,
+      area: env.name,
+      title: "Conformità Videosorveglianza: Accordo Sindacale/ITL e Informativa GDPR",
+      question:
+        "L'impianto di videosorveglianza interno/esterno è stato installato previo accordo con le RSA/RSU o autorizzazione dell'Ispettorato Territoriale del Lavoro (art. 4 L. 300/1970) ed è provvisto di idonea cartellonistica conforme al Regolamento UE 2016/679?",
+      normReference: "Legge 300/1970 (Statuto Lavoratori) art. 4 e Regolamento UE 2016/679 (GDPR)",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "esodo",
+      suggestedNonConformity:
+        "Telecamere di sicurezza operative nell'esercizio senza autorizzazione ITL o prive di informativa privacy per lavoratori e clienti.",
+    });
+
+    items.push({
+      id: `${env.id}-postazione-vdt-amministrazione-comfort`,
+      area: env.name,
+      title: "Postazione Videoterminale Amministrativa con Seduta Conforme EN 1335",
+      question:
+        "La postazione ufficio dispone di schermo inclinabile e antiriflesso, tastiera separata, sedia da lavoro su ruote a 5 razze regolabile in altezza e inclinazione con supporto lombare (UNI EN 1335) e idonea illuminazione?",
+      normReference: "D.Lgs. 81/2008 Titolo VII (Videoterminali) e Allegato XXXIV",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "vdt",
+      suggestedNonConformity:
+        "Sedia per operatore VDT priva di regolazioni ergonomiche o monitor orientato controfinestra con forti riflessi visivi.",
+    });
+
+    items.push({
+      id: `${env.id}-cassaforte-custodia-documenti-riservati`,
+      area: env.name,
+      title: "Custodia Sicura Documenti Personale e Ancoraggio Cassaforte",
+      question:
+        "I documenti contenenti dati personali e fascicoli dei lavoratori sono conservati in armadi metallici chiusi a chiave conformi al GDPR, e la cassaforte a muro o a pavimento è saldamente ancorata alla struttura muraria?",
+      normReference: "Regolamento UE 2016/679 (GDPR) e D.Lgs. 81/2008 art. 15",
+      defaultSeverity: 2,
+      defaultSanctionable: false,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Documenti contabili e del personale lasciati incustoditi su scrivanie aperte o cassaforte appoggiata senza tassellamento.",
+    });
+  }
+
+  // 9. Spogliatoi e Servizi Igienici per il Personale
+  if (env.id === "env-retail-spogliatoi-servizi-personale" || env.id.includes("retail-spogliatoi")) {
+    items.push({
+      id: `${env.id}-armadietti-personali-doppio-scomparto-all-iv`,
+      area: env.name,
+      title: "Armadietti Individuali a Doppio Scomparto con Chiusura a Chiave",
+      question:
+        "Lo spogliatoio è provvisto di armadietti individuali metallici a doppio scomparto (o con divisorio per separare abiti civili da abiti da lavoro), lavabili, disinfettabili e dotati di serratura autonoma?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.12",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Armadietti dello spogliatoio insufficienti per il personale o a scomparto singolo con promiscuità di abiti civili e da lavoro.",
+    });
+
+    items.push({
+      id: `${env.id}-servizi-igienici-antibagno-aerazione-meccanica`,
+      area: env.name,
+      title: "Servizi Igienici con Antibagno e Aspirazione Forzata Temporizzata",
+      question:
+        "I servizi igienici per il personale sono dotati di antibagno disimpegnato con lavamani ad acqua calda/fredda, sapone liquido, asciugamani monouso e idonea ventilazione (finestra o estrattore meccanico temporizzato per bagni ciechi)?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punti 1.9 e 1.13",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "both",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Bagno cieco per il personale con aspiratore elettrico guasto o privo di erogatore di sapone liquido e carta monouso.",
+    });
+
+    items.push({
+      id: `${env.id}-cassetta-pronto-soccorso-allegato-2-dm-388`,
+      area: env.name,
+      title: "Cassetta di Primo Soccorso Aziendale Completa (Allegato 2 D.M. 388/03)",
+      question:
+        "È presente un presidio di primo soccorso (cassetta o pacchetto di medicazione conforme All. 2 D.M. 388/2003) segnalato da cartello, accessibile a tutti i lavoratori, completo di tutti i presidi e con scadenze verificate periodicamente?",
+      normReference: "D.M. 388/2003 e D.Lgs. 81/2008 Titolo I Capo III Sezione VI",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "emergenze",
+      suggestedNonConformity:
+        "Cassetta di primo soccorso con presidi medici scaduti, mancanti o posizionata in locale chiuso a chiave.",
+    });
+  }
+
+  // 10. Area Break Personale, Ristoro & Distributori Automatici
+  if (env.id === "env-retail-area-break-distributori" || env.id.includes("retail-area-break")) {
+    items.push({
+      id: `${env.id}-distributori-automatici-sicurezza-elettrica-cei-64`,
+      area: env.name,
+      title: "Sicurezza Elettrica e Allacciamento Distributori Automatici (CEI 64-8)",
+      question:
+        "I distributori automatici di bevande calde/fredde e snack sono collegati a prese elettriche dedicate con messa a terra senza l'impiego di prolunghe o adattatori multipli volanti a pavimento, e provvisti di dichiarazione CE?",
+      normReference: "D.Lgs. 81/2008 art. 80 e Norma CEI 64-8",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "impianto_elettrico",
+      suggestedNonConformity:
+        "Distributori automatici alimentati tramite ciabatte elettriche multiple volanti lungo le vie di passaggio con rischio sovraccarico e inciampo.",
+    });
+
+    items.push({
+      id: `${env.id}-igiene-elettrodomestici-ristoro-microonde-moca`,
+      area: env.name,
+      title: "Igiene e Pulizia Elettrodomestici Ristoro e Smaltimento Rifiuti",
+      question:
+        "Il forno a microonde, i bollitori e il frigorifero dell'area ristoro sono mantenuti in buone condizioni igieniche e di efficienza, con cestini a pedale per la raccolta differenziata dei rifiuti svuotati quotidianamente?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.11",
+      defaultSeverity: 2,
+      defaultSanctionable: false,
+      domain: "both",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Elettrodomestici di ristoro incrostati con residui organici e assenza di bidoni idonei con coperchio per i rifiuti.",
+    });
+
+    items.push({
+      id: `${env.id}-spazio-ristoro-confortevole-arredi-salubrita`,
+      area: env.name,
+      title: "Salubrità Locale Ristoro, Tavoli, Sedute e Microclima (All. IV p.to 1.11)",
+      question:
+        "L'area di pausa e ristoro è isolata da depositi e polveri, provvista di tavoli e sedie lavabili in numero proporzionato al personale e garantisce un ambiente riscaldato d'inverno e ventilato d'estate?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.11",
+      defaultSeverity: 2,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "arredi_scaffali",
+      suggestedNonConformity:
+        "Spazio pausa ristoro ricavato impropriamente all'interno del magazzino merci tra polveri e scatoloni senza tavolo o sedute idonee.",
+    });
+  }
+
+  // 11. Vano Tecnico Quadro Elettrico Generale, Centrale Clima & UPS
+  if (env.id === "env-retail-vano-tecnico-quadro-clima" || env.id.includes("retail-vano-tecnico")) {
+    items.push({
+      id: `${env.id}-sgancio-elettrico-emergenza-esterno-cei-en-60204`,
+      area: env.name,
+      title: "Pulsante di Sgancio Elettrico d'Emergenza Esterno a Fungo e Schemi Quadro",
+      question:
+        "All'esterno del vano tecnico è installato un pulsante di sgancio elettrico generale con bobina di minima tensione protetto da vetro a rottura, e il quadro generale è provvisto di schema unifilare aggiornato e portelle chiuse?",
+      normReference: "Norma CEI EN 60204-1 e D.Lgs. 81/2008 Titolo III Capo III",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "impianto_elettrico",
+      suggestedNonConformity:
+        "Quadro elettrico generale privo di pulsante di sgancio generale di emergenza all'esterno del vano o con portelle aperte e parti attive in tensione accessibili.",
+    });
+
+    items.push({
+      id: `${env.id}-ups-batterie-ventilazione-antideflagrante`,
+      area: env.name,
+      title: "Gruppo di Continuità UPS, Ventilazione Antiesalazioni e Rilevamento Fumo",
+      question:
+        "L'apparato UPS e le relative batterie di soccorso sono alloggiati in ambiente aerato per evitare l'accumulo di vapori infiammabili/tossici, con cavi ordinati, batterie prive di rigonfiamenti o perdite e rilevatore fumi?",
+      normReference: "Norma CEI EN 50272-2 e D.Lgs. 81/2008 art. 80",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "aspirazione",
+      suggestedNonConformity:
+        "Vano batterie UPS cieco privo di ventilazione naturale o meccanica con rischio di surriscaldamento ed esalazioni chimiche.",
+    });
+
+    items.push({
+      id: `${env.id}-estintore-co2-quadro-elettrico-classe-89b`,
+      area: env.name,
+      title: "Presidio Antincendio: Estintore a CO2 da 5 kg Classe 89B per Rischio Elettrico",
+      question:
+        "In prossimità del vano quadro elettrico è presente un estintore a biossido di carbonio (CO2) da 5 kg omologato per fuochi di classe 89B per apparecchiature in tensione, segnalato da apposito cartello e revisionato semestralmente?",
+      normReference: "D.M. 03/09/2021 (Mini-Codice) e Norma UNI 9994-1",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Vano elettrico generale privo di estintore a CO2 dedicato o estintore presente con revisione semestrale scaduta.",
+    });
+  }
+
+  // 12. Area Retro Scarico Merci & Compattazione Cartoni/Imballaggi
+  if (
+    env.id === "env-retail-area-compattazione-cartoni-scarico" ||
+    env.id.includes("retail-area-compattazione") ||
+    env.id.includes("retail-compattazione")
+  ) {
+    items.push({
+      id: `${env.id}-pressa-compattatrice-direttiva-macchine-arresto-fungo`,
+      area: env.name,
+      title: "Pressa Compattatrice Cartoni Conforme Direttiva Macchine con Stop a Fungo",
+      question:
+        "La pressa per imballaggi e cartoni è provvista di marcatura CE, interblocchi di sicurezza che impediscono l'avvio a camera di compattazione aperta, pulsante di arresto d'emergenza a fungo e manuale d'uso con registro manutenzioni?",
+      normReference: "Direttiva Macchine 2006/42/CE e D.Lgs. 81/2008 Allegato V e VI",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "attrezzature",
+      suggestedNonConformity:
+        "Pressa compattatrice con microinterruttore di sicurezza del portello manomesso o priva di pulsante di arresto d'emergenza a fungo funzionante.",
+    });
+
+    items.push({
+      id: `${env.id}-sicurezza-ribalta-scarico-autocarri-caduta`,
+      area: env.name,
+      title: "Sicurezza Area di Scarico Merci, Banchina e Protezione Caduta Dislivelli",
+      question:
+        "L'area esterna di retro scarico autocarri presenta pavimentazione carrabile integra priva di buche, cunei fermaruote per i camion durante lo scarico, segnaletica a terra giallo/nera e presidi contro la caduta dall'alto da banchine o pedane?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.4.9 e Allegato XXVIII",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "esodo",
+      suggestedNonConformity:
+        "Banchina di scarico merci con dislivello priva di segnalazione a strisce giallo-nere e assenza di cunei fermaruote per gli autocarri in scarico.",
+    });
+
+    items.push({
+      id: `${env.id}-gestione-antincendio-imballaggi-divieto-fumo`,
+      area: env.name,
+      title: "Prevenzione Incendi: Stoccaggio Cartoni Pressati, Divieto di Fumo ed Estintori",
+      question:
+        "Le balle di cartone e gli imballaggi compattati sono stoccati a distanza di sicurezza da sorgenti di calore, con divieto assoluto di fumo ben segnalato ed estintore a polvere da 6 kg o 9 litri idrico prontamente utilizzabile?",
+      normReference: "D.M. 03/09/2021 e D.Lgs. 81/2008 Allegato IV punto 1.10",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Accumulo incontrollato di cartoni e cellophane a ridosso delle uscite di sicurezza esterne o vicino a corpi illuminanti con rischio incendio.",
     });
   }
 
