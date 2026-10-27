@@ -379,7 +379,187 @@ async function run() {
     `Attesi almeno 5 requisiti documentali per ATECO 477110, trovati ${matchedNonFoodRequirements.length}`,
   );
 
-    console.log("Macro sectors checklist test passed");
+  // =========================================================================
+  // Deep verification ATECO 52.10 (Logistica, Magazzino Merci e Depositi)
+  // =========================================================================
+  const logisticsVariants = [
+    "52.10",
+    "52.10.1",
+    "52.10.2",
+    "52.29",
+    "49.41",
+    "5210",
+    "521010",
+    "5229",
+    "4941",
+    "LOGISTICA_MAGAZZINO",
+    "LOGISTICA",
+    "MAGAZZINO",
+  ];
+
+  for (const variant of logisticsVariants) {
+    // 1. Unified mode: template + document templates
+    const unifiedTmplRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(unifiedTmplRes.statusCode, 200, `Unified template request failed for variant ${variant}`);
+    const unifiedTemplates = unifiedTmplRes.json() as Array<{ id: string; name: string; macroGroup?: string | null }>;
+    const unifiedMatch = unifiedTemplates.find((t) => t.macroGroup === "LOGISTICA_MAGAZZINO");
+    assert.ok(unifiedMatch, `Missing LOGISTICA_MAGAZZINO template in unified mode for variant ${variant}`);
+
+    const unifiedDocsRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/document-templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=unified`,
+      headers,
+    });
+    assert.equal(unifiedDocsRes.statusCode, 200, `Unified doc template request failed for variant ${variant}`);
+    const unifiedDocs = unifiedDocsRes.json() as Array<{ name: string; macroGroup?: string | null }>;
+    const unifiedLogisticsDocs = unifiedDocs.filter((d) => d.macroGroup === "LOGISTICA_MAGAZZINO");
+    assert.ok(
+      unifiedLogisticsDocs.length >= 6,
+      `Expected >= 6 logistics docs in unified mode for variant ${variant}, found ${unifiedLogisticsDocs.length}`,
+    );
+
+    // 2. Safety_only mode: template + document templates
+    const safetyTmplRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=safety_only`,
+      headers,
+    });
+    assert.equal(safetyTmplRes.statusCode, 200, `Safety_only template request failed for variant ${variant}`);
+    const safetyTemplates = safetyTmplRes.json() as Array<{ id: string; name: string; macroGroup?: string | null }>;
+    const safetyMatch = safetyTemplates.find((t) => t.macroGroup === "LOGISTICA_MAGAZZINO");
+    assert.ok(safetyMatch, `Missing LOGISTICA_MAGAZZINO template in safety_only mode for variant ${variant}`);
+
+    const safetyDocsRes = await app.inject({
+      method: "GET",
+      url: `/api/checklists/document-templates?atecoCode=${encodeURIComponent(variant)}&checklistMode=safety_only`,
+      headers,
+    });
+    assert.equal(safetyDocsRes.statusCode, 200, `Safety_only doc template request failed for variant ${variant}`);
+    const safetyDocs = safetyDocsRes.json() as Array<{ name: string; macroGroup?: string | null }>;
+    const safetyLogisticsDocs = safetyDocs.filter((d) => d.macroGroup === "LOGISTICA_MAGAZZINO");
+    assert.ok(
+      safetyLogisticsDocs.length >= 6,
+      `Expected >= 6 logistics docs in safety_only mode for variant ${variant}, found ${safetyLogisticsDocs.length}`,
+    );
+  }
+
+  // 3. Specialist items verification on template items
+  const logisticsTmpl = (
+    await app.inject({
+      method: "GET",
+      url: `/api/checklists/templates?atecoCode=52.10&checklistMode=unified`,
+      headers,
+    })
+  )
+    .json()
+    .find((t: { macroGroup?: string | null }) => t.macroGroup === "LOGISTICA_MAGAZZINO");
+  assert.ok(logisticsTmpl, "Template LOGISTICA_MAGAZZINO non trovato per 52.10");
+
+  const logisticsItemsRes = await app.inject({
+    method: "GET",
+    url: `/api/checklists/templates/${logisticsTmpl.id}/items?checklistMode=unified`,
+    headers,
+  });
+  assert.equal(logisticsItemsRes.statusCode, 200);
+  const logisticsItems = logisticsItemsRes.json().items as Array<{ area: string; question: string; normReference?: string }>;
+  const fullLogisticsChecklistText = logisticsItems
+    .map((item) => `${item.area} ${item.question} ${item.normReference ?? ""}`.toLowerCase())
+    .join(" | ");
+
+  const requiredLogisticsTokens = [
+    "baia di carico",
+    "pedane idrauliche 1398",
+    "scaffalature 15635",
+    "ricarica batterie atex",
+    "cunei bloccaruote",
+    "inail",
+  ];
+  for (const token of requiredLogisticsTokens) {
+    assert.ok(
+      fullLogisticsChecklistText.includes(token.toLowerCase()),
+      `Controlli specialistici logistica privi del requisito: "${token}"`,
+    );
+  }
+
+  // 4. Verification of required documents
+  const logisticsDocListRes = await app.inject({
+    method: "GET",
+    url: `/api/checklists/document-templates?atecoCode=52.10&checklistMode=unified`,
+    headers,
+  });
+  assert.equal(logisticsDocListRes.statusCode, 200);
+  const logisticsDocNames = (logisticsDocListRes.json() as Array<{ name: string }>)
+    .map((doc) => doc.name.toLowerCase())
+    .join(" | ");
+
+  const requiredLogisticsDocTokens = [
+    "dvr",
+    "emergenza",
+    "all. xxviii",
+    "15635",
+    "inail",
+    "atex",
+    "03/09/2021",
+  ];
+  for (const docToken of requiredLogisticsDocTokens) {
+    assert.ok(
+      logisticsDocNames.includes(docToken.toLowerCase()),
+      `Documenti logistica privi del documento atteso: "${docToken}"`,
+    );
+  }
+
+  // 5. Creazione azienda di test con ATECO dotless 521010, avvio ispezione e verifica requisiti documentali
+  const logisticsCompanyVat = `99${Date.now().toString().slice(-9)}`;
+  const logisticsCompany = await app.prisma.company.create({
+    data: {
+      name: "Hub Logistica & Magazzino FedShield Test",
+      vatNumber: logisticsCompanyVat,
+      atecoCode: "521010",
+      legalAddress: "Interporto Merci Blocco B, Bologna",
+    },
+  });
+
+  const logisticsInspectionRes = await app.inject({
+    method: "POST",
+    url: "/api/inspections",
+    headers,
+    payload: {
+      companyId: logisticsCompany.id,
+      title: "Sopralluogo Deposito Merci ATECO 521010 Test",
+      checklistMode: "safety_only",
+    },
+  });
+  assert.equal(logisticsInspectionRes.statusCode, 201, "Creazione ispezione 521010 fallita");
+  const logisticsInspectionId = logisticsInspectionRes.json().id as string;
+
+  const logisticsInspectionDocsRes = await app.inject({
+    method: "GET",
+    url: `/api/inspections/${logisticsInspectionId}/documents/requirements`,
+    headers,
+  });
+  assert.equal(logisticsInspectionDocsRes.statusCode, 200, "Recupero requisiti documentali fallito");
+  const logisticsInspectionDocs = logisticsInspectionDocsRes.json() as Array<{ name: string; documentTemplateId: string }>;
+  const matchedLogisticsRequirements = logisticsInspectionDocs.filter(
+    (doc) =>
+      doc.name.toLowerCase().includes("logistico") ||
+      doc.name.toLowerCase().includes("scaffalature") ||
+      doc.name.toLowerCase().includes("carrelli") ||
+      doc.name.toLowerCase().includes("inail") ||
+      doc.name.toLowerCase().includes("piazzale") ||
+      doc.name.toLowerCase().includes("all. xxviii") ||
+      doc.name.toLowerCase().includes("atex") ||
+      doc.name.toLowerCase().includes("dvr"),
+  );
+  assert.ok(
+    matchedLogisticsRequirements.length >= 5,
+    `Attesi almeno 5 requisiti documentali per ATECO 521010, trovati ${matchedLogisticsRequirements.length}`,
+  );
+
+  console.log("Macro sectors checklist test passed");
   await app.close();
 }
 

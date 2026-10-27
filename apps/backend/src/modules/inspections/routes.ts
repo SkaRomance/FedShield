@@ -684,8 +684,70 @@ function buildAtecoVariants(atecoCode?: string | null) {
     variants.add("RETAIL_NON_FOOD");
     variants.add("NEGOZIO_ABBIGLIAMENTO");
   }
-  if (normalized.startsWith("49.4") || parts[0] === "52" || parts[0] === "53") {
+  // Logistica, Magazzino Merci, Depositi Industriali, Centri di Smistamento e Spedizioni
+  // ATECO 52.10, 52.29, 49.41, 52.1, 52.2, 49.4 e relativi prefissi/alias
+  const isLogisticsText =
+    upper === "LOGISTICA_MAGAZZINO" ||
+    upper === "LOGISTICA MAGAZZINO" ||
+    upper === "LOGISTICA" ||
+    upper === "MAGAZZINO" ||
+    upper === "MAGAZZINAGGIO" ||
+    upper === "SPEDIZIONI_LOGISTICA" ||
+    upper === "SPEDIZIONI LOGISTICA" ||
+    upper === "LOGISTICA_TRASPORTI" ||
+    upper === "LOGISTICA TRASPORTI" ||
+    upper === "CORRIERE_LOGISTICA" ||
+    upper === "CORRIERE LOGISTICA" ||
+    upper === "DEPOSITO_MERCI" ||
+    upper === "DEPOSITO MERCI";
+
+  const isLogisticsCode =
+    normalized.startsWith("52.10") ||
+    normalized.startsWith("52.1") ||
+    normalized.startsWith("52.29") ||
+    normalized.startsWith("52.2") ||
+    normalized.startsWith("52.") ||
+    normalized.startsWith("53.") ||
+    normalized.startsWith("49.41") ||
+    normalized.startsWith("49.42") ||
+    normalized.startsWith("49.4") ||
+    digits.startsWith("5210") ||
+    digits.startsWith("521") ||
+    digits.startsWith("5229") ||
+    digits.startsWith("522") ||
+    digits.startsWith("4941") ||
+    digits.startsWith("4942") ||
+    digits.startsWith("494") ||
+    digits.startsWith("52") ||
+    digits.startsWith("53") ||
+    normalized === "52" ||
+    normalized === "53" ||
+    digits === "52" ||
+    digits === "53" ||
+    parts[0] === "52" ||
+    parts[0] === "53";
+
+  if (isLogisticsCode || isLogisticsText) {
+    variants.add("52.10");
+    variants.add("52.10.1");
+    variants.add("52.10.2");
+    variants.add("52.29");
+    variants.add("52.2");
+    variants.add("52.1");
+    variants.add("49.41");
+    variants.add("49.4");
+    variants.add("5210");
+    variants.add("521010");
+    variants.add("521020");
+    variants.add("5229");
+    variants.add("4941");
     variants.add("LOGISTICA_MAGAZZINO");
+    variants.add("LOGISTICA");
+    variants.add("MAGAZZINO");
+    variants.add("MAGAZZINAGGIO");
+    variants.add("SPEDIZIONI_LOGISTICA");
+    variants.add("LOGISTICA_TRASPORTI");
+    variants.add("DEPOSITO_MERCI");
   }
   if (normalized.startsWith("81.2")) {
     variants.add("PULIZIE_SANIFICAZIONE");

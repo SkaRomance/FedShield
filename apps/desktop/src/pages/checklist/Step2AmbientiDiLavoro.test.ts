@@ -8092,6 +8092,518 @@ assert.ok(
   "In modalità safety_only tutti gli item degli Spogliatoi devono essere safety o both",
 );
 
+// ============================================================================
+// Test 43: getStandardEnvironmentsForAteco & conformità per Logistica, Magazzino Merci, Depositi Industriali e Spedizioni (52.10, 52.10.1, 52.10.2, 52.10.19, 52.10.20, 52.29, 52.29.1, 52.29.2, 52.29.21, 52.29.22, 49.41, 49.41.0, 49.42, 52.1, 52.2, 49.4, 5210, 521010, 521020, 5229, 522910, 522921, 522922, 4941, 494100, 494)
+// ============================================================================
+console.log("Test 43: getStandardEnvironmentsForAteco & conformità per Logistica e Magazzino Merci (ATECO 52.10, 52.29, 49.41 e varianti)");
+
+const logisticaAtecoVariants = [
+  "52.10",
+  "52.10.1",
+  "52.10.2",
+  "52.10.19",
+  "52.10.20",
+  "52.29",
+  "52.29.1",
+  "52.29.2",
+  "52.29.21",
+  "52.29.22",
+  "49.41",
+  "49.41.0",
+  "49.42",
+  "52.1",
+  "52.2",
+  "49.4",
+  "5210",
+  "521010",
+  "521020",
+  "5229",
+  "522910",
+  "522921",
+  "522922",
+  "4941",
+  "494100",
+  "494",
+];
+
+for (const code of logisticaAtecoVariants) {
+  const envs = getStandardEnvironmentsForAteco(code);
+  assert.equal(envs.length, 12, `ATECO ${code} deve restituire esattamente 12 ambienti standard logistica`);
+  assert.ok(envs.some((e) => e.id === "env-log-baia-carico-scarico-dock"), `ATECO ${code} deve contenere Baia Carico/Scarico`);
+  assert.ok(envs.some((e) => e.id === "env-log-corsie-scaffalature-portapallet"), `ATECO ${code} deve contenere Corsie Scaffalature`);
+  assert.ok(envs.some((e) => e.id === "env-log-area-picking-smistamento"), `ATECO ${code} deve contenere Area Picking`);
+  assert.ok(envs.some((e) => e.id === "env-log-zona-imballaggio-fardellatura"), `ATECO ${code} deve contenere Reparto Imballaggio`);
+  assert.ok(envs.some((e) => e.id === "env-log-area-ricarica-batterie-muletti"), `ATECO ${code} deve contenere Ricarica Batterie`);
+  assert.ok(envs.some((e) => e.id === "env-log-reparto-stoccaggio-infiammabili-adr"), `ATECO ${code} deve contenere Deposito Infiammabili ADR`);
+  assert.ok(envs.some((e) => e.id === "env-log-soppalco-picking-leggero"), `ATECO ${code} deve contenere Soppalco Picking`);
+  assert.ok(envs.some((e) => e.id === "env-log-ufficio-spedizioni-bolle-dogana"), `ATECO ${code} deve contenere Ufficio Spedizioni`);
+  assert.ok(envs.some((e) => e.id === "env-log-spogliatoi-docce-personale"), `ATECO ${code} deve contenere Spogliatoi e Docce`);
+  assert.ok(envs.some((e) => e.id === "env-log-area-break-mensa-autisti"), `ATECO ${code} deve contenere Area Break Autisti`);
+  assert.ok(envs.some((e) => e.id === "env-log-locale-tecnico-compressori-antincendio"), `ATECO ${code} deve contenere Locale Tecnico Antincendio`);
+  assert.ok(envs.some((e) => e.id === "env-log-piazzale-manovra-tir-parcheggio"), `ATECO ${code} deve contenere Piazzale Manovra TIR`);
+}
+
+const logEnvs = getStandardEnvironmentsForAteco("52.10");
+const logBaia = logEnvs.find((e) => e.id === "env-log-baia-carico-scarico-dock")!;
+const logCorsie = logEnvs.find((e) => e.id === "env-log-corsie-scaffalature-portapallet")!;
+const logPicking = logEnvs.find((e) => e.id === "env-log-area-picking-smistamento")!;
+const logImballaggio = logEnvs.find((e) => e.id === "env-log-zona-imballaggio-fardellatura")!;
+const logRicarica = logEnvs.find((e) => e.id === "env-log-area-ricarica-batterie-muletti")!;
+const logInfiammabili = logEnvs.find((e) => e.id === "env-log-reparto-stoccaggio-infiammabili-adr")!;
+const logSoppalco = logEnvs.find((e) => e.id === "env-log-soppalco-picking-leggero")!;
+const logUfficio = logEnvs.find((e) => e.id === "env-log-ufficio-spedizioni-bolle-dogana")!;
+const logSpogliatoi = logEnvs.find((e) => e.id === "env-log-spogliatoi-docce-personale")!;
+const logAreaBreak = logEnvs.find((e) => e.id === "env-log-area-break-mensa-autisti")!;
+const logLocaleTecnico = logEnvs.find((e) => e.id === "env-log-locale-tecnico-compressori-antincendio")!;
+const logPiazzale = logEnvs.find((e) => e.id === "env-log-piazzale-manovra-tir-parcheggio")!;
+
+// 1. Baia Carico/Scarico
+const evalLogBaia = evaluateEnvironmentCompliance(logBaia, "52.10");
+assert.equal(evalLogBaia.minHeightRequired, 3.0, "Baia richiede altezza minima 3,00m");
+assert.ok(evalLogBaia.isHeightCompliant, "Baia deve essere conforme in altezza (5.00m >= 3.00m)");
+assert.ok(evalLogBaia.isCubatureCompliant, "Baia deve essere conforme in cubatura (1250 / 4 = 312.5 mc/op)");
+assert.ok(
+  evalLogBaia.summaryBadges.some((b) => b.text.includes("Pedana idraulica con labbro a norma UNI EN 1398")),
+  "Baia deve avere badge pedana idraulica UNI EN 1398",
+);
+assert.ok(
+  evalLogBaia.summaryBadges.some((b) => b.text.includes("Cunei bloccaruote TIR con sensore")),
+  "Baia deve avere badge cunei bloccaruote e semaforo interbloccato",
+);
+
+// 2. Corsie Scaffalature
+const evalLogCorsie = evaluateEnvironmentCompliance(logCorsie, "52.10");
+assert.equal(evalLogCorsie.minHeightRequired, 3.0, "Corsie richiedono altezza minima 3,00m");
+assert.ok(evalLogCorsie.isHeightCompliant, "Corsie devono essere conformi in altezza (8.50m >= 3.00m)");
+assert.ok(evalLogCorsie.isCubatureCompliant, "Corsie devono essere conformi in cubatura (10200 / 6 = 1700 mc/op)");
+assert.ok(
+  evalLogCorsie.summaryBadges.some((b) => b.text.includes("Scaffalature antisismiche certificate con verifica periodica annuale (UNI EN 15635)")),
+  "Corsie devono avere badge scaffalature antisismiche UNI EN 15635",
+);
+assert.ok(
+  evalLogCorsie.summaryBadges.some((b) => b.text.includes("Cartelli portata massima visibili e paracolpi")),
+  "Corsie devono avere badge cartelli portata e paracolpi montanti",
+);
+
+// 3. Area Picking
+const evalLogPicking = evaluateEnvironmentCompliance(logPicking, "52.10");
+assert.equal(evalLogPicking.minHeightRequired, 3.0, "Picking richiede altezza minima 3,00m");
+assert.ok(evalLogPicking.isHeightCompliant, "Picking deve essere conforme in altezza (4.00m >= 3.00m)");
+assert.ok(evalLogPicking.isCubatureCompliant, "Picking deve essere conforme in cubatura (1200 / 8 = 150 mc/op)");
+assert.ok(
+  evalLogPicking.summaryBadges.some((b) => b.text.includes("Tavoli regolabili ergonomici ISO 11228")),
+  "Picking deve avere badge ergonomia ISO 11228",
+);
+assert.ok(
+  evalLogPicking.summaryBadges.some((b) => b.text.includes("Pavimentazione piana antiscivolo R11")),
+  "Picking deve avere badge pavimentazione antiscivolo R11",
+);
+
+// 4. Reparto Imballaggio
+const evalLogImballaggio = evaluateEnvironmentCompliance(logImballaggio, "52.10");
+assert.equal(evalLogImballaggio.minHeightRequired, 3.0, "Imballaggio richiede altezza minima 3,00m");
+assert.ok(evalLogImballaggio.isHeightCompliant, "Imballaggio deve essere conforme in altezza (4.00m >= 3.00m)");
+assert.ok(evalLogImballaggio.isCubatureCompliant, "Imballaggio deve essere conforme in cubatura (600 / 4 = 150 mc/op)");
+assert.ok(
+  evalLogImballaggio.summaryBadges.some((b) => b.text.includes("Fasciapallet con barriere ottiche Classe 4 UNI EN ISO 13849-1")),
+  "Imballaggio deve avere badge fasciapallet barriere ottiche Classe 4",
+);
+assert.ok(
+  evalLogImballaggio.summaryBadges.some((b) => b.text.includes("Pesa industriale a filo pavimento")),
+  "Imballaggio deve avere badge pesa industriale ergonomica",
+);
+
+// 5. Ricarica Batterie Muletti
+const evalLogRicarica = evaluateEnvironmentCompliance(logRicarica, "52.10");
+assert.equal(evalLogRicarica.minHeightRequired, 3.0, "Ricarica richiede altezza minima 3,00m");
+assert.ok(evalLogRicarica.isHeightCompliant, "Ricarica deve essere conforme in altezza (3.50m >= 3.00m)");
+assert.ok(evalLogRicarica.isCubatureCompliant, "Ricarica deve essere conforme in cubatura");
+assert.ok(
+  evalLogRicarica.summaryBadges.some((b) => b.text.includes("Ventilazione forzata antideflagrante ATEX per idrogeno CEI EN 62485-3")),
+  "Ricarica deve avere badge ventilazione ATEX CEI EN 62485-3",
+);
+assert.ok(
+  evalLogRicarica.summaryBadges.some((b) => b.text.includes("Vasca contenimento acido e doccia lavaocchi UNI EN 15154")),
+  "Ricarica deve avere badge vasca acido e doccia lavaocchi UNI EN 15154",
+);
+
+// 6. Deposito Infiammabili ADR
+const evalLogInfiammabili = evaluateEnvironmentCompliance(logInfiammabili, "52.10");
+assert.equal(evalLogInfiammabili.minHeightRequired, 3.0, "Infiammabili richiede altezza minima 3,00m");
+assert.ok(evalLogInfiammabili.isHeightCompliant, "Infiammabili deve essere conforme in altezza (4.00m >= 3.00m)");
+assert.ok(evalLogInfiammabili.isCubatureCompliant, "Infiammabili deve essere conforme in cubatura");
+assert.ok(
+  evalLogInfiammabili.summaryBadges.some((b) => b.text.includes("Bacini di contenimento a grigliato D.Lgs. 152/2006")),
+  "Infiammabili deve avere badge bacini di contenimento D.Lgs. 152/2006",
+);
+assert.ok(
+  evalLogInfiammabili.summaryBadges.some((b) => b.text.includes("Impianto antideflagrante Ex (CEI EN 60079) e porta REI 120")),
+  "Infiammabili deve avere badge impianto Ex e porta REI 120",
+);
+
+// 7. Soppalco Picking Leggero
+const evalLogSoppalco = evaluateEnvironmentCompliance(logSoppalco, "52.10");
+assert.equal(evalLogSoppalco.minHeightRequired, 2.4, "Soppalco richiede altezza minima 2,40m");
+assert.ok(evalLogSoppalco.isHeightCompliant, "Soppalco deve essere conforme in altezza (2.80m >= 2.40m)");
+assert.ok(evalLogSoppalco.isCubatureCompliant, "Soppalco deve essere conforme in cubatura (504 / 3 = 168 mc/op)");
+assert.ok(
+  evalLogSoppalco.summaryBadges.some((b) => b.text.includes("Parapetto h ≥ 1,10m con tavola fermapiede 15 cm All. IV p.to 1.4")),
+  "Soppalco deve avere badge parapetto h >= 1.10m e fermapiede 15cm",
+);
+assert.ok(
+  evalLogSoppalco.summaryBadges.some((b) => b.text.includes("Cancello basculante anticaduta per carico bancali")),
+  "Soppalco deve avere badge cancello basculante carico bancali",
+);
+
+// 8. Ufficio Spedizioni e Bolle Dogana
+const evalLogUfficio = evaluateEnvironmentCompliance(logUfficio, "52.10");
+assert.equal(evalLogUfficio.minHeightRequired, 2.7, "Ufficio richiede altezza minima 2,70m");
+assert.ok(evalLogUfficio.isHeightCompliant, "Ufficio deve essere conforme in altezza (2.70m >= 2.70m)");
+assert.ok(evalLogUfficio.isCubatureCompliant, "Ufficio deve essere conforme in cubatura (108 / 3 = 36 mc/op)");
+assert.ok(
+  evalLogUfficio.summaryBadges.some((b) => b.text.includes("Sportello separato autisti esterni con tornello/controllo accessi")),
+  "Ufficio deve avere badge sportello autisti esterni e controllo accessi",
+);
+assert.ok(
+  evalLogUfficio.summaryBadges.some((b) => b.text.includes("Postazioni VDT ergonomiche")),
+  "Ufficio deve avere badge postazioni VDT ergonomiche",
+);
+
+// 9. Spogliatoi e Docce
+const evalLogSpogliatoi = evaluateEnvironmentCompliance(logSpogliatoi, "52.10");
+assert.equal(evalLogSpogliatoi.minHeightRequired, 2.4, "Spogliatoi richiedono altezza minima 2,40m");
+assert.ok(evalLogSpogliatoi.isHeightCompliant, "Spogliatoi devono essere conformi in altezza (2.40m >= 2.40m)");
+assert.ok(
+  evalLogSpogliatoi.summaryBadges.some((b) => b.text.includes("Armadietti a doppio scomparto pulito/sporco All. IV p.to 1.12")),
+  "Spogliatoi devono avere badge armadietti doppio scomparto",
+);
+assert.ok(
+  evalLogSpogliatoi.summaryBadges.some((b) => b.text.includes("Docce areate con acqua calda")),
+  "Spogliatoi devono avere badge docce areate",
+);
+
+// 10. Area Break e Ristoro Autisti
+const evalLogAreaBreak = evaluateEnvironmentCompliance(logAreaBreak, "52.10");
+assert.equal(evalLogAreaBreak.minHeightRequired, 2.7, "Area Break richiede altezza minima 2,70m");
+assert.ok(evalLogAreaBreak.isHeightCompliant, "Area Break deve essere conforme in altezza (2.70m >= 2.70m)");
+assert.ok(evalLogAreaBreak.isCubatureCompliant, "Area Break deve essere conforme in cubatura (94.5 / 8 = 11.8 mc/op)");
+assert.ok(
+  evalLogAreaBreak.summaryBadges.some((b) => b.text.includes("Locale break confortevole e servizi dedicati per autisti esterni All. IV D.Lgs. 81/08")),
+  "Area Break deve avere badge break e servizi autisti esterni",
+);
+assert.ok(
+  evalLogAreaBreak.summaryBadges.some((b) => b.text.includes("Cassetta di primo soccorso aziendale conforme Allegato 1")),
+  "Area Break deve avere badge cassetta primo soccorso All. 1",
+);
+
+// 11. Locale Tecnico Compressori e Antincendio
+const evalLogLocaleTecnico = evaluateEnvironmentCompliance(logLocaleTecnico, "52.10");
+assert.equal(evalLogLocaleTecnico.minHeightRequired, 2.4, "Locale Tecnico richiede altezza minima 2,40m");
+assert.ok(evalLogLocaleTecnico.isHeightCompliant, "Locale Tecnico deve essere conforme in altezza (3.00m >= 2.40m)");
+assert.ok(
+  evalLogLocaleTecnico.summaryBadges.some((b) => b.text.includes("Gruppo pompe sprinkler UNI EN 12845 con motopompa diesel")),
+  "Locale Tecnico deve avere badge pompe sprinkler UNI EN 12845",
+);
+assert.ok(
+  evalLogLocaleTecnico.summaryBadges.some((b) => b.text.includes("Compressori con serbatoi collaudati PED")),
+  "Locale Tecnico deve avere badge compressori PED",
+);
+
+// 12. Piazzale Manovra TIR
+const evalLogPiazzale = evaluateEnvironmentCompliance(logPiazzale, "52.10");
+assert.equal(evalLogPiazzale.minHeightRequired, 3.0, "Piazzale richiede altezza minima 3,00m");
+assert.ok(evalLogPiazzale.isHeightCompliant, "Piazzale deve essere conforme in altezza (4.50m >= 3.00m)");
+assert.ok(
+  evalLogPiazzale.summaryBadges.some((b) => b.text.includes("Percorsi pedonali protetti da cordoli e segnaletica orizzontale All. XXVIII D.Lgs. 81/08")),
+  "Piazzale deve avere badge percorsi pedonali All. XXVIII",
+);
+assert.ok(
+  evalLogPiazzale.summaryBadges.some((b) => b.text.includes("Illuminazione notturna a torre faro ≥ 20 lux UNI EN 12464-2")),
+  "Piazzale deve avere badge illuminazione notturna torre faro >= 20 lux UNI EN 12464-2",
+);
+
+// ============================================================================
+// Test 44: generateEnvironmentChecklistItems per locali Logistica & Magazzino Merci (ATECO 52.10)
+// ============================================================================
+console.log("Test 44: generateEnvironmentChecklistItems per locali Logistica (ATECO 52.10)");
+
+// 1. Baia Carico/Scarico
+const logBaiaItems = generateEnvironmentChecklistItems(logBaia, "52.10");
+assert.ok(
+  logBaiaItems.some(
+    (it) => it.id.includes("pedana-idraulica-labbro-conforme-uni-en-1398") && it.domain === "safety",
+  ),
+  "Baia deve verificare pedana idraulica UNI EN 1398 (domain: safety)",
+);
+assert.ok(
+  logBaiaItems.some(
+    (it) => it.id.includes("cunei-bloccaruote-tir-interblocco-semaforico") && it.domain === "safety",
+  ),
+  "Baia deve verificare cunei bloccaruote e semaforo (domain: safety)",
+);
+assert.ok(
+  logBaiaItems.some(
+    (it) => it.id.includes("protezione-caduta-vuoto-banchina-sezionali-portali") && it.domain === "safety",
+  ),
+  "Baia deve verificare protezione caduta dislivello banchina (domain: safety)",
+);
+
+// 2. Corsie Scaffalature Portapallet
+const logCorsieItems = generateEnvironmentChecklistItems(logCorsie, "52.10");
+assert.ok(
+  logCorsieItems.some(
+    (it) => it.id.includes("ispezione-periodica-scaffali-uni-en-15635-prses") && it.domain === "safety",
+  ),
+  "Corsie devono verificare ispezione periodica scaffali UNI EN 15635 e PRSES (domain: safety)",
+);
+assert.ok(
+  logCorsieItems.some(
+    (it) => it.id.includes("cartelli-portata-massima-paracolpi-montanti-scaffali") && it.domain === "safety",
+  ),
+  "Corsie devono verificare cartelli portata e paracolpi montanti (domain: safety)",
+);
+assert.ok(
+  logCorsieItems.some(
+    (it) => it.id.includes("scia-antincendio-attivita-70-impianto-sprinkler") && it.domain === "safety",
+  ),
+  "Corsie devono verificare Attività 70 CPI e sprinkler ESFR (domain: safety)",
+);
+
+// 3. Area Picking Smistamento
+const logPickingItems = generateEnvironmentChecklistItems(logPicking, "52.10");
+assert.ok(
+  logPickingItems.some(
+    (it) => it.id.includes("ergonomia-picking-movimentazione-carichi-iso-11228") && it.domain === "safety",
+  ),
+  "Picking deve verificare ergonomia MMC ISO 11228 (domain: safety)",
+);
+assert.ok(
+  logPickingItems.some(
+    (it) => it.id.includes("pavimentazione-antiscivolo-corsie-picking-r11") && it.domain === "safety",
+  ),
+  "Picking deve verificare planarità pavimentazione R11 (domain: safety)",
+);
+assert.ok(
+  logPickingItems.some(
+    (it) => it.id.includes("separazione-traffico-pedoni-commissionatori-segnaletica") && it.domain === "safety",
+  ),
+  "Picking deve verificare separazione traffico pedoni e carrelli All. XXVIII (domain: safety)",
+);
+
+// 4. Reparto Imballaggio
+const logImballaggioItems = generateEnvironmentChecklistItems(logImballaggio, "52.10");
+assert.ok(
+  logImballaggioItems.some(
+    (it) => it.id.includes("fasciapallet-barriere-ottiche-arresto-fungo-iso-13849") && it.domain === "safety",
+  ),
+  "Imballaggio deve verificare fasciapallet con barriere ottiche Classe 4 (domain: safety)",
+);
+assert.ok(
+  logImballaggioItems.some(
+    (it) => it.id.includes("nastratrici-chiudiscatole-protezione-organi-lame") && it.domain === "safety",
+  ),
+  "Imballaggio deve verificare carter salvadita nastratrice (domain: safety)",
+);
+assert.ok(
+  logImballaggioItems.some(
+    (it) => it.id.includes("microclima-aspirazione-polveri-scatole-cartone") && it.domain === "safety",
+  ),
+  "Imballaggio deve verificare aspirazione polveri cartone e cutter retrattili (domain: safety)",
+);
+
+// 5. Stazione Ricarica Batterie Muletti
+const logRicaricaItems = generateEnvironmentChecklistItems(logRicarica, "52.10");
+assert.ok(
+  logRicaricaItems.some(
+    (it) => it.id.includes("ventilazione-atex-idrogeno-ricarica-cei-en-62485") && it.domain === "safety",
+  ),
+  "Ricarica deve verificare ventilazione ATEX idrogeno CEI EN 62485-3 (domain: safety)",
+);
+assert.ok(
+  logRicaricaItems.some(
+    (it) => it.id.includes("vasca-contenimento-acido-kit-neutralizzante-spandimenti") && it.domain === "safety",
+  ),
+  "Ricarica deve verificare vasca contenimento acido e neutralizzante (domain: safety)",
+);
+assert.ok(
+  logRicaricaItems.some(
+    (it) => it.id.includes("doccia-lavaocchi-emergenza-e-dpi-chimici-ricarica") && it.domain === "safety",
+  ),
+  "Ricarica deve verificare doccia lavaocchi UNI EN 15154 e DPI chimici (domain: safety)",
+);
+
+// 6. Deposito Infiammabili ADR
+const logInfiammabiliItems = generateEnvironmentChecklistItems(logInfiammabili, "52.10");
+assert.ok(
+  logInfiammabiliItems.some(
+    (it) => it.id.includes("bacini-contenimento-grigliati-d-lgs-152-06-chimici") && it.domain === "safety",
+  ),
+  "Infiammabili deve verificare bacini di contenimento a grigliato D.Lgs. 152/06 (domain: safety)",
+);
+assert.ok(
+  logInfiammabiliItems.some(
+    (it) => it.id.includes("impianto-elettrico-ex-cei-en-60079-aerazione-permanente") && it.domain === "safety",
+  ),
+  "Infiammabili deve verificare impianto elettrico Ex CEI EN 60079 e aerazione 1/30 (domain: safety)",
+);
+assert.ok(
+  logInfiammabiliItems.some(
+    (it) => it.id.includes("separazione-compartimentazione-rei-120-merci-adr") && it.domain === "safety",
+  ),
+  "Infiammabili deve verificare compartimentazione REI 120 e pittogrammi ADR (domain: safety)",
+);
+
+// 7. Soppalco Picking Leggero
+const logSoppalcoItems = generateEnvironmentChecklistItems(logSoppalco, "52.10");
+assert.ok(
+  logSoppalcoItems.some(
+    (it) => it.id.includes("parapetto-normale-arresto-caduta-fermapiede-15cm") && it.domain === "safety",
+  ),
+  "Soppalco deve verificare parapetto h >= 1,10m con fermapiede 15cm (domain: safety)",
+);
+assert.ok(
+  logSoppalcoItems.some(
+    (it) => it.id.includes("cancello-basculante-carico-pallet-soppalco-anticaduta") && it.domain === "safety",
+  ),
+  "Soppalco deve verificare cancello basculante carico bancali (domain: safety)",
+);
+assert.ok(
+  logSoppalcoItems.some(
+    (it) => it.id.includes("targa-sovraccarico-massimo-kg-mq-scala-accesso") && it.domain === "safety",
+  ),
+  "Soppalco deve verificare targa portata kg/mq e scala fissa (domain: safety)",
+);
+
+// 8. Ufficio Spedizioni
+const logUfficioItems = generateEnvironmentChecklistItems(logUfficio, "52.10");
+assert.ok(
+  logUfficioItems.some(
+    (it) => it.id.includes("sportello-separato-autisti-esterni-tornello-accessi") && it.domain === "safety",
+  ),
+  "Ufficio deve verificare sportello separato autisti e controllo accessi DUVRI (domain: safety)",
+);
+assert.ok(
+  logUfficioItems.some(
+    (it) => it.id.includes("ergonomia-postazioni-vdt-ufficio-spedizioni-dlgs-81") && it.domain === "safety",
+  ),
+  "Ufficio deve verificare postazioni VDT ergonomiche Titolo VII (domain: safety)",
+);
+assert.ok(
+  logUfficioItems.some(
+    (it) => it.id.includes("gestione-documentale-duvri-istruzioni-sicurezza-vettori") && it.domain === "safety",
+  ),
+  "Ufficio deve verificare istruzioni di sicurezza e planimetria per vettori esterni (domain: safety)",
+);
+
+// 9. Spogliatoi e Docce
+const logSpogliatoiItems = generateEnvironmentChecklistItems(logSpogliatoi, "52.10");
+assert.ok(
+  logSpogliatoiItems.some(
+    (it) => it.id.includes("armadietti-doppio-scomparto-pulito-sporco-all-iv") && it.domain === "safety",
+  ),
+  "Spogliatoi devono verificare armadietti doppio scomparto All. IV p.to 1.12 (domain: safety)",
+);
+assert.ok(
+  logSpogliatoiItems.some(
+    (it) => it.id.includes("docce-servizi-igienici-antiscivolo-aerazione-meccanica") && it.domain === "safety",
+  ),
+  "Spogliatoi devono verificare docce con acqua calda e antiscivolo R10 (domain: safety)",
+);
+assert.ok(
+  logSpogliatoiItems.some(
+    (it) => it.id.includes("cassetta-pronto-soccorso-allegato-1-dm-388-logistica") && it.domain === "safety",
+  ),
+  "Spogliatoi devono verificare cassetta primo soccorso All. 1 D.M. 388/03 (domain: safety)",
+);
+
+// 10. Area Break e Ristoro Autisti
+const logAreaBreakItems = generateEnvironmentChecklistItems(logAreaBreak, "52.10");
+assert.ok(
+  logAreaBreakItems.some(
+    (it) => it.id.includes("servizi-igienici-dedicati-autisti-esterni-all-iv") && it.domain === "safety",
+  ),
+  "Area Break deve verificare servizi igienici dedicati autotrasportatori All. IV (domain: safety)",
+);
+assert.ok(
+  logAreaBreakItems.some(
+    (it) => it.id.includes("distributori-automatici-elettrodomestici-cei-64-8") && it.domain === "safety",
+  ),
+  "Area Break deve verificare sicurezza elettrica distributori CEI 64-8 (domain: safety)",
+);
+assert.ok(
+  logAreaBreakItems.some(
+    (it) => it.id.includes("salubrita-locale-ristoro-arredi-separazione-operativa") && it.domain === "safety",
+  ),
+  "Area Break deve verificare salubrità locale ristoro All. IV p.to 1.11 (domain: safety)",
+);
+
+// 11. Centrale Termica, Gruppo Pompe Sprinkler & Compressori
+const logLocaleTecnicoItems = generateEnvironmentChecklistItems(logLocaleTecnico, "52.10");
+assert.ok(
+  logLocaleTecnicoItems.some(
+    (it) => it.id.includes("gruppo-pompe-antincendio-sprinkler-uni-en-12845") && it.domain === "safety",
+  ),
+  "Locale Tecnico deve verificare gruppo pompe sprinkler UNI EN 12845 (domain: safety)",
+);
+assert.ok(
+  logLocaleTecnicoItems.some(
+    (it) => it.id.includes("compressori-aria-serbatoi-pressione-ped-inail") && it.domain === "safety",
+  ),
+  "Locale Tecnico deve verificare serbatoi aria compressa marcati PED (domain: safety)",
+);
+assert.ok(
+  logLocaleTecnicoItems.some(
+    (it) => it.id.includes("accesso-riservato-centrale-termica-estintore-co2") && it.domain === "safety",
+  ),
+  "Locale Tecnico deve verificare porta REI ed estintore CO2 (domain: safety)",
+);
+
+// 12. Piazzale Esterno Manovra TIR
+const logPiazzaleItems = generateEnvironmentChecklistItems(logPiazzale, "52.10");
+assert.ok(
+  logPiazzaleItems.some(
+    (it) => it.id.includes("viabilita-esterna-separazione-tir-pedoni-all-xxviii") && it.domain === "safety",
+  ),
+  "Piazzale deve verificare piano viabilità e percorsi pedonali All. XXVIII (domain: safety)",
+);
+assert.ok(
+  logPiazzaleItems.some(
+    (it) => it.id.includes("illuminazione-notturna-torri-faro-uni-en-12464-2") && it.domain === "safety",
+  ),
+  "Piazzale deve verificare illuminazione notturna torri faro UNI EN 12464-2 (domain: safety)",
+);
+assert.ok(
+  logPiazzaleItems.some(
+    (it) => it.id.includes("compattatore-rifiuti-pressa-esterna-e-disoleatore") && it.domain === "safety",
+  ),
+  "Piazzale deve verificare compattatore rifiuti e vasca disoleatore D.Lgs. 152/06 (domain: safety)",
+);
+
+// 13. Verifica filtraggio checklistMode per ambienti Logistica
+const logBaiaSafetyMode = filterEnvironmentItemsByChecklistMode(logBaiaItems, "safety_only");
+assert.ok(
+  logBaiaSafetyMode.every((it) => it.domain === "safety" || it.domain === "both"),
+  "In modalità safety_only tutti gli item della Baia devono essere safety o both",
+);
+assert.ok(
+  !logBaiaSafetyMode.some((it) => it.domain === "haccp"),
+  "In modalità safety_only nessun item della Baia deve avere domain haccp",
+);
+
+const logBaiaUnifiedMode = filterEnvironmentItemsByChecklistMode(logBaiaItems, "unified");
+assert.equal(
+  logBaiaUnifiedMode.length,
+  logBaiaItems.length,
+  "In modalità unified tutti gli item della Baia devono essere presenti",
+);
+
+const logCorsieSafetyMode = filterEnvironmentItemsByChecklistMode(logCorsieItems, "safety_only");
+assert.equal(
+  logCorsieSafetyMode.length,
+  logCorsieItems.length,
+  "In modalità safety_only tutti gli item delle Corsie devono essere presenti (essendo tutti safety)",
+);
+
 console.log("=== TUTTI I TEST Step2AmbientiDiLavoro SUPERATI CON SUCCESSO! ===");
 
 

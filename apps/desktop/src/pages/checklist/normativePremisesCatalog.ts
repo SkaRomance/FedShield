@@ -5145,6 +5145,297 @@ export function getStandardEnvironmentsForAteco(atecoCode?: string): WorkEnviron
     ];
   }
 
+  // 0-undecies-quater-sexies. Logistica, Magazzino Merci, Depositi Industriali e Centri di Smistamento (52.10, 52.1, 52.29, 52.2, 49.41, 49.4, 5210, 5229, 4941)
+  if (
+    cleanAteco.startsWith("5210") ||
+    cleanAteco.startsWith("521") ||
+    cleanAteco.startsWith("5229") ||
+    cleanAteco.startsWith("522") ||
+    cleanAteco.startsWith("4941") ||
+    cleanAteco.startsWith("494") ||
+    ateco.startsWith("52.10") ||
+    ateco.startsWith("52.1") ||
+    ateco.startsWith("52.29") ||
+    ateco.startsWith("52.2") ||
+    ateco.startsWith("49.41") ||
+    ateco.startsWith("49.4")
+  ) {
+    return [
+      {
+        id: "env-log-baia-carico-scarico-dock",
+        key: "log_baia_carico_scarico_dock_banchine",
+        name: "Baia di Carico/Scarico Merci, Banchine con Portali Isotermici e Pedane Idrauliche",
+        icon: "🚚",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 250,
+        heightM: 5.0,
+        volumeCuM: 1250,
+        occupantsCount: 4,
+        emergencyExitsCount: 2,
+        windowSurfaceSqM: 10.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          aerationType: "mechanical_vmc",
+          emergencyLighting: true,
+          emergencyExitsCount: 2,
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-log-corsie-scaffalature-portapallet",
+        key: "log_corsie_stoccaggio_alta_densita_portapallet",
+        name: "Corsie di Stoccaggio ad Alta Densità con Scaffalature Portapallet Intensive",
+        icon: "🏗️",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 1200,
+        heightM: 8.5,
+        volumeCuM: 10200,
+        occupantsCount: 6,
+        emergencyExitsCount: 3,
+        windowSurfaceSqM: 40.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          shelvingCertified: true,
+          fireLoadHigh: true,
+          aerationType: "mechanical_vmc",
+          emergencyLighting: true,
+          emergencyExitsCount: 3,
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-log-area-picking-smistamento",
+        key: "log_reparto_picking_manuale_consolidamento_kitting",
+        name: "Reparto Picking Manuale, Consolidamento Ordini & Kitting",
+        icon: "📦",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 300,
+        heightM: 4.0,
+        volumeCuM: 1200,
+        occupantsCount: 8,
+        emergencyExitsCount: 2,
+        windowSurfaceSqM: 15.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          shelvingCertified: true,
+          aerationType: "mechanical_vmc",
+          emergencyLighting: true,
+          emergencyExitsCount: 2,
+          microclimateCompliant: true,
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-log-zona-imballaggio-fardellatura",
+        key: "log_reparto_imballaggio_nastratura_pesatura_fardellatura",
+        name: "Reparto Imballaggio, Nastratura, Pesatura & Fardellatura Pallet",
+        icon: "🔄",
+        category: "production",
+        isDefault: true,
+        surfaceSqM: 150,
+        heightM: 4.0,
+        volumeCuM: 600,
+        occupantsCount: 4,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 10.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("production"),
+          aerationType: "mechanical_vmc",
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+          microclimateCompliant: true,
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-log-area-ricarica-batterie-muletti",
+        key: "log_locale_stazione_ricarica_batterie_carrelli_muletti",
+        name: "Locale Tecnico Stazione di Ricarica Batterie Carrelli e Muletti Elettrici",
+        icon: "🔋",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 60,
+        heightM: 3.5,
+        volumeCuM: 210,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 4.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          forcedExhaustPresent: true,
+          aerationType: "mechanical_vmc",
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-log-reparto-stoccaggio-infiammabili-adr",
+        key: "log_deposito_chimici_liquidi_infiammabili_merci_adr",
+        name: "Deposito Separato Sostanze Chimiche, Liquidi Infiammabili & Merci ADR",
+        icon: "⚠️",
+        category: "storage",
+        isDefault: true,
+        surfaceSqM: 80,
+        heightM: 4.0,
+        volumeCuM: 320,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 3.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("storage"),
+          fireLoadHigh: true,
+          forcedExhaustPresent: true,
+          aerationType: "mechanical_vmc",
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-log-soppalco-picking-leggero",
+        key: "log_soppalco_metallico_picking_colli_leggeri_ecommerce",
+        name: "Soppalco Metallico Industriale per Picking Colli Leggeri ed E-Commerce",
+        icon: "🪜",
+        category: "storage",
+        isDefault: true,
+        surfaceSqM: 180,
+        heightM: 2.8,
+        volumeCuM: 504,
+        occupantsCount: 3,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 8.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("storage"),
+          shelvingCertified: true,
+          aerationType: "mechanical_vmc",
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-log-ufficio-spedizioni-bolle-dogana",
+        key: "log_ufficio_spedizioni_accettazione_autisti_bolle_dogana",
+        name: "Ufficio Gestione Spedizioni, Accettazione Autisti, Bolle & Controllo Doganale",
+        icon: "🖥️",
+        category: "sales_office",
+        isDefault: true,
+        surfaceSqM: 40,
+        heightM: 2.7,
+        volumeCuM: 108,
+        occupantsCount: 3,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 5.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("sales_office"),
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-log-spogliatoi-docce-personale",
+        key: "log_spogliatoi_servizi_igienici_docce_personale_magazzino",
+        name: "Spogliatoi e Servizi Igienici con Docce per il Personale di Magazzino",
+        icon: "🚻",
+        category: "changing_rooms",
+        isDefault: true,
+        surfaceSqM: 50,
+        heightM: 2.4,
+        volumeCuM: 120,
+        occupantsCount: 15,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 3.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("changing_rooms"),
+          forcedExhaustPresent: true,
+          forcedExhaustType: "blind_toilet_fan",
+          aerationType: "mechanical_vmc",
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-log-area-break-mensa-autisti",
+        key: "log_area_ristoro_dipendenti_locale_break_servizi_autisti",
+        name: "Area Ristoro Dipendenti, Locale Break & Servizi Dedicati Autisti Esterni",
+        icon: "☕",
+        category: "services",
+        isDefault: true,
+        surfaceSqM: 35,
+        heightM: 2.7,
+        volumeCuM: 94.5,
+        occupantsCount: 8,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 4.0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("services"),
+          aerationType: "mechanical_vmc",
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+          microclimateCompliant: true,
+        },
+      },
+      {
+        id: "env-log-locale-tecnico-compressori-antincendio",
+        key: "log_centrale_termica_pompe_sprinkler_antincendio_compressori",
+        name: "Centrale Termica, Gruppo Pompe Sprinkler Antincendio & Compressori",
+        icon: "🧯",
+        category: "technical",
+        isDefault: true,
+        surfaceSqM: 30,
+        heightM: 3.0,
+        volumeCuM: 90,
+        occupantsCount: 1,
+        emergencyExitsCount: 1,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("technical"),
+          emergencyLighting: true,
+          emergencyExitsCount: 1,
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+      {
+        id: "env-log-piazzale-manovra-tir-parcheggio",
+        key: "log_piazzale_esterno_manovra_tir_parcheggio_semirimorchi",
+        name: "Piazzale Esterno di Manovra Mezzi Pesanti, Parcheggio Semirimorchi & Compattatore",
+        icon: "🚛",
+        category: "warehouse",
+        isDefault: true,
+        surfaceSqM: 3500,
+        heightM: 4.5,
+        volumeCuM: 15750,
+        occupantsCount: 10,
+        emergencyExitsCount: 4,
+        windowSurfaceSqM: 0,
+        isConfirmed: false,
+        features: {
+          ...defaultEnvironmentFeatures("warehouse"),
+          emergencyLighting: true,
+          emergencyExitsCount: 4,
+          flooringCondition: "compliant_anti_slip",
+        },
+      },
+    ];
+  }
+
   // 1. Ristorazione, HoReCa, Somministrazione alimenti (56.x, 10.x, 11.x, 47.11, 47.2, 55.1)
   if (
     ateco.startsWith("56") ||
@@ -6163,6 +6454,89 @@ export function evaluateEnvironmentCompliance(
     env.key.includes("retail_ufficio")
   ) {
     minHeightRequired = 2.7; // 2,70 m per ufficio direzione e amministrazione (h = 2,70m -> conforme)
+  } else if (
+    env.id.includes("log-corsie") ||
+    env.id === "env-log-corsie-scaffalature-portapallet" ||
+    env.key.includes("log_corsie")
+  ) {
+    minHeightRequired = 3.0; // 3,00 m per corsie di stoccaggio ad alta densità (h = 8,50m -> conforme)
+  } else if (
+    env.id.includes("log-baia") ||
+    env.id === "env-log-baia-carico-scarico-dock" ||
+    env.key.includes("log_baia")
+  ) {
+    minHeightRequired = 3.0; // 3,00 m per baia di carico/scarico merci (h = 5,00m -> conforme)
+  } else if (
+    env.id.includes("log-picking") ||
+    env.id.includes("log-area-picking") ||
+    env.id === "env-log-area-picking-smistamento" ||
+    env.key.includes("log_picking") ||
+    env.key.includes("log_reparto_picking")
+  ) {
+    minHeightRequired = 3.0; // 3,00 m per reparto picking manuale e smistamento (h = 4,00m -> conforme)
+  } else if (
+    env.id.includes("log-imballaggio") ||
+    env.id.includes("log-zona-imballaggio") ||
+    env.id === "env-log-zona-imballaggio-fardellatura" ||
+    env.key.includes("log_imballaggio") ||
+    env.key.includes("log_reparto_imballaggio")
+  ) {
+    minHeightRequired = 3.0; // 3,00 m per reparto imballaggio e fardellatura (h = 4,00m -> conforme)
+  } else if (
+    env.id.includes("log-ricarica") ||
+    env.id.includes("log-area-ricarica") ||
+    env.id === "env-log-area-ricarica-batterie-muletti" ||
+    env.key.includes("log_ricarica") ||
+    env.key.includes("log_locale_stazione_ricarica")
+  ) {
+    minHeightRequired = 3.0; // 3,00 m per stazione ricarica batterie carrelli (h = 3,50m -> conforme)
+  } else if (
+    env.id.includes("log-infiammabili") ||
+    env.id.includes("log-reparto-stoccaggio-infiammabili") ||
+    env.id === "env-log-reparto-stoccaggio-infiammabili-adr" ||
+    env.key.includes("log_infiammabili") ||
+    env.key.includes("log_deposito_chimici")
+  ) {
+    minHeightRequired = 3.0; // 3,00 m per deposito infiammabili e merci ADR (h = 4,00m -> conforme)
+  } else if (
+    env.id.includes("log-soppalco") ||
+    env.id === "env-log-soppalco-picking-leggero" ||
+    env.key.includes("log_soppalco")
+  ) {
+    minHeightRequired = 2.4; // 2,40 m per soppalco picking leggero (h = 2,80m -> conforme)
+  } else if (
+    env.id.includes("log-ufficio") ||
+    env.id === "env-log-ufficio-spedizioni-bolle-dogana" ||
+    env.key.includes("log_ufficio")
+  ) {
+    minHeightRequired = 2.7; // 2,70 m per ufficio spedizioni e bolle dogana (h = 2,70m -> conforme)
+  } else if (
+    env.id.includes("log-spogliatoi") ||
+    env.id === "env-log-spogliatoi-docce-personale" ||
+    env.key.includes("log_spogliatoi")
+  ) {
+    minHeightRequired = 2.4; // 2,40 m per spogliatoi e servizi personale (h = 2,40m -> conforme)
+  } else if (
+    env.id.includes("log-area-break") ||
+    env.id.includes("log-break") ||
+    env.id === "env-log-area-break-mensa-autisti" ||
+    env.key.includes("log_area_break") ||
+    env.key.includes("log_area_ristoro")
+  ) {
+    minHeightRequired = 2.7; // 2,70 m per area break e ristoro autisti (h = 2,70m -> conforme)
+  } else if (
+    env.id.includes("log-locale-tecnico") ||
+    env.id === "env-log-locale-tecnico-compressori-antincendio" ||
+    env.key.includes("log_locale_tecnico") ||
+    env.key.includes("log_centrale_termica")
+  ) {
+    minHeightRequired = 2.4; // 2,40 m per centrale pompe antincendio e compressori (h = 3,00m -> conforme)
+  } else if (
+    env.id.includes("log-piazzale") ||
+    env.id === "env-log-piazzale-manovra-tir-parcheggio" ||
+    env.key.includes("log_piazzale")
+  ) {
+    minHeightRequired = 3.0; // 3,00 m per piazzale manovra TIR esterno (h = 4,50m -> conforme)
   } else if (env.category === "production" || env.category === "warehouse" || env.category === "storage") {
     minHeightRequired = 3.0; // 3,00 m per locali industriali, stoccaggio e lavorazioni
   } else if (env.category === "services" || env.category === "changing_rooms" || env.category === "technical") {
@@ -9288,6 +9662,202 @@ export function evaluateEnvironmentCompliance(
     });
   }
 
+  // ============================================================================
+  // Regole Specifiche Step 2 per Logistica, Magazzino Merci & Centri di Smistamento (ATECO 52.10, 52.29, 49.41)
+  // ============================================================================
+
+  // a) Baia di Carico/Scarico Merci, Banchine con Portali Isotermici e Pedane Idrauliche
+  const isLogBaia =
+    env.id === "env-log-baia-carico-scarico-dock" ||
+    env.key === "log_baia_carico_scarico_dock_banchine" ||
+    env.id.includes("log-baia");
+  if (isLogBaia) {
+    summaryBadges.push({
+      text: "🚚 Pedana idraulica con labbro a norma UNI EN 1398 e portali isotermici sigillati",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🚦 Cunei bloccaruote TIR con sensore e semaforo interbloccato (D.Lgs. 81/08 All. IV p.to 1.4.9)",
+      status: "success",
+    });
+  }
+
+  // b) Corsie di Stoccaggio ad Alta Densità con Scaffalature Portapallet Intensive
+  const isLogCorsie =
+    env.id === "env-log-corsie-scaffalature-portapallet" ||
+    env.key === "log_corsie_stoccaggio_alta_densita_portapallet" ||
+    env.id.includes("log-corsie");
+  if (isLogCorsie) {
+    summaryBadges.push({
+      text: "🏗️ Scaffalature antisismiche certificate con verifica periodica annuale (UNI EN 15635)",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🛡️ Cartelli portata massima visibili e paracolpi d'angolo sui montanti (All. IV p.to 1.4)",
+      status: "info",
+    });
+  }
+
+  // c) Reparto Picking Manuale, Consolidamento Ordini & Kitting
+  const isLogPicking =
+    env.id === "env-log-area-picking-smistamento" ||
+    env.key === "log_reparto_picking_manuale_consolidamento_kitting" ||
+    env.id.includes("log-picking");
+  if (isLogPicking) {
+    summaryBadges.push({
+      text: "📦 Tavoli regolabili ergonomici ISO 11228 e movimentazione manuale colli (All. XXXIII)",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🚶 Pavimentazione piana antiscivolo R11 priva di fessure o buche per carrelli (All. IV p.to 1.3)",
+      status: "success",
+    });
+  }
+
+  // d) Reparto Imballaggio, Nastratura, Pesatura & Fardellatura Pallet
+  const isLogImballaggio =
+    env.id === "env-log-zona-imballaggio-fardellatura" ||
+    env.key === "log_reparto_imballaggio_nastratura_pesatura_fardellatura" ||
+    env.id.includes("log-imballaggio");
+  if (isLogImballaggio) {
+    summaryBadges.push({
+      text: "🔄 Fasciapallet con barriere ottiche Classe 4 UNI EN ISO 13849-1 e stop d'emergenza a fungo",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "⚖️ Pesa industriale a filo pavimento e postazione reggiatura ergonomica (All. V D.Lgs. 81/08)",
+      status: "info",
+    });
+  }
+
+  // e) Locale Tecnico Stazione di Ricarica Batterie Carrelli e Muletti Elettrici
+  const isLogRicarica =
+    env.id === "env-log-area-ricarica-batterie-muletti" ||
+    env.key === "log_locale_stazione_ricarica_batterie_carrelli_muletti" ||
+    env.id.includes("log-ricarica");
+  if (isLogRicarica) {
+    summaryBadges.push({
+      text: "🔋 Ventilazione forzata antideflagrante ATEX per idrogeno CEI EN 62485-3",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "🚿 Vasca contenimento acido e doccia lavaocchi UNI EN 15154",
+      status: "danger",
+    });
+  }
+
+  // f) Deposito Separato Sostanze Chimiche, Liquidi Infiammabili & Merci ADR
+  const isLogInfiammabili =
+    env.id === "env-log-reparto-stoccaggio-infiammabili-adr" ||
+    env.key === "log_deposito_chimici_liquidi_infiammabili_merci_adr" ||
+    env.id.includes("log-infiammabili");
+  if (isLogInfiammabili) {
+    summaryBadges.push({
+      text: "⚠️ Bacini di contenimento a grigliato D.Lgs. 152/2006 e aerazione permanente 1/30",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "🚪 Impianto antideflagrante Ex (CEI EN 60079) e porta REI 120",
+      status: "danger",
+    });
+  }
+
+  // g) Soppalco Metallico Industriale per Picking Colli Leggeri ed E-Commerce
+  const isLogSoppalco =
+    env.id === "env-log-soppalco-picking-leggero" ||
+    env.key === "log_soppalco_metallico_picking_colli_leggeri_ecommerce" ||
+    env.id.includes("log-soppalco");
+  if (isLogSoppalco) {
+    summaryBadges.push({
+      text: "🪜 Parapetto h ≥ 1,10m con tavola fermapiede 15 cm All. IV p.to 1.4",
+      status: "warning",
+    });
+    summaryBadges.push({
+      text: "🔒 Cancello basculante anticaduta per carico bancali con muletto",
+      status: "info",
+    });
+  }
+
+  // h) Ufficio Gestione Spedizioni, Accettazione Autisti, Bolle & Controllo Doganale
+  const isLogUfficio =
+    env.id === "env-log-ufficio-spedizioni-bolle-dogana" ||
+    env.key === "log_ufficio_spedizioni_accettazione_autisti_bolle_dogana" ||
+    env.id.includes("log-ufficio");
+  if (isLogUfficio) {
+    summaryBadges.push({
+      text: "🖥️ Sportello separato autisti esterni con tornello/controllo accessi",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🪑 Postazioni VDT ergonomiche a norma Titolo VII D.Lgs. 81/08",
+      status: "info",
+    });
+  }
+
+  // i) Spogliatoi e Servizi Igienici con Docce per il Personale di Magazzino
+  const isLogSpogliatoi =
+    env.id === "env-log-spogliatoi-docce-personale" ||
+    env.key === "log_spogliatoi_servizi_igienici_docce_personale_magazzino" ||
+    env.id.includes("log-spogliatoi");
+  if (isLogSpogliatoi) {
+    summaryBadges.push({
+      text: "🚻 Armadietti a doppio scomparto pulito/sporco All. IV p.to 1.12",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🚿 Docce areate con acqua calda e pavimentazione antiscivolo R10",
+      status: "info",
+    });
+  }
+
+  // j) Area Ristoro Dipendenti, Locale Break & Servizi Dedicati Autisti Esterni
+  const isLogAreaBreak =
+    env.id === "env-log-area-break-mensa-autisti" ||
+    env.key === "log_area_ristoro_dipendenti_locale_break_servizi_autisti" ||
+    env.id.includes("log-area-break");
+  if (isLogAreaBreak) {
+    summaryBadges.push({
+      text: "☕ Locale break confortevole e servizi dedicati per autisti esterni All. IV D.Lgs. 81/08",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "🧯 Cassetta di primo soccorso aziendale conforme Allegato 1 D.M. 388/2003",
+      status: "info",
+    });
+  }
+
+  // k) Centrale Termica, Gruppo Pompe Sprinkler Antincendio & Compressori
+  const isLogLocaleTecnico =
+    env.id === "env-log-locale-tecnico-compressori-antincendio" ||
+    env.key === "log_centrale_termica_pompe_sprinkler_antincendio_compressori" ||
+    env.id.includes("log-locale-tecnico");
+  if (isLogLocaleTecnico) {
+    summaryBadges.push({
+      text: "🧯 Gruppo pompe sprinkler UNI EN 12845 con motopompa diesel e quadro di controllo",
+      status: "danger",
+    });
+    summaryBadges.push({
+      text: "⚙️ Compressori con serbatoi collaudati PED e valvole sovrapressione verificate",
+      status: "warning",
+    });
+  }
+
+  // l) Piazzale Esterno di Manovra Mezzi Pesanti, Parcheggio Semirimorchi & Compattatore
+  const isLogPiazzale =
+    env.id === "env-log-piazzale-manovra-tir-parcheggio" ||
+    env.key === "log_piazzale_esterno_manovra_tir_parcheggio_semirimorchi" ||
+    env.id.includes("log-piazzale");
+  if (isLogPiazzale) {
+    summaryBadges.push({
+      text: "🚚 Percorsi pedonali protetti da cordoli e segnaletica orizzontale All. XXVIII D.Lgs. 81/08",
+      status: "info",
+    });
+    summaryBadges.push({
+      text: "💡 Illuminazione notturna a torre faro ≥ 20 lux UNI EN 12464-2",
+      status: "success",
+    });
+  }
+
   return {
     isHeightCompliant,
     minHeightRequired,
@@ -9815,9 +10385,11 @@ export function generateEnvironmentChecklistItems(
 
   // f) Area Vendita Corsie: Vie di esodo (≥ 2.40m Ipermercato o ≥ 1.80m Supermercato) e scaffali di vendita
   if (
-    env.id.includes("corsie") ||
-    env.key.includes("corsie") ||
-    (env.category === "sales_office" && (env.surfaceSqM ?? 0) >= 400)
+    !env.id.includes("log-") &&
+    !env.key.includes("log_") &&
+    (env.id.includes("corsie") ||
+      env.key.includes("corsie") ||
+      (env.category === "sales_office" && (env.surfaceSqM ?? 0) >= 400))
   ) {
     const isSupermarket =
       env.id.includes("super-corsie") ||
@@ -18213,6 +18785,586 @@ export function generateEnvironmentChecklistItems(
       categoryTag: "cpi",
       suggestedNonConformity:
         "Accumulo incontrollato di cartoni e cellophane a ridosso delle uscite di sicurezza esterne o vicino a corpi illuminanti con rischio incendio.",
+    });
+  }
+
+  // ============================================================================
+  // Controlli Specifici Step 2 per Logistica, Magazzino Merci & Centri di Smistamento (ATECO 52.10, 52.29, 49.41)
+  // ============================================================================
+
+  // 1. Baia di Carico/Scarico Merci, Banchine con Portali Isotermici e Pedane Idrauliche
+  if (env.id === "env-log-baia-carico-scarico-dock" || env.id.includes("log-baia")) {
+    items.push({
+      id: `${env.id}-pedana-idraulica-labbro-conforme-uni-en-1398`,
+      area: env.name,
+      title: "Conformità Pedane Idrauliche di Carico e Banchine Livellatrici (UNI EN 1398)",
+      question:
+        "Le rampe e pedane di carico mobili/idrauliche sono conformi alla norma UNI EN 1398, dotate di labbro telescopico o basculante, paratie laterali telescopiche salvapiedi, valvola paracadute idraulica di blocco e manutenzione registrata semestrale?",
+      normReference: "UNI EN 1398 e D.Lgs. 81/2008 Allegato V e VI",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "attrezzature",
+      suggestedNonConformity:
+        "Pedana idraulica della baia di carico priva di manutenzione periodica o con paratie laterali salvapiedi danneggiate.",
+    });
+
+    items.push({
+      id: `${env.id}-cunei-bloccaruote-tir-interblocco-semaforico`,
+      area: env.name,
+      title: "Sistema di Blocco Ruote TIR, Interblocco Semaforico e Segnalazione Partenza Accidentale",
+      question:
+        "Durante le operazioni di carico/scarico al dock, i camion sono vincolati mediante cunei bloccaruote fisici con sensore o sistemi automatici di trattenuta interbloccati con semafori bicolori (rosso interno/verde esterno) e apertura del portone sezionale?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.4.9 e Allegato VI",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "esodo",
+      suggestedNonConformity:
+        "Assenza di cunei bloccaruote con sensore o interblocco semaforico durante il carico del rimorchio (grave rischio schiacciamento/caduta carrello per partenza anticipata del camion).",
+    });
+
+    items.push({
+      id: `${env.id}-protezione-caduta-vuoto-banchina-sezionali-portali`,
+      area: env.name,
+      title: "Protezione Caduta dal Dislivello Banchina e Portali di Tenuta Isotermici",
+      question:
+        "Le banchine con portoni sezionali aperti e prive di mezzo accostato dispongono di barriere di protezione anticaduta o cancelli mobili con fermapiede, e i portali isotermici sigillano adeguatamente l'apertura proteggendo da pioggia e correnti d'aria?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.4 e punto 1.9",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "esodo",
+      suggestedNonConformity:
+        "Portone sezionale della baia aperto senza barriera di protezione contro la caduta nel vuoto dell'operatore o del transpallet.",
+    });
+  }
+
+  // 2. Corsie di Stoccaggio ad Alta Densità con Scaffalature Portapallet Intensive
+  if (env.id === "env-log-corsie-scaffalature-portapallet" || env.id.includes("log-corsie")) {
+    items.push({
+      id: `${env.id}-ispezione-periodica-scaffali-uni-en-15635-prses`,
+      area: env.name,
+      title: "Ispezione Periodica Scaffalature Industriali e Nomina Responsabile PRSES (UNI EN 15635)",
+      question:
+        "Le scaffalature portapallet pesanti sono sottoposte a verifica periodica annuale da parte di tecnico esperto qualificato secondo la norma UNI EN 15635 con apposizione dei bollini di conformità (verde/giallo/rosso) e nomina formale del PRSES aziendale?",
+      normReference: "UNI EN 15635 e D.Lgs. 81/2008 Allegato IV e V",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "strutture",
+      suggestedNonConformity:
+        "Assenza del registro di ispezione annuale delle scaffalature industriali secondo la norma UNI EN 15635 o montanti deformati non sostituiti.",
+    });
+
+    items.push({
+      id: `${env.id}-cartelli-portata-massima-paracolpi-montanti-scaffali`,
+      area: env.name,
+      title: "Cartelli Portata Massima Pallet e Protezioni Paracolpi d'Angolo sui Montanti",
+      question:
+        "Ciascuna testata di campata presenta la targa di carico con portata massima per livello e campata ben leggibile, e tutti i montanti esposti al transito dei carrelli elevatori sono protetti da paracolpi d'angolo in acciaio o polimero ad alto assorbimento d'urto?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.4 e UNI EN 15635",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "strutture",
+      suggestedNonConformity:
+        "Montanti della campata privi di paracolpi d'urto o targhe di carico massimo mancanti o illeggibili.",
+    });
+
+    items.push({
+      id: `${env.id}-scia-antincendio-attivita-70-impianto-sprinkler`,
+      area: env.name,
+      title: "Prevenzione Incendi Deposito Merci Combustibili (Attività 70 CPI) e Impianto Sprinkler ESFR",
+      question:
+        "Per il magazzino con superficie ≥ 500 m² è presente la SCIA Antincendio VVF (Attività 70 D.P.R. 151/2011), le merci sono stoccate garantendo franco minimo di 1 metro sotto le testine sprinkler ESFR e le vie di esodo principali hanno larghezza idonea?",
+      normReference: "D.P.R. 151/2011 Attività 70, UNI EN 12845 e D.M. 03/09/2021",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Pallet stoccati fino al soffitto a meno di 50 cm dalle testine di scarica sprinkler con ostacolo alla conoide d'estinzione o SCIA VVF non aggiornata.",
+    });
+  }
+
+  // 3. Reparto Picking Manuale, Consolidamento Ordini & Kitting
+  if (env.id === "env-log-area-picking-smistamento" || env.id.includes("log-picking")) {
+    items.push({
+      id: `${env.id}-ergonomia-picking-movimentazione-carichi-iso-11228`,
+      area: env.name,
+      title: "Valutazione Ergonomica Movimentazione Manuale Carichi e Picking (ISO 11228-1/2)",
+      question:
+        "Le operazioni di picking manuale e kitting sono organizzate con altezze di prelievo comprese tra 60 e 150 cm da terra (zona comfort), e la valutazione del rischio MMC (metodo NIOSH/Snook-Ciriello) rispetta i limiti di peso e frequenza con rotazione delle mansioni?",
+      normReference: "D.Lgs. 81/2008 Titolo VI e Allegato XXXIII, ISO 11228-1",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "ergonomia",
+      suggestedNonConformity:
+        "Operatori di picking costretti a sollevare continuativamente colli pesanti (>15 kg) al di sotto delle ginocchia o sopra le spalle senza ausili meccanici.",
+    });
+
+    items.push({
+      id: `${env.id}-pavimentazione-antiscivolo-corsie-picking-r11`,
+      area: env.name,
+      title: "Integrità Pavimentazione Industriale, Assenza Avvallamenti e Planarità Corsie",
+      question:
+        "La pavimentazione dell'area picking è perfettamente piana, priva di crepe, giunti sconnessi, fori o macchie d'olio scivolose, consentendo il transito sicuro e stabile di commissionatori, carrelli manuali e operatori a piedi?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.3",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "strutture",
+      suggestedNonConformity:
+        "Pavimentazione dell'area picking fessurata con dislivelli che generano rischio inciampo e instabilità nel traino carrelli.",
+    });
+
+    items.push({
+      id: `${env.id}-separazione-traffico-pedoni-commissionatori-segnaletica`,
+      area: env.name,
+      title: "Segnaletica di Sicurezza, Separazione Traffico Pedonale e Mezzi di Picking",
+      question:
+        "Le corsie di picking sono chiaramente delimitate da segnaletica orizzontale gialla (larghezza minima 1,00 m per pedoni), con specchi convessi negli incroci ciechi e divieto di accesso a carrelli retrattili non autorizzati?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.4 e Allegato XXVIII",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "esodo",
+      suggestedNonConformity:
+        "Corsie di picking prive di delimitazione a pavimento con interferenza non protetta tra operatori a piedi e commissionatori motorizzati.",
+    });
+  }
+
+  // 4. Reparto Imballaggio, Nastratura, Pesatura & Fardellatura Pallet
+  if (env.id === "env-log-zona-imballaggio-fardellatura" || env.id.includes("log-imballaggio")) {
+    items.push({
+      id: `${env.id}-fasciapallet-barriere-ottiche-arresto-fungo-iso-13849`,
+      area: env.name,
+      title: "Protezione Meccanica Fasciapallet / Fardellatrici e Barriere di Sicurezza (UNI EN ISO 13849-1)",
+      question:
+        "Il fardellatore automatico/semiautomatico a tavola rotante o braccio rotante è dotato di recinzione perimetrale con fotocellule/barriere fotoelettriche di muting e arresto d'emergenza a fungo a riarmo manuale prontamente accessibile?",
+      normReference: "UNI EN ISO 13849-1, Direttiva Macchine 2006/42/CE e D.Lgs. 81/2008 Allegato V",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "attrezzature",
+      suggestedNonConformity:
+        "Avvolgitore pallet privo di barriere ottiche di protezione sul raggio di rotazione o fungo di stop d'emergenza guasto.",
+    });
+
+    items.push({
+      id: `${env.id}-nastratrici-chiudiscatole-protezione-organi-lame`,
+      area: env.name,
+      title: "Sicurezza Macchine Nastratrici, Rulli di Trascinamento e Carter Lame di Taglio",
+      question:
+        "Le macchine nastratrici e nastri trasportatori hanno carter di protezione fissi o interbloccati sui rulli di trascinamento e sulle lame di taglio nastro per impedire il contatto accidentale e lo schiacciamento degli arti superiori?",
+      normReference: "D.Lgs. 81/2008 Allegato V punto 6",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "attrezzature",
+      suggestedNonConformity:
+        "Lama di taglio della nastratrice priva di carter salvadita a molla con rischio di lacerazioni durante il passaggio manuale delle scatole.",
+    });
+
+    items.push({
+      id: `${env.id}-microclima-aspirazione-polveri-scatole-cartone`,
+      area: env.name,
+      title: "Microclima Reparto Imballaggio e Pulizia / Aspirazione Polveri di Cartone",
+      question:
+        "Il reparto è provvisto di idoneo ricambio d'aria per abbattere le polveri generate dalla movimentazione di cartoni e rotoli di film estensibile, con microclima salubre e postazioni provviste di cutter di sicurezza con lama retrattile automatica?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.9 e Allegato VI",
+      defaultSeverity: 2,
+      defaultSanctionable: false,
+      domain: "safety",
+      categoryTag: "microclima",
+      suggestedNonConformity:
+        "Uso di taglierini tradizionali a lama fissa non retrattile e accumulo di polvere di cartone nell'area di fardellatura.",
+    });
+  }
+
+  // 5. Locale Tecnico Stazione di Ricarica Batterie Carrelli e Muletti Elettrici
+  if (env.id === "env-log-area-ricarica-batterie-muletti" || env.id.includes("log-ricarica")) {
+    items.push({
+      id: `${env.id}-ventilazione-atex-idrogeno-ricarica-cei-en-62485`,
+      area: env.name,
+      title: "Ventilazione Forzata Antideflagrante Impianto Ricarica Batterie Muletti (CEI EN 62485-3)",
+      question:
+        "Il locale ricarica accumulatori piombo-acido/litio dispone di impianto di ventilazione naturale o meccanica forzata antideflagrante a prova di scintilla ATEX calcolato secondo la norma CEI EN 62485-3 per evitare l'accumulo di idrogeno (miscele esplosive H2)?",
+      normReference: "CEI EN 62485-3, CEI EN 60079-10-1 e D.Lgs. 81/2008 Titolo XI",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "atex",
+      suggestedNonConformity:
+        "Locale ricarica muletti privo di ventilazione forzata certificata ATEX con rischio di formazione di atmosfera esplosiva da idrogeno.",
+    });
+
+    items.push({
+      id: `${env.id}-vasca-contenimento-acido-kit-neutralizzante-spandimenti`,
+      area: env.name,
+      title: "Bacino Contenimento Elettrolita, Kit Neutralizzante e Pavimento Antiacido",
+      question:
+        "Sotto i raddrizzatori e le stazioni di ricarica sono presenti vasche o cordoli di contenimento stagni per l'acido solforico, pavimentazione antiacido e scorta di polvere neutralizzante e assorbente certificata per acido batterie?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.13 e D.M. 24/01/2011 n. 20",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "chimico",
+      suggestedNonConformity:
+        "Assenza del kit assorbente neutralizzante per elettrolita acido e pavimento privo di trattamento antiacido.",
+    });
+
+    items.push({
+      id: `${env.id}-doccia-lavaocchi-emergenza-e-dpi-chimici-ricarica`,
+      area: env.name,
+      title: "Doccia Lavaocchi d'Emergenza (UNI EN 15154) e DPI per Rischio Chimico / Elettrico",
+      question:
+        "Nel locale o nelle immediate adiacenze è presente una stazione lavaocchi d'emergenza o doccia alimentata ad acqua di rete (UNI EN 15154) con controllo trimestrale e DPI specifici disponibili (visiera protettiva, guanti in nitrile/antiacido, grembiule)?",
+      normReference: "UNI EN 15154-1/2 e D.Lgs. 81/2008 Allegato VIII",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "chimico",
+      suggestedNonConformity:
+        "Lavaocchi d'emergenza guasto o privo di acqua di rete a pressione costante nella stazione di rabbocco acido batterie.",
+    });
+  }
+
+  // 6. Deposito Separato Sostanze Chimiche, Liquidi Infiammabili & Merci ADR
+  if (env.id === "env-log-reparto-stoccaggio-infiammabili-adr" || env.id.includes("log-infiammabili")) {
+    items.push({
+      id: `${env.id}-bacini-contenimento-grigliati-d-lgs-152-06-chimici`,
+      area: env.name,
+      title: "Bacini di Contenimento Stagni a Grigliato per Fusti e IBC (D.Lgs. 152/2006)",
+      question:
+        "Tutti i recipienti, fusti e cisternette IBC contenenti liquidi pericolosi, oli o prodotti chimici sono alloggiati su bacini di contenimento stagni a grigliato metallico di volume pari al 100% del contenitore maggiore o 33% del totale?",
+      normReference: "D.Lgs. 152/2006 art. 239 e D.Lgs. 81/2008 Allegato IV e IX",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "chimico",
+      suggestedNonConformity:
+        "Fusti di solventi o liquidi chimici stoccati a pavimento senza bacino di contenimento con rischio di sversamento e contaminazione.",
+    });
+
+    items.push({
+      id: `${env.id}-impianto-elettrico-ex-cei-en-60079-aerazione-permanente`,
+      area: env.name,
+      title: "Impianto Elettrico Antideflagrante Ex (CEI EN 60079) e Aperture di Aerazione 1/30",
+      question:
+        "Il deposito è equipaggiato con corpi illuminanti e interruttori certificati ATEX Zona 1/2 (CEI EN 60079), collegamenti equipotenziali di terra antistatici e superfici di aerazione permanente naturale pari ad almeno 1/30 della superficie in pianta?",
+      normReference: "CEI EN 60079, D.M. 03/09/2021 e D.Lgs. 81/2008 Titolo XI",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "atex",
+      suggestedNonConformity:
+        "Presenza di prese o fari ordinari non marcati Ex nel deposito liquidi infiammabili o aperture di ventilazione ostruite.",
+    });
+
+    items.push({
+      id: `${env.id}-separazione-compartimentazione-rei-120-merci-adr`,
+      area: env.name,
+      title: "Compartimentazione REI/EI 120, Porte Tagliafuoco Autochiudenti e Segnaletica ADR",
+      question:
+        "Il locale presenta pareti e solai resistenti al fuoco EI 120, porta tagliafuoco REI 120 munita di chiudiporta idraulico automatico e segnaletica di pericolo conforme all'Accordo ADR / Regolamento CLP (pittogrammi GHS02, GHS07, GHS09)?",
+      normReference: "D.M. 03/09/2021, D.P.R. 151/2011 e Accordo ADR / D.Lgs. 81/08 Allegato XXV",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Porta REI del deposito liquidi infiammabili bloccata aperta con cuneo di legno o segnaletica di divieto di fumo e pericolo ADR assente.",
+    });
+  }
+
+  // 7. Soppalco Metallico Industriale per Picking Colli Leggeri ed E-Commerce
+  if (env.id === "env-log-soppalco-picking-leggero" || env.id.includes("log-soppalco")) {
+    items.push({
+      id: `${env.id}-parapetto-normale-arresto-caduta-fermapiede-15cm`,
+      area: env.name,
+      title: "Parapetto Regolamentare h ≥ 1,10m con Fascia Fermapiede 15 cm (All. IV p.to 1.4)",
+      question:
+        "Tutti i lati aperti del soppalco metallico verso il vuoto sono provvisti di parapetto rigido alto almeno 1,10 m, con corrente intermedio e tavola fermapiede continua alta almeno 15 cm per impedire la caduta di colli ed attrezzi ai piani sottostanti?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.4",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "strutture",
+      suggestedNonConformity:
+        "Parapetto del soppalco privo di fascia fermapiede da 15 cm o con altezza inferiore a 1,10 m con grave rischio caduta colli sulle corsie sottostanti.",
+    });
+
+    items.push({
+      id: `${env.id}-cancello-basculante-carico-pallet-soppalco-anticaduta`,
+      area: env.name,
+      title: "Cancello Basculante di Sicurezza a Bilanciere per Carico Bancali al Piano Soppalco",
+      question:
+        "Il varco di sbarco merci per il carico bancali con carrello elevatore è protetto da cancello basculante a bilanciere o barriera interbloccata che chiude sempre il fronte vuoto sia durante il carico sia a riposo (esclusione di catenelle mobili)?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.4 e UNI EN ISO 14122-3",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "strutture",
+      suggestedNonConformity:
+        "Punto di carico bancali al piano soppalco protetto soltanto da catenella mobile o rimasto spalancato sul vuoto.",
+    });
+
+    items.push({
+      id: `${env.id}-targa-sovraccarico-massimo-kg-mq-scala-accesso`,
+      area: env.name,
+      title: "Targa di Portata Massima Accidentale kg/m² e Scala Fissa con Gradini Antiscivolo",
+      question:
+        "La struttura del soppalco riporta in modo ben visibile la targa di sovraccarico massimo consentito (kg/m² e carico puntuale scaffali) con relazione di calcolo statico, e la scala metallica d'accesso è provvista di corrimano continuo e gradini antisdrucciolo?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.3 e punto 1.4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "strutture",
+      suggestedNonConformity:
+        "Mancanza del cartello indicante la portata massima ammissibile del soppalco metallico o scala d'accesso priva di corrimano su ambo i lati.",
+    });
+  }
+
+  // 8. Ufficio Gestione Spedizioni, Accettazione Autisti, Bolle & Controllo Doganale
+  if (env.id === "env-log-ufficio-spedizioni-bolle-dogana" || env.id.includes("log-ufficio")) {
+    items.push({
+      id: `${env.id}-sportello-separato-autisti-esterni-tornello-accessi`,
+      area: env.name,
+      title: "Separazione Fisica Accesso Autisti Esterni e Controllo Accessi Magazzino",
+      question:
+        "L'ufficio spedizioni/bolle dispone di sportello d'accettazione dedicato con varco d'attesa esterno per gli autisti vettori terzi, separando fisicamente i visitatori dal transito operativo interno del magazzino (procedura DUVRI / interferenze)?",
+      normReference: "D.Lgs. 81/2008 art. 26 e Allegato IV punto 1.4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "esodo",
+      suggestedNonConformity:
+        "Autisti esterni liberi di circolare a piedi nelle corsie di stoccaggio merci e manovra carrelli senza badge o percorso protetto.",
+    });
+
+    items.push({
+      id: `${env.id}-ergonomia-postazioni-vdt-ufficio-spedizioni-dlgs-81`,
+      area: env.name,
+      title: "Ergonomia Postazioni Videoterminale, Sedute e Illuminamento (Titolo VII)",
+      question:
+        "Le postazioni degli addetti bolle/dogana sono provviste di sedie ergonomiche girevoli conformi UNI EN 1335 (supporto lombare, altezza regolabile), schermi orientabili antiriflesso a norma e illuminamento artificiale uniforme ≥ 500 lux (UNI EN 12464-1)?",
+      normReference: "D.Lgs. 81/2008 Titolo VII Allegato XXXIV e UNI EN 12464-1",
+      defaultSeverity: 2,
+      defaultSanctionable: false,
+      domain: "safety",
+      categoryTag: "ergonomia",
+      suggestedNonConformity:
+        "Sedie d'ufficio rotte non regolabili o monitor collocati in posizione con riflessi e affaticamento visivo dell'operatore VDT.",
+    });
+
+    items.push({
+      id: `${env.id}-gestione-documentale-duvri-istruzioni-sicurezza-vettori`,
+      area: env.name,
+      title: "Informativa di Sicurezza per Vettori Esterni, Planimetrie di Emergenza ed Esodo",
+      question:
+        "Al banco accettazione sono esposte le istruzioni di sicurezza in lingua per i conducenti esterni (limiti di velocità 10 km/h, DPI obbligatori scarpe/gilet, divieto di scendere dal camion senza autorizzazione) e planimetria d'esodo con vie di fuga?",
+      normReference: "D.Lgs. 81/2008 art. 26 e Allegato IV punto 1.5",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "esodo",
+      suggestedNonConformity:
+        "Mancata consegna o esposizione delle norme di sicurezza e piano viabilità aziendale per gli autotrasportatori esterni.",
+    });
+  }
+
+  // 9. Spogliatoi e Servizi Igienici con Docce per il Personale di Magazzino
+  if (env.id === "env-log-spogliatoi-docce-personale" || env.id.includes("log-spogliatoi")) {
+    items.push({
+      id: `${env.id}-armadietti-doppio-scomparto-pulito-sporco-all-iv`,
+      area: env.name,
+      title: "Armadietti a Doppio Scomparto Pulito/Sporco e Aerazione (All. IV p.to 1.12)",
+      question:
+        "Tutti gli addetti alla logistica e movimentazione merci dispongono di armadietto metallico individuale a doppio scomparto per separare gli indumenti civili dagli abiti da lavoro/DPI sporchi, dotato di feritoie di aerazione e chiusura a chiave/lucchetto?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.12",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Armadietti a scomparto singolo per operatori addetti alla logistica esposti a polveri e sporco o indumenti lasciati aperti su panche.",
+    });
+
+    items.push({
+      id: `${env.id}-docce-servizi-igienici-antiscivolo-aerazione-meccanica`,
+      area: env.name,
+      title: "Docce con Acqua Calda, Pavimentazione Antiscivolo R10 ed Estrazione Vapore",
+      question:
+        "I locali docce e servizi igienici sono dotati di pavimentazione antiscivolo a piedi nudi (classe B o R10), rubinetteria con miscelazione termostatica, pulizia quotidiana e impianto di aspirazione forzata per prevenire condense e muffe?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.13",
+      defaultSeverity: 2,
+      defaultSanctionable: false,
+      domain: "safety",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Locale docce privo di ventilazione forzata con presenza di umidità e muffa o piatti doccia scivolosi senza superficie antiscivolo.",
+    });
+
+    items.push({
+      id: `${env.id}-cassetta-pronto-soccorso-allegato-1-dm-388-logistica`,
+      area: env.name,
+      title: "Presidio di Primo Soccorso Aziendale (Pacchetto di Medicazione Allegato 1 D.M. 388/03)",
+      question:
+        "Nel locale spogliatoi o disimpegno è installata la cassetta di primo soccorso conforme all'Allegato 1 del D.M. 388/2003 (Aziende Gruppo A o B con oltre 3 lavoratori), con reintegro periodico dei presidi scaduti e cartello segnalatore UNI EN ISO 7010?",
+      normReference: "D.M. 388/2003 art. 2 e D.Lgs. 81/2008 art. 45",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "soccorso",
+      suggestedNonConformity:
+        "Cassetta di primo soccorso con disinfettante o bende scadute o priva della lista dei contenuti prescritti dal D.M. 388/2003.",
+    });
+  }
+
+  // 10. Area Ristoro Dipendenti, Locale Break & Servizi Dedicati Autisti Esterni
+  if (env.id === "env-log-area-break-mensa-autisti" || env.id.includes("log-area-break")) {
+    items.push({
+      id: `${env.id}-servizi-igienici-dedicati-autisti-esterni-all-iv`,
+      area: env.name,
+      title: "Servizi Igienici Dedicati per Autotrasportatori Esterni (D.Lgs. 81/08 All. IV)",
+      question:
+        "La struttura logistica mette a disposizione degli autotrasportatori esterni in attesa di carico/scarico servizi igienici dedicati, costantemente riforniti di carta igienica, sapone liquido, asciugamani monouso e sanificati quotidianamente?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.13 e L. 286/2005",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "igiene",
+      suggestedNonConformity:
+        "Assenza di servizi igienici accessibili per gli autisti esterni costretti a utilizzare i bagni interni del personale senza autorizzazione.",
+    });
+
+    items.push({
+      id: `${env.id}-distributori-automatici-elettrodomestici-cei-64-8`,
+      area: env.name,
+      title: "Sicurezza Elettrica Distributori Cibo/Caffè e Prese Industriali (CEI 64-8)",
+      question:
+        "I distributori automatici di bevande calde e snack sono alimentati tramite prese con interruttore differenziale ad alta sensibilità da 30 mA (CEI 64-8), ancorati contro il ribaltamento e privi di cavi volanti lungo le vie di passaggio?",
+      normReference: "Norma CEI 64-8 e D.Lgs. 81/2008 Allegato IV punto 1.4",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "elettrico",
+      suggestedNonConformity:
+        "Distributore automatico o forno microonde allacciato tramite ciabatte multipresa multiple volanti con sovraccarico e rischio corto circuito.",
+    });
+
+    items.push({
+      id: `${env.id}-salubrita-locale-ristoro-arredi-separazione-operativa`,
+      area: env.name,
+      title: "Confortevolezza Locale Ristoro, Arredi e Separazione da Polveri e Rumore",
+      question:
+        "L'area break è adeguatamente isolata da rumore e gas di scarico delle baie, dotata di tavoli e sedie lavabili, cestini per la raccolta differenziata con coperchio e microclima confortevole per le pause lavorative (All. IV p.to 1.11)?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.11",
+      defaultSeverity: 2,
+      defaultSanctionable: false,
+      domain: "safety",
+      categoryTag: "microclima",
+      suggestedNonConformity:
+        "Locale break ricavato in un angolo del magazzino a ridosso delle corsie muletti senza separazione fisica né protezione da polveri.",
+    });
+  }
+
+  // 11. Centrale Termica, Gruppo Pompe Sprinkler Antincendio & Compressori
+  if (env.id === "env-log-locale-tecnico-compressori-antincendio" || env.id.includes("log-locale-tecnico")) {
+    items.push({
+      id: `${env.id}-gruppo-pompe-antincendio-sprinkler-uni-en-12845`,
+      area: env.name,
+      title: "Verifica e Manutenzione Gruppo Pompe Antincendio Sprinkler (UNI EN 12845 / UNI 10779)",
+      question:
+        "La centrale idrica antincendio dispone di elettropompa e motopompa diesel di riserva con quadro di avviamento automatico, serbatoio gasolio pieno, batterie di avviamento cariche e registro delle prove settimanali/semestrali conforme a UNI EN 12845?",
+      normReference: "UNI EN 12845, UNI 10779 e D.M. 01/09/2021 (Decreto Controlli)",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Quadro pompe sprinkler in stato di anomalia o batterie di avviamento della motopompa diesel scariche prive di manutenzione periodica.",
+    });
+
+    items.push({
+      id: `${env.id}-compressori-aria-serbatoi-pressione-ped-inail`,
+      area: env.name,
+      title: "Serbatoi Aria Compressa, Valvole di Sicurezza PED e Verifica Periodica INAIL",
+      question:
+        "I serbatoi d'aria compressa per l'automazione del magazzino e baie sono marcati PED (Direttiva 2014/68/UE), dotati di manometro con fondo scala a norma, valvola di sovrapressione piombata tarata e sottoposti alle verifiche periodiche INAIL/ARPA?",
+      normReference: "D.M. 329/2004, Direttiva PED 2014/68/UE e D.Lgs. 81/2008 art. 71",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "attrezzature",
+      suggestedNonConformity:
+        "Serbatoio d'aria compressa con valvola di sicurezza non tarata o privo della verifica periodica decennale di integrità dell'organo di controllo.",
+    });
+
+    items.push({
+      id: `${env.id}-accesso-riservato-centrale-termica-estintore-co2`,
+      area: env.name,
+      title: "Compartimentazione Vano Tecnico, Porta Tagliafuoco REI ed Estintore CO2",
+      question:
+        "L'accesso alla centrale è riservato esclusivamente al personale autorizzato con porta tagliafuoco chiusa a chiave munita di maniglione antipanico, privo di depositi di materiali combustibili ed equipaggiato con estintori a CO2 da 5 kg e a polvere da 6 kg?",
+      normReference: "D.M. 03/09/2021 e D.Lgs. 81/2008 Allegato IV punto 1.10",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "cpi",
+      suggestedNonConformity:
+        "Locale pompe antincendio utilizzato impropriamente come deposito di scatoloni o stracci intrisi d'olio con ostruzione dell'accesso alle valvole.",
+    });
+  }
+
+  // 12. Piazzale Esterno di Manovra Mezzi Pesanti, Parcheggio Semirimorchi & Compattatore
+  if (env.id === "env-log-piazzale-manovra-tir-parcheggio" || env.id.includes("log-piazzale")) {
+    items.push({
+      id: `${env.id}-viabilita-esterna-separazione-tir-pedoni-all-xxviii`,
+      area: env.name,
+      title: "Piano di Viabilità Esterna, Separazione Flussi TIR/Pedoni e Segnaletica Orizzontale",
+      question:
+        "Il piazzale esterno dispone di piano di viabilità formalizzato con sensi unici di marcia indicati a terra (Allegato XXVIII D.Lgs. 81/08), percorsi pedonali protetti da cordoli insormontabili e specchi parabolici alle intersezioni con scarsa visibilità?",
+      normReference: "D.Lgs. 81/2008 Allegato IV punto 1.4 e Allegato XXVIII",
+      defaultSeverity: 4,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "esodo",
+      suggestedNonConformity:
+        "Piazzale esterno privo di percorsi pedonali delimitati con rischio investimento degli autisti o pedoni da parte di autoarticolati in retromarcia.",
+    });
+
+    items.push({
+      id: `${env.id}-illuminazione-notturna-torri-faro-uni-en-12464-2`,
+      area: env.name,
+      title: "Illuminazione Notturna Aree di Manovra Mezzi Pesanti (UNI EN 12464-2)",
+      question:
+        "Le aree di manovra esterne, parcheggio rimorchi e baie di carico sono dotate di illuminazione artificiale notturna a torre faro o proiettori perimetrali che garantiscono un illuminamento medio mantenuto non inferiore a 20 lux (UNI EN 12464-2)?",
+      normReference: "UNI EN 12464-2 e D.Lgs. 81/2008 Allegato IV punto 1.10",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "strutture",
+      suggestedNonConformity:
+        "Aree esterne di manovra e aggancio semirimorchi scarsamente illuminate di notte (<10 lux) con grave pericolo nelle operazioni di attracco.",
+    });
+
+    items.push({
+      id: `${env.id}-compattatore-rifiuti-pressa-esterna-e-disoleatore`,
+      area: env.name,
+      title: "Sicurezza Compattatore Rifiuti Esterno e Vasca Disoleatore Acque di Prima Pioggia",
+      question:
+        "Il compattatore o scarrabile rifiuti esterno dispone di pulsante di arresto d'emergenza a fungo e quadro elettrico IP55 protetto da intemperie, e il piazzale è dotato di rete di raccolta e disoleazione delle acque meteoriche (D.Lgs. 152/2006)?",
+      normReference: "Direttiva Macchine 2006/42/CE, CEI 64-8 e D.Lgs. 152/2006 art. 113",
+      defaultSeverity: 3,
+      defaultSanctionable: true,
+      domain: "safety",
+      categoryTag: "ambiente",
+      suggestedNonConformity:
+        "Compattatore esterno per imballaggi con pulsante di stop d'emergenza lesionato o assenza di pozzetti disoleatori per il lavaggio del piazzale.",
     });
   }
 

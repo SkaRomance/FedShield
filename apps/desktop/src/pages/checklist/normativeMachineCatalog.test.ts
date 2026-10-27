@@ -4578,6 +4578,322 @@ for (const code of retailCodesToTest) {
   assert.ok(fallbackRes.every((m) => m.sourceReason === "ateco"), `Tutte le macchine con ATECO variant '${code}' devono avere sourceReason === 'ateco'`);
 }
 
+// =============================================================
+// TEST SETTORE 17: LOGISTICA, MAGAZZINO MERCI, DEPOSITI INDUSTRIALI, CENTRI DI SMISTAMENTO E SPEDIZIONI
+// ATECO 52.10 / 52.29 / 49.41 / 49.4
+// =============================================================
+console.log("\n=== INIZIO TEST normativeMachineCatalog (ATECO 52.10 Logistica, Magazzino Merci, Depositi Industriali e Spedizioni) ===");
+
+const logisticsCodesToTest = [
+  "52.10",
+  "52.10.1",
+  "52.10.2",
+  "52.10.19",
+  "52.10.20",
+  "52.29",
+  "52.29.1",
+  "52.29.2",
+  "52.29.21",
+  "52.29.22",
+  "49.41",
+  "49.41.0",
+  "49.42",
+  "52.1",
+  "52.2",
+  "49.4",
+  "5210",
+  "521010",
+  "521020",
+  "5229",
+  "522910",
+  "522921",
+  "522922",
+  "4941",
+  "494100",
+  "494",
+];
+
+// -------------------------------------------------------------
+// Test 75: Verifica priorità catalogo ATECO per Logistica e Magazzino Merci
+// -------------------------------------------------------------
+console.log("Test 75: Verifica priorità catalogo ATECO per Logistica e Magazzino Merci (52.10 / 52.29 / 49.41 / 49.4)");
+for (const code of logisticsCodesToTest) {
+  const cat = getSectorMachineCatalogForAteco(code);
+  assert.equal(cat.sectorKey, "logistica_magazzino", `ATECO variant '${code}' deve restituire logistica_magazzino`);
+  assert.ok(
+    cat.sectorLabel.includes("Logistica") || cat.sectorLabel.includes("Magazzino"),
+    `Etichetta per '${code}' deve includere Logistica o Magazzino`,
+  );
+}
+
+// -------------------------------------------------------------
+// Test 76: Verifica completezza delle 16 macchine professionali per logistica con verifiche, corsi e modelli reali
+// -------------------------------------------------------------
+console.log("Test 76: Verifica completezza delle 16 macchine professionali per logistica con verifiche, corsi e modelli reali");
+const catalogLogExact = getSectorMachineCatalogForAteco("52.10");
+assert.equal(catalogLogExact.machines.length, 16, "Il catalogo Logistica deve contenere esattamente 16 macchine");
+
+const expectedLogMachineKeys = [
+  "carrello_elevatore_frontale_elettrico",
+  "carrello_retrattile_alta_quota",
+  "transpallet_elettrico_uomo_bordo",
+  "transpallet_elettrico_uomo_a_terra",
+  "commissionatore_verticale_picking",
+  "transpallet_manuale_pesatore",
+  "fasciapallet_avvolgitore_rotante",
+  "pedana_di_carico_idraulica_dock",
+  "cuneo_bloccaruote_tir_interbloccato",
+  "pressa_compattatrice_scarrabile_cartoni",
+  "stazione_ricarica_batterie_banco",
+  "scaffalatura_industriale_portapallet",
+  "lavapavimenti_lavasciuga_uomo_bordo",
+  "gruppo_pompe_antincendio_sprinkler",
+  "linea_nastri_trasportatori_rulli",
+  "defibrillatore_dae_polo_logistico",
+];
+
+for (const key of expectedLogMachineKeys) {
+  const found = catalogLogExact.machines.find((m) => m.machineKey === key);
+  assert.ok(found, `Attrezzatura logistica con key '${key}' deve essere presente nel catalogo`);
+  assert.ok(found.name.length > 5, `Nome attrezzatura '${key}' deve essere descrittivo`);
+  assert.ok(found.suggestedManufacturer.length > 2, `Produttore suggerito presente per '${key}'`);
+  assert.ok(found.suggestedModel.length > 1, `Modello suggerito presente per '${key}'`);
+  assert.ok(found.safetyChecks.length >= 5, `L'attrezzatura '${key}' deve avere almeno 5 controlli di sicurezza specifici`);
+  for (const check of found.safetyChecks) {
+    assert.ok(check.code.length > 3, `Check code '${check.code}' valido per '${key}'`);
+    assert.ok(check.title.length > 5, `Check title valido per '${check.code}'`);
+    assert.ok(check.question.length > 15, `Check question valida per '${check.code}'`);
+    assert.ok(check.normReference.length > 3, `Check normReference presente per '${check.code}'`);
+    assert.ok(check.defaultSeverity >= 1 && check.defaultSeverity <= 5, `Check severity valida per '${check.code}'`);
+    assert.equal(typeof check.defaultSanctionable, "boolean", `defaultSanctionable booleano per '${check.code}'`);
+  }
+}
+
+// 1. Carrello elevatore frontale elettrico
+const forkliftFrontale = catalogLogExact.machines.find((m) => m.machineKey === "carrello_elevatore_frontale_elettrico")!;
+assert.equal(forkliftFrontale.isSubjectToInailCheck, true);
+assert.equal(forkliftFrontale.inailFrequencyYears, 1);
+assert.equal(forkliftFrontale.training.requiresPatentinoAccordoSR, true);
+assert.equal(forkliftFrontale.training.minHours, 12);
+assert.ok(forkliftFrontale.suggestedModel.includes("Traigo") || forkliftFrontale.suggestedModel.includes("Linde"));
+assert.ok(forkliftFrontale.safetyChecks.some((c) => c.code === "LOG_FORKLIFT_FOPS_ROPS_CABIN"));
+assert.ok(forkliftFrontale.safetyChecks.some((c) => c.code === "LOG_FORKLIFT_SEATBELT_RESTRAINT"));
+assert.ok(forkliftFrontale.safetyChecks.some((c) => c.code === "LOG_FORKLIFT_BLUE_SPOT_REVERSE_ALARM"));
+assert.ok(forkliftFrontale.safetyChecks.some((c) => c.code === "LOG_FORKLIFT_FORKS_WEAR_CRACKS" && c.normReference.includes("ISO 5057")));
+assert.ok(forkliftFrontale.safetyChecks.some((c) => c.code === "LOG_FORKLIFT_INAIL_ANNUAL_INSPECTION" && c.normReference.includes("71 c. 11")));
+
+// 2. Carrello retrattile alta quota
+const reachTruck = catalogLogExact.machines.find((m) => m.machineKey === "carrello_retrattile_alta_quota")!;
+assert.equal(reachTruck.isSubjectToInailCheck, true);
+assert.equal(reachTruck.inailFrequencyYears, 1);
+assert.equal(reachTruck.training.requiresPatentinoAccordoSR, true);
+assert.ok(reachTruck.suggestedModel.includes("ETV") || reachTruck.suggestedModel.includes("R16"));
+assert.ok(reachTruck.safetyChecks.some((c) => c.code === "LOG_REACH_FOPS_LEXAN_CANOPY"));
+assert.ok(reachTruck.safetyChecks.some((c) => c.code === "LOG_REACH_FORK_CAMERA_MONITOR"));
+assert.ok(reachTruck.safetyChecks.some((c) => c.code === "LOG_REACH_CURVE_SPEED_LIMITER"));
+assert.ok(reachTruck.safetyChecks.some((c) => c.code === "LOG_REACH_CHAINS_WEAR_ELONGATION" && c.normReference.includes("4309")));
+
+// 3. Transpallet elettrico uomo a bordo
+const transpalletBordo = catalogLogExact.machines.find((m) => m.machineKey === "transpallet_elettrico_uomo_bordo")!;
+assert.equal(transpalletBordo.training.courseCode, "FORMAZ_TRANSPALLET");
+assert.ok(transpalletBordo.safetyChecks.some((c) => c.code === "LOG_RIDER_SIDE_BARRIERS_INTERLOCK"));
+assert.ok(transpalletBordo.safetyChecks.some((c) => c.code === "LOG_RIDER_OPERATOR_PLATFORM_DEADMAN"));
+assert.ok(transpalletBordo.safetyChecks.some((c) => c.code === "LOG_RIDER_BELLY_BUTTON_REVERSE"));
+
+// 4. Transpallet elettrico uomo a terra
+const transpalletTerraLog = catalogLogExact.machines.find((m) => m.machineKey === "transpallet_elettrico_uomo_a_terra")!;
+assert.equal(transpalletTerraLog.training.courseCode, "FORMAZ_TRANSPALLET");
+assert.ok(transpalletTerraLog.safetyChecks.some((c) => c.code === "LOG_PEDESTRIAN_BELLY_SAFETY"));
+assert.ok(transpalletTerraLog.safetyChecks.some((c) => c.code === "LOG_PEDESTRIAN_DEAD_MAN_BRAKE"));
+assert.ok(transpalletTerraLog.safetyChecks.some((c) => c.code === "LOG_PEDESTRIAN_FOOT_PROTECTION_SKIRT"));
+
+// 5. Commissionatore verticale picking
+const commissionatore = catalogLogExact.machines.find((m) => m.machineKey === "commissionatore_verticale_picking")!;
+assert.equal(commissionatore.isSubjectToInailCheck, true);
+assert.equal(commissionatore.inailFrequencyYears, 1);
+assert.equal(commissionatore.training.courseCode, "FORMAZ_COMMISSIONATORI_ELEVABILI");
+assert.equal(commissionatore.training.requiresPatentinoAccordoSR, true);
+assert.equal(commissionatore.training.minHours, 12);
+assert.ok(commissionatore.safetyChecks.some((c) => c.code === "LOG_PICKER_CABIN_INTERLOCK_GATES"));
+assert.ok(commissionatore.safetyChecks.some((c) => c.code === "LOG_PICKER_ANCHOR_POINT_HARNESS" && c.normReference.includes("795") && c.normReference.includes("361")));
+assert.ok(commissionatore.safetyChecks.some((c) => c.code === "LOG_PICKER_EMERGENCY_LOWERING_VALVE"));
+
+// 6. Transpallet manuale pesatore
+const transpalletPesatore = catalogLogExact.machines.find((m) => m.machineKey === "transpallet_manuale_pesatore")!;
+assert.ok(transpalletPesatore.safetyChecks.some((c) => c.code === "LOG_MANUAL_OVERLOAD_VALVE"));
+assert.ok(transpalletPesatore.safetyChecks.some((c) => c.code === "LOG_MANUAL_PARKING_BRAKE_TILLER"));
+assert.ok(transpalletPesatore.safetyChecks.some((c) => c.code === "LOG_MANUAL_SCALE_CALIBRATION_CE"));
+
+// 7. Fasciapallet avvolgitore rotante
+const fasciapallet = catalogLogExact.machines.find((m) => m.machineKey === "fasciapallet_avvolgitore_rotante")!;
+assert.ok(fasciapallet.safetyChecks.some((c) => c.code === "LOG_WRAPPER_LIGHT_CURTAINS_SAFETY" && c.normReference.includes("13849-1")));
+assert.ok(fasciapallet.safetyChecks.some((c) => c.code === "LOG_WRAPPER_CARRIAGE_ANTIDROP_SAFETY"));
+assert.ok(fasciapallet.safetyChecks.some((c) => c.code === "LOG_WRAPPER_EMERGENCY_STOP_BUTTON"));
+
+// 8. Pedana di carico idraulica dock
+const dockRamp = catalogLogExact.machines.find((m) => m.machineKey === "pedana_di_carico_idraulica_dock")!;
+assert.ok(dockRamp.safetyChecks.some((c) => c.code === "LOG_DOCK_PARACHUTE_VALVE_SAFETY" && c.normReference.includes("1398")));
+assert.ok(dockRamp.safetyChecks.some((c) => c.code === "LOG_DOCK_SIDE_TOE_GUARDS"));
+assert.ok(dockRamp.safetyChecks.some((c) => c.code === "LOG_DOCK_MAINTENANCE_PROP_STRUT"));
+
+// 9. Cuneo bloccaruote TIR interbloccato
+const wheelChock = catalogLogExact.machines.find((m) => m.machineKey === "cuneo_bloccaruote_tir_interbloccato")!;
+assert.ok(wheelChock.safetyChecks.some((c) => c.code === "LOG_CHOCK_BAY_INTERLOCK_SYSTEM"));
+assert.ok(wheelChock.safetyChecks.some((c) => c.code === "LOG_CHOCK_TRAFFIC_LIGHTS_DUAL"));
+assert.ok(wheelChock.safetyChecks.some((c) => c.code === "LOG_CHOCK_ULTRASONIC_OPTICAL_SENSOR"));
+
+// 10. Pressa compattatrice cartoni
+const balerPress = catalogLogExact.machines.find((m) => m.machineKey === "pressa_compattatrice_scarrabile_cartoni")!;
+assert.ok(balerPress.safetyChecks.some((c) => c.code === "LOG_BALER_CODED_DOOR_INTERLOCK" && c.normReference.includes("16500")));
+assert.ok(balerPress.safetyChecks.some((c) => c.code === "LOG_BALER_TWO_HAND_EJECTION_CONTROL"));
+assert.ok(balerPress.safetyChecks.some((c) => c.code === "LOG_BALER_EMERGENCY_STOP_BUTTON"));
+
+// 11. Stazione ricarica batterie banco
+const batteryStation = catalogLogExact.machines.find((m) => m.machineKey === "stazione_ricarica_batterie_banco")!;
+assert.ok(batteryStation.safetyChecks.some((c) => c.code === "LOG_CHARGING_H2_DETECTOR_ALARM" && c.normReference.includes("62485-3")));
+assert.ok(batteryStation.safetyChecks.some((c) => c.code === "LOG_CHARGING_EXPLOSION_PROOF_VENTILATION"));
+assert.ok(batteryStation.safetyChecks.some((c) => c.code === "LOG_CHARGING_EYEWASH_SHOWER_SAFETY" && c.normReference.includes("15154")));
+assert.ok(batteryStation.safetyChecks.some((c) => c.code === "LOG_CHARGING_REMA_CONNECTORS_SAFETY"));
+
+// 12. Scaffalatura industriale portapallet
+const racking = catalogLogExact.machines.find((m) => m.machineKey === "scaffalatura_industriale_portapallet")!;
+assert.equal(racking.training.courseCode, "FORMAZ_SCALE_TRABATTELLI_DPI_QUOTA");
+assert.ok(racking.safetyChecks.some((c) => c.code === "LOG_RACK_ANNUAL_PRSES_INSPECTION" && c.normReference.includes("15635")));
+assert.ok(racking.safetyChecks.some((c) => c.code === "LOG_RACK_FLOOR_ANCHOR_BOLTS" && c.normReference.includes("15512")));
+assert.ok(racking.safetyChecks.some((c) => c.code === "LOG_RACK_LOCKING_PINS_BEAMS"));
+assert.ok(racking.safetyChecks.some((c) => c.code === "LOG_RACK_COLUMN_CORNER_PROTECTORS"));
+
+// 13. Lavapavimenti lavasciuga uomo a bordo
+const scrubber = catalogLogExact.machines.find((m) => m.machineKey === "lavapavimenti_lavasciuga_uomo_bordo")!;
+assert.ok(scrubber.safetyChecks.some((c) => c.code === "LOG_SCRUBBER_FLASHING_BACKUP_ALARM"));
+assert.ok(scrubber.safetyChecks.some((c) => c.code === "LOG_SCRUBBER_DEADMAN_SEAT_SENSOR"));
+assert.ok(scrubber.safetyChecks.some((c) => c.code === "LOG_SCRUBBER_SQUEEGEE_DRYING_EFFICIENCY"));
+
+// 14. Gruppo pompe antincendio sprinkler
+const firePump = catalogLogExact.machines.find((m) => m.machineKey === "gruppo_pompe_antincendio_sprinkler")!;
+assert.equal(firePump.training.courseCode, "FORMAZ_ANTINCENDIO_MAGAZZINO");
+assert.ok(firePump.safetyChecks.some((c) => c.code === "LOG_FIREPUMP_UNI_EN_12845_COMPLIANCE" && c.normReference.includes("12845")));
+assert.ok(firePump.safetyChecks.some((c) => c.code === "LOG_FIREPUMP_DIESEL_FUEL_RESERVE"));
+assert.ok(firePump.safetyChecks.some((c) => c.code === "LOG_FIREPUMP_DUAL_STARTER_BATTERIES"));
+assert.ok(firePump.safetyChecks.some((c) => c.code === "LOG_FIREPUMP_LOCKED_OPEN_VALVES"));
+
+// 15. Linea nastri trasportatori rulli
+const conveyor = catalogLogExact.machines.find((m) => m.machineKey === "linea_nastri_trasportatori_rulli")!;
+assert.ok(conveyor.safetyChecks.some((c) => c.code === "LOG_CONVEYOR_PULL_CORD_EMERGENCY" && c.normReference.includes("619")));
+assert.ok(conveyor.safetyChecks.some((c) => c.code === "LOG_CONVEYOR_NIP_ROLLER_GUARDS"));
+assert.ok(conveyor.safetyChecks.some((c) => c.code === "LOG_CONVEYOR_SIDE_GUARDS_ANTIFALL"));
+assert.ok(conveyor.safetyChecks.some((c) => c.code === "LOG_CONVEYOR_STARTUP_PREWARNING_ALARM"));
+
+// 16. Defibrillatore DAE polo logistico
+const logDae = catalogLogExact.machines.find((m) => m.machineKey === "defibrillatore_dae_polo_logistico")!;
+assert.equal(logDae.training.courseCode, "FORMAZ_BLSD_DAE");
+assert.ok(logDae.safetyChecks.some((c) => c.code === "LOG_DAE_ALARMED_CABINET" && c.normReference.includes("116/2021")));
+assert.ok(logDae.safetyChecks.some((c) => c.code === "LOG_DAE_PADS_EXPIRATION_SEAL"));
+assert.ok(logDae.safetyChecks.some((c) => c.code === "LOG_DAE_SELFTEST_BATTERY_STATUS"));
+assert.ok(logDae.safetyChecks.some((c) => c.code === "LOG_DAE_CPR_ACCESSORY_KIT"));
+assert.ok(logDae.safetyChecks.some((c) => c.code === "LOG_DAE_118_REGISTRATION"));
+
+// -------------------------------------------------------------
+// Test 77: Mappatura 1-a-1 tra ambienti Step 2 Logistica (env-log-*) -> Step 4 Macchine
+// -------------------------------------------------------------
+console.log("Test 77: Mappatura 1-a-1 tra ambienti Step 2 Logistica (env-log-*) -> Step 4 Macchine");
+const logEnvironments = [
+  { id: "env-log-baia-carico-scarico-dock", name: "Baia di Carico e Scarico Merci con Dock Leveller", category: "dock" },
+  { id: "env-log-corsie-scaffalature-portapallet", name: "Corsie Scaffalature Portapallet Intensive e Transito Carrelli", category: "warehouse" },
+  { id: "env-log-area-picking-smistamento", name: "Area Picking, Prelievo Manuale e Smistamento Colli", category: "warehouse" },
+  { id: "env-log-zona-imballaggio-fardellatura", name: "Zona Imballaggio, Fardellatura Pallet e Spedizioni", category: "packaging" },
+  { id: "env-log-area-ricarica-batterie-muletti", name: "Area di Ricarica Accumulatori e Manutenzione Batterie Muletti", category: "battery_charging" },
+  { id: "env-log-reparto-stoccaggio-infiammabili-adr", name: "Reparto Stoccaggio Merci Pericolose e Infiammabili ADR", category: "hazardous_materials" },
+  { id: "env-log-soppalco-picking-leggero", name: "Soppalco Industriale per Prelievo e Stoccaggio Colli Leggeri", category: "mezzanine" },
+  { id: "env-log-ufficio-spedizioni-bolle-dogana", name: "Ufficio Spedizioni, Gestione Bolle, Dogana e Ricezione Autisti", category: "office" },
+  { id: "env-log-locale-tecnico-compressori-antincendio", name: "Centrale Pompe Antincendio Sprinkler e Compressori Aria", category: "technical_room" },
+  { id: "env-log-piazzale-manovra-tir-parcheggio", name: "Piazzale Esterno di Manovra TIR, Parcheggio e Compattazione Rifiuti", category: "outdoor" },
+];
+
+const suggestedWithLogEnvs = getSuggestedMachinesForEnvironmentsAndAteco(logEnvironments, "52.10");
+
+// 1. env-log-baia-carico-scarico-dock -> pedana_di_carico_idraulica_dock, cuneo_bloccaruote_tir_interbloccato, transpallet_manuale_pesatore
+const logBaia = suggestedWithLogEnvs.filter((m) => m.targetEnvironmentId === "env-log-baia-carico-scarico-dock");
+assert.equal(logBaia.length, 3, "env-log-baia-carico-scarico-dock deve associare 3 macchine");
+assert.ok(logBaia.some((m) => m.machineKey === "pedana_di_carico_idraulica_dock"));
+assert.ok(logBaia.some((m) => m.machineKey === "cuneo_bloccaruote_tir_interbloccato"));
+assert.ok(logBaia.some((m) => m.machineKey === "transpallet_manuale_pesatore"));
+
+// 2. env-log-corsie-scaffalature-portapallet -> carrello_elevatore_frontale_elettrico, carrello_retrattile_alta_quota, scaffalatura_industriale_portapallet, lavapavimenti_lavasciuga_uomo_bordo
+const logCorsie = suggestedWithLogEnvs.filter((m) => m.targetEnvironmentId === "env-log-corsie-scaffalature-portapallet");
+assert.equal(logCorsie.length, 4, "env-log-corsie-scaffalature-portapallet deve associare 4 macchine");
+assert.ok(logCorsie.some((m) => m.machineKey === "carrello_elevatore_frontale_elettrico"));
+assert.ok(logCorsie.some((m) => m.machineKey === "carrello_retrattile_alta_quota"));
+assert.ok(logCorsie.some((m) => m.machineKey === "scaffalatura_industriale_portapallet"));
+assert.ok(logCorsie.some((m) => m.machineKey === "lavapavimenti_lavasciuga_uomo_bordo"));
+
+// 3. env-log-area-picking-smistamento -> commissionatore_verticale_picking, transpallet_elettrico_uomo_a_terra, transpallet_elettrico_uomo_bordo
+const logPicking = suggestedWithLogEnvs.filter((m) => m.targetEnvironmentId === "env-log-area-picking-smistamento");
+assert.equal(logPicking.length, 3, "env-log-area-picking-smistamento deve associare 3 macchine");
+assert.ok(logPicking.some((m) => m.machineKey === "commissionatore_verticale_picking"));
+assert.ok(logPicking.some((m) => m.machineKey === "transpallet_elettrico_uomo_a_terra"));
+assert.ok(logPicking.some((m) => m.machineKey === "transpallet_elettrico_uomo_bordo"));
+
+// 4. env-log-zona-imballaggio-fardellatura -> fasciapallet_avvolgitore_rotante, linea_nastri_trasportatori_rulli, transpallet_manuale_pesatore
+const logImballaggio = suggestedWithLogEnvs.filter((m) => m.targetEnvironmentId === "env-log-zona-imballaggio-fardellatura");
+assert.equal(logImballaggio.length, 3, "env-log-zona-imballaggio-fardellatura deve associare 3 macchine");
+assert.ok(logImballaggio.some((m) => m.machineKey === "fasciapallet_avvolgitore_rotante"));
+assert.ok(logImballaggio.some((m) => m.machineKey === "linea_nastri_trasportatori_rulli"));
+assert.ok(logImballaggio.some((m) => m.machineKey === "transpallet_manuale_pesatore"));
+
+// 5. env-log-area-ricarica-batterie-muletti -> stazione_ricarica_batterie_banco
+const logRicarica = suggestedWithLogEnvs.filter((m) => m.targetEnvironmentId === "env-log-area-ricarica-batterie-muletti");
+assert.equal(logRicarica.length, 1, "env-log-area-ricarica-batterie-muletti deve associare 1 macchina");
+assert.ok(logRicarica.some((m) => m.machineKey === "stazione_ricarica_batterie_banco"));
+
+// 6. env-log-reparto-stoccaggio-infiammabili-adr -> 0
+const logAdr = suggestedWithLogEnvs.filter((m) => m.targetEnvironmentId === "env-log-reparto-stoccaggio-infiammabili-adr");
+assert.equal(logAdr.length, 0, "env-log-reparto-stoccaggio-infiammabili-adr non deve associare macchine");
+
+// 7. env-log-soppalco-picking-leggero -> transpallet_manuale_pesatore, commissionatore_verticale_picking
+const logSoppalco = suggestedWithLogEnvs.filter((m) => m.targetEnvironmentId === "env-log-soppalco-picking-leggero");
+assert.equal(logSoppalco.length, 2, "env-log-soppalco-picking-leggero deve associare 2 macchine");
+assert.ok(logSoppalco.some((m) => m.machineKey === "transpallet_manuale_pesatore"));
+assert.ok(logSoppalco.some((m) => m.machineKey === "commissionatore_verticale_picking"));
+
+// 8. env-log-ufficio-spedizioni-bolle-dogana -> defibrillatore_dae_polo_logistico
+const logUfficio = suggestedWithLogEnvs.filter((m) => m.targetEnvironmentId === "env-log-ufficio-spedizioni-bolle-dogana");
+assert.equal(logUfficio.length, 1, "env-log-ufficio-spedizioni-bolle-dogana deve associare 1 macchina");
+assert.ok(logUfficio.some((m) => m.machineKey === "defibrillatore_dae_polo_logistico"));
+
+// 9. env-log-locale-tecnico-compressori-antincendio -> gruppo_pompe_antincendio_sprinkler
+const logTecnico = suggestedWithLogEnvs.filter((m) => m.targetEnvironmentId === "env-log-locale-tecnico-compressori-antincendio");
+assert.equal(logTecnico.length, 1, "env-log-locale-tecnico-compressori-antincendio deve associare 1 macchina");
+assert.ok(logTecnico.some((m) => m.machineKey === "gruppo_pompe_antincendio_sprinkler"));
+
+// 10. env-log-piazzale-manovra-tir-parcheggio -> pressa_compattatrice_scarrabile_cartoni, carrello_elevatore_frontale_elettrico
+const logPiazzale = suggestedWithLogEnvs.filter((m) => m.targetEnvironmentId === "env-log-piazzale-manovra-tir-parcheggio");
+assert.equal(logPiazzale.length, 2, "env-log-piazzale-manovra-tir-parcheggio deve associare 2 macchine");
+assert.ok(logPiazzale.some((m) => m.machineKey === "pressa_compattatrice_scarrabile_cartoni"));
+assert.ok(logPiazzale.some((m) => m.machineKey === "carrello_elevatore_frontale_elettrico"));
+
+// Tutte le macchine associate agli ambienti devono avere sourceReason === 'environment'
+const logEnvMappedMachines = suggestedWithLogEnvs.filter((m) => m.sourceReason === "environment");
+assert.equal(logEnvMappedMachines.length, 20, "Esattamente 20 associazioni ambiente devono avere sourceReason === 'environment'");
+
+// -------------------------------------------------------------
+// Test 78: Integrazione automatica macchine per ATECO 52.10 senza ambienti preventivi
+// -------------------------------------------------------------
+console.log("Test 78: Integrazione automatica macchine per ATECO 52.10 senza ambienti preventivi");
+const suggestedLogOnlyAteco = getSuggestedMachinesForEnvironmentsAndAteco([], "52.10");
+assert.equal(suggestedLogOnlyAteco.length, 16, "Devono essere suggerite tutte le 16 macchine della logistica");
+assert.ok(
+  suggestedLogOnlyAteco.every((m) => m.sourceReason === "ateco"),
+  "Tutte le macchine devono avere sourceReason === 'ateco' se nessun locale è stato specificato",
+);
+
+// Verifica fallback automatico identico per tutte le varianti di codice ATECO logistica
+for (const code of logisticsCodesToTest) {
+  const fallbackRes = getSuggestedMachinesForEnvironmentsAndAteco([], code);
+  assert.equal(fallbackRes.length, 16, `ATECO variant '${code}' deve restituire tutte le 16 macchine della logistica`);
+  assert.ok(fallbackRes.every((m) => m.sourceReason === "ateco"), `Tutte le macchine con ATECO variant '${code}' devono avere sourceReason === 'ateco'`);
+}
+
 console.log("=== TUTTI I TEST normativeMachineCatalog SUPERATI CON SUCCESSO! ===");
 
 

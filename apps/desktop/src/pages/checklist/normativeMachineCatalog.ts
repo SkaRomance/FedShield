@@ -405,6 +405,33 @@ export const TRAINING_REQUIREMENTS_LIBRARY: Record<string, MachineTrainingRequir
     requiresPatentinoAccordoSR: false,
     targetRoleDescription: "Addetti al magazzino, scaffalisti, addetti allestimento vetrine e prelievo merci in quota (4h)",
   },
+  commissionatori_elevabili: {
+    courseCode: "FORMAZ_COMMISSIONATORI_ELEVABILI",
+    courseTitle: "Abilitazione alla Conduzione di Carrelli Elevatori con Cabina o Posto Guida Elevabile (Commissionatori Verticali in Quota)",
+    normReference: "Accordo Stato-Regioni 22/02/2012, All. VI; D.Lgs. 81/2008 art. 73 c. 5",
+    minHours: 12,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: true,
+    targetRoleDescription: "Operatori incaricati dell'uso di carrelli commissionatori verticali con operatore sollevabile a quote > 1,2 m (12h con patentino, rinnovo quinquennale)",
+  },
+  addetto_scale_trabattelli_logistica: {
+    courseCode: "FORMAZ_SCALE_TRABATTELLI_DPI_QUOTA",
+    courseTitle: "Addestramento all'Uso Sicuro di Attrezzature per Lavori in Quota e Imbracature DPI III Categoria nel Magazzino",
+    normReference: "D.Lgs. 81/2008 art. 37, 71, 73, 77 e 115",
+    minHours: 8,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Addetti a lavori di manutenzione scaffalature, sblocco corsie e prelievo merci in quota con DPI anticaduta (8h, rinnovo quinquennale)",
+  },
+  addetto_antincendio_livello_2_3_magazzino: {
+    courseCode: "FORMAZ_ANTINCENDIO_MAGAZZINO",
+    courseTitle: "Addetto Antincendio in Attività di Stoccaggio Merci e Logistica (D.M. 02/09/2021 e D.P.R. 151/2011 Attività 70)",
+    normReference: "D.M. 02/09/2021; D.Lgs. 81/2008 art. 37 c. 9, art. 43",
+    minHours: 8,
+    frequencyYears: 5,
+    requiresPatentinoAccordoSR: false,
+    targetRoleDescription: "Addetti alla squadra antincendio ed evacuazione per depositi e magazzini intensivi (8h o 16h con idoneità VVF)",
+  },
 };
 
 // -------------------------------------------------------------
@@ -12994,113 +13021,880 @@ export const SECTOR_MACHINERY_CATALOGS: SectorMachineCatalog[] = [
     ],
   },
 
-  // 4. LOGISTICA, MAGAZZINO & TRASPORTI
+  // 17. LOGISTICA, MAGAZZINO, SPEDIZIONI E CENTRI DI SMISTAMENTO (ATECO 52.10, 52.1, 52.29, 52.2, 49.41, 49.4)
   {
     sectorKey: "logistica_magazzino",
-    sectorLabel: "Logistica, Magazzino, Spedizioni e Trasporti",
-    atecoPrefixes: ["49.", "52.", "53."],
+    sectorLabel: "Logistica, Magazzino Merci, Depositi Industriali e Spedizioni",
+    atecoPrefixes: [
+      "52.10",
+      "52.1",
+      "52.29",
+      "52.2",
+      "49.41",
+      "49.42",
+      "49.4",
+      "5210",
+      "5229",
+      "4941",
+      "494",
+      "52",
+      "49",
+      "53",
+    ],
     machines: [
+      // 1. Carrello Elevatore Frontale Elettrico (Toyota Traigo 80 / Linde E25 / Jungheinrich EFG 425)
       {
-        machineKey: "carrello_elevatore_frontale",
-        name: "Carrello Elevatore Frontale (Muletto)",
-        type: "Apparecchio di Sollevamento e Movimentazione",
-        suggestedManufacturer: "Toyota / Linde / Jungheinrich / Still",
-        suggestedModel: "Traigo 48 / E16C / RX20",
-        isSubjectToInailCheck: true, // Soggetto a verifica periodica annuale INAIL / ARPA
+        machineKey: "carrello_elevatore_frontale_elettrico",
+        name: "Carrello Elevatore Frontale Elettrico Controbilanciato",
+        type: "Carrello Semovente a Braccio / Montante con Sedile a Bordo",
+        suggestedManufacturer: "Toyota Material Handling / Linde Material Handling / Jungheinrich / Still",
+        suggestedModel: "Toyota Traigo 80 / Linde E25 / Jungheinrich EFG 425 / Still RX 60",
+        isSubjectToInailCheck: true,
         inailFrequencyYears: 1,
         training: TRAINING_REQUIREMENTS_LIBRARY.carrello_elevatore,
         safetyChecks: [
           {
-            code: "ROPS_FOPS_CANOPY",
-            title: "Tettuccio di Protezione Conducente (ROPS/FOPS)",
-            question: "Il carrello è dotato di tettuccio di protezione integro contro la caduta di carichi dall'alto (FOPS) e contro lo schiacciamento da ribaltamento (ROPS)?",
-            normReference: "D.Lgs. 81/2008 All. V p. 2.4; UNI EN ISO 3691-1",
+            code: "LOG_FORKLIFT_FOPS_ROPS_CABIN",
+            title: "Tettuccio di Protezione Conducente (FOPS / ROPS)",
+            question: "Il carrello è dotato di tettuccio di protezione rigido integro contro la caduta di oggetti dall'alto (FOPS) e contro lo schiacciamento dell'operatore in caso di ribaltamento laterale (ROPS)?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2.4; UNI EN ISO 3691-1:2020",
             defaultSeverity: 4,
             defaultSanctionable: true,
           },
           {
-            code: "SAFETY_SEATBELT",
-            title: "Cintura di Sicurezza o Sistema di Ritenuta Conducente",
-            question: "Il sedile di guida è provvisto di cintura di sicurezza con avvolgitore (o barriere laterali) obbligatoria per trattenere l'operatore in cabina in caso di ribaltamento?",
-            normReference: "D.Lgs. 81/2008 All. V p. 2.4 e art. 71; Linee Guida ISPESL",
+            code: "LOG_FORKLIFT_SEATBELT_RESTRAINT",
+            title: "Cintura di Sicurezza con Avvolgitore o Dispositivo di Ritenuta",
+            question: "Il sedile di guida è munito di cintura di sicurezza con arrotolatore funzionante o cancelletti/barriere di trattenuta conformi, obbligatori per impedire lo sbalzamento dell'operatore?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2.4 e art. 71; Linee Guida ISPESL Carrelli Semoventi",
             defaultSeverity: 4,
             defaultSanctionable: true,
           },
           {
-            code: "REVERSE_ALARM_FLASH",
-            title: "Cicalino Acustico Retromarcia e Segnalatore Lampeggiante / Blue Spot",
-            question: "Il carrello è provvisto di avvisatore acustico bitonale in retromarcia e proiettore luminoso (Blue Spot / lampeggiante) funzionanti per avvisare i pedoni?",
-            normReference: "D.Lgs. 81/2008 All. V p. 2.2; UNI EN ISO 3691-1",
+            code: "LOG_FORKLIFT_BLUE_SPOT_REVERSE_ALARM",
+            title: "Segnalatore Acustico di Retromarcia e Proiettore Luminoso Blue Spot / Red Zone",
+            question: "Risultano perfettamente funzionanti l'avvisatore acustico bitonale di retromarcia, il lampeggiante giallo a tetto e il faretto di proiezione visiva sul pavimento (Blue Spot / Safety Light)?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2.2; UNI EN ISO 3691-1:2020",
             defaultSeverity: 3,
             defaultSanctionable: true,
           },
           {
-            code: "FORK_WEAR_CHECK",
-            title: "Integrità Forche di Sollevamento (Usura Tallone < 10%)",
-            question: "Le forche di sollevamento risultano integre, prive di deformazioni permanenti, cricche visibili e con usura del tallone inferiore al 10% dello spessore nominale (ISO 5057)?",
+            code: "LOG_FORKLIFT_FORKS_WEAR_CRACKS",
+            title: "Integrità Strutturale Forche e Usura del Tallone (< 10%)",
+            question: "I bracci delle forche sono integri, esenti da cricche sui raccordi di curvatura, privi di svergolamenti e con usura del tallone inferiore al 10% dello spessore originale (ISO 5057)?",
             normReference: "ISO 5057; D.Lgs. 81/2008 art. 71 c. 8",
             defaultSeverity: 4,
             defaultSanctionable: true,
           },
           {
-            code: "LOAD_CAPACITY_PLATE",
-            title: "Targhetta del Diagramma Portate Visibile al Posto Guida",
-            question: "È chiaramente leggibile e integra la targhetta con il diagramma delle portate residue in funzione dell'altezza di sollevamento e del baricentro del carico?",
+            code: "LOG_FORKLIFT_INAIL_ANNUAL_INSPECTION",
+            title: "Verifica Periodica Annuale INAIL / ARPA / Soggetto Abilitato",
+            question: "Il carrello elevatore con forche è sottoposto a verifica periodica annuale con verbale valido rilasciato da INAIL, ASL/ARPA o Soggetto Abilitato ex art. 71 c. 11?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 11 e Allegato VII; D.M. 11/04/2011",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_FORKLIFT_CAPACITY_CHART_PLATE",
+            title: "Targa di Portata Nominale e Diagramma Carichi Residui in Quota",
+            question: "È chiaramente visibile dal posto di guida e leggibile la targa metallica indelebile indicante la portata nominale e il diagramma di declassamento carichi in funzione di altezza e baricentro?",
             normReference: "D.Lgs. 81/2008 All. V p. 1.2; UNI EN ISO 3691-1",
             defaultSeverity: 3,
             defaultSanctionable: true,
           },
         ],
       },
+
+      // 2. Carrello Retrattile Grandi Altezze (Jungheinrich ETV 320 / Linde R16 / Still FM-X)
       {
-        machineKey: "transpallet_elettrico",
-        name: "Transpallet Elettrico con Timone",
-        type: "Carrello per Movimentazione Bassa",
-        suggestedManufacturer: "Jungheinrich / BT Toyota / Crown",
-        suggestedModel: "EJE 116 / Levio LWE180",
-        isSubjectToInailCheck: false,
-        training: TRAINING_REQUIREMENTS_LIBRARY.transpallet_elettrico,
+        machineKey: "carrello_retrattile_alta_quota",
+        name: "Carrello Elevatore Retrattile per Corsie Strette e Grandi Altezze",
+        type: "Carrello Retrattile Elettrico con Montante Estensibile e Cabina Operatore",
+        suggestedManufacturer: "Jungheinrich / Linde Material Handling / Still / Toyota BT",
+        suggestedModel: "Jungheinrich ETV 320 / Linde R16 / Still FM-X / Toyota BT Reflex RRE",
+        isSubjectToInailCheck: true,
+        inailFrequencyYears: 1,
+        training: TRAINING_REQUIREMENTS_LIBRARY.carrello_elevatore,
         safetyChecks: [
           {
-            code: "BELLY_BUTTON_SAFETY",
-            title: "Pulsante Antinfortunistico Antipizzicamento sul Timone ('Pulsante Pancia')",
-            question: "Sulla testata del timone è presente e funzionante il pulsante di sicurezza rosso che inverte immediatamente la marcia se premuto contro il corpo dell'operatore?",
-            normReference: "UNI EN ISO 3691-1 punto 4.4.2; D.Lgs. 81/2008 All. V",
+            code: "LOG_REACH_FOPS_LEXAN_CANOPY",
+            title: "Tettuccio FOPS con Griglia Protettiva o Vetro Blindato Lexan",
+            question: "La cabina è equipaggiata con tettuccio di protezione FOPS con visibilità ottimale mediante griglia profilata o lastra in policarbonato/lexan priva di fessurazioni per proteggere l'operatore dalla caduta di colli in quota?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2.4; UNI EN ISO 3691-1:2020",
             defaultSeverity: 4,
             defaultSanctionable: true,
           },
           {
-            code: "DEAD_MAN_BRAKE",
-            title: "Freno di Stazionamento Elettromagnetico a Uomo Morto",
-            question: "Portando il timone in posizione verticale o completamente orizzontale il transpallet frena automaticamente in sicurezza?",
-            normReference: "UNI EN ISO 3691-1 punto 4.3; D.Lgs. 81/2008 All. V",
+            code: "LOG_REACH_FORK_CAMERA_MONITOR",
+            title: "Telecamera su Piastra Portaforche e Monitor a Colori in Cabina",
+            question: "Per sollevamenti superiori a 6-12 metri, il carrello dispone di telecamera su piastra forche e monitor a bordo funzionanti con puntatore laser di centraggio pallet?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 7; Linee Guida INAIL Depositi Intensivi",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_REACH_CURVE_SPEED_LIMITER",
+            title: "Dispositivo di Rallentamento Automatico in Curva e Finecorsa Altezza",
+            question: "Il sistema elettronico di controllo Curve Control limita automaticamente la velocità di traslazione in sterzata e riduce la velocità quando le forche sono sollevate oltre l'altezza di sicurezza?",
+            normReference: "UNI EN ISO 3691-1:2020 punto 4.2; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_REACH_CHAINS_WEAR_ELONGATION",
+            title: "Verifica Catene di Sollevamento Montante (Allungamento < 3%)",
+            question: "Le catene Fleyer del montante telescopico sono lubrificate, prive di maglie grippate, fessurate o con allungamento da usura superiore al 3% misurato con calibro per catene?",
+            normReference: "UNI ISO 4309; D.Lgs. 81/2008 art. 71 c. 8",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_REACH_INAIL_PERIODIC_CHECK",
+            title: "Verifica Periodica Annuale INAIL ex art. 71 c. 11",
+            question: "Il carrello retrattile è regolarmente sottoposto a verifica annuale INAIL / ARPA o Soggetto Abilitato con relativo verbale conservato nel registro della sicurezza?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 11 e All. VII; D.M. 11/04/2011",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 3. Transpallet Elettrico Uomo a Bordo (Toyota Levio LPE200 / Jungheinrich ERE 225 / Still EXH-S)
+      {
+        machineKey: "transpallet_elettrico_uomo_bordo",
+        name: "Transpallet Elettrico con Pedana Operatore e Sponde Laterali",
+        type: "Transpallet Elettrico a Bassa Elevazione con Guida a Bordo (Pedana Ribaltabile/Fissa)",
+        suggestedManufacturer: "Toyota Material Handling / Jungheinrich / Still / Crown",
+        suggestedModel: "Toyota Levio LPE200 / Jungheinrich ERE 225 / Still EXH-S / Crown WT 3000",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.transpallet_elettrico,
+        safetyChecks: [
+          {
+            code: "LOG_RIDER_SIDE_BARRIERS_INTERLOCK",
+            title: "Sponde Laterali di Protezione con Sensore Interbloccato",
+            question: "Le sponde laterali ripiegabili di contenimento operatore sono robuste, prive di giochi e interbloccate elettricamente (la velocità massima è consentita solo a sponde alzate e chiuse)?",
+            normReference: "UNI EN ISO 3691-1:2020 punto 4.4; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_RIDER_OPERATOR_PLATFORM_DEADMAN",
+            title: "Pedana Ammortizzata con Interruttore a Uomo Presente (Dead-Man)",
+            question: "La pedana ribaltabile presenta rivestimento in gomma antiscivolo integro e microinterruttore di presenza piedi che disinserisce la trazione se l'operatore scende dalla pedana?",
+            normReference: "UNI EN ISO 3691-1:2020 punto 4.4.1; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_RIDER_BELLY_BUTTON_REVERSE",
+            title: "Pulsante Antinfortunistico Antipizzicamento sul Timone ('Pulsante Pancia')",
+            question: "Sulla testa del timone è presente e attivo il pulsante d'inversione rapida marcia che inverte istantaneamente il moto del mezzo al contatto accidentale con il torace/addome?",
+            normReference: "UNI EN ISO 3691-1:2020 punto 4.4.2; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_RIDER_SPEED_REDUCTION_STEERING",
+            title: "Sistema Riduzione Velocità in Sterzata (Curve Control)",
+            question: "Il carrello riduce automaticamente e proporzionalmente la velocità di traslazione durante le manovre di svolta per prevenire rischi di ribaltamento laterale e disarcionamento?",
+            normReference: "UNI EN ISO 3691-1:2020; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_RIDER_EMERGENCY_DISCONNECT",
+            title: "Disconnettore Rapido Batteria e Arresto d'Emergenza",
+            question: "È installato e facilmente azionabile dall'operatore il pulsante o leva di sgancio rapido del connettore batteria/arresto d'emergenza in caso di anomalia della trazione?",
+            normReference: "UNI EN ISO 3691-1:2020; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 4. Transpallet Elettrico Uomo a Terra (Toyota LWE160 / Jungheinrich EJE 116 / Still ECU 15)
+      {
+        machineKey: "transpallet_elettrico_uomo_a_terra",
+        name: "Transpallet Elettrico con Guida da Terra e Timone",
+        type: "Transpallet Elettrico con Conducente a Terra",
+        suggestedManufacturer: "Toyota Material Handling / Jungheinrich / Still / Linde Material Handling",
+        suggestedModel: "Toyota Levio LWE160 / Jungheinrich EJE 116 / Still ECU 15 / Linde T16",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.transpallet_elettrico,
+        safetyChecks: [
+          {
+            code: "LOG_PEDESTRIAN_BELLY_SAFETY",
+            title: "Pulsante Antinfortunistico Antipizzicamento Timone a Reversione Automatica",
+            question: "Il pulsante di sicurezza rosso sul timone inverte immediatamente il senso di marcia in caso di pressione accidentale contro il corpo del magazziniere secondo norma UNI EN ISO 3691-1?",
+            normReference: "UNI EN ISO 3691-1:2020 punto 4.4.2; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_PEDESTRIAN_DEAD_MAN_BRAKE",
+            title: "Frenatura Automatica Timone a Uomo Morto (Dead-Man Brake)",
+            question: "Rilasciando il timone in posizione verticale o abbassandolo completamente a terra il transpallet applica istantaneamente il freno elettromagnetico di stazionamento?",
+            normReference: "UNI EN ISO 3691-1:2020 punto 4.3; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_PEDESTRIAN_CREEP_SPEED_TURTLE",
+            title: "Funzione Marcia Lenta 'Tartaruga' a Timone Verticale",
+            question: "Il comando di marcia lenta controllata a timone verticale consente manovre millimetriche di scarico camion o corsie strette a velocità ridotta di sicurezza (< 2,5 km/h)?",
+            normReference: "UNI EN ISO 3691-1:2020; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "LOG_PEDESTRIAN_FOOT_PROTECTION_SKIRT",
+            title: "Carenatura Ruota Motrice con Bordo Salvapiedi (< 35 mm)",
+            question: "Il telaio inferiore e il carter attorno alla ruota motrice e alle ruote pivotanti mantengono una luce libera da terra non superiore a 35 mm per impedire lo schiacciamento dei piedi?",
+            normReference: "UNI EN ISO 3691-1:2020 punto 4.7.1; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_PEDESTRIAN_BATTERY_LOCK_SAFETY",
+            title: "Blocco Meccanico Batteria e Cavo di Ricarica Conforme",
+            question: "Il cofano e il fermo di fissaggio del pacco batterie sono saldamente bloccati per evitare spostamenti del baricentro o fuoriuscita durante frenate brusche?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 4; CEI EN 62485-3",
             defaultSeverity: 3,
             defaultSanctionable: true,
           },
         ],
       },
+
+      // 5. Commissionatore Verticale Picking in Quota (Linde V10 / Jungheinrich EKS 215 / Toyota BT Optio)
       {
-        machineKey: "pressa_compattatrice",
-        name: "Pressa Compattatrice per Cartone e Plastica",
-        type: "Macchina per Imballaggi e Rifiuti",
-        suggestedManufacturer: "Orwak / Strautmann / Bramidan",
-        suggestedModel: "Compact 3110 / B4",
+        machineKey: "commissionatore_verticale_picking",
+        name: "Commissionatore Verticale ad Alta Quota (Order Picker)",
+        type: "Carrello Commissionatore con Posto Guida e Cabina Elevabile",
+        suggestedManufacturer: "Linde Material Handling / Jungheinrich / Toyota BT / Still",
+        suggestedModel: "Linde V10 / Jungheinrich EKS 215 / Toyota BT Optio OME / Still EKX",
+        isSubjectToInailCheck: true,
+        inailFrequencyYears: 1,
+        training: TRAINING_REQUIREMENTS_LIBRARY.commissionatori_elevabili,
+        safetyChecks: [
+          {
+            code: "LOG_PICKER_CABIN_INTERLOCK_GATES",
+            title: "Cancelli di Protezione Cabina con Microinterruttori Interbloccati",
+            question: "I cancelletti o barriere laterali della cabina sollevabile sono dotati di microinterruttori di sicurezza interbloccati che impediscono sollevamento o traslazione a cancelli aperti?",
+            normReference: "UNI EN ISO 3691-3:2017; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_PICKER_ANCHOR_POINT_HARNESS",
+            title: "Punto di Ancoraggio EN 795 e Imbracatura Anticaduta UNI EN 361",
+            question: "In cabina è presente un punto di ancoraggio certificato UNI EN 795 a cui l'operatore aggancia obbligatoriamente il cordino con assorbitore e imbracatura di trattenuta anticaduta?",
+            normReference: "D.Lgs. 81/2008 art. 77, 111 e 115; UNI EN 795; UNI EN 361",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_PICKER_EMERGENCY_LOWERING_VALVE",
+            title: "Valvola / Comando di Discesa Manuale di Emergenza da Terra",
+            question: "È presente sul corpo macchina a terra la valvola o pompa idraulica manuale d'emergenza, azionabile dall'esterno per calare a terra la cabina in caso di malore dell'operatore o guasto?",
+            normReference: "UNI EN ISO 3691-3:2017 punto 4.3; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_PICKER_AISLE_SAFETY_SENSORS",
+            title: "Sensori Anticollisione di Fine Corsia e Rallentamento Automatico",
+            question: "Nelle corsie con guida a rulli o filoguidata, sono attivi i sensori di fine corsia e i sistemi di arresto o rallentamento automatico di sicurezza?",
+            normReference: "UNI EN ISO 3691-3:2017; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_PICKER_INAIL_VERIFICATION_BOOK",
+            title: "Verifica Periodica Annuale INAIL Carrelli a Cabina Elevabile",
+            question: "Il commissionatore con posto guida sollevabile a quota > 1,2 m è sottoposto a verifica periodica annuale INAIL / ARPA con verbale registrato sul libretto dell'attrezzatura?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 11 e All. VII; D.M. 11/04/2011",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 6. Transpallet Manuale Pesatore (Pramac GS/P / Jungheinrich AMW 22 / RAVAS 3200)
+      {
+        machineKey: "transpallet_manuale_pesatore",
+        name: "Transpallet Idraulico Manuale con Pesa Integrata",
+        type: "Carrello Idraulico Manuale a Forche con Bilancia Elettronica",
+        suggestedManufacturer: "Pramac Lifter / Jungheinrich / RAVAS / Toyota BT",
+        suggestedModel: "Pramac GS/P 25 / Jungheinrich AMW 22 / RAVAS 3200 / Toyota BT Pro Lifter",
         isSubjectToInailCheck: false,
         training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
         safetyChecks: [
           {
-            code: "PRESS_DOOR_INTERLOCK",
-            title: "Interblocco di Sicurezza Portellone di Carico",
-            question: "Il piatto pressante scende solo a portellone anteriore completamente chiuso con microinterruttore di sicurezza codificato a prova di manomissione?",
+            code: "LOG_MANUAL_OVERLOAD_VALVE",
+            title: "Valvola Idraulica di Sovraccarico Tarata (Portata Nominale)",
+            question: "Il circuito oleodinamico del timone è provvisto di valvola limitatrice di pressione tarata che blocca il sollevamento in caso di superamento della portata massima (es. 2000-2500 kg)?",
+            normReference: "UNI EN ISO 3691-5:2020; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_MANUAL_PARKING_BRAKE_TILLER",
+            title: "Freno di Stazionamento e Controllo Discesa su Timone",
+            question: "La leva manuale a tre posizioni sul timone garantisce abbassamento progressivo e controllato del carico e il freno di stazionamento tiene saldamente bloccato il mezzo?",
+            normReference: "UNI EN ISO 3691-5:2020; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_MANUAL_HANDLE_SPRING_RETURN",
+            title: "Ritorno Automatico a Molla del Timone in Posizione Verticale",
+            question: "Il timone di traino ritorna automaticamente e rapidamente in posizione verticale una volta rilasciato, evitando ostacoli di inciampo nei corridoi di transito?",
+            normReference: "UNI EN ISO 3691-5:2020; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: false,
+          },
+          {
+            code: "LOG_MANUAL_WHEELS_ROLLERS_INTEGRITY",
+            title: "Integrità Rulli Anteriori e Ruote Direzionali in Poliuretano",
+            question: "I rulli sotto le forche e le ruote direzionali sono integri, esenti da sfaldature, solchi profondi o cuscinetti grippati che comporterebbero eccessivo sforzo di spinta e trazione?",
+            normReference: "D.Lgs. 81/2008 Titolo VI e art. 71; ISO 11228-2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_MANUAL_SCALE_CALIBRATION_CE",
+            title: "Conformità Metrologica e Marcatura CE della Bilancia Elettronica",
+            question: "Il display della bilancia elettronica e i sensori a celle di carico risultano calibrati, alimentati a batteria protetta e conformi alla marcatura metrologica CE?",
+            normReference: "Direttiva MID 2014/32/UE; D.Lgs. 81/2008 art. 71 c. 8",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 7. Fasciapallet Avvolgitore Rotante (Robopac Masterplat Plus / Atlanta Stretch Eva / Noxon)
+      {
+        machineKey: "fasciapallet_avvolgitore_rotante",
+        name: "Fasciapallet e Avvolgitore a Tavola Rotante per Pallet",
+        type: "Macchina Avvolgitrice Semiautomatica con Film Estensibile",
+        suggestedManufacturer: "Robopac / Atlanta Stretch / Noxon / Cyklop",
+        suggestedModel: "Robopac Masterplat Plus / Atlanta Stretch Eva / Noxon Ekko / Cyklop CSM",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "LOG_WRAPPER_LIGHT_CURTAINS_SAFETY",
+            title: "Barriere Ottiche Fotoelettriche Classe 4 / Tappeto Sensibile",
+            question: "La zona di rotazione del piatto è protetta da fotocellule di sicurezza Classe 4 o barriere perimetrali conformi a UNI EN ISO 13849-1 che arrestano il piatto in caso di intrusione operatore?",
+            normReference: "UNI EN 415-6:2021; UNI EN ISO 13849-1; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_WRAPPER_CARRIAGE_ANTIDROP_SAFETY",
+            title: "Frizione Prestiro Protetta e Tastatore Anticaduta Carrello Bobina",
+            question: "Il carrello portabobina è dotato di microinterruttore inferiore antipizzicamento piedi e di sistema meccanico paracadute anticaduta in caso di rottura della catena o cinghia di sollevamento?",
+            normReference: "UNI EN 415-6:2021; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_WRAPPER_EMERGENCY_STOP_BUTTON",
+            title: "Pulsante di Arresto d'Emergenza a Ritenuta Meccanica",
+            question: "Sul quadro comandi e sulla colonna operatore è presente il pulsante di emergenza a fungo a ritenuta con riarmo manuale facilmente raggiungibile durante tutte le fasi del ciclo?",
+            normReference: "UNI EN ISO 13850:2015; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_WRAPPER_ROTATING_TABLE_GUARDS",
+            title: "Carter di Protezione Catena e Motoriduttore Piatto Rotante",
+            question: "Tutti gli organi meccanici in movimento, la catena di trasmissione della tavola rotante e i rinvii sono segregati da carter fissi smontabili solo con attrezzo dedicato?",
+            normReference: "UNI EN ISO 14120; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_WRAPPER_ACOUSTIC_OPTICAL_SIGNAL",
+            title: "Segnalatore Acustico di Avvio e Lampeggiante Ciclo Attivo",
+            question: "Prima dell'avvio del piatto rotante scatta un preavviso acustico e il lampeggiante giallo rimane acceso durante l'intero ciclo di fardellatura e avvolgimento?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2.2; UNI EN 415-6",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 8. Pedana di Carico Idraulica Dock (Armo Loading Bay / Campisa / Inkema)
+      {
+        machineKey: "pedana_di_carico_idraulica_dock",
+        name: "Pedana e Rampa di Carico Idraulica a Banchina (Dock Leveller)",
+        type: "Rampa di Raccordo Elettroidraulica a Labbro Telescopico / Basculante",
+        suggestedManufacturer: "Armo / Campisa / Inkema / Crawford Assa Abloy",
+        suggestedModel: "Armo Loading Bay / Campisa Swivelling Lip / Inkema RH / Crawford 6010",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "LOG_DOCK_PARACHUTE_VALVE_SAFETY",
+            title: "Valvola Idraulica Paracadute di Blocco Istantaneo Discesa",
+            question: "I cilindri idraulici della rampa sono provvisti di valvola di sicurezza paracadute che blocca all'istante la caduta del pianale in caso di improvvisa partenza dell'autocarro o rottura tubi?",
+            normReference: "UNI EN 1398:2009; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_DOCK_SIDE_TOE_GUARDS",
+            title: "Bandelle Laterali Telescopiche Salvapiedi Giallo/Nere Anticesoiamento",
+            question: "I fianchi della pedana sono muniti di bandelle laterali metalliche telescopiche con zebratura gialla e nera per evitare il cesoiamento o lo schiacciamento dei piedi durante il movimento?",
+            normReference: "UNI EN 1398:2009 punto 5.2.3; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_DOCK_MAINTENANCE_PROP_STRUT",
+            title: "Puntone Meccanico di Sostegno per Manutenzione in Fossa",
+            question: "Sotto il pianale è alloggiato il puntone rigido di sicurezza giallo che consente di bloccare meccanicamente la rampa sollevata prima di consentire l'accesso dei tecnici nella fossa?",
+            normReference: "UNI EN 1398:2009 punto 5.2.8; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_DOCK_SECTIONAL_DOOR_INTERLOCK",
+            title: "Interblocco Funzionale con Portone Sezionale e Sigillante",
+            question: "La centrale di controllo consente l'azionamento della rampa solo a portone sezionale completamente aperto e il labbro poggia stabilmente sul pianale dell'autocarro per almeno 100 mm?",
+            normReference: "UNI EN 1398:2009; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_DOCK_BUFFER_RUBBER_BUMPERS",
+            title: "Tamponi Respinti Paracolpi in Gomma Rinforzata a Banchina",
+            question: "I respingenti paracolpi in gomma/acciaio sui due lati della baia sono integri e sporgenti a sufficienza per assorbire l'urto dell'autocarro e proteggere la struttura dell'edificio?",
+            normReference: "UNI EN 1398:2009; D.Lgs. 81/2008 All. IV",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 9. Cuneo Bloccaruote TIR Interbloccato (Castelnovo Safety Wheel / G-S Cuneo Elettronico / Dok-Lok)
+      {
+        machineKey: "cuneo_bloccaruote_tir_interbloccato",
+        name: "Cuneo Bloccaruote TIR Elettronico Interbloccato con Baia di Carico",
+        type: "Dispositivo di Ritenuta e Sicurezza Banchina Automezzi Pesanti",
+        suggestedManufacturer: "Castelnovo Safety Wheel / G-S Cuneo Elettronico / Dok-Lok / Calematic",
+        suggestedModel: "Castelnovo CSW-400 / G-S Cuneo / Dok-Lok RHR / Calematic SC",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "LOG_CHOCK_BAY_INTERLOCK_SYSTEM",
+            title: "Interblocco Elettrico con Rampa Idraulica e Portone Baia",
+            question: "Il sistema interblocca il consenso elettrico: la rampa di carico non può essere abbassata e il portone non si apre se il cuneo non è correttamente posizionato contro la ruota del TIR?",
+            normReference: "D.Lgs. 81/2008 art. 71 c. 4; Linee Guida INAIL Sicurezza Baie di Carico",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_CHOCK_TRAFFIC_LIGHTS_DUAL",
+            title: "Semaforo Esterno ed Interno Sincronizzati (Rosso / Verde)",
+            question: "I semafori sono perfettamente funzionanti: semaforo esterno rosso (camion bloccato, non partire) e semaforo interno verde (autorizzazione al carico con carrello)?",
+            normReference: "UNI EN 1398; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_CHOCK_ULTRASONIC_OPTICAL_SENSOR",
+            title: "Sensore di Presenza Pneumatico e Anti-Aggiramento sul Cuneo",
+            question: "Il cuneo è munito di sensore induttivo o ottico/ultrasuoni che rileva l'effettivo contatto con il battistrada della ruota del camion e non può essere ingannato poggiandolo a terra?",
+            normReference: "D.Lgs. 81/2008 art. 71; Linee Guida INAIL",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_CHOCK_ARMORED_SPIRAL_CABLE",
+            title: "Integrità Cavo Spiralato Corazzato con Allarme Rimozione Prematura",
+            question: "Il cavo spiralato di collegamento alla banchina è integro, antischiacciamento e fa scattare un allarme acustico in caso di distacco o spostamento prematuro del cuneo a portone aperto?",
+            normReference: "D.Lgs. 81/2008 All. V; CEI EN 60204-1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_CHOCK_ERGONOMIC_HANDLE_WHEELS",
+            title: "Maniglione Alto Ergonomico e Ruote di Traslazione Salvapulizia",
+            question: "Il cuneo dispone di manico ergonomico lungo e ruote piene che evitano piegamenti della schiena dell'addetto a terra prevenendo sovraccarico biomeccanico lombare?",
+            normReference: "D.Lgs. 81/2008 Titolo VI; ISO 11228-1",
+            defaultSeverity: 2,
+            defaultSanctionable: false,
+          },
+        ],
+      },
+
+      // 10. Pressa Compattatrice Scarrabile Cartoni (Bramidan B50 / Orwak 3620 / Strautmann BaleTainer)
+      {
+        machineKey: "pressa_compattatrice_scarrabile_cartoni",
+        name: "Pressa Compattatrice Elettroidraulica per Cartoni e Imballaggi",
+        type: "Pressa Compattatrice Verticale / Orizzontale a Piatto Mobile",
+        suggestedManufacturer: "Bramidan / Orwak / Strautmann / Macfab",
+        suggestedModel: "Bramidan B50 / Orwak 3620 / Strautmann BaleTainer / Macfab 500",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "LOG_BALER_CODED_DOOR_INTERLOCK",
+            title: "Microinterruttore Codificato di Sicurezza su Portellone di Carico",
+            question: "Il portellone frontale di caricamento è provvisto di microinterruttore di sicurezza codificato magnetico o a cerniera che arresta immediatamente il piatto pressatore in caso di apertura?",
             normReference: "UNI EN 16500:2014; D.Lgs. 81/2008 All. V",
             defaultSeverity: 4,
             defaultSanctionable: true,
           },
           {
-            code: "TWO_HAND_EJECTION",
-            title: "Comando di Espulsione Balla a Due Mani",
-            question: "Il comando di ribaltamento/espulsione della balla richiede l'azionamento controllato a due mani o protezione per evitare schiacciamento arti?",
+            code: "LOG_BALER_TWO_HAND_EJECTION_CONTROL",
+            title: "Comando Bimanuale a Uomo Presente per Espulsione Balla Legata",
+            question: "L'azionamento del meccanismo idraulico di ribaltamento ed espulsione della balla richiede l'impiego simultaneo di entrambe le mani per evitare contatti con organi in movimento?",
+            normReference: "UNI EN 16500:2014; UNI EN ISO 13851; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_BALER_EMERGENCY_STOP_BUTTON",
+            title: "Pulsante di Arresto d'Emergenza a Fungo con Riarmo Manuale",
+            question: "Sul pannello comandi è presente e funzionante il fungo di arresto d'emergenza rosso su sfondo giallo a ritenuta meccanica per disattivare istantaneamente la centralina idraulica?",
+            normReference: "UNI EN ISO 13850:2015; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_BALER_RETAINER_CLAWS_SAFETY",
+            title: "Arpioni di Ritenuta Meccanica Antiritorno Materiale Elastico",
+            question: "All'interno della camera di compattazione sono presenti e mobili gli arpioni antiritorno in acciaio che impediscono la riespansione violenta di cartone o film verso l'apertura?",
             normReference: "UNI EN 16500:2014; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_BALER_HYDRAULIC_CIRCUIT_INTEGRITY",
+            title: "Assenza Perdite Olio Idraulico e Manometro Pressione Tarato",
+            question: "Tubi flessibili, raccordi idraulici e cilindro pressatore sono esenti da trafilamenti di olio e il circuito idraulico è provvisto di valvola di massima pressione certificata?",
+            normReference: "UNI EN ISO 4413:2012; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 11. Stazione Ricarica Batterie Banco (Fronius Selectiva / Micropower / Enersys Hawker)
+      {
+        machineKey: "stazione_ricarica_batterie_banco",
+        name: "Stazione e Banco di Ricarica Accumulatori Trazione Muletti",
+        type: "Impianto Elettrico Centralizzato Raddrizzatori / Caricabatterie Industriali",
+        suggestedManufacturer: "Fronius / Micropower Group / EnerSys Hawker / Zivan",
+        suggestedModel: "Fronius Selectiva 4.0 / Micropower Access 50 / EnerSys Lifetech Modular / Zivan SG3",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "LOG_CHARGING_H2_DETECTOR_ALARM",
+            title: "Rilevatore di Gas Idrogeno (H2) con Allarme Ottico-Acustico e Interblocco",
+            question: "Nel locale o zona di ricarica è installato a soffitto un sensore di idrogeno tarato che in caso di superamento della soglia (1% H2) attiva allarme acustico e ventilazione forzata d'emergenza?",
+            normReference: "CEI EN 62485-3:2015; D.Lgs. 81/2008 Titolo XI (ATEX)",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_CHARGING_EXPLOSION_PROOF_VENTILATION",
+            title: "Impianto di Aspirazione Forzata ATEX e Aerazione Naturale",
+            question: "L'impianto di ventilazione garantisce la portata d'aria minima calcolata secondo norma CEI EN 62485-3 per evitare formazione di atmosfere esplosive con motore ed elettroaspiratore certificati ATEX?",
+            normReference: "CEI EN 62485-3; D.Lgs. 81/2008 art. 71 e Titolo XI",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_CHARGING_EYEWASH_SHOWER_SAFETY",
+            title: "Doccia Lavaocchi d'Emergenza Collegata a Rete Idrica",
+            question: "A distanza inferiore a 6 metri dai banchi di ricarica è presente una postazione lavaocchi con doccetta d'emergenza ad acqua corrente funzionante e verificata periodicamente?",
+            normReference: "D.Lgs. 81/2008 All. IV p. 2.1.6; UNI EN 15154-1/2",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_CHARGING_REMA_CONNECTORS_SAFETY",
+            title: "Connettori di Potenza REMA / Anderson Antiscintilla e Cavi Integri",
+            question: "I connettori di potenza per batterie trazione dispongono di contatti ausiliari pilota antiscintilla per impedire archi elettrici in fase di disconnessione e i cavi non presentano screpolature?",
+            normReference: "CEI EN 62485-3; D.Lgs. 81/2008 Titolo III",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_CHARGING_ACID_SPILL_CONTAINMENT",
+            title: "Vasca di Contenimento Antiacido e Kit Neutralizzante Elettrolita",
+            question: "I banchi o pavimentazioni di ricarica sono protetti da rivestimento antiacido e sul posto sono disponibili kit di sostanze neutralizzanti assorbenti per solforico (D.M. 24/01/2011)?",
+            normReference: "D.M. 24/01/2011; D.Lgs. 81/2008 art. 225 e All. IV",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 12. Scaffalatura Industriale Portapallet (Marcegaglia / Metalsistem Superbo / Mecalux)
+      {
+        machineKey: "scaffalatura_industriale_portapallet",
+        name: "Scaffalatura Metallica Industriale Portapallet Pesante",
+        type: "Sistema Statico di Stoccaggio Merci su Pallet per Corsie Intensive",
+        suggestedManufacturer: "Marcegaglia Buildtech / Metalsistem / Mecalux / Modulblock",
+        suggestedModel: "Marcegaglia Heavy Rack / Metalsistem Superbo / Mecalux Pallet Racking / Modulblock Heavy",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.addetto_scale_trabattelli_logistica,
+        safetyChecks: [
+          {
+            code: "LOG_RACK_ANNUAL_PRSES_INSPECTION",
+            title: "Ispezione Periodica Annuale Esperti PRSES ex UNI EN 15635",
+            question: "La scaffalatura è sottoposta a verifica tecnica annuale documentata da parte di un tecnico esperto PRSES con classificazione dei danni secondo i livelli verde, giallo e rosso (UNI EN 15635)?",
+            normReference: "UNI EN 15635:2009; D.Lgs. 81/2008 art. 71 c. 8",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_RACK_FLOOR_ANCHOR_BOLTS",
+            title: "Tassellatura al Pavimento delle Piastre di Base dei Montanti",
+            question: "Tutti i montanti delle spalle sono saldamente ancorati al pavimento in calcestruzzo con almeno due tasselli di ancoraggio meccanici/chimici intatti conformi alle specifiche del fabbricante?",
+            normReference: "UNI EN 15512:2020; D.Lgs. 81/2008 All. IV",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_RACK_LOCKING_PINS_BEAMS",
+            title: "Spine / Perni di Sicurezza Antisfilamento su Tutti i Correnti",
+            question: "Tutti i connettori correnti-montante sono provvisti di spine o perni di sicurezza metallici antisfilamento originali (2 per corrente) per impedire lo sgancio accidentale durante il sollevamento forche?",
+            normReference: "UNI EN 15635:2009 punto 9.4.2.3; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_RACK_COLUMN_CORNER_PROTECTORS",
+            title: "Protezioni Montanti e Paracolpi d'Angolo in Testata Corsia",
+            question: "Sulle testate delle corsie e sui montanti esposti al transito carrelli sono installati paracolpi d'angolo e salvamontanti in acciaio o polimeri ad assorbimento d'urto tassellati a pavimento?",
+            normReference: "UNI EN 15512:2020; UNI EN 15635:2009",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_RACK_LOAD_CAPACITY_SIGNS",
+            title: "Cartelli di Portata Massima Ammissibile per Campata e Livello",
+            question: "Sono chiaramente affissi all'inizio di ciascuna corsia i cartelli di carico ben visibili con indicazione della portata massima per corrente, per livello e per campata in condizioni di stoccaggio?",
+            normReference: "UNI EN 15635:2009 punto 9.4.1; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 13. Lavapavimenti Lavasciuga Uomo a Bordo (Fimap Magna / Tennant T16 / Dulevo Boost)
+      {
+        machineKey: "lavapavimenti_lavasciuga_uomo_bordo",
+        name: "Lavasciuga Pavimenti Industriale Uomo a Bordo",
+        type: "Macchina per la Pulizia e Lavaggio Pavimentazioni di Magazzino a Batterie",
+        suggestedManufacturer: "Fimap / Tennant Company / Dulevo International / Comac",
+        suggestedModel: "Fimap Magna / Tennant T16 / Dulevo Boost / Comac Innova 85",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "LOG_SCRUBBER_FLASHING_BACKUP_ALARM",
+            title: "Lampeggiante di Segnalazione Giallo e Cicalino di Retromarcia",
+            question: "Il lampeggiante ottico a tetto e l'avvisatore sonoro bitonale di retromarcia risultano perfettamente funzionanti per segnalare la presenza nei corridoi di transito?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2.2; UNI EN ISO 3691-1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_SCRUBBER_DEADMAN_SEAT_SENSOR",
+            title: "Microinterruttore a Uomo Presente (Dead-Man) sul Sedile Guida",
+            question: "Il sedile dell'operatore è dotato di sensore a uomo presente che disinserisce immediatamente la trazione e la rotazione delle spazzole non appena il conducente si alza dal posto guida?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2.1; Direttiva Macchine 2006/42/CE",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_SCRUBBER_SQUEEGEE_DRYING_EFFICIENCY",
+            title: "Efficacia Tergipavimento e Aspirazione Antiscivolo",
+            question: "Le lamine in gomma del tergipavimento (squeegee) e la turbina di aspirazione lasciano la pavimentazione completamente asciutta, prevenendo il rischio scivolamento di carrelli e pedoni?",
+            normReference: "D.Lgs. 81/2008 All. IV p. 1.3.2; Linee Guida INAIL Pavimenti Industriali",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_SCRUBBER_EMERGENCY_STOP_BUTTON",
+            title: "Pulsante di Arresto d'Emergenza a Ritenuta sul Cruscotto",
+            question: "Sulla console di guida è presente e facilmente azionabile il pulsante di arresto d'emergenza a fungo per disconnettere immediatamente l'alimentazione delle batterie?",
+            normReference: "UNI EN ISO 13850:2015; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_SCRUBBER_PARKING_BRAKE_SYSTEM",
+            title: "Freno di Stazionamento Meccanico / Elettromagnetico",
+            question: "Il freno di servizio e il freno di stazionamento sono in grado di arrestare e mantenere bloccata la macchina su pendenze e rampe di carico fino al 10% a pieno carico di serbatoio?",
+            normReference: "D.Lgs. 81/2008 All. V p. 2.1; UNI EN ISO 3691-1",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 14. Gruppo Pompe Antincendio Sprinkler (Caprari Fire / Lowara / Grundfos Hydro EN 12845)
+      {
+        machineKey: "gruppo_pompe_antincendio_sprinkler",
+        name: "Gruppo di Pompaggio Antincendio Sprinkler e Idranti UNI EN 12845",
+        type: "Centrale Idrica Antincendio con Elettropompa di Servizio e Motopompa Diesel",
+        suggestedManufacturer: "Caprari / Lowara Xylem / Grundfos / Wilo",
+        suggestedModel: "Caprari Fire / Lowara Firepack / Grundfos Hydro EN 12845 / Wilo SiFire",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.addetto_antincendio_livello_2_3_magazzino,
+        safetyChecks: [
+          {
+            code: "LOG_FIREPUMP_UNI_EN_12845_COMPLIANCE",
+            title: "Conformità Costruttiva e Certificazione Impianto UNI EN 12845",
+            question: "Il gruppo di pressurizzazione antincendio e i relativi quadri di controllo rispondono pienamente alla norma UNI EN 12845 con alimentazione idrica e curve di portata conformi al progetto?",
+            normReference: "UNI EN 12845:2020; D.M. 02/09/2021; D.P.R. 151/2011 Attività 70",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_FIREPUMP_DIESEL_FUEL_RESERVE",
+            title: "Serbatoio Carburante Motopompa Diesel Pieno con Autonomia > 6 Ore",
+            question: "Il serbatoio dedicato del gasolio della motopompa di riserva è costantemente rifornito e garantisce l'autonomia minima continuativa prevista di almeno 6 ore a pieno carico?",
+            normReference: "UNI EN 12845:2020 punto 10.9.1; D.M. 02/09/2021",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_FIREPUMP_DUAL_STARTER_BATTERIES",
+            title: "Doppie Batterie di Avviamento Indipendenti con Caricatore Tampone",
+            question: "La motopompa diesel dispone di due gruppi batterie di avviamento indipendenti provvisti di caricabatterie a mantenimento tampone e voltmetro verificati settimanalmente?",
+            normReference: "UNI EN 12845:2020 punto 10.9.11; D.M. 01/09/2021",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_FIREPUMP_LOCKED_OPEN_VALVES",
+            title: "Valvole di Intercettazione Aspirazione/Mandata Bloccate in Posizione Aperta",
+            question: "Tutte le saracinesche e valvole di sezionamento sui collettori di aspirazione e mandata sono dotate di catena e lucchetto o microinterruttore di controllo in posizione aperta?",
+            normReference: "UNI EN 12845:2020 punto 10.7; D.M. 01/09/2021",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_FIREPUMP_WEEKLY_TEST_LOGBOOK",
+            title: "Registro Manutenzioni e Prove di Avviamento Automatico Settimanali",
+            question: "Le prove periodiche di avviamento manuale e automatico delle pompe con calo di pressione sono regolarmente eseguite e registrate nel registro antincendio aziendale?",
+            normReference: "D.M. 01/09/2021 (Controlli); UNI EN 12845:2020 punto 20",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 15. Linea Nastri Trasportatori e Rulli (Interroll RollerDrive / Dematic / Cassioli)
+      {
+        machineKey: "linea_nastri_trasportatori_rulli",
+        name: "Linea di Nastri Trasportatori e Rulliere Motorizzate di Smistamento",
+        type: "Impianto di Trasporto Continuo Colli e Scatole per Movimentazione Interna",
+        suggestedManufacturer: "Interroll / Dematic / Cassioli / Ferretto Group",
+        suggestedModel: "Interroll RollerDrive EC5000 / Dematic Conveyor / Cassioli FastSort / Ferretto Roller",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.attrezzature_generiche,
+        safetyChecks: [
+          {
+            code: "LOG_CONVEYOR_PULL_CORD_EMERGENCY",
+            title: "Fune d'Emergenza a Strappo Tirante Lungo Tutto il Percorso",
+            question: "Lungo l'intero sviluppo dei trasportatori accessibili è presente la fune perimetrale d'emergenza a strappo con riarmo manuale che arresta tempestivamente l'intera linea in caso di trazione?",
+            normReference: "UNI EN 619:2022; UNI EN ISO 13850:2015; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_CONVEYOR_NIP_ROLLER_GUARDS",
+            title: "Carterature Fisse di Segregazione Tamburi di Rinvio e Ingranaggi",
+            question: "Tutti i punti di imbocco rulli, tamburi motori e di rinvio, cinghie dentate e catene di rinvio sono protetti da carterature fisse conformi a UNI EN ISO 14120 antintrusione dita?",
+            normReference: "UNI EN 619:2022 punto 5.1; D.Lgs. 81/2008 All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_CONVEYOR_SIDE_GUARDS_ANTIFALL",
+            title: "Sponde Laterali di Contenimento Colli su Tratti Sopraelevati",
+            question: "Sui tratti sopraelevati che sovrastano postazioni o vie di transito dei lavoratori sono installate sponde di contenimento o reti anticaduta per evitare la caduta accidentale di colli dall'alto?",
+            normReference: "UNI EN 619:2022; D.Lgs. 81/2008 All. V p. 1.3",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_CONVEYOR_STARTUP_PREWARNING_ALARM",
+            title: "Avvisatore Acustico-Ottico di Preavviso Avviamento Linea (5s)",
+            question: "Prima dell'avvio automatico della linea di smistamento scatta una segnalazione acustica di durata minima di 5 secondi per consentire l'allontanamento degli operatori?",
+            normReference: "UNI EN 619:2022 punto 5.2.3; D.Lgs. 81/2008 All. V p. 2.2",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_CONVEYOR_LOTO_ENERGY_ISOLATION",
+            title: "Dispositivo Sezionatore Lucchettabile LOTO per Manutenzione Sicura",
+            question: "Ogni modulo o sezione della linea è provvisto di sezionatore generale lucchettabile (Lockout/Tagout) per l'isolamento sicuro dell'energia elettrica e pneumatica durante gli interventi?",
+            normReference: "UNI EN ISO 14118:2018; D.Lgs. 81/2008 art. 71 e All. V",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+        ],
+      },
+
+      // 16. Defibrillatore DAE Polo Logistico (Philips HeartStart FRx / Zoll AED 3)
+      {
+        machineKey: "defibrillatore_dae_polo_logistico",
+        name: "Defibrillatore Semiautomatico Esterno (DAE) in Teca Allarmata Polo Logistico",
+        type: "Dispositivo Elettromedicale Salvavita di Primo Soccorso (BLSD)",
+        suggestedManufacturer: "Philips Healthcare / Zoll Medical / Cardiac Science / Mindray",
+        suggestedModel: "Philips HeartStart FRx / Zoll AED 3 / Cardiac Science Powerheart G5 / Mindray BeneHeart C1A",
+        isSubjectToInailCheck: false,
+        training: TRAINING_REQUIREMENTS_LIBRARY.addetto_blsd_dae,
+        safetyChecks: [
+          {
+            code: "LOG_DAE_ALARMED_CABINET",
+            title: "Teca a Parete con Allarme Sonoro-Ottico ad Alta Visibilità",
+            question: "Il defibrillatore è custodito in una teca metallica a parete con allarme sonoro-luminoso all'apertura, segnalata con apposito cartello ILCOR ad alta visibilità?",
+            normReference: "Legge 116/2021; D.M. 24/04/2013; D.Lgs. 81/2008 art. 45",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_DAE_PADS_EXPIRATION_SEAL",
+            title: "Validità Elettrodi Adesivi Adulti e Sigillatura Confezione",
+            question: "Le piastre elettrodi adesive multifunzione per adulti sono all'interno della data di scadenza stampata, con confezione sigillata ermetica integra e gel conduttivo intatto?",
+            normReference: "Legge 116/2021; D.Lgs. 81/2008 art. 45",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_DAE_SELFTEST_BATTERY_STATUS",
+            title: "Stato di Carica Batteria al Litio e Spia Verde Autotest Permanente",
+            question: "L'indicatore di stato di autodiagnosi (autotest) mostra la spia verde lampeggiante/simbolo OK permanente attestante piena funzionalità e carica della batteria?",
+            normReference: "Legge 116/2021; Guida CEI 62-13; D.Lgs. 81/2008 art. 71",
+            defaultSeverity: 4,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_DAE_CPR_ACCESSORY_KIT",
+            title: "Kit Accessori Rianimazione CPR (Forbici, Mascherina, Rasoio, Guanti)",
+            question: "All'interno della teca è presente il kit di rianimazione con forbici taglia-abiti di Lister, rasoio monouso per tricotomia, barriera/mascherina pocket mask e guanti in nitrile?",
+            normReference: "D.M. 388/2003 All. 1; D.Lgs. 81/2008 art. 45",
+            defaultSeverity: 3,
+            defaultSanctionable: true,
+          },
+          {
+            code: "LOG_DAE_118_REGISTRATION",
+            title: "Registrazione e Comunicazione Collocazione alla Centrale 118",
+            question: "La presenza e l'esatta collocazione del defibrillatore nel polo logistico sono state regolarmente comunicate alla Centrale Operativa 118 / NUE 112 regionale ex Legge 116/2021?",
+            normReference: "Legge 116/2021 art. 6; D.M. 16/03/2023",
             defaultSeverity: 3,
             defaultSanctionable: true,
           },
@@ -14851,6 +15645,27 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
     (s) => s.sectorKey === "commercio_dettaglio_non_alimentare"
   );
   const retailNonFoodMachines = retailNonFoodSector ? retailNonFoodSector.machines : [];
+
+  const isLogisticsAteco = !!atecoCode && (
+    atecoCode.startsWith("52.10") ||
+    atecoCode.startsWith("52.1") ||
+    atecoCode.startsWith("52.29") ||
+    atecoCode.startsWith("52.2") ||
+    atecoCode.startsWith("49.41") ||
+    atecoCode.startsWith("49.4") ||
+    atecoCode.startsWith("52.") ||
+    atecoCode.startsWith("49.") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("5210") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("5229") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("4941") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("494") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("52") ||
+    atecoCode.replace(/[^0-9]/g, "").startsWith("49")
+  );
+  const logSector = SECTOR_MACHINERY_CATALOGS.find(
+    (s) => s.sectorKey === "logistica_magazzino"
+  );
+  const logMachines = logSector ? logSector.machines : [];
 
   // 1. MACCHINE SUGGERITE IN BASE AI LOCALI CENSITI NELLO STEP 2
   for (const env of environments) {
@@ -16653,6 +17468,179 @@ export function getSuggestedMachinesForEnvironmentsAndAteco(
         [
           "pressa_compattatrice_cartoni_retail",
           "transpallet_manuale_magazzino",
+        ].includes(m.machineKey)
+      );
+    }
+
+    // Reparti Logistica, Magazzino Merci, Depositi Industriali e Spedizioni (ATECO 52.10, 52.1, 52.29, 52.2, 49.41, 49.4)
+    else if (
+      envId === "env-log-baia-carico-scarico-dock" ||
+      envId.includes("log-baia-carico") ||
+      envId.includes("log-baia-scarico") ||
+      envId.includes("log-dock") ||
+      (isLogisticsAteco && !envId.startsWith("env-log-") && (
+        nameLower.includes("baia") ||
+        nameLower.includes("banchina") ||
+        nameLower.includes("dock") ||
+        nameLower.includes("carico scarico") ||
+        nameLower.includes("rampa di carico") ||
+        cat === "dock"
+      ))
+    ) {
+      matchingMachines = logMachines.filter((m) =>
+        [
+          "pedana_di_carico_idraulica_dock",
+          "cuneo_bloccaruote_tir_interbloccato",
+          "transpallet_manuale_pesatore",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-log-corsie-scaffalature-portapallet" ||
+      envId.includes("log-corsie-scaffalature") ||
+      envId.includes("log-scaffalature-portapallet") ||
+      envId.includes("log-portapallet") ||
+      (isLogisticsAteco && !envId.startsWith("env-log-") && (
+        nameLower.includes("scaffalatur") ||
+        nameLower.includes("portapallet") ||
+        nameLower.includes("corsie") ||
+        (nameLower.includes("stoccaggio") && !nameLower.includes("infiammabili") && !nameLower.includes("adr"))
+      ))
+    ) {
+      matchingMachines = logMachines.filter((m) =>
+        [
+          "carrello_elevatore_frontale_elettrico",
+          "carrello_retrattile_alta_quota",
+          "scaffalatura_industriale_portapallet",
+          "lavapavimenti_lavasciuga_uomo_bordo",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-log-area-picking-smistamento" ||
+      envId.includes("log-area-picking") ||
+      envId.includes("log-picking") ||
+      envId.includes("log-smistamento") ||
+      (isLogisticsAteco && !envId.startsWith("env-log-") && (
+        nameLower.includes("picking") ||
+        nameLower.includes("prelievo") ||
+        (nameLower.includes("smistamento") && !nameLower.includes("imballaggio"))
+      ))
+    ) {
+      matchingMachines = logMachines.filter((m) =>
+        [
+          "commissionatore_verticale_picking",
+          "transpallet_elettrico_uomo_a_terra",
+          "transpallet_elettrico_uomo_bordo",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-log-zona-imballaggio-fardellatura" ||
+      envId.includes("log-zona-imballaggio") ||
+      envId.includes("log-imballaggio") ||
+      envId.includes("log-fardellatura") ||
+      (isLogisticsAteco && !envId.startsWith("env-log-") && (
+        nameLower.includes("imballaggio") ||
+        nameLower.includes("fardellatura") ||
+        nameLower.includes("fasciapallet") ||
+        nameLower.includes("confezionamento colli") ||
+        cat === "packaging"
+      ))
+    ) {
+      matchingMachines = logMachines.filter((m) =>
+        [
+          "fasciapallet_avvolgitore_rotante",
+          "linea_nastri_trasportatori_rulli",
+          "transpallet_manuale_pesatore",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-log-area-ricarica-batterie-muletti" ||
+      envId.includes("log-area-ricarica") ||
+      envId.includes("log-ricarica-batterie") ||
+      (isLogisticsAteco && !envId.startsWith("env-log-") && (
+        nameLower.includes("ricarica") ||
+        nameLower.includes("caricabatterie") ||
+        nameLower.includes("batterie muletti") ||
+        cat === "battery_charging"
+      ))
+    ) {
+      matchingMachines = logMachines.filter((m) =>
+        [
+          "stazione_ricarica_batterie_banco",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-log-reparto-stoccaggio-infiammabili-adr" ||
+      envId.includes("log-infiammabili") ||
+      envId.includes("log-adr") ||
+      (isLogisticsAteco && !envId.startsWith("env-log-") && (
+        nameLower.includes("infiammabili") ||
+        nameLower.includes("adr") ||
+        cat === "hazardous_materials"
+      ))
+    ) {
+      // Reparto stoccaggio infiammabili ADR: bacini di contenimento, estintori
+      matchingMachines = [];
+    } else if (
+      envId === "env-log-soppalco-picking-leggero" ||
+      envId.includes("log-soppalco") ||
+      (isLogisticsAteco && !envId.startsWith("env-log-") && (
+        nameLower.includes("soppalco") ||
+        cat === "mezzanine"
+      ))
+    ) {
+      matchingMachines = logMachines.filter((m) =>
+        [
+          "transpallet_manuale_pesatore",
+          "commissionatore_verticale_picking",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-log-ufficio-spedizioni-bolle-dogana" ||
+      envId.includes("log-ufficio-spedizioni") ||
+      envId.includes("log-bolle-dogana") ||
+      (isLogisticsAteco && !envId.startsWith("env-log-") && (
+        nameLower.includes("ufficio spedizioni") ||
+        nameLower.includes("bolle") ||
+        nameLower.includes("dogana") ||
+        cat === "office"
+      ))
+    ) {
+      matchingMachines = logMachines.filter((m) =>
+        [
+          "defibrillatore_dae_polo_logistico",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-log-locale-tecnico-compressori-antincendio" ||
+      envId.includes("log-locale-tecnico") ||
+      envId.includes("log-compressori-antincendio") ||
+      (isLogisticsAteco && !envId.startsWith("env-log-") && (
+        nameLower.includes("antincendio") ||
+        nameLower.includes("sprinkler") ||
+        nameLower.includes("pompe antincendio") ||
+        (cat === "technical_rooms" && nameLower.includes("antincendio"))
+      ))
+    ) {
+      matchingMachines = logMachines.filter((m) =>
+        [
+          "gruppo_pompe_antincendio_sprinkler",
+        ].includes(m.machineKey)
+      );
+    } else if (
+      envId === "env-log-piazzale-manovra-tir-parcheggio" ||
+      envId.includes("log-piazzale-manovra") ||
+      envId.includes("log-piazzale-tir") ||
+      (isLogisticsAteco && !envId.startsWith("env-log-") && (
+        nameLower.includes("piazzale") ||
+        nameLower.includes("manovra tir") ||
+        cat === "outdoor" ||
+        cat === "parking"
+      ))
+    ) {
+      matchingMachines = logMachines.filter((m) =>
+        [
+          "pressa_compattatrice_scarrabile_cartoni",
+          "carrello_elevatore_frontale_elettrico",
         ].includes(m.machineKey)
       );
     } else if (cat === "cucina" || nameLower.includes("cucina") || nameLower.includes("laboratorio")) {
